@@ -25,5 +25,5 @@ import broadcasting.BroadcastingBase;
 simple Abba2 extends BroadcastingBase like IUDPApp
 {
     parameters:
-        @class(inet::Abba2);
+        @class(Abba2);
 }

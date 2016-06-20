@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package abba2;
+package testingStuff;
 
 import inet.applications.contract.IUDPApp;
 import broadcasting.BroadcastingBase;
@@ -22,8 +22,9 @@ import broadcasting.BroadcastingBase;
 //
 // Some nodes distribute messages in the network using unicast UDP.
 //
-simple Abba2 extends BroadcastingBase like IUDPApp
+simple testingStuff extends BroadcastingBase like IUDPApp
 {
     parameters:
-        @class(inet::Abba2);
+
+        @class(inet::TestingStuff);
 }

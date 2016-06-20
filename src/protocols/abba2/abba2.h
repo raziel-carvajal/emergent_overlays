@@ -17,8 +17,8 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
-#include "inet/applications/broadcasting/BroadcastingAppBase.h"
-#include "inet/applications/broadcasting/BroadcastingAppBase_m.h"
+#include "broadcasting/BroadcastingAppBase.h"
+#include "broadcasting/BroadcastingAppBase_m.h"
 
 
 namespace inet {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMANDS=( git make gcc g++ opp_run R )
+COMMANDS=( git make gcc g++ opp_run opp_makemake R )
 
 for C in "${COMMANDS[@]}"; do
    printf "Checking if $C is installed: "

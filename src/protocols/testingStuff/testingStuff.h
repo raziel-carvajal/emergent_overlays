@@ -1,5 +1,5 @@
-#ifndef __INET_EWMA_H_
-#define __INET_EWMA_H_
+#ifndef __INET_DIST2MEAN_H_
+#define __INET_DIST2MEAN_H_
 
 #include <omnetpp.h>
 
@@ -13,46 +13,30 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/common/Coord.h"
 
-
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
-
-
-#include "broadcasting/BroadcastingAppBase_m.h"
 #include "broadcasting/BroadcastingAppBase.h"
+#include "broadcasting/BroadcastingAppBase_m.h"
 
-#include "ewmaMsgs_m.h"
+#include "inet/physicallayer/idealradio/IdealTransmitter.h"
+
 
 namespace inet {
 
-
-class INET_API EWMA2 : public BroadcastingAppBase
+class INET_API TestingStuff : public inet::BroadcastingAppBase
 {
   private:
-
-    const std::string nil_edge = "";
-
-    // mst of this node for this broadcast FIXME: use the implementation of MWST
-    std::vector<std::string> local_mst;
-
+    /* payload of the message to broadcast */
     std::map< std::string, std::string >  payloads;
-
-    std::map< std::string, std::set<std::string> > covered;
-
-
-    bool isForwardingNode();
+    /* indicates the set of nodes from whom I received this message */
+    std::map< std::string, std::set<std::string>> received_from;
 
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
 
-    void send_message(const std::vector<std::string>& dst, std::string& key);
-    void send_to_uncovered(std::string& key);
-
-  protected:
-
-
-    virtual void processStart() override;
+    void send_message(std::string& key);
+  public:
 };
 
 } //namespace

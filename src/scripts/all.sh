@@ -1,31 +1,42 @@
 #!/bin/bash
 
-OMNET_PATH=~/work/apps/omnetpp-4.6
+OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
 
 SHA1=`cat ../../revision.txt`
 
 CONFIG_PATH=../../experiments/configs
 
 # configuring path to omnet++
-source local-setenv-omnet.sh $OMNET_PATH
+source local-omnet-setenv.sh $OMNET_PATH
 
 # checking that everything is ready to execute the experiments
-./sanity-checks.sh
+./sanity-check.sh
 
 # load the right version of the code 
-./load-proper-version.sh ${SHA1}
+echo "Checking out revision $SHA1"
+#./load-proper-version.sh ${SHA1}
 
+
+# compile applications' code
+./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
+error_code=$?
+echo "error code ===>>>>>> ${error_code}"
+if [ "${error_code}" -gt "0" ]; then
+   echo "Error: problem compiling. Aborting"
+   exit 1
+fi
 
 # function to extract the configuration name from a given configuration file
 get_config_name() {
-   $1
+   echo "main_config"
 }
 
-for config in "${CONFIG_PATH}/*.ini"; do
-    CONFIG_FILE=${config}
-    CONFIG_NAME=get_config_name(${config})
-    echo ${CONFIG_NAME}
-    #./run-one-configuration.sh ${CONFIG_FILE} ${CONFIG_NAME}
+for config in ${CONFIG_PATH}/*.ini ; do
+    #CONFIG_FILE=${config}
+    #CONFIG_NAME=$(get_config_name "${config}")
+    #printf "%s\n" ${CONFIG_NAME}
+    echo "Executing : ${config}"
+    ./run-one-configuration.sh "${config}" "main_config" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
 done
 
 

@@ -15,11 +15,11 @@ fi
 # the path to omnet
 OMNET_PATH=$1 
 
-case "$-" in
-*i*) ;;
-*)  echo "Error: not a login shell -- run this script as 'source setenv' or '. setenv'"
-    exit 1
-esac
+#case "$-" in
+#*i*) ;;
+#*)  echo "Error: not a login shell -- run this script as 'source setenv' or '. setenv'"
+#    exit 1
+#esac
 
 if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.h" ]; then
     echo "Error: ${OMNET_PATH} directory does not look like an OMNeT++ root directory"

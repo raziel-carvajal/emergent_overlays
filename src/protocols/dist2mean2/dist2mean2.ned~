@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package abba2;
+package dist2mean2;
 
 import inet.applications.contract.IUDPApp;
 import broadcasting.BroadcastingBase;
@@ -22,8 +22,11 @@ import broadcasting.BroadcastingBase;
 //
 // Some nodes distribute messages in the network using unicast UDP.
 //
-simple Abba2 extends BroadcastingBase like IUDPApp
+simple Dist2Mean2 extends BroadcastingBase like IUDPApp
 {
     parameters:
-        @class(inet::Abba2);
+
+        double threshold = default(5000);
+
+        @class(Dist2Mean2);
 }
