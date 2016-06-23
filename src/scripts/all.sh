@@ -1,6 +1,20 @@
 #!/bin/bash
 
-OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
+# check if we have a path for omnet
+if [ ! -f "omnet.config" ]; then
+	while true; do
+		read -p "Do you want to download omnet++ 4.6 (y/n) " yn
+		case $yn in
+				[Yy]* ) ./download-omnet.sh; OMNET_PATH=../../tools/omnetpp-4.6 ; break;;
+				[Nn]* ) read -p "Please enter path to omnet++ 4.6" OMNET_PATH; break;;
+				* ) echo "Please enter y or n.";;
+		esac
+	done
+else
+	OMNET_PATH=`cat omnet.config`
+fi
+
+## OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
 
 SHA1=`cat ../../revision.txt`
 
@@ -11,6 +25,10 @@ source local-omnet-setenv.sh $OMNET_PATH
 
 # checking that everything is ready to execute the experiments
 ./sanity-check.sh
+r=$?
+if [ "$r" -eq "0" ]; then
+		echo "${OMNET_PATH}" >> omnet.config
+fi
 
 # load the right version of the code 
 echo "Checking out revision $SHA1"
