@@ -30,7 +30,7 @@ INET_LIBRARY_PATH=${INET_PATH}/out/gcc-debug/src/INET
 PROTOCOLS_LIBRARY=$4
 
 # specify my ned path. set of path where I can find ned files
-LOCAL_NEDPATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/
+LOCAL_NEDPATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
 
 
 ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}

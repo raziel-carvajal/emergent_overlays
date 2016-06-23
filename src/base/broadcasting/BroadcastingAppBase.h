@@ -82,6 +82,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     simsignal_t signal_received_id;
     simsignal_t signal_sent_id;
     simsignal_t signal_power_level;
+    simsignal_t signal_broadcast_msg_received;
 
     bool already_configured = false;
 
@@ -116,9 +117,10 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     virtual void time_to_broadcast_payload(void* user_data);
 
-    void emitSent();
+    void emitSent(std::string value);
     void emitReceived();
     void emitPowerLevel(double value);
+    void emitBroadcastMsgReceived(std::string value);
 
     L3Address getAddr(std::string id);
 

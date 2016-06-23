@@ -44,9 +44,10 @@ simple BroadcastingBase
 
         volatile double delay_test @unit(s) = default(uniform(0s,0.05s));
 
-        @statistic[msg_received](title="A node receive a message";record=sum; source=msg_received);
-        @statistic[msg_sent](title="The node sends the message";record=sum;source=msg_sent);
-        @statistic[power_level](title="The power level"; record=min; source=power_level);
+        @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
+        @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);
+        @statistic[power_level](title="The power level"; record=vector; source=power_level);
+		@statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
 
    gates:
         input udpIn @labels(UDPControlInfo/up);

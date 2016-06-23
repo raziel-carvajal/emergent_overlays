@@ -31,8 +31,13 @@ MAKE=make
 INCLUDE=$2/src
 PROTOCOLS=$1
 
+# create base library that only includes project broadcasting
+cd "../base" && ${OMNET_MAKEMAKE} -f --deep -a -I${INCLUDE} -O ${OUT_PATH} -o protocol_base
+
+cd "../base" && make 
+
 # a single makefile with all the protocols. it overwrite the previous makefile. Build a shared library. Include path has a reference to omnet
-cd ${PROTOCOLS} && ${OMNET_MAKEMAKE} -f --deep -s -I${INCLUDE} -O ${OUT_PATH}
+cd "${PROTOCOLS}" && ${OMNET_MAKEMAKE} -f --deep -s -I${INCLUDE} -I../base -L../base -lprotocol_base -O ${OUT_PATH}
 
 # build library with all protocols
-cd ${PROTOCOLS} && make
+cd "${PROTOCOLS}" && make

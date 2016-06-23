@@ -88,15 +88,15 @@ EWMA2::send_message(const vector<string>& dst, string& key)
     }
 
     if (dst.size() > 0) {
-        EV_DEBUG << "====================== Sending in " << myself << "\n";
-        cerr << "====================== Sending in " << myself << "\n";
+        //EV_DEBUG << "====================== Sending in " << myself << "\n";
+        //cerr << "====================== Sending in " << myself << "\n";
         vector<string> v;
         for (auto& c : covered[key]) {
             EV_DEBUG << "\t The following is covered: " << c << "\n";
             cerr << "\t The following is covered: " << c << "\n";
             v.push_back(c);
         }
-        emitSent();
+        emitSent(key);
 
         /*only send if some children in the mst are not covered, but send to all uncovered*/
 
@@ -138,7 +138,7 @@ EWMA2::time_to_broadcast_payload(void* user_data)
 
     if (is_source) {
         string key = myself + "-" + to_string(get_next_id_for_msg());
-        cerr << "Broadcasting " <<  key << " in " << myself << " at " << simTime() << endl;
+        //cerr << "Broadcasting " <<  key << " in " << myself << " at " << simTime() << endl;
         payloads[key] = " this is the payload, initially sent from " + myself;
         covered[key].insert(myself);
         send_message(local_mst, key);
@@ -146,7 +146,7 @@ EWMA2::time_to_broadcast_payload(void* user_data)
     else {
         char* s = (char*)user_data;
         string key = string(s);
-        cerr << "Broadcasting key: " << s  << " in " << myself << " at " << simTime() << endl;
+        //cerr << "Broadcasting key: " << s  << " in " << myself << " at " << simTime() << endl;
         delete s;
 
         send_to_uncovered(key);

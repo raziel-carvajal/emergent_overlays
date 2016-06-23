@@ -58,6 +58,7 @@ BroadcastingAppBase::initialize(int stage)
             signal_received_id = this->registerSignal("msg_received");
             signal_sent_id = this->registerSignal("msg_sent");
             signal_power_level = this->registerSignal("power_level");
+            signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
             {
                 cModule *hostModule = getParentModule();
                 cerr << "host name : " << hostModule->getName() << endl;
@@ -311,22 +312,24 @@ void
 BroadcastingAppBase::on_payload_received(const Broadcast* m) {
 
 
-    EV_DEBUG << "Message received at " << simTime() << " from " << m->getSender() << "\n";
-    std::cout << myself << ": message received at " << simTime() << " from " << m->getSender() << "\n";
+    //EV_DEBUG << "Message received at " << simTime() << " from " << m->getSender() << "\n";
+    //std::cout << myself << ": message received at " << simTime() << " from " << m->getSender() << "\n";
 
 }
 
 void
 BroadcastingAppBase::time_to_broadcast_payload(void* user_data)
 {
-    cout << "Time to broadcast called in " << myself << endl;
+    //cout << "Time to broadcast called in " << myself << endl;
 }
 
 
 void
-BroadcastingAppBase::emitSent()
+BroadcastingAppBase::emitSent(string value)
 {
-    emit(signal_sent_id, 1);
+  auto idx = value.find("-");
+  auto v = stoi(value.substr(idx+1).c_str());
+  emit(signal_sent_id, v);
 }
 
 
@@ -341,6 +344,15 @@ void
 BroadcastingAppBase::emitPowerLevel(double value)
 {
     emit(signal_power_level, value);
+}
+
+
+void
+BroadcastingAppBase::emitBroadcastMsgReceived(string value)
+{
+  auto idx = value.find("-");
+  auto v = stoi(value.substr(idx+1).c_str());
+  emit(signal_broadcast_msg_received, v);
 }
 
 

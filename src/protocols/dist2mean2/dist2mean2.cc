@@ -82,7 +82,7 @@ Dist2Mean2::send_message(string& key)
 
         EV_DEBUG << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
         cout << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
-        emitSent();
+        emitSent(key);
         L3AddressResolver resolver;
         L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
         Broadcast* m = new Broadcast("payload");

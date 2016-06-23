@@ -47,7 +47,7 @@ TestingStuff::send_message(string& key)
 
     EV_DEBUG << "====================== Sending in " << myself  << "\n";
     cerr << "====================== Sending in " << myself << " with key " << key << "\n";
-    emitSent();
+    emitSent(key);
 
     L3AddressResolver resolver;
     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);

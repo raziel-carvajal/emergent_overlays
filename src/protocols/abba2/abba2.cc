@@ -41,6 +41,8 @@ Abba2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
 
+    emitBroadcastMsgReceived(key);
+
     bool firstTime = !is_source && payloads[key].empty();
 
     if (firstTime) {
@@ -84,7 +86,7 @@ void
 Abba2::send_message(string& key)
 {
     if (is_source || received_from[key].size() > 0) {
-        cerr << myself << " has still " << received_from[key].size() << " points " << endl;
+        //cerr << myself << " has still " << received_from[key].size() << " points " << endl;
 
         L3AddressResolver resolver;
         L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
@@ -95,7 +97,7 @@ Abba2::send_message(string& key)
         m->setX(position.x);
         m->setY(position.y);
         socket.sendTo(m, addr, remote_port);
-        emitSent();
+        emitSent(key);
     }
 }
 
@@ -108,13 +110,14 @@ Abba2::time_to_broadcast_payload(void* user_data)
     if (is_source) {
         key = myself + "-" + to_string(get_next_id_for_msg());
         payloads[key] = " this is the payload, initially sent from " + myself;
+        emitBroadcastMsgReceived(key);
     }
     else {
         char* s = (char*)user_data;
         key = string(s);
         delete s;
     }
-    cout << "Broadcasting in " << myself << " at " << simTime() << endl;
+    //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
     send_message(key);
 }
 

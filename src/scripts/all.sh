@@ -31,12 +31,24 @@ get_config_name() {
    echo "main_config"
 }
 
+if [ ! -d "../../results" ]; then
+    mkdir ../../results
+fi 
+
 for config in ${CONFIG_PATH}/*.ini ; do
     #CONFIG_FILE=${config}
     #CONFIG_NAME=$(get_config_name "${config}")
     #printf "%s\n" ${CONFIG_NAME}
+    filename=$(basename "$config")
+    config_name="${filename%.*}"
     echo "Executing : ${config}"
-    ./run-one-configuration.sh "${config}" "main_config" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
+    ./run-one-configuration.sh "${config}" "${config_name}" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
+    #tar -zcvf "${CONFIG_PATH}/results/${config_name}" ${CONFIG_PATH}/results/${config_name}-0.sca ${CONFIG_PATH}/results/${config_name}-0.vec ${CONFIG_PATH}/results/${config_name}-0.vci
+    ./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec msg_sent ../../results
+    ./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec broadcast_msg_received ../../results
+    ./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec power_level ../../results
+    nr_nodes=`echo ${config_name} | awk -F "-" '{print $2}'`
+    python processing-data.py "../../results/" "${config_name}" hostR0 ${nr_nodes}
 done
 
 
