@@ -23,11 +23,10 @@ NED_HEADER = ''
 NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
 NED_HEADER += "import inet.node.inet.INetworkNode;\n"
 NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
+#NED_HEADER += "import broadcasting.CenterHost;\n"
+NED_HEADER += "import inet.node.inet.CenterHost;\n"
 
 NED_HEADER1 = ''
-NED_HEADER1 += "{\n"
-NED_HEADER1 += '@display(' + '"' + 'bgb=1908,830' + '"' + ");\n"
-NED_HEADER1 += 'string hostType = default(' + '"' + 'WirelessHost' + '"' + ');\n'
 NED_HEADER1 += 'string mediumType = default(' + '"' + 'IdealRadioMedium' + '"' + ");\n"
 NED_HEADER1 += "submodules:\n"
 NED_HEADER1 += 'configurator: IPv4NetworkConfigurator { @display(' + '"' + 'p=0,0' + '"' + "); }\n"
@@ -55,18 +54,22 @@ def setArguments(argv):
         print('one name for the topology file must be given, network topology was not built')
         sys.exit(1)
 
-def createNedFile(pos, fileName):
+def createNedFile(pos, fileName, layoutSize):
     global NED_HEADER, NED_HEADER1
-    NED_HEADER += 'network ' + fileName + '\n' + NED_HEADER1 
+    NED_HEADER += 'network ' + fileName + '\n{\n' + '@display(' + '"' + 'bgb=' +\
+            str(layoutSize) + ',' + str(layoutSize)+ '"' + ");\n" + NED_HEADER1
     posStr = {}
-    iNetConf = ':<hostType> like INetworkNode { @display('
+    iNetConf = ':CenterHost { @display('
     nodesDes = ''
     for i in pos:
         coor = '"p='
-        pos[i][0] += laRan + (laRan*1.0)/2; coor += "{0:.2f}".format(pos[i][0]) + ', '
-        pos[i][1] += laRan + (laRan*1.0)/2; coor += "{0:.2f}".format(pos[i][1]) + '"'
+        pos[i][0] *= layoutSize; coor += "{0:.2f}".format(pos[i][0]) + ', '
+        pos[i][1] *= layoutSize; coor += "{0:.2f}".format(pos[i][1]) + '"'
         nodesDes += 'hostR' + str(i) + iNetConf + coor + '); }\n'
-    NED_HEADER += nodesDes + '}'
+    NED_HEADER += nodesDes
+    # adding node at the layout center
+    NED_HEADER += 'hostR' + str(len(pos) + 1) + iNetConf + '"p=' + "{0:.2f}".format(0.5 * layoutSize) + \
+            ', ' + "{0:.2f}".format(0.5 * layoutSize) + '"); isCenter=true; }\n}'
     f = open(fileName + '.ned', 'w')
     try:
         f.write(NED_HEADER)
@@ -81,6 +84,8 @@ if __name__ == '__main__':
     toFil = sys.argv[4]
     G = nx.Graph()
     G.add_nodes_from(range(1, nodes + 1))
-    pos = nx.spring_layout(G, k=trRan, scale=laRan, center=[(laRan*1.0)/2,(laRan*1.0)/2])
-    #TODO add node at center AND find a way to represent it at the ned file
-    createNedFile(pos, toFil)
+    #pos = nx.spring_layout(G, k=trRan, scale=laRan, center=[(laRan*1.0)/2,(laRan*1.0)/2])
+    pos = nx.random_layout(G, center=[0,0])
+    #TODO still you need to guarantee density based in the transmission rate
+    #     and not based on the total layout (as it is currently implemented)
+    createNedFile(pos, toFil, laRan)
