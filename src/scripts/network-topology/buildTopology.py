@@ -55,7 +55,7 @@ def setArguments(argv):
         print('one name for the topology file must be given, network topology was not built')
         sys.exit(1)
 
-def createNedFile(pos, fileName):
+def createNedFile(pos, fileName, layoutSize):
     global NED_HEADER, NED_HEADER1
     NED_HEADER += 'network ' + fileName + '\n' + NED_HEADER1 
     posStr = {}
@@ -63,8 +63,8 @@ def createNedFile(pos, fileName):
     nodesDes = ''
     for i in pos:
         coor = '"p='
-        pos[i][0] += laRan + (laRan*1.0)/2; coor += "{0:.2f}".format(pos[i][0]) + ', '
-        pos[i][1] += laRan + (laRan*1.0)/2; coor += "{0:.2f}".format(pos[i][1]) + '"'
+        pos[i][0] *= layoutSize; coor += "{0:.2f}".format(pos[i][0]) + ', '
+        pos[i][1] *= layoutSize; coor += "{0:.2f}".format(pos[i][1]) + '"'
         nodesDes += 'hostR' + str(i) + iNetConf + coor + '); }\n'
     NED_HEADER += nodesDes + '}'
     f = open(fileName + '.ned', 'w')
@@ -81,6 +81,7 @@ if __name__ == '__main__':
     toFil = sys.argv[4]
     G = nx.Graph()
     G.add_nodes_from(range(1, nodes + 1))
-    pos = nx.spring_layout(G, k=trRan, scale=laRan, center=[(laRan*1.0)/2,(laRan*1.0)/2])
+    #pos = nx.spring_layout(G, k=trRan, scale=laRan, center=[(laRan*1.0)/2,(laRan*1.0)/2])
+    pos = nx.random_layout(G, center=[0,0])
     #TODO add node at center AND find a way to represent it at the ned file
-    createNedFile(pos, toFil)
+    createNedFile(pos, toFil, laRan)
