@@ -18,6 +18,8 @@
 //package inet.node.inet;
 package broadcasting;
 
+import inet.node.inet.WirelessHost;
+
 //
 // Models a host with (default) one wireless (802.11) card in infrastructure mode.
 // This module is basically a ~StandardHost with an ~Ieee80211Nic with
