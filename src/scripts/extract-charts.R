@@ -56,27 +56,26 @@ broadcastingTime <- function(ds, dev=pdf("broadcastingTime3.pdf")) {
 	)
 	
 	#dev
-	hist(bt$time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
+	hist(broadcasting.time$time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 	#dev.off()
 }
 
 
 
-args <- commandArgs(trailingOnly=T)
-if (length(args) == 1) {
-  print(paste("Loading data file:", args))
-  ds <- load.datafile(args)
+args <- commandArgs(trailingOnly=TRUE)
+if (length(args) == 2) {
+  print(paste("Loading data file:", args[1]))
+  ds <- load.datafile(args[1])
 
-  device <- pdf(paste("Charts", args, sep="-"))
-  device()
+  device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
+  device
 
-  print(paste("Creating powerlevels:", args))
+  print(paste("Creating powerlevels:", args[1]))
   powerlevels3(ds, dev = device)
 
-  print(paste("Creating broadcasting time:", args))  
+  print(paste("Creating broadcasting time:", args[1]))  
   broadcastingTime(ds, dev = device)
 
-  device.off()
 }
 
 

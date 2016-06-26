@@ -44,20 +44,12 @@ if [ ${error_code} -ne 0 ]; then
    exit 1
 fi
 
-# function to extract the configuration name from a given configuration file
-get_config_name() {
-   echo "main_config"
-}
-
 if [ ! -d "../../results" ]; then
     mkdir ../../results
 fi
 
 
 for config in ${CONFIG_PATH}/*.ini ; do
-    #CONFIG_FILE=${config}
-    #CONFIG_NAME=$(get_config_name "${config}")
-    #printf "%s\n" ${CONFIG_NAME}
     filename=$(basename "$config")
     config_name="${filename%.*}"
     echo "Executing : ${config}"
@@ -67,10 +59,5 @@ for config in ${CONFIG_PATH}/*.ini ; do
 		echo "Error: failure running simulation ${config_name}"
 		exit 1
 	fi
-    #tar -zcvf "${CONFIG_PATH}/results/${config_name}" ${CONFIG_PATH}/results/${config_name}-0.sca ${CONFIG_PATH}/results/${config_name}-0.vec ${CONFIG_PATH}/results/${config_name}-0.vci
-    #./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec msg_sent ../../results
-    #./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec broadcast_msg_received ../../results
-    #./extract-data.sh ${CONFIG_PATH}/results/${config_name}-0.vec power_level ../../results
-    #nr_nodes=`echo ${config_name} | awk -F "-" '{print $2}'`
-    #python processing-data.py "../../results/" "${config_name}" hostR0 ${nr_nodes}
+	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name}
 done
