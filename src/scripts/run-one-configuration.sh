@@ -34,3 +34,7 @@ LOCAL_NEDPATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:
 
 
 ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
+r=$?
+if [ $r -ne 0 ]; then
+	exit 1
+fi
