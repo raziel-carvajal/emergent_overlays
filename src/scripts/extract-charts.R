@@ -55,9 +55,13 @@ broadcastingTime <- function(ds, dev=pdf("broadcastingTime3.pdf")) {
 	  time = reception.time - sending.time
 	)
 	
-	#dev
 	hist(broadcasting.time$time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
-	#dev.off()
+	
+	# compute number of message received at each location (coverage)
+	n.received <- sapply(list_of_received, function(d) sum(sapply(id_msgs, function(id) id %in% d$y)))
+	
+	B.i <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d)  sum(subset(d, y == 1, select=c(y))[[1]]) )))
+	plot(300/B.i, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")
 }
 
 
