@@ -46,7 +46,7 @@ broadcastingTime <- function(ds, simulation.time=600) {
 
 	sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), 100*seq(simulation.time,simulation.time)), 1 )[[1]] )) )
-	
+
 	# compute number of message received at each location (coverage)
   rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
 
@@ -61,19 +61,20 @@ broadcastingTime <- function(ds, simulation.time=600) {
 }
 
 
-plot.charts.for.single.experiment <- function(power.level, broadcast.info) {
+plot.charts.for.single.experiment <- function(power.level, broadcast.info, simulation.time=600) {
 
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-	hist(broadcast.info$time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
+  valid.time <- broadcast.info$time[broadcast.info$time <= simulation.time ]
+	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
 	plot(nr.nodes/broadcast.info$B.i, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
 
   boxplot(power.level)
-	
+
 }
 
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
@@ -95,7 +96,7 @@ if (length(args) == 2) {
   print(paste("Creating powerlevels:", args[1]))
   pl <- powerlevels3(ds)
 
-  print(paste("Creating broadcasting time:", args[1]))  
+  print(paste("Creating broadcasting time:", args[1]))
   bs <- broadcastingTime(ds)
 
 	plot.charts.for.single.experiment(pl, bs)
