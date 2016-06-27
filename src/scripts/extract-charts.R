@@ -32,7 +32,7 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max = 600, step=30) {
 }
 
 
-broadcastingTime <- function(ds) {
+broadcastingTime <- function(ds, simulation.time=600) {
 	v <- ds$vectordata
 	msg_sent <- ds$vectors[ ds$vectors$name == 'msg_sent:vector', ]$result
 	tmp <- subset(v, resultkey %in% msg_sent) # filter out vectors that are not msg_sent
@@ -45,12 +45,12 @@ broadcastingTime <- function(ds) {
 	list_of_received <- lapply(msg_received, function(p) subset(tmp2, resultkey == p)) # create a separate list for each broadcast_msg_received vector
 
 	sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head(subset(d, y == id, select=c(x)), 1)[[1]] )) )
+	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), 100*seq(simulation.time,simulation.time)), 1 )[[1]] )) )
 	
 	# compute number of message received at each location (coverage)
   rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
 
-	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d)  sum(subset(d, y == 1, select=c(y))[[1]]) )))
+	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
 
 	broadcasting.time <- data.frame(
 			id = id_msgs, # session id
