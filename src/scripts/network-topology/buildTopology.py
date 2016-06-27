@@ -16,7 +16,7 @@
 #      REVISION:  ---
 #===============================================================================
 import sys
-import subprocess
+import math
 import networkx as nx
 
 NED_HEADER = ''
@@ -34,9 +34,19 @@ NED_HEADER1 += 'radioMedium: <mediumType> like IRadioMedium { @display(' +'"'+'p
 
 # default topology
 initConf = {}
-initConf[0] = {'txt': 'nodes', 'val': 10}
-initConf[1] = {'txt': 'transmission range', 'val': 2}
-initConf[2] = {'txt': 'layout length', 'val': 5}
+initConf[0] = {'txt': 'transmission range', 'val': 50}
+initConf[1] = {'txt': 'layout length', 'val': 500}
+
+# network density
+density = {}
+density['sparse'] = 2
+density['medium'] = 5
+density['dense'] = 10
+
+# this dictionary will be filled based on the topology density
+topologies = {}
+for deTyp in density:
+    topologies[deTyp] = []
 
 def setArguments(argv):
     for i in range(0, len(initConf)):
@@ -48,44 +58,49 @@ def setArguments(argv):
             print("input argument %d is NIL or isn't an integer" % (i))
             print('parameter %s will be set to its default value' % (initConf[i]['txt']))
             continue
-    try:
-        isinstance(argv[4], str)
-    except Exception as e:
-        print('one name for the topology file must be given, network topology was not built')
-        sys.exit(1)
 
-def createNedFile(pos, fileName, layoutSize):
+def fillSurface(Tx, layoutLen):
+    sqrLen = int(math.ceil(layoutLen / Tx))
+    for i in range(1, sqrLen + 1):
+        x = i * Tx
+        for j in range(1, sqrLen + 1):
+            y = j * Tx
+            for k in density:
+                G = nx.Graph()
+                G.add_nodes_from(range(1, density[k] + 1))
+                pos = nx.random_layout(G, center=[0,0])
+                for l in pos:
+                    pos[l][0] *= x; pos[l][1] *= y
+                    pos[l][0] = "{0:.2f}".format(pos[l][0])
+                    pos[l][1] = "{0:.2f}".format(pos[l][1])
+                    topologies[k].append(pos[l])
+
+def createNedFile(denType, pos, layoutSize, Tx):
     global NED_HEADER, NED_HEADER1
-    NED_HEADER += 'network ' + fileName + '\n{\n' + '@display(' + '"' + 'bgb=' +\
+    fileName = denType + str(len(pos)) + 'peersTx' + str(Tx) + 'layout' + str(layoutSize)
+    header = NED_HEADER + 'network ' + fileName + '\n{\n' + '@display(' + '"' + 'bgb=' +\
             str(layoutSize) + ',' + str(layoutSize)+ '"' + ");\n" + NED_HEADER1
     posStr = {}
     iNetConf = ':CenterHost { @display('
     nodesDes = ''
-    for i in pos:
+    for i in range(0, len(pos)):
         coor = '"p='
-        pos[i][0] *= layoutSize; coor += "{0:.2f}".format(pos[i][0]) + ', '
-        pos[i][1] *= layoutSize; coor += "{0:.2f}".format(pos[i][1]) + '"'
+        coor += str(pos[i][0]) + ', '
+        coor += str(pos[i][1]) + '"'
         nodesDes += 'hostR' + str(i) + iNetConf + coor + '); }\n'
-    NED_HEADER += nodesDes
+    header += nodesDes
     # adding node at the layout center
-    NED_HEADER += 'hostR' + str(len(pos) + 1) + iNetConf + '"p=' + "{0:.2f}".format(0.5 * layoutSize) + \
+    header += 'hostR' + str(len(pos)) + iNetConf + '"p=' + "{0:.2f}".format(0.5 * layoutSize) + \
             ', ' + "{0:.2f}".format(0.5 * layoutSize) + '"); isCenter=true; }\n}'
     f = open(fileName + '.ned', 'w')
     try:
-        f.write(NED_HEADER)
+        f.write(header)
     finally:
         f.close()
 
 if __name__ == '__main__':
     setArguments(sys.argv)
-    nodes = initConf[0]['val']
-    trRan = initConf[1]['val']
-    laRan = initConf[2]['val']
-    toFil = sys.argv[4]
-    G = nx.Graph()
-    G.add_nodes_from(range(1, nodes + 1))
-    #pos = nx.spring_layout(G, k=trRan, scale=laRan, center=[(laRan*1.0)/2,(laRan*1.0)/2])
-    pos = nx.random_layout(G, center=[0,0])
-    #TODO still you need to guarantee density based in the transmission rate
-    #     and not based on the total layout (as it is currently implemented)
-    createNedFile(pos, toFil, laRan)
+    trRan = initConf[0]['val']; laRan = initConf[1]['val']
+    fillSurface(trRan, laRan)
+    for i in density:
+        createNedFile(i, topologies[i], laRan, trRan)
