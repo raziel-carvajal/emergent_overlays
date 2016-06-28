@@ -28,6 +28,9 @@ source local-omnet-setenv.sh $OMNET_PATH
 r=$?
 if [ $r -eq 0 ]; then
 	echo "${OMNET_PATH}" >> omnet.config
+else
+	echo "Stopping the execution because some required application is not installed"
+	exit 1
 fi
 
 # load the right version of the code

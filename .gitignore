@@ -30,3 +30,6 @@
 
 # Vim files
 *.swp
+
+# backup files
+*~

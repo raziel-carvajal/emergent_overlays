@@ -12,7 +12,9 @@ done
 echo "import networkx" | python
 state=$?
 if [ $state -ne 0 ]; then
-    echo >&2 "Python.Networkx must be installed build network topologies. Aborting."; exit 1;
+    echo >&2 "Python.Networkx must be installed build network topologies. Aborting.";
+    tar -xzvf ../../tools/networkx-1.11.tar.gz -C ../../tools
+    exit 1
 fi
 print "Ok\n"
 
