@@ -54,8 +54,8 @@ broadcastingTime <- function(ds, simulation.time=600) {
 
 	broadcasting.time <- data.frame(
 			id = id_msgs, # session id
-			sending = sending.time 
-			receiving = reception.time
+			sending = sending.time, 
+			receiving = reception.time,
 			time = reception.time - sending.time, # broadcasting time per session id
 			n.received = rcv, # how many location received a message from a particular session
 			B.i = B.i.tmp # total number of messages recevied per broadcast session
@@ -78,6 +78,22 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
 
+
+	nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
+
+	plot(y=broadcast.info$n.received/nr.nodes*100, 
+		 x = broadcast.info$sending ,
+		 type="l", 
+		 col="blue", 
+		 xlab="Sending Time (Seconds) of each session", 
+		 ylab="Coverage (%)", 
+		 main="Coverage per session Id"
+		)
+
+	print(ts)
+	print(nr.dead.nodes)
+	plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l")
+	
 	boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
 
 }
