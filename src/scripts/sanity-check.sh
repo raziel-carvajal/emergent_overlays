@@ -9,6 +9,7 @@ for C in "${COMMANDS[@]}"; do
 done
 
 #Checking Networkx: python lib for building topologies
+printf "Checking if Networkx is installed (python library to cope with graphs)\n"
 echo "import networkx" | python
 state=$?
 if [ $state -ne 0 ]; then
@@ -16,7 +17,58 @@ if [ $state -ne 0 ]; then
     tar -xzvf ../../tools/networkx-1.11.tar.gz -C ../../tools
     exit 1
 fi
-print "Ok\n"
+printf "Ok\n"
+
+# Getting transmission range to build topologies
+if [ ! -f "../../experiments/configs/common.ini" ]; then
+   echo "Error: common configuration file for experiments does not exist"
+   exit 1
+fi
+
+tPath='../../experiments/networks/builtTopologies/'
+iniCommon='../../experiments/configs/common.ini'
+
+Tx=`grep 'maxCommunicationRange' $iniCommon | grep -Eo '[0-9]{1,5}'`
+printf "Building topologies with transmission range: $Tx\n"
+rm -fr $tPath'*.ned'
+
+# Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
+# as an input
+./doTopologies.sh $Tx 2 10 $tPath
+state=$?
+if [ $state -ne 0 ]; then
+    echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
+fi
+printf "Ok\n"
+
+printf "Building configurations (ini files) per algorithm and per topology\n"
+# experiments/configs/builtConfigs
+pPath='../protocols/'
+cPath='../../experiments/configs/builtConfigs/'
+here=`pwd`
+cd $pPath
+protocols=`ls -d *`
+cd $here
+cd $tPath
+topologiesFiles=`ls *.ned`
+cd $here
+for t in $topologiesFiles; do
+    srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
+    index=$(( ${#t} - 4 ))
+    tName=${t:0:$index}
+    for p in $protocols; do
+        tId=$tName$p
+        cat $iniCommon >$tId
+        echo -e "[Config $tId]\nnetwork = $tName" >>$tId
+        cat $pPath$p'/ini' >>$tId
+        sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
+        mv $tId $tId'.ini'
+        mv $tId'.ini' $cPath
+    done
+done
+# TODO figure out why there is a file *-e
+rm -fr n-*
+printf "Ok\n"
 
 # installing omnetpp package for R if needed
 Rscript checking-depencencies.R

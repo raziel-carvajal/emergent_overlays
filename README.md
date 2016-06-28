@@ -15,4 +15,6 @@ The generation of a network topology is in charge of the Python library [Network
 1. Download the library [here](https://pypi.python.org/pypi/networkx/)
 2. Decompress the ZIP file and go to that uncompress directory
 2. `sudo python setup.py install`
-	
+
+##Antenna specificcation
+- cc1000
