@@ -31,16 +31,22 @@ iniCommon='../../experiments/configs/common.ini'
 
 Tx=`grep 'maxCommunicationRange' $iniCommon | grep -Eo '[0-9]{1,5}'`
 printf "Building topologies with transmission range: $Tx\n"
-rm -fr $tPath'*.ned'
+#rm -fr $tPath'*.ned'
 
-# Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
-# as an input
-./doTopologies.sh $Tx 2 10 $tPath
-state=$?
-if [ $state -ne 0 ]; then
-    echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
+ls $tPath/*.ned 2>/dev/null
+isEmpty=$?
+if [ $isEmpty -ne 0 ]; then
+    # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
+    # as an input
+    ./doTopologies.sh $Tx 2 10 $tPath
+    state=$?
+    if [ $state -ne 0 ]; then
+        echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
+    fi
+    printf "Ok\n"
+else
+    printf "Topologies were already created, no need to create new ones.\n"
 fi
-printf "Ok\n"
 
 printf "Building configurations (ini files) per algorithm and per topology\n"
 # experiments/configs/builtConfigs

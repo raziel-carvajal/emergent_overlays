@@ -20,6 +20,7 @@ import math
 import networkx as nx
 
 NED_HEADER = ''
+NED_HEADER += 'package builtTopologies;'
 NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
 NED_HEADER += "import inet.node.inet.INetworkNode;\n"
 NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
