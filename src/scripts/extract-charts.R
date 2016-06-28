@@ -48,12 +48,14 @@ broadcastingTime <- function(ds, simulation.time=600) {
 	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), 100*seq(simulation.time,simulation.time)), 1 )[[1]] )) )
 
 	# compute number of message received at each location (coverage)
-  rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
+	rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
 
 	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
 
 	broadcasting.time <- data.frame(
 			id = id_msgs, # session id
+			sending = sending.time 
+			receiving = reception.time
 			time = reception.time - sending.time, # broadcasting time per session id
 			n.received = rcv, # how many location received a message from a particular session
 			B.i = B.i.tmp # total number of messages recevied per broadcast session
@@ -61,22 +63,22 @@ broadcastingTime <- function(ds, simulation.time=600) {
 }
 
 
-plot.charts.for.single.experiment <- function(power.level, broadcast.info, simulation.time=600) {
+plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max = 600, step=30) {
 
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-	valid.time <- broadcast.info$time[broadcast.info$time <= simulation.time ]
+	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
-	plot(nr.nodes/broadcast.info$B.i, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")
+	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
 
-  boxplot(power.level)
+	boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
 
 }
 
@@ -89,20 +91,22 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, simul
 
 
 args <- commandArgs(trailingOnly=TRUE)
-if (length(args) == 2) {
-  print(paste("Loading data file:", args[1]))
-  ds <- load.datafile(args[1])
+print(args)
+if (length(args) == 3) {
+	sim.time <- strtoi(args[3])
+	print(paste("Loading data file:", args[1]))
+	ds <- load.datafile(args[1])
 
-  device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
-  device
+	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
+	device
 
-  print(paste("Creating powerlevels:", args[1]))
-  pl <- powerlevels3(ds)
+	print(paste("Creating powerlevels:", args[1]))
+	pl <- powerlevels3( ds, max= sim.time )
 
-  print(paste("Creating broadcasting time:", args[1]))
-  bs <- broadcastingTime(ds)
+	print(paste("Creating broadcasting time:", args[1]))
+	bs <- broadcastingTime(ds, simulation.time = sim.time)
 
-	plot.charts.for.single.experiment(pl, bs)
+	plot.charts.for.single.experiment(pl, bs, max = sim.time)
 
 }
 

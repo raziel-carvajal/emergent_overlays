@@ -62,5 +62,7 @@ for config in ${CONFIG_PATH}/*.ini ; do
 		echo "Error: failure running simulation ${config_name}"
 		exit 1
 	fi
-	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name}
+	
+	simulation_time=`cat "${config}" | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
+	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time}
 done
