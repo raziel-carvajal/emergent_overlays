@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMANDS=( tar git make gcc g++ opp_run opp_makemake R python )
+COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python )
 
 for C in "${COMMANDS[@]}"; do
    printf "Checking if $C is installed: "
@@ -15,3 +15,6 @@ if [ $state -ne 0 ]; then
     echo >&2 "Python.Networkx must be installed build network topologies. Aborting."; exit 1;
 fi
 print "Ok\n"
+
+# installing omnetpp package for R if needed
+Rscript checking-depencencies.R

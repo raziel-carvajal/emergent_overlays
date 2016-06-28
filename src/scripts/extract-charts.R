@@ -66,7 +66,10 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, simul
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-  valid.time <- broadcast.info$time[broadcast.info$time <= simulation.time ]
+	valid.time <- broadcast.info$time[broadcast.info$time <= simulation.time ]
+	if (length(valid.time) == 0) {
+		valid.time <- broadcast.info$time
+	}
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
 	plot(nr.nodes/broadcast.info$B.i, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")

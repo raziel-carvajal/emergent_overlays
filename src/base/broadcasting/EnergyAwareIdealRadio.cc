@@ -52,6 +52,7 @@ void EnergyAwareIdealRadio::startTransmission(cPacket *macFrame)
     // there is no energy to send the frame
     // cancelEvent(endSwitchTimer);
     // completeRadioModeSwitch(RADIO_MODE_OFF);
+    delete macFrame;
     return;
   }
   inet::physicallayer::Radio::startTransmission(macFrame);
@@ -63,6 +64,7 @@ void EnergyAwareIdealRadio::startReception(inet::physicallayer::RadioFrame *radi
     // there is no energy to receive a message
     // cancelEvent(endSwitchTimer);
     // completeRadioModeSwitch(RADIO_MODE_OFF);
+    delete radioFrame;
     return;
   }
   inet::physicallayer::Radio::startReception(radioFrame);

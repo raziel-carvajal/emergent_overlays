@@ -118,20 +118,20 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
+                    cout << "Another hello now and we still must send " << this->nr_hello_msg << " in " << myself << endl;
                     ctrlMsg0->setKind(SAY_HELLO);
                     scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
                 }
                 break;
             case WAKEUP:
                 configure_neighbors();
-                this->emitReceived();
                 this->time_to_broadcast_payload(nullptr);
                 cancelAndDelete(msg);
                 nr_broadcast_msg--;
                 if (is_source && nr_broadcast_msg > 0) {
                     cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
                     ctrlWakeup->setKind( WAKEUP);
-                    scheduleAt(par("wakeUpTime").doubleValue() + simTime(), ctrlWakeup);
+                    scheduleAt(par("intervalBroadcastTime").doubleValue() + simTime(), ctrlWakeup);
                 }
                 break;
             case BROADCAST_DELAY:
