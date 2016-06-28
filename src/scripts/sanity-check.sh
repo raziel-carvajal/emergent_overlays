@@ -58,13 +58,15 @@ for t in $topologiesFiles; do
     index=$(( ${#t} - 4 ))
     tName=${t:0:$index}
     for p in $protocols; do
-        tId=$tName$p
-        cat $iniCommon >$tId
-        echo -e "[Config $tId]\nnetwork = $tName" >>$tId
-        cat $pPath$p'/ini' >>$tId
-        sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
-        mv $tId $tId'.ini'
-        mv $tId'.ini' $cPath
+	if [ -d $p ]; then
+		tId=$tName$p
+		cat $iniCommon >$tId
+		echo -e "[Config $tId]\nnetwork = $tName" >>$tId
+		cat $pPath$p'/ini' >>$tId
+		sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
+		mv $tId $tId'.ini'
+		mv $tId'.ini' $cPath
+	fi
     done
 done
 # TODO figure out why there is a file *-e
