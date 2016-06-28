@@ -1,0 +1,103 @@
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.INetworkNode;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.node.inet.CenterHost;
+network n-90-d-dense-tr-120-a-360x360-p-
+{
+@display("bgb=360,360");
+string mediumType = default("IdealRadioMedium");
+submodules:
+configurator: IPv4NetworkConfigurator { @display("p=0,0"); }
+radioMedium: <mediumType> like IRadioMedium { @display("p=0,0"); }
+hostR0:CenterHost { @display("p=113.93, 32.7"); }
+hostR1:CenterHost { @display("p=52.43, 11.6"); }
+hostR2:CenterHost { @display("p=101.08, 32.67"); }
+hostR3:CenterHost { @display("p=106.53, 63.44"); }
+hostR4:CenterHost { @display("p=19.09, 18.51"); }
+hostR5:CenterHost { @display("p=117.43, 4.92"); }
+hostR6:CenterHost { @display("p=119.56, 22.43"); }
+hostR7:CenterHost { @display("p=116.72, 37.22"); }
+hostR8:CenterHost { @display("p=83.75, 68.73"); }
+hostR9:CenterHost { @display("p=20.09, 89.03"); }
+hostR10:CenterHost { @display("p=103.39, 143.31"); }
+hostR11:CenterHost { @display("p=29.84, 222.29"); }
+hostR12:CenterHost { @display("p=104.65, 50.87"); }
+hostR13:CenterHost { @display("p=44.38, 133.7"); }
+hostR14:CenterHost { @display("p=62.09, 131.87"); }
+hostR15:CenterHost { @display("p=101.61, 175.57"); }
+hostR16:CenterHost { @display("p=91.05, 227.22"); }
+hostR17:CenterHost { @display("p=87.85, 106.19"); }
+hostR18:CenterHost { @display("p=60.47, 131.12"); }
+hostR19:CenterHost { @display("p=20.41, 17.23"); }
+hostR20:CenterHost { @display("p=115.4, 219.57"); }
+hostR21:CenterHost { @display("p=62.45, 337.2"); }
+hostR22:CenterHost { @display("p=117.38, 193.85"); }
+hostR23:CenterHost { @display("p=25.21, 164.62"); }
+hostR24:CenterHost { @display("p=38.63, 195.73"); }
+hostR25:CenterHost { @display("p=80.32, 81.79"); }
+hostR26:CenterHost { @display("p=42.11, 105.59"); }
+hostR27:CenterHost { @display("p=28.53, 53.14"); }
+hostR28:CenterHost { @display("p=64.07, 348.12"); }
+hostR29:CenterHost { @display("p=17.04, 288.07"); }
+hostR30:CenterHost { @display("p=214.21, 117.73"); }
+hostR31:CenterHost { @display("p=106.65, 69.32"); }
+hostR32:CenterHost { @display("p=80.53, 17.03"); }
+hostR33:CenterHost { @display("p=26.61, 28.56"); }
+hostR34:CenterHost { @display("p=203.05, 72.61"); }
+hostR35:CenterHost { @display("p=7.55, 111.47"); }
+hostR36:CenterHost { @display("p=94.87, 3.22"); }
+hostR37:CenterHost { @display("p=214.51, 57.05"); }
+hostR38:CenterHost { @display("p=198.97, 66.56"); }
+hostR39:CenterHost { @display("p=168.82, 29.28"); }
+hostR40:CenterHost { @display("p=163.47, 91.04"); }
+hostR41:CenterHost { @display("p=71.12, 138.75"); }
+hostR42:CenterHost { @display("p=78.03, 24.26"); }
+hostR43:CenterHost { @display("p=78.86, 32.12"); }
+hostR44:CenterHost { @display("p=138.24, 145.35"); }
+hostR45:CenterHost { @display("p=237.69, 177.85"); }
+hostR46:CenterHost { @display("p=30.13, 89.15"); }
+hostR47:CenterHost { @display("p=134.21, 235.08"); }
+hostR48:CenterHost { @display("p=153.14, 184.32"); }
+hostR49:CenterHost { @display("p=200.36, 90.62"); }
+hostR50:CenterHost { @display("p=127.95, 329.39"); }
+hostR51:CenterHost { @display("p=96.58, 222.89"); }
+hostR52:CenterHost { @display("p=223.82, 215.94"); }
+hostR53:CenterHost { @display("p=19.43, 243.81"); }
+hostR54:CenterHost { @display("p=48.18, 90.18"); }
+hostR55:CenterHost { @display("p=181.28, 350.05"); }
+hostR56:CenterHost { @display("p=7.03, 14.73"); }
+hostR57:CenterHost { @display("p=195.94, 36.29"); }
+hostR58:CenterHost { @display("p=205.22, 64.71"); }
+hostR59:CenterHost { @display("p=39.86, 286.5"); }
+hostR60:CenterHost { @display("p=56.74, 83.36"); }
+hostR61:CenterHost { @display("p=334.49, 8.1"); }
+hostR62:CenterHost { @display("p=129.9, 16.08"); }
+hostR63:CenterHost { @display("p=326.52, 27.67"); }
+hostR64:CenterHost { @display("p=338.94, 72.31"); }
+hostR65:CenterHost { @display("p=346.01, 52.19"); }
+hostR66:CenterHost { @display("p=180.1, 119.95"); }
+hostR67:CenterHost { @display("p=203.87, 77.24"); }
+hostR68:CenterHost { @display("p=318.77, 6.08"); }
+hostR69:CenterHost { @display("p=119.89, 4.9"); }
+hostR70:CenterHost { @display("p=210.37, 65.11"); }
+hostR71:CenterHost { @display("p=325.53, 40.51"); }
+hostR72:CenterHost { @display("p=212.53, 202.87"); }
+hostR73:CenterHost { @display("p=309.75, 91.09"); }
+hostR74:CenterHost { @display("p=250.94, 210.29"); }
+hostR75:CenterHost { @display("p=73.32, 102.46"); }
+hostR76:CenterHost { @display("p=105.63, 171.54"); }
+hostR77:CenterHost { @display("p=140.86, 151.09"); }
+hostR78:CenterHost { @display("p=307.13, 139.27"); }
+hostR79:CenterHost { @display("p=210.74, 169.26"); }
+hostR80:CenterHost { @display("p=323.29, 98.78"); }
+hostR81:CenterHost { @display("p=347.78, 38.86"); }
+hostR82:CenterHost { @display("p=84.49, 195.64"); }
+hostR83:CenterHost { @display("p=342.6, 150.55"); }
+hostR84:CenterHost { @display("p=58.75, 69.61"); }
+hostR85:CenterHost { @display("p=351.17, 101.29"); }
+hostR86:CenterHost { @display("p=77.9, 199.4"); }
+hostR87:CenterHost { @display("p=250.69, 10.48"); }
+hostR88:CenterHost { @display("p=21.81, 269.77"); }
+hostR89:CenterHost { @display("p=272.94, 346.98"); }
+hostR90:CenterHost { @display("p=180.00, 180.00"); isCenter=true; }
+}
