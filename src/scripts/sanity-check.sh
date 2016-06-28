@@ -1,7 +1,11 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 #COMMANDS=( tar git make gcc g++ opp_run opp_makemake R python )
 COMMANDS=( tar git make gcc g++ python )
+=======
+COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python )
+>>>>>>> 17e4fc8d12663ae93ef62c549224c9882f22a18e
 
 for C in "${COMMANDS[@]}"; do
    printf "Checking if $C is installed: "
@@ -16,6 +20,7 @@ state=$?
 if [ $state -ne 0 ]; then
     echo >&2 "Python.Networkx must be installed to build network topologies. Aborting."; exit 1;
 fi
+<<<<<<< HEAD
 printf "Ok\n"
 
 # Getting transmission range to build topologies
@@ -68,3 +73,9 @@ done
 # TODO figure out why there is a file *-e
 rm -fr n-*
 printf "Ok\n"
+=======
+print "Ok\n"
+
+# installing omnetpp package for R if needed
+Rscript checking-depencencies.R
+>>>>>>> 17e4fc8d12663ae93ef62c549224c9882f22a18e
