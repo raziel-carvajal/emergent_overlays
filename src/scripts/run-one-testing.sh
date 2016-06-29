@@ -31,7 +31,7 @@ if [ $r -eq 0 ]; then
 fi
 
 # load the right version of the code
-echo "Checking out revision $SHA1"
+#echo "Checking out revision $SHA1"
 #./load-proper-version.sh ${SHA1}
 
 
