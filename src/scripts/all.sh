@@ -41,7 +41,6 @@ echo "Checking out revision $SHA1"
 # compile applications' code
 ./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
 error_code=$?
-echo "error code ===>>>>>> ${error_code}"
 if [ ${error_code} -ne 0 ]; then
    echo "Error: problem compiling. Aborting"
    exit 1
