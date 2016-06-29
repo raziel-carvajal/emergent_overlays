@@ -37,7 +37,7 @@ simple BroadcastingBase
         bool is_source = default(false);
         int nr_broadcast_msg = default(is_source? 1:0);
         volatile double wakeUpTime @unit(s) = is_source? uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)) : 1000000s;
-		volatile double intervalBroadcastTime @unit(s) = uniform(0.1s,0.5s);
+		double intervalBroadcastTime @unit(s) = default(0.5s);
 
 
         // maybe there is some information to show

@@ -20,6 +20,7 @@ import math
 import networkx as nx
 
 NED_HEADER = ''
+NED_HEADER += 'package builtTopologies;'
 NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
 NED_HEADER += "import inet.node.inet.INetworkNode;\n"
 NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
@@ -77,8 +78,8 @@ def fillSurface(Tx, layoutLen):
 
 def createNedFile(denType, pos, layoutSize, Tx):
     global NED_HEADER, NED_HEADER1
-    fileName = 'n-' + str(len(pos)) + '-d-' + denType + '-tr-' + str(Tx) + '-a-' + str(layoutSize) +\
-            'x' + str(layoutSize) + '-p-'
+    fileName = 'n_' + str(len(pos)) + '_d_' + denType + '_tr_' + str(Tx) + '_a_' + str(layoutSize) +\
+            'x' + str(layoutSize) + '_p_'
     header = NED_HEADER + 'network ' + fileName + '\n{\n' + '@display(' + '"' + 'bgb=' +\
             str(layoutSize) + ',' + str(layoutSize)+ '"' + ");\n" + NED_HEADER1
     posStr = {}
