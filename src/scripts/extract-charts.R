@@ -92,6 +92,9 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 	print(ts)
 	print(nr.dead.nodes)
+
+	# TODO: PLOT THIS USING LINES
+	
 	plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l")
 	
 	boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
