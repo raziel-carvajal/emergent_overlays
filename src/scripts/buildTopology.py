@@ -24,8 +24,8 @@ NED_HEADER += 'package builtTopologies;'
 NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
 NED_HEADER += "import inet.node.inet.INetworkNode;\n"
 NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
-#NED_HEADER += "import broadcasting.CenterHost;\n"
-NED_HEADER += "import inet.node.inet.CenterHost;\n"
+NED_HEADER += "import broadcasting.CenterHost;\n"
+#NED_HEADER += "import inet.node.inet.CenterHost;\n"
 
 NED_HEADER1 = ''
 NED_HEADER1 += 'string mediumType = default(' + '"' + 'IdealRadioMedium' + '"' + ");\n"

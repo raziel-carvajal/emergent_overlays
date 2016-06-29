@@ -55,7 +55,7 @@ pPath='../protocols/'
 cPath='../../experiments/configs/builtConfigs/'
 here=`pwd`
 cd $pPath
-protocols=`ls -d *`
+protocols=`ls -d */`
 cd $here
 cd $tPath
 topologiesFiles=`ls *.ned`
@@ -70,10 +70,12 @@ for t in $topologiesFiles; do
 		pwd
 		pp="${pPath}$p"
 		if [ -d $pp ]; then
+                        s=$(( ${#p} - 1))
+                        p=${p:0:$s}
 			echo "holy shit $p"
 			tId=$tName$p
 			cat $iniCommon >$tId
-			echo -e "[Config $tId]\nnetwork = $tName" >>$tId
+			echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
 			cat $pPath$p'/ini' >>$tId
 			sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
 			mv $tId $tId'.ini'
