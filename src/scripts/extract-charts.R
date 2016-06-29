@@ -101,6 +101,29 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 }
 
+average.values <- function(pl, broadcast.info, max) {
+
+	nr.nodes <- length(pl[,1])
+	n <- length(broadcast.info$id) # number of broadcast messages 
+
+	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
+	
+	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+	bt <- sum(valid.time)/length(valid.time)
+	
+	pc <- sum ( pl[ncol(pl),] )/nr.nodes
+	
+	# TODO: hehehe, stop being lazy
+	dm <- 4
+
+	data.frame(
+		coverage = c,
+		broadcasting.time = bt,
+		power_consumption = pc,
+		duplicated_messages = dm
+	) 
+}
+
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
 # 			- we can aggregate this in many ways
 #					1. chart of broadcast session and coverage (one curve per protocol). this one is only useful to compare protocols using the same topology
@@ -126,7 +149,10 @@ if (length(args) == 3) {
 	bs <- broadcastingTime(ds, simulation.time = sim.time)
 
 	plot.charts.for.single.experiment(pl, bs, max = sim.time)
-
+	
+	# printing average values
+	averages <- average.values(pl, bs, max=sim.time)
+	print(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages))
 }
 
 
