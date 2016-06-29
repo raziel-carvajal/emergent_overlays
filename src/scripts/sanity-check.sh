@@ -35,6 +35,7 @@ printf "Building topologies with transmission range: $Tx\n"
 
 ls $tPath/*.ned 2>/dev/null
 isEmpty=$?
+echo "COHETEEEEEE"
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
@@ -58,21 +59,26 @@ protocols=`ls -d *`
 cd $here
 cd $tPath
 topologiesFiles=`ls *.ned`
-cd $here
+cd ${here}
 for t in $topologiesFiles; do
+	echo "PEPEPEPPEPEPEP ${t} PEPEPPEPEPPE"
     srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
     index=$(( ${#t} - 4 ))
     tName=${t:0:$index}
     for p in $protocols; do
-	if [ -d $p ]; then
-		tId=$tName$p
-		cat $iniCommon >$tId
-		echo -e "[Config $tId]\nnetwork = $tName" >>$tId
-		cat $pPath$p'/ini' >>$tId
-		sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
-		mv $tId $tId'.ini'
-		mv $tId'.ini' $cPath
-	fi
+		echo "${pPath}${p} is very nice"
+		pwd
+		pp="${pPath}$p"
+		if [ -d $pp ]; then
+			echo "holy shit $p"
+			tId=$tName$p
+			cat $iniCommon >$tId
+			echo -e "[Config $tId]\nnetwork = $tName" >>$tId
+			cat $pPath$p'/ini' >>$tId
+			sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
+			mv $tId $tId'.ini'
+			mv $tId'.ini' $cPath
+		fi
     done
 done
 # TODO figure out why there is a file *-e
