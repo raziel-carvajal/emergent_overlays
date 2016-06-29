@@ -73,7 +73,7 @@ for t in $topologiesFiles; do
 			echo "holy shit $p"
 			tId=$tName$p
 			cat $iniCommon >$tId
-			echo -e "[Config $tId]\nnetwork = $tName" >>$tId
+			echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
 			cat $pPath$p'/ini' >>$tId
 			sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
 			mv $tId $tId'.ini'
