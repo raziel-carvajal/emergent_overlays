@@ -39,7 +39,7 @@ echo "COHETEEEEEE"
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    ./doTopologies.sh $Tx 2 10 $tPath
+    ./doTopologies.sh $Tx 2 6 $tPath
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
@@ -77,7 +77,7 @@ for t in $topologiesFiles; do
 			cat $iniCommon >$tId
 			echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
 			cat $pPath$p'/ini' >>$tId
-			sed -i -e s/"SOURCE"/"HostR$srcId"/ $tId
+			sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
 			mv $tId $tId'.ini'
 			mv $tId'.ini' $cPath
 		fi
