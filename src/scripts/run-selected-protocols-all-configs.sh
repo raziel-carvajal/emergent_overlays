@@ -49,10 +49,11 @@ for c in ${path_to_configs}*.ini ; do
 		fi
 		simulation_time=`cat "${c}" | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 		results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time} | grep average_values`
-		coverage=`echo ${results} | awk '{print $2}'`	
-		broadcast_time=`echo ${results} | awk '{print $3}'`
-		power_consumption=`echo ${results} | awk '{print $4}'`
-		duplicated_messages=`echo ${results} | awk '{print $5}'`
+		echo $results
+		coverage=`echo ${results} | awk '{print $3}'`	
+		broadcast_time=`echo ${results} | awk '{print $4}'`
+		power_consumption=`echo ${results} | awk '{print $5}'`
+		duplicated_messages=`echo ${results} | awk '{print $6}'`
 		echo "${config_name},${protocol},${nodes},${density},${coverage},${broadcast_time},${power_consumption},${duplicated_messages}" >> ../../results/summary.csv
 		exit 0
 	elif [ "$protocol" == "dist2mean2" ]; then	

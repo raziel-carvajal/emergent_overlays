@@ -152,7 +152,7 @@ if (length(args) == 3) {
 	
 	# printing average values
 	averages <- average.values(pl, bs, max=sim.time)
-	print(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages))
+	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages)))
 }
 
 
