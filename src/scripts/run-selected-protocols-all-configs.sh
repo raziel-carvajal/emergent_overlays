@@ -49,7 +49,7 @@ for c in ${path_to_configs}*.ini ; do
 		simulation_time=`cat "${c}" | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 		Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time}
 
-		exit 0
+		#exit 0
 	elif [ "$protocol" == "dist2mean2" ]; then	
 		echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 	fi

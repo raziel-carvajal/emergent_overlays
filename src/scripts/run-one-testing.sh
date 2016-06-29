@@ -24,11 +24,11 @@ CONFIG_PATH=../../experiments/configs
 source local-omnet-setenv.sh $OMNET_PATH
 
 # checking that everything is ready to execute the experiments
-#./sanity-check.sh
-#r=$?
-#if [ $r -eq 0 ]; then
-#	echo "${OMNET_PATH}" >> omnet.config
-#fi
+./sanity-check.sh
+r=$?
+if [ $r -eq 0 ]; then
+	echo "${OMNET_PATH}" >> omnet.config
+fi
 
 # load the right version of the code
 #echo "Checking out revision $SHA1"
@@ -36,12 +36,12 @@ source local-omnet-setenv.sh $OMNET_PATH
 
 
 # compile applications' code
-#./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
-#error_code=$?
-#if [ ${error_code} -ne 0 ]; then
-#   echo "Error: problem compiling. Aborting"
-#   exit 1
-#fi
+./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
+error_code=$?
+if [ ${error_code} -ne 0 ]; then
+   echo "Error: problem compiling. Aborting"
+   exit 1
+fi
 
 if [ ! -d "../../results" ]; then
     mkdir ../../results
