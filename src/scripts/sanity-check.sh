@@ -83,4 +83,4 @@ rm -fr n-*
 printf "Ok\n"
 
 # installing omnetpp package for R if needed
-Rscript checking-depencencies.R
+sudo Rscript checking-depencencies.R

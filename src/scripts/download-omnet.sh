@@ -7,24 +7,18 @@ mkdir tools
 cd tools
 
 if [ ! -f omnetpp-4.6-src.tgz ]; then 
-
-    wget -S -r -l 1 -U="Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"  https://omnetpp.org/component/jdownloads/download/32-release-older-versions/2290-omnet-4-6-source-ide-tgz -e robots=off
-
-
-    p=`find . -name 2290-omnet-4-6-source-ide-tgz | grep send`
-
-	echo "Found at $p"
-
-    mv $p omnetpp-4.6-src.tgz
-	
-	rm -r omnetpp.org
-
-	tar -zxvf omnetpp-4.6-src.tgz
+  echo "Error: omnet++ is not detected. Download it following this link https://omnetpp.org/component/jdownloads/download/32-release-older-versions/2290-omnet-4-6-source-ide-tgz"
+  exit 1
+else
+  tar -zxvf omnetpp-4.6-src.tgz
+  cp configure omnetpp-4.6
+  tar -zxvf inet-3.3.0-src.tgz
+  mv inet omnetpp-4.6/samples
+  cd omnetpp-4.6
+  source ../../src/scripts/local-omnet-setenv.sh `pwd`
+  ./configure
+  make -j 4
+  cd samples/inet
+  make makefiles
+  make -j 4
 fi
-
-(
-cd omnetpp-4.6
-source ../../src/scripts/local-omnet-setenv.sh .
-./configure
-make -j 4
-)
