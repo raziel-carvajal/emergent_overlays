@@ -27,7 +27,7 @@ source local-omnet-setenv.sh $OMNET_PATH
 ./sanity-check.sh
 r=$?
 if [ $r -eq 0 ]; then
-	echo "${OMNET_PATH}" >> omnet.config
+	echo "${OMNET_PATH}" > omnet.config
 else
 	echo "Stopping the execution because some required application is not installed"
 	exit 1

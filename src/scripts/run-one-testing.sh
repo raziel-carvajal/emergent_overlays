@@ -30,7 +30,7 @@ source local-omnet-setenv.sh $OMNET_PATH
 ./sanity-check.sh
 r=$?
 if [ $r -eq 0 ]; then
-	echo "${OMNET_PATH}" >> omnet.config
+	echo "${OMNET_PATH}" > omnet.config
 fi
 
 # load the right version of the code
