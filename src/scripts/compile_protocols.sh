@@ -32,6 +32,7 @@ INCLUDE=$2/src
 PROTOCOLS=$1
 
 # create base library that only includes project broadcasting
+echo "TESTING >>>>>>> ${INCLUDE}"
 cd "../base" && ${OMNET_MAKEMAKE} -f --deep -a -I${INCLUDE} -O ${OUT_PATH} -o protocol_base
 
 cd "../base" && make 
