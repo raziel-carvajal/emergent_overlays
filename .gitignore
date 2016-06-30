@@ -33,3 +33,6 @@
 
 # backup files
 *~
+
+# Non useful config files
+src/scripts/omnet.config
