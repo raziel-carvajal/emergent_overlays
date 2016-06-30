@@ -26,3 +26,5 @@ packet ABBABroadcast extends inet::broadcasting::Broadcast {
 	double x;
 	double y;
 }
+
+

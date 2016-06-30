@@ -104,7 +104,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
 
     virtual void processStart();
-    void delayed_broadcast(const std::string& key, double delay);
+    void delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds 
 
     template <typename K>
     class Action {
@@ -112,19 +112,19 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     };
     template <typename T> bool processMessage(cPacket* pkt, void (BroadcastingAppBase::*action)(const T* msg));
 
-    virtual void on_payload_received(const broadcasting::Broadcast* m);
-    virtual bool on_network_message_received(cPacket* pkt);
+    virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
+    virtual bool on_network_message_received(cPacket* pkt); // This nasty one must be defined if your protocol is using other type of messages (percolator)
 
-    virtual void time_to_broadcast_payload(void* user_data);
+    virtual void time_to_broadcast_payload(void* user_data); // it is called sometime after you call delayed_broadcast
 
-    void emitSent(std::string value);
-    void emitReceived();
-    void emitPowerLevel(double value);
-    void emitBroadcastMsgReceived(std::string value);
+    void emitSent(std::string value); // important. you should use it. log data (statistics in vector)
+    void emitReceived(); // this is automatic (don't call it)
+    void emitPowerLevel(double value); // (don't call it)
+    void emitBroadcastMsgReceived(std::string value); // important. you should use it. log data (statistics in vector)
 
     L3Address getAddr(std::string id);
 
-    void delay_broadcast(void* user_data);
+    void delay_broadcast(void* user_data); 
 
     int get_next_id_for_msg();
     int get_last_id_for_msg();

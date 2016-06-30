@@ -88,7 +88,7 @@ Abba2::send_message(string& key)
         //cerr << myself << " has still " << received_from[key].size() << " points " << endl;
 
         L3AddressResolver resolver;
-        L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+        L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4); // TODO: refactor this
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
         m->setPayload(payloads[key].c_str());
         m->setId(key.c_str());
@@ -107,7 +107,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
 //    BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
-        key = myself + "-" + to_string(get_next_id_for_msg());
+        key = myself + "-" + to_string(get_next_id_for_msg()); // TODO: createUniqueBroadcastSessionID()
         payloads[key] = " this is the payload, initially sent from " + myself;
         emitBroadcastMsgReceived(key);
     }
