@@ -55,7 +55,7 @@ for c in ${path_to_configs}*.ini ; do
 		power_consumption=`echo ${results} | awk '{print $5}'`
 		duplicated_messages=`echo ${results} | awk '{print $6}'`
 		echo "${config_name},${protocol},${nodes},${density},${coverage},${broadcast_time},${power_consumption},${duplicated_messages}" >> ../../results/summary.csv
-		exit 0
+		#exit 0
 	elif [ "$protocol" == "dist2mean2" ]; then	
 		echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 	fi
