@@ -1,6 +1,6 @@
 # Evaluation of broadcasting algorithms for MANET's under different scenarios
 
-Our aim is to make a correlation between mobile broadcasting algorithms for MANET's and networks configurations, where every network configuration is characterized by its density (sparse, medium, dense), mobility (nodes changes or not its position according to a mobility model), communication range of nodes (fixed or variable), churn, etc. We aim to have a table T as follows:
+Our aim is to make a correlation between mobile broadcasting algorithms for MANETs and networks configurations, where every network configuration is characterized by its density (sparse, medium, dense), mobility (nodes changes or not its position according to a mobility model), communication range of nodes (fixed or variable), churn, etc. We aim to have a table T as follows:
 
 | Protocol / Configuration | C1 | C2 | C3 | ... |
 |--------------------------|----|----|----|-----|
@@ -8,9 +8,9 @@ Our aim is to make a correlation between mobile broadcasting algorithms for MANE
 | P2                       |    |    |    |     |
 | ...                      |    |    |    |     |
 
-where each P is an implementation of one broadcasting algorithm (we are using as reference the algorithms described in the following survey [1]). In that survey, there is a taxonomy of broadcasting algorithms that we planned to respect i.e. the comparison will be driven between algorithms of the same category (as first step; once we have some results we will see if a comparison of algorithms from different categories make sense).
+where each P is an implementation of one broadcasting algorithm (we are using as reference the algorithms described in the following survey [1]). In that survey, there is a taxonomy of broadcasting algorithms that we planned to respect i.e. the comparison will be driven between algorithms of the same category (as first step; once we have some results we will see if a comparison of algorithms from different categories makes sense).
 
-Notice that in some cases every protocol has different modes (i. e., algorithm attributes could be tuned with different values). Instead of having one row per algorithm at the table, we will have a group of rows per each algorithm.
+Notice that in some cases protocols have different modes (ottributes of the algorithm could be tuned with different values). Instead of having one row per algorithm at table T, we could have a group of rows per each algorithm.
 
 ## Network configurations
 The group of parameters of each network configuration C is described as follows:
@@ -40,14 +40,19 @@ The group of parameters of each network configuration C is described as follows:
 			- Isotropic antenna that model the power consumption of each antenna state (sleep, sending, receiving, etc)
 
 ##Metrics
-Per algorithm and network configuration we will measure:
+Before the description of each metric we have to take into account that:
 
-- Network coverage. Percentage of nodes that received
-- Broadcasting session time
+- Broadcast sessions and nodes are identified in a unique way
+- Brodcast are performed every 0.5 seconds
+
+Per algorithm and per network configuration we will measure:
+
+- Network coverage. Percentage of nodes that receive 
+- Broadcasting session time. Distribution 
 - Power consumption
 - Duplicated messages
 
-Every cell on the table T will be filled with the metrics that were described in this section
+Every cell on the table T will be filled with the metrics that were described in this section.
 
 ## Others
 ### Broadcasting settings
