@@ -39,8 +39,10 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         SAY_HELLO,
         WAKEUP,
         DISPLAY_TIME,
-        BROADCAST_DELAY
+        BROADCAST_DELAY,
+        FLOODING_DELAY
     };
+
 
     // is the source of a broadcast
     bool is_source;
@@ -69,6 +71,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     // counter to assign ids to broadcast messages
     int last_id = 0;
 
+    // keep all the payloads for flooding
+    std::map<std::string, std::string> payload_in_flooding;
+
   private:
 
     // control messages
@@ -86,12 +91,15 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     bool already_configured = false;
 
+
+
     void configure_neighbors();
 
     void on_hello_received(const broadcasting::Hello* msg);
 
   protected:
 
+    /* dond't touch these */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -101,10 +109,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-
-
     virtual void processStart();
-    void delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds 
 
     template <typename K>
     class Action {
@@ -113,6 +118,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     template <typename T> bool processMessage(cPacket* pkt, void (BroadcastingAppBase::*action)(const T* msg));
 
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
+    virtual void on_flooding_received(const broadcasting::FloodingMessage* m);
     virtual bool on_network_message_received(cPacket* pkt); // This nasty one must be defined if your protocol is using other type of messages (percolator)
 
     virtual void time_to_broadcast_payload(void* user_data); // it is called sometime after you call delayed_broadcast
@@ -121,15 +127,21 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void emitReceived(); // this is automatic (don't call it)
     void emitPowerLevel(double value); // (don't call it)
     void emitBroadcastMsgReceived(std::string value); // important. you should use it. log data (statistics in vector)
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value) override;
 
     L3Address getAddr(std::string id);
 
     void delay_broadcast(void* user_data); 
+    void delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
+    void delayed_event(ControlMessageTypes type, const std::string& key, double delay);
 
     int get_next_id_for_msg();
     int get_last_id_for_msg();
+    std::string createUniqueBroadcastingSessionId();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value) override;
+    void initiateFlooding(std::string payload);
+
+
 
   public:
     BroadcastingAppBase();

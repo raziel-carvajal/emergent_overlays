@@ -27,6 +27,7 @@
 
 using namespace std;
 using inet::broadcasting::Broadcast;
+using inet::broadcasting::FloodingMessage;
 using inet::broadcasting::Hello;
 
 namespace inet {
@@ -141,6 +142,17 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
+            case FLOODING_DELAY:
+                {
+                    L3AddressResolver resolver;
+                    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+                    FloodingMessage* m = new FloodingMessage("a flooding");
+                    m->setSender(myself.c_str());
+                    string key = string((char*)msg->getContextPointer());
+                    m->setId(key.c_str());
+                    m->setPayload(payload_in_flooding[key].c_str());
+                    socket.sendTo(m, addr, remote_port);
+                }
             case DISPLAY_TIME:
                 {
                     cancelAndDelete(msg);
@@ -166,7 +178,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 void
 BroadcastingAppBase::receiveSignal(cComponent *source, simsignal_t signalID, double value)
 {
-//    cerr << " una recibida " << signalID << endl;
     if (signalID == inet::power::IEnergyStorage::residualCapacityChangedSignal) {
         emitPowerLevel(value);
     }
@@ -182,7 +193,8 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 
     if (!done) {
         configure_neighbors();
-        done = processMessage<Broadcast>(pkt, &BroadcastingAppBase::on_payload_received);
+        done = processMessage<Broadcast>(pkt, &BroadcastingAppBase::on_payload_received) ||
+               processMessage<FloodingMessage>(pkt, &BroadcastingAppBase::on_flooding_received);
     }
 
     return done;
@@ -309,13 +321,26 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 }
 
 void
-BroadcastingAppBase::on_payload_received(const Broadcast* m) {
+BroadcastingAppBase::on_payload_received(const Broadcast* m)
+{
 
 
     //EV_DEBUG << "Message received at " << simTime() << " from " << m->getSender() << "\n";
     //std::cout << myself << ": message received at " << simTime() << " from " << m->getSender() << "\n";
 
 }
+
+void
+BroadcastingAppBase::on_flooding_received(const FloodingMessage* m)
+{
+    string key = m->getId();
+    string p = m->getPayload();
+    if (payload_in_flooding.find(key) == payload_in_flooding.end()) {
+        payload_in_flooding[key] = p;
+        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, 0.05);
+    }
+}
+
 
 void
 BroadcastingAppBase::time_to_broadcast_payload(void* user_data)
@@ -384,6 +409,23 @@ void BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
     scheduleAt(simTime() + delay, mm);
+}
+
+
+void
+BroadcastingAppBase::delayed_event(ControlMessageTypes type, const std::string& data, double delay)
+{
+    cMessage* mm = new cMessage("some delay");
+    mm->setContextPointer(strdup(data.c_str()));
+    mm->setKind(type);
+    scheduleAt(simTime() + delay, mm);
+}
+
+
+string
+BroadcastingAppBase::createUniqueBroadcastingSessionId()
+{
+    return myself + "-" + to_string(get_next_id_for_msg());
 }
 
 
