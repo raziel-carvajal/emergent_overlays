@@ -24,19 +24,11 @@ The group of parameters of each network configuration C is described as follows:
 		- Static. The position of each node is fixed during the whole experiment
 		- Mobility model. Every node change its position following a mobility model (linear, random, etc.)
 	- Churn. Node joins and leave the network at a certain frequency. Note: any of the articles referenced at [1] consider churn
-<<<<<<< HEAD
 	- Density (position of receivers). We define density as the number of nodes covered by the transmission range of nodes:
 		- Sparse. 2 nodes
 		- Medium. 5 nodes
 		- Dense. 10 nodes
 		- Heterogeneous. Number of nodes randomly located at the whole network area without taking into consideration the transmission rage of nodes. With this model, the density of nodes will be defined by the number of total nodes in the whole area; decreasing the number of nodes will tend to have a sparse network.  Note: this model is followed at [1]
-=======
-	- Density (position of receivers). We define density as the number of nodes covered by the transmission range of nodes
-		- Sparse: at most 2 nodes
-		- Medium: at most 5 nodes
-		- Dense: at most 10 nodes
-		- Heterogeneous. Number of nodes randomly located at the whole network area without taking into consideration the transmission range of nodes. Note: this model is followed at [1]
->>>>>>> f23dae989153b1ceb3641b14a8d7799355860639
 - Networking aspects
 	- Communication range
 		- Fixed radius. Every node send a message at the maximum transmission range its antenna could cover
@@ -47,7 +39,6 @@ The group of parameters of each network configuration C is described as follows:
 		- Currently we use an implementation of the transceiver [Texas Instrument CC1000](http://www.ti.com/lit/ds/symlink/cc1000.pdf)
 			- Isotropic antenna that model the power consumption of each antenna state (sleep, sending, receiving, etc)
 
-<<<<<<< HEAD
 ##Metrics
 Per algorithm and network configuration we will measure:
 
@@ -57,10 +48,6 @@ Per algorithm and network configuration we will measure:
 - Duplicated messages
 
 Every cell on the table T will be filled with the metrics that were described in this section
-=======
-## Metrics
-Every cell at the table T will be filled
->>>>>>> f23dae989153b1ceb3641b14a8d7799355860639
 
 ## Others
 ### Broadcasting settings
