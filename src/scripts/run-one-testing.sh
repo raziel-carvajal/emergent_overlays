@@ -29,6 +29,7 @@ source local-omnet-setenv.sh $OMNET_PATH
 # checking that everything is ready to execute the experiments
 ./sanity-check.sh
 r=$?
+echo "HEREEEEEEEEEEEEEEEE ${OMNET_PATH} $r"
 if [ $r -eq 0 ]; then
 	echo "${OMNET_PATH}" > omnet.config
 fi

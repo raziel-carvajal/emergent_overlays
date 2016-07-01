@@ -28,3 +28,9 @@ packet Broadcast {
     string payload;
 }
 
+
+packet FloodingMessage {
+    string id;
+	string sender;
+	string payload;
+}
