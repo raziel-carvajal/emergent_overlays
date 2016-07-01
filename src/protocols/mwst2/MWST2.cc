@@ -23,8 +23,11 @@
 
 
 #include <algorithm>
+#include <iostream>
 
 #include <climits>
+
+using namespace std;
 
 namespace inet {
 
@@ -103,13 +106,16 @@ MWST2::handleMessageWhenUp(cMessage *msg)
 //                sm_proptocol->reportMessage(MSG_INITIALIZE);
                 break;
             case SAY_HELLO:
-                for ( auto addr : possibleNeighbors ) {
-                    Hello* pkt = new Hello("Hello");
-                    pkt->setX(position.x);
-                    pkt->setY(position.y);
-                    pkt->setSender(myself.c_str());
-                    socket.sendTo(pkt, addr, destinationPort);
-
+                {
+                    L3AddressResolver resolver;
+                    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+                    {
+                        Hello* pkt = new Hello("Hello");
+                        pkt->setX(position.x);
+                        pkt->setY(position.y);
+                        pkt->setSender(myself.c_str());
+                        socket.sendTo(pkt, addr, destinationPort);
+                    }
                 }
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
@@ -127,10 +133,12 @@ MWST2::handleMessageWhenUp(cMessage *msg)
                 {
                     EV_TRACE << "Final MWST from " << myself << " point of view\n";
 
-                    EV_TRACE << "Fragment: " << FN << "\n";
+                    EV_TRACE << "Fragment for " << myself << ": " << FN << '\n';
+                    cerr << "Fragment for " << myself << ": " << FN << endl;
                     for (auto e : edges) {
                         if (SE[e] == EdgeStates::Branch) {
-                            EV_TRACE << e << " with weight " << w[e] << "\n";
+                            EV_TRACE << e << " with weight " << w[e] << endl;
+                            cerr << "\t" << e << " with weight " << w[e] << endl;
                         }
                     }
                     cancelAndDelete(msg);
@@ -327,9 +335,15 @@ MWST2::configure_neighbors()
 
     // print (debug)
     EV_DEBUG << myself << " =>  \n";
+    cerr << myself << "'s neighbors =>  " << endl;
     for (auto i : edges) {
         EV_DEBUG << "\t" << i  << " with cost " << w[i] << "\n";
+        cerr << "\t" << i  << " with cost " << w[i] << endl;
     }
+
+    cerr << endl;
+    cerr << "===============================================" << endl;
+    cerr << endl;
 }
 
 
@@ -398,7 +412,7 @@ MWST2::send_test(const std::string& framentId, const std::string& j, bool now)
         m->setKind(TEST_DELAY);
         scheduleAt(simTime() + par("delay_test").doubleValue(), m);
     }
-    EV_TRACE << "Sending test message from " << myself << " to " << j << "(" << addresses[j] << ")" << "\n";
+    cerr << myself << ": Sending test message from " << myself << " to " << j << "(" << addresses[j] << ")" << "\n";
 
 }
 
@@ -407,7 +421,7 @@ void
 MWST2::wakeup()
 {
 
-    EV_TRACE << "This is wakeup \n";
+    cerr << myself << ": This is wakeup \n";
 
     if (SN == States::Sleeping) {
         configure_neighbors();
@@ -417,14 +431,14 @@ MWST2::wakeup()
         return w[e1] <= w[e2];
     });
 
+    if (m != edges.end()) {
+      SE[*m] = EdgeStates::Branch;
+      SN = States::Found;
+      find_count = 0;
+      FN = myself;
 
-    SE[*m] = EdgeStates::Branch;
-    SN = States::Found;
-    find_count = 0;
-    FN = myself;
-
-    send_connect(*m, false);
-
+      send_connect(*m, false);
+    }
 }
 
 
@@ -433,7 +447,7 @@ MWST2::on_connect_received(const Connect* msg)
 {
     std::string j = msg->getSender();
 
-    EV_TRACE << "Connect Received from " << msg->getSender() << "\n";
+    cerr << myself << ": Connect Received from " << msg->getSender() << "\n";
     print_state();
     if (SN == States::Sleeping) {
         wakeup();
@@ -459,6 +473,10 @@ MWST2::on_connect_received(const Connect* msg)
     }
     else {
         /* someone want to connect, but I am not available, put it in queue */
+        cerr << myself << ": Inserting connect request in queue because I am in state " << SN << endl;
+        cerr << "\ttested.size() " << tested.size() << endl;
+        cerr << "\tfind_count " << find_count << endl;
+        cerr << "\ttest_edge " << test_edge << endl;
         requesting.insert(j);
     }
 }
@@ -492,7 +510,7 @@ MWST2::initiate(const std::string& new_fragment_name)
 void
 MWST2::on_initiate_received(const Initiate* msg)
 {
-    EV_TRACE << "Initiate Received from " << msg->getSender() << "\n";
+    cerr << myself << ": Initiate Received from " << msg->getSender() << "\n";
     print_state();
     std::string j = msg->getSender();
 
@@ -550,7 +568,7 @@ void
 MWST2::on_test_received(const Test* m)
 {
     std::string j = m->getSender();
-    EV_TRACE << "Test Received from " << j  << " and id " << m->getFragmentId() << "\n";
+    cerr  << myself << ": Test Received from " << j  << " and id " << m->getFragmentId() << "\n";
     print_state();
     if (SN == States::Sleeping) {
         wakeup();
@@ -584,7 +602,12 @@ MWST2::on_accept_received(const Accept* m)
         best_edge = j;
         bw = w[j];
     }
-    EV_TRACE << "Accept Received from " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n";
+    cerr << myself << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n";
+    if (find_count) {
+      for (auto f : finding) {
+        cerr << "\t" << f << endl;
+      }
+    }
     test(); // TODO: try this change in the previous version
 }
 
@@ -593,7 +616,7 @@ void
 MWST2::on_reject_received(const Reject* m)
 {
     std::string j = m->getSender();
-    EV_TRACE << "Reject Received from " << j << "\n";
+    cerr << myself << ": Reject Received from " << j << "\n";
     print_state();
     if (SE[j] == EdgeStates::Basic) {
 
@@ -606,9 +629,9 @@ MWST2::on_reject_received(const Reject* m)
 void
 MWST2::report()
 {
-    EV_INFO << "REPORT " << parent << " " << find_count << " " << test_edge <<  "\n";
+    cerr << myself << ": REPORT parent=" << parent << ", find_count " << find_count << ", test_edge " << test_edge <<  "\n";
     if (find_count) {
-        EV_TRACE << "\t\tSome nodes still missing\n";
+        cerr << "\t\tSome nodes still missing\n";
         for (auto n: finding) {
             EV_TRACE << "\t\t\t" << n << "\n";
         }
@@ -632,7 +655,7 @@ MWST2::report()
         }
         else {
             // TODO: HALT
-            EV_TRACE << "HALTTTTTT\n";
+            cerr << myself << ": HALTTTTTT "  << "\n";
         }
     }
 }
@@ -653,7 +676,7 @@ MWST2::on_report_received(const Report* m)
         best_edge = j;
     }
 
-    EV_TRACE << "report Received from " << j << " with w:" << ww << " and bw: " << "(" << best_edge << ")" << bw << " parent: " << parent <<  "\n";
+    cerr << myself << ": report Received from " << j << " with w:" << ww << " and bw: " << "(" << best_edge << ")" << bw << " parent: " << parent <<  "\n";
     report();
 }
 
@@ -675,7 +698,7 @@ MWST2::change_root()
 void
 MWST2::on_change_root_received(const ChangeRoot* msg)
 {
-    EV_TRACE << "change root Received from " << msg->getSender() << "\n";
+    cerr << myself << ": change root Received from " << msg->getSender() << "\n";
     print_state();
     change_root();
 }
