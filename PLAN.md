@@ -21,11 +21,11 @@ The group of parameters of each network configuration C is described as follows:
 		- Static. The position of each node is fixed during the whole experiment
 		- Mobility model. Every node change its position following a mobility model (linear, random, etc.)
 	- Churn. Node joins and leave the network at a certain frequency. Note: any of the articles referenced at [1] consider churn
-	- Density (position of receivers). We define density as the number of nodes covered by the transmission range of nodes
-		- Sparse: 2 nodes
-		- Medium: 5 nodes
-		- Dense: 10 nodes
-		- Heterogeneous. Number of nodes randomly located at the whole network area without taking into consideration the transmission rage of nodes. Note: this model is followed at [1]
+	- Density (position of receivers). We define density as the number of nodes covered by the transmission range of nodes:
+		- Sparse. 2 nodes
+		- Medium. 5 nodes
+		- Dense. 10 nodes
+		- Heterogeneous. Number of nodes randomly located at the whole network area without taking into consideration the transmission rage of nodes. With this model, the density of nodes will be defined by the number of total nodes in the whole area; decreasing the number of nodes will tend to have a sparse network.  Note: this model is followed at [1]
 - Networking aspects
 	- Communication range
 		- Fixed radius. Every node send a message at the maximum transmission range its antenna could cover
@@ -37,7 +37,14 @@ The group of parameters of each network configuration C is described as follows:
 			- Isotropic antenna that model the power consumption of each antenna state (sleep, sending, receiving, etc)
 
 ##Metrics
-Every cell at the table T will be filled 
+Per algorithm and network configuration we will measure:
+
+- Network coverage. Percentage of nodes that received
+- Broadcasting session time
+- Power consumption
+- Duplicated messages
+
+Every cell on the table T will be filled with the metrics that were described in this section
 
 ##Others
 ###Broadcasting settings
