@@ -35,14 +35,17 @@ simple MWST2 like IUDPApp
         double maximumDelay @unit(s) = default(0.5s);
         volatile double helloTime @unit(s) = default(uniform(0s,maximumDelay)); // delay between hello messages
         int nr_hello_messages = default(3); // how many delay messages
+        double intervalBroadcastTime @unit(s) = default(0.5s);
 
         bool spontaneously_awaken = default(false);
 
-        volatile double wakeUpTime @unit(s) = spontaneously_awaken? uniform(1.5s, 2s) : 10000s; //uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)) : 1000000s;
+        volatile double wakeUpTime @unit(s) = spontaneously_awaken? uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)) : 1000000s;
 
-        double display_time @unit(s) = default(5s); // at this point we must show the built MWST
+        double display_time @unit(s) = default(8s); // at this point we must show the built MWST
 
-        volatile double delay_test @unit(s) = default(uniform(0s,0.5s));
+        volatile double delay_test @unit(s) = default(uniform(0s,0.2s));
+
+        @class(inet::MWST2);
 
 	gates:
         input udpIn @labels(UDPControlInfo/up);

@@ -13,24 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-namespace inet::broadcasting;
+package mpr2;
 
+import inet.applications.contract.IUDPApp;
+import broadcasting.BroadcastingBase;
 
-packet Hello {
-    string sender;
-	int x;
-	int y;
-}
-
-packet Broadcast {
-    string id;
-    string sender;
-    string payload;
-}
-
-
-packet FloodingMessage {
-    string id;
-	string sender;
-	string payload;
+//
+//
+// Some nodes distribute messages in the network using unicast UDP.
+//
+simple Mpr2 extends BroadcastingBase like IUDPApp
+{
+    parameters:
+        @class(inet::Mpr2);
+        int buildMprCounter = default(10);
+        double builtMprTimeout @unit(s) = default(3.0s);
 }

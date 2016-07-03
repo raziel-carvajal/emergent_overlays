@@ -37,6 +37,11 @@ LOCAL_NEDPATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:
 
 
 echo "Executing : ${CONF_FILE}"
+echo "Ned path: ${LOCAL_NED_PATH}"
+echo "Inet Library: ${INET_LIBRARY_PATH}"
+echo "Protocols: ${PROTOCOLS_LIBRARY}"
+echo "Config File: ${CONF_FILE}"
+echo "Executing command: ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
 
 ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
