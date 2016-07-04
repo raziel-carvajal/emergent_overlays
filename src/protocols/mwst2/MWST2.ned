@@ -43,7 +43,7 @@ simple MWST2 like IUDPApp
 
         double display_time @unit(s) = default(8s); // at this point we must show the built MWST
 
-        volatile double delay_test @unit(s) = default(uniform(0s,0.2s));
+        volatile double delay_test @unit(s) = default(uniform(0.3s,1.3s)); // TODO: FIX THIS
 
         @class(inet::MWST2);
 

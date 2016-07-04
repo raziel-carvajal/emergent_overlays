@@ -49,6 +49,7 @@ class INET_API MWST2 : public ApplicationBase
     // control messages
     cMessage* ctrlMsg0 = nullptr;
     cMessage* ctrlDisplayTime = nullptr;
+    cMessage* repeat_test_message = nullptr;
 
     // myself as a module
     std::string myself;
@@ -119,8 +120,11 @@ class INET_API MWST2 : public ApplicationBase
     void send_connect(const std::string& j, bool now);
     void send_initiate(const std::string& fragmentId, const std::string& j, bool now);
     void send_test(const std::string& framentId, const std::string& j, bool now);
+    void send_accept(const std::string& j, bool now);
 
     std::string create_unique_name(const std::string& a1, const std::string& a2);
+
+    std::string header() { return myself + "(" + FN + ", "+ SIMTIME_STR(simTime()) + ")"; }
 
   protected:
 
@@ -151,19 +155,19 @@ class INET_API MWST2 : public ApplicationBase
     bool processReceivedHello(cPacket* pkt);
     void addNewAddress(std::string id);
 private:
-    void on_hello_received(const Hello* msg);
+    void on_hello_received(const HelloMWST* msg);
 
     void wakeup();
-    void on_connect_received(const Connect* msg);
+    void on_connect_received(const ConnectMWST* msg);
     void initiate(const std::string& new_fragment_name);
-    void on_initiate_received(const Initiate* msg);
+    void on_initiate_received(const InitiateMWST* msg);
     void test();
-    void on_test_received(const Test* msg);
-    void on_accept_received(const Accept* msg);
-    void on_reject_received(const Reject* msg);
+    void on_test_received(const TestMWST* msg);
+    void on_accept_received(const AcceptMWST* msg);
+    void on_reject_received(const RejectMWST* msg);
     void report();
-    void on_report_received(const Report* msg);
-    void on_change_root_received(const ChangeRoot* msg);
+    void on_report_received(const ReportMWST* msg);
+    void on_change_root_received(const ChangeRootMWST* msg);
     void change_root();
 };
 
