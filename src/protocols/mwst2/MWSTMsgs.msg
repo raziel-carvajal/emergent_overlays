@@ -3,52 +3,52 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 namespace inet;
 
-packet Hello {
-    string sender;
+packet HelloMWST {
+  string sender;
 	int x;
 	int y;
 }
 
-packet Connect {
+packet ConnectMWST {
     string sender;
 }
 
-packet Initiate {
+packet InitiateMWST {
 	string fragmentId;
 	string sender;
 }
 
 
-packet Test {
+packet TestMWST {
 	string fragmentId;
 	string sender;
 }
 
-packet Accept {
+packet AcceptMWST {
     string sender;
 }
 
-packet Reject {
+packet RejectMWST {
     string sender;
 }
 
-packet Report {
+packet ReportMWST {
 	int weight;
 	string sender;
 }
 
-packet ChangeRoot {
+packet ChangeRootMWST {
     string sender;
 }

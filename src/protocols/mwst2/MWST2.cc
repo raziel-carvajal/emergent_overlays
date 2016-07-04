@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 
 #include <climits>
 
@@ -38,10 +39,12 @@ enum ControlMessageTypes {
     START,
     SAY_HELLO,
     WAKEUP,
+    REPEAT_TEST_MSG,
     DISPLAY_TIME,
     TEST_DELAY,
     CONNECT_DELAY,
     INITIATE_DEALY,
+    ACCEPT_DELAY,
     I_REPORT,
     I_TEST,
     I_CONNECT
@@ -50,6 +53,7 @@ enum ControlMessageTypes {
 #define oo INT_MAX
 #define nil nil_edge
 
+static fstream log_file;
 
 void
 MWST2::initialize(int stage)
@@ -65,6 +69,12 @@ MWST2::initialize(int stage)
             ctrlMsg0 = new cMessage("controlMSG", IDLE);
 
             ctrlDisplayTime = new cMessage("DISPLAY TIME", DISPLAY_TIME);
+
+            repeat_test_message = new cMessage("REPEAT TEST", REPEAT_TEST_MSG);
+
+            if (! log_file.is_open()) {
+              log_file.open("log_file_mwst.txt", fstream::out);
+            }
 
             break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
@@ -110,7 +120,7 @@ MWST2::handleMessageWhenUp(cMessage *msg)
                     L3AddressResolver resolver;
                     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
                     {
-                        Hello* pkt = new Hello("Hello");
+                        HelloMWST* pkt = new HelloMWST("Hello");
                         pkt->setX(position.x);
                         pkt->setY(position.y);
                         pkt->setSender(myself.c_str());
@@ -144,23 +154,37 @@ MWST2::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
+            case REPEAT_TEST_MSG:
+              {
+                if (test_edge != nil) {
+                  send_test(FN, test_edge, true);
+                }
+              }
+              break;
             case TEST_DELAY:
                 {
-                    Test* t = check_and_cast_nullable<Test*>(msg);
+                    TestMWST* t = check_and_cast_nullable<TestMWST*>(msg);
                     send_test(t->getFragmentId(), t->getSender(), true);
                     cancelAndDelete(msg);
                 }
                 break;
             case CONNECT_DELAY:
                 {
-                    Connect* t = check_and_cast_nullable<Connect*>(msg);
+                    ConnectMWST* t = check_and_cast_nullable<ConnectMWST*>(msg);
+                    send_connect(t->getSender(), true);
+                    cancelAndDelete(msg);
+                }
+                break;
+            case ACCEPT_DELAY:
+                {
+                    AcceptMWST* t = check_and_cast_nullable<AcceptMWST*>(msg);
                     send_connect(t->getSender(), true);
                     cancelAndDelete(msg);
                 }
                 break;
             case INITIATE_DEALY:
                 {
-                    Initiate* t = check_and_cast_nullable<Initiate*>(msg);
+                    InitiateMWST* t = check_and_cast_nullable<InitiateMWST*>(msg);
                     send_initiate(t->getFragmentId(), t->getSender(), true);
                     cancelAndDelete(msg);
                 }
@@ -173,15 +197,15 @@ MWST2::handleMessageWhenUp(cMessage *msg)
 
         cPacket* pkt = PK(msg);
 
-        bool done = processMessage<Hello>(pkt, &inet::MWST2::on_hello_received);
+        bool done = processMessage<HelloMWST>(pkt, &inet::MWST2::on_hello_received);
         if (!done) {
-            done = done || processMessage<Connect>(pkt, &inet::MWST2::on_connect_received);
-            done = done || processMessage<Initiate>(pkt, &inet::MWST2::on_initiate_received);
-            done = done || processMessage<Test>(pkt, &inet::MWST2::on_test_received);
-            done = done || processMessage<Accept>(pkt, &inet::MWST2::on_accept_received);
-            done = done || processMessage<Reject>(pkt, &inet::MWST2::on_reject_received);
-            done = done || processMessage<Report>(pkt, &inet::MWST2::on_report_received);
-            done = done || processMessage<ChangeRoot>(pkt, &inet::MWST2::on_change_root_received);
+            done = done || processMessage<ConnectMWST>(pkt, &inet::MWST2::on_connect_received);
+            done = done || processMessage<InitiateMWST>(pkt, &inet::MWST2::on_initiate_received);
+            done = done || processMessage<TestMWST>(pkt, &inet::MWST2::on_test_received);
+            done = done || processMessage<AcceptMWST>(pkt, &inet::MWST2::on_accept_received);
+            done = done || processMessage<RejectMWST>(pkt, &inet::MWST2::on_reject_received);
+            done = done || processMessage<ReportMWST>(pkt, &inet::MWST2::on_report_received);
+            done = done || processMessage<ChangeRootMWST>(pkt, &inet::MWST2::on_change_root_received);
 
             print_state();
         }
@@ -215,7 +239,9 @@ MWST2::handleNodeShutdown(IDoneCallback *doneCallback)
     if (ctrlMsg0)
         cancelAndDelete(ctrlMsg0);
     ctrlMsg0 = nullptr;
-
+    if (! log_file.is_open()) {
+        log_file.close();
+    }
     return true;
 }
 
@@ -272,13 +298,12 @@ MWST2::addNewAddress(std::string id)
 
 
 void
-MWST2::on_hello_received(const Hello* msg)
+MWST2::on_hello_received(const HelloMWST* msg)
 {
 
     // add coordinates
     auto it = coordinates.find(msg->getSender());
     if (it == coordinates.end()) {
-//        EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
         addNewAddress(msg->getSender());
         coordinates.insert(std::pair<std::string,  std::pair<int, int> >(msg->getSender(), std::pair<int, int>(msg->getX(), msg->getY())));
     }
@@ -335,7 +360,7 @@ MWST2::configure_neighbors()
 
     // print (debug)
     EV_DEBUG << myself << " =>  \n";
-    cerr << myself << "'s neighbors =>  " << endl;
+    cerr << header() << "'s neighbors =>  " << endl;
     for (auto i : edges) {
         EV_DEBUG << "\t" << i  << " with cost " << w[i] << "\n";
         cerr << "\t" << i  << " with cost " << w[i] << endl;
@@ -366,12 +391,13 @@ MWST2::send_connect(const std::string& j, bool now)
         if (now) {
             SN = States::Connecting;
             connecting_with = j;
-            Connect* pkt = new Connect("connect");
+            ConnectMWST* pkt = new ConnectMWST("connect");
             pkt->setSender(myself.c_str());
             socket.sendTo(pkt, addresses[j], destinationPort);
+            log_file << "Sending Connect " << myself << " " << j << " " << simTime() << endl;
         }
         else {
-            Connect* pkt = new Connect("connect");
+            ConnectMWST* pkt = new ConnectMWST("connect");
             pkt->setSender(j.c_str());
             pkt->setKind(CONNECT_DELAY);
             scheduleAt(simTime() + par("delay_test").doubleValue(), pkt);
@@ -384,12 +410,13 @@ MWST2::send_connect(const std::string& j, bool now)
 void
 MWST2::send_initiate(const std::string& fragmentId, const std::string& j, bool now)
 {
-    Initiate* pkt = new Initiate("initiate");
+    InitiateMWST* pkt = new InitiateMWST("initiate");
     pkt->setSender(myself.c_str());
     pkt->setFragmentId(fragmentId.c_str());
     if (now) {
         EV_TRACE << "Sending initiate to " << j << "(" << addresses[j] <<  ") \n";
         socket.sendTo(pkt, addresses[j], destinationPort);
+        log_file << "Sending Initiate " << myself << " " << j << " " << simTime() << endl;
     }
     else {
         pkt->setKind(INITIATE_DEALY);
@@ -401,19 +428,37 @@ MWST2::send_initiate(const std::string& fragmentId, const std::string& j, bool n
 void
 MWST2::send_test(const std::string& framentId, const std::string& j, bool now)
 {
-    Test* m = new Test((myself + "test").c_str());
+    TestMWST* m = new TestMWST((myself + "test").c_str());
     m->setSender(myself.c_str());
     m->setFragmentId(framentId.c_str());
     if (now) {
         socket.sendTo(m, addresses[j], destinationPort);
+        scheduleAt(simTime() + 0.1, repeat_test_message);
+        log_file << "Sending Test " << myself << " " << j << " " << simTime() << endl;
     }
     else {
         m->setSender(j.c_str());
         m->setKind(TEST_DELAY);
         scheduleAt(simTime() + par("delay_test").doubleValue(), m);
     }
-    cerr << myself << ": Sending test message from " << myself << " to " << j << "(" << addresses[j] << ")" << "\n";
+    cerr << header() << ": Sending Test message from " << myself << " to " << j << "(" << addresses[j] << "), now = " << now <<  "[" << myself << "[" << simTime() << "[" << j << endl;
 
+}
+
+void
+MWST2::send_accept(const std::string& j, bool now)
+{
+    AcceptMWST* a = new AcceptMWST((string("accept") + myself).c_str());
+    a->setSender(myself.c_str());
+    if (now) {
+        socket.sendTo(a, addresses[j], destinationPort);
+        log_file << "Sending Accept " << myself << " " << j << " " << simTime() << endl;
+    }
+    else {
+        a->setSender(j.c_str());
+        a->setKind(ACCEPT_DELAY);
+        scheduleAt(simTime() + uniform(0.1, 0.3), a);
+    }
 }
 
 
@@ -443,11 +488,12 @@ MWST2::wakeup()
 
 
 void
-MWST2::on_connect_received(const Connect* msg)
+MWST2::on_connect_received(const ConnectMWST* msg)
 {
     std::string j = msg->getSender();
 
-    cerr << myself << ": Connect Received from " << msg->getSender() << "\n";
+    cerr << header() << ": Connect Received from j = " << msg->getSender() << "\n";
+    log_file << "Received Connect " << myself << " " << msg->getSender() << " " << simTime() << endl;
     print_state();
     if (SN == States::Sleeping) {
         wakeup();
@@ -473,7 +519,7 @@ MWST2::on_connect_received(const Connect* msg)
     }
     else {
         /* someone want to connect, but I am not available, put it in queue */
-        cerr << myself << ": Inserting connect request in queue because I am in state " << SN << endl;
+        cerr << header() << ": Inserting connect request in queue because I am in state " << SN << endl;
         cerr << "\ttested.size() " << tested.size() << endl;
         cerr << "\tfind_count " << find_count << endl;
         cerr << "\ttest_edge " << test_edge << endl;
@@ -508,9 +554,10 @@ MWST2::initiate(const std::string& new_fragment_name)
 
 
 void
-MWST2::on_initiate_received(const Initiate* msg)
+MWST2::on_initiate_received(const InitiateMWST* msg)
 {
-    cerr << myself << ": Initiate Received from " << msg->getSender() << "\n";
+    cerr << header() << ": Initiate Received from " << msg->getSender() << "\n";
+    log_file << "Received Initiate " << myself << " " << msg->getSender() << " " << simTime() << endl;
     print_state();
     std::string j = msg->getSender();
 
@@ -565,10 +612,11 @@ MWST2::test()
 
 
 void
-MWST2::on_test_received(const Test* m)
+MWST2::on_test_received(const TestMWST* m)
 {
     std::string j = m->getSender();
-    cerr  << myself << ": Test Received from " << j  << " and id " << m->getFragmentId() << "\n";
+    cerr  << header() << ": Test Received from " << j  << " and id " << m->getFragmentId() << "  [" << myself << "[" << j << "[" << simTime() << endl;
+    log_file << "Received Test " << myself << " " << m->getSender() << " " << simTime() << endl;
     print_state();
     if (SN == States::Sleeping) {
         wakeup();
@@ -576,52 +624,59 @@ MWST2::on_test_received(const Test* m)
 
     if (FN != m->getFragmentId()) {
         // it is a different fragment
-        Accept* a = new Accept("accept");
-        a->setSender(myself.c_str());
-        socket.sendTo(a, addresses[j], destinationPort);
+        // AcceptMWST* a = new AcceptMWST((string("accept") + myself).c_str());
+        // a->setSender(myself.c_str());
+        // socket.sendTo(a, addresses[j], destinationPort);
+        send_accept(j, true);
+        // log_file << "Sending Accept " << myself << " " << j << " " << simTime() << endl;
     }
     else {
         if (SE[j] == EdgeStates::Basic) {
             SE[j] = EdgeStates::Rejected;
         }
 
-        Reject* a = new Reject("reject");
+        RejectMWST* a = new RejectMWST("reject");
         a->setSender(myself.c_str());
         socket.sendTo(a, addresses[j], destinationPort);
+        log_file << "Sending Reject " << myself << " " << j << " " << simTime() << endl;
     }
 }
 
 
 void
-MWST2::on_accept_received(const Accept* m)
+MWST2::on_accept_received(const AcceptMWST* m)
 {
     std::string j = m->getSender();
-        print_state();
+    print_state();
 
     if (w[j] < bw) {
         best_edge = j;
         bw = w[j];
     }
-    cerr << myself << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n";
+    cerr << header() << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n";
+    log_file << "Received Accept " << myself << " " << m->getSender() << " " << simTime() << endl;
     if (find_count) {
       for (auto f : finding) {
         cerr << "\t" << f << endl;
       }
     }
+    if (j == test_edge) cancelEvent(repeat_test_message);
     test(); // TODO: try this change in the previous version
 }
 
 
 void
-MWST2::on_reject_received(const Reject* m)
+MWST2::on_reject_received(const RejectMWST* m)
 {
     std::string j = m->getSender();
-    cerr << myself << ": Reject Received from " << j << "\n";
+    cerr << header() << ": Reject Received from " << j << "\n";
+    log_file << "Received Reject " << myself << " " << m->getSender() << " " << simTime() << endl;
     print_state();
     if (SE[j] == EdgeStates::Basic) {
 
         SE[j] = EdgeStates::Rejected;
     }
+    if (j == test_edge) cancelEvent(repeat_test_message);
     test();
 }
 
@@ -629,7 +684,7 @@ MWST2::on_reject_received(const Reject* m)
 void
 MWST2::report()
 {
-    cerr << myself << ": REPORT parent=" << parent << ", find_count " << find_count << ", test_edge " << test_edge <<  "\n";
+    cerr << header() << ": REPORT parent=" << parent << ", find_count " << find_count << ", test_edge " << test_edge <<  "\n";
     if (find_count) {
         cerr << "\t\tSome nodes still missing\n";
         for (auto n: finding) {
@@ -640,10 +695,11 @@ MWST2::report()
         if (find_count == 0 && test_edge == nil) {
             tested.clear();
             SN = States::Found;
-            Report* a = new Report("report");
+            ReportMWST* a = new ReportMWST("report");
             a->setSender(myself.c_str());
             a->setWeight(bw);
             socket.sendTo(a, addresses[parent], destinationPort);
+            log_file << "Sending Report " << myself << " " << parent << " " << simTime() << endl;
         }
     }
     else if (find_count == 0 && test_edge == nil) {
@@ -655,17 +711,19 @@ MWST2::report()
         }
         else {
             // TODO: HALT
-            cerr << myself << ": HALTTTTTT "  << "\n";
+            cerr << header() << ": HALTTTTTT "  << "\n";
         }
     }
 }
 
 
 void
-MWST2::on_report_received(const Report* m)
+MWST2::on_report_received(const ReportMWST* m)
 {
     int ww = m->getWeight();
     std::string j = m->getSender();
+
+    log_file << "Received Report " << myself << " " << m->getSender() << " " << simTime() << endl;
 
     print_state();
 
@@ -676,7 +734,7 @@ MWST2::on_report_received(const Report* m)
         best_edge = j;
     }
 
-    cerr << myself << ": report Received from " << j << " with w:" << ww << " and bw: " << "(" << best_edge << ")" << bw << " parent: " << parent <<  "\n";
+    cerr << header() << ": report Received from " << j << " with w:" << ww << " and bw: " << "(" << best_edge << ")" << bw << " parent: " << parent <<  "\n";
     report();
 }
 
@@ -685,9 +743,10 @@ void
 MWST2::change_root()
 {
     if (SE[best_edge] == EdgeStates::Branch) {
-        ChangeRoot* m = new ChangeRoot("change root");
+        ChangeRootMWST* m = new ChangeRootMWST("change root");
         m->setSender(myself.c_str());
         socket.sendTo(m, addresses[best_edge], destinationPort);
+        log_file << "Sending ChangeRoot " << myself << " " << best_edge << " " << simTime() << endl;
     }
     else {
         send_connect(best_edge, false);
@@ -696,9 +755,10 @@ MWST2::change_root()
 
 
 void
-MWST2::on_change_root_received(const ChangeRoot* msg)
+MWST2::on_change_root_received(const ChangeRootMWST* msg)
 {
-    cerr << myself << ": change root Received from " << msg->getSender() << "\n";
+    cerr << header() << ": change root Received from " << msg->getSender() << "\n";
+    log_file << "Received ChangeRoot " << myself << " " << msg->getSender() << " " << simTime() << endl;
     print_state();
     change_root();
 }
