@@ -19,6 +19,6 @@ namespace inet::examples::infocom::mpr;
 class noncobject Neighbor;
 
 packet Neighbours{
-	Neighbor[] neighbours;
+	Neighbor neighbours[];
 	string emitter;
 }
