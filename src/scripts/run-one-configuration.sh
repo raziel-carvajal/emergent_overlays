@@ -33,7 +33,7 @@ INET_LIBRARY_PATH=${INET_PATH}/out/gcc-debug/src/INET
 PROTOCOLS_LIBRARY=../../built/gcc-debug/protocols
 
 # specify my ned path. set of path where I can find ned files
-LOCAL_NEDPATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
+LOCAL_NED_PATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
 
 
 echo "Executing : ${CONF_FILE}"
@@ -41,9 +41,9 @@ echo "Ned path: ${LOCAL_NED_PATH}"
 echo "Inet Library: ${INET_LIBRARY_PATH}"
 echo "Protocols: ${PROTOCOLS_LIBRARY}"
 echo "Config File: ${CONF_FILE}"
-echo "Executing command: ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
+echo "Executing command: ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
 
-${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NEDPATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
+${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
 if [ $r -ne 0 ]; then
 	exit 1

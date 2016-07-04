@@ -20,11 +20,14 @@
 #include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 
+//#include "mpr2.h"
+#include "mprMsgs_m.h"
+
 using namespace std;
 
 namespace inet {
 
-class INET_API Mpr2 : public inet::BroadcastingAppBase{
+class INET_API Mpr2 : public BroadcastingAppBase{
 protected:
     enum mpr2cases{
         GET_2_HOPS_N
@@ -46,6 +49,12 @@ protected:
     void send_message(string& key);
 
     virtual bool on_network_message_received(cPacket* pkt);
+
+    virtual void handleMessageWhenUp(cMessage *msg);
+
+    virtual void onNeigh(const mpr2::Neighbours* m);
+
+    template <typename T> bool processMessage(cPacket* pkt, void (Mpr2::*action)(const T* msg));
 };
 
 } //namespace

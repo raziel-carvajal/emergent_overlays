@@ -12,13 +12,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 cplusplus{{
     #include "broadcasting/BroadcastingAppBase.h"
+    typedef inet::BroadcastingAppBase::Neighbor *NePo; 
 }};
 
-namespace inet::examples::infocom::mpr;
+namespace inet::mpr2;
 
-class noncobject Neighbor;
+class noncobject NePo;
 
 packet Neighbours{
-	Neighbor neighbours[];
+	NePo neighbours;
 	string emitter;
 }

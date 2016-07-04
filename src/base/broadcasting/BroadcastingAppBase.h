@@ -25,14 +25,19 @@ namespace inet {
 
 class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 {
-  protected:
-    class Neighbor {
+  public:
+
+  // how many hello messages I must send
+  int nr_hello_msg;
+  cMessage* ctrlMsg0 = nullptr;
+  class Neighbor {
     public:
         std::string name;
         L3Address addr;
         Coord pos;
         int w;
     };
+  protected:
     enum ControlMessageTypes {
         IDLE,
         START,
@@ -77,11 +82,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
   private:
 
     // control messages
-    cMessage* ctrlMsg0 = nullptr;
     cMessage* ctrlDisplayTime = nullptr;
 
-    // how many hello messages I must send
-    int nr_hello_msg;
 
     /* signals used to record statistics */
     simsignal_t signal_received_id;

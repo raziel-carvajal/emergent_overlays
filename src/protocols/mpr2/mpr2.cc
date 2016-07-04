@@ -29,21 +29,12 @@
 
 using namespace std;
 using inet::broadcasting::Broadcast;
+using inet::BroadcastingAppBase;
 
 namespace inet {
 
 Define_Module(Mpr2);
 
-Mpr2::Mpr2(){
-    buildMprCounter = 1;
-}
-
-/*
- * if (nr_hello_msg > 0) {
-        ctrlMsg0->setKind(SAY_HELLO);
-        scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
-    }
- */
 void
 Mpr2::handleMessageWhenUp(cMessage *msg){
     if (msg->isSelfMessage()){
@@ -55,23 +46,20 @@ Mpr2::handleMessageWhenUp(cMessage *msg){
                 break;
             case GET_2_HOPS_N:
                 cout << "Calling Neigh.Neigh \n";
-                Neighbor* neighs = new (nothrow) Neighbor[neighbors.size()];
+                BroadcastingAppBase::Neighbor* neighs = new (nothrow) BroadcastingAppBase::Neighbor[neighbors.size()];
                 if (neighbors.size() != 0 && neighs != nullptr){
                     L3AddressResolver resolver;
                     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
                     typedef map<string, Neighbor>::iterator neigIt;
-                    Neighbor* n;
-                    int i;
+                    int i = 0;
                     for (neigIt ite = neighbors.begin(); ite != neighbors.end(); ite++){
-                        n = new Neighbor();
-                        n->name = ite->first;
-                        n->addr = ((Neighbor) ite->second).addr;
-                        n->pos = ((Neighbor) ite->second).pos;
-                        n->w = ((Neighbor) ite->second).w;
-                        neighs[i] = n;
+                        neighs[i].name = ite->first;
+                        neighs[i].addr = ((Neighbor) ite->second).addr;
+                        neighs[i].pos = ((Neighbor) ite->second).pos;
+                        neighs[i].w = ((Neighbor) ite->second).w;
                         i++;
                     }
-                    Neighbours* pck = new Neighbours();
+                    mpr2::Neighbours* pck = new mpr2::Neighbours();
                     pck->setNeighbours(neighs);
                     pck->setEmitter(myself.c_str());
                     socket.sendTo(pck, addr, remote_port);
@@ -85,8 +73,6 @@ Mpr2::handleMessageWhenUp(cMessage *msg){
                 }
                 return;
                 break;
-            default:
-                break;
         }
     }
     BroadcastingAppBase::handleMessage(msg);
@@ -95,11 +81,12 @@ Mpr2::handleMessageWhenUp(cMessage *msg){
 bool
 Mpr2::on_network_message_received(cPacket* pkt){
     return BroadcastingAppBase::on_network_message_received(pkt) ||
-            processMessage<Neighbours>(pkt, &Mpr2::onNeigh);
+            processMessage<mpr2::Neighbours>(pkt, &Mpr2::onNeigh);
 }
 
 void
-Mpr2::onNeigh(const Neighbours* m){
+Mpr2::onNeigh(const mpr2::Neighbours* m){
+    cout << "Calling onNeigh...";
 }
 
 void
@@ -108,7 +95,7 @@ Mpr2::on_payload_received(const Broadcast* m) {
     // string key = string(m->getId())
     emitBroadcastMsgReceived( string(m->getId()) );
 
-    bool firstTime = !is_source && payloads[key].empty();
+    /*bool firstTime = !is_source && payloads[key].empty();
 
     if (firstTime) {
         double angle = 0;
@@ -142,7 +129,7 @@ Mpr2::on_payload_received(const Broadcast* m) {
         // std::minstd_rand0 generator (seed); // minstd_rand0 is a standard linear_congruential_engine
         // std::uniform_real_distribution<double> distribution(0.1,0.5);
         delayed_broadcast(key, uniform(0.1, 0.5));
-    }
+    }*/
 }
 
 
@@ -158,8 +145,8 @@ Mpr2::send_message(string& key)
         m->setPayload(payloads[key].c_str());
         m->setId(key.c_str());
         m->setSender(myself.c_str());
-        m->setX(position.x);
-        m->setY(position.y);
+        //m->setX(position.x);
+        //m->setY(position.y);
         socket.sendTo(m, addr, remote_port);
         emitSent(key);
     }
@@ -185,6 +172,17 @@ Mpr2::time_to_broadcast_payload(void* user_data)
     send_message(key);
 }
 
-
+template <typename T> bool
+Mpr2::processMessage(cPacket* pkt, void (Mpr2::*action)(const T* msg))
+{
+    T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
+    if (t != nullptr) {
+        (this->*action)(t);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 } //namespace
