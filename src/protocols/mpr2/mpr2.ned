@@ -16,7 +16,7 @@
 package mpr2;
 
 import inet.applications.contract.IUDPApp;
-import broadcasting.BroadcastingBase;
+import inet.broadcasting.BroadcastingBase;
 
 //
 //

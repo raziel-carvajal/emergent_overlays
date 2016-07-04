@@ -13,14 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.examples.infocom.mpr;
+//package builtTopologies;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 import broadcasting.CenterHost;
-
 
 // - create a network and specify the size to 500x500
 // - drop an IPv4NetworkConfigurator and rename it to "configurator"
