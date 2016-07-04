@@ -85,6 +85,8 @@ MWST2::initialize(int stage)
                 this->position = mobility->getCurrentPosition();
 
                 EV_TRACE << "My position is " << this->position  << "\n";
+                myself = this->getParentModule()->getFullName();
+                cerr << header() << ": My position is " << this->position  << endl;
             }
             break;
         case INITSTAGE_LAST:
@@ -120,7 +122,7 @@ MWST2::handleMessageWhenUp(cMessage *msg)
                     L3AddressResolver resolver;
                     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
                     {
-                        HelloMWST* pkt = new HelloMWST("Hello");
+                        HelloMWST* pkt = new HelloMWST(("Hello" + myself).c_str());
                         pkt->setX(position.x);
                         pkt->setY(position.y);
                         pkt->setSender(myself.c_str());
@@ -144,7 +146,7 @@ MWST2::handleMessageWhenUp(cMessage *msg)
                     EV_TRACE << "Final MWST from " << myself << " point of view\n";
 
                     EV_TRACE << "Fragment for " << myself << ": " << FN << '\n';
-                    cerr << "Fragment for " << myself << ": " << FN << endl;
+                    cerr << "Fragment for " << myself << ": FN " << FN << ", SN " << SN << ", test_edge " << test_edge << ", find_count " << find_count << ", connecting_with " << connecting_with << endl;
                     for (auto e : edges) {
                         if (SE[e] == EdgeStates::Branch) {
                             EV_TRACE << e << " with weight " << w[e] << endl;
@@ -305,7 +307,7 @@ MWST2::on_hello_received(const HelloMWST* msg)
     auto it = coordinates.find(msg->getSender());
     if (it == coordinates.end()) {
         addNewAddress(msg->getSender());
-        coordinates.insert(std::pair<std::string,  std::pair<int, int> >(msg->getSender(), std::pair<int, int>(msg->getX(), msg->getY())));
+        coordinates.insert(std::pair<std::string,  std::pair<double, double> >(msg->getSender(), std::pair<double, double>(msg->getX(), msg->getY())));
     }
 
 }
@@ -348,22 +350,26 @@ void
 MWST2::configure_neighbors()
 {
     // traverse set of received addresses
-    for (auto it : addresses) {
-        std::string name = it.first;
-        int x_t = coordinates[name].first;
-        int y_t = coordinates[name].second;
-        int d = (x_t - position.x)*(x_t - position.x) + (y_t - position.y)*(y_t - position.y);
-        edges.push_back(name);
-        SE[name] = EdgeStates::Basic;
-        w[name] = d;
-    }
-
     // print (debug)
     EV_DEBUG << myself << " =>  \n";
     cerr << header() << "'s neighbors =>  " << endl;
+    for (auto it : addresses) {
+        std::string name = it.first;
+        double x_t = coordinates[name].first;
+        double y_t = coordinates[name].second;
+        double d = (x_t - position.x)*(x_t - position.x) + (y_t - position.y)*(y_t - position.y);
+        edges.push_back(name);
+        SE[name] = EdgeStates::Basic;
+        w[name] = d;
+        EV_DEBUG << "\t" << name  << " with cost " << w[name] << "\n";
+        cerr << "\t" << myself << "(" << position.x << ", " << position.y  << ") " << name << "(" << x_t << ", " << y_t << ")" << endl;
+        cerr << "\t" << name  << " with cost " << w[name] << endl;
+    }
+
+
+
     for (auto i : edges) {
-        EV_DEBUG << "\t" << i  << " with cost " << w[i] << "\n";
-        cerr << "\t" << i  << " with cost " << w[i] << endl;
+
     }
 
     cerr << endl;
@@ -509,6 +515,7 @@ MWST2::on_connect_received(const ConnectMWST* msg)
                 std::string new_fragment = create_unique_name(j, myself);
                 initiate(new_fragment);
             }
+            connecting_with = nil;
 
         }
         else {
@@ -574,6 +581,7 @@ MWST2::on_initiate_received(const InitiateMWST* msg)
      * 8 - start testing neighbors that don't belong to the tree to get the shortest edge
      * */
 
+    connecting_with = nil;
     parent = j;
     SE[j] = EdgeStates::Branch;
 
@@ -720,7 +728,7 @@ MWST2::report()
 void
 MWST2::on_report_received(const ReportMWST* m)
 {
-    int ww = m->getWeight();
+    double ww = m->getWeight();
     std::string j = m->getSender();
 
     log_file << "Received Report " << myself << " " << m->getSender() << " " << simTime() << endl;

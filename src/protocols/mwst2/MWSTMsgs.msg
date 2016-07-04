@@ -17,8 +17,8 @@ namespace inet;
 
 packet HelloMWST {
   string sender;
-	int x;
-	int y;
+	double x;
+	double y;
 }
 
 packet ConnectMWST {
@@ -45,7 +45,7 @@ packet RejectMWST {
 }
 
 packet ReportMWST {
-	int weight;
+	double weight;
 	string sender;
 }
 

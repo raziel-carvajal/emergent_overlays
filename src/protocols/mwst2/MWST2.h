@@ -66,11 +66,11 @@ class INET_API MWST2 : public ApplicationBase
     // network members
     std::map<std::string, L3Address> addresses;
     // coordinates
-    std::map<std::string, std::pair<int, int> > coordinates;
+    std::map<std::string, std::pair<double, double> > coordinates;
     // my direct edges
     std::vector<std::string> edges;
     std::map<std::string, EdgeStates> SE;
-    std::map<std::string, int> w;
+    std::map<std::string, double> w;
 
     std::queue<cMessage*> old_msgs;
 
