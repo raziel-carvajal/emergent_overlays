@@ -6,8 +6,8 @@ f.close()
 sent = filter( ( lambda e: e.split(' ')[0] == 'Sending'  ) , lines )
 received = filter( ( lambda e: e.split(' ')[0] == 'Received' ) , lines )
 
-ss = map( (lambda x:  ( x.split(' ')[0], x.split(' ')[1], x.split(' ')[2], x.split(' ')[3],  float(x.split(' ')[4]) )  ), sent  )
-rr = map( (lambda x:  ( x.split(' ')[0], x.split(' ')[1], x.split(' ')[2], x.split(' ')[3],  float(x.split(' ')[4]) )  ), received  )
+ss = map( (lambda x:  ( x.split(' ')[0], x.split(' ')[1], x.split(' ')[2], x.split(' ')[3],  float(x.split(' ')[4]), x.split(' ')[5:8] )  ), sent  )
+rr = map( (lambda x:  ( x.split(' ')[0], x.split(' ')[1], x.split(' ')[2], x.split(' ')[3],  float(x.split(' ')[4]), x.split(' ')[5:8] )  ), received  )
 
 def was_received(m, rr):
     for a in rr:

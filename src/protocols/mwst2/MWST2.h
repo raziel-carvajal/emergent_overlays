@@ -93,6 +93,9 @@ class INET_API MWST2 : public ApplicationBase
     // test edge
     std::string test_edge;
 
+    // iteration of test
+    bool test_step_must_be_called = false;
+
     // in-branch
     std::string parent;
 
