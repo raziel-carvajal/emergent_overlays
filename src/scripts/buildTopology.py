@@ -46,8 +46,9 @@ density['dense'] = 10
 
 # this dictionary will be filled based on the topology density
 topologies = {}
-for deTyp in density:
-    topologies[deTyp] = []
+def inittialize_topologies():
+    for deTyp in density:
+        topologies[deTyp] = []
 
 def setArguments(argv):
     for i in range(0, len(initConf)):
@@ -60,8 +61,24 @@ def setArguments(argv):
             print('parameter %s will be set to its default value' % (initConf[i]['txt']))
             continue
 
-def fillSurface(Tx, layoutLen):
-    nr_sqr = int(math.ceil(layoutLen / Tx))
+def buildGraph(pos, tx):
+    g = nx.Graph();
+    for i, v in enumerate(pos):
+        x0 = v[0]
+        y0 = v[1]
+        g.add_node(i)
+        for j, v2 in enumerate(pos):
+            if i != j:
+                x1 = v2[0]
+                y1 = v2[1]
+                d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
+                if d < tx*tx:
+                    g.add_edge(i,j)
+    return g
+
+def fillSurface(Tx, layoutSize):
+    inittialize_topologies()
+    nr_sqr = int(math.ceil(layoutSize / Tx))
     for i in range(0, nr_sqr):
         x = i * Tx
         for j in range(0, nr_sqr):
@@ -71,38 +88,42 @@ def fillSurface(Tx, layoutLen):
                 G.add_nodes_from(range(1, density[k] + 1))
                 pos = nx.random_layout(G)
                 for l in pos:
-                    pos[l][0] = x + Tx*pos[l][0] ; pos[l][1] = y + Tx*pos[l][1];
-                    pos[l][0] = "{0:.2f}".format(pos[l][0])
-                    pos[l][1] = "{0:.2f}".format(pos[l][1])
+                    pos[l][0] = x + Tx*pos[l][0]
+                    pos[l][1] = y + Tx*pos[l][1]
                     topologies[k].append(pos[l])
 
 def createNedFile(denType, pos, layoutSize, Tx):
     global NED_HEADER, NED_HEADER1
-    fileName = 'n_' + str(len(pos)) + '_d_' + denType + '_tr_' + str(Tx) + '_a_' + str(layoutSize) +\
-            'x' + str(layoutSize) + '_p_'
-    header = NED_HEADER + 'network ' + fileName + '\n{\n' + '@display(' + '"' + 'bgb=' +\
-            str(layoutSize) + ',' + str(layoutSize)+ '"' + ");\n" + NED_HEADER1
-    posStr = {}
-    iNetConf = ':CenterHost { @display('
-    nodesDes = ''
-    for i in range(0, len(pos)):
-        coor = '"p='
-        coor += str(pos[i][0]) + ', '
-        coor += str(pos[i][1]) + '"'
-        nodesDes += 'hostR' + str(i) + iNetConf + coor + '); }\n'
-    header += nodesDes
-    # adding node at the layout center
-    header += 'hostR' + str(len(pos)) + iNetConf + '"p=' + "{0:.2f}".format(0.5 * layoutSize) + \
-            ', ' + "{0:.2f}".format(0.5 * layoutSize) + '"); isCenter=true; }\n}'
+    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_p_".format(len(pos), denType, Tx, layoutSize, layoutSize)
+    
     f = open(fileName + '.ned', 'w')
+
     try:
-        f.write(header)
+        f.write(NED_HEADER)
+        f.write('network ' + fileName + '\n{\n' )
+        f.write( '@display("bgb={0}, {0}");\n'.format(layoutSize) )
+        f.write(NED_HEADER1)
+        
+        for i, p in enumerate(pos):
+            f.write( 'hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); }}\n\n'.format(i, p[0], p[1]) )
+
+        f.write( 'hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format( len(pos), layoutSize*0.5, layoutSize*0.5 ) )
+
+        f.write("}\n")
     finally:
         f.close()
 
 if __name__ == '__main__':
     setArguments(sys.argv)
     trRan = initConf[0]['val']; laRan = initConf[1]['val']
+
+   
     fillSurface(trRan, laRan)
+    while not all( nx.is_connected(buildGraph(topologies[k], trRan)) for k in topologies):
+        fillSurface(trRan, laRan)
+    
+    print "Writing NED file"
     for i in density:
         createNedFile(i, topologies[i], laRan, trRan)
+
+
