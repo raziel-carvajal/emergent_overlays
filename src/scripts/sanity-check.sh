@@ -83,4 +83,8 @@ rm -fr n-*
 printf "Ok\n"
 
 # installing omnetpp package for R if needed
-sudo Rscript checking-depencencies.R
+install_r_dependencies=`Rscript checking-depencencies.R | awk '{ print $2 }'`
+if [ "$install_r_dependencies" == "fail" ]; then
+	sudo Rscript installing-dependencies.R
+fi
+
