@@ -20,7 +20,7 @@ import math
 import networkx as nx
 
 NED_HEADER = ''
-NED_HEADER += 'package builtTopologies;'
+NED_HEADER += 'package builtTopologies;\n\n'
 NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
 NED_HEADER += "import inet.node.inet.INetworkNode;\n"
 NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
@@ -61,17 +61,17 @@ def setArguments(argv):
             continue
 
 def fillSurface(Tx, layoutLen):
-    sqrLen = int(math.ceil(layoutLen / Tx))
-    for i in range(1, sqrLen + 1):
+    nr_sqr = int(math.ceil(layoutLen / Tx))
+    for i in range(0, nr_sqr):
         x = i * Tx
-        for j in range(1, sqrLen + 1):
+        for j in range(0, nr_sqr):
             y = j * Tx
             for k in density:
                 G = nx.Graph()
                 G.add_nodes_from(range(1, density[k] + 1))
                 pos = nx.random_layout(G)
                 for l in pos:
-                    pos[l][0] *= x; pos[l][1] *= y
+                    pos[l][0] = x + Tx*pos[l][0] ; pos[l][1] = y + Tx*pos[l][1];
                     pos[l][0] = "{0:.2f}".format(pos[l][0])
                     pos[l][1] = "{0:.2f}".format(pos[l][1])
                     topologies[k].append(pos[l])
