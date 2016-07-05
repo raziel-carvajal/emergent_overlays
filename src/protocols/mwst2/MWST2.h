@@ -160,17 +160,17 @@ class INET_API MWST2 : public ApplicationBase
 private:
     void on_hello_received(const HelloMWST* msg);
 
-    void wakeup();
     void on_connect_received(const ConnectMWST* msg);
-    void initiate(const std::string& new_fragment_name);
     void on_initiate_received(const InitiateMWST* msg);
-    void test();
     void on_test_received(const TestMWST* msg);
     void on_accept_received(const AcceptMWST* msg);
     void on_reject_received(const RejectMWST* msg);
-    void report();
     void on_report_received(const ReportMWST* msg);
     void on_change_root_received(const ChangeRootMWST* msg);
+    void wakeup();
+    void initiate(const std::string& new_fragment_name);
+    void test();
+    void report();
     void change_root();
 };
 

@@ -25,3 +25,34 @@ namespace inet::ewma;
 packet EWMABroadcast extends inet::broadcasting::Broadcast {
 	string covered[];
 }
+
+packet ConnectMWST {
+    string sender;
+}
+
+packet InitiateMWST {
+	string fragmentId;
+	string sender;
+}
+
+packet TestMWST {
+	string fragmentId;
+	string sender;
+}
+
+packet AcceptMWST {
+    string sender;
+}
+
+packet RejectMWST {
+    string sender;
+}
+
+packet ReportMWST {
+	double weight;
+	string sender;
+}
+
+packet ChangeRootMWST {
+    string sender;
+}

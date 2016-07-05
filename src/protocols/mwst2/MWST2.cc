@@ -722,13 +722,13 @@ MWST2::report()
       }
       else if (find_count == 0 && test_edge == nil) {
         /* it is the root */
-        // TODO: change root
+        /* TODO: change root */
         tested.clear();
         if (bw < oo) {
             change_root();
         }
         else {
-            // TODO: HALT
+            /* TODO: HALT */
             cerr << header() << ": HALTTTTTT "  << "\n";
         }
       }

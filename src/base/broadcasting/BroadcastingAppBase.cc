@@ -119,7 +119,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
-                    cout << "Another hello now and we still must send " << this->nr_hello_msg << " in " << myself << endl;
                     ctrlMsg0->setKind(SAY_HELLO);
                     scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
                 }
@@ -276,8 +275,8 @@ BroadcastingAppBase::configure_neighbors()
         EV_DEBUG << "EDGES " << myself << " =>  \n";
         cerr << "EDGES " << myself << " =>  \n";
         for (auto& i : neighbors) {
-            EV_DEBUG << "\t" << i.second.name  << " with cost " << i.second.name << "\n";
-            cerr << "\t" << i.second.name  << " with cost " << i.second.name << "\n";
+            EV_DEBUG << "\t" << i.second.name  << " with cost " << i.second.w << "\n";
+            cerr << "\t" << i.second.name  << " with cost " << i.second.w << "\n";
         }
     }
 }
@@ -313,7 +312,7 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
         node.w = (position.x - msg->getX())*(position.x - msg->getX())
                                 + (position.y - msg->getY())*(position.y - msg->getY());
 
-        neighbors.emplace(node.name, node);
+        neighbors[node.name] = node;
     }
 
 }
@@ -411,7 +410,7 @@ void BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
 
 
 void
-BroadcastingAppBase::delayed_event(ControlMessageTypes type, const std::string& data, double delay)
+BroadcastingAppBase::delayed_event(int type, const std::string& data, double delay)
 {
     cMessage* mm = new cMessage("some delay");
     mm->setContextPointer(strdup(data.c_str()));
