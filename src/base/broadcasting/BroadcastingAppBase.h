@@ -35,7 +35,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         std::string name;
         L3Address addr;
         Coord pos;
-        int w;
+        double w;
     };
   protected:
     enum ControlMessageTypes {
@@ -53,7 +53,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool is_source;
 
     // number of broadcast message to send
-    int nr_broadcast_msg;
+    double nr_broadcast_msg;
 
     // my direct edges (neighbors)
     std::map<std::string, Neighbor> neighbors;
@@ -93,8 +93,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     bool already_configured = false;
 
-
-
     void configure_neighbors();
 
     void on_hello_received(const broadcasting::Hello* msg);
@@ -133,7 +131,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     L3Address getAddr(std::string id);
 
-    void delay_broadcast(void* user_data); 
+    void delay_broadcast(void* user_data);
     void delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
     void delayed_event(ControlMessageTypes type, const std::string& key, double delay);
 

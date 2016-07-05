@@ -310,10 +310,8 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
         node.pos.x = msg->getX();
         node.pos.y = msg->getY();
 
-        int d = (position.x - msg->getX())*(position.x - msg->getX())
+        node.w = (position.x - msg->getX())*(position.x - msg->getX())
                                 + (position.y - msg->getY())*(position.y - msg->getY());
-
-        node.w = d;
 
         neighbors.emplace(node.name, node);
     }
