@@ -427,5 +427,20 @@ BroadcastingAppBase::createUniqueBroadcastingSessionId()
 }
 
 
+void
+BroadcastingAppBase::send_package(cPacket* m, std::string dst)
+{
+  auto addr = getAddr(dst);
+  socket.sendTo(m, addr, remote_port);
+}
+
+
+void
+BroadcastingAppBase::send_package(cPacket* m)
+{
+  send_package(m, "255.255.255.255");
+}
+
+
 
 } //namespace

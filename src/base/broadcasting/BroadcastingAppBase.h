@@ -71,7 +71,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     L3Address myAddress;
     // my position
     Coord position;
-    int radious;
+    double radious;
 
     // counter to assign ids to broadcast messages
     int last_id = 0;
@@ -141,7 +141,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     void initiateFlooding(std::string payload);
 
+    void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
+    void send_package(cPacket* m); // send a package to all neirby devices
 
   public:
     BroadcastingAppBase();

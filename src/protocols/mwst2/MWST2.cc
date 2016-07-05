@@ -403,7 +403,7 @@ MWST2::send_connect(const std::string& j, bool now)
             ConnectMWST* pkt = new ConnectMWST("connect");
             pkt->setSender(j.c_str());
             pkt->setKind(CONNECT_DELAY);
-            scheduleAt(simTime() + par("delay_test").doubleValue(), pkt);
+            scheduleAt(simTime() + uniform(0.01, 0.1), pkt);
         }
     }
 
@@ -422,9 +422,9 @@ MWST2::send_initiate(const std::string& fragmentId, const std::string& j, bool n
         log_file << "Sending Initiate " << myself << " " << j << " " << simTime() << " " << FN << endl;
     }
     else {
-        pkt->setKind(INITIATE_DEALY);
         pkt->setSender(j.c_str());
-        scheduleAt(simTime() + par("delay_test").doubleValue(), pkt);
+        pkt->setKind(INITIATE_DEALY);
+        scheduleAt(simTime() + uniform(0.01, 0.1), pkt);
     }
 }
 
@@ -437,13 +437,13 @@ MWST2::send_test(const std::string& framentId, const std::string& j, bool now)
     if (now) {
         socket.sendTo(m, addresses[j], destinationPort);
         cancelEvent(repeat_test_message);
-        //scheduleAt(simTime() + 0.1, repeat_test_message);
+        scheduleAt(simTime() + 0.1, repeat_test_message);
         log_file << "Sending Test " << myself << " " << j << " " << simTime() << " " << FN << endl;
     }
     else {
         m->setSender(j.c_str());
         m->setKind(TEST_DELAY);
-        scheduleAt(simTime() + par("delay_test").doubleValue(), m);
+        scheduleAt(simTime() + uniform(0.5, 1.5), m);
     }
     /* cerr << header() << ": Sending Test message from " << myself << " to " << j << "(" << addresses[j] << "), now = " << now <<  "[" << myself << "[" << simTime() << "[" << j << endl; */
 
