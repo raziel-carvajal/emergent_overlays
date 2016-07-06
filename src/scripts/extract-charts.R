@@ -6,22 +6,6 @@ load.datafile <- function(fname, extensions=c("sca", "vec")) {
   ds <- loadVectors(ds, NULL)
 }
 
-#powerlevels <- function(ds, ts = seq(step, max, by=step), max = 600, step=30, dev=pdf("powerlevels.pdf")) {
-#  v <- ds$vectordata
-#  power_levels <- ds$vectors[ ds$vectors$name == 'power_level:vector', ]$result
-#  dev
-#  boxplot(sapply(lapply(ts, function(t) lapply(power_levels, function(p) tail(subset(v, resultkey == p & x < t, select=c(y)), 1))), unlist))
-#  dev.off()
-#}
-
-#powerlevels2 <- function(ds, ts = seq(step, max, by=step), max = 600, step=30, dev=pdf("powerlevels.pdf")) {
-#  v <- ds$vectordata
-#  power_levels <- ds$vectors[ ds$vectors$name == 'power_level:vector', ]$result
-#  tmp <- subset(v, resultkey %in% power_levels)
-#  dev
-#  boxplot(sapply(lapply(ts, function(t) lapply(power_levels, function(p) tail(subset(tmp, resultkey == p & x <= t, select=c(y)), 1))), unlist))
-#  dev.off()
-#}
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max = 600, step=30) {
   v <- ds$vectordata
@@ -58,7 +42,7 @@ broadcastingTime <- function(ds, simulation.time=600) {
 			receiving = reception.time,
 			time = reception.time - sending.time, # broadcasting time per session id
 			n.received = rcv, # how many location received a message from a particular session
-			B.i = B.i.tmp # total number of messages recevied per broadcast session
+			B.i = B.i.tmp # total number of messages received per broadcast session
 	)
 }
 
@@ -74,10 +58,9 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	}
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
-	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Ratio of Duplicated Messages ?")
+	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
-
 
 	nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
 
@@ -114,7 +97,7 @@ average.values <- function(pl, broadcast.info, max) {
 	pc <- sum ( pl[ncol(pl),] )/nr.nodes
 	
 	# TODO: hehehe, stop being lazy
-	dm <- 4
+	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
 	data.frame(
 		coverage = c,

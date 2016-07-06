@@ -31,6 +31,9 @@ iniCommon='../../experiments/configs/common.ini'
 
 Tx=`grep 'maxCommunicationRange' $iniCommon | grep -Eo '[0-9]{1,5}'`
 printf "Building topologies with transmission range: $Tx\n"
+
+# Tx is the radius of communication (not the diameter)
+
 #rm -fr $tPath'*.ned'
 
 ls $tPath/*.ned 2>/dev/null
@@ -38,7 +41,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    ./doTopologies.sh $Tx 2 6 $tPath
+    ./doTopologies.sh $Tx 2 9 $tPath
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
@@ -87,4 +90,3 @@ install_r_dependencies=`Rscript checking-depencencies.R | awk '{ print $2 }'`
 if [ "$install_r_dependencies" == "fail" ]; then
 	sudo Rscript installing-dependencies.R
 fi
-

@@ -45,4 +45,6 @@ for c in ${path_to_configs}*.ini ; do
 	
 done
 
+Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
+
 sem --waiti --id "infocom2017" --no-notice
