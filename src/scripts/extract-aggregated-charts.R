@@ -33,7 +33,6 @@ if (length(args) == 2) {
 
 		# create layout for this metric
 		layout(m_layout, heights=c(0.8,0.8,0.8))
-
 		# get column name
 		cn <- m.to.col[ m.to.col$m == m ,]$c
 
@@ -44,7 +43,7 @@ if (length(args) == 2) {
 			ma <- max(d[[cn]])
 
 			yrange <- c(mi - 0.1*mi, ma + 0.1*ma )
-			
+			par(mai = c(0.7,0.6,1.2,0.6))	
 			for (p in unique(d$V2)) {
 				if (p == d[1,]$V2) {
 					plot(d[ d$V2 == p,][[cn]], x=d[ d$V2 == p, ]$V3, type="b",ylim=yrange, col=pal[pal$p == p ,]$color, xlab="nr nodes", main=paste("Density", d[1,]$V4), ylab=m)
@@ -58,7 +57,7 @@ if (length(args) == 2) {
 			#par(new=F)
 		}
 
-		mtext(paste("Charts showing the average", m), outer=TRUE,  cex=1, line=-0.5)
+		mtext(paste("Charts showing the average", m), outer=TRUE,  cex=1, line=-2)
 
 	}
 
