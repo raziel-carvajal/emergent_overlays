@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem )
+COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem bison byacc )
 
 for C in "${COMMANDS[@]}"; do
    printf "Checking if $C is installed: "

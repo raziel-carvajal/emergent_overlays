@@ -16,7 +16,7 @@ else
   mv inet omnetpp-4.6/samples
   cd omnetpp-4.6
   source ../../src/scripts/local-omnet-setenv.sh `pwd`
-  ./configure
+  ./configure NO_TCL=0
   make -j 4
   cd samples/inet
   make makefiles

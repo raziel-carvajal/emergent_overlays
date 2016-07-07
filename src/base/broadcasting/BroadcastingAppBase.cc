@@ -84,7 +84,9 @@ BroadcastingAppBase::initialize(int stage)
             if (is_source && nr_broadcast_msg > 0) {
                 cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
                 ctrlWakeup->setKind( WAKEUP);
-                scheduleAt(par("wakeUpTime").doubleValue() + simTime(), ctrlWakeup);
+                double d = par("wakeUpTime").doubleValue();
+                cerr << "Broadcasting sessions will star at " << (d) << endl;
+                scheduleAt(d, ctrlWakeup);
             }
 
             break;
@@ -125,13 +127,15 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 break;
             case WAKEUP:
                 configure_neighbors();
-                this->time_to_broadcast_payload(nullptr);
                 cancelAndDelete(msg);
-                nr_broadcast_msg--;
+                if (is_source) {
+                  this->time_to_broadcast_payload(nullptr);
+                }
                 if (is_source && nr_broadcast_msg > 0) {
-                    cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
-                    ctrlWakeup->setKind( WAKEUP);
-                    scheduleAt(par("intervalBroadcastTime").doubleValue() + simTime(), ctrlWakeup);
+                  nr_broadcast_msg--;
+                  cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
+                  ctrlWakeup->setKind( WAKEUP);
+                  scheduleAt(simTime() + par("intervalBroadcastTime").doubleValue(), ctrlWakeup);
                 }
                 break;
             case BROADCAST_DELAY:
@@ -191,7 +195,6 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
     bool done = processMessage<Hello>(pkt, &BroadcastingAppBase::on_hello_received);
 
     if (!done) {
-        configure_neighbors();
         done = processMessage<Broadcast>(pkt, &BroadcastingAppBase::on_payload_received) ||
                processMessage<FloodingMessage>(pkt, &BroadcastingAppBase::on_flooding_received);
     }
@@ -213,7 +216,7 @@ bool
 BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     ctrlMsg0->setKind(START);
-    scheduleAt(simTime() + 0.01, ctrlMsg0);
+    scheduleAt(simTime() + 0.001, ctrlMsg0);
     return true;
 }
 
@@ -272,8 +275,8 @@ BroadcastingAppBase::configure_neighbors()
     // print (debug)
     if (!already_configured && neighbors.size() > 0) {
         already_configured = true;
-        EV_DEBUG << "EDGES " << myself << " =>  \n";
-        cerr << "EDGES " << myself << " =>  \n";
+        EV_DEBUG << "Configure EDGES " << myself << " =>  \n";
+        cerr << "Configure EDGES " << myself << "(" << simTime() << ")  => " << endl;
         for (auto& i : neighbors) {
             EV_DEBUG << "\t" << i.second.name  << " with cost " << i.second.w << "\n";
             cerr << "\t" << i.second.name  << " with cost " << i.second.w << "\n";

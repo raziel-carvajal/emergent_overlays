@@ -94,9 +94,8 @@ average.values <- function(pl, broadcast.info, max) {
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	bt <- sum(valid.time)/length(valid.time)
 	
-	pc <- sum ( pl[ncol(pl),] )/nr.nodes
+	pc <- sum ( pl[, ncol(pl)] )/nr.nodes
 	
-	# TODO: hehehe, stop being lazy
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
 	data.frame(
@@ -131,6 +130,7 @@ if (length(args) == 3) {
 	print(paste("Creating broadcasting time:", args[1]))
 	bs <- broadcastingTime(ds, simulation.time = sim.time)
 
+	print("Plotting :-P");
 	plot.charts.for.single.experiment(pl, bs, max = sim.time)
 	
 	# printing average values

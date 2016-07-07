@@ -44,17 +44,17 @@ static fstream log_file;
 
 enum ControlMessageMWST {
     REPEAT_TEST_MSG = 100,
-    DISPLAY_TIME_MWST,
-    TEST_DELAY,
-    CONNECT_DELAY,
-    INITIATE_DEALY,
-    ACCEPT_DELAY,
-    AWAKE_UP_DELAY
+    DISPLAY_TIME_MWST = 101,
+    TEST_DELAY = 102,
+    CONNECT_DELAY = 103,
+    INITIATE_DEALY = 104,
+    ACCEPT_DELAY = 105,
+    AWAKE_UP_DELAY = 106
 };
 
 string
-EWMA2::MWSTInfo::header() {
-  return "FIX THIS";
+EWMA2::header() {
+  return myself + "(" + info_mwst.FN + ", "+ SIMTIME_STR(simTime()) + ")";
 }
 
 void
@@ -75,14 +75,14 @@ EWMA2::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LAST:
-
+          {
             if (par("spontaneously_awaken").boolValue()) {
               delayed_event(AWAKE_UP_DELAY, "", par("spontaneously_awake_time").doubleValue());
             }
 
             delayed_event(DISPLAY_TIME_MWST, "", par("mwst_display_time").doubleValue());
-
-            break;
+          }
+          break;
         default:
             break;
     }
@@ -189,11 +189,24 @@ EWMA2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
 
+    emitBroadcastMsgReceived(key);
+
     if (!payloads[key].empty()) {
         return;
     }
 
+    // if there is nothing in the mst, fill it
+    if (local_mst.size() == 0) {
+      for (auto& n : neighbors) {
+          if (info_mwst.SE[n.first] == EdgeStates::Branch) {
+              local_mst.push_back(n.first);
+          }
+      }
+    }
+
     payloads[key] = string(m->getPayload());
+
+    // cerr << header() << ": received broadcast message with id " << key << endl;
 
     emitReceived();
 
@@ -224,13 +237,13 @@ EWMA2::send_message(const vector<string>& dst, string& key)
         covered[key].insert(d.first);
     }
 
-    if (dst.size() > 0) {
+    if (dst.size() > 0 || uniform(0,1) > 0.7) {
         //EV_DEBUG << "====================== Sending in " << myself << "\n";
         //cerr << "====================== Sending in " << myself << "\n";
         vector<string> v;
         for (auto& c : covered[key]) {
-            EV_DEBUG << "\t The following is covered: " << c << "\n";
-            cerr << "\t The following is covered: " << c << "\n";
+            // EV_DEBUG << "\t The following is covered: " << c << "\n";
+            // cerr << "\t The following is covered: " << c << "\n";
             v.push_back(c);
         }
         emitSent(key);
@@ -245,6 +258,9 @@ EWMA2::send_message(const vector<string>& dst, string& key)
         for (uint32_t i = 0 ; i < v.size() ; i++) {
             m->setCovered(i, v[i].c_str());
         }
+
+
+        // cerr << header() << ": is retransmiting broadcast message with id " << key << endl;
         send_package(m);
     }
 }
@@ -268,6 +284,15 @@ void
 EWMA2::time_to_broadcast_payload(void* user_data)
 {
     BroadcastingAppBase::time_to_broadcast_payload(user_data);
+
+    // if there is nothing in the mst, fill it
+    if (local_mst.size() == 0) {
+      for (auto& n : neighbors) {
+          if (info_mwst.SE[n.first] == EdgeStates::Branch) {
+              local_mst.push_back(n.first);
+          }
+      }
+    }
 
     if (is_source) {
         string key = createUniqueBroadcastingSessionId();
@@ -352,7 +377,7 @@ EWMA2::send_test(const std::string& framentId, const std::string& j, bool now)
     else {
         delayed_event(TEST_DELAY, j, uniform(0.5, 1.5));
     }
-    /* cerr << info_mwst.header() << ": Sending Test message from " << myself << " to " << j << "(" << addresses[j] << "), now = " << now <<  "[" << myself << "[" << simTime() << "[" << j << endl; */
+    /* cerr << header() << ": Sending Test message from " << myself << " to " << j << "(" << addresses[j] << "), now = " << now <<  "[" << myself << "[" << simTime() << "[" << j << endl; */
 
 }
 
@@ -478,7 +503,7 @@ EWMA2::initiate(const std::string& new_fragment_name)
 void
 EWMA2::on_initiate_received(const InitiateMWST* msg)
 {
-    /* cerr << info_mwst.header() << ": Initiate Received from " << msg->getSender() << "\n"; */
+    /* cerr << header() << ": Initiate Received from " << msg->getSender() << "\n"; */
     log_file << "Received Initiate " << myself << " " << msg->getSender() <<
                 " " << simTime() << " " << info_mwst.FN << endl;
 
@@ -537,7 +562,7 @@ void
 EWMA2::on_test_received(const TestMWST* m)
 {
     string j = m->getSender();
-    /*cerr  << info_mwst.header() << ": Test Received from " << j  << " and id " << m->getFragmentId() << "  [" << myself << "[" << j << "[" << simTime() << endl; */
+    /*cerr  << header() << ": Test Received from " << j  << " and id " << m->getFragmentId() << "  [" << myself << "[" << j << "[" << simTime() << endl; */
     log_file << "Received Test " << myself << " " << m->getSender() << " " << simTime() << " " << info_mwst.FN << endl;
     if (info_mwst.SN == States::Sleeping) {
         wakeup();
@@ -573,7 +598,7 @@ EWMA2::on_accept_received(const AcceptMWST* m)
         info_mwst.best_edge = j;
         info_mwst.bw = neighbors[j].w;
     }
-    /* cerr << info_mwst.header() << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n"; */
+    /* cerr << header() << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n"; */
     log_file << "Received Accept " << myself << " " << m->getSender() << " " << simTime() << " " << info_mwst.FN << endl;
     if (info_mwst.find_count) {
       for (auto f : info_mwst.finding) {
@@ -634,7 +659,7 @@ EWMA2::report()
         if (info_mwst.bw < oo)
             change_root();
         else {
-            cerr << info_mwst.header() << ": HALTTTTTT "  << "\n";
+            cerr << header() << ": HALTTTTTT "  << "\n";
         }
       }
     }
@@ -670,7 +695,7 @@ EWMA2::change_root()
                 " " << simTime() << " " << info_mwst.FN << endl;
     }
     else {
-        cerr << info_mwst.header() << " : Connecting to " << info_mwst.best_edge << ", SE[best_edge] = " <<
+        cerr << header() << " : Connecting to " << info_mwst.best_edge << ", SE[best_edge] = " <<
                   info_mwst.SE[info_mwst.best_edge] << endl;
         send_connect(info_mwst.best_edge, false);
     }
@@ -680,7 +705,7 @@ EWMA2::change_root()
 void
 EWMA2::on_change_root_received(const ChangeRootMWST* msg)
 {
-    cerr << info_mwst.header() << ": change root Received from " << msg->getSender() << "\n";
+    cerr << header() << ": change root Received from " << msg->getSender() << "\n";
     log_file << "Received ChangeRoot " << myself << " " << msg->getSender() <<
                 " " << simTime() << " " << info_mwst.FN << endl;
     change_root();

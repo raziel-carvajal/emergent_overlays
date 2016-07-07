@@ -47,7 +47,7 @@ class INET_API EWMA2 : public BroadcastingAppBase
     class MWSTInfo {
     public:
       // state of this node in the protocol
-      States SN;
+      States SN = States::Sleeping;
 
       // fragment identity
       std::string FN;
@@ -95,7 +95,6 @@ class INET_API EWMA2 : public BroadcastingAppBase
           }
       }
 
-      std::string header();
     };
 
     MWSTInfo info_mwst;
@@ -146,6 +145,7 @@ class INET_API EWMA2 : public BroadcastingAppBase
     // FIXME : this is crap
     template <typename T> bool processMessage2(cPacket* pkt, void (EWMA2::*action)(const T* msg));
 
+    std::string header();
 
   protected:
 
