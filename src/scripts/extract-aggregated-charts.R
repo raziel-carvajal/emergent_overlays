@@ -46,7 +46,9 @@ if (length(args) == 2) {
 			par(mai = c(0.7,0.6,1.2,0.6))	
 			for (p in unique(d$V2)) {
 				nr_nodes <- unique(d[ d$V2 == p, ]$V3)
-				avg_value <- lapply(nr_nodes, function(n) mean(d[d$V2 == p && d$V3==n, ][[cn]])  )
+				avg_values <- lapply(nr_nodes, function(n) mean(d[d$V2 == p & d$V3==n, ][[cn]])  )
+				print(p)
+				print(avg_values)
 				if (p == d[1,]$V2) {
 					plot(y=avg_values, x=nr_nodes, type="b",ylim=yrange, col=pal[pal$p == p ,]$color, xlab="nr nodes", main=paste("Density", d[1,]$V4), ylab=m)
 				} else {	
