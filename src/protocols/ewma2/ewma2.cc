@@ -49,7 +49,9 @@ enum ControlMessageMWST {
     CONNECT_DELAY = 103,
     INITIATE_DEALY = 104,
     ACCEPT_DELAY = 105,
-    AWAKE_UP_DELAY = 106
+    AWAKE_UP_DELAY = 106,
+    NOTIFY_NEW_FRAGMENT = 107,
+    REPORT_TO_PARENT_TIME = 108
 };
 
 string
@@ -103,39 +105,27 @@ EWMA2::handleMessageWhenUp(cMessage *msg)
           case DISPLAY_TIME_MWST:
               {
                   cerr << "Fragment for " << myself << ": FN " << info_mwst.FN << ", SN " << info_mwst.SN << ", test_edge " << info_mwst.test_edge << ", find_count " << info_mwst.find_count << ", connecting_with " << info_mwst.connecting_with << endl;
-                  for (auto& n : neighbors) {
-                      if (info_mwst.SE[n.first] == EdgeStates::Branch) {
-                          cerr << "\t" << n.first << " with weight " << n.second.w << endl;
-                      }
+                  // for (auto& n : neighbors) {
+                  //     if (info_mwst.SE[n.first] == EdgeStates::Branch) {
+                  //         cerr << "\t" << n.first << " is branch with weight " << n.second.w << endl;
+                  //     }
+                  //     else if (info_mwst.SE[n.first] == EdgeStates::Basic) {
+                  //         cerr << "\t" << n.first << " is basic with weight " << n.second.w << endl;
+                  //     }
+                  //     else if (info_mwst.SE[n.first] == EdgeStates::Rejected) {
+                  //         cerr << "\t" << n.first << " is rejected with weight " << n.second.w << endl;
+                  //     }
+                  // }
+                  for (auto& n : local_mst) {
+                      cerr << "\t" << n << " is branch with weight " << neighbors[n].w << endl;
                   }
                   cancelAndDelete(msg);
-              }
-              break;
-          case REPEAT_TEST_MSG:
-            {
-              if (info_mwst.test_edge != nil) {
-                send_test(info_mwst.FN, info_mwst.test_edge, true);
-              }
-            }
-            break;
-          case TEST_DELAY:
-              {
-                string dst = string((char*)msg->getContextPointer());
-                send_test(info_mwst.FN, dst, true);
-                cancelAndDelete(msg);
               }
               break;
           case CONNECT_DELAY:
               {
                   string dst = string((char*)msg->getContextPointer());
                   send_connect(dst, true);
-                  cancelAndDelete(msg);
-              }
-              break;
-          case ACCEPT_DELAY:
-              {
-                  string dst = string((char*)msg->getContextPointer());
-                  send_accept(dst, true);
                   cancelAndDelete(msg);
               }
               break;
@@ -146,7 +136,31 @@ EWMA2::handleMessageWhenUp(cMessage *msg)
                   cancelAndDelete(msg);
               }
               break;
-            default:
+          case NOTIFY_NEW_FRAGMENT:
+            {
+              ewma::InNewFragment* m = new ewma::InNewFragment("notifying");
+              m->setSender(myself.c_str());
+              m->setFragmentId(info_mwst.FN.c_str());
+              send_package(m);
+            }
+            cancelAndDelete(msg);
+            break;
+          case REPORT_TO_PARENT_TIME:
+            {
+              for (auto& n : neighbors) {
+                  if (n.first == myself) continue;
+
+                  if (info_mwst.SE[n.first] == EdgeStates::Basic &&
+                      info_mwst.known_names[n.first] != info_mwst.FN && info_mwst.bw > n.second.w) {
+                      info_mwst.bw = n.second.w;
+                      info_mwst.best_edge = n.first;
+                  }
+              }
+              report();
+              cancelAndDelete(msg);
+            }
+            break;
+          default:
               BroadcastingAppBase::handleMessageWhenUp(msg);
             break;
         }
@@ -161,11 +175,9 @@ EWMA2::on_network_message_received(cPacket* pkt)
   return BroadcastingAppBase::on_network_message_received(pkt) ||
       processMessage2<ConnectMWST>(pkt, &EWMA2::on_connect_received) ||
       processMessage2<InitiateMWST>(pkt, &EWMA2::on_initiate_received) ||
-      processMessage2<TestMWST>(pkt, &EWMA2::on_test_received) ||
-      processMessage2<AcceptMWST>(pkt, &EWMA2::on_accept_received) ||
-      processMessage2<RejectMWST>(pkt, &EWMA2::on_reject_received) ||
       processMessage2<ReportMWST>(pkt, &EWMA2::on_report_received) ||
-      processMessage2<ChangeRootMWST>(pkt, &EWMA2::on_change_root_received);
+      processMessage2<ChangeRootMWST>(pkt, &EWMA2::on_change_root_received) ||
+      processMessage2<InNewFragment>(pkt, &EWMA2::on_in_new_fragment_received);
 }
 
 
@@ -183,7 +195,6 @@ EWMA2::processMessage2(cPacket* pkt, void (EWMA2::*action)(const T* msg))
 }
 
 
-
 void
 EWMA2::on_payload_received(const Broadcast* m) {
 
@@ -198,7 +209,11 @@ EWMA2::on_payload_received(const Broadcast* m) {
     // if there is nothing in the mst, fill it
     if (local_mst.size() == 0) {
       for (auto& n : neighbors) {
-          if (info_mwst.SE[n.first] == EdgeStates::Branch) {
+          if (n.first == myself) continue;
+
+          if (info_mwst.SE[n.first] == EdgeStates::Branch ||
+              info_mwst.SE[n.first] == EdgeStates::Basic) {
+                // unfortunately, the algorithm may fail, accepting the basic we avoid the problem
               local_mst.push_back(n.first);
           }
       }
@@ -237,9 +252,11 @@ EWMA2::send_message(const vector<string>& dst, string& key)
         covered[key].insert(d.first);
     }
 
-    if (dst.size() > 0 || uniform(0,1) > 0.7) {
+    if (dst.size() > 0
+    // || uniform(0,1) > 0.7
+       ) {
         //EV_DEBUG << "====================== Sending in " << myself << "\n";
-        //cerr << "====================== Sending in " << myself << "\n";
+        // cerr << header() << ": Sending message ====================== id " << key << "\n";
         vector<string> v;
         for (auto& c : covered[key]) {
             // EV_DEBUG << "\t The following is covered: " << c << "\n";
@@ -258,7 +275,6 @@ EWMA2::send_message(const vector<string>& dst, string& key)
         for (uint32_t i = 0 ; i < v.size() ; i++) {
             m->setCovered(i, v[i].c_str());
         }
-
 
         // cerr << header() << ": is retransmiting broadcast message with id " << key << endl;
         send_package(m);
@@ -288,7 +304,11 @@ EWMA2::time_to_broadcast_payload(void* user_data)
     // if there is nothing in the mst, fill it
     if (local_mst.size() == 0) {
       for (auto& n : neighbors) {
-          if (info_mwst.SE[n.first] == EdgeStates::Branch) {
+          if (n.first == myself) continue;
+
+          if (info_mwst.SE[n.first] == EdgeStates::Branch ||
+              info_mwst.SE[n.first] == EdgeStates::Basic) {
+                // unfortunately, the algorithm may fail, accepting the basic we avoid the problem
               local_mst.push_back(n.first);
           }
       }
@@ -310,6 +330,7 @@ EWMA2::time_to_broadcast_payload(void* user_data)
         send_to_uncovered(key);
     }
 }
+
 
 void
 EWMA2::send_connect(const std::string& j, bool now)
@@ -361,47 +382,10 @@ EWMA2::send_initiate(const std::string& fragmentId, const std::string& j, bool n
     }
 }
 
-void
-EWMA2::send_test(const std::string& framentId, const std::string& j, bool now)
-{
-    if (now) {
-      TestMWST* m = new TestMWST((myself + "test").c_str());
-      m->setSender(myself.c_str());
-      m->setFragmentId(framentId.c_str());
-      send_package(m, j);
-      // cancelEvent(repeat_test_message);
-      // scheduleAt(simTime() + 0.1, repeat_test_message);
-      log_file << "Sending Test " << myself << " " << j << " " << simTime() <<
-                  " " << info_mwst.FN << endl;
-    }
-    else {
-        delayed_event(TEST_DELAY, j, uniform(0.5, 1.5));
-    }
-    /* cerr << header() << ": Sending Test message from " << myself << " to " << j << "(" << addresses[j] << "), now = " << now <<  "[" << myself << "[" << simTime() << "[" << j << endl; */
-
-}
-
-void
-EWMA2::send_accept(const std::string& j, bool now)
-{
-    if (now) {
-      AcceptMWST* a = new AcceptMWST((string("accept") + myself).c_str());
-      a->setSender(myself.c_str());
-      send_package(a, j);
-      log_file << "Sending Accept " << myself << " " << j << " " << simTime() <<
-                    " " << info_mwst.FN << endl;
-    }
-    else {
-        delayed_event(ACCEPT_DELAY, j, uniform(0.1, 0.3));
-    }
-}
-
 
 void
 EWMA2::wakeup()
 {
-
-    cerr << myself << ": This is wakeup in ewma-mwst \n";
 
     if (info_mwst.SN == States::Sleeping) {
       for (auto& n : neighbors) {
@@ -427,6 +411,20 @@ EWMA2::wakeup()
       info_mwst.find_count = 0;
       send_connect(m_name, false);
     }
+}
+
+
+void
+EWMA2::on_in_new_fragment_received(const ewma::InNewFragment* msg)
+{
+  string j = msg->getSender();
+  string f = msg->getFragmentId();
+
+  info_mwst.known_names[j] = f;
+
+  if (info_mwst.SE[j] == EdgeStates::Basic && f == info_mwst.FN && f != nil) {
+    info_mwst.SE[j] = EdgeStates::Rejected;
+  }
 }
 
 
@@ -490,12 +488,11 @@ EWMA2::initiate(const std::string& new_fragment_name)
 
     // TODO: we should only send test messages once we have received the response to all initiate message
     // For instance, in the on_report handler
-    if (info_mwst.find_count == 0) {
-      test();
-    }
-    else {
-      info_mwst.test_step_must_be_called = true;
-    }
+    double d = uniform(0.1, 0.5);
+    delayed_event(NOTIFY_NEW_FRAGMENT, "", d/2);
+    // if (info_mwst.find_count == 0) {
+    delayed_event(REPORT_TO_PARENT_TIME, "", 20*d);
+    // }
 
 }
 
@@ -531,115 +528,15 @@ EWMA2::on_initiate_received(const InitiateMWST* msg)
 }
 
 
-void
-EWMA2::test()
-{
-    int min_w = oo;
-    info_mwst.test_edge = nil;
-    for (auto& n : neighbors) {
-        auto i = n.first;
-        if (info_mwst.SE[i] == EdgeStates::Basic
-                && n.second.w < min_w && info_mwst.tested.find(i) == info_mwst.tested.end()) {
-            min_w = n.second.w;
-            info_mwst.test_edge = i;
-        }
-    }
-
-    info_mwst.test_step_must_be_called = false;
-
-    if (info_mwst.test_edge != nil_edge) {
-            info_mwst.tested.insert(info_mwst.test_edge);
-            send_test(info_mwst.FN, info_mwst.test_edge, false);
-    }
-    else {
-        // there is no more neighbors to try. Report to parent
-        report();
-    }
-}
-
-
-void
-EWMA2::on_test_received(const TestMWST* m)
-{
-    string j = m->getSender();
-    /*cerr  << header() << ": Test Received from " << j  << " and id " << m->getFragmentId() << "  [" << myself << "[" << j << "[" << simTime() << endl; */
-    log_file << "Received Test " << myself << " " << m->getSender() << " " << simTime() << " " << info_mwst.FN << endl;
-    if (info_mwst.SN == States::Sleeping) {
-        wakeup();
-    }
-
-    if (info_mwst.FN != m->getFragmentId()) {
-        // it is a different fragment
-        // AcceptMWST* a = new AcceptMWST((string("accept") + myself).c_str());
-        // a->setSender(myself.c_str());
-        // send_package(a, j);
-        send_accept(j, true);
-        // log_file << "Sending Accept " << myself << " " << j << " " << simTime() << endl;
-    }
-    else {
-        if (info_mwst.SE[j] == EdgeStates::Basic) {
-            info_mwst.SE[j] = EdgeStates::Rejected;
-        }
-
-        RejectMWST* a = new RejectMWST("reject");
-        a->setSender(myself.c_str());
-        send_package(a, j);
-        log_file << "Sending Reject " << myself << " " << j << " " << simTime() << " " << info_mwst.FN << endl;
-    }
-}
-
-
-void
-EWMA2::on_accept_received(const AcceptMWST* m)
-{
-    string j = m->getSender();
-
-    if (neighbors[j].w < info_mwst.bw) {
-        info_mwst.best_edge = j;
-        info_mwst.bw = neighbors[j].w;
-    }
-    /* cerr << header() << ": Accept Received from j = " << j << " best-w: " << bw << "(" << best_edge << ")" << " w[j]: " << w[j] << " find_count: " << find_count<< " in_branch: " << parent <<  "\n"; */
-    log_file << "Received Accept " << myself << " " << m->getSender() << " " << simTime() << " " << info_mwst.FN << endl;
-    if (info_mwst.find_count) {
-      for (auto f : info_mwst.finding) {
-        cerr << "\t" << f << endl;
-      }
-    }
-    // if (j == info_mwst.test_edge) cancelEvent(repeat_test_message);
-    test(); // TODO: try this change in the previous version
-}
-
-
-void
-EWMA2::on_reject_received(const RejectMWST* m)
-{
-    string j = m->getSender();
-    /* cerr << header() << ": Reject Received from " << j << "\n"; */
-    log_file << "Received Reject " << myself << " " << m->getSender() << " " << simTime() << " " << info_mwst.FN << endl;
-
-    if (info_mwst.SE[j] == EdgeStates::Basic) {
-
-        info_mwst.SE[j] = EdgeStates::Rejected;
-    }
-    // if (j == info_mwst.test_edge) cancelEvent(repeat_test_message);
-    test();
-}
 
 
 void
 EWMA2::report()
 {
-    if (info_mwst.find_count) {
-        for (auto n: info_mwst.finding) {
-            EV_TRACE << "\t\t\t" << n << "\n";
-        }
-    }
+    if (info_mwst.SN != States::Find) return;
+
     if (info_mwst.parent != nil_edge) {
-        if (info_mwst.find_count == 0 && info_mwst.test_step_must_be_called) {
-          test();
-        }
-        else if (info_mwst.find_count == 0 && info_mwst.test_edge == nil) {
-            info_mwst.tested.clear();
+          if (info_mwst.find_count == 0) {
             info_mwst.SN = States::Found;
             ReportMWST* a = new ReportMWST("report");
             a->setSender(myself.c_str());
@@ -650,12 +547,9 @@ EWMA2::report()
         }
     }
     else {
-      if (info_mwst.find_count == 0 && info_mwst.test_step_must_be_called) {
-        test();
-      }
-      else if (info_mwst.find_count == 0 && info_mwst.test_edge == nil_edge) {
+      if (info_mwst.find_count == 0) {
+        info_mwst.SN = States::Found;
         /* it is the root */
-        info_mwst.tested.clear();
         if (info_mwst.bw < oo)
             change_root();
         else {
@@ -680,7 +574,7 @@ EWMA2::on_report_received(const ReportMWST* m)
         info_mwst.bw = ww;
         info_mwst.best_edge = j;
     }
-    report();
+    // report();
 }
 
 

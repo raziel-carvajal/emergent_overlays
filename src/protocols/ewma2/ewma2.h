@@ -85,6 +85,9 @@ class INET_API EWMA2 : public BroadcastingAppBase
       // the state of each edge
       std::map<std::string, EdgeStates> SE;
 
+      // for each neighbor, last fragment name you are aware of
+      std::map<std::string, std::string> known_names;
+
       std::string create_unique_name(const std::string& a1, const std::string& a2)
       {
           if (a1 <= a2) {
@@ -124,11 +127,9 @@ class INET_API EWMA2 : public BroadcastingAppBase
     /* processing MWST messages */
     void on_connect_received(const ewma::ConnectMWST* msg);
     void on_initiate_received(const ewma::InitiateMWST* msg);
-    void on_test_received(const ewma::TestMWST* msg);
-    void on_accept_received(const ewma::AcceptMWST* msg);
-    void on_reject_received(const ewma::RejectMWST* msg);
     void on_report_received(const ewma::ReportMWST* msg);
     void on_change_root_received(const ewma::ChangeRootMWST* msg);
+    void on_in_new_fragment_received(const ewma::InNewFragment* msg);
 
     void wakeup();
     void initiate(const std::string& new_fragment_name);
@@ -138,8 +139,6 @@ class INET_API EWMA2 : public BroadcastingAppBase
 
     void send_connect(const std::string& j, bool now);
     void send_initiate(const std::string& fragmentId, const std::string& j, bool now);
-    void send_test(const std::string& framentId, const std::string& j, bool now);
-    void send_accept(const std::string& j, bool now);
 
 
     // FIXME : this is crap

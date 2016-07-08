@@ -36,12 +36,17 @@ printf "Building topologies with transmission range: $Tx\n"
 
 #rm -fr $tPath'*.ned'
 
+if [ ! -d "$tPath" ]; then
+	mkdir "${tPath}"
+fi
+
+
 ls $tPath/*.ned 2>/dev/null
 isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    ./doTopologies.sh $Tx 2 9 $tPath
+    ./doTopologies.sh $Tx 2 6 $tPath
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
@@ -55,6 +60,13 @@ printf "Building configurations (ini files) per algorithm and per topology\n"
 # experiments/configs/builtConfigs
 pPath='../protocols/'
 cPath='../../experiments/configs/builtConfigs/'
+
+
+if [ ! -d "$cPath" ]; then
+	mkdir "${cPath}"
+fi
+
+
 here=`pwd`
 cd $pPath
 protocols=`ls -d */`
@@ -67,18 +79,18 @@ for t in $topologiesFiles; do
     index=$(( ${#t} - 4 ))
     tName=${t:0:$index}
     for p in $protocols; do
-		pp="${pPath}$p"
-		if [ -d $pp ]; then
-            s=$(( ${#p} - 1))
-            p=${p:0:$s}
-			tId=$tName$p
-			cat $iniCommon >$tId
-			echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
-			cat $pPath$p'/ini' >>$tId
-			sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
-			mv $tId $tId'.ini'
-			mv $tId'.ini' $cPath
-		fi
+	pp="${pPath}$p"
+	if [ -d $pp ]; then
+        	s=$(( ${#p} - 1))
+        	p=${p:0:$s}
+		tId=$tName$p
+		cat $iniCommon >$tId
+		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
+		cat $pPath$p'/ini' >>$tId
+		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+		mv $tId $tId'.ini'
+		mv $tId'.ini' $cPath
+	fi
     done
 done
 # TODO figure out why there is a file *-e
