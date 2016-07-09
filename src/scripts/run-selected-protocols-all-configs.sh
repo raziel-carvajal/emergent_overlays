@@ -37,8 +37,8 @@ for c in ${path_to_configs}*.ini ; do
 	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
 	protocol=`echo "$config_name" | awk -F "_" '{print $10 }'`	
-	if [ "$protocol" == "dist2mean2" ] && [ "$nodes" == "18" ]; then
-#	if [ "$protocol" == "abba2" ] || [ "$protocol" == "dist2mean2" ] || [ "$protocol" == "ewma2" ]; then
+#	if [ "$protocol" == "dist2mean2" ] && [ "$nodes" == "18" ]; then
+	if [ "$protocol" == "abba2" ] || [ "$protocol" == "dist2mean2" ] || [ "$protocol" == "ewma2" ]; then
 		echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 		sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
 		#exit 1
@@ -46,6 +46,8 @@ for c in ${path_to_configs}*.ini ; do
 	
 done
 
-Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
 
-sem --waiti --id "infocom2017" --no-notice
+sem --wait --id "infocom2017" --no-notice
+
+
+Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
