@@ -56,3 +56,8 @@ packet ReportMWST {
 packet ChangeRootMWST {
     string sender;
 }
+
+packet InNewFragment {
+	string sender;
+	string fragmentId;
+}
