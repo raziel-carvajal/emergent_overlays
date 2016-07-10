@@ -303,6 +303,10 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 
     // add coordinates
     auto it = neighbors.find(msg->getSender());
+	if (myself == msg->getSender())
+			return;
+
+
     if (it == neighbors.end()) {
         EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
 
