@@ -9,7 +9,7 @@
 #include <queue>
 #include <set>
 #include <array>
-
+#include <stdexcept>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
@@ -48,15 +48,13 @@ private:
 	array< bool, 5> hops_built;
 	array< set<string>, 5 > hops_under_construction;
 
-    int buildMprCounter;
-    double builtMprTimeout;
-    map<string, map<string, Neighbor>> twoHopNeighbors;
+	map< string, pair<double, double> > hops_position;
+
+	bool in_mpr = false;
 
     /* payload of the message to broadcast */
     map< string, string >  payloads;
 
-    /* indicates the set of nodes from whom I received this message */
-    map< string, set< pair<double, double> > > received_from;
 
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
@@ -67,6 +65,8 @@ private:
 
     virtual void on_neighbors(const mpr_t2::Neighbors* m);
 	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
+	virtual void on_mpr_found(const mpr_t2::MprFound* m);
+
 
     template <typename T> bool processMessage2(cPacket* pkt, void (Mpr_t2::*action)(const T* msg));
 
@@ -80,6 +80,37 @@ private:
 	 * using l = 1 will return nodes you can reach using one of your neighbors 
 	 * */
 	set<string> get_hops_in_level(int l);
+
+	/**
+	 * This one is also useful. You can call it to get the position of a host
+	 */
+
+	pair<double, double> get_hop_position(string n) {
+		if (hops_position.find(n) == hops_position.end()) {
+			throw new invalid_argument("unknown hop: " + n);
+		}
+		return hops_position[n];
+	}
+
+	bool is_a_covered_by_b(string a, string b, double b_radius) {
+	
+		auto pA = get_hop_position(a);
+		auto pB = get_hop_position(b);
+
+		return ( 
+				b_radius * b_radius > 
+					(pA.first - pB.first)*(pA.first - pB.first)+
+					(pA.second - pB.second)*(pA.second - pB.second)
+			   );
+
+	
+	}
+	
+
+	/** Compute MPR(x) */
+	set<string> compute_mpr();
+
+
 
 };
 

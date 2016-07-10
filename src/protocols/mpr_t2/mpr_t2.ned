@@ -34,6 +34,6 @@ simple Mpr_t2 extends BroadcastingBase like IUDPApp
 
 		double display_time_hops @unit(s) = default(100s);
 
-		int hops_required = default(2);
+		int hops_required = default(1);
 
 }

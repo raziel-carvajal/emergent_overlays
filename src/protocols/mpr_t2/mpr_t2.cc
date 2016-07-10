@@ -33,6 +33,7 @@ using inet::BroadcastingAppBase;
 
 using inet::mpr_t2::Neighbors;
 using inet::mpr_t2::RequestNeighbors;
+using inet::mpr_t2::MprFound;
 
 namespace inet {
 
@@ -43,7 +44,8 @@ enum ControlMessageTypes {
 	REPLY_NEIGHBORS = 101,
 	DELEGATE_REQUEST = 102,
 	WAKEUP_HOPS_REQUESTER = 103,
-	DISPLAY_HOPS = 104
+	DISPLAY_HOPS = 104,
+	NOTIFY_MPR = 105
 };
 
 
@@ -87,15 +89,21 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 					m->setSender(myself.c_str());
 					m->setNeighborsArraySize(count);
 					m->setHopLevelsArraySize(count);	
+					m->setXsArraySize(count);	
+					m->setYsArraySize(count);	
 					int i = 0;
 					for (int l = 0 ; l <= n ; l++) {
 						for (auto& h : hops[l]) {
 							m->setNeighbors(i, h.c_str());
 							m->setHopLevels(i, l);
+							m->setXs(i, hops_position[h].first);
+							m->setYs(i, hops_position[h].second);
 							i++;
 						}
 					}
 					m->setMaxHopLevel(n);
+					m->setX(position.x);
+					m->setY(position.y);
 					send_package(m);
 				}
 				cancelAndDelete(msg);
@@ -115,9 +123,25 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 					for (int l = 0 ; l <= n ; l++) {
 						cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
 						for (auto& h : hops[l])
-							cerr << "\t\t" << h << endl;
+							cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
 						cerr << endl;
 					}
+					delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
+				}
+				cancelAndDelete(msg);
+				break;
+			case NOTIFY_MPR:
+				{
+					auto mpr = compute_mpr();
+					MprFound* m = new MprFound("mpr found");
+					m->setSender(myself.c_str());
+					m->setInMprArraySize(mpr.size());
+					int idx = 0;
+					for (auto& h: mpr) {
+						//cerr << h << " ======== is in mpr" << endl << endl;
+						m->setInMpr(idx++, strdup(h.c_str()));
+					}
+					send_package(m);
 				}
 				cancelAndDelete(msg);
 				break;
@@ -140,21 +164,41 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 bool
 Mpr_t2::on_network_message_received(cPacket* pkt){
     return BroadcastingAppBase::on_network_message_received(pkt) ||
-            processMessage2<mpr_t2::Neighbors>(pkt, &Mpr_t2::on_neighbors) ||
-			processMessage2<mpr_t2::RequestNeighbors>(pkt, &Mpr_t2::on_request_neighbors)
+            processMessage2<Neighbors>(pkt, &Mpr_t2::on_neighbors) ||
+			processMessage2<RequestNeighbors>(pkt, &Mpr_t2::on_request_neighbors) ||
+			processMessage2<MprFound>(pkt, &Mpr_t2::on_mpr_found);
 			;
 }
+
+
+
+void
+Mpr_t2::on_mpr_found(const mpr_t2::MprFound* m)
+{
+	if (in_mpr) return;
+
+	int n = m->getInMprArraySize();
+	for (int i = 0 ; i < n ; i++) {
+		string j = m->getInMpr(i);
+		if (j == myself) {
+			in_mpr = true;
+			cerr << myself << ": YESSSSSS, I am in MPR :-)" << endl;
+			return;
+		}
+	}
+}
+
 
 void
 Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 {
-
+	string j = m->getSender();
+	if (j == myself) return;
 	int nr_hops = m->getNeighborsArraySize();
 
 	/* first, it is obvious that the sender is a member of hops level 0 */
-	if (myself != m->getSender()) {
-		hops[0].insert(string(m->getSender()));
-	}
+	hops[0].insert(j);
+	hops_position[j] = make_pair(m->getX(), m->getY());
 
 	for (int l = 0 ; l < hops.size() ; l++) {
 		for (int i = 0 ; i < nr_hops ; i++) {
@@ -169,6 +213,7 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 
 			if (b) {
 				hops[h].insert(name);
+				hops_position[name] = make_pair(m->getXs(i), m->getYs(i));
 				//cerr << myself << "(" << simTime() << ")===== : Adding " << name << " to level " << h << endl;
 			}
 		}
@@ -188,7 +233,8 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 
 	// decide if we are ready to reply
 	int max_hop_level = m->getMaxHopLevel() + 1;
-	hops_under_construction[max_hop_level].erase(m->getSender());
+	hops_under_construction[max_hop_level].erase(j);
+
 	if (hops_under_construction[max_hop_level].empty()) {
 		for (int l = 0 ; l <= max_hop_level ; l++) {
 			hops_built[l] = true;
@@ -214,12 +260,19 @@ void
 Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 {
 	string j = m->getSender();
+	if (j == myself) return;
 	int max_hop_level = m->getMaxHopLevel();
 	
 	for (auto& n: neighbors) {
 		string s = n.first;
 		hops[0].insert(s);
+		auto p = make_pair(n.second.pos.x, n.second.pos.y);
+		hops_position[s] = p;
 	}
+
+	/* add also the one sending the message */
+	hops[0].insert(string(m->getSender()));
+	hops_position[string(m->getSender())] = make_pair(m->getX(), m->getY());
 
 	hops_built[0] = true;
 
@@ -252,17 +305,12 @@ Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 void
 Mpr_t2::request_hops(int h)
 {
-	/*
-	if (h < 1) {
-		cerr << "Error: You already got hops level 0. They are located in 'neighbors'." << endl;
-		throw runtime_error("The nr of requested hops must be 1 or more");
-	}
-	*/
-
-
+	
 	RequestNeighbors* m = new RequestNeighbors("Requesting hops");
 	m->setSender(myself.c_str());
 	m->setMaxHopLevel(h);
+	m->setX(position.x);
+	m->setY(position.y);
 	send_package(m);
 
 }
@@ -272,21 +320,29 @@ void
 Mpr_t2::on_payload_received(const Broadcast* m)
 {
     // Store in a map a a broadcast session ID
-    // string key = string(m->getId())
-    emitBroadcastMsgReceived( string(m->getId()) );
+    string key = m->getId();
+    emitBroadcastMsgReceived( key );
+	
+	bool first = (!is_source && payloads.find(key) == payloads.end());
 
+	if (first) {
+		payloads[key] = m->getPayload();
+		if (in_mpr)
+			delayed_broadcast(key, uniform(0.01, 0.2));
+	}	
 }
 
 
 void
 Mpr_t2::send_message(string& key)
 {
-    if (is_source || received_from[key].size() > 0) {
+    if (is_source || in_mpr) {
 
         Broadcast* m = new Broadcast("payload");
         m->setPayload(payloads[key].c_str());
         m->setId(key.c_str());
         m->setSender(myself.c_str());
+		send_package(m);
         emitSent(key);
     }
 }
@@ -295,7 +351,7 @@ Mpr_t2::send_message(string& key)
 void
 Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
-//    BroadcastingAppBase::time_to_broadcast_payload(user_data);
+    //BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
@@ -308,7 +364,7 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
         delete s;
     }
     //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
-    // send_message(key);
+    send_message(key);
 }
 
 template <typename T> bool
@@ -323,5 +379,91 @@ Mpr_t2::processMessage2(cPacket* pkt, void (Mpr_t2::*action)(const T* msg))
         return false;
     }
 }
+
+
+
+set<string>
+Mpr_t2::compute_mpr()
+{
+	set<string> mpr;
+
+	/* base case (or case 1 in Raziel's presentation)  */
+	for (auto& z: hops[1]){
+		set<string> s;
+
+		for (auto& y: hops[0]) {
+			if (is_a_covered_by_b(z, y, radious) ) {
+				s.insert(y);
+			}
+		}
+
+		if (s.size() == 1) {
+			mpr.insert(s.begin(), s.end());
+		}
+
+	}
+
+	bool b = any_of(hops[1].begin(), hops[1].end(), [&] (string z) {
+
+		bool r = any_of(mpr.begin(), mpr.end(), [&] (string h) {
+			return is_a_covered_by_b(z, h, radious);
+		});
+
+		//if (!r) {
+		// cerr << "Apparently " << z << " not covered in " << myself << endl;
+		//}
+
+		return !r;
+
+	});
+
+	int iterations = hops[1].size();
+
+	while (b && iterations) {
+		//cerr << myself << ": building mpr, already with " << mpr.size() << " elements" << endl;
+		string max_y = "";
+		int max = -1;
+		for (auto& y: hops[0]) {
+			if (mpr.find(y) != mpr.end()) continue;
+			int c = 0;
+			for (auto& z: hops[1])
+				if (is_a_covered_by_b(z, y, radious))
+					c++;
+
+			if (c > max) {
+				max_y = y;
+				max = c;
+			}
+		}
+
+		if (max_y != "") { 
+				mpr.insert(max_y);
+			//	cerr << "\nadding " << max_y << endl;
+		}
+	
+		b = any_of(hops[1].begin(), hops[1].end(), [&] (string z) {
+
+			bool r = any_of(mpr.begin(), mpr.end(), [&] (string h) {
+				return is_a_covered_by_b(z, h, radious);
+			});
+
+			//if (!r) {
+			//	cerr << "Apparently " << z << " not covered in " << myself << endl;
+			//}
+
+			return !r;
+
+		});
+
+		//iterations --;
+	}
+
+
+
+
+
+	return mpr;
+}
+
 
 } //namespace

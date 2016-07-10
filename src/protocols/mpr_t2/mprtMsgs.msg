@@ -22,8 +22,12 @@ class noncobject NePo;
 packet Neighbors {
 	string neighbors[];
 	int hopLevels[];
+	double xs[];
+	double ys[];
 	int maxHopLevel;
 	string sender;
+	double x;
+	double y;
 }
 
 // Used to request the hops of a node
@@ -31,4 +35,11 @@ packet Neighbors {
 packet RequestNeighbors {
 	string sender;
 	int maxHopLevel;
+	double x;
+	double y;
+}
+
+packet MprFound {
+	string sender;
+	string inMpr[];
 }

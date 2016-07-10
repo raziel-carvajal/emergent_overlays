@@ -1,11 +1,11 @@
 description = "Broadcasting messages using MPR"
 
-# repeat = 10
+repeat=4
 
 *.host*.udpApp[0].typename = "Mpr_t2"
-*.SOURCE.udpApp[0].is_source = false
+*.SOURCE.udpApp[0].is_source = true
 *.SOURCE.udpApp[0].nr_broadcast_msg = 300
-*.SOURCE.udpApp[0].wakeUpTime = 20s
+*.SOURCE.udpApp[0].wakeUpTime = 25s
 
 *.host*.energyStorage.nominalCapacity = 500J
 
@@ -19,7 +19,7 @@ description = "Broadcasting messages using MPR"
 
 *.host*.udpApp[0].wakeup_time_to_build_hops = 8s
 
-*.SOURCE.udpApp[0].display_time_hops = 170s
+*.host*.udpApp[0].display_time_hops = 20s
 
 
 

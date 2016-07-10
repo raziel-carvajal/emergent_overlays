@@ -55,9 +55,15 @@ PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $10 }'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 
-for i in $(seq 0 4); do
+count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
-	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME} ${simulation_time} | grep average_values`
+echo "Checking ${count} repetitions"
+
+count=$(($count-1))
+
+for i in $(seq 0 ${count}); do
+
+	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} | grep average_values`
 	echo "Repetition $i"
 	echo $results
 
