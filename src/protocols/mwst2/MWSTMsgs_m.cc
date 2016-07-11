@@ -54,25 +54,25 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
 template<typename T>
 inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
 
-Register_Class(Hello);
+Register_Class(HelloMWST);
 
-Hello::Hello(const char *name, int kind) : ::cPacket(name,kind)
+HelloMWST::HelloMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->sender_var = 0;
     this->x_var = 0;
     this->y_var = 0;
 }
 
-Hello::Hello(const Hello& other) : ::cPacket(other)
+HelloMWST::HelloMWST(const HelloMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Hello::~Hello()
+HelloMWST::~HelloMWST()
 {
 }
 
-Hello& Hello::operator=(const Hello& other)
+HelloMWST& HelloMWST::operator=(const HelloMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -80,14 +80,14 @@ Hello& Hello::operator=(const Hello& other)
     return *this;
 }
 
-void Hello::copy(const Hello& other)
+void HelloMWST::copy(const HelloMWST& other)
 {
     this->sender_var = other.sender_var;
     this->x_var = other.x_var;
     this->y_var = other.y_var;
 }
 
-void Hello::parsimPack(cCommBuffer *b)
+void HelloMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->sender_var);
@@ -95,7 +95,7 @@ void Hello::parsimPack(cCommBuffer *b)
     doPacking(b,this->y_var);
 }
 
-void Hello::parsimUnpack(cCommBuffer *b)
+void HelloMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->sender_var);
@@ -103,41 +103,41 @@ void Hello::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->y_var);
 }
 
-const char * Hello::getSender() const
+const char * HelloMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Hello::setSender(const char * sender)
+void HelloMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-int Hello::getX() const
+int HelloMWST::getX() const
 {
     return x_var;
 }
 
-void Hello::setX(int x)
+void HelloMWST::setX(int x)
 {
     this->x_var = x;
 }
 
-int Hello::getY() const
+int HelloMWST::getY() const
 {
     return y_var;
 }
 
-void Hello::setY(int y)
+void HelloMWST::setY(int y)
 {
     this->y_var = y;
 }
 
-class HelloDescriptor : public cClassDescriptor
+class HelloMWSTDescriptor : public cClassDescriptor
 {
   public:
-    HelloDescriptor();
-    virtual ~HelloDescriptor();
+    HelloMWSTDescriptor();
+    virtual ~HelloMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -156,34 +156,34 @@ class HelloDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(HelloDescriptor);
+Register_ClassDescriptor(HelloMWSTDescriptor);
 
-HelloDescriptor::HelloDescriptor() : cClassDescriptor("inet::Hello", "cPacket")
+HelloMWSTDescriptor::HelloMWSTDescriptor() : cClassDescriptor("inet::HelloMWST", "cPacket")
 {
 }
 
-HelloDescriptor::~HelloDescriptor()
+HelloMWSTDescriptor::~HelloMWSTDescriptor()
 {
 }
 
-bool HelloDescriptor::doesSupport(cObject *obj) const
+bool HelloMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Hello *>(obj)!=NULL;
+    return dynamic_cast<HelloMWST *>(obj)!=NULL;
 }
 
-const char *HelloDescriptor::getProperty(const char *propertyname) const
+const char *HelloMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int HelloDescriptor::getFieldCount(void *object) const
+int HelloMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 3+basedesc->getFieldCount(object) : 3;
 }
 
-unsigned int HelloDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int HelloMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -199,7 +199,7 @@ unsigned int HelloDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
-const char *HelloDescriptor::getFieldName(void *object, int field) const
+const char *HelloMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -215,7 +215,7 @@ const char *HelloDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<3) ? fieldNames[field] : NULL;
 }
 
-int HelloDescriptor::findField(void *object, const char *fieldName) const
+int HelloMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -225,7 +225,7 @@ int HelloDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *HelloDescriptor::getFieldTypeString(void *object, int field) const
+const char *HelloMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -241,7 +241,7 @@ const char *HelloDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *HelloDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *HelloMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -254,7 +254,7 @@ const char *HelloDescriptor::getFieldProperty(void *object, int field, const cha
     }
 }
 
-int HelloDescriptor::getArraySize(void *object, int field) const
+int HelloMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -262,13 +262,13 @@ int HelloDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Hello *pp = (Hello *)object; (void)pp;
+    HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string HelloDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string HelloMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -276,7 +276,7 @@ std::string HelloDescriptor::getFieldAsString(void *object, int field, int i) co
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Hello *pp = (Hello *)object; (void)pp;
+    HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
         case 1: return long2string(pp->getX());
@@ -285,7 +285,7 @@ std::string HelloDescriptor::getFieldAsString(void *object, int field, int i) co
     }
 }
 
-bool HelloDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool HelloMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -293,7 +293,7 @@ bool HelloDescriptor::setFieldAsString(void *object, int field, int i, const cha
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Hello *pp = (Hello *)object; (void)pp;
+    HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
         case 1: pp->setX(string2long(value)); return true;
@@ -302,7 +302,7 @@ bool HelloDescriptor::setFieldAsString(void *object, int field, int i, const cha
     }
 }
 
-const char *HelloDescriptor::getFieldStructName(void *object, int field) const
+const char *HelloMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -315,7 +315,7 @@ const char *HelloDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *HelloDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *HelloMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -323,29 +323,29 @@ void *HelloDescriptor::getFieldStructPointer(void *object, int field, int i) con
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Hello *pp = (Hello *)object; (void)pp;
+    HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Connect);
+Register_Class(ConnectMWST);
 
-Connect::Connect(const char *name, int kind) : ::cPacket(name,kind)
+ConnectMWST::ConnectMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->sender_var = 0;
 }
 
-Connect::Connect(const Connect& other) : ::cPacket(other)
+ConnectMWST::ConnectMWST(const ConnectMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Connect::~Connect()
+ConnectMWST::~ConnectMWST()
 {
 }
 
-Connect& Connect::operator=(const Connect& other)
+ConnectMWST& ConnectMWST::operator=(const ConnectMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -353,38 +353,38 @@ Connect& Connect::operator=(const Connect& other)
     return *this;
 }
 
-void Connect::copy(const Connect& other)
+void ConnectMWST::copy(const ConnectMWST& other)
 {
     this->sender_var = other.sender_var;
 }
 
-void Connect::parsimPack(cCommBuffer *b)
+void ConnectMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->sender_var);
 }
 
-void Connect::parsimUnpack(cCommBuffer *b)
+void ConnectMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->sender_var);
 }
 
-const char * Connect::getSender() const
+const char * ConnectMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Connect::setSender(const char * sender)
+void ConnectMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class ConnectDescriptor : public cClassDescriptor
+class ConnectMWSTDescriptor : public cClassDescriptor
 {
   public:
-    ConnectDescriptor();
-    virtual ~ConnectDescriptor();
+    ConnectMWSTDescriptor();
+    virtual ~ConnectMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -403,34 +403,34 @@ class ConnectDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(ConnectDescriptor);
+Register_ClassDescriptor(ConnectMWSTDescriptor);
 
-ConnectDescriptor::ConnectDescriptor() : cClassDescriptor("inet::Connect", "cPacket")
+ConnectMWSTDescriptor::ConnectMWSTDescriptor() : cClassDescriptor("inet::ConnectMWST", "cPacket")
 {
 }
 
-ConnectDescriptor::~ConnectDescriptor()
+ConnectMWSTDescriptor::~ConnectMWSTDescriptor()
 {
 }
 
-bool ConnectDescriptor::doesSupport(cObject *obj) const
+bool ConnectMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Connect *>(obj)!=NULL;
+    return dynamic_cast<ConnectMWST *>(obj)!=NULL;
 }
 
-const char *ConnectDescriptor::getProperty(const char *propertyname) const
+const char *ConnectMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int ConnectDescriptor::getFieldCount(void *object) const
+int ConnectMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 1+basedesc->getFieldCount(object) : 1;
 }
 
-unsigned int ConnectDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int ConnectMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -444,7 +444,7 @@ unsigned int ConnectDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
-const char *ConnectDescriptor::getFieldName(void *object, int field) const
+const char *ConnectMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -458,7 +458,7 @@ const char *ConnectDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<1) ? fieldNames[field] : NULL;
 }
 
-int ConnectDescriptor::findField(void *object, const char *fieldName) const
+int ConnectMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -466,7 +466,7 @@ int ConnectDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *ConnectDescriptor::getFieldTypeString(void *object, int field) const
+const char *ConnectMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -480,7 +480,7 @@ const char *ConnectDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *ConnectDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *ConnectMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -493,7 +493,7 @@ const char *ConnectDescriptor::getFieldProperty(void *object, int field, const c
     }
 }
 
-int ConnectDescriptor::getArraySize(void *object, int field) const
+int ConnectMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -501,13 +501,13 @@ int ConnectDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Connect *pp = (Connect *)object; (void)pp;
+    ConnectMWST *pp = (ConnectMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string ConnectDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string ConnectMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -515,14 +515,14 @@ std::string ConnectDescriptor::getFieldAsString(void *object, int field, int i) 
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Connect *pp = (Connect *)object; (void)pp;
+    ConnectMWST *pp = (ConnectMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
         default: return "";
     }
 }
 
-bool ConnectDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool ConnectMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -530,14 +530,14 @@ bool ConnectDescriptor::setFieldAsString(void *object, int field, int i, const c
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Connect *pp = (Connect *)object; (void)pp;
+    ConnectMWST *pp = (ConnectMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
         default: return false;
     }
 }
 
-const char *ConnectDescriptor::getFieldStructName(void *object, int field) const
+const char *ConnectMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -550,7 +550,7 @@ const char *ConnectDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *ConnectDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *ConnectMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -558,30 +558,30 @@ void *ConnectDescriptor::getFieldStructPointer(void *object, int field, int i) c
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Connect *pp = (Connect *)object; (void)pp;
+    ConnectMWST *pp = (ConnectMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Initiate);
+Register_Class(InitiateMWST);
 
-Initiate::Initiate(const char *name, int kind) : ::cPacket(name,kind)
+InitiateMWST::InitiateMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->fragmentId_var = 0;
     this->sender_var = 0;
 }
 
-Initiate::Initiate(const Initiate& other) : ::cPacket(other)
+InitiateMWST::InitiateMWST(const InitiateMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Initiate::~Initiate()
+InitiateMWST::~InitiateMWST()
 {
 }
 
-Initiate& Initiate::operator=(const Initiate& other)
+InitiateMWST& InitiateMWST::operator=(const InitiateMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -589,51 +589,51 @@ Initiate& Initiate::operator=(const Initiate& other)
     return *this;
 }
 
-void Initiate::copy(const Initiate& other)
+void InitiateMWST::copy(const InitiateMWST& other)
 {
     this->fragmentId_var = other.fragmentId_var;
     this->sender_var = other.sender_var;
 }
 
-void Initiate::parsimPack(cCommBuffer *b)
+void InitiateMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->fragmentId_var);
     doPacking(b,this->sender_var);
 }
 
-void Initiate::parsimUnpack(cCommBuffer *b)
+void InitiateMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->fragmentId_var);
     doUnpacking(b,this->sender_var);
 }
 
-const char * Initiate::getFragmentId() const
+const char * InitiateMWST::getFragmentId() const
 {
     return fragmentId_var.c_str();
 }
 
-void Initiate::setFragmentId(const char * fragmentId)
+void InitiateMWST::setFragmentId(const char * fragmentId)
 {
     this->fragmentId_var = fragmentId;
 }
 
-const char * Initiate::getSender() const
+const char * InitiateMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Initiate::setSender(const char * sender)
+void InitiateMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class InitiateDescriptor : public cClassDescriptor
+class InitiateMWSTDescriptor : public cClassDescriptor
 {
   public:
-    InitiateDescriptor();
-    virtual ~InitiateDescriptor();
+    InitiateMWSTDescriptor();
+    virtual ~InitiateMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -652,34 +652,34 @@ class InitiateDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(InitiateDescriptor);
+Register_ClassDescriptor(InitiateMWSTDescriptor);
 
-InitiateDescriptor::InitiateDescriptor() : cClassDescriptor("inet::Initiate", "cPacket")
+InitiateMWSTDescriptor::InitiateMWSTDescriptor() : cClassDescriptor("inet::InitiateMWST", "cPacket")
 {
 }
 
-InitiateDescriptor::~InitiateDescriptor()
+InitiateMWSTDescriptor::~InitiateMWSTDescriptor()
 {
 }
 
-bool InitiateDescriptor::doesSupport(cObject *obj) const
+bool InitiateMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Initiate *>(obj)!=NULL;
+    return dynamic_cast<InitiateMWST *>(obj)!=NULL;
 }
 
-const char *InitiateDescriptor::getProperty(const char *propertyname) const
+const char *InitiateMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int InitiateDescriptor::getFieldCount(void *object) const
+int InitiateMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 2+basedesc->getFieldCount(object) : 2;
 }
 
-unsigned int InitiateDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int InitiateMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -694,7 +694,7 @@ unsigned int InitiateDescriptor::getFieldTypeFlags(void *object, int field) cons
     return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
-const char *InitiateDescriptor::getFieldName(void *object, int field) const
+const char *InitiateMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -709,7 +709,7 @@ const char *InitiateDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<2) ? fieldNames[field] : NULL;
 }
 
-int InitiateDescriptor::findField(void *object, const char *fieldName) const
+int InitiateMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -718,7 +718,7 @@ int InitiateDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *InitiateDescriptor::getFieldTypeString(void *object, int field) const
+const char *InitiateMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -733,7 +733,7 @@ const char *InitiateDescriptor::getFieldTypeString(void *object, int field) cons
     return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *InitiateDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *InitiateMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -746,7 +746,7 @@ const char *InitiateDescriptor::getFieldProperty(void *object, int field, const 
     }
 }
 
-int InitiateDescriptor::getArraySize(void *object, int field) const
+int InitiateMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -754,13 +754,13 @@ int InitiateDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Initiate *pp = (Initiate *)object; (void)pp;
+    InitiateMWST *pp = (InitiateMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string InitiateDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string InitiateMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -768,7 +768,7 @@ std::string InitiateDescriptor::getFieldAsString(void *object, int field, int i)
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Initiate *pp = (Initiate *)object; (void)pp;
+    InitiateMWST *pp = (InitiateMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getFragmentId());
         case 1: return oppstring2string(pp->getSender());
@@ -776,7 +776,7 @@ std::string InitiateDescriptor::getFieldAsString(void *object, int field, int i)
     }
 }
 
-bool InitiateDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool InitiateMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -784,7 +784,7 @@ bool InitiateDescriptor::setFieldAsString(void *object, int field, int i, const 
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Initiate *pp = (Initiate *)object; (void)pp;
+    InitiateMWST *pp = (InitiateMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setFragmentId((value)); return true;
         case 1: pp->setSender((value)); return true;
@@ -792,7 +792,7 @@ bool InitiateDescriptor::setFieldAsString(void *object, int field, int i, const 
     }
 }
 
-const char *InitiateDescriptor::getFieldStructName(void *object, int field) const
+const char *InitiateMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -805,7 +805,7 @@ const char *InitiateDescriptor::getFieldStructName(void *object, int field) cons
     };
 }
 
-void *InitiateDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *InitiateMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -813,30 +813,30 @@ void *InitiateDescriptor::getFieldStructPointer(void *object, int field, int i) 
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Initiate *pp = (Initiate *)object; (void)pp;
+    InitiateMWST *pp = (InitiateMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Test);
+Register_Class(TestMWST);
 
-Test::Test(const char *name, int kind) : ::cPacket(name,kind)
+TestMWST::TestMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->fragmentId_var = 0;
     this->sender_var = 0;
 }
 
-Test::Test(const Test& other) : ::cPacket(other)
+TestMWST::TestMWST(const TestMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Test::~Test()
+TestMWST::~TestMWST()
 {
 }
 
-Test& Test::operator=(const Test& other)
+TestMWST& TestMWST::operator=(const TestMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -844,51 +844,51 @@ Test& Test::operator=(const Test& other)
     return *this;
 }
 
-void Test::copy(const Test& other)
+void TestMWST::copy(const TestMWST& other)
 {
     this->fragmentId_var = other.fragmentId_var;
     this->sender_var = other.sender_var;
 }
 
-void Test::parsimPack(cCommBuffer *b)
+void TestMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->fragmentId_var);
     doPacking(b,this->sender_var);
 }
 
-void Test::parsimUnpack(cCommBuffer *b)
+void TestMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->fragmentId_var);
     doUnpacking(b,this->sender_var);
 }
 
-const char * Test::getFragmentId() const
+const char * TestMWST::getFragmentId() const
 {
     return fragmentId_var.c_str();
 }
 
-void Test::setFragmentId(const char * fragmentId)
+void TestMWST::setFragmentId(const char * fragmentId)
 {
     this->fragmentId_var = fragmentId;
 }
 
-const char * Test::getSender() const
+const char * TestMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Test::setSender(const char * sender)
+void TestMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class TestDescriptor : public cClassDescriptor
+class TestMWSTDescriptor : public cClassDescriptor
 {
   public:
-    TestDescriptor();
-    virtual ~TestDescriptor();
+    TestMWSTDescriptor();
+    virtual ~TestMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -907,34 +907,34 @@ class TestDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(TestDescriptor);
+Register_ClassDescriptor(TestMWSTDescriptor);
 
-TestDescriptor::TestDescriptor() : cClassDescriptor("inet::Test", "cPacket")
+TestMWSTDescriptor::TestMWSTDescriptor() : cClassDescriptor("inet::TestMWST", "cPacket")
 {
 }
 
-TestDescriptor::~TestDescriptor()
+TestMWSTDescriptor::~TestMWSTDescriptor()
 {
 }
 
-bool TestDescriptor::doesSupport(cObject *obj) const
+bool TestMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Test *>(obj)!=NULL;
+    return dynamic_cast<TestMWST *>(obj)!=NULL;
 }
 
-const char *TestDescriptor::getProperty(const char *propertyname) const
+const char *TestMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int TestDescriptor::getFieldCount(void *object) const
+int TestMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 2+basedesc->getFieldCount(object) : 2;
 }
 
-unsigned int TestDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int TestMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -949,7 +949,7 @@ unsigned int TestDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
-const char *TestDescriptor::getFieldName(void *object, int field) const
+const char *TestMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -964,7 +964,7 @@ const char *TestDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<2) ? fieldNames[field] : NULL;
 }
 
-int TestDescriptor::findField(void *object, const char *fieldName) const
+int TestMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -973,7 +973,7 @@ int TestDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *TestDescriptor::getFieldTypeString(void *object, int field) const
+const char *TestMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -988,7 +988,7 @@ const char *TestDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *TestDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *TestMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1001,7 +1001,7 @@ const char *TestDescriptor::getFieldProperty(void *object, int field, const char
     }
 }
 
-int TestDescriptor::getArraySize(void *object, int field) const
+int TestMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1009,13 +1009,13 @@ int TestDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Test *pp = (Test *)object; (void)pp;
+    TestMWST *pp = (TestMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string TestDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string TestMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1023,7 +1023,7 @@ std::string TestDescriptor::getFieldAsString(void *object, int field, int i) con
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Test *pp = (Test *)object; (void)pp;
+    TestMWST *pp = (TestMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getFragmentId());
         case 1: return oppstring2string(pp->getSender());
@@ -1031,7 +1031,7 @@ std::string TestDescriptor::getFieldAsString(void *object, int field, int i) con
     }
 }
 
-bool TestDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool TestMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1039,7 +1039,7 @@ bool TestDescriptor::setFieldAsString(void *object, int field, int i, const char
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Test *pp = (Test *)object; (void)pp;
+    TestMWST *pp = (TestMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setFragmentId((value)); return true;
         case 1: pp->setSender((value)); return true;
@@ -1047,7 +1047,7 @@ bool TestDescriptor::setFieldAsString(void *object, int field, int i, const char
     }
 }
 
-const char *TestDescriptor::getFieldStructName(void *object, int field) const
+const char *TestMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1060,7 +1060,7 @@ const char *TestDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *TestDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *TestMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1068,29 +1068,29 @@ void *TestDescriptor::getFieldStructPointer(void *object, int field, int i) cons
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Test *pp = (Test *)object; (void)pp;
+    TestMWST *pp = (TestMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Accept);
+Register_Class(AcceptMWST);
 
-Accept::Accept(const char *name, int kind) : ::cPacket(name,kind)
+AcceptMWST::AcceptMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->sender_var = 0;
 }
 
-Accept::Accept(const Accept& other) : ::cPacket(other)
+AcceptMWST::AcceptMWST(const AcceptMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Accept::~Accept()
+AcceptMWST::~AcceptMWST()
 {
 }
 
-Accept& Accept::operator=(const Accept& other)
+AcceptMWST& AcceptMWST::operator=(const AcceptMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -1098,38 +1098,38 @@ Accept& Accept::operator=(const Accept& other)
     return *this;
 }
 
-void Accept::copy(const Accept& other)
+void AcceptMWST::copy(const AcceptMWST& other)
 {
     this->sender_var = other.sender_var;
 }
 
-void Accept::parsimPack(cCommBuffer *b)
+void AcceptMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->sender_var);
 }
 
-void Accept::parsimUnpack(cCommBuffer *b)
+void AcceptMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->sender_var);
 }
 
-const char * Accept::getSender() const
+const char * AcceptMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Accept::setSender(const char * sender)
+void AcceptMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class AcceptDescriptor : public cClassDescriptor
+class AcceptMWSTDescriptor : public cClassDescriptor
 {
   public:
-    AcceptDescriptor();
-    virtual ~AcceptDescriptor();
+    AcceptMWSTDescriptor();
+    virtual ~AcceptMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -1148,34 +1148,34 @@ class AcceptDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(AcceptDescriptor);
+Register_ClassDescriptor(AcceptMWSTDescriptor);
 
-AcceptDescriptor::AcceptDescriptor() : cClassDescriptor("inet::Accept", "cPacket")
+AcceptMWSTDescriptor::AcceptMWSTDescriptor() : cClassDescriptor("inet::AcceptMWST", "cPacket")
 {
 }
 
-AcceptDescriptor::~AcceptDescriptor()
+AcceptMWSTDescriptor::~AcceptMWSTDescriptor()
 {
 }
 
-bool AcceptDescriptor::doesSupport(cObject *obj) const
+bool AcceptMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Accept *>(obj)!=NULL;
+    return dynamic_cast<AcceptMWST *>(obj)!=NULL;
 }
 
-const char *AcceptDescriptor::getProperty(const char *propertyname) const
+const char *AcceptMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int AcceptDescriptor::getFieldCount(void *object) const
+int AcceptMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 1+basedesc->getFieldCount(object) : 1;
 }
 
-unsigned int AcceptDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int AcceptMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1189,7 +1189,7 @@ unsigned int AcceptDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
-const char *AcceptDescriptor::getFieldName(void *object, int field) const
+const char *AcceptMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1203,7 +1203,7 @@ const char *AcceptDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<1) ? fieldNames[field] : NULL;
 }
 
-int AcceptDescriptor::findField(void *object, const char *fieldName) const
+int AcceptMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -1211,7 +1211,7 @@ int AcceptDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *AcceptDescriptor::getFieldTypeString(void *object, int field) const
+const char *AcceptMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1225,7 +1225,7 @@ const char *AcceptDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *AcceptDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *AcceptMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1238,7 +1238,7 @@ const char *AcceptDescriptor::getFieldProperty(void *object, int field, const ch
     }
 }
 
-int AcceptDescriptor::getArraySize(void *object, int field) const
+int AcceptMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1246,13 +1246,13 @@ int AcceptDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Accept *pp = (Accept *)object; (void)pp;
+    AcceptMWST *pp = (AcceptMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string AcceptDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string AcceptMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1260,14 +1260,14 @@ std::string AcceptDescriptor::getFieldAsString(void *object, int field, int i) c
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Accept *pp = (Accept *)object; (void)pp;
+    AcceptMWST *pp = (AcceptMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
         default: return "";
     }
 }
 
-bool AcceptDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool AcceptMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1275,14 +1275,14 @@ bool AcceptDescriptor::setFieldAsString(void *object, int field, int i, const ch
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Accept *pp = (Accept *)object; (void)pp;
+    AcceptMWST *pp = (AcceptMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
         default: return false;
     }
 }
 
-const char *AcceptDescriptor::getFieldStructName(void *object, int field) const
+const char *AcceptMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1295,7 +1295,7 @@ const char *AcceptDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *AcceptDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *AcceptMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1303,29 +1303,29 @@ void *AcceptDescriptor::getFieldStructPointer(void *object, int field, int i) co
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Accept *pp = (Accept *)object; (void)pp;
+    AcceptMWST *pp = (AcceptMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Reject);
+Register_Class(RejectMWST);
 
-Reject::Reject(const char *name, int kind) : ::cPacket(name,kind)
+RejectMWST::RejectMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->sender_var = 0;
 }
 
-Reject::Reject(const Reject& other) : ::cPacket(other)
+RejectMWST::RejectMWST(const RejectMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Reject::~Reject()
+RejectMWST::~RejectMWST()
 {
 }
 
-Reject& Reject::operator=(const Reject& other)
+RejectMWST& RejectMWST::operator=(const RejectMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -1333,38 +1333,38 @@ Reject& Reject::operator=(const Reject& other)
     return *this;
 }
 
-void Reject::copy(const Reject& other)
+void RejectMWST::copy(const RejectMWST& other)
 {
     this->sender_var = other.sender_var;
 }
 
-void Reject::parsimPack(cCommBuffer *b)
+void RejectMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->sender_var);
 }
 
-void Reject::parsimUnpack(cCommBuffer *b)
+void RejectMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->sender_var);
 }
 
-const char * Reject::getSender() const
+const char * RejectMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Reject::setSender(const char * sender)
+void RejectMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class RejectDescriptor : public cClassDescriptor
+class RejectMWSTDescriptor : public cClassDescriptor
 {
   public:
-    RejectDescriptor();
-    virtual ~RejectDescriptor();
+    RejectMWSTDescriptor();
+    virtual ~RejectMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -1383,34 +1383,34 @@ class RejectDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(RejectDescriptor);
+Register_ClassDescriptor(RejectMWSTDescriptor);
 
-RejectDescriptor::RejectDescriptor() : cClassDescriptor("inet::Reject", "cPacket")
+RejectMWSTDescriptor::RejectMWSTDescriptor() : cClassDescriptor("inet::RejectMWST", "cPacket")
 {
 }
 
-RejectDescriptor::~RejectDescriptor()
+RejectMWSTDescriptor::~RejectMWSTDescriptor()
 {
 }
 
-bool RejectDescriptor::doesSupport(cObject *obj) const
+bool RejectMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Reject *>(obj)!=NULL;
+    return dynamic_cast<RejectMWST *>(obj)!=NULL;
 }
 
-const char *RejectDescriptor::getProperty(const char *propertyname) const
+const char *RejectMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int RejectDescriptor::getFieldCount(void *object) const
+int RejectMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 1+basedesc->getFieldCount(object) : 1;
 }
 
-unsigned int RejectDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int RejectMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1424,7 +1424,7 @@ unsigned int RejectDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
-const char *RejectDescriptor::getFieldName(void *object, int field) const
+const char *RejectMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1438,7 +1438,7 @@ const char *RejectDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<1) ? fieldNames[field] : NULL;
 }
 
-int RejectDescriptor::findField(void *object, const char *fieldName) const
+int RejectMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -1446,7 +1446,7 @@ int RejectDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *RejectDescriptor::getFieldTypeString(void *object, int field) const
+const char *RejectMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1460,7 +1460,7 @@ const char *RejectDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *RejectDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *RejectMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1473,7 +1473,7 @@ const char *RejectDescriptor::getFieldProperty(void *object, int field, const ch
     }
 }
 
-int RejectDescriptor::getArraySize(void *object, int field) const
+int RejectMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1481,13 +1481,13 @@ int RejectDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Reject *pp = (Reject *)object; (void)pp;
+    RejectMWST *pp = (RejectMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string RejectDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string RejectMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1495,14 +1495,14 @@ std::string RejectDescriptor::getFieldAsString(void *object, int field, int i) c
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Reject *pp = (Reject *)object; (void)pp;
+    RejectMWST *pp = (RejectMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
         default: return "";
     }
 }
 
-bool RejectDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool RejectMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1510,14 +1510,14 @@ bool RejectDescriptor::setFieldAsString(void *object, int field, int i, const ch
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Reject *pp = (Reject *)object; (void)pp;
+    RejectMWST *pp = (RejectMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
         default: return false;
     }
 }
 
-const char *RejectDescriptor::getFieldStructName(void *object, int field) const
+const char *RejectMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1530,7 +1530,7 @@ const char *RejectDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *RejectDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *RejectMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1538,30 +1538,30 @@ void *RejectDescriptor::getFieldStructPointer(void *object, int field, int i) co
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Reject *pp = (Reject *)object; (void)pp;
+    RejectMWST *pp = (RejectMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(Report);
+Register_Class(ReportMWST);
 
-Report::Report(const char *name, int kind) : ::cPacket(name,kind)
+ReportMWST::ReportMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->weight_var = 0;
     this->sender_var = 0;
 }
 
-Report::Report(const Report& other) : ::cPacket(other)
+ReportMWST::ReportMWST(const ReportMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-Report::~Report()
+ReportMWST::~ReportMWST()
 {
 }
 
-Report& Report::operator=(const Report& other)
+ReportMWST& ReportMWST::operator=(const ReportMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -1569,51 +1569,51 @@ Report& Report::operator=(const Report& other)
     return *this;
 }
 
-void Report::copy(const Report& other)
+void ReportMWST::copy(const ReportMWST& other)
 {
     this->weight_var = other.weight_var;
     this->sender_var = other.sender_var;
 }
 
-void Report::parsimPack(cCommBuffer *b)
+void ReportMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->weight_var);
     doPacking(b,this->sender_var);
 }
 
-void Report::parsimUnpack(cCommBuffer *b)
+void ReportMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->weight_var);
     doUnpacking(b,this->sender_var);
 }
 
-int Report::getWeight() const
+int ReportMWST::getWeight() const
 {
     return weight_var;
 }
 
-void Report::setWeight(int weight)
+void ReportMWST::setWeight(int weight)
 {
     this->weight_var = weight;
 }
 
-const char * Report::getSender() const
+const char * ReportMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void Report::setSender(const char * sender)
+void ReportMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class ReportDescriptor : public cClassDescriptor
+class ReportMWSTDescriptor : public cClassDescriptor
 {
   public:
-    ReportDescriptor();
-    virtual ~ReportDescriptor();
+    ReportMWSTDescriptor();
+    virtual ~ReportMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -1632,34 +1632,34 @@ class ReportDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(ReportDescriptor);
+Register_ClassDescriptor(ReportMWSTDescriptor);
 
-ReportDescriptor::ReportDescriptor() : cClassDescriptor("inet::Report", "cPacket")
+ReportMWSTDescriptor::ReportMWSTDescriptor() : cClassDescriptor("inet::ReportMWST", "cPacket")
 {
 }
 
-ReportDescriptor::~ReportDescriptor()
+ReportMWSTDescriptor::~ReportMWSTDescriptor()
 {
 }
 
-bool ReportDescriptor::doesSupport(cObject *obj) const
+bool ReportMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<Report *>(obj)!=NULL;
+    return dynamic_cast<ReportMWST *>(obj)!=NULL;
 }
 
-const char *ReportDescriptor::getProperty(const char *propertyname) const
+const char *ReportMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int ReportDescriptor::getFieldCount(void *object) const
+int ReportMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 2+basedesc->getFieldCount(object) : 2;
 }
 
-unsigned int ReportDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int ReportMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1674,7 +1674,7 @@ unsigned int ReportDescriptor::getFieldTypeFlags(void *object, int field) const
     return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
-const char *ReportDescriptor::getFieldName(void *object, int field) const
+const char *ReportMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1689,7 +1689,7 @@ const char *ReportDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<2) ? fieldNames[field] : NULL;
 }
 
-int ReportDescriptor::findField(void *object, const char *fieldName) const
+int ReportMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -1698,7 +1698,7 @@ int ReportDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *ReportDescriptor::getFieldTypeString(void *object, int field) const
+const char *ReportMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1713,7 +1713,7 @@ const char *ReportDescriptor::getFieldTypeString(void *object, int field) const
     return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *ReportDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *ReportMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1726,7 +1726,7 @@ const char *ReportDescriptor::getFieldProperty(void *object, int field, const ch
     }
 }
 
-int ReportDescriptor::getArraySize(void *object, int field) const
+int ReportMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1734,13 +1734,13 @@ int ReportDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    Report *pp = (Report *)object; (void)pp;
+    ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string ReportDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string ReportMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1748,7 +1748,7 @@ std::string ReportDescriptor::getFieldAsString(void *object, int field, int i) c
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    Report *pp = (Report *)object; (void)pp;
+    ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getWeight());
         case 1: return oppstring2string(pp->getSender());
@@ -1756,7 +1756,7 @@ std::string ReportDescriptor::getFieldAsString(void *object, int field, int i) c
     }
 }
 
-bool ReportDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool ReportMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1764,7 +1764,7 @@ bool ReportDescriptor::setFieldAsString(void *object, int field, int i, const ch
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    Report *pp = (Report *)object; (void)pp;
+    ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setWeight(string2long(value)); return true;
         case 1: pp->setSender((value)); return true;
@@ -1772,7 +1772,7 @@ bool ReportDescriptor::setFieldAsString(void *object, int field, int i, const ch
     }
 }
 
-const char *ReportDescriptor::getFieldStructName(void *object, int field) const
+const char *ReportMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1785,7 +1785,7 @@ const char *ReportDescriptor::getFieldStructName(void *object, int field) const
     };
 }
 
-void *ReportDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *ReportMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1793,29 +1793,29 @@ void *ReportDescriptor::getFieldStructPointer(void *object, int field, int i) co
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    Report *pp = (Report *)object; (void)pp;
+    ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }
 }
 
-Register_Class(ChangeRoot);
+Register_Class(ChangeRootMWST);
 
-ChangeRoot::ChangeRoot(const char *name, int kind) : ::cPacket(name,kind)
+ChangeRootMWST::ChangeRootMWST(const char *name, int kind) : ::cPacket(name,kind)
 {
     this->sender_var = 0;
 }
 
-ChangeRoot::ChangeRoot(const ChangeRoot& other) : ::cPacket(other)
+ChangeRootMWST::ChangeRootMWST(const ChangeRootMWST& other) : ::cPacket(other)
 {
     copy(other);
 }
 
-ChangeRoot::~ChangeRoot()
+ChangeRootMWST::~ChangeRootMWST()
 {
 }
 
-ChangeRoot& ChangeRoot::operator=(const ChangeRoot& other)
+ChangeRootMWST& ChangeRootMWST::operator=(const ChangeRootMWST& other)
 {
     if (this==&other) return *this;
     ::cPacket::operator=(other);
@@ -1823,38 +1823,38 @@ ChangeRoot& ChangeRoot::operator=(const ChangeRoot& other)
     return *this;
 }
 
-void ChangeRoot::copy(const ChangeRoot& other)
+void ChangeRootMWST::copy(const ChangeRootMWST& other)
 {
     this->sender_var = other.sender_var;
 }
 
-void ChangeRoot::parsimPack(cCommBuffer *b)
+void ChangeRootMWST::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->sender_var);
 }
 
-void ChangeRoot::parsimUnpack(cCommBuffer *b)
+void ChangeRootMWST::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
     doUnpacking(b,this->sender_var);
 }
 
-const char * ChangeRoot::getSender() const
+const char * ChangeRootMWST::getSender() const
 {
     return sender_var.c_str();
 }
 
-void ChangeRoot::setSender(const char * sender)
+void ChangeRootMWST::setSender(const char * sender)
 {
     this->sender_var = sender;
 }
 
-class ChangeRootDescriptor : public cClassDescriptor
+class ChangeRootMWSTDescriptor : public cClassDescriptor
 {
   public:
-    ChangeRootDescriptor();
-    virtual ~ChangeRootDescriptor();
+    ChangeRootMWSTDescriptor();
+    virtual ~ChangeRootMWSTDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -1873,34 +1873,34 @@ class ChangeRootDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(ChangeRootDescriptor);
+Register_ClassDescriptor(ChangeRootMWSTDescriptor);
 
-ChangeRootDescriptor::ChangeRootDescriptor() : cClassDescriptor("inet::ChangeRoot", "cPacket")
+ChangeRootMWSTDescriptor::ChangeRootMWSTDescriptor() : cClassDescriptor("inet::ChangeRootMWST", "cPacket")
 {
 }
 
-ChangeRootDescriptor::~ChangeRootDescriptor()
+ChangeRootMWSTDescriptor::~ChangeRootMWSTDescriptor()
 {
 }
 
-bool ChangeRootDescriptor::doesSupport(cObject *obj) const
+bool ChangeRootMWSTDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<ChangeRoot *>(obj)!=NULL;
+    return dynamic_cast<ChangeRootMWST *>(obj)!=NULL;
 }
 
-const char *ChangeRootDescriptor::getProperty(const char *propertyname) const
+const char *ChangeRootMWSTDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int ChangeRootDescriptor::getFieldCount(void *object) const
+int ChangeRootMWSTDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 1+basedesc->getFieldCount(object) : 1;
 }
 
-unsigned int ChangeRootDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int ChangeRootMWSTDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1914,7 +1914,7 @@ unsigned int ChangeRootDescriptor::getFieldTypeFlags(void *object, int field) co
     return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
-const char *ChangeRootDescriptor::getFieldName(void *object, int field) const
+const char *ChangeRootMWSTDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1928,7 +1928,7 @@ const char *ChangeRootDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<1) ? fieldNames[field] : NULL;
 }
 
-int ChangeRootDescriptor::findField(void *object, const char *fieldName) const
+int ChangeRootMWSTDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -1936,7 +1936,7 @@ int ChangeRootDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *ChangeRootDescriptor::getFieldTypeString(void *object, int field) const
+const char *ChangeRootMWSTDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1950,7 +1950,7 @@ const char *ChangeRootDescriptor::getFieldTypeString(void *object, int field) co
     return (field>=0 && field<1) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *ChangeRootDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *ChangeRootMWSTDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1963,7 +1963,7 @@ const char *ChangeRootDescriptor::getFieldProperty(void *object, int field, cons
     }
 }
 
-int ChangeRootDescriptor::getArraySize(void *object, int field) const
+int ChangeRootMWSTDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1971,13 +1971,13 @@ int ChangeRootDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    ChangeRoot *pp = (ChangeRoot *)object; (void)pp;
+    ChangeRootMWST *pp = (ChangeRootMWST *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string ChangeRootDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string ChangeRootMWSTDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -1985,14 +1985,14 @@ std::string ChangeRootDescriptor::getFieldAsString(void *object, int field, int 
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    ChangeRoot *pp = (ChangeRoot *)object; (void)pp;
+    ChangeRootMWST *pp = (ChangeRootMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
         default: return "";
     }
 }
 
-bool ChangeRootDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool ChangeRootMWSTDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2000,14 +2000,14 @@ bool ChangeRootDescriptor::setFieldAsString(void *object, int field, int i, cons
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    ChangeRoot *pp = (ChangeRoot *)object; (void)pp;
+    ChangeRootMWST *pp = (ChangeRootMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
         default: return false;
     }
 }
 
-const char *ChangeRootDescriptor::getFieldStructName(void *object, int field) const
+const char *ChangeRootMWSTDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2020,7 +2020,7 @@ const char *ChangeRootDescriptor::getFieldStructName(void *object, int field) co
     };
 }
 
-void *ChangeRootDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *ChangeRootMWSTDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -2028,7 +2028,7 @@ void *ChangeRootDescriptor::getFieldStructPointer(void *object, int field, int i
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    ChangeRoot *pp = (ChangeRoot *)object; (void)pp;
+    ChangeRootMWST *pp = (ChangeRootMWST *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

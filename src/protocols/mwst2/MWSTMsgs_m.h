@@ -19,7 +19,7 @@ namespace inet {
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:18</tt> by nedtool.
  * <pre>
- * packet Hello
+ * packet HelloMWST
  * {
  *     string sender;
  *     int x;
@@ -27,7 +27,7 @@ namespace inet {
  * }
  * </pre>
  */
-class Hello : public ::cPacket
+class HelloMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
@@ -35,18 +35,18 @@ class Hello : public ::cPacket
     int y_var;
 
   private:
-    void copy(const Hello& other);
+    void copy(const HelloMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Hello&);
+    bool operator==(const HelloMWST&);
 
   public:
-    Hello(const char *name=NULL, int kind=0);
-    Hello(const Hello& other);
-    virtual ~Hello();
-    Hello& operator=(const Hello& other);
-    virtual Hello *dup() const {return new Hello(*this);}
+    HelloMWST(const char *name=NULL, int kind=0);
+    HelloMWST(const HelloMWST& other);
+    virtual ~HelloMWST();
+    HelloMWST& operator=(const HelloMWST& other);
+    virtual HelloMWST *dup() const {return new HelloMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -59,36 +59,36 @@ class Hello : public ::cPacket
     virtual void setY(int y);
 };
 
-inline void doPacking(cCommBuffer *b, Hello& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Hello& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, HelloMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, HelloMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:24</tt> by nedtool.
  * <pre>
- * packet Connect
+ * packet ConnectMWST
  * {
  *     string sender;
  * }
  * </pre>
  */
-class Connect : public ::cPacket
+class ConnectMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
 
   private:
-    void copy(const Connect& other);
+    void copy(const ConnectMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Connect&);
+    bool operator==(const ConnectMWST&);
 
   public:
-    Connect(const char *name=NULL, int kind=0);
-    Connect(const Connect& other);
-    virtual ~Connect();
-    Connect& operator=(const Connect& other);
-    virtual Connect *dup() const {return new Connect(*this);}
+    ConnectMWST(const char *name=NULL, int kind=0);
+    ConnectMWST(const ConnectMWST& other);
+    virtual ~ConnectMWST();
+    ConnectMWST& operator=(const ConnectMWST& other);
+    virtual ConnectMWST *dup() const {return new ConnectMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -97,38 +97,38 @@ class Connect : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Connect& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Connect& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, ConnectMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, ConnectMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:28</tt> by nedtool.
  * <pre>
- * packet Initiate
+ * packet InitiateMWST
  * {
  *     string fragmentId;
  *     string sender;
  * }
  * </pre>
  */
-class Initiate : public ::cPacket
+class InitiateMWST : public ::cPacket
 {
   protected:
     opp_string fragmentId_var;
     opp_string sender_var;
 
   private:
-    void copy(const Initiate& other);
+    void copy(const InitiateMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Initiate&);
+    bool operator==(const InitiateMWST&);
 
   public:
-    Initiate(const char *name=NULL, int kind=0);
-    Initiate(const Initiate& other);
-    virtual ~Initiate();
-    Initiate& operator=(const Initiate& other);
-    virtual Initiate *dup() const {return new Initiate(*this);}
+    InitiateMWST(const char *name=NULL, int kind=0);
+    InitiateMWST(const InitiateMWST& other);
+    virtual ~InitiateMWST();
+    InitiateMWST& operator=(const InitiateMWST& other);
+    virtual InitiateMWST *dup() const {return new InitiateMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -139,38 +139,38 @@ class Initiate : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Initiate& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Initiate& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, InitiateMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, InitiateMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:34</tt> by nedtool.
  * <pre>
- * packet Test
+ * packet TestMWST
  * {
  *     string fragmentId;
  *     string sender;
  * }
  * </pre>
  */
-class Test : public ::cPacket
+class TestMWST : public ::cPacket
 {
   protected:
     opp_string fragmentId_var;
     opp_string sender_var;
 
   private:
-    void copy(const Test& other);
+    void copy(const TestMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Test&);
+    bool operator==(const TestMWST&);
 
   public:
-    Test(const char *name=NULL, int kind=0);
-    Test(const Test& other);
-    virtual ~Test();
-    Test& operator=(const Test& other);
-    virtual Test *dup() const {return new Test(*this);}
+    TestMWST(const char *name=NULL, int kind=0);
+    TestMWST(const TestMWST& other);
+    virtual ~TestMWST();
+    TestMWST& operator=(const TestMWST& other);
+    virtual TestMWST *dup() const {return new TestMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -181,36 +181,36 @@ class Test : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Test& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Test& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, TestMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, TestMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:39</tt> by nedtool.
  * <pre>
- * packet Accept
+ * packet AcceptMWST
  * {
  *     string sender;
  * }
  * </pre>
  */
-class Accept : public ::cPacket
+class AcceptMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
 
   private:
-    void copy(const Accept& other);
+    void copy(const AcceptMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Accept&);
+    bool operator==(const AcceptMWST&);
 
   public:
-    Accept(const char *name=NULL, int kind=0);
-    Accept(const Accept& other);
-    virtual ~Accept();
-    Accept& operator=(const Accept& other);
-    virtual Accept *dup() const {return new Accept(*this);}
+    AcceptMWST(const char *name=NULL, int kind=0);
+    AcceptMWST(const AcceptMWST& other);
+    virtual ~AcceptMWST();
+    AcceptMWST& operator=(const AcceptMWST& other);
+    virtual AcceptMWST *dup() const {return new AcceptMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -219,36 +219,36 @@ class Accept : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Accept& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Accept& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, AcceptMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, AcceptMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:43</tt> by nedtool.
  * <pre>
- * packet Reject
+ * packet RejectMWST
  * {
  *     string sender;
  * }
  * </pre>
  */
-class Reject : public ::cPacket
+class RejectMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
 
   private:
-    void copy(const Reject& other);
+    void copy(const RejectMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Reject&);
+    bool operator==(const RejectMWST&);
 
   public:
-    Reject(const char *name=NULL, int kind=0);
-    Reject(const Reject& other);
-    virtual ~Reject();
-    Reject& operator=(const Reject& other);
-    virtual Reject *dup() const {return new Reject(*this);}
+    RejectMWST(const char *name=NULL, int kind=0);
+    RejectMWST(const RejectMWST& other);
+    virtual ~RejectMWST();
+    RejectMWST& operator=(const RejectMWST& other);
+    virtual RejectMWST *dup() const {return new RejectMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -257,38 +257,38 @@ class Reject : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Reject& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Reject& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, RejectMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, RejectMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:47</tt> by nedtool.
  * <pre>
- * packet Report
+ * packet ReportMWST
  * {
  *     int weight;
  *     string sender;
  * }
  * </pre>
  */
-class Report : public ::cPacket
+class ReportMWST : public ::cPacket
 {
   protected:
     int weight_var;
     opp_string sender_var;
 
   private:
-    void copy(const Report& other);
+    void copy(const ReportMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Report&);
+    bool operator==(const ReportMWST&);
 
   public:
-    Report(const char *name=NULL, int kind=0);
-    Report(const Report& other);
-    virtual ~Report();
-    Report& operator=(const Report& other);
-    virtual Report *dup() const {return new Report(*this);}
+    ReportMWST(const char *name=NULL, int kind=0);
+    ReportMWST(const ReportMWST& other);
+    virtual ~ReportMWST();
+    ReportMWST& operator=(const ReportMWST& other);
+    virtual ReportMWST *dup() const {return new ReportMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -299,36 +299,36 @@ class Report : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, Report& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, Report& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, ReportMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, ReportMWST& obj) {obj.parsimUnpack(b);}
 
 /**
  * Class generated from <tt>mwst2/MWSTMsgs.msg:52</tt> by nedtool.
  * <pre>
- * packet ChangeRoot
+ * packet ChangeRootMWST
  * {
  *     string sender;
  * }
  * </pre>
  */
-class ChangeRoot : public ::cPacket
+class ChangeRootMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
 
   private:
-    void copy(const ChangeRoot& other);
+    void copy(const ChangeRootMWST& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const ChangeRoot&);
+    bool operator==(const ChangeRootMWST&);
 
   public:
-    ChangeRoot(const char *name=NULL, int kind=0);
-    ChangeRoot(const ChangeRoot& other);
-    virtual ~ChangeRoot();
-    ChangeRoot& operator=(const ChangeRoot& other);
-    virtual ChangeRoot *dup() const {return new ChangeRoot(*this);}
+    ChangeRootMWST(const char *name=NULL, int kind=0);
+    ChangeRootMWST(const ChangeRootMWST& other);
+    virtual ~ChangeRootMWST();
+    ChangeRootMWST& operator=(const ChangeRootMWST& other);
+    virtual ChangeRootMWST *dup() const {return new ChangeRootMWST(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -337,8 +337,8 @@ class ChangeRoot : public ::cPacket
     virtual void setSender(const char * sender);
 };
 
-inline void doPacking(cCommBuffer *b, ChangeRoot& obj) {obj.parsimPack(b);}
-inline void doUnpacking(cCommBuffer *b, ChangeRoot& obj) {obj.parsimUnpack(b);}
+inline void doPacking(cCommBuffer *b, ChangeRootMWST& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, ChangeRootMWST& obj) {obj.parsimUnpack(b);}
 
 } // namespace inet
 

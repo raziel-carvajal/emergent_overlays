@@ -33,7 +33,7 @@ INET_LIBRARY_PATH=${INET_PATH}/out/gcc-debug/src/INET
 PROTOCOLS_LIBRARY=../../built/gcc-debug/protocols
 
 # specify my ned path. set of path where I can find ned files
-LOCAL_NED_PATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
+LOCAL_NED_PATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks/builtTopologies:../protocols/:../base
 
 
 echo "Executing : ${CONF_FILE}"

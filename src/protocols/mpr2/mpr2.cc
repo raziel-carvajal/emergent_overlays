@@ -42,31 +42,30 @@ Mpr2::handleMessageWhenUp(cMessage *msg){
             case START:
                 cout << "Calling my START \n";
                 ctrlMsg0->setKind(GET_2_HOPS_N);
-                scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
+                scheduleAt(simTime() + par("helloTime").doubleValue(), ctrlMsg0);
                 break;
             case GET_2_HOPS_N:
                 cout << "Calling Neigh.Neigh \n";
-                BroadcastingAppBase::Neighbor* neighs = new (nothrow) BroadcastingAppBase::Neighbor[neighbors.size()];
-                if (neighbors.size() != 0 && neighs != nullptr){
+                if (neighbors.size() != 0){
                     L3AddressResolver resolver;
                     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
                     typedef map<string, Neighbor>::iterator neigIt;
-                    int i = 0;
+                    stringstream ss;
                     for (neigIt ite = neighbors.begin(); ite != neighbors.end(); ite++){
-                        neighs[i].name = ite->first;
-                        neighs[i].addr = ((Neighbor) ite->second).addr;
-                        neighs[i].pos = ((Neighbor) ite->second).pos;
-                        neighs[i].w = ((Neighbor) ite->second).w;
-                        i++;
+                        ss << ite->first << '_' << ite->second.addr.str() << '_' <<
+                                ite->second.pos.x << '_' << ite->second.pos.y << '&';
                     }
                     mpr2::Neighbours* pck = new mpr2::Neighbours();
-                    pck->setNeighbours(neighs);
+                    pck->setNeighbours(ss.str().c_str());
                     pck->setEmitter(myself.c_str());
+                    cout << "Neighbors were sent: " << ss.str() << "\n";
                     socket.sendTo(pck, addr, remote_port);
-                } else
-                    cout << "No memory to send neighbors \n";
+                } else {
+                    cout << "I have no neighbors \n";
+                    return;
+                }
                 this->nr_hello_msg--;
-                if (this->nr_hello_msg) {
+                if (this->nr_hello_msg > 0) {
                     cout << "Another GET_2_HOP_N now and we still must send " << this->nr_hello_msg << " in " << myself << endl;
                     ctrlMsg0->setKind(GET_2_HOPS_N);
                     scheduleAt(simTime() + par("helloTime").doubleValue(), ctrlMsg0);
@@ -87,6 +86,7 @@ Mpr2::on_network_message_received(cPacket* pkt){
 void
 Mpr2::onNeigh(const mpr2::Neighbours* m){
     cout << "Calling onNeigh...";
+    cout << "Received string: " << m->getNeighbours();
 }
 
 void
@@ -185,4 +185,39 @@ Mpr2::processMessage(cPacket* pkt, void (Mpr2::*action)(const T* msg))
     }
 }
 
+map<string, string>
+Mpr2::splitString(string str, string delimiter){
+    map<string, string> v;
+    int i = 1;
+    size_t pos = 0;
+    string token;
+    while ((pos = str.find(delimiter)) != string::npos) {
+        token = str.substr(0, pos);
+        v.emplace(to_string(i), token);
+        str.erase(0, pos + delimiter.length());
+        i++;
+    }
+    return v;
+}
+
+map<string, BroadcastingAppBase::Neighbor>
+Mpr2::get2HopNe(string str){
+    map<string, string> neighs = splitString(str, "&");
+    map<string, string> attr;
+    Neighbor n;
+    size_t sz;
+    map<string, BroadcastingAppBase::Neighbor> r;
+    typedef map<string, string>::iterator strIt;
+    for (strIt ite = neighs.begin(); ite != neighs.end(); ite++){
+        attr = splitString(ite->second, "_");
+        n.name = attr.find("1")->second;
+        n.addr = getAddr(attr.find("2")->second);
+        n.pos.x = stod(attr.find("3")->second, &sz);
+        n.pos.x = stod(attr.find("4")->second, &sz);
+        r.emplace(n.name, n);
+    }
+    return r;
+}
+
 } //namespace
+

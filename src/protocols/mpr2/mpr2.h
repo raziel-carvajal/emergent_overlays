@@ -20,7 +20,6 @@
 #include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 
-//#include "mpr2.h"
 #include "mprMsgs_m.h"
 
 using namespace std;
@@ -53,6 +52,10 @@ protected:
     virtual void handleMessageWhenUp(cMessage *msg);
 
     virtual void onNeigh(const mpr2::Neighbours* m);
+
+    virtual map<string, string> splitString(string str, string delimiter);
+
+    virtual map<string, Neighbor> get2HopNe(string str);
 
     template <typename T> bool processMessage(cPacket* pkt, void (Mpr2::*action)(const T* msg));
 };

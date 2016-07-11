@@ -10,16 +10,14 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-cplusplus{{
-    #include "broadcasting/BroadcastingAppBase.h"
-    typedef inet::BroadcastingAppBase::Neighbor *NePo; 
-}};
+//cplusplus{{
+//    #include "inet/broadcasting/BroadcastingAppBase.h"
+//    typedef std::map<std::string, inet::BroadcastingAppBase::Neighbor> NeMap; 
+//}};
 
 namespace inet::mpr2;
 
-class noncobject NePo;
-
 packet Neighbours{
-	NePo neighbours;
+	string neighbours;
 	string emitter;
 }
