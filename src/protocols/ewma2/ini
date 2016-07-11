@@ -1,6 +1,6 @@
 description = "Broadcasting messages using EWMA2"
 
-repeat = 10
+repeat=4
 
 *.host*.udpApp[0].typename = "EWMA2"
 *.SOURCE.udpApp[0].is_source = true
