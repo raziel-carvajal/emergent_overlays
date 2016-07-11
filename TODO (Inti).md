@@ -34,9 +34,9 @@
 
 - Do we have an explanation for why this value decreases systematically with the number of nodes in the system for both protocols? [done]
 
-- cambiar quien inicia elk broadcast session
+- cambiar quien inicia el broadcast session
 
-- crear directorios cuando no existan (builtTopologies and builtConfigs)
+- crear directorios cuando no existan (builtTopologies and builtConfigs) [done]
 
 ===========================================
 
