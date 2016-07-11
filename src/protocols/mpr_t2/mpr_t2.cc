@@ -200,7 +200,7 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 	hops[0].insert(j);
 	hops_position[j] = make_pair(m->getX(), m->getY());
 
-	for (int l = 0 ; l < hops.size() ; l++) {
+	for (unsigned int l = 0 ; l < hops.size() ; l++) {
 		for (int i = 0 ; i < nr_hops ; i++) {
 			string name = m->getNeighbors(i);
 			int h = m->getHopLevels(i) + 1;
@@ -220,9 +220,9 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 	}
 
 	// Ok, clean the mess
-	for (int l = 0 ; l < hops.size() - 1 ; l++ ) {
+	for (unsigned int l = 0 ; l < hops.size() - 1 ; l++ ) {
 		for (auto& h : hops[l]) {
-			for (int l2 = l + 1; l2 < hops.size() ; l2++) {
+			for (unsigned int l2 = l + 1; l2 < hops.size() ; l2++) {
 				auto it = hops[l2].find(h);
 				if (it != hops[l2].end()) {
 					hops[l2].erase(it);
@@ -251,7 +251,7 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 set<string>
 Mpr_t2::get_hops_in_level(int l)
 {
-	if (l < 0 || l >= hops.size()) throw invalid_argument("Level is out of range");
+	if (l < 0 || l >= (int)hops.size()) throw invalid_argument("Level is out of range");
 	return hops[l];
 }
 
