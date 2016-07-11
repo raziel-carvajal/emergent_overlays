@@ -35,7 +35,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         std::string name;
         L3Address addr;
         Coord pos;
-        int w;
+        double w;
     };
   protected:
     enum ControlMessageTypes {
@@ -53,7 +53,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool is_source;
 
     // number of broadcast message to send
-    int nr_broadcast_msg;
+    double nr_broadcast_msg;
 
     // my direct edges (neighbors)
     std::map<std::string, Neighbor> neighbors;
@@ -71,7 +71,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     L3Address myAddress;
     // my position
     Coord position;
-    int radious;
+    double radious;
 
     // counter to assign ids to broadcast messages
     int last_id = 0;
@@ -94,12 +94,11 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool already_configured = false;
 
 
-
-    void configure_neighbors();
-
     void on_hello_received(const broadcasting::Hello* msg);
 
   protected:
+    
+    virtual void configure_neighbors();
 
     /* dond't touch these */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -113,10 +112,10 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     virtual void processStart();
 
-    template <typename K>
-    class Action {
-      void task(BroadcastingAppBase*, K*);
-    };
+    // template <typename K>
+    // class Action {
+    //   void task(BroadcastingAppBase*, K*);
+    // };
     template <typename T> bool processMessage(cPacket* pkt, void (BroadcastingAppBase::*action)(const T* msg));
 
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
@@ -133,9 +132,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     L3Address getAddr(std::string id);
 
-    void delay_broadcast(void* user_data); 
+    void delay_broadcast(void* user_data);
     void delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
-    void delayed_event(ControlMessageTypes type, const std::string& key, double delay);
+    void delayed_event(int type, const std::string& key, double delay);
 
     int get_next_id_for_msg();
     int get_last_id_for_msg();
@@ -143,7 +142,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     void initiateFlooding(std::string payload);
 
+    void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
+    void send_package(cPacket* m); // send a package to all neirby devices
 
   public:
     BroadcastingAppBase();

@@ -22,8 +22,8 @@ namespace inet {
  * packet HelloMWST
  * {
  *     string sender;
- *     int x;
- *     int y;
+ *     double x;
+ *     double y;
  * }
  * </pre>
  */
@@ -31,8 +31,8 @@ class HelloMWST : public ::cPacket
 {
   protected:
     opp_string sender_var;
-    int x_var;
-    int y_var;
+    double x_var;
+    double y_var;
 
   private:
     void copy(const HelloMWST& other);
@@ -53,10 +53,10 @@ class HelloMWST : public ::cPacket
     // field getter/setter methods
     virtual const char * getSender() const;
     virtual void setSender(const char * sender);
-    virtual int getX() const;
-    virtual void setX(int x);
-    virtual int getY() const;
-    virtual void setY(int y);
+    virtual double getX() const;
+    virtual void setX(double x);
+    virtual double getY() const;
+    virtual void setY(double y);
 };
 
 inline void doPacking(cCommBuffer *b, HelloMWST& obj) {obj.parsimPack(b);}
@@ -265,7 +265,7 @@ inline void doUnpacking(cCommBuffer *b, RejectMWST& obj) {obj.parsimUnpack(b);}
  * <pre>
  * packet ReportMWST
  * {
- *     int weight;
+ *     double weight;
  *     string sender;
  * }
  * </pre>
@@ -273,7 +273,7 @@ inline void doUnpacking(cCommBuffer *b, RejectMWST& obj) {obj.parsimUnpack(b);}
 class ReportMWST : public ::cPacket
 {
   protected:
-    int weight_var;
+    double weight_var;
     opp_string sender_var;
 
   private:
@@ -293,8 +293,8 @@ class ReportMWST : public ::cPacket
     virtual void parsimUnpack(cCommBuffer *b);
 
     // field getter/setter methods
-    virtual int getWeight() const;
-    virtual void setWeight(int weight);
+    virtual double getWeight() const;
+    virtual void setWeight(double weight);
     virtual const char * getSender() const;
     virtual void setSender(const char * sender);
 };

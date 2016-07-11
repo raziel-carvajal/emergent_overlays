@@ -20,10 +20,10 @@ import inet.applications.contract.IUDPApp;
 import broadcasting.BroadcastingBase;
 
 //
-// This module is an application that implement the Gossip protocol
+// This module is an application that implement the EWMA protocol
 // to disseminate messages.
 //
-// Some nodes distribute messages in the network using unicast UDP.
+// Some nodes distribute messages in the network using unicast/broadcast UDP.
 //
 simple EWMA2 extends BroadcastingBase like IUDPApp
 {
@@ -35,8 +35,11 @@ simple EWMA2 extends BroadcastingBase like IUDPApp
         int T_corr @unit(s) = default(T_max/3);
         int T_act @unit(s) = default(T_max/3);
 
-        // horrible hack to specify (by hand) the neighbors in the MST
-        string mst = default("");
+        bool spontaneously_awaken = default(true);
+
+        double spontaneously_awake_time @unit(s) = default(maximumDelay*(nr_hello_messages + 1));
+
+        double mwst_display_time @unit(s) = default(80s); // at this point we must show the built MWST
 
         @class(inet::EWMA2);
 }

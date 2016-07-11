@@ -36,7 +36,7 @@ simple BroadcastingBase
         // say if this node is the source of a broadcast
         bool is_source = default(false);
         int nr_broadcast_msg = default(is_source? 1:0);
-        volatile double wakeUpTime @unit(s) = is_source? uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)) : 1000000s;
+        double wakeUpTime @unit(s) = default(uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)));
         double intervalBroadcastTime @unit(s) = default(0.5s);
 
 

@@ -1,4 +1,3 @@
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -11,53 +10,36 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+cplusplus{{
+    #include "broadcasting/BroadcastingAppBase.h"
+    typedef inet::BroadcastingAppBase::Neighbor *NePo; 
+}};
 
-cplusplus {{
-#include "broadcasting/BroadcastingAppBase_m.h"
-using inet::broadcasting::Broadcast;
-}}
+namespace inet::mpr_t2;
 
-packet inet::broadcasting::Broadcast;
+class noncobject NePo;
 
-namespace inet::ewma;
-
-packet EWMABroadcast extends inet::broadcasting::Broadcast {
-	string covered[];
-}
-
-packet ConnectMWST {
-    string sender;
-}
-
-packet InitiateMWST {
-	string fragmentId;
+packet Neighbors {
+	string neighbors[];
+	int hopLevels[];
+	double xs[];
+	double ys[];
+	int maxHopLevel;
 	string sender;
+	double x;
+	double y;
 }
 
-packet TestMWST {
-	string fragmentId;
+// Used to request the hops of a node
+// the max_hop_value must be >= 0
+packet RequestNeighbors {
 	string sender;
+	int maxHopLevel;
+	double x;
+	double y;
 }
 
-packet AcceptMWST {
-    string sender;
-}
-
-packet RejectMWST {
-    string sender;
-}
-
-packet ReportMWST {
-	double weight;
+packet MprFound {
 	string sender;
-}
-
-packet ChangeRootMWST {
-    string sender;
-}
-
-packet InNewFragment {
-	string sender;
-	string fragmentId;
+	string inMpr[];
 }

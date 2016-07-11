@@ -73,9 +73,6 @@ Abba2::on_payload_received(const Broadcast* m) {
 
     if (firstTime) {
         payloads[key] = m->getPayload();
-        // unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        // std::minstd_rand0 generator (seed); // minstd_rand0 is a standard linear_congruential_engine
-        // std::uniform_real_distribution<double> distribution(0.1,0.5);
         delayed_broadcast(key, uniform(0.1, 0.5));
     }
 }

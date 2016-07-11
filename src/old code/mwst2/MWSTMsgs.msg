@@ -13,17 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-cplusplus {{
-#include "broadcasting/BroadcastingAppBase_m.h"
-using inet::broadcasting::Broadcast;
-}}
+namespace inet;
 
-packet inet::broadcasting::Broadcast;
-
-namespace inet::ewma;
-
-packet EWMABroadcast extends inet::broadcasting::Broadcast {
-	string covered[];
+packet HelloMWST {
+  string sender;
+	double x;
+	double y;
 }
 
 packet ConnectMWST {
@@ -34,6 +29,7 @@ packet InitiateMWST {
 	string fragmentId;
 	string sender;
 }
+
 
 packet TestMWST {
 	string fragmentId;
@@ -55,9 +51,4 @@ packet ReportMWST {
 
 packet ChangeRootMWST {
     string sender;
-}
-
-packet InNewFragment {
-	string sender;
-	string fragmentId;
 }

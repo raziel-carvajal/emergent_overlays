@@ -41,9 +41,9 @@ echo "Ned path: ${LOCAL_NED_PATH}"
 echo "Inet Library: ${INET_LIBRARY_PATH}"
 echo "Protocols: ${PROTOCOLS_LIBRARY}"
 echo "Config File: ${CONF_FILE}"
-echo "Executing command: ${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
+echo "Executing command: ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
 
-${OMNET} -u Cmdenv -r 0 -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
+${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
 if [ $r -ne 0 ]; then
 	exit 1
@@ -54,12 +54,24 @@ DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
 PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $10 }'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
-results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/${CONF_NAME} ${simulation_time} | grep average_values`
-echo $results
 
-coverage=`echo ${results} | awk '{print $3}'`	
-broadcast_time=`echo ${results} | awk '{print $4}'`
-power_consumption=`echo ${results} | awk '{print $5}'`
-duplicated_messages=`echo ${results} | awk '{print $6}'`
+count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
-echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages}" >> ../../results/summary.csv
+echo "Checking ${count} repetitions"
+
+count=$(($count-1))
+
+for i in $(seq 0 ${count}); do
+
+	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} | grep average_values`
+	echo "Repetition $i"
+	echo $results
+
+	coverage=`echo ${results} | awk '{print $3}'`	
+	broadcast_time=`echo ${results} | awk '{print $4}'`
+	power_consumption=`echo ${results} | awk '{print $5}'`
+	duplicated_messages=`echo ${results} | awk '{print $6}'`
+
+	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages}" >> ../../results/summary.csv
+
+done

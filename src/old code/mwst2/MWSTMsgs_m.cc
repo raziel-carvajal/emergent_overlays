@@ -113,22 +113,38 @@ void HelloMWST::setSender(const char * sender)
     this->sender_var = sender;
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 int HelloMWST::getX() const
+=======
+double HelloMWST::getX() const
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     return x_var;
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 void HelloMWST::setX(int x)
+=======
+void HelloMWST::setX(double x)
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     this->x_var = x;
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 int HelloMWST::getY() const
+=======
+double HelloMWST::getY() const
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     return y_var;
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 void HelloMWST::setY(int y)
+=======
+void HelloMWST::setY(double y)
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     this->y_var = y;
 }
@@ -235,8 +251,8 @@ const char *HelloMWSTDescriptor::getFieldTypeString(void *object, int field) con
     }
     static const char *fieldTypeStrings[] = {
         "string",
-        "int",
-        "int",
+        "double",
+        "double",
     };
     return (field>=0 && field<3) ? fieldTypeStrings[field] : NULL;
 }
@@ -279,8 +295,8 @@ std::string HelloMWSTDescriptor::getFieldAsString(void *object, int field, int i
     HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getSender());
-        case 1: return long2string(pp->getX());
-        case 2: return long2string(pp->getY());
+        case 1: return double2string(pp->getX());
+        case 2: return double2string(pp->getY());
         default: return "";
     }
 }
@@ -296,8 +312,8 @@ bool HelloMWSTDescriptor::setFieldAsString(void *object, int field, int i, const
     HelloMWST *pp = (HelloMWST *)object; (void)pp;
     switch (field) {
         case 0: pp->setSender((value)); return true;
-        case 1: pp->setX(string2long(value)); return true;
-        case 2: pp->setY(string2long(value)); return true;
+        case 1: pp->setX(string2double(value)); return true;
+        case 2: pp->setY(string2double(value)); return true;
         default: return false;
     }
 }
@@ -1589,12 +1605,20 @@ void ReportMWST::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->sender_var);
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 int ReportMWST::getWeight() const
+=======
+double ReportMWST::getWeight() const
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     return weight_var;
 }
 
+<<<<<<< HEAD:src/protocols/mwst2/MWSTMsgs_m.cc
 void ReportMWST::setWeight(int weight)
+=======
+void ReportMWST::setWeight(double weight)
+>>>>>>> 06d662ce78b092f9cb513bf7ecc3768056a29450:src/old code/mwst2/MWSTMsgs_m.cc
 {
     this->weight_var = weight;
 }
@@ -1707,7 +1731,7 @@ const char *ReportMWSTDescriptor::getFieldTypeString(void *object, int field) co
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
-        "int",
+        "double",
         "string",
     };
     return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
@@ -1750,7 +1774,7 @@ std::string ReportMWSTDescriptor::getFieldAsString(void *object, int field, int 
     }
     ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getWeight());
+        case 0: return double2string(pp->getWeight());
         case 1: return oppstring2string(pp->getSender());
         default: return "";
     }
@@ -1766,7 +1790,7 @@ bool ReportMWSTDescriptor::setFieldAsString(void *object, int field, int i, cons
     }
     ReportMWST *pp = (ReportMWST *)object; (void)pp;
     switch (field) {
-        case 0: pp->setWeight(string2long(value)); return true;
+        case 0: pp->setWeight(string2double(value)); return true;
         case 1: pp->setSender((value)); return true;
         default: return false;
     }

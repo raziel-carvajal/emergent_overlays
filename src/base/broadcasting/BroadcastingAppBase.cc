@@ -84,7 +84,9 @@ BroadcastingAppBase::initialize(int stage)
             if (is_source && nr_broadcast_msg > 0) {
                 cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
                 ctrlWakeup->setKind( WAKEUP);
-                scheduleAt(par("wakeUpTime").doubleValue() + simTime(), ctrlWakeup);
+                double d = par("wakeUpTime").doubleValue();
+                cerr << "Broadcasting sessions will star at " << (d) << endl;
+                scheduleAt(d, ctrlWakeup);
             }
 
             break;
@@ -119,20 +121,21 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
-                    cout << "Another hello now and we still must send " << this->nr_hello_msg << " in " << myself << endl;
                     ctrlMsg0->setKind(SAY_HELLO);
                     scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
                 }
                 break;
             case WAKEUP:
                 configure_neighbors();
-                this->time_to_broadcast_payload(nullptr);
                 cancelAndDelete(msg);
-                nr_broadcast_msg--;
+                if (is_source) {
+                  this->time_to_broadcast_payload(nullptr);
+                }
                 if (is_source && nr_broadcast_msg > 0) {
-                    cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
-                    ctrlWakeup->setKind( WAKEUP);
-                    scheduleAt(par("intervalBroadcastTime").doubleValue() + simTime(), ctrlWakeup);
+                  nr_broadcast_msg--;
+                  cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
+                  ctrlWakeup->setKind( WAKEUP);
+                  scheduleAt(simTime() + par("intervalBroadcastTime").doubleValue(), ctrlWakeup);
                 }
                 break;
             case BROADCAST_DELAY:
@@ -192,7 +195,6 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
     bool done = processMessage<Hello>(pkt, &BroadcastingAppBase::on_hello_received);
 
     if (!done) {
-        configure_neighbors();
         done = processMessage<Broadcast>(pkt, &BroadcastingAppBase::on_payload_received) ||
                processMessage<FloodingMessage>(pkt, &BroadcastingAppBase::on_flooding_received);
     }
@@ -214,7 +216,7 @@ bool
 BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     ctrlMsg0->setKind(START);
-    scheduleAt(simTime() + 0.01, ctrlMsg0);
+    scheduleAt(simTime() + 0.001, ctrlMsg0);
     return true;
 }
 
@@ -273,11 +275,11 @@ BroadcastingAppBase::configure_neighbors()
     // print (debug)
     if (!already_configured && neighbors.size() > 0) {
         already_configured = true;
-        EV_DEBUG << "EDGES " << myself << " =>  \n";
-        cerr << "EDGES " << myself << " =>  \n";
+        EV_DEBUG << "Configure EDGES " << myself << " =>  \n";
+        cerr << "Configure EDGES " << myself << "(" << simTime() << ")  => " << endl;
         for (auto& i : neighbors) {
-            EV_DEBUG << "\t" << i.second.name  << " with cost " << i.second.name << "\n";
-            cerr << "\t" << i.second.name  << " with cost " << i.second.name << "\n";
+            EV_DEBUG << "\t" << i.second.name  << " with cost " << i.second.w << "\n";
+            cerr << "\t" << i.second.name  << " with cost " << i.second.w << "\n";
         }
     }
 }
@@ -301,6 +303,10 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 
     // add coordinates
     auto it = neighbors.find(msg->getSender());
+	if (myself == msg->getSender())
+			return;
+
+
     if (it == neighbors.end()) {
         EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
 
@@ -310,12 +316,10 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
         node.pos.x = msg->getX();
         node.pos.y = msg->getY();
 
-        int d = (position.x - msg->getX())*(position.x - msg->getX())
+        node.w = (position.x - msg->getX())*(position.x - msg->getX())
                                 + (position.y - msg->getY())*(position.y - msg->getY());
 
-        node.w = d;
-
-        neighbors.emplace(node.name, node);
+        neighbors[node.name] = node;
     }
 
 }
@@ -413,7 +417,7 @@ void BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
 
 
 void
-BroadcastingAppBase::delayed_event(ControlMessageTypes type, const std::string& data, double delay)
+BroadcastingAppBase::delayed_event(int type, const std::string& data, double delay)
 {
     cMessage* mm = new cMessage("some delay");
     mm->setContextPointer(strdup(data.c_str()));
@@ -426,6 +430,21 @@ string
 BroadcastingAppBase::createUniqueBroadcastingSessionId()
 {
     return myself + "-" + to_string(get_next_id_for_msg());
+}
+
+
+void
+BroadcastingAppBase::send_package(cPacket* m, std::string dst)
+{
+  auto addr = getAddr(dst);
+  socket.sendTo(m, addr, remote_port);
+}
+
+
+void
+BroadcastingAppBase::send_package(cPacket* m)
+{
+  send_package(m, "255.255.255.255");
 }
 
 

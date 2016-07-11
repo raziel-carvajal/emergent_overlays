@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem )
+COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem bison )
 
 for C in "${COMMANDS[@]}"; do
    printf "Checking if $C is installed: "
@@ -31,7 +31,15 @@ iniCommon='../../experiments/configs/common.ini'
 
 Tx=`grep 'maxCommunicationRange' $iniCommon | grep -Eo '[0-9]{1,5}'`
 printf "Building topologies with transmission range: $Tx\n"
+
+# Tx is the radius of communication (not the diameter)
+
 #rm -fr $tPath'*.ned'
+
+if [ ! -d "$tPath" ]; then
+	mkdir "${tPath}"
+fi
+
 
 ls $tPath/*.ned 2>/dev/null
 isEmpty=$?
@@ -52,6 +60,13 @@ printf "Building configurations (ini files) per algorithm and per topology\n"
 # experiments/configs/builtConfigs
 pPath='../protocols/'
 cPath='../../experiments/configs/builtConfigs/'
+
+
+if [ ! -d "$cPath" ]; then
+	mkdir "${cPath}"
+fi
+
+
 here=`pwd`
 cd $pPath
 protocols=`ls -d */`
@@ -64,18 +79,18 @@ for t in $topologiesFiles; do
     index=$(( ${#t} - 4 ))
     tName=${t:0:$index}
     for p in $protocols; do
-		pp="${pPath}$p"
-		if [ -d $pp ]; then
-            s=$(( ${#p} - 1))
-            p=${p:0:$s}
-			tId=$tName$p
-			cat $iniCommon >$tId
-			echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
-			cat $pPath$p'/ini' >>$tId
-			sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
-			mv $tId $tId'.ini'
-			mv $tId'.ini' $cPath
-		fi
+	pp="${pPath}$p"
+	if [ -d $pp ]; then
+        	s=$(( ${#p} - 1))
+        	p=${p:0:$s}
+		tId=$tName$p
+		cat $iniCommon >$tId
+		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
+		cat $pPath$p'/ini' >>$tId
+		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+		mv $tId $tId'.ini'
+		mv $tId'.ini' $cPath
+	fi
     done
 done
 # TODO figure out why there is a file *-e
@@ -83,4 +98,7 @@ rm -fr n-*
 printf "Ok\n"
 
 # installing omnetpp package for R if needed
-sudo Rscript checking-depencencies.R
+install_r_dependencies=`Rscript checking-depencencies.R | awk '{ print $2 }'`
+if [ "$install_r_dependencies" == "fail" ]; then
+	sudo Rscript installing-dependencies.R
+fi
