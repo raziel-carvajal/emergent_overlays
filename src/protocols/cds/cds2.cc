@@ -33,7 +33,7 @@ using inet::BroadcastingAppBase;
 
 using inet::cds2::Neighbors;
 using inet::cds2::RequestNeighbors;
-using inet::cds2::MprFound;
+using inet::cds2::MarkerChanged;
 
 namespace inet {
 
@@ -168,26 +168,19 @@ CDS2::on_network_message_received(cPacket* pkt){
     return BroadcastingAppBase::on_network_message_received(pkt) ||
             processMessage2<Neighbors>(pkt, &CDS2::on_neighbors) ||
 			processMessage2<RequestNeighbors>(pkt, &CDS2::on_request_neighbors) ||
-			processMessage2<MprFound>(pkt, &CDS2::on_mpr_found);
+			processMessage2<MarkerChanged>(pkt, &CDS2::on_marker_changed);
 			;
 }
 
 
 
 void
-CDS2::on_mpr_found(const cds2::MprFound* m)
+CDS2::on_marker_changed(const cds2::MarkerChanged* m)
 {
-	if (marker) return;
 
-	int n = m->getInMprArraySize();
-	for (int i = 0 ; i < n ; i++) {
-		string j = m->getInMpr(i);
-		if (j == myself) {
-			marker = true;
-			cerr << myself << ": YESSSSSS, I am in MPR :-)" << endl;
-			return;
-		}
-	}
+	string u = m->getSender();
+	markers[u] = m->getMarker();
+
 }
 
 
