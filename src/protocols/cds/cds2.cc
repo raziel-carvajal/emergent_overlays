@@ -325,6 +325,7 @@ CDS2::request_hops(int h)
 void
 CDS2::initialize_marker()
 {
+	/* setip initial markers */
 	marker = any_of(hops[0].begin(), hops[0].end(), [&] (string v) {
 
 		bool a = any_of(hops[0].begin(), hops[0].end(), [&](string u){
@@ -334,6 +335,30 @@ CDS2::initialize_marker()
 		return a;		
 	});
 
+	cerr << myself << ": marker = " << marker << endl;
+
+	if (marker) {
+
+		/* apply rule 1 to reduce the number of nodes with markers */
+		string v = myself;
+		set<string> N_v (hops[0].begin(), hops[0].end());
+		N_v.insert(v);
+
+		marker = !any_of(hops[0].begin(), hops[0].end(), [&] (string u) { 
+
+			set<string> N_u (N[u].begin(), N[u].end());
+			N_u.insert(u);
+
+			bool b = (v < u) && includes(N_u.begin(), N_u.end(), N_v.begin(), N_v.end());
+
+			if (b) {
+				cerr << "FOUNNNNNNNNND v = " << v << ", u = " << u << endl;
+			}
+
+			return b;
+		});
+	}
+	
 	cerr << myself << ": marker = " << marker << endl;
 }
 
