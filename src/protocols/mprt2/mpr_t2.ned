@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package mpr_t2;
+package mprt2;
 
 import inet.applications.contract.IUDPApp;
 import broadcasting.BroadcastingBase;
