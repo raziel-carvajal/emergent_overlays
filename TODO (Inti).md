@@ -50,6 +50,10 @@
 
 - it is weird the behavior of ewma in terms of duplicated messsages vs energy level. It shouldn't be like that because it is having more dupplicated messages
 
+- write down -- in the paper -- a description of each protocol and how it was evaluated. Try to highlight the difference in evaluation and how they performance was compared
+
+- write down -- in the paper -- a first draft of the experimental setup. The idea is to find evaluate the same protocols using those conditions and other conditions. We also hope that they were evaluated using different conditions. This will serve as a hint for us regarding how we should evaluate them.
+
 ===========================================
 
 
