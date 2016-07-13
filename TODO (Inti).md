@@ -20,23 +20,35 @@
 
 - las redes no estan conectadas [done]
 
-- unify todos los mensajes enviados con retardo
+- unify todos los mensajes enviados con retardo [done]
 
-- crear repo para la otra cosa
+- crear repo para la otra cosa [done]
 
-- copiar capitulos en repo
+- copiar capitulos en repo [done]
 
-- mandar correo a Johann
+- mandar correo a Johann [done]
 
 - arreglar todos los ini [done]
 
-- ejecutar cada experimento con 5 semillas diferentes
+- ejecutar cada experimento con 5 semillas diferentes [done]
 
 - Do we have an explanation for why this value decreases systematically with the number of nodes in the system for both protocols? [done]
 
 - cambiar quien inicia el broadcast session
 
 - crear directorios cuando no existan (builtTopologies and builtConfigs) [done]
+
+- try with initial battery level = 50J [done]
+
+- take interference into account [done]
+
+- try the same number of nodes with all densities
+
+- build table of winners [done]
+
+- check in the papers what properties/behavior each protocol should have
+
+- it is weird the behavior of ewma in terms of duplicated messsages vs energy level. It shouldn't be like that because it is having more dupplicated messages
 
 ===========================================
 
