@@ -7,7 +7,7 @@ repeat=4
 *.SOURCE.udpApp[0].nr_broadcast_msg = 300
 *.SOURCE.udpApp[0].wakeUpTime = 20s
 
-*.host*.energyStorage.nominalCapacity = 500J
+*.host*.energyStorage.nominalCapacity = 50J
 
 
 *.host*.udpApp[0].nr_hello_messages = 5

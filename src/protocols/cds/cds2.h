@@ -62,22 +62,22 @@ private:
 		return (r);
 	}
 
-    /* payload of the message to broadcast */
-    map< string, string >  payloads;
+	/* payload of the message to broadcast */
+	map< string, string >  payloads;
 
-    virtual void on_payload_received(const broadcasting::Broadcast* m) override;
-    virtual void time_to_broadcast_payload(void* user_data) override;
+	virtual void on_payload_received(const broadcasting::Broadcast* m) override;
+	virtual void time_to_broadcast_payload(void* user_data) override;
 
-    void send_message(string& key);
+	void send_message(string& key);
 
-    virtual bool on_network_message_received(cPacket* pkt) override;
+	virtual bool on_network_message_received(cPacket* pkt) override;
 
-    virtual void on_neighbors(const cds2::Neighbors* m);
+	virtual void on_neighbors(const cds2::Neighbors* m);
 	virtual void on_request_neighbors(const cds2::RequestNeighbors* m);
-	virtual void on_mpr_found(const cds2::MprFound* m);
+	virtual void on_marker_changed(const cds2::MarkerChanged* m);
 
 
-    template <typename T> bool processMessage2(cPacket* pkt, void (CDS2::*action)(const T* msg));
+	template <typename T> bool processMessage2(cPacket* pkt, void (CDS2::*action)(const T* msg));
 
 	void request_hops(int h);
 

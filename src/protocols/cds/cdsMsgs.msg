@@ -38,7 +38,7 @@ packet RequestNeighbors {
 	double y;
 }
 
-packet MprFound {
+packet MarkerChanged {
 	string sender;
-	string inMpr[];
+	bool marker;
 }

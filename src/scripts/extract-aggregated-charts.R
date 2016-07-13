@@ -26,8 +26,9 @@ if (length(args) == 2) {
 	# enumarate metrics
 	metrics <- c("Coverage", "Broadcasting Time", "Power Level", "Duplicated Messages")
 	col_idx <- c(5, 6, 7, 8)
+	col_factor <- c(0.1, 0.1, 0.005, 0.1)
 	
-	m.to.col <- data.frame( m = metrics, c = col_idx )
+	m.to.col <- data.frame( m = metrics, c = col_idx, f = col_factor )
 
 	for (m in metrics) {
 
@@ -35,6 +36,7 @@ if (length(args) == 2) {
 		layout(m_layout, heights=c(0.8,0.8,0.8))
 		# get column name
 		cn <- m.to.col[ m.to.col$m == m ,]$c
+		factor <- m.to.col[ m.to.col == m, ]$f
 
 		# plot
 		for (d in densities) {
@@ -42,7 +44,7 @@ if (length(args) == 2) {
 			mi <- min(d[[cn]])
 			ma <- max(d[[cn]])
 
-			yrange <- c(mi - 0.1*mi, ma + 0.1*ma )
+			yrange <- c(mi - factor*mi, ma + factor*ma )
 			par(mai = c(0.7,0.6,1.2,0.6))	
 			for (p in unique(d$V2)) {
 				nr_nodes <- unique(d[ d$V2 == p, ]$V3)
