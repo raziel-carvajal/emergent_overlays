@@ -51,7 +51,7 @@ fi
 
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
-PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $10 }'`
+PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 
