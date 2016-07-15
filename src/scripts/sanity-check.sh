@@ -49,7 +49,7 @@ if [ $isEmpty -ne 0 ]; then
     ./doTopologies.sh $Tx 2 6 $tPath
     state=$?
     if [ $state -ne 0 ]; then
-        echo >&2 "Error: the construction of topologies was not done correctely. Aborting."; exit 1;
+        echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
     fi
     printf "Ok\n"
 else

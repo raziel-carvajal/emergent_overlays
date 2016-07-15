@@ -17,8 +17,7 @@ if [ ! -d $dst ]; then
 fi
 
 
-for (( CNTR=$loB; CNTR<=$upB; CNTR+=1 )); do
-  let layoutLen=tx*CNTR
-  python buildTopology.py $tx $layoutLen
-done
+
+python buildTopology.py $tx $loB $upB
+
 mv *.ned $dst
