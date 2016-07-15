@@ -5,7 +5,7 @@ repeat=4
 *.host*.udpApp[0].typename = "Mpr_t2"
 *.SOURCE.udpApp[0].is_source = true
 *.SOURCE.udpApp[0].nr_broadcast_msg = 300
-*.SOURCE.udpApp[0].wakeUpTime = 25s
+*.SOURCE.udpApp[0].wakeUpTime = 20s
 
 *.host*.energyStorage.nominalCapacity = 50J
 
