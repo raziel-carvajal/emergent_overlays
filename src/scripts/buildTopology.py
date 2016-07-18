@@ -1,8 +1,9 @@
-#===============================================================================
+# =============================================================================
 #
 #          FILE: buildTopology.py
 #
-#         USAGE: python buildTopology.py nodes transmissionRange layoutSize topologyFile
+#         USAGE: python buildTopology.py nodes transmissionRange layoutSize
+#                topologyFile
 #
 #   DESCRIPTION:
 #
@@ -14,7 +15,8 @@
 #  ORGANIZATION:
 #       CREATED: 06/22/16 19:37
 #      REVISION:  ---
-#===============================================================================
+# =============================================================================
+
 import sys
 import random
 import math
@@ -80,9 +82,7 @@ def is_network_connected(pos, tx, density):
                 if d < tx*tx:
                     g.add_edge(i, j)
                     c = c + 1
-#if c > density * 1.5:
-# 1.5 means that if a node is connected to 1.5 times other nodes, it is still Ok
-#    return False
+
     return nx.is_connected(g)
 
 
@@ -103,9 +103,9 @@ def fillSurface(Tx, tilesWidth, tilesHeight, d_name):
                 topologies[d_name].append(pos[l])
 
 
-def createNedFile(denType, pos, layoutSizeW, layoutSizeH, Tx):
+def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
     global NED_HEADER, NED_HEADER1
-    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH)
+    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, idx)
 
     f = open(fileName + '.ned', 'w')
 
@@ -162,17 +162,18 @@ if __name__ == '__main__':
 
             print(expected, seem, v1, v2)
             print "Building topologies for an area of ({0}, {1}) and  range tx={2}".format(trRan*v1, trRan*v2, trRan)
-            
-            fillSurface(trRan, v1, v2, d_name)
-            cleanTopology(topologies[d_name], seem - expected)
-            while not all(is_network_connected(topologies[d_name], trRan, i) for k in topologies):
+
+            # create many topologies with the same features but different
+            # positions for the nodes
+
+            for index in range(0, 3):
                 fillSurface(trRan, v1, v2, d_name)
-                cleanTopology(topologies[d_name], seem - expected)
+            	cleanTopology(topologies[d_name], seem - expected)
+                while not is_network_connected(topologies[d_name], trRan, i):
+                    fillSurface(trRan, v1, v2, d_name)
+                    cleanTopology(topologies[d_name], seem - expected)
 
-
-            print "Writing NED file"
-            createNedFile(d_name, topologies[d_name], v1*trRan, v2*trRan, trRan)
+                print "Writing NED file"
+                createNedFile(d_name, topologies[d_name], index, v1*trRan, v2*trRan, trRan)
 
     print "Done"
-
-

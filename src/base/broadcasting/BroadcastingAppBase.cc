@@ -70,6 +70,7 @@ BroadcastingAppBase::initialize(int stage)
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
             {
                 cModule* host = getContainingNode(this);
+
                 IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
                 physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
 
@@ -77,6 +78,13 @@ BroadcastingAppBase::initialize(int stage)
                 this->radious = transmitter->getMaxCommunicationRange().get();
 
                 EV_TRACE << "My position is " << this->position  << "\n";
+
+                bool is_center = host->par("isCenter").boolValue();
+                if (is_center) {
+                  is_source = true;
+                  cerr << getParentModule()->getName() << "=========================================== is center " << is_center << endl;
+                }
+
             }
             break;
         case INITSTAGE_LAST:
