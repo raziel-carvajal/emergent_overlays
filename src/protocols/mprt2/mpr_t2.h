@@ -43,6 +43,8 @@ private:
 	};
 
 	int nr_hops_required = 2;
+	int builtMprCounter;
+	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
 
 	array< set<string>, 5 > hops;
 	array< bool, 5> hops_built;

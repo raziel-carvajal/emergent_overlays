@@ -54,7 +54,8 @@ void
 Mpr_t2::processStart()
 {
 	BroadcastingAppBase::processStart();
-
+	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
+	builtMprCounter = stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
 	bool b = par("build_hops").boolValue();
 
 	if (b) {
@@ -147,9 +148,14 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 				break;
 			case WAKEUP_HOPS_REQUESTER:
 				{
-					int n = par("hops_required");
-					cerr << myself << ": Wakeup to build hops " << endl;	
-					request_hops(n-1);
+				    cerr << "BuiltMprCounter :: " << builtMprCounter << endl;
+				    if(builtMprCounter > 0){
+				        builtMprCounter--;
+				        int n = par("hops_required");
+				        cerr << myself << ": Wakeup to build hops, number of builds left: " << builtMprCounter << endl;
+				        request_hops(n-1);
+				        delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
+				    }
 				}
 				cancelAndDelete(msg);
 				break;
