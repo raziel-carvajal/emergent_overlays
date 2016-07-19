@@ -76,9 +76,19 @@ Dist2Mean2::send_message(string& key)
         my /= received_from[key].size();
     }
 
-    double dist = (mx - position.x)*(mx - position.x) + (my - position.y)*(my - position.y);
+    double dist = sqrt((mx - position.x)*(mx - position.x) + (my - position.y)*(my - position.y));
 
-    must_send = must_send || dist > par("threshold").doubleValue();
+	double norm_d = dist / radious;
+
+
+	int n = 4;
+	if (neighbors.size() > 0) {
+		n = neighbors.size();
+	}
+
+	double t_c = 0.95 - 0.7 * exp(-0.11*n);
+
+    must_send = must_send || norm_d > t_c;
 
     if (must_send) {
 
