@@ -54,6 +54,20 @@
 
 - write down -- in the paper -- a first draft of the experimental setup. The idea is to find evaluate the same protocols using those conditions and other conditions. We also hope that they were evaluated using different conditions. This will serve as a hint for us regarding how we should evaluate them.
 
+- create a table for classifiers
+
+- classify
+
+- use anohter radio model
+
+- implement other protocols
+
+- add another metric to measure network bandwidth
+
+- add mobility
+
+- fix redundant data in aggregated charts [done]
+
 ===========================================
 
 
