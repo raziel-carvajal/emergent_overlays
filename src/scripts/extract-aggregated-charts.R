@@ -8,6 +8,10 @@ if (length(args) == 2) {
 	# sort base on the numbert of nodes
 	A <- A[order(A$V3), ]
 
+	# find protocols
+	protocols <- unique(A$V2)
+	print(protocols)
+
 	# separate base on densities
 	densities<- lapply( unique(A$V4), function(d) A[ A$V4 == d ,])
 
@@ -37,7 +41,8 @@ if (length(args) == 2) {
 		# get column name
 		cn <- m.to.col[ m.to.col$m == m ,]$c
 		factor <- m.to.col[ m.to.col == m, ]$f
-
+		
+		print(paste("============================", m, "=========================", sep=" "))
 		# plot
 		for (d in densities) {
 			
@@ -45,17 +50,19 @@ if (length(args) == 2) {
 			ma <- max(d[[cn]])
 
 			yrange <- c(mi - factor*mi, ma + factor*ma )
-			par(mai = c(0.7,0.6,1.2,0.6))	
-			for (p in unique(d$V2)) {
+			par(mai = c(0.7,0.6,1.2,0.6))
+			idx <- 0	
+			for (p in protocols) {
 				nr_nodes <- unique(d[ d$V2 == p, ]$V3)
-				avg_values <- lapply(nr_nodes, function(n) mean(d[d$V2 == p & d$V3==n, ][[cn]])  )
+				avg_values <- sapply(nr_nodes, function(n) mean(d[d$V2 == p & d$V3==n, ][[cn]])  )
 				print(p)
 				print(avg_values)
-				if (p == d[1,]$V2) {
+				if (idx == 0) {
 					plot(y=avg_values, x=nr_nodes, type="b",ylim=yrange, col=pal[pal$p == p ,]$color, xlab="nr nodes", main=paste("Density", d[1,]$V4), ylab=m)
 				} else {	
-					lines(d[ d$V2 == p,][[cn]], x=d[ d$V2 == p, ]$V3, type="b", col=pal[pal$p == p ,]$color)
+					lines(y=avg_values, x=nr_nodes, type="b", col=pal[pal$p == p ,]$color)
 				}
+				idx <- idx + 1
 				#print(pal[pal$p==p,]$color)
 				#par(new=T)
 			}
