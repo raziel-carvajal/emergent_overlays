@@ -36,3 +36,15 @@
 
 # Non useful config files
 src/scripts/omnet.config
+tools/omnetpp-4.6/
+src/protocols/*/*_m.cc
+src/protocols/*/*_m.h
+
+# Non useful output files
+src/base/Makefile
+src/base/*/*_m.cc
+src/base/*/*_m.h
+src/protocols/Makefile
+built/
+experiments/configs/builtConfigs/*.ini
+experiments/networks/builtTopologies/*.ned
