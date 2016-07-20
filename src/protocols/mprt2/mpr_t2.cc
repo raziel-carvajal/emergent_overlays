@@ -55,6 +55,8 @@ Mpr_t2::processStart()
 {
 	BroadcastingAppBase::processStart();
 	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
+	// number of times that the information of two-hops neighbors will be exchanged
+	// to compute the MPR set
 	builtMprCounter = stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
 	bool b = par("build_hops").boolValue();
 
@@ -119,15 +121,20 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 				break;
 			case DISPLAY_HOPS:
 				{
-					int n = par("hops_required");
-					cerr << myself << "(" << simTime() << ")" << endl;
-					for (int l = 0 ; l <= n ; l++) {
-						cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
-						for (auto& h : hops[l])
-							cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
-						cerr << endl;
+					if (builtMprCounter > 0) {
+                        int n = par("hops_required");
+                        cerr << myself << "(" << simTime() << ")" << endl;
+                        for (int l = 0 ; l <= n ; l++) {
+                            cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
+                            for (auto& h : hops[l])
+                                cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
+                            cerr << endl;
+                        }
+                        delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
+                        // Doing this loop little bit later that the information about
+                        // two-hops neighbors have been exchanged
+                        delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
 					}
-					delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
 				}
 				cancelAndDelete(msg);
 				break;
