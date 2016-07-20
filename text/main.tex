@@ -386,10 +386,6 @@ The abstract goes here.
 \end{abstract}
 
 % no keywords
-
-
-
-
 % For peer review papers, you can put extra information on the cover
 % page as needed:
 % \ifCLASSOPTIONpeerreview
@@ -402,8 +398,12 @@ The abstract goes here.
 
 
 
-\section{Introduction}
+\input{introduction}
+\input{dissemination-algorithms}
+\input{conclusion}
 
+\section*{Acknowledgment}
+The authors would like to thank...
 
 
 % An example of a floating figure using the graphicx package.
@@ -500,158 +500,13 @@ The abstract goes here.
 % footnotes above bottom floats. This can be corrected via the
 % \fnbelowfloat command of the stfloats package.
 
-
-\section{Evaluated Dissemination Algorithms}\label{sec:algorithms}
-
-In this paper we focus on dissemination algorithms for wireless ad-hoc networks.
-To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al. \cite{Ruiz2015}.
-In that comprehensive survey, the authors present a large subset of dissemination algorithms and propose a taxonomy of features to classify them.
-In addition, the survey makes a summary of the \textit{standard} terminology used in the literature.
-The terms of interest for this paper follow: 
-
-An ad-hoc network can be represented as a graph $G = (V, E)$, where $V$ is the set of
-nodes composing it, and $E$ is the set of links connecting nodes in the communication range.
-
-\newtheorem{mydef}{Definition}
-
-\begin{mydef}[Dissemination/Broadcast]
-	Given a \textit{source node} $v$ starting a broadcast process, the broadcast problem consists in reaching any $u \in V$ with the message $m$ by following the set of links $e \in E$.
-\end{mydef}
-
-\begin{mydef}[Broadcast Session]
-	In an ad-hoc network, nodes $V^\prime \subseteq V$ may aim at disseminating the messages $m_0, m_1, \dots, m_k$.
-	The dissemination of a message $m_i$ is a \textit{broadcast session}; and it can be uniquely identified by the message.
-\end{mydef}
-
-\begin{mydef}[Underlying Topology]
-	Dissemination algorithms often maintain a subset of nodes -- the underlying topology -- used to drive the broadcasting process. Those nodes, which play a special role during a broadcast session, are determined using strategies specifics to each dissemination technique.
-\end{mydef}
-
-In general, dissemination methods share a set of steps that include ``\textit{variation points}''.
-The methods are then classified based on the concrete way in which these variation points are implemented.
-For instance, the foremost variation point is the usage or not of an \textit{underlying topology} to drive the dissemination process.
-
-Among algorithms that build an underlying topology, we study three in this paper:
-multi-point relaying~\cite{Qayyum2002}, computing relay points based on connected dominating sets~\cite{Wu2001}, and a simplified version of a method that uses a tree-like topology~\cite{Cagalj2007}.
-As stated, these methods, which are executed in every node $n \in V$, have a common structure that follows:
-
-\begin{enumerate}
-	\item \textbf{Compute underlying topology} $T$.
-	\item When a broadcast message $m_i$ is received for the first time, process it.
-	\item If $n \in T$ and \textbf{some other conditions} are met, \textbf{retransmit} $m_i$ to a subset of my direct neighbors.
-\end{enumerate}
-
-Notice how the variation points are highlighted in the previous steps.
-
-On the other hand, methods that do not build an underlying topology can be classified using additional features.
-For instance, how much contextual information they use.
-In this case, we find \textit{context-aware} and \textit{context-oblivious} methods, but there are also methods where nodes only use a specific piece of contextual information (e.g., neighbor knowledge).
-The algorithms of this group that we consider in this paper are context-aware and \textit{statistical}.
-They share the following common structure, where $T$ is a value related to the context and $T_C$ is an associated threshold:
-
-\begin{enumerate}
-	\item \textbf{Initialize} $T$, \textbf{calculate threshold} value $T_C$.
-	\item When a broadcast message $m_i$ is received, \textbf{update the value} of $T$.
-		  
-		  If $T < T_C$, do not retransmit and stop procedure. Otherwise, set random timer.
-		  
-	\item If $m_i$ is received again before the timer expires, repeat the previous step.
-	\item When the timer expires, retransmit $m_i$ if $T > T_C$.
-\end{enumerate}
-
-\begin{figure*}[!h] 
-	\centering
-	\includegraphics[scale=0.3]{fig/taxonomy.png}
-	\caption{Taxonomy to classify broadcasting algorithms}\label{fig:taxonomy}
-\end{figure*}
-
-In the rest of this section we briefly present the methods evaluated in the present work.
- 
-\subsection{Using underlying topology}
-
-To build an underlying topology for a given method, the nodes in the network must exchange messages.
-Some dissemination algorithms require relatively simple data from the context in order to build this topology.
-However, in some cases the complexity of creating the underlying topology far exceeds that of disseminating messages.
-
-A common type of information required is the set of neighbors of a node $v$ that can be reached using exactly a certain number $k$ of hops -- this is written as $N^{k}(v)$.
-For instance $N(v)$ is the set of direct neighbors of $v$ (notice that no superscript is used when $k = 1$).
-In the same way, $u \in N^2(v)$ if $\exists w \in V, \{(v, w), (w,u)\} \subseteq E$, but $(v, u) \notin E$.
-This indicates the nodes reachable from $v$ using exactly one hop.
-
-The \textbf{multipoint relaying  (MPR)} is an efficient technique for flooding in wireless networks~\cite{Qayyum2002}.
-Using $N(v)$ and $N^2(v)$, each node determines if it is a member of the MPR set (it must retransmit broadcast messages).
-To do so, it uses two rules:
-\begin{enumerate}
-	\item A node $w \in N(v)$ is member of MPR if $w$ is the only neighbor of a node in $N^2(v)$.
-	\item While there exist a node $w \in N^2(v)$ which is not covered by a node in MPR:
-		\begin{itemize}
-			\item Select the node $z \in N(v)$, but not in MPR, that covers more uncovered nodes in $N^2(v)$. Add it to MPR.
-		\end{itemize}
-	\item Notify to each member of MPR that it must retransmit messages.
-\end{enumerate}
-
-Using this topology, a node simply retransmit a message the first time it is received.
-
-Another technique determines the relay points using the \textbf{connected dominating sets (CDS)}~\cite{Wu2001}.
-In this approach, a node retransmit a message if it is member of an approximation of the CDS.
-Such an approximation is computed in a distributed manner by means of a proposed heuristic. 
-Initially a node $v$ is marked as member of CDS if there exists two unconnected nodes $u, w \in N(v)$. This initial approximation can be improved using two rules
-
-\newtheorem{myrule}{Rule}
-
-\begin{myrule}
-	Given nodes $v$, $u$ in $G^\prime$, 
-	let $N\left[v\right] = N(v) \cup \{v\}$ and $N\left[u\right] = N(u) \cup \{u\}$,
-	if $N\left[v\right] \subseteq N\left[u\right]$ and $id(v) < id(u)$
-	then $G^\prime$ becomes $G^\prime - \{v\}$.
-\end{myrule}
-
-\begin{myrule}
-	Assume that Given nodes $v$, $u$, $w$ in $G^\prime$. 
-	if $N(v) \subseteq N(u) \cup N(w)$ and $id(v) = min \{ id(v), id(u), id(w) \}$, then $G^\prime$ is changed to $G^\prime - \{v\}$.
-\end{myrule}
-
-The above rules can be modified to take into account the battery level of each node.
-In this way, the method can ensure that nodes will last longer.
-
-\textbf{Embedded Wireless Multicast Advantage (EWMA)} \cite{Cagalj2007} using \cite{Gallager1983} to compute the minimum-weighted spanning tree.
-
-\subsection{Without underlying topology}
-
-The \textbf{distance-to-mean} (dist2mean) approach~\cite{Slavik2011} is based on a simple observation: if a node $v$ receives a message from all directions, there is little benefit in retransmitting it because likely all neighbors already received the message.
-In other words, the neighborhood of $v$ is already covered.
-To estimate the coverage of $v$, the method computes a metric for each broadcast session -- the distance to the spatial mean.
-This is, every time the node $v$ receives a message, it records the position $(x_i, y_i)$ of the transmitting node.
-When the timer expires and it is time to decide whether retransmit, this only happens if $T > T_C$, where:
-
-\begin{equation}
-T = \dfrac{\sqrt{(v_x-\bar{x})^2 + (v_y-\bar{y})^2}}{r}
-\end{equation}
-
-\begin{equation}\label{eq:dist2mean_threshold}
-T_C = 0.95 -0.7e^{-0.11N}
-\end{equation}
-
-\begin{equation}
-M = (\bar{x},\bar{y}) = (\dfrac{1}{n}\sum_{i=1}^{n}x_i, \dfrac{1}{n}\sum_{i=1}^{n}y_i)
-\end{equation}
-
-and $N$ is the number of neighbors of $v$ and $(v_x, v_y)$ is its location.
-The value of function~\ref{eq:dist2mean_threshold}, which have been taken from \cite{Slavik2011}, decreases as $N$ decreases in order to ensure connectivity.
+%%
 
 
-The \textbf{area based beaconless (ABB)} algorithm~\cite{Ovalle-Martinez2006} uses a different approach to estimate whether a node $v$ must retransmit a message $m_i$.
-As in the method \textit{dist2mean}, a metric is computed to determine if the transmission range of $v$ is already covered.
-This metric, which is related to the context, is the angle covered by the transmitting nodes.
-In practice, this can be expressed as the percentage $P$ of the communication perimeter that is covered by the received copies of $m_i$.
-Another parameter of interest, the threshold $P_C$ is set to 100\%.
-Finally, two methods to compute the timeout value of the timer are proposed: a uniform random value in the interval from 0 to 1; and the value $P/P_C$.
+
+%\section{Previous methodologies used to asses the algorithms}
 
 
-\section{Previous methodologies used to asses the algorithms}
-
-\section{Conclusion}
-The conclusion goes here.
 
 
 
@@ -660,10 +515,7 @@ The conclusion goes here.
 
 
 % use section* for acknowledgment
-\section*{Acknowledgment}
 
-
-The authors would like to thank...
 
 
 
