@@ -48,3 +48,13 @@ src/protocols/Makefile
 built/
 experiments/configs/builtConfigs/*.ini
 experiments/networks/builtTopologies/*.ned
+
+# Non useful experimental results
+experiments/configs/builtConfigs/results/
+
+# Paper
+text/main.aux
+text/main.bbl
+text/main.blg
+text/main.log
+text/main.pdf

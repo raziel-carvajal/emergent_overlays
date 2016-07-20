@@ -18,7 +18,7 @@ fi
 
 SHA1=`cat ../../revision.txt`
 
-CONFIG_PATH=../../experiments/configs
+CONFIG_PATH=../../experiments/configs/builtConfigs
 
 # configuring path to omnet++
 source local-omnet-setenv.sh $OMNET_PATH
@@ -55,7 +55,8 @@ for config in ${CONFIG_PATH}/*.ini ; do
     filename=$(basename "$config")
     config_name="${filename%.*}"
     echo "Executing : ${config}"
-    ./run-one-configuration.sh "${config}" "${config_name}" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
+    #./run-one-configuration.sh "${config}" "${config_name}" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
+    ./run-one-configuration.sh "${config}" "${OMNET_PATH}/samples/inet"
 	r=$?
 	if [ $r -ne 0 ]; then
 		echo "Error: failure running simulation ${config_name}"
