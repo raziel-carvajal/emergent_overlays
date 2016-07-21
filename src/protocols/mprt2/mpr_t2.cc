@@ -49,6 +49,11 @@ enum ControlMessageTypes {
 };
 
 
+Mpr_t2::Mpr_t2():BroadcastingAppBase()
+{
+	hops_built.fill(false);
+}
+
 
 void
 Mpr_t2::processStart()
@@ -58,15 +63,15 @@ Mpr_t2::processStart()
 	bool b = par("build_hops").boolValue();
 
 	if (b) {
-		delayed_event(WAKEUP_HOPS_REQUESTER, 
-						"", 
+		delayed_event(WAKEUP_HOPS_REQUESTER,
+						"",
 						par("wakeup_time_to_build_hops").doubleValue());
 
 
 	}
 
 	delayed_event(DISPLAY_HOPS, "", par("display_time_hops").doubleValue());
-		
+
 }
 
 
@@ -79,34 +84,34 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
         switch (msg->getKind()) {
             case REPLY_NEIGHBORS:
                 {
-					char* s = (char*)msg->getContextPointer();
-					int n = stoi(string(s));
-					int count = 0;
-					for (int l = 0 ; l <= n ; l++) {
-						count += hops[l].size();
-					}
-					Neighbors* m = new Neighbors("neighbors");
-					m->setSender(myself.c_str());
-					m->setNeighborsArraySize(count);
-					m->setHopLevelsArraySize(count);	
-					m->setXsArraySize(count);	
-					m->setYsArraySize(count);	
-					int i = 0;
-					for (int l = 0 ; l <= n ; l++) {
-						for (auto& h : hops[l]) {
-							m->setNeighbors(i, h.c_str());
-							m->setHopLevels(i, l);
-							m->setXs(i, hops_position[h].first);
-							m->setYs(i, hops_position[h].second);
-							i++;
-						}
-					}
-					m->setMaxHopLevel(n);
-					m->setX(position.x);
-					m->setY(position.y);
-					send_package(m);
-				}
-				cancelAndDelete(msg);
+									char* s = (char*)msg->getContextPointer();
+									int n = stoi(string(s));
+									int count = 0;
+									for (int l = 0 ; l <= n ; l++) {
+										count += hops[l].size();
+									}
+									Neighbors* m = new Neighbors("neighbors");
+									m->setSender(myself.c_str());
+									m->setNeighborsArraySize(count);
+									m->setHopLevelsArraySize(count);
+									m->setXsArraySize(count);
+									m->setYsArraySize(count);
+									int i = 0;
+									for (int l = 0 ; l <= n ; l++) {
+										for (auto& h : hops[l]) {
+											m->setNeighbors(i, h.c_str());
+											m->setHopLevels(i, l);
+											m->setXs(i, hops_position[h].first);
+											m->setYs(i, hops_position[h].second);
+											i++;
+										}
+									}
+									m->setMaxHopLevel(n);
+									m->setX(position.x);
+									m->setY(position.y);
+									send_package(m);
+							}
+							cancelAndDelete(msg);
 				break;
 			case DELEGATE_REQUEST:
 				{
@@ -121,7 +126,7 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 					int n = par("hops_required");
 					cerr << myself << "(" << simTime() << ")" << endl;
 					for (int l = 0 ; l <= n ; l++) {
-						cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
+						cerr << "\thops level " << l << ", found cojone = " << ((hops_built[l]) != false) << endl;
 						for (auto& h : hops[l])
 							cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
 						cerr << endl;
@@ -148,7 +153,7 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 			case WAKEUP_HOPS_REQUESTER:
 				{
 					int n = par("hops_required");
-					cerr << myself << ": Wakeup to build hops " << endl;	
+					//cerr << myself << ": Wakeup to build hops " << endl;
 					request_hops(n-1);
 				}
 				cancelAndDelete(msg);
@@ -262,7 +267,7 @@ Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 	string j = m->getSender();
 	if (j == myself) return;
 	int max_hop_level = m->getMaxHopLevel();
-	
+
 	for (auto& n: neighbors) {
 		string s = n.first;
 		hops[0].insert(s);
@@ -305,7 +310,7 @@ Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 void
 Mpr_t2::request_hops(int h)
 {
-	
+
 	RequestNeighbors* m = new RequestNeighbors("Requesting hops");
 	m->setSender(myself.c_str());
 	m->setMaxHopLevel(h);
@@ -315,21 +320,21 @@ Mpr_t2::request_hops(int h)
 
 }
 
-		
+
 void
 Mpr_t2::on_payload_received(const Broadcast* m)
 {
     // Store in a map a a broadcast session ID
     string key = m->getId();
     emitBroadcastMsgReceived( key );
-	
+
 	bool first = (!is_source && payloads.find(key) == payloads.end());
 
 	if (first) {
 		payloads[key] = m->getPayload();
 		if (in_mpr)
 			delayed_broadcast(key, uniform(0.01, 0.2));
-	}	
+	}
 }
 
 
@@ -436,11 +441,11 @@ Mpr_t2::compute_mpr()
 			}
 		}
 
-		if (max_y != "") { 
+		if (max_y != "") {
 				mpr.insert(max_y);
 			//	cerr << "\nadding " << max_y << endl;
 		}
-	
+
 		b = any_of(hops[1].begin(), hops[1].end(), [&] (string z) {
 
 			bool r = any_of(mpr.begin(), mpr.end(), [&] (string h) {

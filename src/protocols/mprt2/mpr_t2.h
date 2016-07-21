@@ -39,8 +39,7 @@ protected:
 
 private:
 
-	struct R {
-	};
+
 
 	int nr_hops_required = 2;
 
@@ -77,7 +76,7 @@ private:
 	 *
 	 * This is the one one should call to get the hops in a level.
 	 * For instance, using l = 0 will return the direct neighbors
-	 * using l = 1 will return nodes you can reach using one of your neighbors 
+	 * using l = 1 will return nodes you can reach using one of your neighbors
 	 * */
 	set<string> get_hops_in_level(int l);
 
@@ -93,24 +92,25 @@ private:
 	}
 
 	bool is_a_covered_by_b(string a, string b, double b_radius) {
-	
+
 		auto pA = get_hop_position(a);
 		auto pB = get_hop_position(b);
 
-		return ( 
-				b_radius * b_radius > 
+		return (
+				b_radius * b_radius >
 					(pA.first - pB.first)*(pA.first - pB.first)+
 					(pA.second - pB.second)*(pA.second - pB.second)
 			   );
 
-	
+
 	}
-	
+
 
 	/** Compute MPR(x) */
 	set<string> compute_mpr();
 
-
+public:
+  Mpr_t2();
 
 };
 
