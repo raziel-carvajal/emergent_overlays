@@ -59,7 +59,10 @@ void
 Mpr_t2::processStart()
 {
 	BroadcastingAppBase::processStart();
-
+	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
+	// number of times that the information of two-hops neighbors will be exchanged
+	// to compute the MPR set
+	builtMprCounter = stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
 	bool b = par("build_hops").boolValue();
 
 	if (b) {
@@ -84,34 +87,34 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
         switch (msg->getKind()) {
             case REPLY_NEIGHBORS:
                 {
-									char* s = (char*)msg->getContextPointer();
-									int n = stoi(string(s));
-									int count = 0;
-									for (int l = 0 ; l <= n ; l++) {
-										count += hops[l].size();
-									}
-									Neighbors* m = new Neighbors("neighbors");
-									m->setSender(myself.c_str());
-									m->setNeighborsArraySize(count);
-									m->setHopLevelsArraySize(count);
-									m->setXsArraySize(count);
-									m->setYsArraySize(count);
-									int i = 0;
-									for (int l = 0 ; l <= n ; l++) {
-										for (auto& h : hops[l]) {
-											m->setNeighbors(i, h.c_str());
-											m->setHopLevels(i, l);
-											m->setXs(i, hops_position[h].first);
-											m->setYs(i, hops_position[h].second);
-											i++;
-										}
-									}
-									m->setMaxHopLevel(n);
-									m->setX(position.x);
-									m->setY(position.y);
-									send_package(m);
-							}
-							cancelAndDelete(msg);
+					char* s = (char*)msg->getContextPointer();
+					int n = stoi(string(s));
+					int count = 0;
+					for (int l = 0 ; l <= n ; l++) {
+						count += hops[l].size();
+					}
+					Neighbors* m = new Neighbors("neighbors");
+					m->setSender(myself.c_str());
+					m->setNeighborsArraySize(count);
+					m->setHopLevelsArraySize(count);
+					m->setXsArraySize(count);
+					m->setYsArraySize(count);
+					int i = 0;
+					for (int l = 0 ; l <= n ; l++) {
+						for (auto& h : hops[l]) {
+							m->setNeighbors(i, h.c_str());
+							m->setHopLevels(i, l);
+							m->setXs(i, hops_position[h].first);
+							m->setYs(i, hops_position[h].second);
+							i++;
+						}
+					}
+					m->setMaxHopLevel(n);
+					m->setX(position.x);
+					m->setY(position.y);
+					send_package(m);
+				}
+				cancelAndDelete(msg);
 				break;
 			case DELEGATE_REQUEST:
 				{
@@ -123,15 +126,20 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 				break;
 			case DISPLAY_HOPS:
 				{
-					int n = par("hops_required");
-					cerr << myself << "(" << simTime() << ")" << endl;
-					for (int l = 0 ; l <= n ; l++) {
-						cerr << "\thops level " << l << ", found cojone = " << ((hops_built[l]) != false) << endl;
-						for (auto& h : hops[l])
-							cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
-						cerr << endl;
+					if (builtMprCounter > 0) {
+                        int n = par("hops_required");
+                        cerr << myself << "(" << simTime() << ")" << endl;
+                        for (int l = 0 ; l <= n ; l++) {
+                            cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
+                            for (auto& h : hops[l])
+                                cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
+                            cerr << endl;
+                        }
+                        delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
+                        // Doing this loop little bit later that the information about
+                        // two-hops neighbors have been exchanged
+                        delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
 					}
-					delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
 				}
 				cancelAndDelete(msg);
 				break;
@@ -152,9 +160,14 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 				break;
 			case WAKEUP_HOPS_REQUESTER:
 				{
-					int n = par("hops_required");
-					//cerr << myself << ": Wakeup to build hops " << endl;
-					request_hops(n-1);
+				    cerr << "BuiltMprCounter :: " << builtMprCounter << endl;
+				    if(builtMprCounter > 0){
+				        builtMprCounter--;
+				        int n = par("hops_required");
+				        cerr << myself << ": Wakeup to build hops, number of builds left: " << builtMprCounter << endl;
+				        request_hops(n-1);
+				        delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
+				    }
 				}
 				cancelAndDelete(msg);
 				break;
