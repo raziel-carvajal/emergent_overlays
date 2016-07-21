@@ -1,13 +1,6 @@
 description = "Broadcasting messages using EWMA2"
 
-repeat=4
-
 *.host*.udpApp[0].typename = "EWMA2"
-*.SOURCE.udpApp[0].is_source = true
-*.SOURCE.udpApp[0].nr_broadcast_msg = 300
-*.SOURCE.udpApp[0].wakeUpTime = 20s
-
-*.host*.energyStorage.nominalCapacity = 50J
 
 
 *.host*.udpApp[0].nr_hello_messages = 5
@@ -15,9 +8,4 @@ repeat=4
 
 # mwst related stuff
 *.host*.udpApp[0].spontaneously_awaken = true
-*.host*.udpApp[0].mwst_display_time = 170s
-
-
-
-# simulation time
-sim-time-limit =  180s
+*.host*.udpApp[0].mwst_display_time = 50s

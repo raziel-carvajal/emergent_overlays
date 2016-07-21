@@ -1,13 +1,3 @@
 description = "Broadcasting messages using ABBA"
 
-repeat=4
-
 *.host*.udpApp[0].typename = "Abba2"
-*.SOURCE.udpApp[0].is_source = true
-*.SOURCE.udpApp[0].nr_broadcast_msg = 300
-*.SOURCE.udpApp[0].wakeUpTime = 20s
-
-*.host*.energyStorage.nominalCapacity = 50J
-
-# simulation time
-sim-time-limit =  180s
