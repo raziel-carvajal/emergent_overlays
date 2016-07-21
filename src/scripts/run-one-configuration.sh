@@ -71,7 +71,8 @@ for i in $(seq 0 ${count}); do
 	broadcast_time=`echo ${results} | awk '{print $4}'`
 	power_consumption=`echo ${results} | awk '{print $5}'`
 	duplicated_messages=`echo ${results} | awk '{print $6}'`
+	retransmissions=`echo ${results} | awk '{print $7}'`
 
-	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages}" >> ../../results/summary.csv
+	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages} ${retransmissions}" >> ../../results/summary.csv
 
 done

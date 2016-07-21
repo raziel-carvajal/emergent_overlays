@@ -9,7 +9,8 @@ load.datafile <- function(fname, extensions=c("sca", "vec")) {
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   v <- ds$vectordata
-  power_levels <- ds$vectors[ ds$vectors$name == 'power_level:vector', ]$result
+  # the vector name used to be power_level
+  power_levels <- ds$vectors[ ds$vectors$name == 'residualCapacity:vector', ]$result
   tmp <- subset(v, resultkey %in% power_levels) # filter out other vectors
   others <- lapply(power_levels, function(p) subset(tmp, resultkey == p)) # create a separete list for each power level
   sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist) # vector of power levels for each instant of time
@@ -34,6 +35,10 @@ broadcastingTime <- function(ds, simulation.time) {
 	# compute number of message received at each location (coverage)
 	rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
 
+	# compute number of message sent at each location (retransmission)
+	sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
+	
+	# compute number of message received per broadcast session
 	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
 
 	broadcasting.time <- data.frame(
@@ -41,7 +46,8 @@ broadcastingTime <- function(ds, simulation.time) {
 			sending = sending.time, 
 			receiving = reception.time,
 			time = reception.time - sending.time, # broadcasting time per session id
-			n.received = rcv, # how many location received a message from a particular session
+			n.received = rcv, # how many locations received a message in a particular session
+			n.sent = sent, # how many locations sent a message in a particular session
 			B.i = B.i.tmp # total number of messages received per broadcast session
 	)
 }
@@ -98,11 +104,14 @@ average.values <- function(pl, broadcast.info, max) {
 	
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
+	rt <- mean(broadcast.info$n.sent)
+
 	data.frame(
 		coverage = c,
 		broadcasting.time = bt,
 		power_consumption = pc,
-		duplicated_messages = dm
+		duplicated_messages = dm,
+		retransmitted_messages = rt
 	) 
 }
 
@@ -135,7 +144,7 @@ if (length(args) == 3) {
 	
 	# printing average values
 	averages <- average.values(pl, bs, max=sim.time)
-	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages)))
+	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages, averages$retransmitted_messages)))
 }
 
 

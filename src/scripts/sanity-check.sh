@@ -46,7 +46,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    ./doTopologies.sh $Tx 2 6 $tPath
+    ./doTopologies.sh $Tx 5 5 $tPath
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;

@@ -18,6 +18,6 @@ fi
 
 
 
-python buildTopology.py $tx $loB $upB
+python buildTopology.py $tx $loB $upB 0
 
 mv *.ned $dst

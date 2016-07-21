@@ -40,19 +40,13 @@ initConf = {}
 initConf[0] = {'txt': 'transmission range', 'val': 50}
 initConf[1] = {'txt': 'minimum layout length in tiles', 'val': 2}
 initConf[2] = {'txt': 'maximum layout length in tiles', 'val': 6}
+initConf[3] = {'txt': 'last id number used to identify topologies', 'val': 0}
 
 # network density
 density = {}
 density['sparse'] = 2
 density['medium'] = 5
 density['dense'] = 10
-
-
-# this dictionary will be filled based on the topology density
-topologies = {}
-def inittialize_topologies():
-    for deTyp in density:
-        topologies[deTyp] = []
 
 
 def setArguments(argv):
@@ -67,7 +61,7 @@ def setArguments(argv):
             continue
 
 
-def is_network_connected(pos, tx, density):
+def is_valid_network(pos, tx, density, allowed_error):
     g = nx.Graph()
     for i, v in enumerate(pos):
         x0 = v[0]
@@ -82,33 +76,61 @@ def is_network_connected(pos, tx, density):
                 if d < tx*tx:
                     g.add_edge(i, j)
                     c = c + 1
+    degrees = map(lambda(k, v): v, nx.degree(g).iteritems())
+    sum_degree = sum(degrees)
+    avg_degree = sum_degree/float(nx.number_of_nodes(g))
+    expected = density-density*allowed_error/100.0
+    cond2 = abs(avg_degree - density) <= density*allowed_error/100.0
+    cond1 = nx.is_connected(g)
+    if cond1 and cond2:
+        min_degree = min(degrees)
+        max_degree = max(degrees)
+        u = set(degrees)
+        h = {d: len(filter(lambda(x): x == d,  degrees)) for d in u}
+        print avg_degree, max_degree, min_degree, expected, nx.number_of_nodes(g), nx.number_of_edges(g), density, cond1, cond2
+        print h
+    return cond1 and cond2
 
-    return nx.is_connected(g)
 
-
-def fillSurface(Tx, tilesWidth, tilesHeight, d_name):
-    inittialize_topologies()
-    block_width = Tx
-    d = density[d_name]
+def fillSurface(Tx, tilesWidth, tilesHeight, density):
+    result = []
+    block_width = 2*Tx
     for i in range(0, tilesWidth):
         x = i * block_width
         for j in range(0, tilesHeight):
             y = j * block_width
             G = nx.Graph()
-            G.add_nodes_from(range(1, d + 1))
+            G.add_nodes_from(range(1, density + 1 + int(20/100.0*density)))
             pos = nx.random_layout(G)
             for l in pos:
                 pos[l][0] = x + block_width*pos[l][0]
                 pos[l][1] = y + block_width*pos[l][1]
-                topologies[d_name].append(pos[l])
+                result.append(pos[l])
+    return result
+
+
+def fillSurface2(Tx, tilesWidth, tilesHeight, density):
+    result = []
+    block_width = 2*Tx
+    w = tilesWidth * block_width
+    h = tilesHeight * block_width
+    G = nx.Graph()
+    G.add_nodes_from(range(1, (density + 1 + int(20/100.0*density))*w*h))
+    pos = nx.random_layout(G)
+    for l in pos:
+        pos[l][0] = w*pos[l][0]
+        pos[l][1] = h*pos[l][1]
+        result.append(pos[l])
+    return result
 
 
 def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
     global NED_HEADER, NED_HEADER1
-    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, idx)
+    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, index)
 
     f = open(fileName + '.ned', 'w')
 
+    idx_source = random.randint(0, len(pos) - 1)
     try:
         f.write(NED_HEADER)
         f.write('network ' + fileName + '\n{\n')
@@ -116,9 +138,12 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
         f.write(NED_HEADER1)
 
         for i, p in enumerate(pos):
-            f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); }}\n\n'.format(i, p[0], p[1]) )
+            if i == idx_source:
+                f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format(i, p[0], p[1]))
+            else:
+                f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); }}\n\n'.format(i, p[0], p[1]))
 
-        f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format( len(pos), layoutSizeW*0.5, layoutSizeH*0.5 ) )
+        # f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format(len(pos), layoutSizeW*0.5, layoutSizeH*0.5))
 
         f.write("}\n")
     finally:
@@ -139,41 +164,19 @@ if __name__ == '__main__':
     minL = initConf[1]['val']
     maxL = initConf[2]['val']
 
-    d = sorted([density[k] for k in density])
-    xx = [ x*x*e for x in range(minL,maxL + 1) for e in d ]
-    xx = list(set(xx))
-    xx.sort()
+    index = initConf[3]['val']
+    for d in range(5, 45, 5):
+        expected = maxL*maxL*d
 
-    for d_name in density:
-        i = density[d_name]
-        min_values = [ int(pow(e / float(i), 0.5)) for e in xx  ]
-        print(min_values)
-        for idx in range(0, len(min_values)):
+        print "Building topology with density", d
+        topology = fillSurface(trRan, maxL, maxL, d)
+        # cleanTopology(topology, seen - expected)
+        while not is_valid_network(topology, trRan, d, 20):
+            topology = fillSurface(trRan, maxL, maxL, d)
+        # cleanTopology(topology, seem - expected)
 
-            expected = xx[idx]
-            v1 = min_values[idx]
-            if v1 == 0:
-                v1 = 1
-            v2 = v1
-            seem = v1 * v2 * i
-            while seem < expected:
-                v2 = v2 + 1
-                seem = v1 * v2 * i
+        print "Writing NED file"
+        createNedFile(d, topology, index, maxL*2*trRan, maxL*2*trRan, trRan)
+        index = index + 1
 
-            print(expected, seem, v1, v2)
-            print "Building topologies for an area of ({0}, {1}) and  range tx={2}".format(trRan*v1, trRan*v2, trRan)
-
-            # create many topologies with the same features but different
-            # positions for the nodes
-
-            for index in range(0, 3):
-                fillSurface(trRan, v1, v2, d_name)
-            	cleanTopology(topologies[d_name], seem - expected)
-                while not is_network_connected(topologies[d_name], trRan, i):
-                    fillSurface(trRan, v1, v2, d_name)
-                    cleanTopology(topologies[d_name], seem - expected)
-
-                print "Writing NED file"
-                createNedFile(d_name, topologies[d_name], index, v1*trRan, v2*trRan, trRan)
-
-    print "Done"
+    print "Done", index

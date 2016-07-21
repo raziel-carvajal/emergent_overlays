@@ -58,13 +58,7 @@ BroadcastingAppBase::initialize(int stage)
 
             signal_received_id = this->registerSignal("msg_received");
             signal_sent_id = this->registerSignal("msg_sent");
-            signal_power_level = this->registerSignal("power_level");
             signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
-            {
-                cModule *hostModule = getParentModule();
-                cerr << "host name : " << hostModule->getName() << endl;
-                hostModule->subscribe(inet::power::IEnergyStorage::residualCapacityChangedSignal, this);
-            }
 
             break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
@@ -82,7 +76,7 @@ BroadcastingAppBase::initialize(int stage)
                 bool is_center = host->par("isCenter").boolValue();
                 if (is_center) {
                   is_source = true;
-                  cerr << getParentModule()->getName() << "=========================================== is center " << is_center << endl;
+                  cerr << getParentModule()->getName() << ": is center " << is_center << endl;
                 }
 
             }
@@ -189,9 +183,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 void
 BroadcastingAppBase::receiveSignal(cComponent *source, simsignal_t signalID, double value)
 {
-    if (signalID == inet::power::IEnergyStorage::residualCapacityChangedSignal) {
-        emitPowerLevel(value);
-    }
 
 }
 
