@@ -30,3 +30,6 @@ The following table presents algorithms that **don't require underlying topology
 | The broadcast storm problem in a mobile ad hoc network ([probabilistic flooding](papers/others/flooding.pdf))| Conf | MobiCom | A* | 1999 | |
 | Speed adaptive probabilistic flooding in cooperative emergency warning ([SAPF](papers/others/SAPF.pdf)) | Conf | International Conference on Wireless Internet | - | 2008 | |
 | Performance improvements for network-wide broadcast with instantaneous network information ([banerjee](papers/others/banerjee.pdf)) | Journal | Network and Computer Applications | A | 2012 | |
+| Research and Realization on Improved MANET Distance Broadcast Algorithm Based on Percolation Theory ([Gang](papers/others/gang.pdf)) | Conf | International Conference on Industrial Control and Electronics Engineering | - | 2012 | |
+| DibA: An adaptive broadcasting scheme in mobile ad hoc networks ([DibA](papers/others/diba.pdf)) | Conf | Communication Networks and Services Research Conference | | 2009 | |
+| Stochastic broadcast for VANET ([slavik-stochastic](slavik-stochastic.pdf)) | Conf | Consumer Communications and Networking Conference | B | 2010 | |
