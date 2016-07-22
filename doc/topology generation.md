@@ -1,0 +1,1 @@
+The generation of a network topology is in charge of the Python library [Networkx](https://networkx.github.io/) where a group of random graph generators are already coded and based in well-known [graph algorithms](http://networkx.readthedocs.io/en/networkx-1.11/reference/generators.html).
