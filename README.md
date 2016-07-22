@@ -1,29 +1,27 @@
-# infocom2017
+# Framework to Evaluate Dissemination Algorithms in Wireless Ad Hoc Networks
 source code and experiments
-
 
 ## Motivation
 
 ## Algorithms
 
-##
+[Complete List](doc/algorithms.md)
 
-## Dependencies
-
-### Network topologies
+## Network topologies
 
 [Generation of one topology](doc/topology generation.md)
 
-The generation of a network topology is in charge of the Python library [Networkx](https://networkx.github.io/) where a group of random graph generators are already coded and based in well-known [graph algorithms](http://networkx.readthedocs.io/en/networkx-1.11/reference/generators.html).
-
-#### Installation instructions
-#### Linux
-`sudo apt-get install python-networkx`
-
-#### Mac OS
-1. Download the library [here](https://pypi.python.org/pypi/networkx/)
-2. Decompress the ZIP file and go to that uncompress directory
-2. `sudo python setup.py install`
+## Parameters and Metrics used
 
 ## Antenna Specification
 - cc1000
+
+## Current Status
+
+## Related Works
+
+## TODO List
+
+[List (sorry, it has a mix of some languages: English, Spanish, some words in French and some gibberish I tend to write under pressure :-))](TODO.md)
+
+## Installation instructions
