@@ -4,7 +4,7 @@ We are using the [taxonomy proposed by Ruiz et al. in 2015](papers/others/survey
 
 ![Taxonomy](taxonomy.png)
 
-For the moment, we are interested on algorithms where the antenna transmission range is fixed (the red areas in the picture above). Observe that there are these protocols can be further subclassfied depending on other features (e.g., underlying topology, context-awareness, etc.)
+For the moment, we are interested on algorithms where the antenna transmission range is fixed (the red areas in the picture above). Observe that there are these protocols can be further classified depending on other features (e.g., underlying topology, context-awareness, etc.)
 
 Each algorithm below can be located under one leaf in the taxonomy; we will give the leaf every time we present a method.
 
@@ -20,3 +20,13 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 
 
 # Unimplemented
+
+The following table presents algorithms that **don't require underlying topology**, with **fixed transmission range**, and (**context-aware** or **context Oblivious**)
+
+| Title  | Publication Type | Publication Name | Publication Rank | Year | Use Topology |
+| ------- | --------- | ---------- | --------- | --------- | ---- |
+| The broadcast storm problem in a mobile ad hoc network ([simple flooding](papers/others/flooding.pdf))| Conf | MobiCom | A* | 1999 | |
+| An adaptive approach to group communications in multi hop ad hoc networks ([Hyper-Flooding](papers/others/hyper-flooding.pdf)) | Conf | International Symposium on Computers and Communications | B | 2002 | |
+| The broadcast storm problem in a mobile ad hoc network ([probabilistic flooding](papers/others/flooding.pdf))| Conf | MobiCom | A* | 1999 | |
+| Speed adaptive probabilistic flooding in cooperative emergency warning ([SAPF](papers/others/SAPF.pdf)) | Conf | International Conference on Wireless Internet | - | 2008 | |
+| Performance improvements for network-wide broadcast with instantaneous network information ([banerjee](papers/others/banerjee.pdf)) | Journal | Network and Computer Applications | A | 2012 | |
