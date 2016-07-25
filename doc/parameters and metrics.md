@@ -32,14 +32,18 @@ Before the description of each metric we have to take into account that:
 - Broadcasts are performed every 0.5 seconds
 - We perform (right now) __1__ broadcast session. We were doing 300, but we are discussing what is better.
 
-Per algorithm and per network configuration we will measure:
+Per __algorithm__ and per __network configuration__ we collect the following data:
 
-- Network coverage. Percentage of nodes that receive
-- Broadcasting session time. Distribution.
-- Power consumption
-- Duplicated messages
-- How many nodes retransmit the message.
-- Number of collisions
+- Percentage of nodes that receive the message in a broadcast session. With that information we have a vector where each element correspond to a broadcast session. For instance, if vector[3] = 60 it means that in broadcast session 3, 60% of the nodes received the message. Using this vector we can compute the __metric Network coverage__. So far, we are using the __mean__ to compute this metric.
+- For those broadcast sessions where the coverage reach a minimum threshold __T__, we can compute the __Broadcasting session time__. For a single experiment, this value can be shown using the mean or as a distribution. We are using a threshold __T__ of 100%, but in some papers this value is less (__95%__) or not even considered.
+- Power consumption along the experiment. This is, at different time, what is the __residual capacity__ in the battery. We expect that the more a node transmit, the lower is its residual capacity.
+- For those broadcast sessions where the coverage reach a minimum threshold __T__, we compute the number of __duplicated messages__ received at each node. Then we find the mean value for the whole experiment.
+- How many nodes __retransmit the message__. This has yet to be done, but the idea is to compute for each broadcast session how many nodes retransmit the message.
+- __Number of collisions__ (yet to be done). Since we are using an antenna model that emulates collisions, we can measure the total number of collisions in the experiments, or the number of collisions per node.
+
+Note that all the values mentioned are collected for each pair (algorithm, network configuration). We can have many such pairs sharing the same algorithm and configuration. The question is than in such a case we _must_ aggregate the results somehow.
+1. For each experiment, We must aggregate the results that are not a single value (e.g., network coverage).
+2. We must aggregate the results of many pairs.
 
 For more information see [statistical methodology](statistical methodology.md).
 
