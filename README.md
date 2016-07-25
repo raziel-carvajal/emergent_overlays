@@ -43,7 +43,7 @@ Notice that in some cases protocols have different modes (ottributes of the algo
 
 ## Related Works
 
-A brief description of the implemented algorithms is [here](text/main.pdf).
+A brief description of the implemented algorithms is [here](text/).
 
 ## TODO List
 
