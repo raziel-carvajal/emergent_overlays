@@ -11,7 +11,9 @@ source code and experiments
 
 [Generation of one topology](doc/topology generation.md)
 
-## Parameters and Metrics used
+## Parameters and metrics to use
+
+## Statistical Methods
 
 ## Antenna Specification
 - cc1000
