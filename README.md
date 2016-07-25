@@ -45,6 +45,8 @@ Notice that in some cases protocols have different modes (ottributes of the algo
 
 A brief description of the implemented algorithms is [here](text/).
 
+In the following link, we present a [comparison of our experimental setup with that of previous papers](doc/summary of previous works.docx). In particular, it shows how are the experiments configured in the papers we _implement_.
+
 ## TODO List
 
 Some high level requests:
