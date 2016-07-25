@@ -3,6 +3,18 @@ source code and experiments
 
 ## Motivation
 
+Our aim is to make a correlation between mobile broadcasting algorithms for MANETs and networks configurations, where every network configuration is characterized by its density (sparse, medium, dense), mobility (nodes changes or not its position according to a mobility model), communication range of nodes (fixed or variable), churn, etc. We aim to have a table T as follows:
+
+| Protocol / Configuration | C1 | C2 | C3 | ... |
+|--------------------------|----|----|----|-----|
+| P1                       |    |    |    |     |
+| P2                       |    |    |    |     |
+| ...                      |    |    |    |     |
+
+where each P is an implementation of one broadcasting algorithm. In that survey, there is a taxonomy of broadcasting algorithms that we planned to respect i.e. the comparison will be driven between algorithms of the same category (as first step; once we have some results we will see if a comparison of algorithms from different categories makes sense).
+
+Notice that in some cases protocols have different modes (ottributes of the algorithm could be tuned with different values). Instead of having one row per algorithm at table T, we could have a group of rows per each algorithm.
+
 ## Algorithms
 
 [Complete List](doc/algorithms.md)
@@ -13,18 +25,34 @@ source code and experiments
 
 ## Parameters and metrics to use
 
-[Parameters](doc/parameters and metrics.md)
+[Parameters and metrics](doc/parameters and metrics.md)
 
 ## Statistical Methods
 
-## Antenna Specification
-- cc1000
+## Summary of Current Status
 
-## Current Status
+- 4 Protocols fully implemented.
+- 1 Protocol partially implemented. It depends on a dynamic range antenna and we don't have that model in OMNET.
+- Using simple antenna model. The collision model is too simple (there is collision if two nodes in range are sending at the same time).
+- Generating topologies based on an expected density.
+- So far, a single __INPUT PARAMETER__: the density.
+- Many output parameters. See [Parameters and metrics](doc/parameters and metrics.md)
+  - Alas, we are using simple averages to show the results.
+- Overall conclusion so far, we cannot identify differences between algorithms in a clear way.
 
 ## Related Works
 
 ## TODO List
+
+Some high level requests:
+
+1.  Test the protocols to be sure they are bug-free.
+2. Use a better antenna model. OMNET has a more realistic one, we must verify if its model to describe collision is better.
+3. Check how power consumption is measured in previous works.
+4. Improve the evaluation framework to use __bootstrapping__ to compute confident intervals for each metric.
+5. Consider other metrics. For instance, a metric call __Complement of the Integral__ to find how fast the message is broadcast.
+6. Consider options to statistically compare algorithms. The correlation of Spearman was mentioned in the dicussions here, but we have to discuss a bit more with our colleague.
+7. Consider the __cumulative distribution frequency__ to present the results. Raziel is already working on that.
 
 [List (sorry, it has a mix of some languages: English, Spanish, some words in French and some gibberish I tend to write under pressure :-))](TODO.md)
 
