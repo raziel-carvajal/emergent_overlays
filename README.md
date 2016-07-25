@@ -33,7 +33,7 @@ Notice that in some cases protocols have different modes (ottributes of the algo
 
 - 4 Protocols fully implemented.
 - 1 Protocol partially implemented. It depends on a dynamic range antenna and we don't have that model in OMNET.
-- Using simple antenna model. The collision model is too simple (there is collision if two nodes in range are sending at the same time).
+- Using a simple antenna model. The collision model is too simple (there is collision if two nodes in range are sending at the same time). In addition, it is an isotropic antenna ([isotropic radiator](https://en.wikipedia.org/wiki/Isotropic_radiator)) (a.k.a ideal) that despite of being used in almost any simulation is not realistic. 
 - Generating topologies based on an expected density.
 - So far, a single __INPUT PARAMETER__: the density.
 - Many output parameters. See [Parameters and metrics](doc/parameters and metrics.md)
