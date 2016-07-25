@@ -13,7 +13,7 @@ source code and experiments
 
 ## Parameters and metrics to use
 
-[Parameters](doc/paramters and metrics.md)
+[Parameters](doc/parameters and metrics.md)
 
 ## Statistical Methods
 
