@@ -13,6 +13,8 @@ source code and experiments
 
 ## Parameters and metrics to use
 
+[Parameters](doc/paramters and metrics.md)
+
 ## Statistical Methods
 
 ## Antenna Specification
