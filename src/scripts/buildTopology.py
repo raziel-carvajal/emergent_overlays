@@ -87,7 +87,7 @@ def is_valid_network(pos, tx, density, allowed_error):
         max_degree = max(degrees)
         u = set(degrees)
         h = {d: len(filter(lambda(x): x == d,  degrees)) for d in u}
-        print avg_degree, max_degree, min_degree, expected, nx.number_of_nodes(g), nx.number_of_edges(g), density, cond1, cond2
+        print avg_degree, max_degree, min_degree, expected, "Nr Nodes", nx.number_of_nodes(g), "Nr Edges", nx.number_of_edges(g), density, cond1, cond2
         print h
     return cond1 and cond2
 
@@ -111,11 +111,14 @@ def fillSurface(Tx, tilesWidth, tilesHeight, density):
 
 def fillSurface2(Tx, tilesWidth, tilesHeight, density):
     result = []
+    r = float(Tx)/(tilesWidth*2*Tx)
+    n = int(math.ceil(float(density)/(math.pi*r*r)))
+    # print n, density, r
     block_width = 2*Tx
     w = tilesWidth * block_width
     h = tilesHeight * block_width
     G = nx.Graph()
-    G.add_nodes_from(range(1, (density + 1 + int(20/100.0*density))*w*h))
+    G.add_nodes_from(range(1, n+1))
     pos = nx.random_layout(G)
     for l in pos:
         pos[l][0] = w*pos[l][0]
@@ -169,10 +172,10 @@ if __name__ == '__main__':
         expected = maxL*maxL*d
 
         print "Building topology with density", d
-        topology = fillSurface(trRan, maxL, maxL, d)
+        topology = fillSurface2(trRan, maxL, maxL, d)
         # cleanTopology(topology, seen - expected)
-        while not is_valid_network(topology, trRan, d, 20):
-            topology = fillSurface(trRan, maxL, maxL, d)
+        while not is_valid_network(topology, trRan, d, 10):
+            topology = fillSurface2(trRan, maxL, maxL, d)
         # cleanTopology(topology, seem - expected)
 
         print "Writing NED file"
