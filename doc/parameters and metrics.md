@@ -39,6 +39,7 @@ Per algorithm and per network configuration we will measure:
 - Power consumption
 - Duplicated messages
 - How many nodes retransmit the message.
+- Number of collisions
 
 For more information see [statistical methodology](statistical methodology.md).
 
