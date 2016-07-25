@@ -57,6 +57,8 @@ Some high level requests:
 6. Consider options to statistically compare algorithms. The correlation of Spearman was mentioned in the dicussions here, but we have to discuss a bit more with our colleague.
 7. Consider the __cumulative distribution frequency__ to present the results. Raziel is already working on that.
 
+Detailed list:
+
 [List (sorry, it has a mix of some languages: English, Spanish, some words in French and some gibberish I tend to write under pressure :-))](TODO.md)
 
 ## Installation instructions
