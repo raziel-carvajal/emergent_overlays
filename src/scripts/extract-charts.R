@@ -1,6 +1,10 @@
 
 require('omnetpp')
 
+#
+# ds <- loadVectors(loadDataset("test-0.vec", add(type="vector", select="module(*.udpApp[*]) AND name(power_level:vector)") ), NULL)
+
+
 load.datafile <- function(fname, extensions=c("sca", "vec")) {
   ds <- loadDataset(paste(fname, sep= ".", extensions), add('vector'))
   ds <- loadVectors(ds, NULL)
