@@ -173,25 +173,11 @@ bool
 EWMA2::on_network_message_received(cPacket* pkt)
 {
   return BroadcastingAppBase::on_network_message_received(pkt) ||
-      processMessage2<ConnectMWST>(pkt, &EWMA2::on_connect_received) ||
-      processMessage2<InitiateMWST>(pkt, &EWMA2::on_initiate_received) ||
-      processMessage2<ReportMWST>(pkt, &EWMA2::on_report_received) ||
-      processMessage2<ChangeRootMWST>(pkt, &EWMA2::on_change_root_received) ||
-      processMessage2<InNewFragment>(pkt, &EWMA2::on_in_new_fragment_received);
-}
-
-
-template <typename T> bool
-EWMA2::processMessage2(cPacket* pkt, void (EWMA2::*action)(const T* msg))
-{
-    T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
-    if (t != nullptr) {
-        (this->*action)(t);
-        return true;
-    }
-    else {
-        return false;
-    }
+      processMessage<ConnectMWST>(pkt, [&](const ConnectMWST *m) { this->on_connect_received(m); }) ||
+      processMessage<InitiateMWST>(pkt, [&](const InitiateMWST *m) { this->on_initiate_received(m); }) ||
+      processMessage<ReportMWST>(pkt, [&](const ReportMWST *m) { this->on_report_received(m); }) ||
+      processMessage<ChangeRootMWST>(pkt, [&](const ChangeRootMWST *m) { this->on_change_root_received(m); }) ||
+      processMessage<InNewFragment>(pkt, [&](const InNewFragment *m) { this->on_in_new_fragment_received(m); });
 }
 
 
