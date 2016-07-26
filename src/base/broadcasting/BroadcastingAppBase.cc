@@ -332,7 +332,7 @@ BroadcastingAppBase::on_flooding_received(const FloodingMessage* m)
     string p = m->getPayload();
     if (payload_in_flooding.find(key) == payload_in_flooding.end()) {
         payload_in_flooding[key] = p;
-        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, 0.05);
+        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, uniform(0.01, 0.05));
     }
 }
 
