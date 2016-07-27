@@ -3,7 +3,7 @@ We are using the [taxonomy proposed by Ruiz et al. in 2015](papers/others/survey
 
 ![Taxonomy](taxonomy.png)
 
-For the moment, we are interested on algorithms where the antenna transmission range is fixed (the red areas in the picture above). Observe that there are these protocols can be further subclassfied depending on other features (e.g., underlying topology, context-awareness, etc.)
+For the moment, we are interested on algorithms where the antenna transmission range is fixed (the red areas in the picture above). Observe that there are these protocols can be further sub-classified depending on other features (e.g., underlying topology, context-awareness, etc.)
 
 Each algorithm below can be located under one leaf in the taxonomy; we will give the leaf every time we present a method.
 

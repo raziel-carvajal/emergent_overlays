@@ -13,7 +13,7 @@ Our aim is to make a correlation between mobile broadcasting algorithms for MANE
 
 where each P is an implementation of one broadcasting algorithm. In that survey, there is a taxonomy of broadcasting algorithms that we planned to respect i.e. the comparison will be driven between algorithms of the same category (as first step; once we have some results we will see if a comparison of algorithms from different categories makes sense).
 
-Notice that in some cases protocols have different modes (ottributes of the algorithm could be tuned with different values). Instead of having one row per algorithm at table T, we could have a group of rows per each algorithm.
+Notice that in some cases protocols have different modes (attributes of the algorithm could be tuned with different values). Instead of having one row per algorithm at table T, we could have a group of rows per each algorithm.
 
 ## Algorithms
 
