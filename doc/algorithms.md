@@ -13,13 +13,15 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 | Title  | Topology | Name | Rank | Year |
 | :--- | :--- | :--- | :--- | :--- |
 | Forward-node-set-based broadcast in clustered mobile ad hoc networks [FNSB](papers/others/wcmc2003.pdf) &#10008; | Cluster | [Wireless Communications and Mobile Computing](http://www.scimagojr.com/journalsearch.php?q=17543&tip=sid&clean=0)**(journal)**| A | 2003 |
-| Connectivity Based k-hop Clustering in Wireless Networks [K-HOP](papers/others/10.1.1.104.5681.pdf) &#10008;| Cluster |  [Proceedings of the Annual Hawaii International Conference on System Sciences](http://www.scimagojr.com/journalsearch.php?q=145755&tip=sid&clean=0)**(conf)** | A | 2003 | 
+| Connectivity Based k-hop Clustering in Wireless Networks [K-HOP](papers/others/10.1.1.104.5681.pdf) &#10008;| Cluster |  [Proceedings of the Annual Hawaii International Conference on System Sciences](http://www.scimagojr.com/journalsearch.php?q=145755&tip=sid&clean=0)**(conf)** | A | 2003 |
 | Extended Multipoint Relays to Determine Connected Dominating Sets in MANETs [CDS-MPR](papers/implemented/cds.pdf) &#10008; | MPR, CDS | [IEEE Transactions on Computers](http://www.scimagojr.com/journalsearch.php?q=25033&tip=sid&clean=0)**(journal)**| A* | 2006 |
 |Dominating sets and neighbor elimination-based broadcasting algorithms in wireless networks [CDS](papers/others/DominartingSets02.pdf) &#10008; | CDS | [IEEE Transactions on Parallel and Distributed Systems](http://www.scimagojr.com/journalsearch.php?q=26098&tip=sid&clean=0)**(journal)** | A* | 2002 |
 | BODYF – A Parameterless Broadcasting Protocol Over Dynamic Forest [BODYF](papers/others/10.1.1.371.7527.pdf) &#10008; | Tree | [IEEE International Conference on High Performance Computing and Simulation (HPCS)](http://lipn.univ-paris13.fr/~bennani/CSRank.html)**(conf)**| B | 2008 |
 | On Demand Routing in Large Ad Hoc Wireless Networks with Passive Clustering [AODV/PC](papers/others/kwon-wcnc00.pdf) &#10008;| Cluster | [IEEE Wireless Communications and Networking Conference, WCNC](http://www.scimagojr.com/journalsearch.php?q=145653&tip=sid&clean=0)**(conf)** | B | 2000 |
 | On Calculating Power-Aware Connected Dominating Sets for Efficient Routing in Ad Hoc Wireless Networks [CDS](papers/others/jcn.pdf) &#10004; | CDS |[JOURNAL OF COMMUNICATIONS AND NETWORKS](http://www.scimagojr.com/journalsearch.php?q=4800154012&tip=sid&clean=0) **(journal)**| C | 2000 |
 | Information dissemination in VANETs based upon a tree topology [DAGRS/BODYF](papers/others/91e59974989554f70cd9cf64d8ac7a1ca9dd.pdf) &#10008; | Tree | [Journal of Ad Hoc Networks](http://www.scimagojr.com/journalsearch.php?q=26799&tip=sid&clean=0)**(journal)** | ? | 2012 |
+
+
 
 # Non underlying topology algorithms with a fixed transmission range
 | Title | Category | Name | Rank | Year |
@@ -47,6 +49,9 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 | Adaptive multihop broadcast protocols for ad hoc networks [*BHG](papers/others/poznan_cikk.pdf) | ? | [International Symposium on Communication Systems, Networks Digital Signal Processing](http://www.scimagojr.com/journalsearch.php?q=21100218914&tip=sid&clean=0) **(conf)** | ? | 2012 |
 | An Efficient Flooding Algorithm for Mobile Ad-hoc Networks [geoflood](papers/others/geoflood.pdf) &#10008; | ? | Workshop on Modeling and Optimizations in Mobile Ad Hoc and Wireless Networks **(workshop)**| ? | 2004 |
 | Six-shot broadcast: A context-aware algorithm for efficient message diffusion in MANETs [six-shoot](papers/others/six-shoot.pdf) &#10008; | ? | Confederated International Conferences, CoopIS, DOA, GADA, IS, and ODBASE **(conf)**| ? | 2008 |
+| Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
+| Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
+| Optimized broadcast protocol for sensor networks ([durresi](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1453502&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1453502)) | - | IEEE Transactions on Computers | A* | 2005 | 
 
 
 # Underlying topology algorithms with a variable transmission range
