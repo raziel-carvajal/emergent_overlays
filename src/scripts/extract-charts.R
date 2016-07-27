@@ -1,38 +1,28 @@
 
 require('omnetpp')
 
-#
-# ds <- loadVectors(loadDataset("test-0.vec", add(type="vector", select="module(*.udpApp[*]) AND name(power_level:vector)") ), NULL)
-
-
-load.datafile <- function(fname, extensions=c("sca", "vec")) {
-  ds <- loadDataset(paste(fname, sep= ".", extensions), add('vector'))
-  ds <- loadVectors(ds, NULL)
+load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
+  ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
 
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  v <- ds$vectordata
-  # the vector name used to be power_level
-  power_levels <- ds$vectors[ ds$vectors$name == 'residualCapacity:vector', ]$result
-  tmp <- subset(v, resultkey %in% power_levels) # filter out other vectors
-  others <- lapply(power_levels, function(p) subset(tmp, resultkey == p)) # create a separete list for each power level
-  sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist) # vector of power levels for each instant of time
+  # create a separete list for each power level
+  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+  # vector of power levels for each instant of time
+  sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist) 
 }
 
 
-broadcastingTime <- function(ds, simulation.time) {
-	v <- ds$vectordata
-	msg_sent <- ds$vectors[ ds$vectors$name == 'msg_sent:vector', ]$result
-	tmp <- subset(v, resultkey %in% msg_sent) # filter out vectors that are not msg_sent
-	list_of_sent <- lapply(msg_sent, function(p) subset(tmp, resultkey == p)) # create a separate list for each msg_sent vector
-
-	id_msgs <- tmp[[4]][!duplicated(tmp[[4]])] # recover list of msg id
-
-	msg_received <- ds$vectors[ ds$vectors$name == 'broadcast_msg_received:vector', ]$result
-	tmp2 <- subset(v, resultkey %in% msg_received) # filter out vectors that are not broadcast_msg_received
-	list_of_received <- lapply(msg_received, function(p) subset(tmp2, resultkey == p)) # create a separate list for each broadcast_msg_received vector
-
+broadcastingTime <- function(msgDs, broDs, simulation.time) {
+        # create a separate list for each msg_sent vector
+	list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p)) 
+        
+        # recover list of msg id
+	id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])] 
+	
+        # create a separate list for each broadcast_msg_received vector
+	list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p)) 
 	sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), c(100*simulation.time)), 1 )[[1]] )) )
 
@@ -126,22 +116,26 @@ average.values <- function(pl, broadcast.info, max) {
 # TODO: total power consumption in one experiment
 # TODO: chart of power consumption in many experiments (depends on the previous one)
 
-
 args <- commandArgs(trailingOnly=TRUE)
 print(args)
 if (length(args) == 3) {
 	sim.time <- strtoi(args[3])
 	print(paste("Loading data file:", args[1]))
-	ds <- load.datafile(args[1])
+	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
+        msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
+        msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
 
+  #return( data.frame(plD = powerLevelDs, msD = msgSentDs, bmrD = broadcastMsgRcvDs) )
 	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
 	device
 
 	print(paste("Creating powerlevels:", args[1]))
-	pl <- powerlevels3( ds, max= sim.time )
+	#pl <- powerlevels3( ds, max= sim.time )
+	pl <- powerlevels3(powerLevelDs, max= sim.time )
 
 	print(paste("Creating broadcasting time:", args[1]))
-	bs <- broadcastingTime(ds, simulation.time = sim.time)
+	#bs <- broadcastingTime(ds, simulation.time = sim.time)
+	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P");
 	plot.charts.for.single.experiment(pl, bs, max = sim.time)
@@ -150,6 +144,5 @@ if (length(args) == 3) {
 	averages <- average.values(pl, bs, max=sim.time)
 	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages, averages$retransmitted_messages)))
 }
-
 
 #lapply(1:1, function(b) max(as.numeric(unlist(lapply(broadcasts, function(n) { s = x$vectordata[x$vectordata$resultkey == n,]; min(s[s$y == b,]$x) } )))))
