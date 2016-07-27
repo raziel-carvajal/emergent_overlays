@@ -26,6 +26,7 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 # Non underlying topology algorithms with a fixed transmission range
 | Title | Category | Name | Rank | Year |
 | :--- | :--- | :--- | :--- | :--- |
+| Optimized broadcast protocol for sensor networks ([durresi](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1453502&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1453502)) | - | IEEE Transactions on Computers | A* | 2005 |
 | A broadcasting method considering battery lifetime and distance between nodes in MANET [BMBD](papers/others/) &#10008; | ? | International Conference on Distributed Computing SystemsWorkshops **(workshop)** | A | 2009 |
 | Border node retransmission based probabilistic broadcast protocols in ad-hoc networks [cartigny](papers/others/cartigny.pdf) &#10008; | ? | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)** | A | 2003 |
 | Multipoint relaying for flooding broadcast messages in mobile wireless networks [MPR](papers/implemented/mpr.pdf) &#10004; | Neighbor-based | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)**| A  | 2002  |
@@ -37,6 +38,7 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 | Stochastic broadcast for VANET [slavik-stochastic](slavik-stochastic.pdf) &#10008; | ? | [Consumer Communications and Networking Conference](http://portal.core.edu.au/conf-ranks/616/) **(conf)** | B | 2010 |
 | Location aided broadcast in wireless ad hoc network systems [SunAndLai](papers/others/SunAndLai.pdf) &#10008; | ? | [IEEE Wireless Communications and Networking Conference](http://portal.core.edu.au/conf-ranks/760/) **(conf)**| B | 2002 |
 | An adaptive approach to group communications in multi hop ad hoc networks [Hyper-Flooding](papers/others/hyper-flooding.pdf) &#10008; | ? | International Symposium on Computers and Communications **(conf)**| B | 2002 |
+| Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
 | Speed adaptive probabilistic flooding in cooperative emergency warning [SAPF](papers/others/SAPF.pdf) &#10008; | ? | International Conference on Wireless Internet **(conf)** | C | 2008 |
 | Area-based beaconless reliable broadcasting in sensor networks [ABBA](papers/implemented/abba.pdf) &#10004;| Context-aware/Area-based | [International Journal of Sensor Networks](http://www.scimagojr.com/journalsearch.php?q=19900192159&tip=sid&clean=0) **(journal)** | C | 2006  |
 | NPPB: A broadcast scheme in dense VANETs [NPPB](papers/others/NPPB.pdf) &#10008; | ? | [Information Technology Journal](http://portal.core.edu.au/jnl-ranks/573/) **(journal)** | C | 2010 |
@@ -49,9 +51,7 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 | Adaptive multihop broadcast protocols for ad hoc networks [*BHG](papers/others/poznan_cikk.pdf) | ? | [International Symposium on Communication Systems, Networks Digital Signal Processing](http://www.scimagojr.com/journalsearch.php?q=21100218914&tip=sid&clean=0) **(conf)** | ? | 2012 |
 | An Efficient Flooding Algorithm for Mobile Ad-hoc Networks [geoflood](papers/others/geoflood.pdf) &#10008; | ? | Workshop on Modeling and Optimizations in Mobile Ad Hoc and Wireless Networks **(workshop)**| ? | 2004 |
 | Six-shot broadcast: A context-aware algorithm for efficient message diffusion in MANETs [six-shoot](papers/others/six-shoot.pdf) &#10008; | ? | Confederated International Conferences, CoopIS, DOA, GADA, IS, and ODBASE **(conf)**| ? | 2008 |
-| Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
-| Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
-| Optimized broadcast protocol for sensor networks ([durresi](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1453502&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1453502)) | - | IEEE Transactions on Computers | A* | 2005 | 
+
 
 
 # Underlying topology algorithms with a variable transmission range
