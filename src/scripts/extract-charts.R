@@ -1,10 +1,8 @@
-
 require('omnetpp')
 
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
-
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separete list for each power level
@@ -13,37 +11,47 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist) 
 }
 
-
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
-        # create a separate list for each msg_sent vector
-	list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p)) 
-        
-        # recover list of msg id
-	id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])] 
-	
-        # create a separate list for each broadcast_msg_received vector
-	list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p)) 
-	sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), c(100*simulation.time)), 1 )[[1]] )) )
-
-	# compute number of message received at each location (coverage)
-	rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
-
-	# compute number of message sent at each location (retransmission)
-	sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
-	
-	# compute number of message received per broadcast session
-	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
-
-	broadcasting.time <- data.frame(
-			id = id_msgs, # session id
-			sending = sending.time, 
-			receiving = reception.time,
-			time = reception.time - sending.time, # broadcasting time per session id
-			n.received = rcv, # how many locations received a message in a particular session
-			n.sent = sent, # how many locations sent a message in a particular session
-			B.i = B.i.tmp # total number of messages received per broadcast session
-	)
+  # create a separate list for each msg_sent vector
+  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p)) 
+  # recover list of msg id
+  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])] 
+  
+  # create a separate list for each broadcast_msg_received vector
+  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
+  
+  sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
+  
+  reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), NA), 1 )[[1]] )) )
+  #sending.time[ which(is.na(reception.time)) ] <- NA
+  #sending.time <- sending.time[ !is.na(sending.time) ]
+  #reception.time <- reception.time[ !is.na(reception.time) ]
+  #tmp <- reception.time - sending.time
+  #tmp <- tmp[!is.na(tmp)]
+  #test <- reception.time - sending.time
+  #test <- test[!is.na(test)]
+  #print('NA indexes')
+  #lapply( which(is.na(reception.time)), function(entry) replace(sending.time, sending.time[entry] , NA ) )
+  #print(sending.time)
+  
+  # compute number of message received at each location (coverage)
+  rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
+  
+  # compute number of message sent at each location (retransmission)
+  sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
+  
+  # compute number of message received per broadcast session
+  B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
+  
+  broadcasting.time <- data.frame(
+  		id = id_msgs, # session id
+  		sending = sending.time, 
+  		receiving = reception.time,
+  		time = reception.time - sending.time, # broadcasting time per session id
+  		n.received = rcv, # how many locations received a message in a particular session
+  		n.sent = sent, # how many locations sent a message in a particular session
+  		B.i = B.i.tmp # total number of messages received per broadcast session
+  )
 }
 
 
@@ -51,8 +59,12 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
-
-	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+        
+        # TODO this implies a change of size in the data.frame
+        #      an an error is reached
+        # broadcast.info$time <- broadcast.info$time[!is.na(broadcast.info$time)]
+	
+        valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
@@ -92,7 +104,7 @@ average.values <- function(pl, broadcast.info, max) {
 	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
 	
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
-	bt <- sum(valid.time)/length(valid.time)
+	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
 	
 	pc <- sum ( pl[, ncol(pl)] )/nr.nodes
 	
