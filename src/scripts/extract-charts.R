@@ -54,16 +54,48 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 }
 
+export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
+
+  valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+  valid.time <- valid.time[!is.na(valid.time)]
+  if (length(valid.time) == 0) { valid.time <- broadcast.info$time }
+  broSes <- valid.time * 1000
+
+  broSes <- data.frame( whatever = broSes)
+  colnames(broSes) <- c(expeId)
+  write.table(
+            broSes,
+            file = "../../results/broadcastSession",
+            row.names = FALSE,
+            append = TRUE
+  )
+  
+  n <- length(broadcast.info$id) # number of broadcast messages
+  broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
+  broDupMsgsInfo <- data.frame( whatever = c(mean(broDupMsgs), sd(broDupMsgs)) )
+  colnames(broDupMsgsInfo) <- c(expeId)
+  write.table(
+            broDupMsgsInfo,
+            file = "../../results/duplicatedMsgs",
+            row.names = FALSE,
+            append = TRUE
+  )
+
+  powerLevelInfo <- data.frame( whatever = c(mean(power.level), sd(power.level)) )
+  colnames(powerLevelInfo) <- c(expeId)
+  write.table(
+            powerLevelInfo,
+            file = "../../results/batteryConsumption",
+            row.names = FALSE,
+            append = TRUE
+  )
+}
 
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
 
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
         
-        # TODO this implies a change of size in the data.frame
-        #      an an error is reached
-        # broadcast.info$time <- broadcast.info$time[!is.na(broadcast.info$time)]
-	
         valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
@@ -131,7 +163,7 @@ average.values <- function(pl, broadcast.info, max) {
 
 args <- commandArgs(trailingOnly=TRUE)
 print(args)
-if (length(args) == 3) {
+if (length(args) == 4) {
 	sim.time <- strtoi(args[3])
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
@@ -150,8 +182,11 @@ if (length(args) == 3) {
 	#bs <- broadcastingTime(ds, simulation.time = sim.time)
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
-	print("Plotting :-P");
+	print("Plotting :-P")
 	plot.charts.for.single.experiment(pl, bs, max = sim.time)
+
+        print("Exporting data...")
+        export.data.of.experiment(args[4], bs, max = sim.time, pl)
 	
 	# printing average values
 	averages <- average.values(pl, bs, max=sim.time)
