@@ -68,6 +68,7 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
+        plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of broadcasting session time")
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
 	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
