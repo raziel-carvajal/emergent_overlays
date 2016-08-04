@@ -1,4 +1,3 @@
-
 import.data <- function(fileName) {
   data <- readLines(fileName)
   closeAllConnections()
@@ -33,38 +32,83 @@ get.attrSet <- function(dfNames, attri) {
   )
 }
 
-plot.cdfs <- function(df, dfNames, sizes, algos, plotTitle) {
-  for (d in c('sparse', 'medium', 'dense')) {
-    for (s in sizes) {
-      pos <- grep(paste("n_", s, "_d_", d, sep=''), dfNames)
-      if (length(pos) != 0) {
-        keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
-        for (a in algos) {
-          i <- grep(a, keys)
-          if (length(i) != 0){
-            # TODO plot ECDF and add it to file per page
-            print(keys[i]) 
-          }
-        }
-      }
-    }
+plot.errorBars <- function(matriz, pal, d) {
+  algos <- matriz[, 1]
+  y <- as.numeric( matriz[, 2] )
+  sd <-as.numeric( matriz[, 3] )
+  plot(y, ylim = range( c(y - sd, y + sd) ),
+    pch = 19, xlab="Protocol", ylab="Mean +/- SD",
+    main = paste("Density ", d), axes = FALSE
+  )
+  axis(2)
+  axis(1, at = seq_along(y),labels = algos)
+  arrows(1:length(algos), y - sd, 1:length(algos), y + sd, length = 0.05, angle = 90, code = 3)
+  box()
+}
+
+plot.cdf <- function(df, key, it, c, d){
+  H <- ecdf( df[[ key ]][, 1] )
+  X <- df[[ key ]][, 1]
+  Y <- H(X)
+  if (it == 0) {
+    plot( y = Y, x = X, type = 'p', col = c, xlab = "Time (ms)", main = paste("Density ", d))
+  } else {
+    lines(y = Y, x = X, type = 'p', col = c)
   }
 }
 
-#x <- lapply(c('sparse', 'medium', 'dense'), function(d){ grep(d, dfNames) })
-#names(x) <- c('sparse', 'medium', 'dense')
-#df[[ dfNames[ x$dense ] ]]
+plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
+  for (s in sizes) {
+    for (d in c('sparse', 'medium', 'dense')) {
+      pos <- grep(paste("n_", s, "_d_", d, sep = ''), dfNames)
+      keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
+      it <- 0
+      avgs <- c()
+      stds <- c()
+      tmp <- matrix(0, length(algos), 3)
+      for (a in algos) {
+        j <- head(grep(a, keys), 1)
+        if (metric == "broadcastSessTime") { plot.cdf(df, keys[j], it, pal[a], d) }
+        if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") {
+          avg <- df[[ keys[j] ]][, 1][1]
+          std <- df[[ keys[j] ]][, 1][2]
+          tmp[it + 1, ] <- c(a, avg, std)
+        }
+        it <- it + 1
+      }
+      if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d) }
+      legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
+    }
+    mtext(plotHeader, outer = TRUE, cex = 1, line = -2 )
+  }
+}
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 1) {
-  df <- import.data(args[1])
-  dfNames <- names(df)
+if (length(args) == 4) {
+  bcFile <- paste(args[1], args[2], sep = '')
+  dmFile <- paste(args[1], args[3], sep = '')
+  bsFile <- paste(args[1], args[4], sep = '')
+  
+  dfBc <- import.data(bcFile)
+  dfDm <- import.data(dmFile)
+  dfBs <- import.data(bsFile)
+
+  # datasets headers, algorithms and number of peers are the same for each
+  # dataset file
+  dfNames <- names(dfBs)
   sizes <- get.attrSet(dfNames, "n")
   algos <- get.attrSet(dfNames, "p")
-  plot.cdfs(df, dfNames, sizes, algos, "Broadcasting")
+
+  # setting attributes to plot
+  m_layout <- matrix(1:3, 1, 3, byrow=TRUE)
+  pal <- rainbow( length(algos) )
+  names(pal) <- algos
+  pdf(paste(args[1], "Results", sep = ""), width=17, height=8)
+  # create layout for this metric
+  layout(m_layout, heights=c(0.8,0.8,0.8))
+  par(mai = c(0.7,0.6,1.2,0.6))
   
-  #lapply(names(df), function(n){
-  #  x <- unlist(strsplit( unlist(strsplit(n, '\"'))[2], '_' ))
-  #  x
-  #})
+  plot.metric(dfBc, "batteryConsuption", dfNames, sizes, algos, pal, "AVG power consumption")
+  #plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")
+  plot.metric(dfBs, "broadcastSessTime", dfNames, sizes, algos, pal, "CDF of broadcasting session time")
 }
