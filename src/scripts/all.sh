@@ -48,14 +48,14 @@ fi
 
 if [ ! -d "../../results" ]; then
     mkdir ../../results
-    rm -f ../../results/broadcastSession.csv 
-    rm -f ../../results/duplicatedMsgs.csv 
-    rm -f ../../results/batteryConsumption.csv 
-    rm -f ../../results/networkCoverage.csv 
-    touch ../../results/broadcastSession.csv 
-    touch ../../results/duplicatedMsgs.csv 
-    touch ../../results/batteryConsumption.csv 
-    touch ../../results/networkCoverage.csv 
+    rm -f ../../results/broadcastSession 
+    rm -f ../../results/duplicatedMsgs 
+    rm -f ../../results/batteryConsumption
+    rm -f ../../results/networkCoverage 
+    touch ../../results/broadcastSession
+    touch ../../results/duplicatedMsgs
+    touch ../../results/batteryConsumption
+    touch ../../results/networkCoverage
 fi
 
 
