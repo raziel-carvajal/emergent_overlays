@@ -166,9 +166,9 @@ CDS2::handleMessageWhenUp(cMessage *msg)
 bool
 CDS2::on_network_message_received(cPacket* pkt){
     return BroadcastingAppBase::on_network_message_received(pkt) ||
-            processMessage2<Neighbors>(pkt, &CDS2::on_neighbors) ||
-			processMessage2<RequestNeighbors>(pkt, &CDS2::on_request_neighbors) ||
-			processMessage2<MarkerChanged>(pkt, &CDS2::on_marker_changed);
+            processMessage<Neighbors>(pkt, [&] (const Neighbors*m) { this->on_neighbors(m); }) ||
+			processMessage<RequestNeighbors>(pkt, [&] (const RequestNeighbors*m) { this->on_request_neighbors(m); }) ||
+			processMessage<MarkerChanged>(pkt, [&] (const MarkerChanged*m) { this->on_marker_changed(m); });
 			;
 }
 
@@ -406,19 +406,6 @@ CDS2::time_to_broadcast_payload(void* user_data)
     }
     //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
     send_message(key);
-}
-
-template <typename T> bool
-CDS2::processMessage2(cPacket* pkt, void (CDS2::*action)(const T* msg))
-{
-    T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
-    if (t != nullptr) {
-        (this->*action)(t);
-        return true;
-    }
-    else {
-        return false;
-    }
 }
 
 

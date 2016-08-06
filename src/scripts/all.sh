@@ -48,6 +48,14 @@ fi
 
 if [ ! -d "../../results" ]; then
     mkdir ../../results
+    rm -f ../../results/broadcastSession 
+    rm -f ../../results/duplicatedMsgs 
+    rm -f ../../results/batteryConsumption
+    rm -f ../../results/networkCoverage 
+    touch ../../results/broadcastSession
+    touch ../../results/duplicatedMsgs
+    touch ../../results/batteryConsumption
+    touch ../../results/networkCoverage
 fi
 
 
@@ -64,5 +72,5 @@ for config in ${CONFIG_PATH}/*.ini ; do
 	fi
 	
 	simulation_time=`cat "${config}" | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
-	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time}
+	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time} ${config_name}
 done

@@ -191,11 +191,17 @@ bool
 BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 {
 
-    bool done = processMessage<Hello>(pkt, &BroadcastingAppBase::on_hello_received);
+    bool done = processMessage<Hello>(pkt, [&] (const Hello* m) {
+		this-> on_hello_received(m);
+	});
 
     if (!done) {
-        done = processMessage<Broadcast>(pkt, &BroadcastingAppBase::on_payload_received) ||
-               processMessage<FloodingMessage>(pkt, &BroadcastingAppBase::on_flooding_received);
+        done = processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
+					this->on_payload_received(m);
+			   }) ||
+               processMessage<FloodingMessage>(pkt, [&] (const FloodingMessage* m) {
+					this->on_flooding_received(m);
+			   });
     }
 
     return done;
@@ -250,20 +256,6 @@ BroadcastingAppBase::processStart()
     if (nr_hello_msg > 0) {
         ctrlMsg0->setKind(SAY_HELLO);
         scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
-    }
-}
-
-
-template <typename T> bool
-BroadcastingAppBase::processMessage(cPacket* pkt, void (BroadcastingAppBase::*action)(const T* msg))
-{
-    T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
-    if (t != nullptr) {
-        (this->*action)(t);
-        return true;
-    }
-    else {
-        return false;
     }
 }
 
@@ -340,7 +332,7 @@ BroadcastingAppBase::on_flooding_received(const FloodingMessage* m)
     string p = m->getPayload();
     if (payload_in_flooding.find(key) == payload_in_flooding.end()) {
         payload_in_flooding[key] = p;
-        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, 0.05);
+        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, uniform(0.01, 0.05));
     }
 }
 

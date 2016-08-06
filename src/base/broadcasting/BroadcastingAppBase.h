@@ -8,6 +8,7 @@
 #include <string>
 #include <queue>
 #include <set>
+#include <functional>
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleAccess.h"
@@ -112,11 +113,18 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     virtual void processStart();
 
-    // template <typename K>
-    // class Action {
-    //   void task(BroadcastingAppBase*, K*);
-    // };
-    template <typename T> bool processMessage(cPacket* pkt, void (BroadcastingAppBase::*action)(const T* msg));
+    template <typename T> bool
+	processMessage(cPacket* pkt, std::function<void(const T*)> action)
+	{
+		T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
+		if (t != nullptr) {
+			action(t);
+		    return true;
+		}
+		else {
+		    return false;
+		}
+	}
 
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
     virtual void on_flooding_received(const broadcasting::FloodingMessage* m);

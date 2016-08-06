@@ -68,9 +68,6 @@ private:
 	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
 	virtual void on_mpr_found(const mpr_t2::MprFound* m);
 
-
-    template <typename T> bool processMessage2(cPacket* pkt, void (Mpr_t2::*action)(const T* msg));
-
 	void request_hops(int h);
 
 

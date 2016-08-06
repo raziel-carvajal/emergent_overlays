@@ -140,10 +140,6 @@ class INET_API EWMA2 : public BroadcastingAppBase
     void send_connect(const std::string& j, bool now);
     void send_initiate(const std::string& fragmentId, const std::string& j, bool now);
 
-
-    // FIXME : this is crap
-    template <typename T> bool processMessage2(cPacket* pkt, void (EWMA2::*action)(const T* msg));
-
     std::string header();
 
   protected:

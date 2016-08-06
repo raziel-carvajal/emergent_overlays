@@ -182,9 +182,9 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 bool
 Mpr_t2::on_network_message_received(cPacket* pkt){
     return BroadcastingAppBase::on_network_message_received(pkt) ||
-            processMessage2<Neighbors>(pkt, &Mpr_t2::on_neighbors) ||
-			processMessage2<RequestNeighbors>(pkt, &Mpr_t2::on_request_neighbors) ||
-			processMessage2<MprFound>(pkt, &Mpr_t2::on_mpr_found);
+            processMessage<Neighbors>(pkt, [&](const Neighbors*m) { this->on_neighbors(m); }) ||
+			processMessage<RequestNeighbors>(pkt, [&](const RequestNeighbors*m) { this->on_request_neighbors(m); }) ||
+			processMessage<MprFound>(pkt, [&](const MprFound*m) { this->on_mpr_found(m); });
 			;
 }
 
@@ -384,20 +384,6 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
     //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
     send_message(key);
 }
-
-template <typename T> bool
-Mpr_t2::processMessage2(cPacket* pkt, void (Mpr_t2::*action)(const T* msg))
-{
-    T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
-    if (t != nullptr) {
-        (this->*action)(t);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 
 
 set<string>

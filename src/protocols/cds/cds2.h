@@ -76,9 +76,6 @@ private:
 	virtual void on_request_neighbors(const cds2::RequestNeighbors* m);
 	virtual void on_marker_changed(const cds2::MarkerChanged* m);
 
-
-	template <typename T> bool processMessage2(cPacket* pkt, void (CDS2::*action)(const T* msg));
-
 	void request_hops(int h);
 
 
