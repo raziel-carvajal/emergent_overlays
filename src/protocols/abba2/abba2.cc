@@ -34,8 +34,6 @@ namespace inet {
 
 Define_Module(Abba2);
 
-#define  PIPI  3.141592653589793238463
-
 void
 Abba2::on_payload_received(const Broadcast* m) {
 
@@ -47,8 +45,8 @@ Abba2::on_payload_received(const Broadcast* m) {
 
     if (firstTime) {
         double angle = 0;
-        double delta = 2*PIPI / 36;
-        while (angle < 2*PIPI) {
+        double delta = 2*M_PI / 36;
+        while (angle < 2*M_PI) {
             auto y = std::sin(angle)*radious;
             auto x = std::cos(angle)*radious;
             received_from[key].insert(make_pair(x+position.x, y + position.y));
