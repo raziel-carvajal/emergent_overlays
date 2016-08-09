@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import matplotlib.pyplot as plt
 
+
 def get_graph(pos, tx):
     g = nx.Graph()
     for i in pos:
@@ -42,7 +43,8 @@ if __name__ == '__main__':
             l[node_id] = "hostR" + str(node_id)
             node_id = node_id + 1
 
-    print pos
+    print "Positions"
+    print pos, "\n"
 
     g = get_graph(pos, communication_range)
     plt.axis('off')
@@ -50,5 +52,34 @@ if __name__ == '__main__':
     nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700)
 
     plt.savefig(output_image_file)
+
+    H1 = defaultdict(set)
+    for n in g.nodes():
+        for e in g.neighbors(n):
+            H1[n].add(e)
+
+    H2 = defaultdict(set)
+    for n in g.nodes():
+        for e in g.neighbors(n):
+            H2[n] = H2[n] | H1[e]
+        H2[n] = H2[n] - ({n} | H1[n])
+
+    print "", "H1"
+    print H1, "\n"
+    print "", "H2"
+    print H2, "\n"
+
+    # Step 1
+    C = defaultdict(set)
+    for v in g.nodes():
+        print "\t", v
+        covered = defaultdict(set)
+        for u in g.neighbors(v):
+            covered[u] = H2[v] & H1[u]
+
+        for h in H2[v]:
+            haveIt = [u for u in g.neighbors(v) if h in covered[u]]
+            if len(haveIt) == 1:
+                print "\t\tIncluded in step 1: ", haveIt[0]
 
     print "Done"
