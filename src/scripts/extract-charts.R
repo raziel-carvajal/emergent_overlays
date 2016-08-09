@@ -1,10 +1,8 @@
-
 require('omnetpp')
 
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
-
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separate list for each power level
@@ -13,49 +11,97 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist)
 }
 
-
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
-        # create a separate list for each msg_sent vector
-	list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
 
-        # recover list of msg id
-	id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+  # create a separate list for each msg_sent vector
+  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+  # recover list of msg id
+  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
 
-        # create a separate list for each broadcast_msg_received vector
-	list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-	sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-	reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), c(100*simulation.time)), 1 )[[1]] )) )
+  # create a separate list for each broadcast_msg_received vector
+  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
 
-	# compute number of message received at each location (coverage)
-	rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
+  sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
-	# compute number of message sent at each location (retransmission)
-	sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
+  reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), NA), 1 )[[1]] )) )
+  #sending.time[ which(is.na(reception.time)) ] <- NA
+  #sending.time <- sending.time[ !is.na(sending.time) ]
+  #reception.time <- reception.time[ !is.na(reception.time) ]
+  #tmp <- reception.time - sending.time
+  #tmp <- tmp[!is.na(tmp)]
+  #test <- reception.time - sending.time
+  #test <- test[!is.na(test)]
+  #print('NA indexes')
+  #lapply( which(is.na(reception.time)), function(entry) replace(sending.time, sending.time[entry] , NA ) )
+  #print(sending.time)
 
-	# compute number of message received per broadcast session
-	B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
+  # compute number of message received at each location (coverage)
+  rcv <- sapply(id_msgs, function(id) { sum( sapply(list_of_received, function(d) id %in% d$y ) ) } )
 
-	broadcasting.time <- data.frame(
-			id = id_msgs, # session id
-			sending = sending.time,
-			receiving = reception.time,
-			time = reception.time - sending.time, # broadcasting time per session id
-			n.received = rcv, # how many locations received a message in a particular session
-			n.sent = sent, # how many locations sent a message in a particular session
-			B.i = B.i.tmp # total number of messages received per broadcast session
-	)
+  # compute number of message sent at each location (retransmission)
+  sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
+
+  # compute number of message received per broadcast session
+  B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
+
+  broadcasting.time <- data.frame(
+  		id = id_msgs, # session id
+  		sending = sending.time,
+  		receiving = reception.time,
+  		time = reception.time - sending.time, # broadcasting time per session id
+  		n.received = rcv, # how many locations received a message in a particular session
+  		n.sent = sent, # how many locations sent a message in a particular session
+  		B.i = B.i.tmp # total number of messages received per broadcast session
+  )
 }
 
+export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
+
+  valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+  valid.time <- valid.time[!is.na(valid.time)]
+  if (length(valid.time) == 0) { valid.time <- broadcast.info$time }
+  broSes <- valid.time * 1000
+
+  broSes <- data.frame( whatever = broSes)
+  colnames(broSes) <- c(expeId)
+  write.table(
+            broSes,
+            file = "../../results/broadcastSession",
+            row.names = FALSE,
+            append = TRUE
+  )
+
+  n <- length(broadcast.info$id) # number of broadcast messages
+  broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
+  broDupMsgsInfo <- data.frame( whatever = c(mean(broDupMsgs), sd(broDupMsgs)) )
+  colnames(broDupMsgsInfo) <- c(expeId)
+  write.table(
+            broDupMsgsInfo,
+            file = "../../results/duplicatedMsgs",
+            row.names = FALSE,
+            append = TRUE
+  )
+
+  powerLevelInfo <- data.frame( whatever = c(mean(power.level), sd(power.level)) )
+  colnames(powerLevelInfo) <- c(expeId)
+  write.table(
+            powerLevelInfo,
+            file = "../../results/batteryConsumption",
+            row.names = FALSE,
+            append = TRUE
+  )
+}
 
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
 
 	nr.nodes <- length(power.level[,1])
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+        valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
+        plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of broadcasting session time")
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
 	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
@@ -92,7 +138,7 @@ average.values <- function(pl, broadcast.info, max) {
 	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
 
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
-	bt <- sum(valid.time)/length(valid.time)
+	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
 
 	pc <- sum ( pl[, ncol(pl)] )/nr.nodes
 
@@ -118,12 +164,13 @@ average.values <- function(pl, broadcast.info, max) {
 
 args <- commandArgs(trailingOnly=TRUE)
 print(args)
-if (length(args) == 3) {
-  sim.time <- strtoi(args[3])
-  print(paste("Loading data file:", args[1]))
-  powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
-  msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
-  msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
+
+if (length(args) == 4) {
+	sim.time <- strtoi(args[3])
+	print(paste("Loading data file:", args[1]))
+	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
+        msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
+        msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
 
   #return( data.frame(plD = powerLevelDs, msD = msgSentDs, bmrD = broadcastMsgRcvDs) )
 	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
@@ -137,8 +184,11 @@ if (length(args) == 3) {
 	#bs <- broadcastingTime(ds, simulation.time = sim.time)
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
-	print("Plotting :-P");
+	print("Plotting :-P")
 	plot.charts.for.single.experiment(pl, bs, max = sim.time)
+
+  print("Exporting data...")
+  export.data.of.experiment(args[4], bs, max = sim.time, pl)
 
 	# printing average values
 	averages <- average.values(pl, bs, max=sim.time)
