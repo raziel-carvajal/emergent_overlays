@@ -79,6 +79,7 @@ Abba2::on_payload_received(const Broadcast* m) {
 void
 Abba2::send_message(string& key)
 {
+
     if (is_source || received_from[key].size() > 0) {
         //cerr << myself << " has still " << received_from[key].size() << " points " << endl;
 
@@ -102,8 +103,11 @@ Abba2::time_to_broadcast_payload(void* user_data)
 //    BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
-        key = myself + "-" + to_string(get_next_id_for_msg()); // TODO: createUniqueBroadcastSessionID()
-        payloads[key] = " this is the payload, initially sent from " + myself;
+        key = myself + "-" + to_string(get_next_id_for_msg());
+        auto s = " this is the payload, initially sent from " + myself;
+        // std::string content(10024, '9');
+        // s = s + content;
+        payloads[key] = s;
         emitBroadcastMsgReceived(key);
     }
     else {
