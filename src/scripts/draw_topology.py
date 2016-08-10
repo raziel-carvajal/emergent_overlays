@@ -127,7 +127,7 @@ def simulate(g, pos, l, base_filename):
     NOT_IN_C = 0.0 # blue
     colors = map(lambda(u): IN_C if any(u in C[v] for v in C) else NOT_IN_C , g.nodes())
 
-    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='viridis', node_color=colors)
+    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='summer', node_color=colors)
     plt.savefig(base_filename + " members of mpr.png")
 
     Senders = compute_potential_senders(g, C)
@@ -139,7 +139,7 @@ def simulate(g, pos, l, base_filename):
     SENDERS_COLOR = 1.0 # yellow
     NOT_SENDERS_COLOR = 0.0 # blue
     colors = [ SENDERS_COLOR if u in Senders else NOT_SENDERS_COLOR for u in g.nodes()]
-    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='viridis', node_color=colors)
+    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='summer', node_color=colors)
     plt.savefig(base_filename + " after mpr rule.png")
 
     pass
@@ -158,7 +158,7 @@ def generate_topology():
     count = 1
 
     # inner circle
-    angles = [  idx * (2*math.pi/8) for idx in range(0, 8) ]
+    angles = [  (-idx) * (2*math.pi/8) + math.pi/2 for idx in range(0, 8) ]
     nodes = [ [20*math.cos(a), 20*math.sin(a)] for a in angles ]
     for i in range(0, len(nodes)):
         pos[i+count] = nodes[i]
@@ -170,35 +170,50 @@ def generate_topology():
     count = count + len(nodes)
 
     # medium circle
-    angles = [  idx * (2*math.pi/16) for idx in range(0, 16) ]
-    nodes = [ [40*math.cos(a), 40*math.sin(a)] for a in angles ]
+    angles = [(-idx) * (2*math.pi/16) + math.pi/2 for idx in range(0, 16)]
+    nodes = [[40*math.cos(a), 40*math.sin(a)] for a in angles]
     for i in range(0, len(nodes)):
         pos[i+count] = nodes[i]
         g.add_node(i+count)
 
     # adding edges
-    dist = { v: [  [distance(v, u, pos), u] for u in range(count , count + len(nodes)) ] for v in last_circle }
-    for v in last_circle:
-        d = sorted(dist[v], key=lambda(e): e[0])[:4]
-        for u in d:
-            g.add_edge(v, u[1])
+    g.add_edges_from([(1, 9), (1, 10), (1, 11), (1, 24)])
+    g.add_edges_from([(2, 10), (2, 11), (2, 12), (2, 13)])
+    g.add_edges_from([(3, 12), (3, 13), (3, 14), (3, 15)])
+    g.add_edges_from([(4, 14), (4, 15), (4, 15), (4, 17)])
+    g.add_edges_from([(5, 16), (5, 17), (5, 18), (5, 19)])
+    g.add_edges_from([(6, 18), (6, 19), (6, 20), (6, 21)])
+    g.add_edges_from([(7, 20), (7, 21), (7, 22), (7, 23)])
+    g.add_edges_from([(8, 22), (8, 23), (8, 24), (8, 9)])
+
 
     last_circle = range(count, count + len(nodes))
     count = count + len(nodes)
 
     # outer circle
-    angles = [  idx * (2*math.pi/25) for idx in range(0, 25) ]
+    angles = [(-idx) * (2*math.pi/25) + math.pi/2 for idx in range(0, 25) ]
     nodes = [ [60*math.cos(a), 60*math.sin(a)] for a in angles ]
     for i in range(0, len(nodes)):
         pos[i+count] = nodes[i]
         g.add_node(i+count)
 
     # adding edges
-    dist = { v: [  [distance(v, u, pos), u] for u in range(count , count + len(nodes)) ] for v in last_circle }
-    for v in last_circle:
-        d = sorted(dist[v], key=lambda(e): e[0])[:3]
-        for u in d:
-            g.add_edge(v, u[1])
+    g.add_edges_from([(9, 25), (9, 26), (9, 48), (9, 49)])
+    g.add_edges_from([(10, 25), (10, 26), (10, 27)])
+    g.add_edges_from([(11, 26), (11, 27), (11, 28)])
+    g.add_edges_from([(12, 27), (12, 28), (12, 29), (12, 30)])
+    g.add_edges_from([(13, 29), (13, 30), (13, 31)])
+    g.add_edges_from([(14, 30), (14, 31), (14, 32), (14, 33)])
+    g.add_edges_from([(15, 32), (15, 33), (15, 34)])
+    g.add_edges_from([(16, 33), (16, 34), (16, 35), (16, 36)])
+    g.add_edges_from([(17, 35), (17, 36), (17, 37), (17, 38)])
+    g.add_edges_from([(18, 37), (18, 38), (18, 39), (18, 40)])
+    g.add_edges_from([(19, 39), (19, 40), (19, 41)])
+    g.add_edges_from([(20, 40), (20, 41), (20, 42), (20, 43)])
+    g.add_edges_from([(21, 42), (21, 43), (21, 44), (21, 45)])
+    g.add_edges_from([(22, 44), (22, 45), (22, 46)])
+    g.add_edges_from([(23, 45), (23, 46), (23, 47), (23, 48)])
+    g.add_edges_from([(24, 47), (24, 48), (24, 49)])
 
     l = { v:"h"+str(v) for v in g.nodes() }
     return g, pos, l
