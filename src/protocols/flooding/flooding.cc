@@ -44,7 +44,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 
     if (firstTime) {
         payloads[key] = m->getPayload();
-        delayed_broadcast(key, uniform(0.1, 0.5));
+        delayed_broadcast(key, uniform(0.01, 0.2));
     }
 }
 
