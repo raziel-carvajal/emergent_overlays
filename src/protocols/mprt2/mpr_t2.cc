@@ -62,7 +62,7 @@ Mpr_t2::processStart()
 	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
 	// number of times that the information of two-hops neighbors will be exchanged
 	// to compute the MPR set
-	builtMprCounter = stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
+	builtMprCounter = 1; // stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
 	bool b = par("build_hops").boolValue();
 
 	if (b) {

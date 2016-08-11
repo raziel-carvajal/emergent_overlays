@@ -180,13 +180,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 }
 
 
-void
-BroadcastingAppBase::receiveSignal(cComponent *source, simsignal_t signalID, double value)
-{
-
-}
-
-
 bool
 BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 {
