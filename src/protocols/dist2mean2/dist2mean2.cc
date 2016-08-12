@@ -46,14 +46,13 @@ Dist2Mean2::on_payload_received(const Broadcast* m) {
 
     received_from[key].insert(m->getSender());
     if (first_time) {
-        emitReceived();
         payloads[key] = m->getPayload();
-        cMessage* mm = new cMessage("broadcast delay");
-        mm->setContextPointer(strdup(key.c_str()));
-        mm->setKind(BROADCAST_DELAY);
-        double delay = (1.0 / neighbors[m->getSender()].w)*1000.0*2; // this is in s/(m^2)
-        // cout << "\t\t\tThe waiting time in " << myself << " is " << delay << endl;
-        scheduleAt(simTime() + delay, mm);
+        auto p = neighbors[m->getSender()].pos;
+        double d = sqrt((p.x - position.x)*(p.x - position.x) + (p.y - position.y)*(p.y - position.y));
+        double delay = (1 - d/radious) * 0.5;
+        // cerr  << "A delay : " << delay << endl;
+        // delayed_broadcast();
+        delayed_broadcast(key, delay);
     }
 }
 
@@ -62,47 +61,48 @@ void
 Dist2Mean2::send_message(string& key)
 {
 
-    bool must_send = received_from[key].empty();
+  bool must_send = is_source;
+
+  if (!must_send) {
     double mx = 0;
     double my = 0;
-    if (!must_send) {
 
-        for (auto& s : received_from[key]) {
-            auto p = neighbors[s].pos;
-            mx += p.x;
-            my += p.y;
-        }
-        mx /= received_from[key].size();
-        my /= received_from[key].size();
+    for (auto& s : received_from[key]) {
+        auto p = neighbors[s].pos;
+        mx += p.x;
+        my += p.y;
     }
+    mx /= received_from[key].size();
+    my /= received_from[key].size();
 
     double dist = sqrt((mx - position.x)*(mx - position.x) + (my - position.y)*(my - position.y));
 
-	double norm_d = dist / radious;
+  	double norm_d = dist / radious;
 
 
-	int n = 4;
-	if (neighbors.size() > 0) {
-		n = neighbors.size();
-	}
+  	int n = (neighbors.size() > 0) ? neighbors.size() : 0;
 
-	double t_c = 0.95 - 0.7 * exp(-0.11*n);
+  	double t_c = 0.95 - 0.7 * exp(-0.11*n);
 
-    must_send = must_send || norm_d > t_c;
+    must_send = must_send || norm_d > 0.40; // || norm_d > t_c;
 
-    if (must_send) {
+    // if (norm_d < t_c)
+    //   cerr << norm_d << " < " << t_c << endl;
+  }
 
-        // EV_DEBUG << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
-        // cout << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
-        emitSent(key);
-        L3AddressResolver resolver;
-        L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
-        Broadcast* m = new Broadcast("payload");
-        m->setPayload(payloads[key].c_str());
-        m->setId(key.c_str());
-        m->setSender(myself.c_str());
-        socket.sendTo(m, addr, remote_port);
-    }
+
+
+  if (must_send) {
+
+      // EV_DEBUG << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
+      // cout << myself << ": sending !!! " << "\n";
+      emitSent(key);
+      Broadcast* m = new Broadcast("payload");
+      m->setPayload(payloads[key].c_str());
+      m->setId(key.c_str());
+      m->setSender(myself.c_str());
+      send_package(m);
+  }
 }
 
 
