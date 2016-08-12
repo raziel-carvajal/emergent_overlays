@@ -51,6 +51,8 @@ private:
 
 	map< string, pair<double, double> > hops_position;
 
+  set<string> selectors;
+
 	bool in_mpr = false;
 
     /* payload of the message to broadcast */

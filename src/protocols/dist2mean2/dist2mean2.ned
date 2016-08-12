@@ -26,7 +26,7 @@ simple Dist2Mean2 extends BroadcastingBase like IUDPApp
 {
     parameters:
 
-        double threshold = default(0.9);
+        double threshold = default(0.5);
 
         @class(inet::Dist2Mean2);
 }

@@ -36,13 +36,15 @@ for c in ${path_to_configs}*.ini ; do
 	config_name="${filename%.*}"
 	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
-	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`	
-	if [ "$protocol" == "abba2" ] || [ "$protocol" == "dist2mean2" ] || [ "$protocol" == "ewma2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] ; then
-		echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
+	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
+	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] || [ "$protocol" == "flooding"  ] ; then
+    if [ "${nodes}" -lt "550" ]; then
+    echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 		sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
-		#exit 1
+    fi
+    #exit 1
 	fi
-	
+
 done
 
 

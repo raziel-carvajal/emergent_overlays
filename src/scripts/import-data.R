@@ -81,7 +81,7 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
         }
         it <- it + 1
       }
-      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(40, 52)) }
+      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(-.1, 0.01)) }
       if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(2 , 16)) }
       legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
     }
@@ -118,7 +118,7 @@ if (length(args) == 4) {
   # create layout for this metric
   layout(m_layout, heights=c(0.8,0.8,0.8))
   par(mai = c(0.7,0.6,1.2,0.6))
-  print('Plotting: avg power consumption') 
+  print('Plotting: avg power consumption')
   plot.metric(dfBc, "batteryConsuption", dfNames, sizes, algos, pal, "AVG power consumption")
   # dfNames <- names(dfDm)
   plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")

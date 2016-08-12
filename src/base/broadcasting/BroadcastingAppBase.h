@@ -98,7 +98,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void on_hello_received(const broadcasting::Hello* msg);
 
   protected:
-    
+
     virtual void configure_neighbors();
 
     /* dond't touch these */
@@ -136,7 +136,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void emitReceived(); // this is automatic (don't call it)
     void emitPowerLevel(double value); // (don't call it)
     void emitBroadcastMsgReceived(std::string value); // important. you should use it. log data (statistics in vector)
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double value) override;
 
     L3Address getAddr(std::string id);
 

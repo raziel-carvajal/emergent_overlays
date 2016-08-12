@@ -17,7 +17,7 @@ fi
 # one of the configurations in that file
 
 filename=$(basename "$1")
-CONF_NAME=${filename%.*} 
+CONF_NAME=${filename%.*}
 CONFIG_PATH=$(dirname "$1")
 
 # executable omnet
@@ -59,20 +59,19 @@ count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
 echo "Checking ${count} repetitions"
 
-count=$(($count-1))
+END=$(($count))
 
-for i in $(seq 0 ${count}); do
-
-	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} | grep average_values`
+for ((i=0;i<END;i++)); do
+	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
-	echo $results
+	echo "$results"
 
-	coverage=`echo ${results} | awk '{print $3}'`	
+	coverage=`echo ${results} | awk '{print $3}'`
 	broadcast_time=`echo ${results} | awk '{print $4}'`
 	power_consumption=`echo ${results} | awk '{print $5}'`
 	duplicated_messages=`echo ${results} | awk '{print $6}'`
 	retransmissions=`echo ${results} | awk '{print $7}'`
 
-	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages} ${retransmissions}" >> ../../results/summary.csv
+	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
 
 done
