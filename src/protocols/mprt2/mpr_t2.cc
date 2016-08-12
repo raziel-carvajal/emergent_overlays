@@ -127,14 +127,15 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 						case DISPLAY_HOPS:
 							{
 								if (builtMprCounter > 0) {
+										builtMprCounter--;
 			              int n = par("hops_required");
 			              // cerr << myself << "(" << simTime() << ")" << endl;
-			              for (int l = 0 ; l <= n ; l++) {
-			                  // cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
-			                  // for (auto& h : hops[l])
-			                  //     cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
-			                  // cerr << endl;
-			              }
+			              // for (int l = 0 ; l <= n ; l++) {
+			              //     cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
+			              //     for (auto& h : hops[l])
+			              //         cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
+			              //     cerr << endl;
+			              // }
 			              delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
 			              // Doing this loop little bit later that the information about
 			              // two-hops neighbors have been exchanged
@@ -160,12 +161,13 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 							break;
 						case WAKEUP_HOPS_REQUESTER:
 							{
-							    // cerr << "BuiltMprCounter :: " << builtMprCounter << endl;
+									int n = par("hops_required");
+							    // cerr << myself << ": BuiltMprCounter :: " << builtMprCounter << ", hops_required :: " << n << endl;
 							    if(builtMprCounter > 0){
-											builtMprCounter--;
-							        int n = par("hops_required");
+
 							        // cerr << myself << ": Wakeup to build hops, number of builds left: " << builtMprCounter << endl;
 							        request_hops(n-1);
+
 							        if (builtMprCounter > 0)  delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
 							    }
 							}
@@ -234,7 +236,7 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 			if (b) {
 				hops[h].insert(name);
 				hops_position[name] = make_pair(m->getXs(i), m->getYs(i));
-				//cerr << myself << "(" << simTime() << ")===== : Adding " << name << " to level " << h << endl;
+				// cerr << myself << "(" << simTime() << ")===== : Adding " << name << " to level " << h << endl;
 			}
 		}
 	}
@@ -279,6 +281,7 @@ Mpr_t2::get_hops_in_level(int l)
 void
 Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 {
+	// cerr << myself << ": Someone is requesting " << m->getMaxHopLevel()  << ", and I know " << neighbors.size() <<  endl;
 	string j = m->getSender();
 	if (j == myself) return;
 	int max_hop_level = m->getMaxHopLevel();
@@ -346,6 +349,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 	bool first = (!is_source && payloads.find(key) == payloads.end());
 
 	if (first) {
+		// cerr << myself << "(" << simTime() << ")" << ": receiving message with key = " << key << endl;
 		payloads[key] = m->getPayload();
 		bool from_selector = selectors.find(m->getSender()) != selectors.end();
 		if (in_mpr && from_selector)
