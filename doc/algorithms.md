@@ -10,8 +10,8 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 **Note: protocols with the check mark &#10004; are implemented while those with &#10008; are not**
 
 # Underlying topology algorithms with a fixed transmission range
-| Title  | Topology | Name | Rank | Year |
-| :--- | :--- | :--- | :--- | :--- |
+| Title  | Topology | Name | Rank | Year | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | Forward-node-set-based broadcast in clustered mobile ad hoc networks [FNSB](papers/others/wcmc2003.pdf) &#10008; | Cluster | [Wireless Communications and Mobile Computing](http://www.scimagojr.com/journalsearch.php?q=17543&tip=sid&clean=0)**(journal)**| A | 2003 |
 | Connectivity Based k-hop Clustering in Wireless Networks [K-HOP](papers/others/10.1.1.104.5681.pdf) &#10008;| Cluster |  [Proceedings of the Annual Hawaii International Conference on System Sciences](http://www.scimagojr.com/journalsearch.php?q=145755&tip=sid&clean=0)**(conf)** | A | 2003 |
 | Extended Multipoint Relays to Determine Connected Dominating Sets in MANETs [CDS-MPR](papers/implemented/cds.pdf) &#10008; | MPR, CDS | [IEEE Transactions on Computers](http://www.scimagojr.com/journalsearch.php?q=25033&tip=sid&clean=0)**(journal)**| A* | 2006 |
@@ -24,12 +24,12 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 
 
 # Non underlying topology algorithms with a fixed transmission range
-| Title | Category | Name | Rank | Year |
-| :--- | :--- | :--- | :--- | :--- |
+| Title | Category | Name | Rank | Year | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | Optimized broadcast protocol for sensor networks ([durresi](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1453502&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1453502)) &#10008; | - | IEEE Transactions on Computers | A* | 2005 |
 | A broadcasting method considering battery lifetime and distance between nodes in MANET [BMBD](papers/others/) &#10008; | ? | International Conference on Distributed Computing Systems Workshops **(workshop)** | A | 2009 |
 | Border node retransmission based probabilistic broadcast protocols in ad-hoc networks [cartigny](papers/others/cartigny.pdf) &#10008; | ? | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)** | A | 2003 |
-| Multipoint relaying for flooding broadcast messages in mobile wireless networks [MPR](papers/implemented/mpr.pdf) &#10004; | Neighbor-based | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)**| A  | 2002  |
+| Multipoint relaying for flooding broadcast messages in mobile wireless networks [MPR](papers/implemented/mpr.pdf) &#10004; | Neighbor-based | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)**| A  | 2002  | Decentralized heuristic that finds one subset MPR of one-hop neighbors that covers every two-hops neighbors per every peer P in the network |
 | Adaptive approaches to relieving broadcast storms in a wireless multihop mobile ad hoc network [AdaptiveCounter](paper/others/AdaptiveCounter.ps) &#10008; | ? | [IEEE Transactions on Computers](http://portal.core.edu.au/jnl-ranks/360/) **(journal)** | A* | 2002 |
 | The broadcast storm problem in a mobile ad hoc network [simple flooding](papers/others/flooding.pdf) &#10008;| ? | MobiCom **(conf)** | A* | 1999 |
 | Performance improvements for network-wide broadcast with instantaneous network information [banerjee](papers/others/banerjee.pdf) &#10008; | ? | Network and Computer Applications **(journal)**| A | 2012 |
