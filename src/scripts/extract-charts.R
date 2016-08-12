@@ -21,7 +21,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
   
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-  
+
   reception.time <- sapply(id_msgs, function (id) max(sapply(list_of_received, function(d)  head( rbind(subset(d, y == id, select=c(x)), NA), 1 )[[1]] )) )
   #sending.time[ which(is.na(reception.time)) ] <- NA
   #sending.time <- sending.time[ !is.na(sending.time) ]
@@ -39,7 +39,6 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   
   # compute number of message sent at each location (retransmission)
   sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
-  
   # compute number of message received per broadcast session
   B.i.tmp <- sapply(id_msgs, function(id) sum(sapply(list_of_received, function(d) length(subset(d, y == id, select=c(y))[[1]]) )))
   
