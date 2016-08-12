@@ -81,7 +81,7 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
         }
         it <- it + 1
       }
-      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(-.1, 0.01)) }
+      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(-3., 0.01)) }
       if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(2 , 16)) }
       legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
     }

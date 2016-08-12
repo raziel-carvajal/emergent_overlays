@@ -29,6 +29,15 @@ if [ ! -d "../../results" ]; then
     mkdir ../../results
 fi
 
+rm -f ../../results/broadcastSession
+rm -f ../../results/duplicatedMsgs
+rm -f ../../results/batteryConsumption
+rm -f ../../results/networkCoverage
+touch ../../results/broadcastSession
+touch ../../results/duplicatedMsgs
+touch ../../results/batteryConsumption
+touch ../../results/networkCoverage
+
 echo "" > ../../results/summary.csv
 
 for c in ${path_to_configs}*.ini ; do
@@ -37,8 +46,8 @@ for c in ${path_to_configs}*.ini ; do
 	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
 	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
-	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] || [ "$protocol" == "flooding"  ] ; then
-    if [ "${nodes}" -lt "550" ]; then
+	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] || [ "$protocol" == "flooding"  ] || [ "$protocol" == "dist2mean2"  ] ; then
+    if [ "${nodes}" -lt "500" ]; then
     echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 		sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
     fi
