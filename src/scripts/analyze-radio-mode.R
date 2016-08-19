@@ -11,6 +11,8 @@ transmission <- read.csv(file=args[2], header=TRUE, sep=",")
 consumption.receiving <- sapply( reception[,2], function(mode) if (mode==1) 0.002 else 0.01 )
 consumption.transmitting <- sapply( transmission[,2], function(mode) if (mode==1) 0.002 else 0.35 )
 
+# r.idle.time <- 
+
 delta.t.trans <- transmission[,1] - ( c(c(0), transmission[,1])[-length(c( c(0), transmission[,1]))] )
 delta.t.recep <- reception[,1] - ( c(c(0), reception[,1])[-length(c( c(0), reception[,1]))] )
 
