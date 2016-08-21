@@ -84,8 +84,12 @@ No source code, just configuration:
 *.host*.wlan[0].radio.energyConsumer transmitterIdlePowerConsumption = 2mW
 *.host*.wlan[0].radio.energyConsumer.transmitterTransmittingPowerConsumption = 350mW
 
-# model of energy storage (we don't care)
+# model of energy storage
 *.host*.energyStorageType = "IdealEnergyStorage"
+
+*.host*.udpApp[0].nr_broadcast_msg = 300
+
+*.host*.udpApp[0].intervalBroadcastTime = 0.1s
 ```
 
 ## Why there is only a tiny difference among protocols?
@@ -95,23 +99,7 @@ To investigate the cause of this, we performed the following experiment: we meas
 
 These measurements were collected using the log system of OMNET++. For each node, it creates two vectors that indicate when the state of receiver and transmitter changed their state. (see [relay's receiver](), [relay's transmitter](), [non-relay's receiver]() and [non-relay's transmitter]()).
 
-Some parameters of this experiment are shown below:
-
-```
-**.energyConsumerType = "StateBasedEnergyConsumer"
-*.host*.wlan[0].radio.energyConsumer.offPowerConsumption = 0mW
-*.host*.wlan[0].radio.energyConsumer.sleepPowerConsumption = 1mW
-*.host*.wlan[0].radio.energyConsumer.switchingPowerConsumption = 1mW
-*.host*.wlan[0].radio.energyConsumer.receiverIdlePowerConsumption = 2mW
-*.host*.wlan[0].radio.energyConsumer.receiverBusyPowerConsumption = 5mW
-*.host*.wlan[0].radio.energyConsumer.receiverReceivingPowerConsumption = 10mW
-*.host*.wlan[0].radio.energyConsumer transmitterIdlePowerConsumption = 2mW
-*.host*.wlan[0].radio.energyConsumer.transmitterTransmittingPowerConsumption = 350mW
-
-*.host*.udpApp[0].nr_broadcast_msg = 300
-
-*.host*.udpApp[0].intervalBroadcastTime = 0.1s
-```
+The parameters we use for the experiment are shown in the previous listing.
 
 Notice that we are using 300 broadcast sessions, and sending them at a periodic interval of 0.1s. You may also notice that the power consumption during transmission is relatively high (350 mW).
 
@@ -148,8 +136,6 @@ As can be seen, this node consumes less energy. However, the difference with the
 From the tables above, we see that the receiver and transmitter are all th time in only two states. As a consequence, we can write the total energy consumption as:
 
 E = TIME_RECEIVER_IDLE * POWER_RECEIVER_IDLE + TIME_RECEIVER_RECEIVING * POWER_RECEIVER_RECEIVING + TIME_TRANSMITTER_IDLE * POWER_TRANSMITTER_IDLE + __TIME_TRANSMITTER_TRANSMITTING * POWER_TRANSMITTER_TRANSMITTING__
-
-$a_b$
 
 To increase the difference in energy consumption between relay and non-relay nodes, we can either increase the time spent in transmitting mode (simply performing more broadcast sessions) or increasing the power consumption in transmitting mode.
 
