@@ -117,12 +117,12 @@ Notice that we are using 3000 broadcast sessions, and sending them at a periodic
 
 The results are as follow for the relay node:
 
- State | Time in State | Energy used
--------|---------------|-
- RECEPTION_STATE_IDLE | 323.8240s | 0.6476 J
- RECEPTION_STATE_RECEIVING | 1.9769s | 0.0198 J
- TRANSMISSION_STATE_IDLE | 325.1084s | 0.6502 J
- TRANSMISSION_STATE_TRANSMITTING | 0.6595s | 0.2308 J
+State | Time in State | Energy used
+------|---------------|-------------
+RECEPTION_STATE_IDLE | 323.8240s | 0.6476 J
+RECEPTION_STATE_RECEIVING | 1.9769s | 0.0198 J
+TRANSMISSION_STATE_IDLE | 325.1084s | 0.6502 J
+TRANSMISSION_STATE_TRANSMITTING | 0.6595s | 0.2308 J
 
 From this table we can conclude a few things:
 1. Even with 3000 broadcast messages the time spent retransmitting is a tiny fraction of the total time -- far less than 1%.
