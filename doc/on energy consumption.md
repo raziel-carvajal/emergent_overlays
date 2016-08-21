@@ -108,26 +108,39 @@ Some parameters of this experiment are shown below:
 *.host*.wlan[0].radio.energyConsumer transmitterIdlePowerConsumption = 2mW
 *.host*.wlan[0].radio.energyConsumer.transmitterTransmittingPowerConsumption = 350mW
 
-*.host*.udpApp[0].nr_broadcast_msg = 3000
+*.host*.udpApp[0].nr_broadcast_msg = 300
 
 *.host*.udpApp[0].intervalBroadcastTime = 0.1s
 ```
 
-Notice that we are using 3000 broadcast sessions, and sending them at a periodic interval of 0.1s. You may also notice that the power consumption during transmission is relatively high (350 mW).
+Notice that we are using 300 broadcast sessions, and sending them at a periodic interval of 0.1s. You may also notice that the power consumption during transmission is relatively high (350 mW).
 
 The results are as follow for the relay node:
 
 State | Time in State | Energy used
 ------|---------------|-------------
-RECEPTION_STATE_IDLE | 323.8240s | 0.6476 J
-RECEPTION_STATE_RECEIVING | 1.9769s | 0.0198 J
-TRANSMISSION_STATE_IDLE | 325.1084s | 0.6502 J
-TRANSMISSION_STATE_TRANSMITTING | 0.6595s | 0.2308 J
+RECEPTION_STATE_IDLE | 56.2502s | 0.1125 J
+RECEPTION_STATE_RECEIVING | 0.1635s | 0.0016 J
+TRANSMISSION_STATE_IDLE | 56.3183s | 0.1126 J
+TRANSMISSION_STATE_TRANSMITTING | 0.0721s | 0.0252 J
+
+Total consumption: 0.2520 J
 
 From this table we can conclude a few things:
 
-1. Even with 3000 broadcast messages the time spent retransmitting is a tiny fraction of the total time -- far less than 1 %.
+1. With 300 broadcast messages the time spent retransmitting is a tiny fraction of the total time -- far less than 1 %.
 2. Most of the time is spent in idle state, both for receiver and transmitter.
 3. Transmission only impacts consumption if it is relatively high.
 
 The results are as follow for the non-relay node:
+
+State | Time in State | Energy used
+------|---------------|-------------
+RECEPTION_STATE_IDLE | 56.1557s | 0.1123 J
+RECEPTION_STATE_RECEIVING | 0.2347s | 0.0023 J
+TRANSMISSION_STATE_IDLE | 50.8565s | 0.1017 J
+TRANSMISSION_STATE_TRANSMITTING | 0.0063s | 0.0022 J
+
+Total consumption: 0.2186 J
+
+As can be seen, this node consumes less energy. However, the difference with the relay node is really small. 
