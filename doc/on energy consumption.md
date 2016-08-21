@@ -35,14 +35,14 @@ while the reception state, which also change over time, can be:
 
 In using *StateBasedEnergyConsumer*, we must specify what is the consumption, in watts, when the radio receiver and transmitter are in different states. For instance:
 
-|State|Consumption|
-|-|-|
-| RECEPTION_STATE_IDLE | 1 mW |
-| RECEPTION_STATE_BUSY | 5 mW |
-| RECEPTION_STATE_SYNCHRONIZING | 10 mW |
-| RECEPTION_STATE_RECEIVING | 40 mW |
-| TRANSMISSION_STATE_IDLE | 1 mW |
-| TRANSMISSION_STATE_TRANSMITTING | 70 mW |
+State|Consumption
+-----|-----------
+RECEPTION_STATE_IDLE | 1 mW
+RECEPTION_STATE_BUSY | 5 mW
+RECEPTION_STATE_SYNCHRONIZING | 10 mW
+RECEPTION_STATE_RECEIVING | 40 mW
+TRANSMISSION_STATE_IDLE | 1 mW
+TRANSMISSION_STATE_TRANSMITTING | 70 mW
 
 The values of *C_receiver* and *C_transmitter* at time *t0* is equal to the power consumption of receiver and transmitter of the state they were at *t0*.
 For instance, let's use the previous table and say that the receiver is in RECEPTION_STATE_IDLE during 3 seconds, from 0s to 3s, and in RECEPTION_STATE_RECEIVING from 3s to 4s. Then:
