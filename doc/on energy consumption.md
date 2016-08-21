@@ -143,4 +143,16 @@ TRANSMISSION_STATE_TRANSMITTING | 0.0063s | 0.0022 J
 
 Total consumption: 0.2186 J
 
-As can be seen, this node consumes less energy. However, the difference with the relay node is really small. 
+As can be seen, this node consumes less energy. However, the difference with the relay node is really small.
+
+From the tables above, we see that the receiver and transmitter are all th time in only two states. As a consequence, we can write the total energy consumption as:
+
+E = TIME_RECEIVER_IDLE * POWER_RECEIVER_IDLE + TIME_RECEIVER_RECEIVING * POWER_RECEIVER_RECEIVING + TIME_TRANSMITTER_IDLE * POWER_TRANSMITTER_IDLE + TIME_TRANSMITTER_TRANSMITTING * POWER_TRANSMITTER_TRANSMITTING
+
+To increase the difference in energy consumption between relay and non-relay nodes, we can either increase the time spent in transmitting mode (simply performing more broadcast sessions) or increasing the power consumption in transmitting mode.
+
+## Conclusions
+
+1. As expected, energy consumption is affected by the number of messages transmitted. However, even with a large number of broadcast sessions, the time spent in transmission mode is very short and hence the consumption due to transmitting is relatively low.
+2. To increase the difference between relay and non-relay nodes we should increase the number of broadcast messages and the consumption due to transmission. This will also has an impact on how different dissemination algorithms behave in terms of energy consumption.
+3. I (Inti) think that with the current implementation we have, we can already see differences among algorithms. However, we have been using the median to display the results. I think that using boxplots should be enough to highlight the differences.
