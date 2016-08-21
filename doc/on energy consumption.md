@@ -57,12 +57,12 @@ To compute the energy consumption (in joules) during the whole experiment we sim
 
 Example (four seconds scenario):
 
-|State| Time in the state |
-| - | - |
-| RECEPTION_STATE_IDLE | 3s |
-| RECEPTION_STATE_RECEIVING | 1s |
-| TRANSMISSION_STATE_IDLE | 1s |
-| TRANSMISSION_STATE_TRANSMITTING | 3s |
+State| Time in the state
+---- | -----------------
+RECEPTION_STATE_IDLE | 3s
+RECEPTION_STATE_RECEIVING | 1s
+TRANSMISSION_STATE_IDLE | 1s
+TRANSMISSION_STATE_TRANSMITTING | 3s
 
 EnergyConsumed = 3s * 1mW + 1s * 40mW + 1s * 1mW + 3s * 70mW
 
@@ -125,7 +125,8 @@ TRANSMISSION_STATE_IDLE | 325.1084s | 0.6502 J
 TRANSMISSION_STATE_TRANSMITTING | 0.6595s | 0.2308 J
 
 From this table we can conclude a few things:
-1. Even with 3000 broadcast messages the time spent retransmitting is a tiny fraction of the total time -- far less than 1%.
+
+1. Even with 3000 broadcast messages the time spent retransmitting is a tiny fraction of the total time -- far less than 1 %.
 2. Most of the time is spent in idle state, both for receiver and transmitter.
 3. Transmission only impacts consumption if it is relatively high.
 
