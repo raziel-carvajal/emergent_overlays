@@ -147,7 +147,9 @@ As can be seen, this node consumes less energy. However, the difference with the
 
 From the tables above, we see that the receiver and transmitter are all th time in only two states. As a consequence, we can write the total energy consumption as:
 
-E = TIME_RECEIVER_IDLE * POWER_RECEIVER_IDLE + TIME_RECEIVER_RECEIVING * POWER_RECEIVER_RECEIVING + TIME_TRANSMITTER_IDLE * POWER_TRANSMITTER_IDLE + TIME_TRANSMITTER_TRANSMITTING * POWER_TRANSMITTER_TRANSMITTING
+E = TIME_RECEIVER_IDLE * POWER_RECEIVER_IDLE + TIME_RECEIVER_RECEIVING * POWER_RECEIVER_RECEIVING + TIME_TRANSMITTER_IDLE * POWER_TRANSMITTER_IDLE + __TIME_TRANSMITTER_TRANSMITTING * POWER_TRANSMITTER_TRANSMITTING__
+
+$a_b$
 
 To increase the difference in energy consumption between relay and non-relay nodes, we can either increase the time spent in transmitting mode (simply performing more broadcast sessions) or increasing the power consumption in transmitting mode.
 
