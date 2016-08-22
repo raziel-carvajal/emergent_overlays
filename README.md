@@ -27,6 +27,10 @@ Notice that in some cases protocols have different modes (ottributes of the algo
 
 [Parameters and metrics](doc/parameters and metrics.md)
 
+## On energy consumption
+
+[Energy Consumption](doc/on energy consumption.md)
+
 ## Statistical Methods
 
 ## Summary of Current Status
