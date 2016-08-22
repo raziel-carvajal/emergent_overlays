@@ -35,6 +35,7 @@ class INET_API Flooding2 : public inet::BroadcastingAppBase
     virtual void time_to_broadcast_payload(void* user_data) override;
 
     void send_message(std::string& key);
+    std::string getLogHeader();
 };
 
 } //namespace

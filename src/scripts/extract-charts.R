@@ -178,14 +178,14 @@ if (length(args) == 4) {
 
 	print(paste("Creating powerlevels:", args[1]))
 	#pl <- powerlevels3( ds, max= sim.time )
-	pl <- powerlevels3(powerLevelDs, max= sim.time )
+	pl <- powerlevels3(powerLevelDs, max= sim.time, step=1)
 
 	print(paste("Creating broadcasting time:", args[1]))
 	#bs <- broadcastingTime(ds, simulation.time = sim.time)
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P")
-	plot.charts.for.single.experiment(pl, bs, max = sim.time)
+	plot.charts.for.single.experiment(pl, bs, max = sim.time, step=1)
 
   print("Exporting data...")
   export.data.of.experiment(args[4], bs, max = sim.time, pl)

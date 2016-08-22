@@ -136,7 +136,7 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 			              //         cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
 			              //     cerr << endl;
 			              // }
-			              delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.3));
+			              delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.2));
 			              // Doing this loop little bit later that the information about
 			              // two-hops neighbors have been exchanged
 										if (builtMprCounter > 0) delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
@@ -263,7 +263,7 @@ Mpr_t2::on_neighbors(const mpr_t2::Neighbors* m)
 		}
 		if (max_hop_level < nr_hops_required) {
 			// reply back, but only to the maximum level
-			delayed_event(REPLY_NEIGHBORS, to_string(max_hop_level), uniform(0.1, 0.3));
+			delayed_event(REPLY_NEIGHBORS, to_string(max_hop_level), uniform(0.1, 0.2));
 		}
 	}
 }
@@ -301,17 +301,17 @@ Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 
 	if (max_hop_level == 0) {
 		// just reply back my neighbors
-		delayed_event(REPLY_NEIGHBORS, "0", uniform(0.1, 0.3));
+		delayed_event(REPLY_NEIGHBORS, "0", uniform(0.1, 0.2));
 	}
 	else {
 		if (hops_built[max_hop_level]) {
 			/* I already got the information. I will just send it back */
-			delayed_event(REPLY_NEIGHBORS, to_string(max_hop_level), uniform(0.1, 0.3));
+			delayed_event(REPLY_NEIGHBORS, to_string(max_hop_level), uniform(0.1, 0.2));
 		}
 		else {
 			int l = max_hop_level - 1;
 			// request max_hop_level - 1 to my neighbors
-			delayed_event(DELEGATE_REQUEST, to_string(l), uniform(0.1, 0.3));
+			delayed_event(DELEGATE_REQUEST, to_string(l), uniform(0.1, 0.2));
 
 			for (auto& n : neighbors) {
 				if (n.first != myself) {

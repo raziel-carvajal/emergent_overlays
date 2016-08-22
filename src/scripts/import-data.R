@@ -54,9 +54,9 @@ plot.cdf <- function(df, key, it, c, d){
   X <- df[[ key ]][, 1]
   Y <- H(X)
   if (it == 0) {
-    plot( y = Y, x = X, xlim = range(0, 7000), type = 'p', col = c, xlab = "Time (ms)", main = paste("Density ", d))
+    plot( y = Y, x = X, xlim = range(0, 2000), type = 'p', col = c, xlab = "Time (ms)", main = paste("Density ", d))
   } else {
-    lines(y = Y, x = X, xlim = range(0, 7000), type = 'p', col = c)
+    lines(y = Y, x = X, xlim = range(0, 2000), type = 'p', col = c)
   }
 }
 
@@ -64,7 +64,8 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
   for (s in sizes) {
     print( paste('Nodes:', s, sep = '') )
     #for (d in c('sparse', 'medium', 'dense')) {
-    for (d in c('sparse', 'medium', 'dense')) {
+    #for (d in c('sparse', 'medium', 'dense')) {
+    for (d in c('medium')) {
       print( paste('Density:', d, sep = '') )
       pos <- grep(paste("n_", s, "_d_", d, sep = ''), dfNames)
       keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
@@ -81,8 +82,8 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
         }
         it <- it + 1
       }
-      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(-3., 0.01)) }
-      if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(2 , 16)) }
+      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(30, 50)) }
+      if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(0 , 8)) }
       legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
     }
     mtext(plotHeader, outer = TRUE, cex = 1, line = -2 )
