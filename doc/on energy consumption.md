@@ -139,6 +139,10 @@ E = TIME_RECEIVER_IDLE * POWER_RECEIVER_IDLE + TIME_RECEIVER_RECEIVING * POWER_R
 
 To increase the difference in energy consumption between relay and non-relay nodes, we can either increase the time spent in transmitting mode (simply performing more broadcast sessions) or increasing the power consumption in transmitting mode.
 
+Below you can see the bloxplot for the whole previous experiment (150 nodes, 78 relay nodes, MPR, 300 broadcast sessions at an interval of 0.1s). The experiment finishes 30 seconds after the first broadcast session, the rest of the time is not important.
+
+![Energy Consumption](n_150_d_5_tr_10_a_100x100_idx_0_p_mprt2-0-charts.png)  
+
 ## Conclusions
 
 1. As expected, energy consumption is affected by the number of messages transmitted. However, even with a large number of broadcast sessions, the time spent in transmission mode is very short and hence the consumption due to transmitting is relatively low.
