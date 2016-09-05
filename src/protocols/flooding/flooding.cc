@@ -38,13 +38,16 @@ Flooding2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
 
+    cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
 
     bool firstTime = !is_source && payloads[key].empty();
 
     if (firstTime) {
         payloads[key] = m->getPayload();
-        delayed_broadcast(key, uniform(0.01, 0.2));
+        delayed_broadcast(key, uniform(0.1, 0.2));
+    } else {
+      cerr << getLogHeader() + "retransmission of message " + key + "was cancelled\n";
     }
 }
 
@@ -52,6 +55,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 void
 Flooding2::send_message(string& key)
 {
+    cerr << getLogHeader() + "doing broadcast of message " + key + " \n";
     Broadcast* m = new Broadcast("payload");
     m->setPayload(payloads[key].c_str());
     m->setId(key.c_str());
@@ -79,6 +83,7 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     send_message(key);
 }
 
+std::string Flooding2::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
 
 
 } //namespace
