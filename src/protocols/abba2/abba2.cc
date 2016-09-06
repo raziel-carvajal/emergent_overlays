@@ -90,8 +90,10 @@ bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second
 double
 Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     int i, j; double sum;
+    if (items.size() == 0) return 0.0;
     if (items.size() == 1) return items[0].second - items[0].first;
     std::sort(items.begin(), items.end());
+    // cout << " SIZEEEEEEEEEEEEEEEEE " << items.size() << endl;
     for (i = 0; i < items.size(); i++)
         sum += items[i].second - items[i].first;
     for (i = 0; i < items.size() - 1; i++) {
@@ -174,18 +176,16 @@ Abba2::send_message(string& key)
         cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
         ignoredMsgs[key] = key;
-        while (!firHalfPairs.empty()) firHalfPairs.pop_back();
-        while (!secHalfPairs.empty()) secHalfPairs.pop_back();
+        firHalfPairs.clear();
+        secHalfPairs.clear();
 
-        L3AddressResolver resolver;
-        L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4); // TODO: refactor this
-        abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
+        auto m = new abba::ABBABroadcast("payload");
         m->setPayload(payloads[key].c_str());
         m->setId(key.c_str());
         m->setSender(myself.c_str());
         m->setX(position.x);
         m->setY(position.y);
-        socket.sendTo(m, addr, remote_port);
+	send_package(m);
         emitSent(key);
     } else {
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
