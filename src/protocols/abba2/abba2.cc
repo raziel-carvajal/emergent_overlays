@@ -35,7 +35,7 @@ namespace inet {
 Define_Module(Abba2);
 
 int
-Abba2::findQuadrant(Coord b) {
+Abba2::findQuadrant(Coord& b) {
     if (b.x > position.x) {
         if (b.y >= position.y) return FIRST;
         else return FOURTH;
@@ -46,7 +46,7 @@ Abba2::findQuadrant(Coord b) {
 }
 
 void
-Abba2::updateAngleCovered(Coord b){
+Abba2::updateAngleCovered(Coord& b){
     double d = position.distance(b);
     double alp = acos(abs(position.x - b.x) / d) * 180 / M_PI;
     double bet = acos(d * 0.5 / radious) * 180 / M_PI;
@@ -85,13 +85,13 @@ Abba2::updateAngleCovered(Coord b){
     }
 }
 
-bool Abba2::inPair(double x, std::pair<double, double> p) { return x < p.second ? true : false; }
+bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second; }
 
 double
-Abba2::getAngleCovered(std::vector<std::pair<double, double>> items) {
+Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     int i, j; double sum;
-    std::sort(items.begin(), items.end());
     if (items.size() == 1) return items[0].second - items[0].first;
+    std::sort(items.begin(), items.end());
     for (i = 0; i < items.size(); i++)
         sum += items[i].second - items[i].first;
     for (i = 0; i < items.size() - 1; i++) {
@@ -134,31 +134,29 @@ Abba2::on_payload_received(const Broadcast* m) {
         double newTimeout = computeTimeout(angleCovered);
         cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
 
-        cMessage* mm = new cMessage("broadcast delay");
-        mm->setContextPointer(strdup(key.c_str()));
-        mm->setKind(BROADCAST_DELAY);
-
         if (newTimeout <= 0) {// just in case we will considered that the angle is more than 306 degrees which is "rare"
             // TODO find a way to put this event at the top of the scheduler
             // cancel retransmission (ASAP I thought...)
-            cancelAndDelete(mm);
             ignoredMsgs[key] = key;
-            while (!firHalfPairs.empty()) firHalfPairs.pop_back();
-            while (!secHalfPairs.empty()) secHalfPairs.pop_back();
+	    cMessage* old_msg = delayMessages[key];
+            cancelAndDelete(old_msg);
+            firHalfPairs.clear();
+            secHalfPairs.clear();
             cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
                 cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
                 timeouts[key] = newTimeout;
                 //delayed_broadcast(key, uniform(newTimeout, newTimeout + 0.2));
-                delayed_broadcast(key, newTimeout);
+                delayMessages[key] = delayed_broadcast(key, newTimeout);
 
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
                 cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
-                cancelAndDelete(mm);
+		cMessage* old_msg = delayMessages[key];
+                cancelAndDelete(old_msg);
                 timeouts[key] = newTimeout;
                 //delayed_broadcast(key, uniform(newTimeout, newTimeout + 0.2));
-                delayed_broadcast(key, newTimeout);
+                delayMessages[key] = delayed_broadcast(key, newTimeout);
             }
         }
     } else {

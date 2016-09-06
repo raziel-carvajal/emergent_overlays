@@ -392,11 +392,12 @@ BroadcastingAppBase::get_last_id_for_msg()
 }
 
 
-void BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
+cMessage* BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
     cMessage* mm = new cMessage("broadcast delay");
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
     scheduleAt(simTime() + delay, mm);
+    return mm;
 }
 
 

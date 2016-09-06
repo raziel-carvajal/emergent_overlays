@@ -38,6 +38,7 @@ class INET_API Abba2 : public inet::BroadcastingAppBase
     double timeOut;
     std::map<std::string, std::string> ignoredMsgs;
     std::map<std::string, double> timeouts;
+    std::map<std::string, cMessage*> delayMessages;
     std::vector<std::pair<double, double>> firHalfPairs;
     std::vector<std::pair<double, double>> secHalfPairs;
 
@@ -46,10 +47,10 @@ class INET_API Abba2 : public inet::BroadcastingAppBase
     virtual void time_to_broadcast_payload(void* user_data) override;
     void send_message(std::string& key);
 
-    int findQuadrant(Coord b);
-    void updateAngleCovered(Coord b);
-    bool inPair(double x, std::pair<double, double> p);
-    double getAngleCovered(std::vector<std::pair<double, double>> items);
+    int findQuadrant(Coord& b);
+    void updateAngleCovered(Coord& b);
+    bool inPair(double x, std::pair<double, double>& p);
+    double getAngleCovered(std::vector<std::pair<double, double>>& items);
     double computeTimeout(double angle);
     std::string getLogHeader();
 };
