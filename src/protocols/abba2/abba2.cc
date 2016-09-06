@@ -46,38 +46,38 @@ Abba2::findQuadrant(Coord& b) {
 }
 
 void
-Abba2::updateAngleCovered(Coord& b){
+Abba2::updateAngleCovered(Coord& b, string& key){
     double d = position.distance(b);
     double alp = acos(abs(position.x - b.x) / d) * 180 / M_PI;
     double bet = acos(d * 0.5 / radious) * 180 / M_PI;
     switch (findQuadrant(b)) {
     case FIRST:
         if (alp < bet) {
-            firHalfPairs.push_back( make_pair(0, alp + bet) );
-            secHalfPairs.push_back( make_pair(360 - (bet - alp), 360) );
+            firHalfPairs[key].push_back( make_pair(0, alp + bet) );
+            secHalfPairs[key].push_back( make_pair(360 - (bet - alp), 360) );
         } else
-            firHalfPairs.push_back( make_pair(alp - bet, alp + bet) );
+            firHalfPairs[key].push_back( make_pair(alp - bet, alp + bet) );
         break;
     case SECOND:
         if (alp < bet) {
-            firHalfPairs.push_back( make_pair(180 - (alp + bet), 180) );
-            secHalfPairs.push_back( make_pair(180, 180 + (bet - alp)) );
+            firHalfPairs[key].push_back( make_pair(180 - (alp + bet), 180) );
+            secHalfPairs[key].push_back( make_pair(180, 180 + (bet - alp)) );
         } else
-            firHalfPairs.push_back( make_pair(alp - bet, alp + bet) );
+            firHalfPairs[key].push_back( make_pair(alp - bet, alp + bet) );
         break;
     case THIRD:
         if (alp < bet) {
-            firHalfPairs.push_back( make_pair(180 - (alp + bet), 180) );
-            secHalfPairs.push_back( make_pair(180, 180 + (bet - alp)) );
+            firHalfPairs[key].push_back( make_pair(180 - (alp + bet), 180) );
+            secHalfPairs[key].push_back( make_pair(180, 180 + (bet - alp)) );
         } else
-            secHalfPairs.push_back( make_pair(180 + (alp - bet), 180 + alp + bet) );
+            secHalfPairs[key].push_back( make_pair(180 + (alp - bet), 180 + alp + bet) );
         break;
     case FOURTH:
         if (alp < bet) {
-            firHalfPairs.push_back( make_pair(360 - (alp + bet), 360) );
-            secHalfPairs.push_back( make_pair(0, bet - alp) );
+            firHalfPairs[key].push_back( make_pair(360 - (alp + bet), 360) );
+            secHalfPairs[key].push_back( make_pair(0, bet - alp) );
         } else
-            secHalfPairs.push_back( make_pair(180 + (alp - bet), 180 + alp + bet) );
+            secHalfPairs[key].push_back( make_pair(180 + (alp - bet), 180 + alp + bet) );
         break;
     default:
         cerr << myself + "ENUM value is not recognized\n";
@@ -118,20 +118,15 @@ Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360); 
 
 void
 Abba2::on_payload_received(const Broadcast* m) {
-    /* TODO
-     * Take into consideration that this implementation isn't capable to compute two the reception
-     * of more than one consecutive broadcast session, i. e., if two different broadcast messages
-     * are received one after the other, then the vectors of pairs will store angles as it was
-     * just one broadcast.
-     * IDEA: one broadcast ID must map two independent vectors of pairs*/
+    
     string key = string(m->getId());
     cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
-        updateAngleCovered(b);
-        double angleCovered = getAngleCovered(firHalfPairs) + getAngleCovered(secHalfPairs);
+        updateAngleCovered(b, key);
+        double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
         cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
         double newTimeout = computeTimeout(angleCovered);
         cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
@@ -142,8 +137,8 @@ Abba2::on_payload_received(const Broadcast* m) {
             ignoredMsgs[key] = key;
 	    cMessage* old_msg = delayMessages[key];
             cancelAndDelete(old_msg);
-            firHalfPairs.clear();
-            secHalfPairs.clear();
+            firHalfPairs[key].clear();
+            secHalfPairs[key].clear();
             cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
@@ -164,6 +159,7 @@ Abba2::on_payload_received(const Broadcast* m) {
     } else {
         cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
     }
+
 }
 
 
@@ -176,8 +172,8 @@ Abba2::send_message(string& key)
         cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
         ignoredMsgs[key] = key;
-        firHalfPairs.clear();
-        secHalfPairs.clear();
+        firHalfPairs[key].clear();
+        secHalfPairs[key].clear();
 
         auto m = new abba::ABBABroadcast("payload");
         m->setPayload(payloads[key].c_str());
