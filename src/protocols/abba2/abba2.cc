@@ -37,11 +37,9 @@ Define_Module(Abba2);
 int
 Abba2::findQuadrant(Coord& b) {
     if (b.x > position.x) {
-        if (b.y >= position.y) return FIRST;
-        else return FOURTH;
+        return (b.y >= position.y)? FIRST : FOURTH;
     } else {
-        if (b.y > position.y) return SECOND;
-        else return THIRD;
+        return (b.y > position.y)? SECOND : THIRD;
     }
 }
 
@@ -120,16 +118,16 @@ void
 Abba2::on_payload_received(const Broadcast* m) {
     
     string key = string(m->getId());
-    cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
+//    cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
         updateAngleCovered(b, key);
         double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
-        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
+    //    cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
         double newTimeout = computeTimeout(angleCovered);
-        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
+    //    cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
 
         if (newTimeout <= 0) {// just in case we will considered that the angle is more than 306 degrees which is "rare"
             // TODO find a way to put this event at the top of the scheduler
@@ -139,16 +137,16 @@ Abba2::on_payload_received(const Broadcast* m) {
             cancelAndDelete(old_msg);
             firHalfPairs[key].clear();
             secHalfPairs[key].clear();
-            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
+ //           cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
-                cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
+   //             cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
                 timeouts[key] = newTimeout;
                 //delayed_broadcast(key, uniform(newTimeout, newTimeout + 0.2));
                 delayMessages[key] = delayed_broadcast(key, newTimeout);
 
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
-                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
+     //           cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
 		cMessage* old_msg = delayMessages[key];
                 cancelAndDelete(old_msg);
                 timeouts[key] = newTimeout;
@@ -157,7 +155,7 @@ Abba2::on_payload_received(const Broadcast* m) {
             }
         }
     } else {
-        cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
+  //      cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
     }
 
 }
@@ -169,7 +167,7 @@ Abba2::send_message(string& key)
     cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
     bool applyRetransmission = ignoredMsgs.find(key) == ignoredMsgs.end();
     if (is_source || applyRetransmission) {
-        cerr << getLogHeader() + "broadcasting message " + key + " \n";
+   //     cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
         ignoredMsgs[key] = key;
         firHalfPairs[key].clear();
@@ -184,7 +182,7 @@ Abba2::send_message(string& key)
 	send_package(m);
         emitSent(key);
     } else {
-        cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
+ //       cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
     }
 }
 

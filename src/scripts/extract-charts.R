@@ -8,7 +8,7 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separate list for each power level
   others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
   # vector of power levels for each instant of time
-  sapply(lapply(ts, function(t)  lapply(others, function(s) tail(subset(s, x<=t, select=c(y)), 1) )), unlist)
+  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
@@ -82,7 +82,9 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
             append = TRUE
   )
 
-  powerLevelInfo <- data.frame( whatever = c(mean(power.level), sd(power.level)) )
+  print("til here it is Ok")
+
+  powerLevelInfo <- data.frame( whatever = c(unlist(lapply(power.level, mean)), unlist(lapply(power.level, sd)) ) )
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
@@ -94,10 +96,10 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
 
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
 
-	nr.nodes <- length(power.level[,1])
+	nr.nodes <- max(sapply(power.level, function(p) length(p)))
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-        valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+    valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
@@ -108,7 +110,8 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
 
-	nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
+	# nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
+	#nr.dead.nodes <- apply(power.level, 2, function(e) 0 )
 
 	plot(y=broadcast.info$n.received/nr.nodes*100,
 		 x = broadcast.info$sending ,
@@ -120,11 +123,11 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 		)
 
 	print(ts)
-	print(nr.dead.nodes)
+	#print(nr.dead.nodes)
 
 	# TODO: PLOT THIS USING LINES
 
-	plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l")
+	#plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l", main="Dead Nodes")
 
 	boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
 
@@ -132,7 +135,7 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 average.values <- function(pl, broadcast.info, max) {
 
-	nr.nodes <- length(pl[,1])
+	nr.nodes <- max(sapply(pl, function(p) length(p)))
 	n <- length(broadcast.info$id) # number of broadcast messages
 
 	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
@@ -140,7 +143,7 @@ average.values <- function(pl, broadcast.info, max) {
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
 
-	pc <- sum ( pl[, ncol(pl)] )/nr.nodes
+	pc <- unlist(lapply(pl, sum))/nr.nodes
 
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
@@ -169,8 +172,8 @@ if (length(args) == 4) {
 	sim.time <- strtoi(args[3])
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
-        msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
-        msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
+    msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
+    msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
 
   #return( data.frame(plD = powerLevelDs, msD = msgSentDs, bmrD = broadcastMsgRcvDs) )
 	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
@@ -187,8 +190,8 @@ if (length(args) == 4) {
 	print("Plotting :-P")
 	plot.charts.for.single.experiment(pl, bs, max = sim.time, step=1)
 
-  print("Exporting data...")
-  export.data.of.experiment(args[4], bs, max = sim.time, pl)
+  	print("Exporting data...")
+  	export.data.of.experiment(args[4], bs, max = sim.time, pl)
 
 	# printing average values
 	averages <- average.values(pl, bs, max=sim.time)
