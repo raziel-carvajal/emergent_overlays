@@ -68,6 +68,7 @@ Flooding2::send_message(string& key)
 void
 Flooding2::time_to_broadcast_payload(void* user_data)
 {
+	BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();

@@ -46,7 +46,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         WAKEUP,
         DISPLAY_TIME,
         BROADCAST_DELAY,
-        FLOODING_DELAY
+        FLOODING_DELAY,
+        HALT_SIMULATION_DELAY
     };
 
 

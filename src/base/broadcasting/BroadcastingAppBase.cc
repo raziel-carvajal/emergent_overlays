@@ -163,6 +163,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
+            case HALT_SIMULATION_DELAY:
+            	endSimulation();
+            	break;
 //            case TEST_DELAY:
 //                {
 //                    cancelAndDelete(msg);
@@ -334,6 +337,10 @@ void
 BroadcastingAppBase::time_to_broadcast_payload(void* user_data)
 {
     //cout << "Time to broadcast called in " << myself << endl;
+    if (nr_broadcast_msg == 0) {
+		// stop simulation 10 minutes after last broadcast message
+		delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
+    }
 }
 
 

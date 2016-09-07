@@ -189,6 +189,7 @@ Abba2::send_message(string& key)
 void
 Abba2::time_to_broadcast_payload(void* user_data)
 {
+	BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
         key = myself + "-" + to_string(get_next_id_for_msg());
