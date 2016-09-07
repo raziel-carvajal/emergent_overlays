@@ -82,8 +82,6 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
             append = TRUE
   )
 
-  print("til here it is Ok")
-
   powerLevelInfo <- data.frame( whatever = c(unlist(lapply(power.level, mean)), unlist(lapply(power.level, sd)) ) )
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
@@ -180,7 +178,7 @@ if (length(args) == 4) {
 	device
 
 	print(paste("Creating powerlevels:", args[1]))
-	#pl <- powerlevels3( ds, max= sim.time )
+	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=30)
 	pl <- powerlevels3(powerLevelDs, max= sim.time, step=1)
 
 	print(paste("Creating broadcasting time:", args[1]))
@@ -188,13 +186,13 @@ if (length(args) == 4) {
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P")
-	plot.charts.for.single.experiment(pl, bs, max = sim.time, step=1)
+	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=30)
 
   	print("Exporting data...")
   	export.data.of.experiment(args[4], bs, max = sim.time, pl)
 
 	# printing average values
-	averages <- average.values(pl, bs, max=sim.time)
+	averages <- average.values(pl.local, bs, max=sim.time)
 	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages, averages$retransmitted_messages)))
 }
 

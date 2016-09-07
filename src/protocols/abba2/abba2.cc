@@ -91,7 +91,6 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     if (items.size() == 0) return 0.0;
     if (items.size() == 1) return items[0].second - items[0].first;
     std::sort(items.begin(), items.end());
-    // cout << " SIZEEEEEEEEEEEEEEEEE " << items.size() << endl;
     for (i = 0; i < items.size(); i++)
         sum += items[i].second - items[i].first;
     for (i = 0; i < items.size() - 1; i++) {
@@ -164,7 +163,7 @@ Abba2::on_payload_received(const Broadcast* m) {
 void
 Abba2::send_message(string& key)
 {
-    cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
+    // cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
     bool applyRetransmission = ignoredMsgs.find(key) == ignoredMsgs.end();
     if (is_source || applyRetransmission) {
    //     cerr << getLogHeader() + "broadcasting message " + key + " \n";
