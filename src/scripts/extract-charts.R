@@ -70,7 +70,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(broSes) <- c(expeId)
   write.table(
             broSes,
-            file = "../../results/broadcastSession",
+            file = paste("../../results/broadcastSession",expeId),
             row.names = FALSE,
             append = TRUE
   )
@@ -81,7 +81,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(broDupMsgsInfo) <- c(expeId)
   write.table(
             broDupMsgsInfo,
-            file = "../../results/duplicatedMsgs",
+            file = paste("../../results/duplicatedMsgs", expeId),
             row.names = FALSE,
             append = TRUE
   )
@@ -90,7 +90,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
-            file = "../../results/batteryConsumption",
+            file = paste("../../results/batteryConsumption",expeId),
             row.names = FALSE,
             append = TRUE
   )
@@ -103,7 +103,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
-            file = "../../results/batteryConsumptionDistribution",
+            file = paste("../../results/batteryConsumptionDistribution",expeId),
             row.names = FALSE,
             append = TRUE
   )
