@@ -40,6 +40,8 @@ touch ../../results/networkCoverage
 
 echo "" > ../../results/summary.csv
 
+echo "Simulating"
+
 for c in ${path_to_configs}*.ini ; do
 	filename=$(basename "$c")
 	config_name="${filename%.*}"
@@ -47,10 +49,10 @@ for c in ${path_to_configs}*.ini ; do
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
 	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
 	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] || [ "$protocol" == "flooding"  ] || [ "$protocol" == "dist2mean2"  ] ; then
-    if [ "${nodes}" -lt "500" ]; then
-    echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
-		sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
-    fi
+    		if [ "${nodes}" -lt "500" ]; then
+    			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
+			sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+    		fi
     #exit 1
 	fi
 
