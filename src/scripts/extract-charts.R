@@ -36,26 +36,15 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 
   l.recp <- do.call("rbind", l.recp)
-
-  reception.time <- l.recp$reception.time
-
-  # compute number of message received at each location (coverage)
-  rcv <- l.recp$rcv
-
-  # compute number of message sent at each location (retransmission)
-  sent <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
-
-  # compute number of message received per broadcast session
-  B.i.tmp <- l.recp$B.i.tmp
   
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id
   		sending = sending.time,
-  		receiving = reception.time,
+  		receiving = l.recp$reception.time,
   		time = reception.time - sending.time, # broadcasting time per session id
-  		n.received = rcv, # how many locations received a message in a particular session
-  		n.sent = sent, # how many locations sent a message in a particular session
-  		B.i = B.i.tmp # total number of messages received per broadcast session
+  		n.received = l.recp$rcv, # how many locations received a message in a particular session
+  		n.sent = sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } ), # how many locations sent a message in a particular session
+  		B.i = l.recp$B.i.tmp # total number of messages received per broadcast session
   )
 }
 
