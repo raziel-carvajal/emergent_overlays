@@ -83,7 +83,4 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     send_message(key);
 }
 
-std::string Flooding2::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
-
-
 } //namespace

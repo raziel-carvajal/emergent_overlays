@@ -40,6 +40,7 @@ class INET_API Abba2 : public inet::BroadcastingAppBase
     std::map<std::string, double> timeouts;
     std::vector<std::pair<double, double>> firHalfPairs;
     std::vector<std::pair<double, double>> secHalfPairs;
+    cMessage* currentBrodcast;
 
     virtual void processStart() override;
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
@@ -51,7 +52,6 @@ class INET_API Abba2 : public inet::BroadcastingAppBase
     bool inPair(double x, std::pair<double, double> p);
     double getAngleCovered(std::vector<std::pair<double, double>> items);
     double computeTimeout(double angle);
-    std::string getLogHeader();
 };
 
 } //namespace

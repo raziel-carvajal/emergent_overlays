@@ -32,6 +32,8 @@ using inet::broadcasting::Hello;
 
 namespace inet {
 
+string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
+
 //Define_Module(BroadcastingAppBase);
 
 
@@ -392,11 +394,13 @@ BroadcastingAppBase::get_last_id_for_msg()
 }
 
 
-void BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
+cMessage*
+BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
     cMessage* mm = new cMessage("broadcast delay");
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
     scheduleAt(simTime() + delay, mm);
+    return mm;
 }
 
 
@@ -431,6 +435,16 @@ BroadcastingAppBase::send_package(cPacket* m)
   send_package(m, "255.255.255.255");
 }
 
-
+void
+BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
+{
+    L3AddressResolver resolver;
+    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+    msg->setPayload(key.c_str());
+    msg->setId(key.c_str());
+    msg->setSender(myself.c_str());
+    socket.sendTo(msg, addr, remote_port);
+    emitSent(key);
+}
 
 } //namespace

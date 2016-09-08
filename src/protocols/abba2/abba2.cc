@@ -17,10 +17,6 @@
 #include "abbaMsgs_m.h"
 
 
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
-#include "inet/mobility/contract/IMobility.h"
-
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -120,8 +116,7 @@ Abba2::on_payload_received(const Broadcast* m) {
      * Take into consideration that this implementation isn't capable to compute two the reception
      * of more than one consecutive broadcast session, i. e., if two different broadcast messages
      * are received one after the other, then the vectors of pairs will store angles as it was
-     * just one broadcast.
-     * IDEA: one broadcast ID must map two independent vectors of pairs*/
+     * just one broadcast. IMPROVEMENT: one broadcast ID must map two independent vectors of pairs*/
     string key = string(m->getId());
     cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
@@ -133,15 +128,10 @@ Abba2::on_payload_received(const Broadcast* m) {
         cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
         double newTimeout = computeTimeout(angleCovered);
         cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
-
-        cMessage* mm = new cMessage("broadcast delay");
-        mm->setContextPointer(strdup(key.c_str()));
-        mm->setKind(BROADCAST_DELAY);
-
-        if (newTimeout <= 0) {// just in case we will considered that the angle is more than 306 degrees which is "rare"
-            // TODO find a way to put this event at the top of the scheduler
+        if (newTimeout <= 0) {// just in case we will considered that the angle is more than 306 degrees which is rare
+            // TODO Optimizing messages delivery: find a way to put this event at the top of the scheduler
             // cancel retransmission (ASAP I thought...)
-            cancelAndDelete(mm);
+            cancelAndDelete(currentBrodcast);
             ignoredMsgs[key] = key;
             while (!firHalfPairs.empty()) firHalfPairs.pop_back();
             while (!secHalfPairs.empty()) secHalfPairs.pop_back();
@@ -149,17 +139,12 @@ Abba2::on_payload_received(const Broadcast* m) {
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
                 cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
-                timeouts[key] = newTimeout;
-                //delayed_broadcast(key, uniform(newTimeout, newTimeout + 0.2));
-                delayed_broadcast(key, newTimeout);
-
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
                 cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
-                cancelAndDelete(mm);
-                timeouts[key] = newTimeout;
-                //delayed_broadcast(key, uniform(newTimeout, newTimeout + 0.2));
-                delayed_broadcast(key, newTimeout);
+                cancelAndDelete(currentBrodcast);
             }
+            timeouts[key] = newTimeout;
+            currentBrodcast = delayed_broadcast(key, newTimeout);
         }
     } else {
         cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
@@ -171,6 +156,7 @@ void
 Abba2::send_message(string& key)
 {
     cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
+    //TODO check if retransmission must be decided here
     bool applyRetransmission = ignoredMsgs.find(key) == ignoredMsgs.end();
     if (is_source || applyRetransmission) {
         cerr << getLogHeader() + "broadcasting message " + key + " \n";
@@ -179,15 +165,10 @@ Abba2::send_message(string& key)
         while (!firHalfPairs.empty()) firHalfPairs.pop_back();
         while (!secHalfPairs.empty()) secHalfPairs.pop_back();
 
-        L3AddressResolver resolver;
-        L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4); // TODO: refactor this
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
-        m->setPayload(payloads[key].c_str());
-        m->setId(key.c_str());
-        m->setSender(myself.c_str());
         m->setX(position.x);
         m->setY(position.y);
-        socket.sendTo(m, addr, remote_port);
+        broadcast(key, m);
         emitSent(key);
     } else {
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
@@ -217,7 +198,5 @@ Abba2::time_to_broadcast_payload(void* user_data)
     }
     send_message(key);
 }
-
-std::string Abba2::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
 
 } //namespace
