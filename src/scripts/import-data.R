@@ -60,43 +60,56 @@ plot.cdf <- function(df, key, it, c, d){
   }
 }
 
+plot.boxes <- function(df, algos, pal, d) {
+	print("Plotting boxes with power consumption")
+	#dd <- lapply(df, function(e) e[[1]][,1] <- abs(e[[1]][,1]))
+	data<- do.call("cbind", df)
+	boxplot(data, names=algos)
+}
+
 plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
   for (s in sizes) {
     print( paste('Nodes:', s, sep = '') )
     #for (d in c('sparse', 'medium', 'dense')) {
-    #for (d in c('sparse', 'medium', 'dense')) {
-    for (d in c('medium')) {
-      print( paste('Density:', d, sep = '') )
-      pos <- grep(paste("n_", s, "_d_", d, sep = ''), dfNames)
-      keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
-      it <- 0
-      tmp <- matrix(0, length(algos), 3)
-      for (a in algos) {
-        print( paste('Algorithm:', a, sep = '') )
-        j <- head(grep(a, keys), 1)
-        if (metric == "broadcastSessTime") { plot.cdf(df, keys[j], it, pal[a], d) }
-        if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") {
-          avg <- df[[ keys[j] ]][, 1][1]
-          std <- df[[ keys[j] ]][, 1][2]
-          tmp[it + 1, ] <- c(a, avg, std)
-        }
-        it <- it + 1
-      }
-      if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(30, 50)) }
-      if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(0 , 8)) }
-      legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
-    }
-    mtext(plotHeader, outer = TRUE, cex = 1, line = -2 )
+    
+	for (d in c('5')) {
+	  print( paste('Density:', d, sep = '') )
+	  pos <- grep(paste("n_", s, "_d_", d, sep = ''), dfNames)
+	  keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
+	  it <- 0
+	  tmp <- matrix(0, length(algos), 3)
+	  if (metric == "batteryConsuptionDistribution") { plot.boxes(df, algos, pal, d) }
+	  else {
+		  for (a in algos) {
+			print( paste('Algorithm:', a, sep = '') )
+			j <- head(grep(a, keys), 1)
+			if (metric == "broadcastSessTime") { plot.cdf(df, keys[j], it, pal[a], d) }
+			if (metric == "batteryConsuptionDistribution") { plot.boxes(df, keys[j], it, pal[a], d) }
+			if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") {
+			  avg <- df[[ keys[j] ]][, 1][1]
+			  std <- df[[ keys[j] ]][, 1][2]
+			  tmp[it + 1, ] <- c(a, avg, std)
+			}
+			it <- it + 1
+		  }
+		  if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(0, -5)) }
+		  if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(0 , 8)) }
+		  legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
+	  }
+	}
+	mtext(plotHeader, outer = TRUE, cex = 1, line = -2 )
   }
 }
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 4) {
+if (length(args) == 5) {
   bcFile <- paste(args[1], args[2], sep = '')
-  dmFile <- paste(args[1], args[3], sep = '')
-  bsFile <- paste(args[1], args[4], sep = '')
+  bcDFile <- paste(args[1], args[3], sep = '')
+  dmFile <- paste(args[1], args[4], sep = '')
+  bsFile <- paste(args[1], args[5], sep = '')
   print('Importing datasets...')
   dfBc <- import.data(bcFile)
+  dfBcD <- import.data(bcDFile)
   dfDm <- import.data(dmFile)
   dfBs <- import.data(bsFile)
   print(paste('Metrics to plot:',
@@ -121,6 +134,7 @@ if (length(args) == 4) {
   par(mai = c(0.7,0.6,1.2,0.6))
   print('Plotting: avg power consumption')
   plot.metric(dfBc, "batteryConsuption", dfNames, sizes, algos, pal, "AVG power consumption")
+  plot.metric(dfBcD, "batteryConsuptionDistribution", dfNames, sizes, algos, pal, "Box plot power consumption")
   # dfNames <- names(dfDm)
   plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")
   # dfNames <- names(dfBs)
