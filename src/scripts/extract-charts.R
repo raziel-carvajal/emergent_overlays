@@ -94,6 +94,19 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
             row.names = FALSE,
             append = TRUE
   )
+  pl <- power.level[lapply(power.level, length) > 0]
+  print(power.level)
+  print(pl)
+  print(tail(pl, 1))
+  print(class(tail(pl, 1)))
+  powerLevelInfo <- data.frame( whatever = c(tail(pl, 1)) )
+  colnames(powerLevelInfo) <- c(expeId)
+  write.table(
+            powerLevelInfo,
+            file = "../../results/batteryConsumptionDistribution",
+            row.names = FALSE,
+            append = TRUE
+  )
 }
 
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
