@@ -59,7 +59,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(broSes) <- c(expeId)
   write.table(
             broSes,
-            file = paste("../../results/broadcastSession",expeId),
+            file = paste("../../results/broadcastSession",expeId,sep="-"),
             row.names = FALSE,
             append = TRUE
   )
@@ -70,7 +70,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(broDupMsgsInfo) <- c(expeId)
   write.table(
             broDupMsgsInfo,
-            file = paste("../../results/duplicatedMsgs", expeId),
+            file = paste("../../results/duplicatedMsgs", expeId,sep="-"),
             row.names = FALSE,
             append = TRUE
   )
@@ -79,7 +79,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
-            file = paste("../../results/batteryConsumption",expeId),
+            file = paste("../../results/batteryConsumption",expeId,sep="-"),
             row.names = FALSE,
             append = TRUE
   )
@@ -92,7 +92,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
-            file = paste("../../results/batteryConsumptionDistribution",expeId),
+            file = paste("../../results/batteryConsumptionDistribution",expeId,sep="-"),
             row.names = FALSE,
             append = TRUE
   )
@@ -103,11 +103,11 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	nr.nodes <- max(sapply(power.level, function(p) length(p)))
 	n <- length(broadcast.info$id) # number of broadcast messages
 
-    valid.time <- broadcast.info$time[broadcast.info$time <= max ]
+	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
-    plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of broadcasting session time")
+	plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of broadcasting session time")
 	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
 
 	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
