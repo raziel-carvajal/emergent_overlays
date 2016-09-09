@@ -360,10 +360,6 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		
 		auto idx = key.find("-");
   		auto v = stoi(key.substr(idx+1).c_str());
-  		//if (v == 20) { // when I received last message, it is no longer important to send control message because the experiment is node for me 
-  		//	forbid_control_messages();
-  		//	cerr << "================================================" << endl;
-  		//}
 	}
 }
 
@@ -390,8 +386,13 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
-				payloads[key] = " this is the payload, initially sent from " + myself;
+		payloads[key] = " this is the payload, initially sent from " + myself;
         emitBroadcastMsgReceived(key);
+        if (nr_broadcast_msg == 0) { // when I received the last message, it is no longer important to send control message because the experiment is node for me 
+  			cerr << "================================================" << endl;
+  			delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
+  		}
+        
     }
     else {
         char* s = (char*)user_data;

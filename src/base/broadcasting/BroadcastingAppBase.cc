@@ -165,6 +165,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
+            case HALT_SIMULATION_DELAY:
+            	endSimulation();
+            break;
 //            case TEST_DELAY:
 //                {
 //                    cancelAndDelete(msg);
