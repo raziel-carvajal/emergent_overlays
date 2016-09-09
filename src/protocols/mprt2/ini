@@ -10,5 +10,4 @@ description = "Broadcasting messages using MPR"
 *.host*.udpApp[0].build_hops = true
 
 *.host*.udpApp[0].wakeup_time_to_build_hops = 8s
-
-*.host*.udpApp[0].display_time_hops = 20s
+*.host*.udpApp[0].display_time_hops = 10s

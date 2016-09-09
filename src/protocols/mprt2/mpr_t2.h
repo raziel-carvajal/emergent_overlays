@@ -51,7 +51,7 @@ private:
 
 	map< string, pair<double, double> > hops_position;
 
-  set<string> selectors;
+	set<string> selectors;
 
 	bool in_mpr = false;
 
@@ -71,6 +71,8 @@ private:
 	virtual void on_mpr_found(const mpr_t2::MprFound* m);
 
 	void request_hops(int h);
+	
+	void notify_mpr();
 
 
 	/**

@@ -27,13 +27,13 @@ simple Mpr_t2 extends BroadcastingBase like IUDPApp
     parameters:
         @class(inet::Mpr_t2);
         
-        double builtMprTimeout @unit(s) = default(10s);
+		double builtMprTimeout @unit(s) = default(10s);
 
-    		double wakeup_time_to_build_hops @unit(s) = default(5s);
-    		bool build_hops = default(false);
+		double wakeup_time_to_build_hops @unit(s) = default(5s);
+		bool build_hops = default(false);
 
-    		double display_time_hops @unit(s) = default(100s);
+		double display_time_hops @unit(s) = default(100s);
 
-    		int hops_required = default(1);
+		int hops_required = default(1);
 
 }

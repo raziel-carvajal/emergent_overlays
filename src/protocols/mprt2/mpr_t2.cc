@@ -44,8 +44,7 @@ enum ControlMessageTypes {
 	REPLY_NEIGHBORS = 101,
 	DELEGATE_REQUEST = 102,
 	WAKEUP_HOPS_REQUESTER = 103,
-	DISPLAY_HOPS = 104,
-	NOTIFY_MPR = 105
+	DISPLAY_HOPS = 104
 };
 
 
@@ -62,7 +61,7 @@ Mpr_t2::processStart()
 	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
 	// number of times that the information of two-hops neighbors will be exchanged
 	// to compute the MPR set
-	builtMprCounter = 1; // stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
+	builtMprCounter = stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
 	bool b = par("build_hops").boolValue();
 
 	if (b) {
@@ -87,96 +86,78 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
         switch (msg->getKind()) {
             case REPLY_NEIGHBORS:
               {
-								char* s = (char*)msg->getContextPointer();
-								int n = stoi(string(s));
-								int count = 0;
-								for (int l = 0 ; l <= n ; l++) {
-									count += hops[l].size();
-								}
-								Neighbors* m = new Neighbors("neighbors");
-								m->setSender(myself.c_str());
-								m->setNeighborsArraySize(count);
-								m->setHopLevelsArraySize(count);
-								m->setXsArraySize(count);
-								m->setYsArraySize(count);
-								int i = 0;
-								for (int l = 0 ; l <= n ; l++) {
-									for (auto& h : hops[l]) {
-										m->setNeighbors(i, h.c_str());
-										m->setHopLevels(i, l);
-										m->setXs(i, hops_position[h].first);
-										m->setYs(i, hops_position[h].second);
-										i++;
-									}
-								}
-								m->setMaxHopLevel(n);
-								m->setX(position.x);
-								m->setY(position.y);
-								send_package(m);
-							}
-							cancelAndDelete(msg);
-							break;
-						case DELEGATE_REQUEST:
-							{
-								char* s = (char*)msg->getContextPointer();
-								int n = stoi(string(s));
-								request_hops(n);
-							}
-							cancelAndDelete(msg);
-							break;
-						case DISPLAY_HOPS:
-							{
-								if (builtMprCounter > 0) {
-										builtMprCounter--;
-			              int n = par("hops_required");
-			              // cerr << myself << "(" << simTime() << ")" << endl;
-			              // for (int l = 0 ; l <= n ; l++) {
-			              //     cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
-			              //     for (auto& h : hops[l])
-			              //         cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
-			              //     cerr << endl;
-			              // }
-			              delayed_event(NOTIFY_MPR, "", uniform(0.1, 0.2));
-			              // Doing this loop little bit later that the information about
-			              // two-hops neighbors have been exchanged
-										if (builtMprCounter > 0) delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
-								}
-							}
-							cancelAndDelete(msg);
-							break;
-						case NOTIFY_MPR:
-							{
-								auto mpr = compute_mpr();
-								MprFound* m = new MprFound("mpr found");
-								m->setSender(myself.c_str());
-								m->setInMprArraySize(mpr.size());
-								int idx = 0;
-								for (auto& h: mpr) {
-									//cerr << h << " ======== is in mpr" << endl << endl;
-									m->setInMpr(idx++, strdup(h.c_str()));
-								}
-								send_package(m);
-							}
-							cancelAndDelete(msg);
-							break;
-						case WAKEUP_HOPS_REQUESTER:
-							{
-									int n = par("hops_required");
-							    // cerr << myself << ": BuiltMprCounter :: " << builtMprCounter << ", hops_required :: " << n << endl;
-							    if(builtMprCounter > 0){
-
-							        // cerr << myself << ": Wakeup to build hops, number of builds left: " << builtMprCounter << endl;
-							        request_hops(n-1);
-
-							        if (builtMprCounter > 0)  delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
-							    }
-							}
-							cancelAndDelete(msg);
-							break;
-						default:
-							BroadcastingAppBase::handleMessageWhenUp(msg);
-							break;
+				char* s = (char*)msg->getContextPointer();
+				int n = stoi(string(s));
+				int count = 0;
+				for (int l = 0 ; l <= n ; l++) {
+					count += hops[l].size();
+				}
+				Neighbors* m = new Neighbors("neighbors");
+				m->setSender(myself.c_str());
+				m->setNeighborsArraySize(count);
+				m->setHopLevelsArraySize(count);
+				m->setXsArraySize(count);
+				m->setYsArraySize(count);
+				int i = 0;
+				for (int l = 0 ; l <= n ; l++) {
+					for (auto& h : hops[l]) {
+						m->setNeighbors(i, h.c_str());
+						m->setHopLevels(i, l);
+						m->setXs(i, hops_position[h].first);
+						m->setYs(i, hops_position[h].second);
+						i++;
 					}
+				}
+				m->setMaxHopLevel(n);
+				m->setX(position.x);
+				m->setY(position.y);
+				if (are_control_messages_allowed()) {
+					send_package(m);
+				}
+			  }
+			  cancelAndDelete(msg);
+			break;
+			case DELEGATE_REQUEST:
+				{
+					char* s = (char*)msg->getContextPointer();
+					int n = stoi(string(s));
+					request_hops(n);
+				}
+				cancelAndDelete(msg);
+				break;
+			case DISPLAY_HOPS:
+				{
+					if (builtMprCounter > 0 && are_control_messages_allowed()) {
+						  builtMprCounter--;
+						  //int n = par("hops_required");
+						  // cerr << myself << "(" << simTime() << ")" << endl;
+						  // for (int l = 0 ; l <= n ; l++) {
+						  //     cerr << "\thops level " << l << ", found = " << hops_built[l] << endl;
+						  //     for (auto& h : hops[l])
+						  //         cerr << "\t\t" << h << "(" << hops_position[h].first << ", " << hops_position[h].second  << ")" << endl;
+						  //     cerr << endl;
+						  // }
+						  notify_mpr();
+						  if (builtMprCounter > 0) delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
+					}
+				}
+				cancelAndDelete(msg);
+				break;
+			case WAKEUP_HOPS_REQUESTER:
+				{
+					int n = par("hops_required");
+				    // cerr << myself << ": BuiltMprCounter :: " << builtMprCounter << ", hops_required :: " << n << endl;
+				    if(builtMprCounter > 0 && are_control_messages_allowed()){
+				        // cerr << myself << ": Wakeup to build hops, number of builds left: " << builtMprCounter << endl;
+				        request_hops(n-1);
+				    }
+				}
+				cancelAndDelete(msg);
+				break;
+			default:
+				BroadcastingAppBase::handleMessageWhenUp(msg);
+				break;
+		}
 	}
 	else BroadcastingAppBase::handleMessageWhenUp(msg);
 }
@@ -328,23 +309,44 @@ Mpr_t2::on_request_neighbors(const mpr_t2::RequestNeighbors* m)
 void
 Mpr_t2::request_hops(int h)
 {
+	if (are_control_messages_allowed()) {
+		RequestNeighbors* m = new RequestNeighbors("Requesting hops");
+		m->setSender(myself.c_str());
+		m->setMaxHopLevel(h);
+		m->setX(position.x);
+		m->setY(position.y);
+		send_package(m);
+	}
+}
 
-	RequestNeighbors* m = new RequestNeighbors("Requesting hops");
-	m->setSender(myself.c_str());
-	m->setMaxHopLevel(h);
-	m->setX(position.x);
-	m->setY(position.y);
-	send_package(m);
-
+void
+Mpr_t2::notify_mpr()
+{
+	if (are_control_messages_allowed()) {
+		auto mpr = compute_mpr();
+		MprFound* m = new MprFound("mpr found");
+		m->setSender(myself.c_str());
+		m->setInMprArraySize(mpr.size());
+		int idx = 0;
+		for (auto& h: mpr) {
+			//cerr << h << " ======== is in mpr" << endl << endl;
+			m->setInMpr(idx++, strdup(h.c_str()));
+		}
+		send_package(m);
+	
+		if (builtMprCounter > 0) {
+			delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
+		}
+	}
 }
 
 
 void
 Mpr_t2::on_payload_received(const Broadcast* m)
 {
-  // Store in a map a a broadcast session ID
-  string key = m->getId();
-  emitBroadcastMsgReceived( key );
+	// Store in a map a a broadcast session ID
+	string key = m->getId();
+	emitBroadcastMsgReceived( key );
 
 	bool first = (!is_source && payloads.find(key) == payloads.end());
 
@@ -352,8 +354,16 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		// cerr << myself << "(" << simTime() << ")" << ": receiving message with key = " << key << endl;
 		payloads[key] = m->getPayload();
 		bool from_selector = selectors.find(m->getSender()) != selectors.end();
-		if (in_mpr && from_selector)
+		if (in_mpr && from_selector) {
 			delayed_broadcast(key, uniform(0.01, 0.2));
+		}
+		
+		auto idx = key.find("-");
+  		auto v = stoi(key.substr(idx+1).c_str());
+  		//if (v == 20) { // when I received last message, it is no longer important to send control message because the experiment is node for me 
+  		//	forbid_control_messages();
+  		//	cerr << "================================================" << endl;
+  		//}
 	}
 }
 
