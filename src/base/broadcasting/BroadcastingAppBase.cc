@@ -32,6 +32,8 @@ using inet::broadcasting::Hello;
 
 namespace inet {
 
+string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
+
 //Define_Module(BroadcastingAppBase);
 
 
@@ -163,9 +165,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
-            case HALT_SIMULATION_DELAY:
-            	endSimulation();
-            	break;
 //            case TEST_DELAY:
 //                {
 //                    cancelAndDelete(msg);
@@ -337,10 +336,6 @@ void
 BroadcastingAppBase::time_to_broadcast_payload(void* user_data)
 {
     //cout << "Time to broadcast called in " << myself << endl;
-    if (nr_broadcast_msg == 0) {
-		// stop simulation 10 minutes after last broadcast message
-		delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
-    }
 }
 
 
@@ -399,7 +394,8 @@ BroadcastingAppBase::get_last_id_for_msg()
 }
 
 
-cMessage* BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
+cMessage*
+BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
     cMessage* mm = new cMessage("broadcast delay");
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
@@ -439,6 +435,16 @@ BroadcastingAppBase::send_package(cPacket* m)
   send_package(m, "255.255.255.255");
 }
 
-
+void
+BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
+{
+    L3AddressResolver resolver;
+    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+    msg->setPayload(key.c_str());
+    msg->setId(key.c_str());
+    msg->setSender(myself.c_str());
+    socket.sendTo(msg, addr, remote_port);
+    emitSent(key);
+}
 
 } //namespace

@@ -63,8 +63,10 @@ plot.cdf <- function(df, key, it, c, d){
 plot.boxes <- function(df, algos, pal, d) {
 	print("Plotting boxes with power consumption")
 	#dd <- lapply(df, function(e) e[[1]][,1] <- abs(e[[1]][,1]))
-	data<- do.call("cbind", df)
-	boxplot(data, names=algos)
+	dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
+	data <- do.call("cbind", dd)
+	print(algos)
+	boxplot(data, names=algos, main=(paste("Density", d)))
 }
 
 plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
@@ -78,27 +80,64 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
 	  keys <- unlist( lapply(pos, function(i) { dfNames[i] }) )
 	  it <- 0
 	  tmp <- matrix(0, length(algos), 3)
-	  if (metric == "batteryConsuptionDistribution") { plot.boxes(df, algos, pal, d) }
-	  else {
-		  for (a in algos) {
-			print( paste('Algorithm:', a, sep = '') )
-			j <- head(grep(a, keys), 1)
-			if (metric == "broadcastSessTime") { plot.cdf(df, keys[j], it, pal[a], d) }
-			if (metric == "batteryConsuptionDistribution") { plot.boxes(df, keys[j], it, pal[a], d) }
-			if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") {
-			  avg <- df[[ keys[j] ]][, 1][1]
-			  std <- df[[ keys[j] ]][, 1][2]
-			  tmp[it + 1, ] <- c(a, avg, std)
-			}
-			it <- it + 1
-		  }
-		  if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(0, -5)) }
-		  if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(0 , 8)) }
-		  legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
+	  for (a in algos) {
+		print( paste('Algorithm:', a, sep = '') )
+		j <- head(grep(a, keys), 1)
+		if (metric == "broadcastSessTime") { plot.cdf(df, keys[j], it, pal[a], d) }
+		if (metric == "batteryConsuption" || metric == "duplBroadcastMsgs") {
+		
+		  avg <- df[[ keys[j] ]][, 1][1]
+		  std <- df[[ keys[j] ]][, 1][2]
+		  tmp[it + 1, ] <- c(a, avg, std)
+		}
+		it <- it + 1
 	  }
+	  if (metric == "batteryConsuption") { plot.errorBars(tmp, pal, d, range(0, -5)) }
+	  if (metric == "duplBroadcastMsgs") { plot.errorBars(tmp, pal, d, range(0 , 8)) }
+	  legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
 	}
 	mtext(plotHeader, outer = TRUE, cex = 1, line = -2 )
   }
+}
+
+plot.power.consumption <- function(df, algos, pal) {
+	for (d in c('5')) {
+		print( paste('Density:', d, sep = '') )
+		plot.boxes(df, algos, pal, d)
+		mtext("Power consumption", outer = TRUE, cex = 1, line = -2 )
+	}
+}
+
+plot.duplicated.messages <- function(df) {
+
+	dd <- lapply(df, function(e) {
+		s <- unlist( strsplit(colnames(e),'_'))
+		data.frame(
+			d = s[which(s == "d") + 1],
+			p = s[which(s == "p") + 1],
+			m = e[,1][1],
+			sd = e[,1][2]
+		)
+	})
+	
+	data <- do.call("rbind", dd)
+	for (d in c('5')) {
+		dm <- data[data$d == d,]
+		print( paste('Density:', d, sep = '') )
+		y <- as.numeric( dm$m )
+		sd <-as.numeric( dm$sd )
+		#plot(y, ylim = range( c(y - sd, y + sd) ),
+		yl <- range( min(dm$m) - max(dm$sd), max(dm$m) + max(dm$sd) )
+		plot(y, ylim = yl,
+		pch = 19, xlab="Protocol", ylab="Mean +/- SD",
+		main = paste("Density ", d), axes = FALSE
+		)
+		axis(2)
+		axis(1, at = seq_along(y),labels = dm$p)
+		arrows(1:length(dm$p), y - sd, 1:length(dm$p), y + sd, length = 0.05, angle = 90, code = 3)
+		box()
+		# mtext("Power consumption", outer = TRUE, cex = 1, line = -2 )
+	}
 }
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -133,10 +172,16 @@ if (length(args) == 5) {
   layout(m_layout, heights=c(0.8,0.8,0.8))
   par(mai = c(0.7,0.6,1.2,0.6))
   print('Plotting: avg power consumption')
-  plot.metric(dfBc, "batteryConsuption", dfNames, sizes, algos, pal, "AVG power consumption")
-  plot.metric(dfBcD, "batteryConsuptionDistribution", dfNames, sizes, algos, pal, "Box plot power consumption")
+  
+  #plot.metric(dfBc, "batteryConsuption", dfNames, sizes, algos, pal, "AVG power consumption")
+  
+  plot.power.consumption(dfBcD, algos, pal)
+  
   # dfNames <- names(dfDm)
-  plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")
+  # plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")
+  
+  plot.duplicated.messages(dfDm)
+  
   # dfNames <- names(dfBs)
-  plot.metric(dfBs, "broadcastSessTime", dfNames, sizes, algos, pal, "CDF of broadcasting session time")
+  #plot.metric(dfBs, "broadcastSessTime", dfNames, sizes, algos, pal, "CDF of broadcasting session time")
 }

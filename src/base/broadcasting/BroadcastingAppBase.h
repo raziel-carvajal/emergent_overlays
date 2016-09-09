@@ -38,6 +38,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         Coord pos;
         double w;
     };
+
+  std::string getLogHeader();
   protected:
     enum ControlMessageTypes {
         IDLE,
@@ -46,8 +48,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         WAKEUP,
         DISPLAY_TIME,
         BROADCAST_DELAY,
-        FLOODING_DELAY,
-        HALT_SIMULATION_DELAY
+        FLOODING_DELAY
     };
 
 
@@ -102,7 +103,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     virtual void configure_neighbors();
 
-    /* dond't touch these */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
@@ -113,6 +113,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     virtual void handleNodeCrash() override;
 
     virtual void processStart();
+
+    virtual void broadcast(std::string key, broadcasting::Broadcast* msg);
 
     template <typename T> bool
 	processMessage(cPacket* pkt, std::function<void(const T*)> action)
