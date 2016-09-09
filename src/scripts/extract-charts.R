@@ -1,4 +1,5 @@
 require('omnetpp')
+# library(data.table)
 
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
@@ -25,14 +26,14 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
   l.recp <- lapply(id_msgs, function (id) {
-  										tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
-										l <- sapply(tmp.list, function(d)  c(d, NA)[[1]] )
-										data.frame(
-											reception.time = max(l),
-											rcv = sum(sapply(l, function(i) if (is.na(i)) 0 else 1)),
-											B.i.tmp = sum(sapply(tmp.list, function(d) length(d) ))
-										)
-									}
+						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
+						l <- sapply(tmp.list, function(d)  c(d, NA)[[1]] )
+						data.frame(
+							reception.time = max(l),
+							rcv = sum(sapply(l, function(i) if (is.na(i)) 0 else 1)),
+							B.i.tmp = sum(sapply(tmp.list, function(d) length(d) ))
+						)
+			}
   )
 
   l.recp <- do.call("rbind", l.recp)
@@ -41,7 +42,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   		id = id_msgs, # session id
   		sending = sending.time,
   		receiving = l.recp$reception.time,
-  		time = reception.time - sending.time, # broadcasting time per session id
+  		time = l.recp$reception.time - sending.time, # broadcasting time per session id
   		n.received = l.recp$rcv, # how many locations received a message in a particular session
   		n.sent = sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } ), # how many locations sent a message in a particular session
   		B.i = l.recp$B.i.tmp # total number of messages received per broadcast session
