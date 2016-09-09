@@ -60,15 +60,6 @@ plot.cdf <- function(df, key, it, c, d){
   }
 }
 
-plot.boxes <- function(df, algos, pal, d) {
-	print("Plotting boxes with power consumption")
-	#dd <- lapply(df, function(e) e[[1]][,1] <- abs(e[[1]][,1]))
-	dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
-	data <- do.call("cbind", dd)
-	print(algos)
-	boxplot(data, names=algos, main=(paste("Density", d)))
-}
-
 plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
   for (s in sizes) {
     print( paste('Nodes:', s, sep = '') )
@@ -100,12 +91,35 @@ plot.metric <- function(df, metric, dfNames, sizes, algos, pal, plotHeader) {
   }
 }
 
+plot.broadcasting.time <- function(df, pal){
+  print('Doing plotting rigth now...')
+  for (d in c('5','10','15')) {
+	  dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
+	  data <- unname(dd)
+	  algos <- lapply(lapply(data, colnames), function(e) {
+	  		s <- unlist( strsplit(e,'_'))
+	  		s[which(s == "p") + 1]	
+	  })  
+	  t <- lapply(data, function(e) e[,1] )
+	  xli <- range( min(sapply(t, min))  , max(sapply(t, max)))
+	  for (i in 1:length(t) ) {
+	  	plot.ecdf(t[[i]], xlim = xli, col = pal[algos[[i]]], xlab = "Time (ms)", add=(i>1), main = paste("Density ", d))
+	  }
+	  legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
+  }
+  mtext("ECDF broadcasting time", outer = TRUE, cex = 1, line = -2 )
+}
+
 plot.power.consumption <- function(df, algos, pal) {
-	for (d in c('5')) {
-		print( paste('Density:', d, sep = '') )
-		plot.boxes(df, algos, pal, d)
-		mtext("Power consumption", outer = TRUE, cex = 1, line = -2 )
+	for (d in c('5','10', '15')) {
+		dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
+		print("tata")
+		dd <- lapply(dd, function(e) -1*e[,1])
+		#dd[[1]][,1] <- dd[[1]][,1]*-1
+		data <- do.call("cbind", dd)
+		boxplot(data, names=algos, main=(paste("Density", d)))	
 	}
+	mtext("Box plot of power consumption", outer = TRUE, cex = 1, line = -2 )
 }
 
 plot.duplicated.messages <- function(df) {
@@ -121,7 +135,7 @@ plot.duplicated.messages <- function(df) {
 	})
 	
 	data <- do.call("rbind", dd)
-	for (d in c('5')) {
+	for (d in c('5','10', '15')) {
 		dm <- data[data$d == d,]
 		print( paste('Density:', d, sep = '') )
 		y <- as.numeric( dm$m )
@@ -136,8 +150,9 @@ plot.duplicated.messages <- function(df) {
 		axis(1, at = seq_along(y),labels = dm$p)
 		arrows(1:length(dm$p), y - sd, 1:length(dm$p), y + sd, length = 0.05, angle = 90, code = 3)
 		box()
-		# mtext("Power consumption", outer = TRUE, cex = 1, line = -2 )
+		
 	}
+	mtext("AVG duplicated messages", outer = TRUE, cex = 1, line = -2 )
 }
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -177,11 +192,8 @@ if (length(args) == 5) {
   
   plot.power.consumption(dfBcD, algos, pal)
   
-  # dfNames <- names(dfDm)
-  # plot.metric(dfDm, "duplBroadcastMsgs", dfNames, sizes, algos, pal, "AVG duplicated messages")
-  
   plot.duplicated.messages(dfDm)
   
-  # dfNames <- names(dfBs)
+  plot.broadcasting.time(dfBs,pal)
   #plot.metric(dfBs, "broadcastSessTime", dfNames, sizes, algos, pal, "CDF of broadcasting session time")
 }
