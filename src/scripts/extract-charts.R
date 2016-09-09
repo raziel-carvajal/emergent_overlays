@@ -9,7 +9,7 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separate list for each power level
   others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
   # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x >=(t-step) & s$x <= t,]$y, 1) ) ), unlist)
+  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
@@ -185,7 +185,7 @@ if (length(args) == 4) {
 	device
 
 	print(paste("Creating powerlevels:", args[1]))
-	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=30)
+	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=5)
 	# pl <- powerlevels3(powerLevelDs, max= sim.time, step=1)
 
 	print(paste("Creating broadcasting time:", args[1]))
@@ -193,7 +193,7 @@ if (length(args) == 4) {
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P")
-	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=30)
+	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=5)
 
   	print("Exporting data...")
   	export.data.of.experiment(args[4], bs, max = sim.time, pl.local)
