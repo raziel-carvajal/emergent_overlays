@@ -113,59 +113,68 @@ plot.broadcasting.time <- function(df, pal){
 plot.power.consumption <- function(df, algos, pal) {
 	for (d in c('5','10', '15')) {
 		dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
-		print("tata")
 		dd <- lapply(dd, function(e) -1*e[,1])
 		#dd[[1]][,1] <- dd[[1]][,1]*-1
 		data <- do.call("cbind", dd)
+		print(data)
+		print(unlist(algos))
 		boxplot(data, names=algos, main=(paste("Density", d)))	
 	}
 	mtext("Box plot of power consumption", outer = TRUE, cex = 1, line = -2 )
 }
 
 plot.duplicated.messages <- function(df) {
-
-	dd <- lapply(df, function(e) {
-		s <- unlist( strsplit(colnames(e),'_'))
-		data.frame(
-			d = s[which(s == "d") + 1],
-			p = s[which(s == "p") + 1],
-			m = e[,1][1],
-			sd = e[,1][2]
-		)
-	})
-	
-	data <- do.call("rbind", dd)
 	for (d in c('5','10', '15')) {
-		dm <- data[data$d == d,]
-		print( paste('Density:', d, sep = '') )
-		y <- as.numeric( dm$m )
-		sd <-as.numeric( dm$sd )
-		#plot(y, ylim = range( c(y - sd, y + sd) ),
-		yl <- range( min(dm$m) - max(dm$sd), max(dm$m) + max(dm$sd) )
-		plot(y, ylim = yl,
-		pch = 19, xlab="Protocol", ylab="Mean +/- SD",
-		main = paste("Density ", d), axes = FALSE
-		)
-		axis(2)
-		axis(1, at = seq_along(y),labels = dm$p)
-		arrows(1:length(dm$p), y - sd, 1:length(dm$p), y + sd, length = 0.05, angle = 90, code = 3)
-		box()
-		
+		dd <- df[grepl(paste("d",d,sep="_"), sapply(df, function(e) colnames(e) ))]
+		#dd[[1]][,1] <- dd[[1]][,1]*-1
+		data <- do.call("cbind", dd)
+		print(data)
+		print(unlist(algos))
+		boxplot(data, names=algos, main=(paste("Density", d)))	
 	}
-	mtext("AVG duplicated messages", outer = TRUE, cex = 1, line = -2 )
+	mtext("Box plot of AVG duplicated messages", outer = TRUE, cex = 1, line = -2 )
+	
+	#dd <- lapply(df, function(e) {
+	#	s <- unlist( strsplit(colnames(e),'_'))
+	#	data.frame(
+	#		d = s[which(s == "d") + 1],
+	#		p = s[which(s == "p") + 1],
+	#		m = e[,1][1],
+	#		sd = e[,1][2]
+	#	)
+	#})
+	
+	#data <- do.call("rbind", dd)
+	#for (d in c('5','10', '15')) {
+	#	dm <- data[data$d == d,]
+	#	print( paste('Density:', d, sep = '') )
+	#	y <- as.numeric( dm$m )
+	#	sd <-as.numeric( dm$sd )
+		#plot(y, ylim = range( c(y - sd, y + sd) ),
+	#	yl <- range( min(dm$m) - max(dm$sd), max(dm$m) + max(dm$sd) )
+	#	plot(y, ylim = yl,
+	#	pch = 19, xlab="Protocol", ylab="Mean +/- SD",
+	#	main = paste("Density ", d), axes = FALSE
+	#	)
+	#	axis(2)
+	#	axis(1, at = seq_along(y),labels = dm$p)
+	#	arrows(1:length(dm$p), y - sd, 1:length(dm$p), y + sd, length = 0.05, angle = 90, code = 3)
+	#	box()
+		
+	#}
 }
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 5) {
-  bcFile <- paste(args[1], args[2], sep = '')
-  bcDFile <- paste(args[1], args[3], sep = '')
-  dmFile <- paste(args[1], args[4], sep = '')
-  bsFile <- paste(args[1], args[5], sep = '')
+if (length(args) == 4) {
+  bcDFile <- paste(args[1], args[2], sep = '') # load battery consumption time
+  dmFile <- paste(args[1], args[3], sep = '') # duplicated messages file
+  bsFile <- paste(args[1], args[4], sep = '') # broadcastting time
+  
   print('Importing datasets...')
-  dfBc <- import.data(bcFile)
   dfBcD <- import.data(bcDFile)
   dfDm <- import.data(dmFile)
   dfBs <- import.data(bsFile)
+  
   print(paste('Metrics to plot:',
     'broadcasting session time (CDF),',
     'avg of power consumption &',
@@ -173,7 +182,7 @@ if (length(args) == 5) {
   ))
   # datasets headers, algorithms and number of peers are the same for each
   # dataset file
-  dfNames <- names(dfBc)
+  dfNames <- names(dfBcD)
   sizes <- get.attrSet(dfNames, "n")
   print('Broadcast protocols: ')
   algos <- get.attrSet(dfNames, "p")
