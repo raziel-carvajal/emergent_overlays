@@ -23,8 +23,6 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
-#include <chrono>
-#include <random>
 
 using namespace std;
 using inet::broadcasting::Broadcast;
@@ -38,7 +36,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
 
-    cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
+    cerr << getLogHeader() << "reception of message " << key << " by sender " << m->getSender() << endl;
     emitBroadcastMsgReceived(key);
 
     bool firstTime = !is_source && payloads[key].empty();
@@ -47,7 +45,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
         payloads[key] = m->getPayload();
         delayed_broadcast(key, uniform(0.1, 0.2));
     } else {
-      cerr << getLogHeader() + "retransmission of message " + key + "was cancelled\n";
+      // cerr << getLogHeader() << "retransmission of message " << key << "was cancelled" << endl;
     }
 }
 
@@ -55,7 +53,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 void
 Flooding2::send_message(string& key)
 {
-    cerr << getLogHeader() + "doing broadcast of message " + key + " \n";
+    cerr << getLogHeader() << "doing broadcast of message " << key << endl;
     Broadcast* m = new Broadcast("payload");
     m->setPayload(payloads[key].c_str());
     m->setId(key.c_str());
