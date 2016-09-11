@@ -43,7 +43,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 
     if (firstTime) {
         payloads[key] = m->getPayload();
-        delayed_broadcast(key, uniform(0.1, 0.2));
+        delayed_broadcast(key, get_random_delay());
     } else {
       // cerr << getLogHeader() << "retransmission of message " << key << "was cancelled" << endl;
     }
