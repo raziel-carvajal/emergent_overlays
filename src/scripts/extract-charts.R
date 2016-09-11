@@ -1,20 +1,15 @@
 require('omnetpp')
-library(data.table)
+#library(data.table)
 
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey,
-  			function(p) { 
-  				d <- as.data.table(subset(ds$vectordata, resultkey==p))
-  				setattr(d, "sorted", "x")
-  				d
-  })
-  # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) s[J(t), roll = "nearest"]$y ) ), unlist)
+	# create a separate list for each power level
+	others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+	# vector of power levels for each instant of time
+	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
