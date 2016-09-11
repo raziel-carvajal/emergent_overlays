@@ -61,6 +61,16 @@ def setArguments(argv):
             continue
 
 
+class RandomGeometricGraphTopologyGenerator:
+    def __init__(self, d):
+        self.density = d
+        pass
+
+class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
+
+    def __init__(self, s):
+        pass
+
 def is_valid_network(pos, tx, density, allowed_error):
     g = nx.Graph()
     for i, v in enumerate(pos):
@@ -157,13 +167,12 @@ if __name__ == '__main__':
     for d in range(5, 45, 5):
 
         print "Building topology with density", d, trRan, maxL, maxL
-        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
+        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
         while not is_valid_network(topology, trRan, d, 10):
-            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
+            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
 
         print "Writing NED file"
         createNedFile(d, topology, index, w, w, trRan)
         index = index + 1
     
-    fillSurfaceWithFixedNumberOfNodes(10, 160, 5)
     print "Done", index
