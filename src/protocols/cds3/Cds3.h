@@ -33,9 +33,12 @@ private:
         ONE_HOP_NEIGHS
     };
 
-    bool amIrelay = false;
+    bool markingProcedureDone;
+    bool amIrelay;
     std::map<std::string, std::map<std::string, std::string> > oneHopNeigs;
     std::map<std::string, std::string> alreadyDispatched;
+    std::map<std::string, std::string> relaysIcanSee;
+    void applyCdsRule2();
     void doMarkingProcedure();
 
 protected:
