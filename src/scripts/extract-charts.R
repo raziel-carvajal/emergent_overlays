@@ -12,11 +12,18 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
 	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
+time.of.powerlevels <- function(ds, ts = seq(step, max, by=step), max, step=30) {
+	# create a separate list for each power level
+	others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+	# vector of power levels for each instant of time
+	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$x, 1) ) ), unlist)
+}
+
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-  
+
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
 
@@ -37,7 +44,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 
   l.recp <- do.call("rbind", l.recp)
-  
+
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id
   		sending = sending.time,
@@ -49,7 +56,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 }
 
-export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
+export.data.of.experiment <- function(expeId, broadcast.info, max, power.level, time.of.powerlevels){
 
   valid.time <- broadcast.info$time[broadcast.info$time <= max ]
   valid.time <- valid.time[!is.na(valid.time)]
@@ -75,7 +82,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
   #          row.names = FALSE,
   #          append = F
   #)
-  
+
   n <- length(broadcast.info$id) # number of broadcast messages
   broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
   broDupMsgsInfo <- data.frame( whatever = c(broDupMsgs) )
@@ -87,20 +94,22 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
             append = F
   )
 
-  #powerLevelInfo <- data.frame( whatever = c(unlist(lapply(power.level, mean)), unlist(lapply(power.level, sd)) ) )
-  #colnames(powerLevelInfo) <- c(expeId)
-  #write.table(
-  #          powerLevelInfo,
-  #          file = paste("../../results/batteryConsumption",expeId,sep="-"),
-  #          row.names = FALSE,
-  #          append = F
-  #)
   pl <- power.level[lapply(power.level, length) > 0]
   powerLevelInfo <- data.frame( whatever = c(tail(pl, 1)) )
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
             file = paste("../../results/batteryConsumptionDistribution",expeId,sep="-"),
+            row.names = FALSE,
+            append = F
+  )
+
+  t.pl <- time.of.powerlevels[lapply(time.of.powerlevels, length) > 0]
+  t.powerLevelInfo <- data.frame( whatever = c(tail(t.pl, 1)) )
+  colnames(t.powerLevelInfo) <- c(expeId)
+  write.table(
+            t.powerLevelInfo,
+            file = paste("../../results/batteryConsumptionDistributionTime",expeId,sep="-"),
             row.names = FALSE,
             append = F
   )
@@ -115,8 +124,8 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	if (length(valid.time) == 0) {
 		valid.time <- broadcast.info$time
 	}
-	plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of broadcasting session time")
-	hist(valid.time, xlab="Session broadcasting Time (Seconds)", main="Broadcasting Time")
+	plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of maximal reception delay")
+	hist(valid.time, xlab="Maximal reception delay (Seconds)", main="Maximal reception delay")
 
 	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
 
@@ -182,8 +191,9 @@ print(args)
 
 if (length(args) == 4) {
 	sim.time <- strtoi(args[3])
+  print(paste("Simulation time", sim.time, "seconds"))
 	pl.step <- sim.time / 10
-	
+
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
     msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
@@ -194,20 +204,21 @@ if (length(args) == 4) {
 
 	print(paste("Creating powerlevels:", args[1]))
 	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=pl.step)
+	time.pl <- time.of.powerlevels( powerLevelDs, max= sim.time, step=pl.step)
 	# pl <- powerlevels3(powerLevelDs, max= sim.time, step=1)
 
-	print(paste("Creating broadcasting time:", args[1]))
+	print(paste("Creating maximal reception delay:", args[1]))
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P")
 	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=pl.step)
 
-  	print("Exporting data...")
-  	export.data.of.experiment(args[4], bs, max = sim.time, pl.local)
+  print("Exporting data...")
+  export.data.of.experiment(args[4], bs, max = sim.time, pl.local, time.pl)
 
 	print("Printing average values")
 	averages <- average.values(pl.local, bs, max=sim.time)
-	print(noquote(paste("average_values", 
+	print(noquote(paste("average_values",
 					averages$coverage,
 					averages$broadcasting.time,
 					averages$power_consumption,

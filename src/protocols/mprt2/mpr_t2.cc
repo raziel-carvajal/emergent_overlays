@@ -139,7 +139,7 @@ Mpr_t2::handleMessageWhenUp(cMessage *msg)
 						  //     cerr << endl;
 						  //}
 						  delayed_event(NOTIFY_MPR, "", get_random_delay());
-						  
+
 						  if (builtMprCounter > 0) delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
 					}
 				}
@@ -339,7 +339,7 @@ Mpr_t2::notify_mpr()
 			m->setInMpr(idx++, strdup(h.c_str()));
 		}
 		send_package(m);
-	
+
 		if (builtMprCounter > 0) {
 			delayed_event(WAKEUP_HOPS_REQUESTER, "", par("builtMprTimeout").doubleValue());
 		}
@@ -363,7 +363,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		if (in_mpr && from_selector) {
 			delayed_broadcast(key, get_random_delay());
 		}
-		
+
 		auto idx = key.find("-");
   		auto v = stoi(key.substr(idx+1).c_str());
 	}
@@ -392,13 +392,13 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
-		payloads[key] = " this is the payload, initially sent from " + myself;
+				payloads[key] = " this is the payload, initially sent from " + myself;
         emitBroadcastMsgReceived(key);
-        if (nr_broadcast_msg == 0) { // when I received the last message, it is no longer important to send control message because the experiment is node for me 
-  			cerr << "================================================" << endl;
-  			delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
-  		}
-        
+        //if (nr_broadcast_msg == 0) { // when I received the last message, it is no longer important to send control message because the experiment is node for me
+  			//	cerr << "================================================" << endl;
+  			//	delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
+  			//}
+
     }
     else {
         char* s = (char*)user_data;

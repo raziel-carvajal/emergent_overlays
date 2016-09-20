@@ -85,10 +85,23 @@ BroadcastingAppBase::initialize(int stage)
             break;
         case INITSTAGE_LAST:
 
+            // sending messages if source
             if (is_source && nr_broadcast_msg > 0) {
             	double d = par("wakeUpTime").doubleValue();
             	delayed_event(WAKEUP, "intervalBroadcastTime", d);
-                cerr << "Broadcasting sessions will star at " << (d) << endl;
+              cerr << "Broadcasting sessions will star at " << (d) << endl;
+            }
+
+            // stop simulation at some point in the future
+
+            {
+              double d = par("wakeUpTime").doubleValue();
+              d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
+              d += 15; // some extra seconds
+              delayed_event(LAST_POWER_REPORT, "last power report", d - 0.5);
+              if (is_source) {
+            	   delayed_event(HALT_SIMULATION_DELAY, "halt simulation", d);
+              }
             }
 
             break;
@@ -124,8 +137,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
-                    //ctrlMsg0->setKind(SAY_HELLO);
-                    //scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
                 }
                 cancelAndDelete(msg);
                 break;
@@ -163,7 +174,18 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                 }
                 break;
+            case LAST_POWER_REPORT:
+                {
+                  Hello* pkt = new Hello("Hello");
+                  pkt->setX(position.x);
+                  pkt->setY(position.y);
+                  pkt->setSender(myself.c_str());
+                  send_package(pkt);
+                }
+                cancelAndDelete(msg);
+              break;
             case HALT_SIMULATION_DELAY:
+              cancelAndDelete(msg);
             	endSimulation();
             break;
 //            case TEST_DELAY:

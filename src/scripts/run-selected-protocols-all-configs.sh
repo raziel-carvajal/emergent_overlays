@@ -45,9 +45,9 @@ for c in ${path_to_configs}*.ini ; do
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
 	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
 	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "flooding"  ] ; then
-    		if [ "${nodes}" -lt "500" ]; then
+    		if [ "${density}" -lt "18" ]; then
     			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
-			sem -j+0 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+			    sem -j+0 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
     		fi
     #exit 1
 	fi
@@ -60,8 +60,10 @@ sem --wait --id "infocom2017" --no-notice
 
 # Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
 
-cat broadcastSession-n_* >> broadcastSession
-cat duplicatedMsgsDistribution-n_* >> duplicatedMsgsDistribution
-cat batteryConsumptionDistribution-n_* >> batteryConsumptionDistribution
+cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
+cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgsDistribution
+cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
+cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
 
-Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
+Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession batteryConsumptionDistributionTime
+

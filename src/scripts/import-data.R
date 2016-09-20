@@ -107,7 +107,7 @@ plot.broadcasting.time <- function(df, pal){
 	  }
 	  legend(x="topright", legend=algos, col=rainbow( length(algos) ), lty=sapply(algos, function(d) 1 ))
   }
-  mtext("ECDF broadcasting time", outer = TRUE, cex = 1, line = -2 )
+  mtext("ECDF Maximal reception delay", outer = TRUE, cex = 1, line = -2 )
 }
 
 plot.power.consumption <- function(df, algos, pal) {
@@ -176,7 +176,7 @@ if (length(args) == 4) {
   dfBs <- import.data(bsFile)
   
   print(paste('Metrics to plot:',
-    'broadcasting session time (CDF),',
+    'maximal reception delay (CDF),',
     'avg of power consumption &',
     'avg of duplicated messages', sep = ' '
   ))

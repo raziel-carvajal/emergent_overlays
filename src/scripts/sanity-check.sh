@@ -46,7 +46,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-	python buildTopology.py $Tx 5 5
+	python buildTopology.py $Tx 5 5 0
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
