@@ -29,14 +29,10 @@ if [ ! -d "../../results" ]; then
     mkdir ../../results
 fi
 
-rm -f ../../results/broadcastSession
-rm -f ../../results/duplicatedMsgs
-rm -f ../../results/batteryConsumption
-rm -f ../../results/networkCoverage
-touch ../../results/broadcastSession
-touch ../../results/duplicatedMsgs
-touch ../../results/batteryConsumption
-touch ../../results/networkCoverage
+rm -f ../../results/broadcastSession*
+rm -f ../../results/duplicatedMsgs*
+rm -f ../../results/batteryConsumption*
+rm -f ../../results/networkCoverage*
 
 echo "" > ../../results/summary.csv
 
@@ -51,7 +47,7 @@ for c in ${path_to_configs}*.ini ; do
 	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "flooding"  ] ; then
     		if [ "${nodes}" -lt "500" ]; then
     			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
-			sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+			sem -j+0 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
     		fi
     #exit 1
 	fi
@@ -62,4 +58,10 @@ done
 sem --wait --id "infocom2017" --no-notice
 
 
-Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
+# Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
+
+cat broadcastSession-n_* >> broadcastSession
+cat duplicatedMsgsDistribution-n_* >> duplicatedMsgsDistribution
+cat batteryConsumptionDistribution-n_* >> batteryConsumptionDistribution
+
+Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession

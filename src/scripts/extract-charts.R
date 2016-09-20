@@ -1,15 +1,15 @@
 require('omnetpp')
-# library(data.table)
+#library(data.table)
 
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
-  # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
+	# create a separate list for each power level
+	others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+	# vector of power levels for each instant of time
+	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
@@ -62,40 +62,47 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level){
             broSes,
             file = paste("../../results/broadcastSession",expeId,sep="-"),
             row.names = FALSE,
-            append = TRUE
+            append = F
   )
 
+  #n <- length(broadcast.info$id) # number of broadcast messages
+  #broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
+  #broDupMsgsInfo <- data.frame( whatever = c(mean(broDupMsgs), sd(broDupMsgs)) )
+  #colnames(broDupMsgsInfo) <- c(expeId)
+  #write.table(
+  #          broDupMsgsInfo,
+  #          file = paste("../../results/duplicatedMsgs", expeId,sep="-"),
+  #          row.names = FALSE,
+  #          append = F
+  #)
+  
   n <- length(broadcast.info$id) # number of broadcast messages
   broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
-  broDupMsgsInfo <- data.frame( whatever = c(mean(broDupMsgs), sd(broDupMsgs)) )
+  broDupMsgsInfo <- data.frame( whatever = c(broDupMsgs) )
   colnames(broDupMsgsInfo) <- c(expeId)
   write.table(
             broDupMsgsInfo,
-            file = paste("../../results/duplicatedMsgs", expeId,sep="-"),
+            file = paste("../../results/duplicatedMsgsDistribution", expeId,sep="-"),
             row.names = FALSE,
-            append = TRUE
+            append = F
   )
 
-  powerLevelInfo <- data.frame( whatever = c(unlist(lapply(power.level, mean)), unlist(lapply(power.level, sd)) ) )
-  colnames(powerLevelInfo) <- c(expeId)
-  write.table(
-            powerLevelInfo,
-            file = paste("../../results/batteryConsumption",expeId,sep="-"),
-            row.names = FALSE,
-            append = TRUE
-  )
+  #powerLevelInfo <- data.frame( whatever = c(unlist(lapply(power.level, mean)), unlist(lapply(power.level, sd)) ) )
+  #colnames(powerLevelInfo) <- c(expeId)
+  #write.table(
+  #          powerLevelInfo,
+  #          file = paste("../../results/batteryConsumption",expeId,sep="-"),
+  #          row.names = FALSE,
+  #          append = F
+  #)
   pl <- power.level[lapply(power.level, length) > 0]
-  print(power.level)
-  print(pl)
-  print(tail(pl, 1))
-  print(class(tail(pl, 1)))
   powerLevelInfo <- data.frame( whatever = c(tail(pl, 1)) )
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
             file = paste("../../results/batteryConsumptionDistribution",expeId,sep="-"),
             row.names = FALSE,
-            append = TRUE
+            append = F
   )
 }
 
@@ -175,30 +182,35 @@ print(args)
 
 if (length(args) == 4) {
 	sim.time <- strtoi(args[3])
+	pl.step <- sim.time / 10
+	
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
     msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
     msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
 
-  #return( data.frame(plD = powerLevelDs, msD = msgSentDs, bmrD = broadcastMsgRcvDs) )
-	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
+ 	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
 	device
 
 	print(paste("Creating powerlevels:", args[1]))
-	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=5)
+	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=pl.step)
 	# pl <- powerlevels3(powerLevelDs, max= sim.time, step=1)
 
 	print(paste("Creating broadcasting time:", args[1]))
-	#bs <- broadcastingTime(ds, simulation.time = sim.time)
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = sim.time)
 
 	print("Plotting :-P")
-	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=5)
+	plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=pl.step)
 
   	print("Exporting data...")
   	export.data.of.experiment(args[4], bs, max = sim.time, pl.local)
 
-	# printing average values
+	print("Printing average values")
 	averages <- average.values(pl.local, bs, max=sim.time)
-	print(noquote(paste("average_values", averages$coverage, averages$broadcasting.time, averages$power_consumption, averages$duplicated_messages, averages$retransmitted_messages)))
+	print(noquote(paste("average_values", 
+					averages$coverage,
+					averages$broadcasting.time,
+					averages$power_consumption,
+					averages$duplicated_messages,
+					averages$retransmitted_messages)))
 }

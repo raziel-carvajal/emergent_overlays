@@ -160,6 +160,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     
     void forbid_control_messages() { allowing_control_messages = false; }
     bool are_control_messages_allowed() { return allowing_control_messages; }
+    
+    double get_random_delay() { return uniform(0.01, 0.1); }
   public:
     BroadcastingAppBase();
 

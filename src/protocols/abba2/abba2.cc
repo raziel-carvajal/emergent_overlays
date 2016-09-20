@@ -102,7 +102,7 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     return sum;
 }
 
-void Abba2::processStart() {
+void Abba2::processStart() { 
     timeOut = par("timeOut").doubleValue();
     BroadcastingAppBase::processStart();
 }
@@ -119,7 +119,7 @@ Abba2::on_payload_received(const Broadcast* m) {
      * are received one after the other, then the vectors of pairs will store angles as it was
      * just one broadcast. IMPROVEMENT: one broadcast ID must map two independent vectors of pairs*/
     string key = string(m->getId());
-    cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
+    //cerr << getLogHeader() + "reception of message " + key + " by sender " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
@@ -128,8 +128,8 @@ Abba2::on_payload_received(const Broadcast* m) {
         double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
         cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
         double newTimeout = computeTimeout(angleCovered);
-        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
-        if (newTimeout <= 0) {// just in case we will considered that the angle is more than 306 degrees which is rare
+        // cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
+        if (newTimeout <= 0 || newTimeout > timeOut) {// just in case we will considered that the angle is more than 306 degrees which is rare
             // TODO Optimizing messages delivery: find a way to put this event at the top of the scheduler
             // cancel retransmission (ASAP I thought...)
             cMessage* old_msg = delayMessages[key];
@@ -140,9 +140,9 @@ Abba2::on_payload_received(const Broadcast* m) {
             cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
-                cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
+                //cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
-                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
+                //cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " for message " + key + " \n";
                 cMessage* old_msg = delayMessages[key];
                 cancelAndDelete(old_msg);
             }
@@ -150,7 +150,7 @@ Abba2::on_payload_received(const Broadcast* m) {
             delayMessages[key] = delayed_broadcast(key, newTimeout);
         }
     } else {
-        cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
+        //cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
     }
 }
 

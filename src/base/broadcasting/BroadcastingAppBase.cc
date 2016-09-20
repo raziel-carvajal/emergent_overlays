@@ -86,11 +86,9 @@ BroadcastingAppBase::initialize(int stage)
         case INITSTAGE_LAST:
 
             if (is_source && nr_broadcast_msg > 0) {
-                cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
-                ctrlWakeup->setKind( WAKEUP);
-                double d = par("wakeUpTime").doubleValue();
+            	double d = par("wakeUpTime").doubleValue();
+            	delayed_event(WAKEUP, "intervalBroadcastTime", d);
                 cerr << "Broadcasting sessions will star at " << (d) << endl;
-                scheduleAt(d, ctrlWakeup);
             }
 
             break;
@@ -125,9 +123,11 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
-                    ctrlMsg0->setKind(SAY_HELLO);
-                    scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
+                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+                    //ctrlMsg0->setKind(SAY_HELLO);
+                    //scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
                 }
+                cancelAndDelete(msg);
                 break;
             case WAKEUP:
                 configure_neighbors();
@@ -137,9 +137,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 if (is_source && nr_broadcast_msg > 0) {
                   nr_broadcast_msg--;
-                  cMessage* ctrlWakeup = new cMessage("controlMSG", WAKEUP);
-                  ctrlWakeup->setKind( WAKEUP);
-                  scheduleAt(simTime() + par("intervalBroadcastTime").doubleValue(), ctrlWakeup);
+                  delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
                 }
                 break;
             case BROADCAST_DELAY:
@@ -252,8 +250,9 @@ BroadcastingAppBase::processStart()
     socket.setBroadcast(true);
 
     if (nr_hello_msg > 0) {
-        ctrlMsg0->setKind(SAY_HELLO);
-        scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
+    	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+        //ctrlMsg0->setKind(SAY_HELLO);
+        //scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
     }
 }
 

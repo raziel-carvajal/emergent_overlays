@@ -61,6 +61,16 @@ def setArguments(argv):
             continue
 
 
+class RandomGeometricGraphTopologyGenerator:
+    def __init__(self, d):
+        self.density = d
+        pass
+
+class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
+
+    def __init__(self, s):
+        pass
+
 def is_valid_network(pos, tx, density, allowed_error):
     g = nx.Graph()
     for i, v in enumerate(pos):
@@ -92,31 +102,27 @@ def is_valid_network(pos, tx, density, allowed_error):
     return cond1 and cond2
 
 
-def fillSurface(Tx, tilesWidth, tilesHeight, density):
+def fillSurfaceWithFixedRadio(tx, tilesWidth, tilesHeight, density):
     result = []
-    block_width = 2*Tx
-    for i in range(0, tilesWidth):
-        x = i * block_width
-        for j in range(0, tilesHeight):
-            y = j * block_width
-            G = nx.Graph()
-            G.add_nodes_from(range(1, density + 1 + int(20/100.0*density)))
-            pos = nx.random_layout(G)
-            for l in pos:
-                pos[l][0] = x + block_width*pos[l][0]
-                pos[l][1] = y + block_width*pos[l][1]
-                result.append(pos[l])
-    return result
-
-
-def fillSurface2(Tx, tilesWidth, tilesHeight, density):
-    result = []
-    r = float(Tx)/(tilesWidth*2*Tx)
+    r = float(tx)/(tilesWidth*2*tx)
     n = int(math.ceil(float(density)/(math.pi*r*r)))
-    # print n, density, r
-    block_width = 2*Tx
+    print n, density, r
+    block_width = 2*tx
     w = tilesWidth * block_width
     h = tilesHeight * block_width
+    return fillSurfaceBase(r, n, density, w, h), w, h
+
+
+def fillSurfaceWithFixedNumberOfNodes(tx, n, density):
+    # n*pi*r^2 = d
+    r = math.sqrt(density/(n*math.pi))
+    h = w = math.floor(tx/r)
+    return fillSurfaceBase(r, n, density, w, h), w, h
+
+def fillSurfaceBase(r, n, density, w, h):
+    assert w == h
+    # print r, n, density, w
+    result = []
     G = nx.Graph()
     G.add_nodes_from(range(1, n+1))
     pos = nx.random_layout(G)
@@ -146,19 +152,9 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
             else:
                 f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); }}\n\n'.format(i, p[0], p[1]))
 
-        # f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format(len(pos), layoutSizeW*0.5, layoutSizeH*0.5))
-
         f.write("}\n")
     finally:
         f.close()
-
-
-def cleanTopology(t, count):
-    while count > 0:
-        idx = random.randint(0, len(t) - 1)
-        del t[idx]
-        count = count - 1
-    return
 
 
 if __name__ == '__main__':
@@ -169,17 +165,14 @@ if __name__ == '__main__':
 
     index = initConf[3]['val']
     for d in range(5, 45, 5):
-        expected = maxL*maxL*d
 
-        print "Building topology with density", d
-        topology = fillSurface2(trRan, maxL, maxL, d)
-        # cleanTopology(topology, seen - expected)
+        print "Building topology with density", d, trRan, maxL, maxL
+        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
         while not is_valid_network(topology, trRan, d, 10):
-            topology = fillSurface2(trRan, maxL, maxL, d)
-        # cleanTopology(topology, seem - expected)
+            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
 
         print "Writing NED file"
-        createNedFile(d, topology, index, maxL*2*trRan, maxL*2*trRan, trRan)
+        createNedFile(d, topology, index, w, w, trRan)
         index = index + 1
-
+    
     print "Done", index

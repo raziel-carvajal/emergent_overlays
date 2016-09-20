@@ -24,6 +24,7 @@ class noncobject Neigh;
 class noncobject NeighMap;
    
 packet Cds3 {
+    bool amIrelay;
     Neigh emitter;
   	NeighMap neighbors;
 }
