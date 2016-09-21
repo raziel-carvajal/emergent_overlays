@@ -98,9 +98,9 @@ BroadcastingAppBase::initialize(int stage)
               double d = par("wakeUpTime").doubleValue();
               d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
               d += 15; // some extra seconds
-              delayed_event(LAST_POWER_REPORT, "last power report", d - 0.5);
+              delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
               if (is_source) {
-            	   delayed_event(HALT_SIMULATION_DELAY, "halt simulation", d);
+            	   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
               }
             }
 
@@ -436,6 +436,18 @@ BroadcastingAppBase::delayed_event(int type, const std::string& data, double del
     mm->setKind(type);
     scheduleAt(simTime() + delay, mm);
 }
+
+
+void
+BroadcastingAppBase::delayed_event_with_strict_time(int type, const std::string& data, double t)
+{
+    cMessage* mm = new cMessage("some delay");
+    mm->setContextPointer(strdup(data.c_str()));
+    mm->setKind(type);
+    scheduleAt(SimTime(t), mm);
+}
+
+
 
 
 string

@@ -148,6 +148,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void delay_broadcast(void* user_data);
     cMessage* delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
     void delayed_event(int type, const std::string& key, double delay);
+    void delayed_event_with_strict_time(int type, const std::string& key, double delay);
+
 
     int get_next_id_for_msg();
     int get_last_id_for_msg();
