@@ -20,8 +20,6 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
-#include <chrono>
-#include <random>
 
 using namespace std;
 using inet::broadcasting::Broadcast;
@@ -76,7 +74,7 @@ Abba2::updateAngleCovered(Coord b, string& key){
             secHalfPairs[key].push_back( make_pair(180 + (alp - bet), 180 + alp + bet) );
         break;
     default:
-        cerr << myself + "ENUM value is not recognized\n";
+        //cerr << myself + "ENUM value is not recognized\n";
         break;
     }
 }
@@ -102,7 +100,7 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     return sum;
 }
 
-void Abba2::processStart() { 
+void Abba2::processStart() {
     timeOut = par("timeOut").doubleValue();
     BroadcastingAppBase::processStart();
 }
@@ -126,7 +124,7 @@ Abba2::on_payload_received(const Broadcast* m) {
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
         updateAngleCovered(b,key);
         double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
-        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
+        // cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + " for message " + key + "\n";
         double newTimeout = computeTimeout(angleCovered);
         // cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + " for message " + key + "\n";
         if (newTimeout <= 0 || newTimeout > timeOut) {// just in case we will considered that the angle is more than 306 degrees which is rare
@@ -136,8 +134,8 @@ Abba2::on_payload_received(const Broadcast* m) {
             cancelAndDelete(old_msg);
             ignoredMsgs[key] = key;
             firHalfPairs[key].clear();
-        	secHalfPairs[key].clear();
-            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
+            secHalfPairs[key].clear();
+            // cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
                 //cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
@@ -158,11 +156,11 @@ Abba2::on_payload_received(const Broadcast* m) {
 void
 Abba2::send_message(string& key)
 {
-    cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
+    // cerr << getLogHeader() + "calling send_message() for message " + key + " \n";
     //TODO check if retransmission must be decided here
     bool applyRetransmission = ignoredMsgs.find(key) == ignoredMsgs.end();
     if (is_source || applyRetransmission) {
-        cerr << getLogHeader() + "broadcasting message " + key + " \n";
+        // cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
         ignoredMsgs[key] = key;
         firHalfPairs[key].clear();
@@ -174,7 +172,7 @@ Abba2::send_message(string& key)
         broadcast(key, m);
         emitSent(key);
     } else {
-        cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
+        // cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
     }
 }
 
@@ -186,7 +184,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
     if (is_source) {
         key = myself + "-" + to_string(get_next_id_for_msg());
         auto s = " this is the payload, initially sent from " + myself;
-        cerr << key + s + "\n";
+        // cerr << key + s + "\n";
         payloads[key] = key + s;
         /* XXX why the source have to say "I received a broadcast message..." ?
         //      isn't just for non source nodes?

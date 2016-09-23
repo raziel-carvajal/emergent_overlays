@@ -84,33 +84,39 @@ get.attrSet <- function(dfNames, attri) {
 }
 
 
-
-
-
 plot.broadcasting.time2 <- function(df, densities, pal){
   print('Plotting ECDF of broadcasting time ...')
-  p.list <- lapply(densities, function(density) {
+  data.list <- lapply(densities, function(density) {
 	  dd <- df[grepl(paste("d", density, "tr", sep="_"), sapply(df, function(e) colnames(e) ))]
 	  dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  		cn <- s[which(s == "p") + 1]
-			data=e[,1]
-			data.frame( d = data, a = rep(cn, length(data))  )
+	  	cn <- s[which(s == "p") + 1]
+			data <-e[,1]
+      den <-rep(as.factor(paste("Density", density)), length(data))
+			data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
 	  })
 	  dd <- unname(dd)
 	  data <- do.call("rbind", dd)
 
-	  data <- arrange(data,a,d)
-	  data.ecdf <- ddply(data, .(a), transform, ecdf=ecdf(d)(d) )
-	  ggplot( data.ecdf, aes(d, ecdf, colour = a) ) +
-	  		theme(legend.position="bottom") +
-	  		xlab("Time (ms)") + labs(title=paste("Density", density)) +
-			theme(plot.title=element_text(size=15, vjust=3)) +
-			theme(plot.margin = unit(c(1,1,1,1), "cm")) +
-	  	    geom_step()
+	  data <- arrange(data, density, alg, dat)
+	  data.ecdf <- ddply(data, .(alg), transform, ecdf=ecdf(dat)(dat) )
+
+    data.ecdf
   })
-  multiplot(plotlist=p.list,cols=length(densities))
+
+  data <- do.call("rbind", data.list)
+
+  p <- ggplot( data, aes(dat, ecdf, colour = alg) ) +
+      facet_grid(. ~ density) +
+      theme(legend.position="bottom") +
+      xlab("Time (ms)") +
+      labs(title="Maximum delay time", colour="Algorithms") +
+      theme(plot.title=element_text(size=15, vjust=3)) +
+      theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+      geom_step()
+
+  print(p)
 }
 
 plot.power.consumption <- function(df, algos, densities, pal) {
@@ -120,8 +126,8 @@ plot.power.consumption <- function(df, algos, densities, pal) {
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  		cn <- s[which(s == "p") + 1]
-			data=-1*e[,1]
+	  	cn <- s[which(s == "p") + 1]
+			data <- -1*e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
@@ -153,7 +159,7 @@ plot.time.power.consumption <- function(df, algos, densities, pal) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
-			data=e[,1]
+			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
@@ -185,7 +191,7 @@ plot.duplicated.messages <- function(df, densities) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
-			data=e[,1]
+			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
