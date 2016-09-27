@@ -48,7 +48,6 @@ BroadcastingAppBase::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LOCAL:
-
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
@@ -122,24 +121,19 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 this->processStart();
                 }
                 break;
-            case SAY_HELLO:
-                {
-                    L3AddressResolver resolver;
-                    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
-                    {
-                        Hello* pkt = new Hello("Hello");
-                        pkt->setX(position.x);
-                        pkt->setY(position.y);
-                        pkt->setSender(myself.c_str());
-                        socket.sendTo(pkt, addr, remote_port);
-                    }
-                }
+            case SAY_HELLO:{
+                Hello* pkt = new Hello("Hello");
+                pkt->setX(position.x);
+                pkt->setY(position.y);
+                pkt->setSender(myself.c_str());
+                send_package(pkt);
                 this->nr_hello_msg--;
                 if (this->nr_hello_msg) {
-                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
                 }
                 cancelAndDelete(msg);
                 break;
+                }
             case WAKEUP:
                 configure_neighbors();
                 cancelAndDelete(msg);
@@ -156,24 +150,23 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     void* data = msg->getContextPointer();
                     this->time_to_broadcast_payload(data);
                     cancelAndDelete(msg);
+                    break;
                 }
-                break;
             case FLOODING_DELAY:
                 {
-                    L3AddressResolver resolver;
-                    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
                     FloodingMessage* m = new FloodingMessage("a flooding");
                     m->setSender(myself.c_str());
                     string key = string((char*)msg->getContextPointer());
                     m->setId(key.c_str());
                     m->setPayload(payload_in_flooding[key].c_str());
-                    socket.sendTo(m, addr, remote_port);
+                    send_package(m);
+                    break;
                 }
             case DISPLAY_TIME:
                 {
                     cancelAndDelete(msg);
+                    break;
                 }
-                break;
             case LAST_POWER_REPORT:
                 {
                   Hello* pkt = new Hello("Hello");
@@ -181,13 +174,13 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   pkt->setY(position.y);
                   pkt->setSender(myself.c_str());
                   send_package(pkt);
+	          cancelAndDelete(msg);
+		  break;
                 }
-                cancelAndDelete(msg);
-              break;
             case HALT_SIMULATION_DELAY:
-              cancelAndDelete(msg);
+                cancelAndDelete(msg);
             	endSimulation();
-            break;
+            	break;
 //            case TEST_DELAY:
 //                {
 //                    cancelAndDelete(msg);
@@ -198,7 +191,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        bool done = on_network_message_received(PK(msg));
+        on_network_message_received(PK(msg));
         delete msg;
     }
 
@@ -239,7 +232,7 @@ bool
 BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     ctrlMsg0->setKind(START);
-    scheduleAt(simTime() + 0.001, ctrlMsg0);
+    scheduleAt(simTime(), ctrlMsg0);
     return true;
 }
 
@@ -264,7 +257,10 @@ BroadcastingAppBase::handleNodeCrash()
 void
 BroadcastingAppBase::processStart()
 {
+    std::string::size_type sz;
     myself = this->getParentModule()->getFullName();
+    delta = std::stoi (myself.substr(5, myself.size()), &sz) * 0.001;
+//    cerr << getLogHeader() + "My delta is: " + to_string(delta) + "\n";
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
 
     socket.setOutputGate(gate("udpOut"));
@@ -272,7 +268,7 @@ BroadcastingAppBase::processStart()
     socket.setBroadcast(true);
 
     if (nr_hello_msg > 0) {
-    	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+    	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
         //ctrlMsg0->setKind(SAY_HELLO);
         //scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
     }
@@ -318,7 +314,8 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 
 
     if (it == neighbors.end()) {
-        EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
+        //EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
+        //cerr <<  getLogHeader() + "A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
 
         Neighbor node;
         node.name = msg->getSender();
@@ -468,7 +465,10 @@ BroadcastingAppBase::send_package(cPacket* m, std::string dst)
 void
 BroadcastingAppBase::send_package(cPacket* m)
 {
-  send_package(m, "255.255.255.255");
+  //send_package(m, "255.255.255.255");
+  L3AddressResolver resolver;
+  L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
+  socket.sendTo(m, addr, remote_port);
 }
 
 void

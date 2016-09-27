@@ -27,7 +27,9 @@ namespace inet {
 class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 {
   public:
-
+  //Unique (there aren't two nodes with the same delta) number of milliseconds that every node
+  //set (according to its node identifier) to send control messages
+  double delta;
   // how many hello messages I must send
   int nr_hello_msg;
   cMessage* ctrlMsg0 = nullptr;
@@ -99,7 +101,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool already_configured = false;
 
     void on_hello_received(const broadcasting::Hello* msg);
-
+    
     bool allowing_control_messages = true;
 
   protected:
@@ -160,7 +162,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
     void send_package(cPacket* m); // send a package to all neirby devices
-
+    
     void forbid_control_messages() { allowing_control_messages = false; }
     bool are_control_messages_allowed() { return allowing_control_messages; }
 

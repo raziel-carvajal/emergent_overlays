@@ -30,13 +30,16 @@ simple BroadcastingBase
 
         // section defining parameters used to identify my neighbors
         double maximumDelay @unit(s) = default(0.5s);
-        volatile double helloTime @unit(s) = default(uniform(0s,maximumDelay)); // delay between hello messages
+        //volatile double helloTime @unit(s) = default(uniform(0s,maximumDelay)); // delay between hello messages
+        //double helloTime @unit(s) = default(0.1s); // delay between hello messages
+        double helloTime = default(0.2); // delay between hello messages
         int nr_hello_messages = default(3); // how many delay messages
 
         // say if this node is the source of a broadcast
         bool is_source = default(false);
         int nr_broadcast_msg = default(is_source? 1:0);
-        double wakeUpTime @unit(s) = default(uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)));
+//        double wakeUpTime @unit(s) = default(uniform(maximumDelay*nr_hello_messages, maximumDelay*(nr_hello_messages + 1)));
+        double wakeUpTime @unit(s) = default(3s);
         double intervalBroadcastTime @unit(s) = default(0.5s);
 
 
