@@ -188,7 +188,7 @@ Mpr_t2::on_mpr_found(const mpr_t2::MprFound* m)
 		if (j == myself) {
 
 			selectors.insert(m->getSender());
-			cerr << myself << "(" << simTime() << ")" << ": YESSSSSS, " << m->getSender() << " selected me" << endl;
+			// cerr << myself << "(" << simTime() << ")" << ": YESSSSSS, " << m->getSender() << " selected me" << endl;
 			in_mpr = true;
 			return;
 		}

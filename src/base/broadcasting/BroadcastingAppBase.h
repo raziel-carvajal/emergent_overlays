@@ -27,7 +27,9 @@ namespace inet {
 class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 {
   public:
-
+  //Unique (there aren't two nodes with the same delta) number of milliseconds that every node
+  //set (according to its node identifier) to send control messages
+  double delta;
   // how many hello messages I must send
   int nr_hello_msg;
   cMessage* ctrlMsg0 = nullptr;
@@ -99,7 +101,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool already_configured = false;
 
     void on_hello_received(const broadcasting::Hello* msg);
-
+    
     bool allowing_control_messages = true;
 
   protected:
@@ -148,6 +150,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void delay_broadcast(void* user_data);
     cMessage* delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
     void delayed_event(int type, const std::string& key, double delay);
+    void delayed_event_with_strict_time(int type, const std::string& key, double delay);
+
 
     int get_next_id_for_msg();
     int get_last_id_for_msg();
@@ -158,11 +162,11 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
     void send_package(cPacket* m); // send a package to all neirby devices
-
+    
     void forbid_control_messages() { allowing_control_messages = false; }
     bool are_control_messages_allowed() { return allowing_control_messages; }
 
-    double get_random_delay() { return uniform(0.01, 0.1); }
+    double get_random_delay() { return uniform(0.01, 0.04); }
   public:
     BroadcastingAppBase();
 

@@ -196,8 +196,8 @@ if (length(args) == 4) {
 
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )
-    msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
-    msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
+  msgSentDs <- load.datafile(args[1], "name(msg_sent:vector)" )
+  msgRcvDs <- load.datafile(args[1], "name(broadcast_msg_received:vector)" )
 
  	device<-pdf(paste(args[2], "charts.pdf", sep="-"), width=10, height=7)
 	device
