@@ -164,15 +164,15 @@ if __name__ == '__main__':
     maxL = initConf[2]['val']
 
     index = initConf[3]['val']
-    for d in range(5, 45, 5):
+    for d in range(5, 75, 5):
 
         print "Building topology with density", d, trRan, maxL, maxL
-        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
+        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
         while not is_valid_network(topology, trRan, d, 10):
-            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 160, d)
+            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
 
         print "Writing NED file"
-        createNedFile(d, topology, index, w, w, trRan)
+        createNedFile(d, topology, index, int(w), int(w), trRan)
         index = index + 1
-    
+
     print "Done", index

@@ -49,6 +49,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         DISPLAY_TIME,
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
+        LAST_POWER_REPORT,
         FLOODING_DELAY
     };
 
@@ -98,7 +99,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool already_configured = false;
 
     void on_hello_received(const broadcasting::Hello* msg);
-    
+
     bool allowing_control_messages = true;
 
   protected:
@@ -157,10 +158,10 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
     void send_package(cPacket* m); // send a package to all neirby devices
-    
+
     void forbid_control_messages() { allowing_control_messages = false; }
     bool are_control_messages_allowed() { return allowing_control_messages; }
-    
+
     double get_random_delay() { return uniform(0.01, 0.1); }
   public:
     BroadcastingAppBase();
