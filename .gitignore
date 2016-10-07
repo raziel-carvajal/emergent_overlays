@@ -66,3 +66,6 @@ text/main.synctex.gz
 
 # partial results
 results/n*.pdf
+
+#CVS
+results/summary.csv
