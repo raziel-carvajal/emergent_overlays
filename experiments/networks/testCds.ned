@@ -42,7 +42,7 @@ network testCds
         }
         hostR0: CenterHost {
             @display("p=84,268;r=70");
-            isCenter = true;
+//            isCenter = true;
         }
         hostR2: CenterHost {
             @display("p=89,306;r=40");

@@ -35,7 +35,7 @@ void
 Flooding2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
-
+    if (string(m->getSender()) == myself) return;
     cerr << getLogHeader() << "reception of message " << key << " by sender " << m->getSender() << endl;
     emitBroadcastMsgReceived(key);
 
@@ -43,7 +43,8 @@ Flooding2::on_payload_received(const Broadcast* m) {
 
     if (firstTime) {
         payloads[key] = m->getPayload();
-        delayed_broadcast(key, get_random_delay());
+        broadcast(key, new broadcasting::Broadcast("payload"));
+        //delayed_broadcast(key, get_random_delay());
     } else {
       // cerr << getLogHeader() << "retransmission of message " << key << "was cancelled" << endl;
     }

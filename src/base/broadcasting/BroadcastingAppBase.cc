@@ -74,7 +74,8 @@ BroadcastingAppBase::initialize(int stage)
 
                 EV_TRACE << "My position is " << this->position  << "\n";
 
-                bool is_center = host->par("isCenter").boolValue();
+                //bool is_center = host->par("is_source").boolValue();
+                bool is_center = par("is_source").boolValue();
                 if (is_center) {
                   is_source = true;
                   cerr << getParentModule()->getName() << ": is center " << is_center << endl;
@@ -87,8 +88,8 @@ BroadcastingAppBase::initialize(int stage)
             // sending messages if source
             if (is_source && nr_broadcast_msg > 0) {
             	double d = par("wakeUpTime").doubleValue();
+                cerr << "Broadcasting sessions will start at: " << (d) << endl;
             	delayed_event(WAKEUP, "intervalBroadcastTime", d);
-              cerr << "Broadcasting sessions will star at " << (d) << endl;
             }
 
             // stop simulation at some point in the future
@@ -135,13 +136,14 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 break;
                 }
             case WAKEUP:
-                configure_neighbors();
+                //configure_neighbors();
                 cancelAndDelete(msg);
-                if (is_source) {
-                  this->time_to_broadcast_payload(nullptr);
-                }
+//                if (is_source) {
+//                  this->time_to_broadcast_payload(nullptr);
+//                }
                 if (is_source && nr_broadcast_msg > 0) {
                   nr_broadcast_msg--;
+                  this->time_to_broadcast_payload(nullptr);
                   delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
                 }
                 break;

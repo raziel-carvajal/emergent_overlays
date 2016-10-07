@@ -25,6 +25,6 @@ import broadcasting.BroadcastingBase;
 simple Abba2 extends BroadcastingBase like IUDPApp
 {
     parameters:
-        double timeOut = default(0.06);
+        double timeOut = default(1.0);
         @class(inet::Abba2);
 }

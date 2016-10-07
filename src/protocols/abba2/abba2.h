@@ -30,11 +30,6 @@ class INET_API Abba2 : public inet::BroadcastingAppBase
     enum Quadrant {
         FIRST, SECOND, THIRD, FOURTH
     };
-    /* payload of the message to broadcast */
-    std::map< std::string, std::string >  payloads;
-    /* indicates the set of nodes from whom I received this message */
-    std::map< std::string, std::set< std::pair<double, double> > > received_from;
-
     double timeOut;
     std::map<std::string, std::string> ignoredMsgs;
     std::map<std::string, double> timeouts;
