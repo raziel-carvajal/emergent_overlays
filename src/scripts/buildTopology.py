@@ -71,10 +71,12 @@ class RandomGeometricGraphTopologyGenerator:
         self.density = d
         pass
 
+
 class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
 
     def __init__(self, s):
         pass
+
 
 def is_valid_network(pos, tx, density, allowed_error):
     g = nx.Graph()
@@ -108,7 +110,6 @@ def is_valid_network(pos, tx, density, allowed_error):
 
 
 def fillSurfaceWithFixedRadio(tx, tilesWidth, tilesHeight, density):
-    result = []
     r = float(tx)/(tilesWidth*2*tx)
     n = int(math.ceil(float(density)/(math.pi*r*r)))
     print n, density, r
@@ -171,7 +172,7 @@ if __name__ == '__main__':
     # index = initConf[3]['val']
     args = get_arguments()
     trRan = args.tx
-    index = args.last_idx;
+    index = args.last_idx
     min_density = args.min_density
     max_density = args.max_density
     nr_nodes = 200
@@ -190,7 +191,7 @@ if __name__ == '__main__':
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
             genmobility.generateMobility(sps=10,nr_nodes=nr_nodes,
-                    map_x=int(w), map_y=int(h), sim_time=6000, positions=topology, outputFile=filename)
+                                         map_x=int(w), map_y=int(h), sim_time=6000, positions=topology, outputFile=filename)
         index = index + 1
 
     print "Done", index
