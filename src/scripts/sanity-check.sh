@@ -77,23 +77,25 @@ cd $tPath
 topologiesFiles=`ls *.ned`
 cd ${here}
 for t in $topologiesFiles; do
-    srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
-    index=$(( ${#t} - 4 ))
-    tName=${t:0:$index}
-    for p in $protocols; do
-	pp="${pPath}$p"
-	if [ -d $pp ]; then
-        	s=$(( ${#p} - 1))
-        	p=${p:0:$s}
-		tId=$tName$p
-		cat $iniCommon >$tId
-		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
-		cat $pPath$p'/ini' >>$tId
-		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
-		mv $tId $tId'.ini'
-		mv $tId'.ini' $cPath
-	fi
-    done
+  srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
+  index=$(( ${#t} - 4 ))
+  tName=${t:0:$index}
+  mobFile="${t:0:$((index-3))}.mobility"
+  for p in $protocols; do
+  	pp="${pPath}$p"
+  	if [ -d $pp ]; then
+          	s=$(( ${#p} - 1))
+          	p=${p:0:$s}
+  		tId=$tName$p
+  		cat $iniCommon >$tId
+  		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
+  		cat $pPath$p'/ini' >>$tId
+      echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
+  		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+  		mv $tId $tId'.ini'
+  		mv $tId'.ini' $cPath
+  	fi
+  done
 done
 # TODO figure out why there is a file *-e
 rm -fr n-*

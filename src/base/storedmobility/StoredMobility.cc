@@ -126,32 +126,49 @@ StoredMovingMobility::initialize(int stage)
 
         cModule* host = getContainingNode(this);
         string hostName = this->getParentModule()->getFullName();
-        int idx = stoi(hostName.substr( string("hostR").size(), string::npos));
-        cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << hostName << " " << idx <<  " " << filename << endl;
+        auto id = hostName.substr( string("hostR").length(), string::npos);
+        // cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << hostName << " " << idx <<  " " << filename << " " << string("hostR").length() << "|" << id << "|"  << endl;
+        int idx = stoi(id);
 
         if (isMoving) {
           auto m = StoredMobility::getInstance(filename);
           m->readNodeMobilities();
-          int idx = 0;
           mobility = m->getMobility(idx);
         }
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
-      lastPosition = Coord(0, 1);
-      cModule* host = getContainingNode(this);
-      string hostName = this->getParentModule()->getFullName();
-      emitMobilityStateChangedSignal();
-      updateVisualRepresentation();
+      if (isMoving) {
+        auto l = mobility.get_next_location();
+        lastPosition = Coord(l.first, l.second);
+        // cout << "jejeje " << lastPosition << endl;
+        cModule* host = getContainingNode(this);
+        string hostName = this->getParentModule()->getFullName();
+        emitMobilityStateChangedSignal();
+        updateVisualRepresentation();
+      }
+      else {
+        MovingMobilityBase::initialize(stage);
+      }
     }
 }
 
 void
 StoredMovingMobility::move()
 {
-  //auto l = mobility.get_next_location();
-  //lastPosition = Coord(l.first, l.second);
-  // lastSpeed
-  nextChange = simTime() + mobility.get_time_step();
+  if (isMoving) {
+    auto l = mobility.get_next_location();
+    auto previousPosition = lastPosition;
+    lastPosition = Coord(l.first, l.second);
+    // cout << "jejeje " << lastPosition << endl;
+    lastSpeed = (lastPosition - previousPosition);
+    auto d = lastSpeed.length();
+    auto v = d / mobility.get_time_step();
+    lastSpeed.normalize();
+    lastSpeed *= v;
+    nextChange = simTime() + mobility.get_time_step();
+  } {
+    lastSpeed = Coord::ZERO;
+  }
 }
 
 } // namespace

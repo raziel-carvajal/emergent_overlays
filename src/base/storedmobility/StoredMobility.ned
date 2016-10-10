@@ -9,6 +9,7 @@ import inet.mobility.base.MovingMobilityBase;
 simple StoredMobility extends MovingMobilityBase
 {
     parameters:
+      bool initFromDisplayString = default(true);
       bool isMoving = default(false);
       string filename;
 
