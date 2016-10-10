@@ -52,16 +52,18 @@ def getArguments():
     args = parser.parse_args()
     return args
 
+
 def read_positions(positionsFile):
     pass
+
 
 def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000):
     np.random.seed(0xffff)
     # Truncated Levy-Walk model
     if positions:
         rw = truncated_levy_walk_with_fix_initial_positions(nr_nodes,
-                dimensions=(map_x, map_y),
-                positions=positions)
+                                                            dimensions=(map_x, map_y),
+                                                            positions=positions)
     else:
         rw = truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y))
     step_time = 1. / float(sps)
@@ -82,9 +84,7 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
 
 if __name__ == '__main__':
     args = getArguments()
-    if args.positionsFile:
-        positions = read_positions(args.positionsFile)
-    else:
-        positions = None
+    positions = read_positions(args.positionsFile) if args.positionsFile else None
     generateMobility(args.steps_per_second, args.nr_nodes,
-        args.map_width, args.map_height, args.simtime, positions, args.filename)
+                     args.map_width, args.map_height,
+                     args.simtime, positions, args.filename)
