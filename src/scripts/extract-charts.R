@@ -1,9 +1,11 @@
 require('omnetpp')
 #library(data.table)
 
+
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
+
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
 	# create a separate list for each power level
@@ -12,12 +14,14 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
 	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
+
 time.of.powerlevels <- function(ds, ts = seq(step, max, by=step), max, step=30) {
 	# create a separate list for each power level
 	others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
 	# vector of power levels for each instant of time
 	lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$x, 1) ) ), unlist)
 }
+
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
@@ -55,6 +59,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   		B.i = l.recp$B.i.tmp # total number of messages received per broadcast session
   )
 }
+
 
 export.data.of.experiment <- function(expeId, broadcast.info, max, power.level, time.of.powerlevels){
 
@@ -115,6 +120,7 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, power.level, 
   )
 }
 
+
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
 
 	nr.nodes <- max(sapply(power.level, function(p) length(p)))
@@ -157,11 +163,12 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
         boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
 	#boxplot(
-        #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ), 
+        #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ),
         #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)", ylim=c(49, 50)
         #)
 
 }
+
 
 average.values <- function(pl, broadcast.info, max) {
 
