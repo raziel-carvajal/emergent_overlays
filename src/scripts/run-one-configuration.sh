@@ -62,7 +62,7 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME}
+	# Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME}
 	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
