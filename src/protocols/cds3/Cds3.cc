@@ -18,6 +18,7 @@ namespace inet {
   Define_Module(Cds_3);
 
   void inet::Cds_3::on_payload_received(const broadcasting::Broadcast* m) {
+    if (string(m->getSender()) == myself) return;
     std::string key = string(m->getPayload());
     emitBroadcastMsgReceived(key);
     if (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end()) {

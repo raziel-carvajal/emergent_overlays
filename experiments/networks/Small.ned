@@ -13,9 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-
-//package builtTopologies;
-//package cds3;
+//package abba2;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
@@ -28,9 +26,9 @@ import broadcasting.CenterHost;
 // - drop an IdealRadioMedium module and rename to "radioMedium"
 // - drop two standardhosts at the 100,100 and 400,400 position and
 //   rename them to hostA and hostB
-network testCds
+network Small
 {
-    @display("bgb=500,500;bgg=50,0,white");
+    @display("bgb=500,500");
     string hostType = default("WirelessHost");
     string mediumType = default("IdealRadioMedium");
     submodules:
@@ -41,49 +39,25 @@ network testCds
             @display("p=309,24");
         }
         hostR0: CenterHost {
-            @display("p=84,268;r=70");
-//            isCenter = true;
+            @display("p=116.928,217.72801;r=75");
+            //isCenter=true;
+        }
+        hostR1: CenterHost {
+            @display("p=179.42401,217.72801;r=75");
         }
         hostR2: CenterHost {
-            @display("p=89,306;r=40");
+            @display("p=250,218;r=75");
         }
         hostR3: CenterHost {
-            @display("p=103,235;r=45");
+            @display("p=280,166;r=75");
         }
         hostR4: CenterHost {
-            @display("p=50,262;r=40");
+            @display("p=280,273;r=75");
         }
         hostR5: CenterHost {
-            @display("p=137,223;r=75");
+            @display("p=83,166;r=75");
         }
         hostR6: CenterHost {
-            @display("p=197,202;r=85");
-        }
-        hostR7: CenterHost {
-            @display("p=219,175;r=40");
-        }
-        hostR8: CenterHost {
-            @display("p=236,202;r=40");
-        }
-        hostR9: CenterHost {
-            @display("p=225,229;r=40");
-        }
-        hostR10: CenterHost {
-            @display("p=209,256;r=60");
-        }
-        hostR11: CenterHost {
-            @display("p=209,306;r=70");
-        }
-        hostR13: CenterHost {
-            @display("p=180,339;r=50");
-        }
-        hostR14: CenterHost {
-            @display("p=180,339;r=50");
-        }
-        hostR15: CenterHost {
-            @display("p=254,324;r=50");
-        }
-        hostR16: CenterHost {
-            @display("p=254,324;r=50");
+            @display("p=96,260;r=75");
         }
 }

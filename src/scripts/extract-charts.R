@@ -127,7 +127,12 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of maximal reception delay")
 	hist(valid.time, xlab="Maximal reception delay (Seconds)", main="Maximal reception delay")
 
-	plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
+        plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
+
+	#plot(broadcast.info$B.i / broadcast.info$n.received,
+        #     type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?",
+        #     ylim=c(1, 3)
+        #)
 
 	plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
 
@@ -150,7 +155,11 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 	#plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l", main="Dead Nodes")
 
-	boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
+        boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
+	#boxplot(
+        #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ), 
+        #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)", ylim=c(49, 50)
+        #)
 
 }
 
@@ -193,6 +202,7 @@ if (length(args) == 4) {
 	sim.time <- strtoi(args[3])
   print(paste("Simulation time", sim.time, "seconds"))
 	pl.step <- sim.time / 10
+	#pl.step <- 3
 
 	print(paste("Loading data file:", args[1]))
 	powerLevelDs <- load.datafile(args[1], "name(residualCapacity:vector)" )

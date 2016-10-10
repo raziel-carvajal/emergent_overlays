@@ -14,7 +14,6 @@
 //
 
 
-//package builtTopologies;
 //package cds3;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
@@ -28,7 +27,7 @@ import broadcasting.CenterHost;
 // - drop an IdealRadioMedium module and rename to "radioMedium"
 // - drop two standardhosts at the 100,100 and 400,400 position and
 //   rename them to hostA and hostB
-network testCds
+network CDSpaper
 {
     @display("bgb=500,500;bgg=50,0,white");
     string hostType = default("WirelessHost");

@@ -32,7 +32,7 @@ simple BroadcastingBase
         double maximumDelay @unit(s) = default(0.5s);
         //volatile double helloTime @unit(s) = default(uniform(0s,maximumDelay)); // delay between hello messages
         //double helloTime @unit(s) = default(0.1s); // delay between hello messages
-        double helloTime = default(0.2); // delay between hello messages
+        double helloTime @unit(s) = default(0.2s); // delay between hello messages
         int nr_hello_messages = default(3); // how many delay messages
 
         // say if this node is the source of a broadcast
