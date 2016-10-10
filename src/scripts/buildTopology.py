@@ -21,6 +21,8 @@ import sys
 import random
 import math
 import networkx as nx
+import argparse
+import genmobility
 
 NED_HEADER = ''
 NED_HEADER += 'package builtTopologies;\n\n'
@@ -49,16 +51,19 @@ density['medium'] = 5
 density['dense'] = 10
 
 
-def setArguments(argv):
-    for i in range(0, len(initConf)):
-        argu = argv[i + 1]
-        try:
-            isinstance(argu, int)
-            initConf[i]['val'] = int(argu)
-        except Exception as e:
-            print("input argument %d is NIL or isn't an integer" % (i))
-            print('parameter %s will be set to its default value' % (initConf[i]['txt']))
-            continue
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Generate a topology using random geometric graphs.')
+    parser.add_argument('--tx', dest='tx', type=int, default=10,
+                        help='Transmission Range (default: 10)')
+    parser.add_argument('--min_d', dest='min_density', type=int, default=5,
+                        help='Minimum density (default: 5)')
+    parser.add_argument('--max_d', dest='max_density', type=int, default=65,
+                        help='Maximum density (default: 65)')
+    parser.add_argument('--idx', dest='last_idx', type=int, default=0,
+                        help='last id number used to identify topologies (default: 0)')
+    parser.add_argument("--mobility", help="Generate mobility files")
+    args = parser.parse_args()
+    return args
 
 
 class RandomGeometricGraphTopologyGenerator:
@@ -119,6 +124,7 @@ def fillSurfaceWithFixedNumberOfNodes(tx, n, density):
     h = w = math.floor(tx/r)
     return fillSurfaceBase(r, n, density, w, h), w, h
 
+
 def fillSurfaceBase(r, n, density, w, h):
     assert w == h
     # print r, n, density, w
@@ -158,21 +164,33 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
 
 
 if __name__ == '__main__':
-    setArguments(sys.argv)
-    trRan = initConf[0]['val']
-    minL = initConf[1]['val']
-    maxL = initConf[2]['val']
+    # trRan = initConf[0]['val']
+    # minL = initConf[1]['val']
+    # maxL = initConf[2]['val']
+    #
+    # index = initConf[3]['val']
+    args = get_arguments()
+    trRan = args.tx
+    index = args.last_idx;
+    min_density = args.min_density
+    max_density = args.max_density
+    nr_nodes = 200
+    mobility = args.mobility
 
-    index = initConf[3]['val']
-    for d in range(5, 65, 5):
+    for d in range(min_density, max_density, 5):
 
-        print "Building topology with density", d, trRan, maxL, maxL
-        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
+        print "Building topology with density %d and transmission range %d" % (d, trRan)
+        topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
         while not is_valid_network(topology, trRan, d, 10):
-            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, 200, d)
+            topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
 
         print "Writing NED file"
         createNedFile(d, topology, index, int(w), int(w), trRan)
+        if mobility:
+            print "Generating mobility"
+            filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
+            genmobility.generateMobility(sps=10,nr_nodes=nr_nodes,
+                    map_x=int(w), map_y=int(h), sim_time=6000, positions=topology, outputFile=filename)
         index = index + 1
 
     print "Done", index
