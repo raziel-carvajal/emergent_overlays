@@ -73,9 +73,10 @@ BroadcastingAppBase::initialize(int stage)
                 this->radious = transmitter->getMaxCommunicationRange().get();
 
                 EV_TRACE << "My position is " << this->position  << "\n";
+                bool is_center = host->par("isCenter").boolValue();
 
                 //bool is_center = host->par("is_source").boolValue();
-                bool is_center = par("is_source").boolValue();
+
                 if (is_center) {
                   is_source = true;
                   cerr << getParentModule()->getName() << ": is center " << is_center << endl;
@@ -88,7 +89,7 @@ BroadcastingAppBase::initialize(int stage)
             // sending messages if source
             if (is_source && nr_broadcast_msg > 0) {
             	double d = par("wakeUpTime").doubleValue();
-                cerr << "Broadcasting sessions will start at: " << (d) << endl;
+              cerr << "Broadcasting sessions will start at: " << (d) << endl;
             	delayed_event(WAKEUP, "intervalBroadcastTime", d);
             }
 
