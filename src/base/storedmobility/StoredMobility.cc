@@ -151,12 +151,12 @@ StoredMovingMobility::initialize(int stage)
     else {
       visualRepresentation = findVisualRepresentation();
       if (visualRepresentation) {
-        bool filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x)
-            && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
-        if (filled) {
-          lastPosition.z = 0;
-          cerr << " THIS IS VERY NICE " << lastPosition << endl;
-        }
+        string x = visualRepresentation->getDisplayString().getTagArg("p", 0);
+        string y = visualRepresentation->getDisplayString().getTagArg("p", 1);
+        lastPosition.x = stod(x);
+        lastPosition.y = stod(y);
+        lastPosition.z = 0;
+        EV_TRACE << " THIS IS VERY NICE " << lastPosition << endl;
 
       }
     }
