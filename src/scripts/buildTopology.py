@@ -191,7 +191,7 @@ if __name__ == '__main__':
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
             genmobility.generateMobility(sps=1,nr_nodes=nr_nodes,
-                                         map_x=int(w), map_y=int(h), sim_time=6000, positions=topology, outputFile=filename)
+                                         map_x=int(w), map_y=int(h), sim_time=1060, positions=topology, outputFile=filename)
         index = index + 1
 
     print "Done", index

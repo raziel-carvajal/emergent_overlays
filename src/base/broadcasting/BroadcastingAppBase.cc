@@ -268,7 +268,7 @@ BroadcastingAppBase::processStart()
     this->radious = transmitter->getMaxCommunicationRange().get();
 
     EV_TRACE << "My position is " << this->position  << "\n";
-    cerr << " My position is " << this->position << " " << myself  << endl;
+    // cerr << " My position is " << this->position << " " << myself  << endl;
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(local_port);

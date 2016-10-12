@@ -38,9 +38,12 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   l.recp <- lapply(id_msgs, function (id) {
 						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
+            # print(tmp.list)
 						l <- sapply(tmp.list, function(d)  c(d, NA)[[1]] )
+            # print(l)
+            # print(max(l, na.rm = TRUE))
 						data.frame(
-							reception.time = max(l),
+							reception.time = max(l, na.rm = TRUE),
 							rcv = sum(sapply(l, function(i) if (is.na(i)) 0 else 1)),
 							B.i.tmp = sum(sapply(tmp.list, function(d) length(d) ))
 						)

@@ -86,10 +86,14 @@ StoredMobility::readNodeMobilities()
 	getline(ifs, line); // time step in seconds
 	double time_step = stod(line);
 	for (int i = 0 ; i < nr_nodes; i++) {
+
 		mobility.push_back(NodeStoredMobility(time_step));
 	}
 
+  cerr << "Number of node is " << nr_nodes << endl;
+  cerr << "The time step is " << time_step << " seconds" << endl;
 	do {
+
 		for (int i = 0 ; i < nr_nodes; i++ ) {
 			getline(ifs, line);
 			if (line.empty()) break;
@@ -144,6 +148,7 @@ StoredMovingMobility::initialize(int stage)
   }
   else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
     if (isMoving) {
+      updateInterval = 0;
       auto l = mobility.get_next_location();
       lastPosition = Coord(l.first, l.second);
       emitMobilityStateChangedSignal();
@@ -173,6 +178,18 @@ void
 StoredMovingMobility::move()
 {
   if (isMoving) {
+    // string hostName = this->getParentModule()->getFullName();
+    // if (hostName == "hostR0") {
+    //   cerr << hostName << ": "<< simTime() << " what the fuck " << mobility.get_time_step() << " " << nextChange << " " << updateInterval << endl;
+    //   // void *array[10];
+    //   // size_t size;
+    //   //
+    //   // // get void*'s for all entries on the stack
+    //   // size = backtrace(array, 10);
+    //   //
+    //   // // print out all the frames to stderr
+    //   // backtrace_symbols_fd(array, size, STDERR_FILENO);
+    // }
     auto l = mobility.get_next_location();
     auto previousPosition = lastPosition;
     lastPosition = Coord(l.first, l.second);
@@ -187,12 +204,12 @@ StoredMovingMobility::move()
 
 Coord StoredMovingMobility::getCurrentPosition()
 {
-  return (isMoving)? MovingMobilityBase::getCurrentPosition():lastPosition;
+  return (isMoving && lastPosition == Coord::ZERO)? MovingMobilityBase::getCurrentPosition():lastPosition;
 }
 
 Coord StoredMovingMobility::getCurrentSpeed()
 {
-    return (isMoving)? MovingMobilityBase::getCurrentSpeed():lastSpeed;
+    return (isMoving && lastPosition == Coord::ZERO)? MovingMobilityBase::getCurrentSpeed():lastSpeed;
 }
 
 } // namespace
