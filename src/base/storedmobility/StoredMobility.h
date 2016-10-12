@@ -35,8 +35,15 @@ namespace inet {
 	     * and other state according to the mobility model.
 	     */
 	    void move() override;
+
+			/** @brief Returns the current position at the current simulation time. */
+	    virtual Coord getCurrentPosition() override;
+
+	    /** @brief Returns the current speed at the current simulation time. */
+	    virtual Coord getCurrentSpeed() override;
 		protected:
 			void initialize(int stage);
+			void handleSelfMessage(cMessage *message) override;
 		private:
 			bool isMoving = false;
 			std::string filename;

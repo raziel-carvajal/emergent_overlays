@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <memory>
 
+#include <execinfo.h>
+#include <stdlib.h>
+
 using namespace std;
 
 namespace inet {
@@ -116,40 +119,54 @@ StoredMobility::getMobility(int idx)
 void
 StoredMovingMobility::initialize(int stage)
 {
+  MovingMobilityBase::initialize(stage);
+  if (stage == INITSTAGE_LOCAL) {
 
-    EV_TRACE << "initializing StoredMovingMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL) {
-        MovingMobilityBase::initialize(stage);
-        moveTimer = new cMessage("move");
-        isMoving = par("isMoving").boolValue();
-        filename = par("filename").stdstringValue();
+    moveTimer = new cMessage("move");
+    isMoving = par("isMoving").boolValue();
+    filename = par("filename").stdstringValue();
 
-        cModule* host = getContainingNode(this);
-        string hostName = this->getParentModule()->getFullName();
-        auto id = hostName.substr( string("hostR").length(), string::npos);
-        // cout << "XXXXXXXXXXXXXXXXXXXXXXXXX" << hostName << " " << idx <<  " " << filename << " " << string("hostR").length() << "|" << id << "|"  << endl;
-        int idx = stoi(id);
+    cModule* host = getContainingNode(this);
+    string hostName = this->getParentModule()->getFullName();
+    auto id = hostName.substr( string("hostR").length(), string::npos);
+    int idx = stoi(id);
+    lastSpeed = Coord::ZERO;
 
-        if (isMoving) {
-          auto m = StoredMobility::getInstance(filename);
-          m->readNodeMobilities();
-          mobility = m->getMobility(idx);
+    if (isMoving) {
+      auto m = StoredMobility::getInstance(filename);
+      m->readNodeMobilities();
+      mobility = m->getMobility(idx);
+    }
+    stationary = !isMoving;
+    if (stationary) {
+      nextChange = -1;
+    }
+  }
+  else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
+    if (isMoving) {
+      auto l = mobility.get_next_location();
+      lastPosition = Coord(l.first, l.second);
+      emitMobilityStateChangedSignal();
+    }
+    else {
+      visualRepresentation = findVisualRepresentation();
+      if (visualRepresentation) {
+        bool filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x)
+            && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        if (filled) {
+          lastPosition.z = 0;
+          cerr << " THIS IS VERY NICE " << lastPosition << endl;
         }
-    }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
-      if (isMoving) {
-        auto l = mobility.get_next_location();
-        lastPosition = Coord(l.first, l.second);
-        // cout << "jejeje " << lastPosition << endl;
-        cModule* host = getContainingNode(this);
-        string hostName = this->getParentModule()->getFullName();
-        emitMobilityStateChangedSignal();
-        updateVisualRepresentation();
-      }
-      else {
-        MovingMobilityBase::initialize(stage);
+
       }
     }
+  }
+}
+
+void StoredMovingMobility::handleSelfMessage(cMessage *message)
+{
+  if (isMoving)
+    MovingMobilityBase::handleSelfMessage(message);
 }
 
 void
@@ -159,16 +176,23 @@ StoredMovingMobility::move()
     auto l = mobility.get_next_location();
     auto previousPosition = lastPosition;
     lastPosition = Coord(l.first, l.second);
-    // cout << "jejeje " << lastPosition << endl;
     lastSpeed = (lastPosition - previousPosition);
     auto d = lastSpeed.length();
     auto v = d / mobility.get_time_step();
     lastSpeed.normalize();
     lastSpeed *= v;
     nextChange = simTime() + mobility.get_time_step();
-  } {
-    lastSpeed = Coord::ZERO;
   }
+}
+
+Coord StoredMovingMobility::getCurrentPosition()
+{
+  return (isMoving)? MovingMobilityBase::getCurrentPosition():lastPosition;
+}
+
+Coord StoredMovingMobility::getCurrentSpeed()
+{
+    return (isMoving)? MovingMobilityBase::getCurrentSpeed():lastSpeed;
 }
 
 } // namespace

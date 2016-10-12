@@ -24,6 +24,7 @@ import argparse
 logging.basicConfig(format='%(asctime)-15s - %(message)s', level=logging.INFO)
 logger = logging.getLogger("simulation")
 
+
 def getArguments():
     '''
     Return the arguments paased to the file
@@ -59,13 +60,14 @@ def read_positions(positionsFile):
 
 def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000):
     np.random.seed(0xffff)
-    # Truncated Levy-Walk model
+    # Truncated Levy-Walk model, FL_EXP=-3.9 is way to "force" the fligth
+    # length to a value close to 1.4 m/s (prefered human walk speed)
     if positions:
         rw = truncated_levy_walk_with_fix_initial_positions(nr_nodes,
                                                             dimensions=(map_x, map_y),
-                                                            positions=positions)
+                                                            positions=positions, FL_EXP=-3.9)
     else:
-        rw = truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y))
+        rw = truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), FL_EXP=-3.9)
     step_time = 1. / float(sps)
 
     with open(outputFile, 'w') as f:
