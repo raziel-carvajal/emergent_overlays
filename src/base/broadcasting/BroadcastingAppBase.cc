@@ -24,6 +24,7 @@
 #include "inet/physicallayer/idealradio/IdealTransmitter.h"
 
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 using inet::broadcasting::Broadcast;
@@ -65,14 +66,6 @@ BroadcastingAppBase::initialize(int stage)
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
             {
                 cModule* host = getContainingNode(this);
-
-                IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
-                physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
-
-                this->position = mobility->getCurrentPosition();
-                this->radious = transmitter->getMaxCommunicationRange().get();
-
-                EV_TRACE << "My position is " << this->position  << "\n";
                 bool is_center = host->par("isCenter").boolValue();
 
                 //bool is_center = host->par("is_source").boolValue();
@@ -146,10 +139,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   nr_broadcast_msg--;
                   this->time_to_broadcast_payload(nullptr);
                   delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
-                  cModule* host = getContainingNode(this);
-                  IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
-                  cerr << "My position is jejeje " << mobility->getCurrentPosition()  << "\n";
-
                 }
 
                 break;
@@ -182,8 +171,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   pkt->setY(position.y);
                   pkt->setSender(myself.c_str());
                   send_package(pkt);
-	          cancelAndDelete(msg);
-		  break;
+	                cancelAndDelete(msg);
+                  break;
                 }
             case HALT_SIMULATION_DELAY:
                 cancelAndDelete(msg);
@@ -270,6 +259,16 @@ BroadcastingAppBase::processStart()
     delta = std::stoi (myself.substr(5, myself.size()), &sz) * 0.001;
 //    cerr << getLogHeader() + "My delta is: " + to_string(delta) + "\n";
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
+
+    cModule* host = getContainingNode(this);
+    IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
+    physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
+
+    this->position = mobility->getCurrentPosition();
+    this->radious = transmitter->getMaxCommunicationRange().get();
+
+    EV_TRACE << "My position is " << this->position  << "\n";
+    cerr << " My position is " << this->position << " " << myself  << endl;
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(local_port);
@@ -425,7 +424,7 @@ BroadcastingAppBase::get_last_id_for_msg()
 
 cMessage*
 BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
-    cMessage* mm = new cMessage("broadcast delay");
+    cMessage* mm = new cMessage("broadcast delay1123");
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
     scheduleAt(simTime() + delay, mm);
