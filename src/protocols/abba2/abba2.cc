@@ -102,7 +102,7 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     return sum;
 }
 
-void Abba2::processStart() { 
+void Abba2::processStart() {
     timeOut = par("timeOut").doubleValue();
     BroadcastingAppBase::processStart();
 }
@@ -133,7 +133,7 @@ Abba2::on_payload_received(const Broadcast* m) {
             cancelAndDelete(old_msg);
             ignoredMsgs[key] = key;
             firHalfPairs[key].clear();
-        	secHalfPairs[key].clear();
+        	  secHalfPairs[key].clear();
             cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
@@ -142,6 +142,10 @@ Abba2::on_payload_received(const Broadcast* m) {
                 cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
                 cMessage* old_msg = delayMessages[key];
                 cancelAndDelete(old_msg);
+            }
+
+            if (std::isnan(newTimeout)) { // FIXME: well, something the previous code tries to go back in time :-)
+              newTimeout = 0.001;
             }
             timeouts[key] = newTimeout;
             delayMessages[key] = delayed_broadcast(key, newTimeout);
