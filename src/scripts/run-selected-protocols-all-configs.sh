@@ -46,7 +46,7 @@ for c in ${path_to_configs}*.ini ; do
 	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
 	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
-	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "flooding"  ] ; then
+	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
     		if [ "${density}" -lt "18" ]; then
     			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
 			    sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
@@ -74,4 +74,3 @@ cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batter
 echo "Plotting aggregated results"
 
 Rscript pretty-plotting.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession batteryConsumptionDistributionTime
-
