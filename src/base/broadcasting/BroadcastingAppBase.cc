@@ -146,7 +146,12 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   nr_broadcast_msg--;
                   this->time_to_broadcast_payload(nullptr);
                   delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
+                  cModule* host = getContainingNode(this);
+                  IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
+                  cerr << "My position is jejeje " << mobility->getCurrentPosition()  << "\n";
+
                 }
+
                 break;
             case BROADCAST_DELAY:
                 {
@@ -397,7 +402,7 @@ BroadcastingAppBase::emitBroadcastMsgReceived(string value)
 
 void
 BroadcastingAppBase::delay_broadcast(void* user_data) {
-    cMessage* mm = new cMessage("broadcast delay");
+    cMessage* mm = new cMessage("broadcast delay112");
     mm->setKind(BROADCAST_DELAY);
     mm->setContextPointer(user_data);
     scheduleAt(simTime() + par("delay_test").doubleValue(), mm);
