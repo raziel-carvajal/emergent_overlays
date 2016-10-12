@@ -446,7 +446,11 @@ Mpr_t2::compute_mpr()
 
 	bool b = any_of(hops[1].begin(), hops[1].end(), checking_coverage);
 
-	while (b) {
+	int iterations = 0;
+
+	int MAX_ITERATION = 100; // FIXME: this is crap
+
+	while (b && iterations < MAX_ITERATION) {
 		//cerr << myself << ": building mpr, already with " << mpr.size() << " elements" << endl;
 		string max_y = "";
 		int max = -1;
@@ -469,11 +473,8 @@ Mpr_t2::compute_mpr()
 		}
 
 		b = any_of(hops[1].begin(), hops[1].end(), checking_coverage);
+		iterations ++;
 	}
-
-
-
-
 
 	return mpr;
 }
