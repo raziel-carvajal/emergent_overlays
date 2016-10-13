@@ -73,4 +73,8 @@ cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batter
 
 echo "Plotting aggregated results"
 
-Rscript pretty-plotting.R -p ../../results/ -pc batteryConsumptionDistribution -dm duplicatedMsgsDistribution -bs broadcastSession
+Rscript pretty-plotting.R \
+      -pc batteryConsumptionDistribution \
+      -dm duplicatedMsgsDistribution \
+      -bs broadcastSession \
+      ../../results/

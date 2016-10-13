@@ -222,7 +222,7 @@ plot.duplicated.messages <- function(df, densities) {
 #
 get_arguments <- function() {
   parser <- ArgumentParser(description='Process some integers')
-  parser$add_argument('-p', '--path', dest='path', type="character",
+  parser$add_argument('path', metavar='path', type="character",
                       help='Path to result files')
   parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
                       help='Power consumption file name')
