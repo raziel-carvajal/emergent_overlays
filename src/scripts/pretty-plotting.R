@@ -1,5 +1,6 @@
 library(ggplot2)
 library(plyr)
+library(argparse)
 
 import.data <- function(fileName) {
   data <- readLines(fileName)
@@ -216,48 +217,75 @@ plot.duplicated.messages <- function(df, densities) {
 	print(p)
 }
 
-args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 5) {
-  bcDFile <- paste(args[1], args[2], sep = '') # load battery consumption
-  dmFile <- paste(args[1], args[3], sep = '') # duplicated messages file
-  bsFile <- paste(args[1], args[4], sep = '') # broadcastting time
-  tbcDFile <- paste(args[1], args[5], sep = '') # load time of battery consumption
+#
+# Used to define the arguments of the script
+#
+get_arguments <- function() {
+  parser <- ArgumentParser(description='Process some integers')
+  parser$add_argument('-p', '--path', dest='path', type="character",
+                      help='Path to result files')
+  parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
+                      help='Power consumption file name')
+  parser$add_argument('-dm', '--duplicated-messages-file', dest='dm', type="character",
+                      help='Duplicated messages file name')
+  parser$add_argument('-bs', '--broadcast-session-file', dest='bs', type="character",
+                      help='Broadcast session file name')
+  parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
+                      help='useless')
+  # parser$print_help()
+  parser$parse_args()
+}
 
-  print('Importing datasets...')
-  dfBcD <- import.data(bcDFile)
-  dfDm <- import.data(dmFile)
-  dfBs <- import.data(bsFile)
-  dftbcD <- import.data(tbcDFile)
-
-  print(paste('Metrics to plot:',
-    'broadcasting session time (CDF),',
-    'avg of power consumption &',
-    'avg of duplicated messages', sep = ' '
-  ))
-  # datasets headers, algorithms and number of peers are the same for each
-  # dataset file
-  dfNames <- names(dfBcD)
-  sizes <- get.attrSet(dfNames, "n")
-  print('Broadcast protocols: ')
+#
+# Extract metadata such as the protocols, the densities and a palette for plotting
+#
+extract.metadata <- function(data) {
+  dfNames <- names(data)
   algos <- get.attrSet(dfNames, "p")
   densities <- as.numeric(unlist(get.attrSet(dfNames, "d")))
   densities <- densities[order(densities)]
-  print(unlist(algos))
-  # setting attributes to plot
-  #m_layout <- matrix(1:3, 1, 3, byrow=TRUE)
   pal <- rainbow( length(algos) )
   names(pal) <- algos
-  pdf(paste(args[1], "Pretty-Results.pdf", sep = ""), width=4*length(densities), height=8)
-  # create layout for this metric
-  #layout(m_layout, heights=c(0.8,0.8,0.8))
-  #par(mai = c(0.7,0.6,1.2,0.6))
+  l <- list(algos, densities, pal)
+  names(l) <- c("algos","densities", "pal")
+  l
+}
 
-  plot.power.consumption(dfBcD, algos, densities, pal)
+load.dataset.with.metadata <- function(path, filename, metadata) {
+  file <- paste(path, filename, sep = '') # load battery consumption
+  data <- import.data(file)
+  if (is.null(metadata)) {
+    metadata = extract.metadata(data)
+    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=4*length(metadata$densities), height=8)
+  }
+  l <- list(data, metadata)
+  names(l) <- c("data", "metadata")
+  l
+}
 
-  plot.time.power.consumption(dftbcD, algos, densities, pal)
+args <- get_arguments()
+metadata = NULL
 
-  plot.duplicated.messages(dfDm, densities)
+if (!is.null(args$pc)) {
+  print("Importing power consumption dataset")
+  r <- load.dataset.with.metadata(args$path, args$pc, metadata)
+  metadata <- r$metadata
+  print("Plotting power consumption")
+  plot.power.consumption(r$data, metadata$algos, metadata$densities, metadata$pal)
+}
 
-  plot.broadcasting.time2(dfBs, densities, pal)
+if (!is.null(args$pc)) {
+  print("Importing duplicated messages dataset")
+  r <- load.dataset.with.metadata(args$path, args$dm, metadata)
+  metadata <- r$metadata
+  print("Plotting duplicated messages")
+  plot.duplicated.messages(r$data, metadata$densities)
+}
 
+if (!is.null(args$bs)) {
+  print("Importing broadcast time dataset")
+  r <- load.dataset.with.metadata(args$path, args$bs, metadata)
+  metadata <- r$metadata
+  print("Plotting broadcast time")
+  plot.broadcasting.time2(r$data, metadata$densities, metadata$pal)
 }
