@@ -361,11 +361,12 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		payloads[key] = m->getPayload();
 		bool from_selector = selectors.find(m->getSender()) != selectors.end();
 		if (in_mpr && from_selector) {
-			delayed_broadcast(key, get_random_delay());
+			broadcast(key, new broadcasting::Broadcast("payload"));
+			//delayed_broadcast(key, get_random_delay());
 		}
 
 		auto idx = key.find("-");
-  		auto v = stoi(key.substr(idx+1).c_str());
+  	auto v = stoi(key.substr(idx+1).c_str());
 	}
 }
 
