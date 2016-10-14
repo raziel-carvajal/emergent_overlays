@@ -29,7 +29,7 @@ namespace inet {
 
   void inet::Cds_3::time_to_broadcast_payload(void* user_data) {
     string key = is_source ? myself + "-" + to_string(get_next_id_for_msg()) : string((char*)user_data);
-    if (is_source) { emitBroadcastMsgReceived(key); }
+    //if (is_source) { emitBroadcastMsgReceived(key); }
     if (is_source || (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end())) {
         alreadyDispatched[key] = key;
         broadcast(key, new broadcasting::Broadcast("payload"));

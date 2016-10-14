@@ -183,7 +183,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
 {
     string key = is_source ? myself + "-" + to_string(get_next_id_for_msg()) : string((char*)user_data);
     if (is_source) {
-        emitBroadcastMsgReceived(key);
+        //emitBroadcastMsgReceived(key);
         ignoredMsgs[key] = key;
         cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");

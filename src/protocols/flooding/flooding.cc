@@ -44,7 +44,6 @@ Flooding2::on_payload_received(const Broadcast* m) {
     if (firstTime) {
         payloads[key] = m->getPayload();
         broadcast(key, new broadcasting::Broadcast("payload"));
-        //delayed_broadcast(key, get_random_delay());
     } else {
       // cerr << getLogHeader() << "retransmission of message " << key << "was cancelled" << endl;
     }
@@ -71,7 +70,7 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
         payloads[key] = " this is the payload, initially sent from " + myself;
-        emitBroadcastMsgReceived(key);
+        //emitBroadcastMsgReceived(key);
     }
     else {
         char* s = (char*)user_data;
