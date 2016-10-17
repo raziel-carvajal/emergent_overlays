@@ -113,10 +113,10 @@ Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360); 
 
 void
 Abba2::on_payload_received(const Broadcast* m) {
-    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     string key = string(m->getId());
-    cerr << getLogHeader() + "broadcast message " + key + " was sent by peer " + m->getSender() + "\n";
     emitBroadcastMsgReceived(key);
+    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
+    cerr << getLogHeader() + "broadcast message " + key + " was sent by peer " + m->getSender() + "\n";
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
@@ -171,7 +171,6 @@ Abba2::send_message(string& key)
         m->setX(position.x);
         m->setY(position.y);
         broadcast(key, m);
-        emitSent(key);
     } else {
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
     }
@@ -181,18 +180,19 @@ Abba2::send_message(string& key)
 void
 Abba2::time_to_broadcast_payload(void* user_data)
 {
-    string key = is_source ? myself + "-" + to_string(get_next_id_for_msg()) : string((char*)user_data);
+    string key;
     if (is_source) {
-        //emitBroadcastMsgReceived(key);
+        key = createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;
         cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
         m->setX(position.x);
         m->setY(position.y);
         broadcast(key, m);
-        emitSent(key);
-    } else
+    } else {
+        key = string( (char*)user_data );
         send_message(key);
+    }
 }
 
 } //namespace

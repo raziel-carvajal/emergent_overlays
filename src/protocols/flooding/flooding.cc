@@ -35,17 +35,13 @@ void
 Flooding2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
+    emitBroadcastMsgReceived(key);
     if (string(m->getSender()) == myself) return;
     cerr << getLogHeader() << "reception of message " << key << " by sender " << m->getSender() << endl;
-    emitBroadcastMsgReceived(key);
-
-    bool firstTime = !is_source && payloads[key].empty();
-
+    bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {
-        payloads[key] = m->getPayload();
+        payloads[key] = key;
         broadcast(key, new broadcasting::Broadcast("payload"));
-    } else {
-      // cerr << getLogHeader() << "retransmission of message " << key << "was cancelled" << endl;
     }
 }
 
@@ -69,16 +65,13 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
-        payloads[key] = " this is the payload, initially sent from " + myself;
-        //emitBroadcastMsgReceived(key);
+        payloads[key] = key;
+        broadcast(key, new broadcasting::Broadcast("payload"));
     }
-    else {
-        char* s = (char*)user_data;
-        key = string(s);
-        delete s;
-    }
-    //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
-    send_message(key);
+//    else {
+//        char* s = (char*)user_data;
+//        key = string(s);
+//    }
 }
 
 } //namespace
