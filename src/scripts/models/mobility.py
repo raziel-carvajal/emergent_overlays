@@ -280,6 +280,7 @@ class StochasticWalk(object):
         # assign node's positions, flight lengths and velocities
         xy = self.initial_positions(ndim, NODES)
         fl = self.FL_DISTR(NODES)
+        # print(fl)
         velocity = self.VELOCITY_DISTR(fl)
 
         # assign nodes' movements (direction * node velocity)
@@ -291,7 +292,7 @@ class StochasticWalk(object):
         wt = np.zeros(self.nr_nodes)
 
         if self.collect_fl_stats: self.fl_stats = list(fl)
-        if  self.collect_wt_stats: self.wt_stats = list(wt)
+        if self.collect_wt_stats: self.wt_stats = list(wt)
 
         # return the initial position as first positions
         yield xy
@@ -475,7 +476,6 @@ class TruncatedLevyWalk(StochasticWalk):
 class TruncatedLevyWalkWithFixInitialPositions(TruncatedLevyWalk):
 
     def initial_positions(self, ndim, nodes):
-        print "pepess"
         # return StochasticWalk.initial_positions(self, ndim, self.positions)
         return self.positions
 

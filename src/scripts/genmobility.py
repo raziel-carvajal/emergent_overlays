@@ -58,8 +58,8 @@ def read_positions(positionsFile):
     pass
 
 
-def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000):
-    np.random.seed(0xffff)
+def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000, test=lambda p: True):
+    # np.random.seed(0xffff)
     # Truncated Levy-Walk model, FL_EXP=-3.9 is way to "force" the fligth
     # length to a value close to 1.4 m/s (prefered human walk speed)
     if positions:
@@ -73,8 +73,26 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
     with open(outputFile, 'w') as f:
         f.write('%d\n' % nr_nodes)
         f.write('%f\n' % step_time)
+        connected = True
+        counter = 0
+        times = 0.0
+        before = 0.0
         for step in range(0, sim_time*sps):
             xy = rw.next()
+            b = test(xy)
+            if not b:
+                if connected:
+                    counter += 1
+                    before = (float(step)/float(sps))
+                    print "pepe => {0} {1} {2}".format(before, step, sps)
+                connected = False
+
+                # return False
+            else:
+                if not connected:
+                    times += (step/float(sps)) - before
+                connected = True
+
             if step % (sps*60*10) == 0:
                 logger.info('Simulation Time %s minutes' % (step / (sps*60)))
 
@@ -82,7 +100,8 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
                 f.write('%f %f\n' % (x, y))
                 # f.write('%d,%f,%f,%f\n' % (idx, step_time*step, x, y))
 
-    pass
+    print "The time disconnected was {0} s witg mean {1}s  and there were {2} disconnections".format(times, times/counter, counter)
+    return True
 
 if __name__ == '__main__':
     args = getArguments()

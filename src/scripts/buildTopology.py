@@ -78,7 +78,7 @@ class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
         pass
 
 
-def is_valid_network(pos, tx, density, allowed_error):
+def build_graph(pos, tx):
     g = nx.Graph()
     for i, v in enumerate(pos):
         x0 = v[0]
@@ -93,6 +93,10 @@ def is_valid_network(pos, tx, density, allowed_error):
                 if d < tx*tx:
                     g.add_edge(i, j)
                     c = c + 1
+    return g
+
+def is_valid_network(pos, tx, density, allowed_error):
+    g = build_graph(pos, tx)
     degrees = map(lambda(k, v): v, nx.degree(g).iteritems())
     sum_degree = sum(degrees)
     avg_degree = sum_degree/float(nx.number_of_nodes(g))
@@ -164,6 +168,10 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
         f.close()
 
 
+def get_still_connected_callback(tx):
+    l = lambda pos: nx.is_connected(build_graph(pos, tx))
+    return l
+
 if __name__ == '__main__':
     # trRan = initConf[0]['val']
     # minL = initConf[1]['val']
@@ -178,7 +186,7 @@ if __name__ == '__main__':
     nr_nodes = 200
     mobility = args.mobility
 
-    for d in range(min_density, max_density, 5):
+    for d in range(min_density, max_density + 5, 5):
 
         print "Building topology with density %d and transmission range %d" % (d, trRan)
         topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
@@ -190,8 +198,16 @@ if __name__ == '__main__':
         if mobility:
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
-            genmobility.generateMobility(sps=10,nr_nodes=nr_nodes,
-                                         map_x=int(w), map_y=int(h), sim_time=1060, positions=topology, outputFile=filename)
+            while True:
+                b = genmobility.generateMobility(sps=10,nr_nodes=nr_nodes,
+                                            map_x=int(w), map_y=int(h),
+                                            sim_time=50, positions=topology,
+                                            outputFile=filename,
+                                            test=get_still_connected_callback(trRan))
+                if b:
+                    break
+
+
         index = index + 1
 
     print "Done", index
