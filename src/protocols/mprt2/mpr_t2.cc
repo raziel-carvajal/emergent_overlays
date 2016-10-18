@@ -372,21 +372,6 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 
 
 void
-Mpr_t2::send_message(string& key)
-{
-    if (is_source || in_mpr) {
-
-        Broadcast* m = new Broadcast("payload");
-        m->setPayload(payloads[key].c_str());
-        m->setId(key.c_str());
-        m->setSender(myself.c_str());
-				send_package(m);
-        emitSent(key);
-    }
-}
-
-
-void
 Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
     //BroadcastingAppBase::time_to_broadcast_payload(user_data);
@@ -399,15 +384,8 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
   			//	cerr << "================================================" << endl;
   			//	delayed_event(HALT_SIMULATION_DELAY, string(""), 10.0);
   			//}
-
+				broadcast(key, new broadcasting::Broadcast("payload"));
     }
-    else {
-        char* s = (char*)user_data;
-        key = string(s);
-        delete s;
-    }
-    //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
-    send_message(key);
 }
 
 

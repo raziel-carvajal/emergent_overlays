@@ -62,8 +62,6 @@ private:
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
 
-    void send_message(string& key);
-
     virtual bool on_network_message_received(cPacket* pkt) override;
 
     virtual void on_neighbors(const mpr_t2::Neighbors* m);
@@ -71,7 +69,7 @@ private:
 	virtual void on_mpr_found(const mpr_t2::MprFound* m);
 
 	void request_hops(int h);
-	
+
 	void notify_mpr();
 
 

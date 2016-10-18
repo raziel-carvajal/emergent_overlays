@@ -165,7 +165,7 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 	plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of maximal reception delay")
 	hist(valid.time, xlab="Maximal reception delay (Seconds)", main="Maximal reception delay")
 
-        plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
+  plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?")
 
 	#plot(broadcast.info$B.i / broadcast.info$n.received,
         #     type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?",
