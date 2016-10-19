@@ -64,9 +64,9 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
     # rw = mb.reference_point_group(nr_nodes, dimensions=(map_x, map_y), positions=positions)
     # rw = mb.gauss_markov(nr_nodes, dimensions=(map_x, map_y), positions=positions)
     # rw = mb.random_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions)
-    rw = mb.random_direction(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    # rw = mb.random_direction(nr_nodes, dimensions=(map_x, map_y), positions=positions)
     # rw = mb.heterogeneous_truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
-    # rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
+    rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
     step_time = 1. / float(sps)
 
     with open(outputFile, 'w') as f:
