@@ -14,12 +14,9 @@ Created on Jan 24, 2012
 @contact: panisson@gmail.com
 @organization: ISI Foundation, Torino, Italy
 '''
-from models.mobility import truncated_levy_walk, truncated_levy_walk_with_fix_initial_positions
-import numpy as np
 import logging
-import sys
 import argparse
-
+import models.mobility as mb
 
 logging.basicConfig(format='%(asctime)-15s - %(message)s', level=logging.INFO)
 logger = logging.getLogger("simulation")
@@ -62,12 +59,14 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
     # np.random.seed(0xffff)
     # Truncated Levy-Walk model, FL_EXP=-3.9 is way to "force" the fligth
     # length to a value close to 1.4 m/s (prefered human walk speed)
-    if positions:
-        rw = truncated_levy_walk_with_fix_initial_positions(nr_nodes,
-                                                            dimensions=(map_x, map_y),
-                                                            positions=positions, FL_EXP=-3.9)
-    else:
-        rw = truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), FL_EXP=-3.9)
+
+    # rw = mb.tvc(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    # rw = mb.reference_point_group(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    # rw = mb.gauss_markov(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    # rw = mb.random_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    rw = mb.random_direction(nr_nodes, dimensions=(map_x, map_y), positions=positions)
+    # rw = mb.heterogeneous_truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
+    # rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
     step_time = 1. / float(sps)
 
     with open(outputFile, 'w') as f:
@@ -78,29 +77,37 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
         times = 0.0
         before = 0.0
         for step in range(0, sim_time*sps):
+            now = float(step)/float(sps)
             xy = rw.next()
             b = test(xy)
             if not b:
                 if connected:
                     counter += 1
-                    before = (float(step)/float(sps))
-                    print "pepe => {0} {1} {2}".format(before, step, sps)
+                    print "black zone => {0}".format(now)
+                    before = now
                 connected = False
-
-                # return False
             else:
                 if not connected:
-                    times += (step/float(sps)) - before
+                    e = now - before
+                    times += e
+                    print "entering white zone at {0}s (we are in a blackout for {1}s)".format(now, e)
                 connected = True
 
             if step % (sps*60*10) == 0:
                 logger.info('Simulation Time %s minutes' % (step / (sps*60)))
 
-            for idx, (x, y) in enumerate(xy):
-                f.write('%f %f\n' % (x, y))
-                # f.write('%d,%f,%f,%f\n' % (idx, step_time*step, x, y))
+            if connected:
+                for idx, (x, y) in enumerate(xy):
+                    f.write('%f %f\n' % (x, y))
 
-    print "The time disconnected was {0} s witg mean {1}s  and there were {2} disconnections".format(times, times/counter, counter)
+        if not connected:
+            times += (float(sim_time)) - before
+            print "white zone => {0}".format(sim_time)
+
+        if counter > 0:
+            print "The time disconnected was {0} s with mean {1}s  and there were {2} disconnections".format(times, times/counter, counter)
+        else:
+            print "No time disconnected"
     return True
 
 if __name__ == '__main__':

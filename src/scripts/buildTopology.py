@@ -1,3 +1,5 @@
+"""This module builds a set of topologies with given densities."""
+
 # =============================================================================
 #
 #          FILE: buildTopology.py
@@ -17,7 +19,6 @@
 #      REVISION:  ---
 # =============================================================================
 
-import sys
 import random
 import math
 import networkx as nx
@@ -81,9 +82,10 @@ class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
 def build_graph(pos, tx):
     g = nx.Graph()
     for i, v in enumerate(pos):
+        g.add_node(i)
+    for i, v in enumerate(pos):
         x0 = v[0]
         y0 = v[1]
-        g.add_node(i)
         c = 0
         for j, v2 in enumerate(pos):
             if i != j:
@@ -94,6 +96,7 @@ def build_graph(pos, tx):
                     g.add_edge(i, j)
                     c = c + 1
     return g
+
 
 def is_valid_network(pos, tx, density, allowed_error):
     g = build_graph(pos, tx)
@@ -169,8 +172,7 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
 
 
 def get_still_connected_callback(tx):
-    l = lambda pos: nx.is_connected(build_graph(pos, tx))
-    return l
+    return lambda pos: nx.is_connected(build_graph(pos, tx))
 
 if __name__ == '__main__':
     # trRan = initConf[0]['val']
@@ -199,14 +201,13 @@ if __name__ == '__main__':
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
             while True:
-                b = genmobility.generateMobility(sps=10,nr_nodes=nr_nodes,
-                                            map_x=int(w), map_y=int(h),
-                                            sim_time=50, positions=topology,
-                                            outputFile=filename,
-                                            test=get_still_connected_callback(trRan))
+                b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
+                                                 map_x=int(w), map_y=int(h),
+                                                 sim_time=100, positions=topology,
+                                                 outputFile=filename,
+                                                 test=get_still_connected_callback(trRan))
                 if b:
                     break
-
 
         index = index + 1
 

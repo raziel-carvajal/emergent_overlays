@@ -33,9 +33,9 @@ def pause_probability_init(pause_low, pause_high, speed_low, speed_high, dimensi
 
 # *************** Palm residual ******************************
 def residual_time(mean, delta, shape=(1,)):
-    t1 = mean - delta;
-    t2 = mean + delta;
-    u = rand(*shape);
+    t1 = mean - delta
+    t2 = mean + delta
+    u = rand(*shape)
     residual = np.zeros(shape)
     if delta != 0.0:
         case_1_u = u < (2.*t1/(t1+t2))
@@ -197,9 +197,9 @@ class RandomWaypoint(object):
 class StochasticWalk(object):
 
     def initial_positions(self, ndim, nodes):
-        return U(np.zeros(ndim), np.array(self.dimensions), np.dstack((nodes,)*ndim)[0])
+        return self.positions if self.positions is None else U(np.zeros(ndim), np.array(self.dimensions), np.dstack((nodes,)*ndim)[0])
 
-    def __init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, WT_DISTR=None, border_policy='reflect'):
+    def __init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, positions=None, WT_DISTR=None, border_policy='reflect'):
         '''
         Base implementation for models with direction uniformly chosen from [0,pi]:
         random_direction, random_walk, truncated_levy_walk
@@ -226,6 +226,9 @@ class StochasticWalk(object):
 
         keyword arguments:
 
+          *positions*:
+            Initial position of each node.
+
           *WT_DISTR*:
             A function that, given a set of samples,
              returns another set with the same size of the input set.
@@ -246,6 +249,8 @@ class StochasticWalk(object):
         self.FL_DISTR = FL_DISTR
         self.VELOCITY_DISTR = VELOCITY_DISTR
         self.WT_DISTR = WT_DISTR
+        self.positions = None if positions is None else np.array(positions)
+        pass
 
     def __iter__(self):
         def reflect(xy):
@@ -334,7 +339,7 @@ class StochasticWalk(object):
 
 class RandomWalk(StochasticWalk):
 
-    def __init__(self, nr_nodes, dimensions, velocity=1., distance=1., border_policy='reflect'):
+    def __init__(self, nr_nodes, dimensions, positions=None, velocity=1., distance=1., border_policy='reflect'):
         '''
         Random Walk mobility model.
         This model is based in the Stochastic Walk, but both the flight length and node velocity distributions are in fact constants,
@@ -372,11 +377,11 @@ class RandomWalk(StochasticWalk):
         FL_DISTR = lambda SAMPLES: np.array(fl[:len(SAMPLES)])
         VELOCITY_DISTR = lambda FD: np.array(vel[:len(FD)])
 
-        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR,border_policy=border_policy)
+        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, positions=positions, border_policy=border_policy)
 
 class RandomDirection(StochasticWalk):
 
-    def __init__(self, nr_nodes, dimensions, wt_max=None, velocity=(0.1, 1.), border_policy='reflect'):
+    def __init__(self, nr_nodes, dimensions, positions=None, wt_max=None, velocity=(0.1, 1.), border_policy='reflect'):
         '''
         Random Direction mobility model.
         This model is based in the Stochastic Walk. The flight length is chosen from a uniform distribution,
@@ -420,11 +425,11 @@ class RandomDirection(StochasticWalk):
             WT_DISTR = None
         VELOCITY_DISTR = lambda FD: U(MIN_V, MAX_V, FD)
 
-        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, WT_DISTR=WT_DISTR, border_policy=border_policy)
+        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, positions=positions, WT_DISTR=WT_DISTR, border_policy=border_policy)
 
 class TruncatedLevyWalk(StochasticWalk):
 
-    def __init__(self, nr_nodes, dimensions, FL_EXP=-2.6, FL_MAX=50., WT_EXP=-1.8, WT_MAX=100., border_policy='reflect'):
+    def __init__(self, nr_nodes, dimensions, positions=None, FL_EXP=-2.6, FL_MAX=50., WT_EXP=-1.8, WT_MAX=100., border_policy='reflect'):
         '''
         Truncated Levy Walk mobility model, based on the following paper:
         Injong Rhee, Minsu Shin, Seongik Hong, Kyunghan Lee, and Song Chong. On the Levy-Walk Nature of Human Mobility.
@@ -470,65 +475,11 @@ class TruncatedLevyWalk(StochasticWalk):
             WT_DISTR = None
         VELOCITY_DISTR = lambda FD: np.sqrt(FD)/10.
 
-        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, WT_DISTR=WT_DISTR, border_policy=border_policy)
-
-
-class TruncatedLevyWalkWithFixInitialPositions(TruncatedLevyWalk):
-
-    def initial_positions(self, ndim, nodes):
-        # return StochasticWalk.initial_positions(self, ndim, self.positions)
-        return self.positions
-
-    def __init__(self, nr_nodes, dimensions, positions, FL_EXP=-2.6, FL_MAX=50., WT_EXP=-1.8, WT_MAX=100., border_policy='reflect'):
-        '''
-        Truncated Levy Walk mobility model, based on the following paper:
-        Injong Rhee, Minsu Shin, Seongik Hong, Kyunghan Lee, and Song Chong. On the Levy-Walk Nature of Human Mobility.
-            In 2008 IEEE INFOCOM - Proceedings of the 27th Conference on Computer Communications, pages 924-932. April 2008.
-
-        The implementation is a special case of the more generic Stochastic Walk,
-        in which both the flight length and waiting time distributions are truncated power laws,
-        with exponents set to FL_EXP and WT_EXP and truncated at FL_MAX and WT_MAX.
-        The node velocity is a function of the flight length.
-
-        Required arguments:
-
-          *nr_nodes*:
-            Integer, the number of nodes.
-
-          *dimensions*:
-            Tuple of Integers, the x and y dimensions of the simulation area.
-
-          *positions*:
-            Initial position of each node.
-
-        keyword arguments:
-
-          *FL_EXP*:
-            Double, the exponent of the flight length distribution. Default is -2.6
-
-          *FL_MAX*:
-            Double, the maximum value of the flight length distribution. Default is 50
-
-          *WT_EXP*:
-            Double, the exponent of the waiting time distribution. Default is -1.8
-
-          *WT_MAX*:
-            Double, the maximum value of the waiting time distribution. Default is 100
-
-          *border_policy*:
-            String, either 'reflect' or 'wrap'. The policy that is used when the node arrives to the border.
-            If 'reflect', the node reflects off the border.
-            If 'wrap', the node reappears at the opposite edge (as in a torus-shaped area).
-        '''
-
-        self.positions = np.array(positions)
-        TruncatedLevyWalk.__init__(self, nr_nodes, dimensions, FL_EXP, FL_MAX, WT_EXP, WT_MAX, border_policy)
-
-
+        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, positions=positions, WT_DISTR=WT_DISTR, border_policy=border_policy)
 
 class HeterogeneousTruncatedLevyWalk(StochasticWalk):
 
-    def __init__(self, nr_nodes, dimensions, WT_EXP=-1.8, WT_MAX=100., FL_EXP=-2.6, FL_MAX=50., border_policy='reflect'):
+    def __init__(self, nr_nodes, dimensions, positions=None, WT_EXP=-1.8, WT_MAX=100., FL_EXP=-2.6, FL_MAX=50., border_policy='reflect'):
         '''
         This is a variant of the Truncated Levy Walk mobility model.
         This model is based in the Stochastic Walk.
@@ -573,7 +524,7 @@ class HeterogeneousTruncatedLevyWalk(StochasticWalk):
         WT_DISTR = lambda SAMPLES: P(WT_EXP, 1., WT_MAX, SAMPLES)
         VELOCITY_DISTR = lambda FD: np.sqrt(FD)/10.
 
-        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, WT_DISTR=WT_DISTR, border_policy=border_policy)
+        StochasticWalk.__init__(self, nr_nodes, dimensions, FL_DISTR, VELOCITY_DISTR, positions=positions, WT_DISTR=WT_DISTR, border_policy=border_policy)
 
 def random_waypoint(*args, **kwargs):
     return iter(RandomWaypoint(*args, **kwargs))
@@ -590,13 +541,10 @@ def random_direction(*args, **kwargs):
 def truncated_levy_walk(*args, **kwargs):
     return iter(TruncatedLevyWalk(*args, **kwargs))
 
-def truncated_levy_walk_with_fix_initial_positions(*args, **kwargs):
-    return iter(TruncatedLevyWalkWithFixInitialPositions(*args, **kwargs))
-
 def heterogeneous_truncated_levy_walk(*args, **kwargs):
     return iter(HeterogeneousTruncatedLevyWalk(*args, **kwargs))
 
-def gauss_markov(nr_nodes, dimensions, velocity_mean=1., alpha=1., variance=1.):
+def gauss_markov(nr_nodes, dimensions, velocity_mean=1., alpha=1., variance=1., positions=None):
     '''
     Gauss-Markov Mobility Model, as proposed in
     Camp, T., Boleng, J. & Davies, V. A survey of mobility models for ad hoc network research.
@@ -624,9 +572,14 @@ def gauss_markov(nr_nodes, dimensions, velocity_mean=1., alpha=1., variance=1.):
 
     MAX_X, MAX_Y = dimensions
     NODES = np.arange(nr_nodes)
-    x = U(0, MAX_X, NODES)
-    y = U(0, MAX_Y, NODES)
-    velocity =  np.zeros(nr_nodes)+velocity_mean
+    if positions is None:
+        x = U(0, MAX_X, NODES)
+        y = U(0, MAX_Y, NODES)
+    else:
+        pos = np.array(positions)
+        x = pos[:, 0]
+        y = pos[:, 1]
+    velocity = np.zeros(nr_nodes)+velocity_mean
     theta = U(0, 2*np.pi, NODES)
     angle_mean = theta
 
@@ -653,13 +606,12 @@ def gauss_markov(nr_nodes, dimensions, velocity_mean=1., alpha=1., variance=1.):
                     alpha2 * velocity_mean +
                     alpha3 * np.random.normal(0.0, 1.0, nr_nodes))
 
-        theta = (alpha * theta +
-                    alpha2 * angle_mean +
-                    alpha3 * np.random.normal(0.0, 1.0, nr_nodes))
+        theta = (alpha * theta + alpha2 * angle_mean +
+                 alpha3 * np.random.normal(0.0, 1.0, nr_nodes))
 
-        yield np.dstack((x,y))[0]
+        yield np.dstack((x, y))[0]
 
-def reference_point_group(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=0.1):
+def reference_point_group(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=0.1, positions=None):
     '''
     Reference Point Group Mobility model, discussed in the following paper:
 
@@ -717,8 +669,13 @@ def reference_point_group(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=
     VELOCITY_DISTR = lambda FD: U(MIN_V, MAX_V, FD)
 
     MAX_X, MAX_Y = dimensions
-    x = U(0, MAX_X, NODES)
-    y = U(0, MAX_Y, NODES)
+    if positions is None:
+        x = U(0, MAX_X, NODES)
+        y = U(0, MAX_Y, NODES)
+    else:
+        pos = np.array(positions)
+        x = pos[:, 0]
+        y = pos[:, 1]
     velocity = 1.
     theta = U(0, 2*np.pi, NODES)
     costheta = np.cos(theta)
@@ -787,7 +744,7 @@ def reference_point_group(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=
 
         yield np.dstack((x,y))[0]
 
-def tvc(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=[0.5,0.], epoch=[100,100]):
+def tvc(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=[0.5,0.], epoch=[100,100], positions=None):
     '''
     Time-variant Community Mobility Model, discussed in the paper
 
@@ -877,8 +834,14 @@ def tvc(nr_nodes, dimensions, velocity=(0.1, 1.), aggregation=[0.5,0.], epoch=[1
             y[b] -= MAX_Y
 
     MAX_X, MAX_Y = dimensions
-    x = U(0, MAX_X, NODES)
-    y = U(0, MAX_Y, NODES)
+
+    if positions is None:
+        x = U(0, MAX_X, NODES)
+        y = U(0, MAX_Y, NODES)
+    else:
+        pos = np.array(positions)
+        x = pos[:, 0]
+        y = pos[:, 1]
     velocity = 1.
     theta = U(0, 2*np.pi, NODES)
     costheta = np.cos(theta)
