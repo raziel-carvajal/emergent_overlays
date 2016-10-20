@@ -221,7 +221,7 @@ plot.duplicated.messages <- function(df, densities) {
 # Used to define the arguments of the script
 #
 get_arguments <- function() {
-  parser <- ArgumentParser(description='Process some integers')
+  parser <- ArgumentParser(description='Plots the aggregated results of the experiments')
   parser$add_argument('path', metavar='path', type="character",
                       help='Path to result files')
   parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
