@@ -48,7 +48,7 @@ r=$?
 if [ $r -ne 0 ]; then
 	exit 1
 fi
-exit 1
+
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
 PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
@@ -64,7 +64,7 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	# Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME}
+	Rscript extract-charts.R  --algorithm ${PROTOCOL} --density ${DENSITY} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME}
 	results=`Rscript extract-charts.R ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/${CONF_NAME}-$i ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
