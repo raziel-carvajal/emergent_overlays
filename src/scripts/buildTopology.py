@@ -180,7 +180,8 @@ def get_still_connected_callback(tx, idx_source):
         if not b:
             x = [len(c) for c in nx.connected_components(G) if idx_source in c]
             logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
-        return b
+        return True
+        # return b
     return l
 
 if __name__ == '__main__':
