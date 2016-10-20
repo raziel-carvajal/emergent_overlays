@@ -40,7 +40,6 @@ network Small
         }
         hostR0: CenterHost {
             @display("p=116.928,217.72801;r=75");
-            //isCenter=true;
         }
         hostR1: CenterHost {
             @display("p=179.42401,217.72801;r=75");
