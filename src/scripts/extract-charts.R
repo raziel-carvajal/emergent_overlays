@@ -1,4 +1,5 @@
 require('omnetpp')
+library(argparse)
 #library(data.table)
 
 
@@ -32,7 +33,7 @@ getPowerConsumption <- function(ds, algo, timeLine) {
 	for (i in 1:nRow) {
 		tmp <- c(algo)
 		for (j in 1:length( ds )) {
-                        v <- ds[[j]][i]
+      v <- ds[[j]][i]
 			tmp <- c(tmp, v)
 		}
 		df[i,] <- tmp
@@ -43,10 +44,10 @@ getPowerConsumption <- function(ds, algo, timeLine) {
 getNumberOfRelays <- function(msgDs, algo) {
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-  
+
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-  
+
   nRow <- 1
   nCol <- 1 + length( id_msgs )
   headers <- paste("B", id_msgs, sep="")
@@ -68,7 +69,7 @@ getDuplicatedMsgs <- function(msgDs, broDs, algo){
       id==v$y
     })
   })
-  
+
   nRow <- length(tmp[[1]])
   nCol <- 1 + length( id_msgs )
   headers <- paste("B", id_msgs, sep="")
@@ -96,7 +97,7 @@ getBroadcastingTime <- function(msgDs, broDs, algo) {
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-  
+
   l.recp <- lapply(id_msgs, function (id) {
     lapply(list_of_received, function(r) {
       max(r[r$y == id,]$x)
@@ -136,7 +137,7 @@ countMsgsPerRadioMode <- function(radioModeDs, msgsDs, algo){
   headers <- c(headers, "Algorithm")
   nRow <- length(keys)
   nCol <- length(headers)
-  r <- as.data.frame(matrix(0, nrow=nRow, ncol=nCol)) 
+  r <- as.data.frame(matrix(0, nrow=nRow, ncol=nCol))
   names(r) <- headers
   for (i in 1:length(keys)) {
     a <- subset(radioModeDs, resultkey == keys[i])
@@ -228,11 +229,18 @@ average.values <- function(pl, broadcast.info, max) {
 }
 
 
-
 exportDataset <- function(ds, dst){
 	if (!file.exists(dst)) write.table(ds, file = dst, col.names = T, row.names = F, append = F, sep=",")
 	else write.table(ds, file = dst, col.names = F, row.names = F, append = T, sep=",")
 }
+
+
+build.filename <- function(path, filename, density) {
+  filename <- paste(path, filename, sep="/")
+  paste(filename, density, sep="-")
+}
+
+
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
 # 			- we can aggregate this in many ways
 #					1. chart of broadcast session and coverage (one curve per protocol). this one is only useful to compare protocols using the same topology
@@ -241,81 +249,87 @@ exportDataset <- function(ds, dst){
 # TODO: chart of power consumption in many experiments (depends on the previous one)
 
 
-args <- commandArgs(trailingOnly=TRUE)
-print(args)
-if (length(args) == 5) {
-	dsSrc <- args[1]
-	dstDir <- args[2]
-	sim.time <- strtoi(args[3])
-	algoName <- args[4]
-	density <- args[5]
-	
-	print(paste("Simulation time", sim.time, "seconds"))
+#
+# Used to define the arguments of the script
+#
+get.arguments <- function() {
+  parser <- ArgumentParser(description='Process omnetpp result files to extract the measurements of our experiment')
+  parser$add_argument('file', metavar='file', type="character",
+                      help='Full path to the result file (without extension)')
+  parser$add_argument('outputPath', metavar='outputPath', type="character",
+                      help='Full path to a directory where the output wiil be saved')
+  parser$add_argument('simTime', metavar='simTime', type="integer",
+                      help='Simulation time')
+  parser$add_argument('configuration', metavar='configuration', type="character",
+                      help='Name of the configuration')
+  parser$add_argument('-a','--algorithm', dest='algorithm', type="character",
+                      help='Algorithm used')
+  parser$add_argument('-d', '--density', metavar='density', type="integer",
+                      help='Density of the topology used')
+  parser$add_argument('-rm', '--radio-mode', dest='computeRadioMode', action="store_true",
+                      help='Computing the time spent in each radio mode is a debug only option')
 
-	#TODO find a way to adapt this parameter in an automatic way
-	pl.step <- 3
-
-	radioMode <- load.datafile(dsSrc, "name(radioMode:vector)" )
-        rcvM <- subset(radioMode$vectordata, y == 2)
-        trsM <- subset(radioMode$vectordata, y == 3)
-        msgSentDs <- load.datafile(dsSrc, "name(msg_sent:vector)" )
-        msgRcvDs <- load.datafile(dsSrc, "name(broadcast_msg_received:vector)" )
-        #print("MSGS RECEIVED")
-        
-        r <- countMsgsPerRadioMode(rcvM, msgRcvDs, algoName)
-	dst <- paste(dstDir, "/RadioModeReception", sep="")
-	dst <- paste(dst, density, sep="-")
-	exportDataset(r, dst)
-        
-        
-        #print(r)
-
-        #print("SENT MSGS")
-        #print(msgSentDs$vectordata)
-        #print("Trs Mode")
-        #print(trsM)
-        #stop()
-	print(paste("Loading data file:", dsSrc))
-	powerLevelDs <- load.datafile(dsSrc, "name(residualCapacity:vector)" )
-        #print(powerLevelDs)
-        #stop()
-        msgSentDs <- load.datafile(dsSrc, "name(msg_sent:vector)" )
-        print('SENT MSGS')
-        #print(msgSentDs$vectordata)
-        msgRcvDs <- load.datafile(dsSrc, "name(broadcast_msg_received:vector)" )
-        print('RCV MSGS')
-        #print(msgRcvDs$vectordata)
-	print("Computing distributions of each metric...")
-	pl.local <- powerlevels3( powerLevelDs, max= sim.time, step=pl.step)
-	pcoDist <- getPowerConsumption(pl.local, algoName, seq(pl.step, sim.time, by=pl.step))
-	relDist <- getNumberOfRelays(msgSentDs, algoName)
-        dupDist <- getDuplicatedMsgs(msgSentDs, msgRcvDs, algoName)
-	broDist <- getBroadcastingTime(msgSentDs, msgRcvDs, algoName)
-
-	#print("Exporting data...")
-	dst <- paste(dstDir, "/batteryConsumption", sep="")
-	dst <- paste(dst, density, sep="-")
-	exportDataset(pcoDist, dst)
-	dst <- paste(dstDir, "/numberOfRelays", sep="")
-	dst <- paste(dst, density, sep="-")	
-	exportDataset(relDist, dst)
-	dst <- paste(dstDir, "/duplicatedMsgs", sep="")
-	dst <- paste(dst, density, sep="-")
-	exportDataset(dupDist, dst)
-	dst <- paste(dstDir, "/broadcastSessionTime", sep="")
-	dst <- paste(dst, density, sep="-")
-	exportDataset(broDist, dst)
-	
-	print("END")
-
-	#print("Plotting :-P")
-	#plot.charts.for.single.experiment(pl.local, bs, max = sim.time, step=pl.step)
-	#print("Printing average values")
-	#averages <- average.values(pl.local, bs, max=sim.time)
-	#print(noquote(paste("average_values",
-	#				averages$coverage,
-	#				averages$broadcasting.time,
-	#				averages$power_consumption,
-	#				averages$duplicated_messages,
-	#				averages$retransmitted_messages)))
+  # parser$print_help()
+  parser$parse_args()
 }
+
+
+args = get.arguments()
+
+print(paste("Simulation time", args$simTime, "seconds"))
+
+#TODO find a way to adapt this parameter in an automatic way
+pl.step <- 3
+
+print("Reading vectors with messages sent and received")
+msgSentDs <- load.datafile(args$file, "name(msg_sent:vector)" )
+msgRcvDs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+
+if (args$computeRadioMode) {
+  print("Ohhh ... this is a debug session. Ok, reading radio modes")
+  radioMode <- load.datafile(args$file, "name(radioMode:vector)" )
+  rcvM <- subset(radioMode$vectordata, y == 2)
+  trsM <- subset(radioMode$vectordata, y == 3)
+  r <- countMsgsPerRadioMode(rcvM, msgRcvDs, args$algorithm)
+  filename <- build.filename(args$outputPath, "RadioModeReception", args$density)
+  exportDataset(r, filename)
+}
+
+print(paste("Loading power consumption data file:", args$file))
+powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)" )
+#print(powerLevelDs)
+#stop()
+
+#print(msgRcvDs$vectordata)
+print("Computing distributions of each metric...")
+pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
+pcoDist <- getPowerConsumption(pl.local, args$algorithm, seq(pl.step, args$simTime, by=pl.step))
+relDist <- getNumberOfRelays(msgSentDs, args$algorithm)
+dupDist <- getDuplicatedMsgs(msgSentDs, msgRcvDs, args$algorithm)
+broDist <- getBroadcastingTime(msgSentDs, msgRcvDs, args$algorithm)
+
+print("Exporting data...")
+filename <- build.filename(args$outputPath, "batteryConsumption", args$density)
+exportDataset(pcoDist, filename)
+
+filename <- build.filename(args$outputPath, "numberOfRelays", args$density)
+exportDataset(relDist, filename)
+
+filename <- build.filename(args$outputPath, "duplicatedMsgs", args$density)
+exportDataset(dupDist, filename)
+
+filename <- build.filename(args$outputPath, "broadcastSessionTime", args$density)
+exportDataset(broDist, filename)
+
+print("END")
+
+#print("Plotting :-P")
+#plot.charts.for.single.experiment(pl.local, bs, max = args$sim.time, step=pl.step)
+#print("Printing average values")
+#averages <- average.values(pl.local, bs, max=args$sim.time)
+#print(noquote(paste("average_values",
+#				averages$coverage,
+#				averages$broadcasting.time,
+#				averages$power_consumption,
+#				averages$duplicated_messages,
+#				averages$retransmitted_messages)))
