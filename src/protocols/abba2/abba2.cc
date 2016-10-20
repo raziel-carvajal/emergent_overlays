@@ -104,12 +104,13 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
 
 void Abba2::processStart() {
     timeOut = par("timeOut").doubleValue();
+    cerr << getLogHeader() + "Timeout: " + to_string(timeOut) << endl;
     BroadcastingAppBase::processStart();
 }
 
 double
 //Inversely proportional to the angle covered by all receptions
-Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360); }
+Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360.0); }
 
 void
 Abba2::on_payload_received(const Broadcast* m) {
