@@ -23,6 +23,7 @@ import random
 import math
 import networkx as nx
 import argparse
+import logging
 import genmobility
 
 NED_HEADER = ''
@@ -50,6 +51,8 @@ density = {}
 density['sparse'] = 2
 density['medium'] = 5
 density['dense'] = 10
+
+logger = logging.getLogger("mobility-generator")
 
 
 def get_arguments():
@@ -147,13 +150,12 @@ def fillSurfaceBase(r, n, density, w, h):
     return result
 
 
-def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
+def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, idx_source):
     global NED_HEADER, NED_HEADER1
     fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, index)
 
     f = open(fileName + '.ned', 'w')
 
-    idx_source = random.randint(0, len(pos) - 1)
     try:
         f.write(NED_HEADER)
         f.write('network ' + fileName + '\n{\n')
@@ -171,8 +173,15 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx):
         f.close()
 
 
-def get_still_connected_callback(tx):
-    return lambda pos: nx.is_connected(build_graph(pos, tx))
+def get_still_connected_callback(tx, idx_source):
+    def l(p):
+        G = build_graph(p, tx)
+        b = nx.is_connected(G)
+        if not b:
+            x = [len(c) for c in nx.connected_components(G) if idx_source in c]
+            logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
+        return b
+    return l
 
 if __name__ == '__main__':
     # trRan = initConf[0]['val']
@@ -188,15 +197,21 @@ if __name__ == '__main__':
     nr_nodes = 200
     mobility = args.mobility
 
-    for d in range(min_density, max_density + 5, 5):
+    step = 5
+    threshold = 10
+
+    for d in range(min_density, max_density + step, step):
 
         print "Building topology with density %d and transmission range %d" % (d, trRan)
         topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
-        while not is_valid_network(topology, trRan, d, 10):
+        while not is_valid_network(topology, trRan, d, threshold):
             topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
 
+        print "Selecting source of broadcasting"
+        idx_source = random.randint(0, len(topology) - 1)
+
         print "Writing NED file"
-        createNedFile(d, topology, index, int(w), int(w), trRan)
+        createNedFile(d, topology, index, int(w), int(w), trRan, idx_source)
         if mobility:
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
@@ -205,7 +220,7 @@ if __name__ == '__main__':
                                                  map_x=int(w), map_y=int(h),
                                                  sim_time=100, positions=topology,
                                                  outputFile=filename,
-                                                 test=get_still_connected_callback(trRan))
+                                                 test=get_still_connected_callback(trRan, idx_source))
                 if b:
                     break
 

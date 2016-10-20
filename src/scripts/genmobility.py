@@ -19,7 +19,7 @@ import argparse
 import models.mobility as mb
 
 logging.basicConfig(format='%(asctime)-15s - %(message)s', level=logging.INFO)
-logger = logging.getLogger("simulation")
+logger = logging.getLogger("mobility-generator")
 
 
 def getArguments():
