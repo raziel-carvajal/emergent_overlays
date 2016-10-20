@@ -48,7 +48,7 @@ r=$?
 if [ $r -ne 0 ]; then
 	exit 1
 fi
-
+exit 1
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
 PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
@@ -56,6 +56,8 @@ PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
+
+#cat SmallTestAbba.ini |grep typename| tail -1| awk -F "=" '{print $2}'
 
 echo "Checking ${count} repetitions"
 
