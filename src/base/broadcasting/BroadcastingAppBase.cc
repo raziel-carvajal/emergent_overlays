@@ -91,7 +91,7 @@ BroadcastingAppBase::initialize(int stage)
             {
               double d = par("wakeUpTime").doubleValue();
               d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
-              d += 15; // some extra seconds
+              d += 5; // some extra seconds
               delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
               if (is_source) {
             	   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
