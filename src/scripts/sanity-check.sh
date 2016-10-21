@@ -46,11 +46,13 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    ./doTopologies.sh $Tx 5 5 $tPath
+    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility 1
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
     fi
+    mv *.ned $tPath
+    mv *.mobility $tPath
     printf "Ok\n"
 else
     printf "Topologies were already created, no need to create new ones.\n"
@@ -75,23 +77,25 @@ cd $tPath
 topologiesFiles=`ls *.ned`
 cd ${here}
 for t in $topologiesFiles; do
-    srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
-    index=$(( ${#t} - 4 ))
-    tName=${t:0:$index}
-    for p in $protocols; do
-	pp="${pPath}$p"
-	if [ -d $pp ]; then
-        	s=$(( ${#p} - 1))
-        	p=${p:0:$s}
-		tId=$tName$p
-		cat $iniCommon >$tId
-		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
-		cat $pPath$p'/ini' >>$tId
-		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
-		mv $tId $tId'.ini'
-		mv $tId'.ini' $cPath
-	fi
-    done
+  srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
+  index=$(( ${#t} - 4 ))
+  tName=${t:0:$index}
+  mobFile="${t:0:$((index-3))}.mobility"
+  for p in $protocols; do
+  	pp="${pPath}$p"
+  	if [ -d $pp ]; then
+          	s=$(( ${#p} - 1))
+          	p=${p:0:$s}
+  		tId=$tName$p
+  		cat $iniCommon >$tId
+  		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
+  		cat $pPath$p'/ini' >>$tId
+      echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
+  		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+  		mv $tId $tId'.ini'
+  		mv $tId'.ini' $cPath
+  	fi
+  done
 done
 # TODO figure out why there is a file *-e
 rm -fr n-*

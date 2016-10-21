@@ -10,26 +10,26 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 **Note: protocols with the check mark &#10004; are implemented while those with &#10008; are not**
 
 # Underlying topology algorithms with a fixed transmission range
-| Title  | Topology | Name | Rank | Year |
-| :--- | :--- | :--- | :--- | :--- |
+| Title  | Topology | Name | Rank | Year | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | Forward-node-set-based broadcast in clustered mobile ad hoc networks [FNSB](papers/others/wcmc2003.pdf) &#10008; | Cluster | [Wireless Communications and Mobile Computing](http://www.scimagojr.com/journalsearch.php?q=17543&tip=sid&clean=0)**(journal)**| A | 2003 |
 | Connectivity Based k-hop Clustering in Wireless Networks [K-HOP](papers/others/10.1.1.104.5681.pdf) &#10008;| Cluster |  [Proceedings of the Annual Hawaii International Conference on System Sciences](http://www.scimagojr.com/journalsearch.php?q=145755&tip=sid&clean=0)**(conf)** | A | 2003 |
 | Extended Multipoint Relays to Determine Connected Dominating Sets in MANETs [CDS-MPR](papers/implemented/cds.pdf) &#10008; | MPR, CDS | [IEEE Transactions on Computers](http://www.scimagojr.com/journalsearch.php?q=25033&tip=sid&clean=0)**(journal)**| A* | 2006 |
 |Dominating sets and neighbor elimination-based broadcasting algorithms in wireless networks [CDS](papers/others/DominartingSets02.pdf) &#10008; | CDS | [IEEE Transactions on Parallel and Distributed Systems](http://www.scimagojr.com/journalsearch.php?q=26098&tip=sid&clean=0)**(journal)** | A* | 2002 |
 | BODYF – A Parameterless Broadcasting Protocol Over Dynamic Forest [BODYF](papers/others/10.1.1.371.7527.pdf) &#10008; | Tree | [IEEE International Conference on High Performance Computing and Simulation (HPCS)](http://lipn.univ-paris13.fr/~bennani/CSRank.html)**(conf)**| B | 2008 |
 | On Demand Routing in Large Ad Hoc Wireless Networks with Passive Clustering [AODV/PC](papers/others/kwon-wcnc00.pdf) &#10008;| Cluster | [IEEE Wireless Communications and Networking Conference, WCNC](http://www.scimagojr.com/journalsearch.php?q=145653&tip=sid&clean=0)**(conf)** | B | 2000 |
-| On Calculating Power-Aware Connected Dominating Sets for Efficient Routing in Ad Hoc Wireless Networks [CDS](papers/others/jcn.pdf) &#10004; | CDS |[JOURNAL OF COMMUNICATIONS AND NETWORKS](http://www.scimagojr.com/journalsearch.php?q=4800154012&tip=sid&clean=0) **(journal)**| C | 2000 |
+| On Calculating Power-Aware Connected Dominating Sets for Efficient Routing in Ad Hoc Wireless Networks [CDS](papers/others/jcn.pdf)&#10004; | CDS |[JOURNAL OF COMMUNICATIONS AND NETWORKS](http://www.scimagojr.com/journalsearch.php?q=4800154012&tip=sid&clean=0) **(journal)**| C | 2000 | A CDS is a subset of peers that is going to form a backbone in the whole network, just peers in the backbone will  perform message retransmissions. To label peers belonging to the backbone, firstly, peers exchange periodically the list of one-hop and two-hop neighbors. Secondly, a one-hop neighbor will belong to the backbone if there is a pair of its two-hop neighbors that is not connected. Finally, the size of the backbone is minimized while the number of covered peers maximize. | 
 | Information dissemination in VANETs based upon a tree topology [DAGRS/BODYF](papers/others/91e59974989554f70cd9cf64d8ac7a1ca9dd.pdf) &#10008; | Tree | [Journal of Ad Hoc Networks](http://www.scimagojr.com/journalsearch.php?q=26799&tip=sid&clean=0)**(journal)** | ? | 2012 |
 
 
 
 # Non underlying topology algorithms with a fixed transmission range
-| Title | Category | Name | Rank | Year |
-| :--- | :--- | :--- | :--- | :--- |
+| Title | Category | Name | Rank | Year | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 | Optimized broadcast protocol for sensor networks ([durresi](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1453502&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1453502)) &#10008; | - | IEEE Transactions on Computers | A* | 2005 |
 | A broadcasting method considering battery lifetime and distance between nodes in MANET [BMBD](papers/others/) &#10008; | ? | International Conference on Distributed Computing Systems Workshops **(workshop)** | A | 2009 |
 | Border node retransmission based probabilistic broadcast protocols in ad-hoc networks [cartigny](papers/others/cartigny.pdf) &#10008; | ? | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)** | A | 2003 |
-| Multipoint relaying for flooding broadcast messages in mobile wireless networks [MPR](papers/implemented/mpr.pdf) &#10004; | Neighbor-based | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)**| A  | 2002  |
+| Multipoint relaying for flooding broadcast messages in mobile wireless networks [MPR](papers/implemented/mpr.pdf) &#10004; | Neighbor-based | [Hawaii International Conference on System Sciences](http://portal.core.edu.au/conf-ranks/575/) **(conf)**| A  | 2002  | A MPR is a subset of relays among those peers in the whole network, just peers in this set will  perform message retransmissions. To label a relay, firstly, peers exchange periodically the list of one-hop and two-hop neighbors. Secondly, every peer keep the minimum number of one-hop neighbors that cover every two-hop neighbor (this is done by performing simple operations with sets). |
 | Adaptive approaches to relieving broadcast storms in a wireless multihop mobile ad hoc network [AdaptiveCounter](paper/others/AdaptiveCounter.ps) &#10008; | ? | [IEEE Transactions on Computers](http://portal.core.edu.au/jnl-ranks/360/) **(journal)** | A* | 2002 |
 | The broadcast storm problem in a mobile ad hoc network [simple flooding](papers/others/flooding.pdf) &#10008;| ? | MobiCom **(conf)** | A* | 1999 |
 | Performance improvements for network-wide broadcast with instantaneous network information [banerjee](papers/others/banerjee.pdf) &#10008; | ? | Network and Computer Applications **(journal)**| A | 2012 |
@@ -40,7 +40,7 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 | An adaptive approach to group communications in multi hop ad hoc networks [Hyper-Flooding](papers/others/hyper-flooding.pdf) &#10008; | ? | International Symposium on Computers and Communications **(conf)**| B | 2002 |
 | Resource aware information dissemination in ad hoc networks ([paper](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1266255&url=http%3A%2F%2Fieeexplore.ieee.org%2Fiel5%2F8945%2F28322%2F01266255.pdf%3Farnumber%3D1266255)) &#10008; | Neightbord-based | IEEE International Conference on Networks | B | 2003 |
 | Speed adaptive probabilistic flooding in cooperative emergency warning [SAPF](papers/others/SAPF.pdf) &#10008; | ? | International Conference on Wireless Internet **(conf)** | C | 2008 |
-| Area-based beaconless reliable broadcasting in sensor networks [ABBA](papers/implemented/abba.pdf) &#10004;| Context-aware/Area-based | [International Journal of Sensor Networks](http://www.scimagojr.com/journalsearch.php?q=19900192159&tip=sid&clean=0) **(journal)** | C | 2006  |
+| Area-based beaconless reliable broadcasting in sensor networks [ABBA](papers/implemented/abba.pdf) &#10004;| Context-aware/Area-based | [International Journal of Sensor Networks](http://www.scimagojr.com/journalsearch.php?q=19900192159&tip=sid&clean=0) **(journal)** | C | 2006 | Nodes that run ABBA set a timer to retransmit a message just when this timer expires. This algorithm concatenate the GPS coordinates of peers in broadcast messages. Considering that the transmission area of one node is defined by a circle in the 2D plane, timers are inversely proportional to the perimeter's length (of that circle) that is covered by message receptions from that node's neighbors. In other words, the bigger the angle defined by the covered perimeter, the smaller the timer. |
 | NPPB: A broadcast scheme in dense VANETs [NPPB](papers/others/NPPB.pdf) &#10008; | ? | [Information Technology Journal](http://portal.core.edu.au/jnl-ranks/573/) **(journal)** | C | 2010 |
 | An energy-aware broadcast scheme for directed diffusion in wireless sensor network [CAO](papers/others/CAO.pdf) &#10008; | ? | [Journal of Communication and Computer](http://portal.core.edu.au/jnl-ranks/845/) **(journal)** | C | 2007 |
 | Analysis and evaluation of distance-to-mean broadcast method for VANET [MEAN2MEAN](papers/implemented/dist2mean.pdf) &#10004; | Context-aware/Area-based  | Journal of King Saud University - Computer and Information Sciences/INTERNATIONAL JOURNAL OF COMMUNICATION SYSTEMS **(journal)**| ?  | 2013/2015 |
@@ -55,6 +55,6 @@ Each algorithm below can be located under one leaf in the taxonomy; we will give
 
 
 # Underlying topology algorithms with a variable transmission range
-| Title  | Name | Rank | Year |
-| :--- | :--- | :--- | :--- |
-| Minimum-Energy Broadcast in All-Wireless Networks: NP-Completeness and Distribution Issues [EWMA](papers/implemented/ewma.pdf) &#10004; | [International Conference on Mobile Computing and Networking](http://portal.core.edu.au/conf-ranks/27/) **(conf)** | A*  | 2002 |
+| Title  | Name | Rank | Year | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| Minimum-Energy Broadcast in All-Wireless Networks: NP-Completeness and Distribution Issues [EWMA](papers/implemented/ewma.pdf) &#10004; | [International Conference on Mobile Computing and Networking](http://portal.core.edu.au/conf-ranks/27/) **(conf)** | A*  | 2002 | The EWMA protocol uses an spanning tree as input, then, the transmission range of nodes changes in order to reduce the nodes degree with the guarantee of covering the maximum number of neighbors. |

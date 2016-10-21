@@ -29,24 +29,52 @@ if [ ! -d "../../results" ]; then
     mkdir ../../results
 fi
 
+rm -f ../../results/broadcastSession*
+rm -f ../../results/duplicatedMsgs*
+rm -f ../../results/batteryConsumption*
+rm -f ../../results/networkCoverage*
+rm -f ../../results/*.pdf
+rm -f ../../results/summary.csv
+
 echo "" > ../../results/summary.csv
+
+echo "Simulating"
 
 for c in ${path_to_configs}*.ini ; do
 	filename=$(basename "$c")
 	config_name="${filename%.*}"
 	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
 	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
-	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`	
-	if [ "$protocol" == "abba2" ] || [ "$protocol" == "dist2mean2" ] || [ "$protocol" == "ewma2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds"  ] ; then
-		echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
-		sem -j -1 --id "infocom2017" --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
-		#exit 1
+	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
+	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
+    		if [ "${density}" -lt "18" ]; then
+    			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
+			    sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+    		fi
+    #exit 1
 	fi
-	
+
 done
 
 
-sem --wait --id "infocom2017" --no-notice
+sem --wait --no-notice
 
 
-Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
+# Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
+
+echo "Creating aggregated results"
+
+cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
+cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgsDistribution
+cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
+cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
+
+# Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
+
+echo "Plotting aggregated results"
+
+Rscript pretty-plotting.R \
+      -pc batteryConsumptionDistribution \
+      -dm duplicatedMsgsDistribution \
+      -bs broadcastSession \
+      ../../results/

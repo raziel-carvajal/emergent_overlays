@@ -23,8 +23,6 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
-#include <chrono>
-#include <random>
 
 using namespace std;
 using inet::broadcasting::Broadcast;
@@ -37,14 +35,13 @@ void
 Flooding2::on_payload_received(const Broadcast* m) {
 
     string key = string(m->getId());
-
     emitBroadcastMsgReceived(key);
-
-    bool firstTime = !is_source && payloads[key].empty();
-
+    if (string(m->getSender()) == myself) return;
+    cerr << getLogHeader() << "reception of message " << key << " by sender " << m->getSender() << endl;
+    bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {
-        payloads[key] = m->getPayload();
-        delayed_broadcast(key, uniform(0.1, 0.5));
+        payloads[key] = key;
+        broadcast(key, new broadcasting::Broadcast("payload"));
     }
 }
 
@@ -52,6 +49,7 @@ Flooding2::on_payload_received(const Broadcast* m) {
 void
 Flooding2::send_message(string& key)
 {
+    cerr << getLogHeader() << "doing broadcast of message " << key << endl;
     Broadcast* m = new Broadcast("payload");
     m->setPayload(payloads[key].c_str());
     m->setId(key.c_str());
@@ -67,18 +65,13 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     string key;
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
-        payloads[key] = " this is the payload, initially sent from " + myself;
-        emitBroadcastMsgReceived(key);
+        payloads[key] = key;
+        broadcast(key, new broadcasting::Broadcast("payload"));
     }
-    else {
-        char* s = (char*)user_data;
-        key = string(s);
-        delete s;
-    }
-    //cout << "Broadcasting in " << myself << " at " << simTime() << endl;
-    send_message(key);
+//    else {
+//        char* s = (char*)user_data;
+//        key = string(s);
+//    }
 }
-
-
 
 } //namespace

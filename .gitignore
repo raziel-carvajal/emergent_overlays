@@ -27,6 +27,7 @@
 *.exe
 *.out
 *.app
+*.pyc
 
 # Vim files
 *.swp
@@ -37,6 +38,7 @@
 # Non useful config files
 src/scripts/omnet.config
 tools/omnetpp-4.6/
+tools/omnetpp-5.0/
 tools/inet/
 tools/networkx-1.11/
 src/protocols/*/*_m.cc
@@ -53,6 +55,7 @@ experiments/networks/builtTopologies/*.ned
 
 # Non useful experimental results
 experiments/configs/builtConfigs/results/
+experiments/configs/results/
 
 # Paper
 text/main.aux
@@ -64,3 +67,6 @@ text/main.synctex.gz
 
 # partial results
 results/n*.pdf
+
+#CVS
+results/summary.csv

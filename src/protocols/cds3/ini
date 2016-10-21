@@ -1,0 +1,5 @@
+description = "Broadcasting messages using CDS"
+
+*.host*.udpApp[0].typename = "Cds_3"
+*.host*.udpApp[0].nr_hello_messages = 10
+*.host*.udpApp[0].helloTime = uniform(0.1s, 0.3s)

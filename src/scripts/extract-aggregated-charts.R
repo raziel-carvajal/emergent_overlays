@@ -13,7 +13,7 @@ if (length(args) == 2) {
 	print(protocols)
 
 	# separate base on densities
-	densities<- lapply( unique(A$V4), function(d) A[ A$V4 == d ,])
+	densities<- A # lapply( unique(A$V4), function(d) A[ A$V4 == d ,])
 
 	# matrix for layout
 	m_layout <- matrix(1:length(unique(A$V4)), 1, length(unique(A$V4)), byrow=TRUE)
