@@ -1,7 +1,10 @@
-\section{Evaluated Dissemination Algorithms}\label{sec:algorithms}
+%!TEX root = main.tex
+
+\section{Evaluated Dissemination Algorithms}
+\label{sec:algorithms}
 
 In this paper we focus on dissemination algorithms for wireless ad-hoc networks.
-To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al. \cite{Ruiz2015}.
+To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al.~\cite{Ruiz2015}.
 In that comprehensive survey, the authors present a large subset of dissemination algorithms and propose a taxonomy of features to classify them.
 In addition, the survey makes a summary of the \textit{standard} terminology used in the literature.
 The terms of interest for this paper follow: 
@@ -111,7 +114,7 @@ Initially a node $v$ is marked as member of CDS if there exists two unconnected 
 The above rules can be modified to take into account the battery level of each node.
 In this way, the method can ensure that nodes will last longer.
 
-\textbf{Embedded Wireless Multicast Advantage (EWMA)} \cite{Cagalj2007} using \cite{Gallager1983} to compute the minimum-weighted spanning tree.
+\textbf{Embedded Wireless Multicast Advantage (EWMA)}~\cite{Cagalj2007} using~\cite{Gallager1983} to compute the minimum-weighted spanning tree.
 
 \subsection{Without underlying topology}
 
@@ -134,7 +137,7 @@ M = (\bar{x},\bar{y}) = (\dfrac{1}{n}\sum_{i=1}^{n}x_i, \dfrac{1}{n}\sum_{i=1}^{
 \end{equation}
 
 and $N$ is the number of neighbors of $v$ and $(v_x, v_y)$ is its location.
-The value of function~\ref{eq:dist2mean_threshold}, which have been taken from \cite{Slavik2011}, decreases as $N$ decreases in order to ensure connectivity.
+The value of function~\ref{eq:dist2mean_threshold}, which have been taken from~\cite{Slavik2011}, decreases as $N$ decreases in order to ensure connectivity.
 
 
 The \textbf{area based beaconless (ABB)} algorithm~\cite{Ovalle-Martinez2006} uses a different approach to estimate whether a node $v$ must retransmit a message $m_i$.

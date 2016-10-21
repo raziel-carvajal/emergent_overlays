@@ -1,1 +1,28 @@
+%!TEX root = main.tex
+
 \section{Introduction}
+
+\er{This is a proposal for an introduction structure, to be discussed}
+
+\begin{itemize}
+	\item Definition and importance of MANETs
+	\item Operating MANETs rely on a set of fundamental operations, among which broadcast is of great importance \er{ideally we can link to work that relies on broadcast to form routing paths}
+	\item Challenges in MANET networks: limited energy, mobility, wireless communication and collisions, limited knowledge of the topology, etc.
+	\item Broadcast received considerable attention in order to maximize coverage, minimize cost, support mobility patterns, and minimize the consumption of energy
+	\item Protocols in the literature seek to control the flooding of the broadcast message by selecting which node should transmit wirelessly, and when:
+	\begin{itemize}
+		\item Some protocols control the diffusion protocol in space, determining either in advance (topology-based) or during the dissemination, which node is eligible to forward the message when it receives it
+		\item Other protocols control the diffusion protocol in time, determining when a received message should be forwarded and under which conditions, avoiding unnecessary collisions and retransmissions
+	\end{itemize}
+	\item Protocol efficiency depends on their ability to use knowledge about the network topology, node location, and 
+	\item But the efficiency of protocols is also largely influenced by external factors, and primarily by the density of the network, and the mobility rate of its nodes. \er{not sure we should mention other aspects, such as the loosiness of channels, the presence of obstacles, etc.?}
+	\item The relative efficiency of each of the broadcast protocols against the simple and inefficient flooding algorithm, where no control is performed on the flooding operation, has been studied but the relative performance of advanced protocols between them is largely unstudied
+	\item We propose to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions.
+	\item Our study considers three \er{more?} protocols, in addition to the baseline flooding algorithm, that are representative of their class:
+	\begin{itemize}
+		\item ABBA2 controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the message will be received from its neighbors from other sources
+		\item CDS builds and maintain an overlay independently from dissemination, allowing to control the latter in space by selecting which node should or should not propagate incoming messages
+		\item MPR \er{fill me}
+	\end{itemize}
+	\item Our study allows answering the question of what is the most appropriate protocol for a certain deployment scenario, and concludes that there is no one-size-fits-all in MANET broadcasting \er{provide summary of main findings}
+\end{itemize}
