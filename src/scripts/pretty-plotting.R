@@ -120,19 +120,20 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   print(p)
 }
 
-plot.power.consumption <- function(df, algos, densities, pal) {
-	data.list <- lapply(densities, function(density) {
 
-		dd <- df[grepl(paste("d",density, "tr",sep="_"), sapply(df, function(e) colnames(e) ))]
+plot.data.using.boxes <- function(data, densities, ylabel, caption) {
+  data.list <- lapply(densities, function(density) {
+
+		dd <- data[grepl(paste("d",density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
-			data <- -1*e[,1]
+			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
-					  )
+			)
 		})
 
 		do.call("rbind", dd)
@@ -144,77 +145,30 @@ plot.power.consumption <- function(df, algos, densities, pal) {
 		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
 		 facet_grid(. ~ density) +
 		 theme(legend.position="bottom") +
-		 ylab("Power Consumption (J)") + xlab("Algortihm") +
-		 labs(title="Power consumption for different algorithms", fill="Algorithms") +
+		 ylab(ylabel) + xlab("Algortihm") +
+		 labs(title=caption, fill="Algorithms") +
 		 theme(plot.title=element_text(size=15, vjust=3)) +
 		 theme(plot.margin = unit(c(1,1,1,1), "cm"))
 
 	print(p)
 }
 
-plot.time.power.consumption <- function(df, algos, densities, pal) {
-	data.list <- lapply(densities, function(density) {
+plot.power.consumption <- function(df, densities) {
+  plot.data.using.boxes(df, densities,
+                        "Power Consumption (J)",
+                        "Power consumption for different algorithms")
+}
 
-		dd <- df[grepl(paste("d",density, "tr",sep="_"), sapply(df, function(e) colnames(e) ))]
-		dd <- lapply(dd, function(e) {
-			cn <- colnames(e)[1]
-			s <- unlist( strsplit(cn,'_'))
-	  	cn <- s[which(s == "p") + 1]
-			data <- e[,1]
-			data.frame( dat = data,
-						alg = rep(cn, length(data)),
-						density=rep(as.factor(paste("Density", density)), length(data))
-					  )
-		})
-
-		do.call("rbind", dd)
-	})
-
-	data <- do.call("rbind", data.list)
-
-	p <- ggplot(data) +
-		geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
-		facet_grid(. ~ density) +
-		theme(legend.position="bottom") +
-		ylab("Last Time Power Consumption was reported (S)") +
-		xlab("Algortihm") +
-		labs(title="Last time power consumption was reported (DEBUG ONLY)", fill="Algorithms") +
-		theme(plot.title=element_text(size=15, vjust=3)) +
-		theme(plot.margin = unit(c(1,1,1,1), "cm"))
-
-	print(p)
+plot.time.power.consumption <- function(df, densities) {
+  plot.data.using.boxes(df, densities,
+                        "Last Time Power Consumption was reported (S)",
+                        "Last time power consumption was reported (DEBUG ONLY)")
 }
 
 plot.duplicated.messages <- function(df, densities) {
-	data.list <- lapply(densities , function(density) {
-		dd <- df[grepl(paste("d", density, "tr", sep="_"), sapply(df, function(e) colnames(e) ))]
-		dd <- lapply(dd, function(e) {
-			cn <- colnames(e)[1]
-			s <- unlist( strsplit(cn,'_'))
-	  	cn <- s[which(s == "p") + 1]
-			data <- e[,1]
-			data.frame( dat = data,
-						alg = rep(cn, length(data)),
-						density=rep(as.factor(paste("Density", density)), length(data))
-					  )
-		})
-
-		do.call("rbind", dd)
-	})
-
-	data <- do.call("rbind", data.list)
-
-	p <- ggplot(data) +
-		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
-		 facet_grid(. ~ density) +
-		 theme(legend.position="bottom") +
-		 ylab("AVG duplicated messages") +
-		 xlab("Algortihm") +
-		 labs(title="AVG duplicated messages", fill="Algorithms") +
-		 theme(plot.title=element_text(size=15, vjust=3)) +
-		 theme(plot.margin = unit(c(1,1,1,1), "cm"))
-
-	print(p)
+  plot.data.using.boxes(df, densities,
+                        "AVG duplicated messages",
+                        "AVG duplicated messages")
 }
 
 #
@@ -271,10 +225,10 @@ if (!is.null(args$pc)) {
   r <- load.dataset.with.metadata(args$path, args$pc, metadata)
   metadata <- r$metadata
   print("Plotting power consumption")
-  plot.power.consumption(r$data, metadata$algos, metadata$densities, metadata$pal)
+  plot.power.consumption(r$data, metadata$densities)
 }
 
-if (!is.null(args$pc)) {
+if (!is.null(args$dm)) {
   print("Importing duplicated messages dataset")
   r <- load.dataset.with.metadata(args$path, args$dm, metadata)
   metadata <- r$metadata

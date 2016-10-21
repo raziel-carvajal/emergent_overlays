@@ -136,7 +136,7 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
 
 save.power.level <- function(power.level, outputPath, expeId){
   pl <- power.level[lapply(power.level, length) > 0]
-  powerLevelInfo <- data.frame( whatever = c(tail(pl, 1)) )
+  powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(tail(pl, 1)))) )
   colnames(powerLevelInfo) <- c(expeId)
   write.table(
             powerLevelInfo,
