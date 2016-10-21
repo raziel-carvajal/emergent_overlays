@@ -2,6 +2,27 @@ library(ggplot2)
 library(plyr)
 library(argparse)
 
+
+#
+# Used to define the arguments of the script
+#
+get_arguments <- function() {
+  parser <- ArgumentParser(description='Plots the aggregated results of the experiments')
+  parser$add_argument('path', metavar='path', type="character",
+                      help='Path to result files')
+  parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
+                      help='Power consumption file name')
+  parser$add_argument('-dm', '--duplicated-messages-file', dest='dm', type="character",
+                      help='Duplicated messages file name')
+  parser$add_argument('-bs', '--broadcast-session-file', dest='bs', type="character",
+                      help='Broadcast session file name')
+  parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
+                      help='useless')
+  # parser$print_help()
+  parser$parse_args()
+}
+
+
 import.data <- function(fileName) {
   data <- readLines(fileName)
   closeAllConnections()
@@ -167,27 +188,8 @@ plot.time.power.consumption <- function(df, densities) {
 
 plot.duplicated.messages <- function(df, densities) {
   plot.data.using.boxes(df, densities,
-                        "AVG duplicated messages",
-                        "AVG duplicated messages")
-}
-
-#
-# Used to define the arguments of the script
-#
-get_arguments <- function() {
-  parser <- ArgumentParser(description='Plots the aggregated results of the experiments')
-  parser$add_argument('path', metavar='path', type="character",
-                      help='Path to result files')
-  parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
-                      help='Power consumption file name')
-  parser$add_argument('-dm', '--duplicated-messages-file', dest='dm', type="character",
-                      help='Duplicated messages file name')
-  parser$add_argument('-bs', '--broadcast-session-file', dest='bs', type="character",
-                      help='Broadcast session file name')
-  parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
-                      help='useless')
-  # parser$print_help()
-  parser$parse_args()
+                        "Duplicated messages",
+                        "Distribution of duplicated messages along the experiment")
 }
 
 #

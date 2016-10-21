@@ -104,6 +104,26 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 }
 
 
+collect.duplicated.messages <- function(msgDs, broDs, simulation.time) {
+  # create a separate list for each msg_sent vector
+  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+
+  # recover list of msg id
+  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+
+  # create a separate list for each broadcast_msg_received vector
+  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
+
+  l.recp <- lapply(id_msgs, function (id) {
+						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
+						data.frame(dm = sapply(tmp.list, function(d) length(d)) )
+			}
+  )
+
+  do.call("rbind", l.recp)
+}
+
+
 export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
 
   n <- length(broadcast.info$id) # number of broadcast messages
@@ -129,6 +149,18 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   write.table(
             broSes,
             file = build.filename(outputPath, "broadcastSession", expeId),
+            row.names = F, append = F
+  )
+}
+
+
+save.duplicated.messages <- function(data, outputPath, expeId){
+  dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
+  df <- data.frame( whatever = dm)
+  colnames(df) <- c(expeId)
+  write.table(
+            df,
+            file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
             row.names = F, append = F
   )
 }
@@ -397,11 +429,15 @@ main <- function(args) {
   print("Computing maximal reception delay")
 	bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
 
+  print("Collecting information on number of duplicated messages")
+	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
+
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
-  export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
+  save.duplicated.messages(dm, args$outputPath, args$configuration)
+  # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior
 
