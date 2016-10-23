@@ -49,4 +49,4 @@
 # Underlying topology algorithms with a variable transmission range
 | Title  | Name | Rank | Year | Description | Flooding | Others |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Minimum-Energy Broadcast in All-Wireless Networks: NP-Completeness and Distribution Issues [EWMA](papers/implemented/ewma.pdf) &#10004; | [International Conference on Mobile Computing and Networking](http://portal.core.edu.au/conf-ranks/27/) **(conf)** | A*  | 2002 | The EWMA protocol uses an spanning tree as input, then, the transmission range of nodes changes in order to reduce the nodes degree with the guarantee of covering the maximum number of neighbors. | | No | MST, BIP |
+| Minimum-Energy Broadcast in All-Wireless Networks: NP-Completeness and Distribution Issues [EWMA](papers/implemented/ewma.pdf) &#10004; | [International Conference on Mobile Computing and Networking](http://portal.core.edu.au/conf-ranks/27/) **(conf)** | A*  | 2002 | The EWMA protocol uses an spanning tree as input, then, the transmission range of nodes changes in order to reduce the nodes degree with the guarantee of covering the maximum number of neighbors. | No | MST, BIP |
