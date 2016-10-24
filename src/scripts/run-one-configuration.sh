@@ -51,20 +51,19 @@ fi
 
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
-PROTOCOL=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
+PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
-
-#cat SmallTestAbba.ini |grep typename| tail -1| awk -F "=" '{print $2}'
 
 echo "Checking ${count} repetitions"
 
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
+	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} --algorithm ${PROTOCOL}
+	results=`Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 
