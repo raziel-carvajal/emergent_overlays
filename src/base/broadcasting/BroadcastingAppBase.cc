@@ -91,7 +91,7 @@ BroadcastingAppBase::initialize(int stage)
             {
               double d = par("wakeUpTime").doubleValue();
               d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
-              d += 5; // some extra seconds
+              d += 3; // some extra seconds
               delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
               if (is_source) {
             	   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
@@ -175,14 +175,14 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   break;
                 }
             case HALT_SIMULATION_DELAY:
-                cancelAndDelete(msg);
+              cancelAndDelete(msg);
             	endSimulation();
             	break;
 //            case TEST_DELAY:
 //                {
 //                    cancelAndDelete(msg);
 //                }
-                break;
+                // break;
             default:
                 break;
         }
