@@ -1,76 +1,31 @@
 #!/bin/bash
 
-# check if we have a path for omnet
-if [ ! -f "omnet.config" ]; then
-	while true; do
-		read -p "Do you want to download omnet++ 4.6 (y/n) " yn
-		case $yn in
-				[Yy]* ) ./download-omnet.sh; OMNET_PATH=../../tools/omnetpp-4.6 ; break;;
-				[Nn]* ) read -p "Please enter path to omnet++ 4.6 : " OMNET_PATH; break;;
-				* ) echo "Please enter y or n.";;
-		esac
-	done
-else
-	OMNET_PATH=`cat omnet.config`
-fi
+# sort of include files
+. utils.sh
 
-## OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
-
-SHA1=`cat ../../revision.txt`
+# install all dependencies
+. install-everything.sh || error_msg_exit "Error configuring the framework"
 
 CONFIG_PATH=../../experiments/configs/builtConfigs
 
-# configuring path to omnet++
-source local-omnet-setenv.sh $OMNET_PATH
-
-# checking that everything is ready to execute the experiments
-./sanity-check.sh
-r=$?
-if [ $r -eq 0 ]; then
-	echo "${OMNET_PATH}" > omnet.config
-else
-	echo "Stopping the execution because some required application is not installed"
-	exit 1
-fi
-
-# load the right version of the code
-echo "Checking out revision $SHA1"
-#./load-proper-version.sh ${SHA1}
-
-
-# compile applications' code
-./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
-error_code=$?
-if [ ${error_code} -ne 0 ]; then
-   echo "Error: problem compiling. Aborting"
-   exit 1
-fi
-
-if [ ! -d "../../results" ]; then
-    mkdir ../../results
-    rm -f ../../results/broadcastSession 
-    rm -f ../../results/duplicatedMsgs 
-    rm -f ../../results/batteryConsumption
-    rm -f ../../results/networkCoverage 
-    touch ../../results/broadcastSession
-    touch ../../results/duplicatedMsgs
-    touch ../../results/batteryConsumption
-    touch ../../results/networkCoverage
-fi
-
+minimum_density=100000
+maximum_density=0
+algorithms=()
 
 for config in ${CONFIG_PATH}/*.ini ; do
     filename=$(basename "$config")
-    config_name="${filename%.*}"
-    echo "Executing : ${config}"
-    #./run-one-configuration.sh "${config}" "${config_name}" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
-    ./run-one-configuration.sh "${config}" "${OMNET_PATH}/samples/inet"
-	r=$?
-	if [ $r -ne 0 ]; then
-		echo "Error: failure running simulation ${config_name}"
-		exit 1
-	fi
-	
-	simulation_time=`cat "${config}" | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
-	Rscript extract-charts.R ${CONFIG_PATH}/results/${config_name}-0 ../../results/${config_name} ${simulation_time} ${config_name}
+		config_name="${filename%.*}"
+		density=$(get_density_from_config_name $config_name)
+		protocol=$(get_protocol_from_config_name $config_name)
+
+		if [ "$density" -lt "$minimum_density" ]; then
+			minimum_density=$density
+		fi
+		if [ "$density" -gt "$maximum_density" ]; then
+			maximum_density=$density
+		fi
+
+		algorithms+=("-a" $protocol)
 done
+
+./run-selected-protocols-all-configs.sh -d $minimum_density -D $maximum_density -p ${CONFIG_PATH} ${algorithms[@]}

@@ -1,66 +1,90 @@
 #!/bin/bash
 
-path_to_configs=../../experiments/configs/builtConfigs/
+# sort of include files
+. utils.sh
 
-# check if we have a path for omnet
-if [ ! -f "omnet.config" ]; then
-        while true; do
-                read -p "Do you want to download omnet++ 4.6 (y/n) " yn
-                case $yn in
-                                [Yy]* ) ./download-omnet.sh; OMNET_PATH=../../tools/omnetpp-4.6 ; break;;
-                                [Nn]* ) read -p "Please enter path to omnet++ 4.6 : " OMNET_PATH; break;;
-                                * ) echo "Please enter y or n.";;
-                esac
-        done
-else
-        OMNET_PATH=`cat omnet.config`
-fi
+# the configuration to use
+CONFIG_PATH=../../experiments/configs/builtConfigs/
+MINIMUM_DENSITY=5
+MAXIMUM_DENSITY=15
+ALGORITHMS=()
 
-## OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
+usage() {
+  echo "Usage $0: [-d DENSITY1] [-D DENSITY2] [-p PATH] [-a ALGORITHM]*"
+  echo ""
+  echo -e "\tDENSITY1: minimum density to consider (5 by default)\n"
+  echo -e "\tDENSITY2: maximum density to consider (15 by default)\n"
+  echo -e "\tPATH: used to located the configurations (../../experiments/configs/builtConfigs/ by default)\n"
+  echo -e "\tALGORITHM: an algorithm to consider\n"
+}
 
-SHA1=`cat ../../revision.txt`
 
-CONFIG_PATH=${path_to_configs}
+# parsing parameters
+while getopts "d:D:p:a:h" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+    d)
+      MINIMUM_DENSITY=$OPTARG
+      ;;
+    D)
+      MAXIMUM_DENSITY=$OPTARG
+      ;;
+    p)
+      CONFIG_PATH=$OPTARG
+      ;;
+    a)
+      ALGORITHMS+=($OPTARG)
+      ;;
+    \?)
+      exit 1
+      ;;
+  esac
+done
+
+[ "${#ALGORITHMS[@]}" -eq "0" ] && echo "Ok, since there is no algorithm selected, we are done, bye!!!" && exit 0
 
 # configuring path to omnet++
+source download-omnet.sh
+OMNET_PATH=$(make_sure_that_omnet_is_installed)
 source local-omnet-setenv.sh $OMNET_PATH
 
+# prepare result directory
 if [ ! -d "../../results" ]; then
     mkdir ../../results
 fi
-
-rm -f ../../results/broadcastSession*
-rm -f ../../results/duplicatedMsgs*
-rm -f ../../results/batteryConsumption*
-rm -f ../../results/networkCoverage*
-rm -f ../../results/*.pdf
-rm -f ../../results/summary.csv
-
-echo "" > ../../results/summary.csv
+rm -f ../../results/broadcastSession* \
+      ../../results/duplicatedMsgs* \
+      ../../results/batteryConsumption* \
+      ../../results/networkCoverage* \
+      ../../results/*.pdf \
+      ../../results/summary.csv
 
 echo "Simulating"
 
-for c in ${path_to_configs}*.ini ; do
+for c in ${CONFIG_PATH}*.ini ; do
 	filename=$(basename "$c")
 	config_name="${filename%.*}"
-	nodes=`echo "$config_name" | awk -F "_" '{print $2 }'`
-	density=`echo "$config_name" | awk -F "_" '{print $4 }'`
-	protocol=`echo "$config_name" | awk -F "_" '{print $12 }'`
-	if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
-    		if [ "${density}" -lt "18" ]; then
-    			echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
-			    sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
-    		fi
-    #exit 1
-	fi
+  nodes=$(get_nrnodes_from_config_name $config_name)
+  density=$(get_density_from_config_name $config_name)
+  protocol=$(get_protocol_from_config_name $config_name)
+  if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
+    case "${ALGORITHMS[@]}" in  *"$protocol"*)
+      echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
+      sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+      ;;
+    esac
+  fi
+  # if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
+  #
+  #   #exit 1
+  # fi
 
 done
 
-
 sem --wait --no-notice
-
-
-# Rscript extract-aggregated-charts.R ../../results/summary.csv ../../results/summary.pdf
 
 echo "Creating aggregated results"
 
@@ -68,6 +92,11 @@ cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
 cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgsDistribution
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
 cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
+
+rm -f ../../results/broadcastSession-n_* \
+      ../../results/duplicatedMsgsDistribution-n_* \
+      ../../results/batteryConsumptionDistribution-n_* \
+      ../../results/batteryConsumptionDistributionTime-n_*
 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 

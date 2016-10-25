@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# configuring path to omnet++
+echo "toto 1"
+source download-omnet.sh
+echo "toto 2"
+OMNET_PATH=$(make_sure_that_omnet_is_installed)
+echo "toto 3 $OMNET_PATH"
+source local-omnet-setenv.sh $OMNET_PATH
+
 COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem bison )
 
 for C in "${COMMANDS[@]}"; do
@@ -19,6 +27,9 @@ if [ $state -ne 0 ]; then
     exit 1
 fi
 printf "Ok\n"
+
+# saving omnet path because it is find
+echo "${OMNET_PATH}" > omnet.config
 
 # Getting transmission range to build topologies
 if [ ! -f "../../experiments/configs/common.ini" ]; then

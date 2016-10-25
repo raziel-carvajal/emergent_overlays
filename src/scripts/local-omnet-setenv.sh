@@ -1,6 +1,6 @@
 #! /bin/sh
 
-if [ $# -lt 1 ]; then
+if [ $# -ne 1 ]; then
     echo "Wrong number of arguments"
     echo "Usage: $0 PathToOmnet"
     exit 1
@@ -13,7 +13,7 @@ if [ ! -d $1 ]; then
 fi
 
 # the path to omnet
-OMNET_PATH=$1 
+OMNET_PATH=$1
 
 #case "$-" in
 #*i*) ;;
@@ -26,10 +26,9 @@ if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.
     # no exit -- it would close the shell
 else
     omnetpp_root=${OMNET_PATH}
-    echo $omnetpp_root
+    echo "Path to omnetpp: $omnetpp_root"
     export PATH=$omnetpp_root/bin:$PATH
     export LD_LIBRARY_PATH=$omnetpp_root/lib:$LD_LIBRARY_PATH
     export HOSTNAME
     export HOST
 fi
-

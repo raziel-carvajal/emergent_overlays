@@ -1,62 +1,39 @@
 #!/bin/bash
 
-# check if we have a path for omnet
-if [ ! -f "omnet.config" ]; then
-	while true; do
-		read -p "Do you want to download omnet++ 4.6 (y/n) " yn
-		case $yn in
-				[Yy]* ) ./download-omnet.sh; OMNET_PATH=../../tools/omnetpp-4.6 ; break;;
-				[Nn]* ) read -p "Please enter path to omnet++ 4.6 : " OMNET_PATH; break;;
-				* ) echo "Please enter y or n.";;
-		esac
-	done
-else
-	OMNET_PATH=`cat omnet.config`
-fi
-
-## OMNET_PATH=/home/inti/work/apps/omnetpp-4.6
-
-SHA1=`cat ../../revision.txt`
+# sort of include files
+. utils.sh
 
 CONFIG_PATH=../../experiments/configs
-if [ $# -eq 2 ]; then
-	CONFIG_PATH=$2
-fi
 
-# configuring path to omnet++
-source local-omnet-setenv.sh $OMNET_PATH
+usage() {
+  echo "Usage $0: [-p PATH]"
+  echo ""
+  echo -e "\tPATH: used to locate the configurations (../../experiments/configs/builtConfigs/ by default)\n"
+}
 
-# checking that everything is ready to execute the experiments
-./sanity-check.sh
-r=$?
-echo "HEREEEEEEEEEEEEEEEE ${OMNET_PATH} $r"
-if [ $r -eq 0 ]; then
-	echo "${OMNET_PATH}" > omnet.config
-fi
+# parsing parameters
+while getopts "p:h" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+    p)
+      CONFIG_PATH=$OPTARG
+      ;;
+    \?)
+      exit 1
+      ;;
+  esac
+done
 
-# load the right version of the code
-#echo "Checking out revision $SHA1"
-#./load-proper-version.sh ${SHA1}
-
-
-# compile applications' code
-./compile_protocols.sh "../protocols" "${OMNET_PATH}/samples/inet/" "../../built"
-error_code=$?
-if [ ${error_code} -ne 0 ]; then
-   echo "Error: problem compiling. Aborting"
-   exit 1
-fi
-
-if [ ! -d "../../results" ]; then
-    mkdir ../../results
-fi
-
-config="${CONFIG_PATH}/$1.ini"
+shift $((OPTIND-1))
 config_name="$1"
-echo "Executing : ${config}"
-./run-one-configuration.sh "${config}" "${OMNET_PATH}/samples/inet" "../../built/gcc-debug/protocols"
-r=$?
-if [ $r -ne 0 ]; then
-  echo "Error: failure running simulation ${config_name}"
-  exit 1
-fi
+
+# install all dependencies
+. install-everything.sh || error_msg_exit "Error configuring the framework"
+
+# executes the simulation
+density=$(get_density_from_config_name $config_name)
+protocol=$(get_protocol_from_config_name $config_name)
+./run-selected-protocols-all-configs.sh -d $density -D $density -p ${CONFIG_PATH} -a $protocol
