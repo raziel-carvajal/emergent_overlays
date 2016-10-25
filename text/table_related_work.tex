@@ -1,0 +1,73 @@
+%!TEX root = main.tex
+
+\newcommand{\YES}{{\color{OliveGreen} $\surd$\xspace}}
+\newcommand{\NO}{{\color{BrickRed} $\times$\xspace}}
+\newcommand{\DONTKNOW}{{\color{BlueViolet} --\xspace}}
+\newcommand{\USER}{{\color{Black} \textit{User}\xspace}}
+\newcommand{\KERNEL}{{\color{Black} \textit{Kernel}\xspace}}
+
+\newcommand{\strong}{{\color{Black} \textit{S}\xspace}}
+\newcommand{\event}{{\color{Black} \textit{E}\xspace}}
+\newcommand{\cto}{{\color{Black} \textit{CTO}\xspace}}
+\newcommand{\weak}{{\color{Black} \textit{W}\xspace}}
+\newcommand{\cache}{{\color{Black} \textit{CH}\xspace}}
+\newcommand{\raw}{{\color{Black} \textit{RaW}\xspace}}
+
+\newcommand{\wol}{{\color{Black} \textit{WoL}\xspace}}
+\newcommand{\wow}{{\color{Black} \textit{WoW}\xspace}}
+\newcommand{\sow}{{\color{Black} \textit{SoW}\xspace}}
+
+\begin{table}[ht]
+\setlength\tabcolsep{1pt}
+\renewcommand\arraystretch{0.9}
+\footnotesize
+\centering
+
+\newcolumntype{A}{ >{\raggedright} m{0.230\linewidth} }
+\newcolumntype{B}{ >{\centering\arraybackslash} m{0.180\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} m{0.140\linewidth} }
+\newcolumntype{D}{ >{\centering\arraybackslash} m{0.135\linewidth} }
+
+\begin{tabular}{ABCCCDB}
+
+\textbf{Name} & \textbf{Consistency level} & \textbf{POSIX interface} & \textbf{Code available} & \textbf{Client type} & \textbf{Scaling potential} \\
+
+\midrule
+
+TODO					& \strong	  	& \YES   	  &   \YES		& \USER   	    &  \sow     \\
+AFS~\cite{afs}				& \weak,\cto	& \NO   	  &   \YES       & \USER   		&  \wow		\\
+CalvinFS~\cite{calvinfs}	& \strong		& \NO    	  &   \NO        & \USER   		&  \sow     \\
+CephFS~\cite{weil2006ceph} 	& \strong		& \YES   	  &   \YES       & \KERNEL,\USER&  \wol     \\
+CodaFS~\cite{coda}			& \event		& \YES   	  &   \YES       & \KERNEL    	&  \wol		\\
+Colossus~\cite{spanner}		& \strong		& \DONTKNOW   &   \NO        & \DONTKNOW   	&  \sow     \\
+BeeGFS~\cite{beegfs}		& \strong$^{*}$		& \YES   	  &   \YES       & \USER   		&  \wol  	\\
+GeoFS~\cite{geofs}			& \strong$^{*}$,\cto & \YES   	  &   \NO  		 & \USER 	  	&  \wow     \\
+GFS/GFS2~\cite{rhgfs}		& \DONTKNOW		& \YES   	  &   \YES       & \KERNEL   	&  \wol		\\ %http://is.gd/y5NqdN
+GIGA+~\cite{gigaplus}		& \event		& \YES   	  &   \NO        & \USER    	&  \wol		\\ %OrangeFS ?
+GlusterFS~\cite{glusterfs}	& \strong		& \YES   	  &   \YES       & \USER   		&  \wow     \\
+GoogleFS~\cite{GFS}			& \strong		& \YES   	  &   \NO        & \DONTKNOW   	&  \sow     \\
+HDFS~\cite{hdfs}			& \strong, \cto	& \NO   	  &   \YES       & \USER   		&  \sow     \\
+%LeoFS~\cite{leofs}			& \event		& \DONTKNOW   &   \YES       & \USER        &  \wow		\\
+LOCUS~\cite{WPEKT83}		& \strong		& \YES    	  &   \NO  		 & \KERNEL	    &  \wol 	\\
+Lustre~\cite{lustre}		& \cache		& \YES   	  &   \YES       & \KERNEL	    &  \wol		\\
+%MogileFS					& \DONTKNOW		& \NO		  &   \YES       & \KERNEL   	&  \DONTKNOW\\
+MooseFS~\cite{moosefs}		& \strong$^{*}$		& \YES  	  &   \YES       & \USER   		&  \wol		\\
+NFS/pNFS~\cite{nfs:637}	    & \cto			& \YES    	  &   \YES       & \KERNEL   	&  \wow		\\
+ObjectiveFS~\cite{objfs}	& \raw			& \YES    	  &   \YES       & \USER   		&  \wow  	\\
+OCFS~\cite{ocfs}			& \cache		& \NO   	  &   \YES       & \KERNEL  	&  \wol		\\
+OCFS2~\cite{ocfs}			& \cache		& \YES   	  &   \YES       & \KERNEL  	&  \wol		\\
+%OrangeFS					& \DONTKNOW		& \DONTKNOW   &   \YES       & \USER   		&  todo     \\ %commercial PVFS
+%OriFS~\cite{orifs}			& \event		& \YES   	  &   \YES       & \USER  		&  \wow		\\ % P2P FS
+PVFS~\cite{pvfs}			& \raw			& \NO    	  &   \YES       & \USER   		&  \wol  	\\
+OrangeFS~\cite{pvfs2}		& \raw			& \NO    	  &   \YES       & \USER   		&  \wol  	\\
+QuantcastFS~\cite{quantacast}& \event		& \NO   	  &   \YES       & \USER  		&  \wol     \\
+SeaweedFS~\cite{seaweedfs}	& \strong	    & \NO   	  &   \YES       & \KERNEL   	&  \wol		\\
+%RedHat GFS2				& \DONTKNOW		& \YES   	  &   \YES       & \KERNEL   	&  todo   	\\
+XtreemFS~\cite{xtreemfs}	& \strong$^{*}$		& \YES    	  &   \YES       & \USER   		&  \wow     \\
+WheelFS~\cite{wheelfs}		& \strong,\cto	& \YES    	  &   \YES       & \USER   		&  \wow     \\
+
+\end{tabular}
+\caption{Survey of distributed file systems along several criteria: consistency level (Strong=\strong, Weak=\weak, Eventual=\event, Cache=\cache, Close-To-Open=\cto, Read-after-Write=\raw), support of the POSIX standard, code availability, client type (user-space=\USER, kernel-space=\KERNEL), scaling potential (Works-on-LAN=\wol, Works-on-WAN=\wow, Scale-on-WAN=\sow). Some properties are unknown (\DONTKNOW) or not by default ($^{*}$).}
+\label{tbl:rw}
+\vspace{-3mm}
+\end{table}

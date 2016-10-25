@@ -15,10 +15,14 @@
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{booktabs}
+\usepackage{caption}
 \usepackage{verbatim}
+\usepackage{ragged2e}
 \usepackage{xspace}
 \usepackage{wrapfig}
 \usepackage{pifont}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
 
 % leads to better typograpy
 \usepackage[protrusion=true,expansion=true]{microtype}
@@ -92,16 +96,25 @@
 
 \IEEEpeerreviewmaketitle
 
-\input{introduction}
-\input{dissemination-algorithms}
+\input{introduction} %% general introduction, motivation and summary of the results
+\input{background} %% taxonomy and description of MANET bcast algorithm
+\input{related_work} %% other work evaluating protocols for broadcast against each other
+\input{scenarios} %% evaluation scenarios
+\input{protocols} %% description of the protocols used in the evaluation
+\input{evaluation} %% description of the experimental results
+\input{discussion} %% take away and discussion of the results
+\input{perspectives} %% short section on follow-up on automatic adaptation in MANET networks
 \input{conclusion}
 
 \section*{Acknowledgment}
-The research leading to these results has received funding from CHIST-ERA under project DIONASYS, and from the Swiss National Science Foundation (SNSF) under grant 155249.
+The research leading to these results has received funding from CHIST-ERA under project DIONASYS, and from the Swiss National Science Foundation (SNSF) under grant 155249. \er{add ANR project number}
 
 % references section
 \bibliographystyle{IEEEtran}
 \bibliography{main}
+
+\appendix
+\input{dissemination-algorithms}
 
 \end{document}
 
