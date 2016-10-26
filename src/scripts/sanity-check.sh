@@ -2,12 +2,12 @@
 
 # configuring path to omnet++
 . download-omnet.sh
-. local-omnet-setenv.sh ${OMNET_PATH}
+source local-omnet-setenv.sh ${OMNET_PATH}
 
 COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem bison )
 
 for C in "${COMMANDS[@]}"; do
-   printf "Checking if $C is installed: "
+   printf "sanity-check: Checking if $C is installed: "
    type ${C} >/dev/null 2>&1 || { echo >&2 "I require ${C}, but it's not installed.  Aborting."; exit 1; }
    printf "Ok\n"
 done
