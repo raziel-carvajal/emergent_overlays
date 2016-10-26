@@ -47,9 +47,8 @@ done
 [ "${#ALGORITHMS[@]}" -eq "0" ] && echo "Ok, since there is no algorithm selected, we are done, bye!!!" && exit 0
 
 # configuring path to omnet++
-source download-omnet.sh
-OMNET_PATH=$(make_sure_that_omnet_is_installed)
-source local-omnet-setenv.sh $OMNET_PATH
+. download-omnet.sh
+. local-omnet-setenv.sh ${OMNET_PATH}
 
 # prepare result directory
 if [ ! -d "../../results" ]; then

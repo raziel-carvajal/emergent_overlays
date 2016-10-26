@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # configuring path to omnet++
-source download-omnet.sh
-OMNET_PATH=$(make_sure_that_omnet_is_installed)
-source local-omnet-setenv.sh $OMNET_PATH
+. download-omnet.sh
+. local-omnet-setenv.sh ${OMNET_PATH}
 
 COMMANDS=( tar git make gcc g++ opp_run opp_makemake R Rscript python sem bison )
 
@@ -14,18 +13,23 @@ for C in "${COMMANDS[@]}"; do
 done
 
 #Checking Networkx: python lib for building topologies
-printf "Checking if Networkx is installed (python library to cope with graphs)\n"
+echo "Checking if Networkx is installed (python library to cope with graphs)"
 echo "import networkx" | python
-state=$?
-if [ $state -ne 0 ]; then
-    echo >&2 "Python.Networkx must be installed build network topologies. Aborting.";
-    tar -xzvf ../../tools/networkx-1.11.tar.gz -C ../../tools
-    cd ../../tools/networkx-1.11/ && sudo python setup.py install
-    exit 1
+if [ $? -ne 0 ]; then
+  echo "Installing Python.Networkx"
+  tar -xzf ../../tools/networkx-1.11.tar.gz -C ../../tools
+  pushd ../../tools/networkx-1.11/ && python setup.py install && popd
 fi
 printf "Ok\n"
 
-# saving omnet path because it is find
+# installing omnetpp package for R if needed
+install_r_dependencies=`Rscript checking-depencencies.R | awk '{ print $2 }'`
+if [ "$install_r_dependencies" == "fail" ]; then
+	echo "Installing package to read omnet files in R"
+	Rscript installing-dependencies.R
+fi
+
+# saving omnet path because it is fine
 echo "${OMNET_PATH}" > omnet.config
 
 # Getting transmission range to build topologies
@@ -38,16 +42,13 @@ tPath='../../experiments/networks/builtTopologies/'
 iniCommon='../../experiments/configs/common.ini'
 
 Tx=`grep 'maxCommunicationRange' $iniCommon | grep -Eo '[0-9]{1,5}'`
-printf "Building topologies with transmission range: $Tx\n"
+echo "Building topologies with transmission range: $Tx"
 
 # Tx is the radius of communication (not the diameter)
 
-#rm -fr $tPath'*.ned'
+rm -fr $tPath'*.ned'
 
-if [ ! -d "$tPath" ]; then
-	mkdir "${tPath}"
-fi
-
+[ ! -d "$tPath" ] && mkdir "${tPath}"
 
 ls $tPath/*.ned 2>/dev/null
 isEmpty=$?
@@ -72,9 +73,7 @@ pPath='../protocols/'
 cPath='../../experiments/configs/builtConfigs/'
 
 
-if [ ! -d "$cPath" ]; then
-	mkdir "${cPath}"
-fi
+[ ! -d "$cPath" ] &&	mkdir "${cPath}"
 
 
 here=`pwd`
@@ -108,10 +107,3 @@ done
 # TODO figure out why there is a file *-e
 rm -fr n-*
 printf "Ok\n"
-
-# installing omnetpp package for R if needed
-install_r_dependencies=`Rscript checking-depencencies.R | awk '{ print $2 }'`
-if [ "$install_r_dependencies" == "fail" ]; then
-	echo "Installing package to read omnet files in R"
-	sudo Rscript installing-dependencies.R
-fi

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # configuring path to omnet++
-source download-omnet.sh
-OMNET_PATH=$(make_sure_that_omnet_is_installed)
-source local-omnet-setenv.sh $OMNET_PATH
+. download-omnet.sh
+. local-omnet-setenv.sh ${OMNET_PATH}
 
 if [ $# -lt 2 ]; then
     echo "Error: wrong number of parameters"

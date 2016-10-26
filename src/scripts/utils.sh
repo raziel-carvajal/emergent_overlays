@@ -1,7 +1,7 @@
 #!/bin/bash
 
 error_msg_exit() {
-	echo "Stopping the execution because some required application is not installed"
+	echo "$1"
 	exit 1
 }
 

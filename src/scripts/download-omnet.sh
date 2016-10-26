@@ -1,33 +1,31 @@
 #!/bin/bash
 
+OMNET_PATH=""
+
 install_omnet() {
   mkdir -p ../../tools
-  cd ../../tools
-
-  echo "caraajooooo"
-
+  pushd ../../tools
   if [ ! -f omnetpp-4.6-src.tgz ]; then
     echo "Error: omnet++ is not detected. Download it following this link https://omnetpp.org/component/jdownloads/download/32-release-older-versions/2290-omnet-4-6-source-ide-tgz"
     exit 1
   else
     tar -zxf omnetpp-4.6-src.tgz
-    cp configure omnetpp-4.6 2 > /dev/null
+    cp configure omnetpp-4.6 /dev/null
     tar -zxf inet-3.3.0-src.tgz
     mv inet omnetpp-4.6/samples > /dev/null
     cd omnetpp-4.6
     source ../../src/scripts/local-omnet-setenv.sh `pwd`
     ./configure NO_TCL=0 && make -j 4 && cd samples/inet && make makefiles && make -j 4 && echo "happy"
   fi
+  popd
 }
 
 make_sure_that_omnet_is_installed() {
   # check if we have a path for omnet
   if [ ! -f "omnet.config" ]; then
-          echo "caraajooooo 11111"
-          install_omnet
-          local myresult=../../tools/omnetpp-4.6
-  else
-          local myresult=`cat omnet.config`
+    install_omnet
   fi
-  echo "${myresult}"
+  OMNET_PATH="../../tools/omnetpp-4.6"
 }
+
+make_sure_that_omnet_is_installed
