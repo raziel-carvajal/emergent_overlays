@@ -3,7 +3,7 @@
 # sort of include files
 . utils.sh
 
-CONFIG_PATH=../../experiments/configs
+CONFIG_PATH=../../experiments/configs/
 
 usage() {
   echo "Usage $0: [-p PATH]"

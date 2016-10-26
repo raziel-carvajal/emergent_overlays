@@ -74,5 +74,5 @@ for ((i=0;i<END;i++)); do
 	retransmissions=`echo ${results} | awk '{print $7}'`
 
 	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
-
+  echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}"
 done

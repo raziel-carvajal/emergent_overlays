@@ -70,11 +70,11 @@ for c in ${CONFIG_PATH}*.ini ; do
   density=$(get_density_from_config_name $config_name)
   protocol=$(get_protocol_from_config_name $config_name)
   if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
-    case "${ALGORITHMS[@]}" in  *"$protocol"*)
-      echo "This is one ${config_name}  ${nodes} ${density} ${protocol} "
+    array_contains "$protocol" "${ALGORITHMS[@]}"
+    if [ $? -eq 0 ]; then
+      echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
       sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
-      ;;
-    esac
+    fi
   fi
   # if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
   #
