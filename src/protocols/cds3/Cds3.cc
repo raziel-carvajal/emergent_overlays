@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 #include <cds3/Cds3.h>
 namespace inet {
 
@@ -38,6 +38,7 @@ namespace inet {
   }
 
   void Cds_3::handleMessageWhenUp(cMessage* msg) {
+
     if (msg->isSelfMessage()) {
         if (msg->getKind() == SAY_HELLO) {
     //	    cerr << getLogHeader() + "Doing Hello\n";
@@ -50,6 +51,8 @@ namespace inet {
              * having ( (the number of hello messages) MOD 3 )== 1*/
             if (nr_hello_msg % 2 == 1) { doMarkingProcedure(); }
             scheduleAt(simTime() + par("helloTime").doubleValue() + delta, neighsMsg);
+            // cancelAndDelete(msg);
+            // return;
         } else if (msg->getKind() == ONE_HOP_NEIGHS) {
 //            cerr << getLogHeader() + "Sending ONE_HOP_NEIGS\n";
             Neigh emitter, tmp;
@@ -64,6 +67,8 @@ namespace inet {
             packet->setNeighbors(myNeigs);
             packet->setAmIrelay(amIrelay);
             send_package(packet);
+            cancelAndDelete(msg);
+            return;
         }
     }
     BroadcastingAppBase::handleMessageWhenUp(msg);
@@ -92,7 +97,9 @@ namespace inet {
         for (auto& myNeig: neighbors) {
             for (auto& neigsMap: oneHopNeigs) {
                 if (myNeig.first != neigsMap.first && neigsMap.second.find(myNeig.first) == neigsMap.second.end()) {
-                    amIrelay = true; cerr << getLogHeader() + "I am Relay (marking procedure)\n";
+                    amIrelay = true;
+                    cerr << getLogHeader() << "I am Relay (marking procedure)\n";
+                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "MARKED" << endl;
                     markingProcedureDone = true;
                     return;
                 }
@@ -147,12 +154,13 @@ namespace inet {
                     j = std::stoi (u.first.substr(5, u.first.size()), &sz);
                     k = std::stoi (w.first.substr(5, w.first.size()), &sz);
                     str_int = { {myself, i}, {u.first, j}, {w.first, k} };
-                    cerr << getLogHeader() + "my min [" + to_string(i) + "], Umin [" + to_string(j) + "], Wmin [" +
-                            to_string(k) + "]\n";
+                    // cerr << getLogHeader() + "my min [" + to_string(i) + "], Umin [" + to_string(j) + "], Wmin [" +
+                    //         to_string(k) + "]\n";
                     int min = std::min( i, std::min(j, k) );
-                    cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
+                    // cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
                     if (str_int[myself] == min) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
                         amIrelay = false;
                         return;
                     }
@@ -179,6 +187,7 @@ void Cds_3::applyRule2_1() {
                 wATuUv = isSubset(oneHopNeigs[w.first], computeUnion(oneHopNeigs[u.first], cpyNeigs));
                 if (vATuUw && !uATvUw && wATuUv) {
                     cerr << getLogHeader() + "Not relay anymore<<<<<\n";
+                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
                     amIrelay = false;
                     return;
                 }
@@ -195,10 +204,11 @@ void Cds_3::applyRule2_1() {
                 //Rule 2.1.2
 //                cerr << getLogHeader() + "Checking rule 2.1.2\n";
                 if (vATuUw && uATvUw && !wATuUv) {
-                    cerr << getLogHeader() + "Is node 7 here??\n";
+                    // cerr << getLogHeader() + "Is node 7 here??\n";
                     if (cpyNeigs.size() < uCloseSet.size() ||
                             (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
                         amIrelay = false;
                         return;
                     }
@@ -212,6 +222,7 @@ void Cds_3::applyRule2_1() {
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == min)) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
                         amIrelay = false;
                         return;
                     }

@@ -63,7 +63,7 @@ END=$(($count))
 
 for ((i=0;i<END;i++)); do
 	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} --algorithm ${PROTOCOL}
-	results=`Rscript extract-charts.R --show-averages --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
+	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 
@@ -74,5 +74,4 @@ for ((i=0;i<END;i++)); do
 	retransmissions=`echo ${results} | awk '{print $7}'`
 
 	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
-  echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}"
 done
