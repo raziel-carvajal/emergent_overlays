@@ -6,6 +6,19 @@ error_msg_exit() {
 }
 
 
+array_contains () {
+    local seeking=$1; shift
+    local in=1
+    for element; do
+        if [[ $element == $seeking ]]; then
+            in=0
+            break
+        fi
+    done
+    return $in
+}
+
+
 get_density_from_config_name() {
   echo "$1" | awk -F "_" '{print $4 }'
 }
