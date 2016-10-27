@@ -54,6 +54,7 @@ namespace inet {
              * having ( (the number of hello messages) MOD 3 )== 1*/
             if (nr_hello_msg % 2 == 1) { doMarkingProcedure(); }
             scheduleAt(simTime() + par("helloTime").doubleValue() + delta, neighsMsg);
+            cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "STANDING" << endl;
             // cancelAndDelete(msg);
             // return;
         } else if (msg->getKind() == ONE_HOP_NEIGHS) {
@@ -62,8 +63,8 @@ namespace inet {
             emitter.addr = myAddress; emitter.pos = position; emitter.name = myself;
             NeighMap myNeigs;
             for (auto& n: neighbors) {
-                tmp.addr = n.second.addr; tmp.pos = n.second.pos; tmp.name = n.second.name;
-                myNeigs[n.first] = tmp;
+                // tmp.addr = n.second.addr; tmp.pos = n.second.pos; tmp.name = n.second.name;
+                myNeigs[n.first] = n.second;
             }
             cds3::Cds3* packet = new cds3::Cds3();
             packet->setEmitter(emitter);
@@ -119,17 +120,9 @@ namespace inet {
     return _union;
   }
 
-  map<string, string> Cds_3::cloneMap(map<string, string> a) {
-      map<string, string> _union;
-      for (auto& n: a) { _union[n.first] = n.first; }
-      return _union;
-  }
-
   map<string, string> Cds_3::computeUnion(map<string, string> a, map<string, string> b) {
-    map<string, string> _union;
-    for (auto& n: a) { _union[n.first] = n.first; }
-    for (auto& n: b) { _union[n.first] = n.first; }
-    return _union;
+    for (auto& n: b) { a[n.first] = n.first; }
+    return a;
   }
 
   bool Cds_3::isSubset(map<string, string> a, map<string, string> b) {
@@ -162,8 +155,8 @@ namespace inet {
                     int m = min( i, min(j, k) );
                     // cerr << getLogHeader() + "MIN: " + to_string(m) + "\n";
                     if (str_int[myself] == m) {
-                        cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
+                        cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED4" << endl;
                         amIrelay = false;
                         return;
                     }
@@ -189,13 +182,13 @@ void Cds_3::applyRule2_1() {
                 uATvUw = isSubset(oneHopNeigs[u.first], computeUnion(cpyNeigs, oneHopNeigs[w.first]));
                 wATuUv = isSubset(oneHopNeigs[w.first], computeUnion(oneHopNeigs[u.first], cpyNeigs));
                 if (vATuUw && !uATvUw && wATuUv) {
-                    cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
+                    cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED1" << endl;
                     amIrelay = false;
                     return;
                 }
-                uCloseSet = cloneMap(oneHopNeigs[u.first]);
-                wCloseSet = cloneMap(oneHopNeigs[w.first]);
+                uCloseSet = oneHopNeigs[u.first];
+                wCloseSet = oneHopNeigs[w.first];
                 //adding u, v and w to the corresponding set will make it a close set
                 uCloseSet[u.first] = u.first;
                 cpyNeigs[myself] = myself;
@@ -211,7 +204,7 @@ void Cds_3::applyRule2_1() {
                     if (cpyNeigs.size() < uCloseSet.size() ||
                             (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED2" << endl;
                         amIrelay = false;
                         return;
                     }
@@ -225,7 +218,7 @@ void Cds_3::applyRule2_1() {
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == m)) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED" << endl;
+                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED3" << endl;
                         amIrelay = false;
                         return;
                     }

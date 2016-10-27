@@ -12,6 +12,7 @@ import networkx as nx
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def get_graph(pos, tx):
@@ -175,24 +176,70 @@ if __name__ == '__main__':
     with open(logFile, 'rb') as csvfile:
         logreader = csv.reader(csvfile, delimiter=',')
         for row in logreader:
-            data.append({'name': row[1], 'x': float(row[3]), 'y': float(row[4]), 'status': row[5]})
+            data.append({'name': row[1], 'time': float(row[2]), 'x': float(row[3]), 'y': float(row[4]), 'status': row[5]})
 
+    # create dictionary
+    d = {}
     for e in data:
-        print e
+        if not e['name'] in d:
+            d[e['name']] = {'status': e['status'], 'x': e['x'], 'y': e['y']}
 
-    px = [e['x'] for e in data]
-    py = [e['y'] for e in data]
+    data = [ e for e in data if e['status'] != 'STANDING']
 
-    IN_C = 24
-    NOT_IN_C = 70
-    colors = [IN_C if e['status'] == 'MARKED' else NOT_IN_C for e in data]
-    m = ['o' if e['status'] == 'MARKED' else 'v' for e in data]
+    # draw initial stuff
+    fig, ax = plt.subplots()
 
-    plt.figure()
-    plt.axis('off')
+    for k1 in d:
+        x1 = d[k1]['x']
+        y1 = d[k1]['y']
+        for k2 in d:
+            if k1 != k2:
+                x2 = d[k2]['x']
+                y2 = d[k2]['y']
+                dist = (x1-x2)**2 + (y1-y2)**2
+                if dist <= 10**2:
+                    # print x1, x2, y1, y2
+                    ax.plot([x1, x2] , [y1, y2], c='red', linewidth=1.3)
 
-    plt.scatter(px, py, marker=m, c=colors)
+    px = [ d[k]['x'] for k in d ]
+    py = [ d[k]['y'] for k in d ]
+    cc = [ 'black' if k == 'hostR54' else 'red' for k in d]
+
+    scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
+
+    def getColor(name, status):
+        if name == 'hostR54':
+            return 'black'
+        if status == 'MARKED':
+            return 'green'
+        if status == 'UNMARKED1':
+            return 'blue'
+        if status == 'UNMARKED2':
+            return 'yellow'
+        if status == 'UNMARKED3':
+            return 'gray'
+        if status == 'UNMARKED4':
+            return 'pink'
+        return 'red'
+
+    def animate(i):
+        name = data[i]['name']
+        status = data[i]['status']
+        time = data[i]['time']
+        print i, name, time
+        if status != 'STANDING':
+            d[name]['status'] = status
+            colors = [ getColor(k, d[k]['status']) for k in d]
+            scatter.set_facecolor(colors)
+        return scatter,
+
+    def init():
+        return scatter,
+
+    ani = animation.FuncAnimation(fig, animate, np.arange(0, len(data)), init_func=init,
+                                  interval=200, blit=False, repeat=False)
 
     plt.show()
+
 
     print "Done"

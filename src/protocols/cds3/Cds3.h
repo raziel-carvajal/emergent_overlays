@@ -45,8 +45,7 @@ private:
     bool isSubset(std::map<std::string, std::string> a, std::map<std::string, std::string> b);
     bool equal(std::map<std::string, std::string> a, std::map<std::string, std::string> b);
     std::map<std::string, std::string> cloneNeighbors();
-    std::map<std::string, std::string> cloneMap(std::map<std::string, std::string> a);
-
+    
 protected:
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     void virtual time_to_broadcast_payload(void* user_data) override;
