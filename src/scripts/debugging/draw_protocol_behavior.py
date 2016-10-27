@@ -183,19 +183,22 @@ if __name__ == '__main__':
     px = [e['x'] for e in data if e['status'] == 'MARKED']
     py = [e['y'] for e in data if e['status'] == 'MARKED']
 
-    IN_C = 1.0 # yellow
-    NOT_IN_C = 0.0 # blue
+    IN_C = 1 # yellow
+    NOT_IN_C = 0 # blue
     colors = [IN_C if e['status'] == 'MARKED' else NOT_IN_C for e in data]
 
     t = np.arange(len(px))
 
-    print np.asarray(colors)
+    tt = np.asarray(colors)
+
+    print tt
+    print np.asanyarray(colors, order='F')
     print t
 
     plt.figure()
     plt.axis('off')
 
-    plt.scatter(px, py, marker='v', c=np.asarray(colors))
+    plt.scatter(px, py, marker='v', c=np.asanyarray(colors, order='F'))
 
     plt.show()
 
