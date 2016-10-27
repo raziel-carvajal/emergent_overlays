@@ -180,25 +180,18 @@ if __name__ == '__main__':
     for e in data:
         print e
 
-    px = [e['x'] for e in data if e['status'] == 'MARKED']
-    py = [e['y'] for e in data if e['status'] == 'MARKED']
+    px = [e['x'] for e in data]
+    py = [e['y'] for e in data]
 
-    IN_C = 1 # yellow
-    NOT_IN_C = 0 # blue
+    IN_C = 24
+    NOT_IN_C = 70
     colors = [IN_C if e['status'] == 'MARKED' else NOT_IN_C for e in data]
-
-    t = np.arange(len(px))
-
-    tt = np.asarray(colors)
-
-    print tt
-    print np.asanyarray(colors, order='F')
-    print t
+    m = ['o' if e['status'] == 'MARKED' else 'v' for e in data]
 
     plt.figure()
     plt.axis('off')
 
-    plt.scatter(px, py, marker='v', c=np.asanyarray(colors, order='F'))
+    plt.scatter(px, py, marker=m, c=colors)
 
     plt.show()
 
