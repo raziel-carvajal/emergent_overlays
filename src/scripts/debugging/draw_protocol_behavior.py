@@ -193,7 +193,7 @@ if __name__ == '__main__':
         x1 = d[k1]['x']
         y1 = d[k1]['y']
         for k2 in d:
-            if k1 != k2:
+            if k1 < k2:
                 x2 = d[k2]['x']
                 y2 = d[k2]['y']
                 dist = (x1-x2)**2 + (y1-y2)**2
@@ -237,9 +237,30 @@ if __name__ == '__main__':
         return scatter,
 
     ani = animation.FuncAnimation(fig, animate, np.arange(0, len(data)), init_func=init,
-                                  interval=200, blit=False, repeat=False)
+                                  interval=100, blit=False, repeat=False)
 
     plt.show()
 
+    print "Plotting final graph"
+    fig, ax = plt.subplots()
+
+    for k1 in d:
+        x1 = d[k1]['x']
+        y1 = d[k1]['y']
+        status = d[k1]['status']
+        if status == "MARKED":
+            for k2 in d:
+                if k1 != k2:
+                    x2 = d[k2]['x']
+                    y2 = d[k2]['y']
+                    dist = (x1-x2)**2 + (y1-y2)**2
+                    if dist <= 10**2:
+                        ax.plot([x1, x2] , [y1, y2], c='red', linewidth=1.3)
+
+    px = [ d[k]['x'] for k in d ]
+    py = [ d[k]['y'] for k in d ]
+    cc = [ 'black' if k == 'hostR54' else 'green' if d[k]['status'] == 'MARKED' else 'red' for k in d]
+    scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
+    plt.show()
 
     print "Done"
