@@ -189,13 +189,13 @@ if __name__ == '__main__':
 
     t = np.arange(len(px))
 
-    print colors
+    print np.asarray(colors)
     print t
 
     plt.figure()
     plt.axis('off')
 
-    plt.scatter(px, py, marker='v', c=t)
+    plt.scatter(px, py, marker='v', c=np.asarray(colors))
 
     plt.show()
 
