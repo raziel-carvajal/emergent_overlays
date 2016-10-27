@@ -54,6 +54,14 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
 }
 
+getRecOrTraTimeByNode_Session <- function(rcvOrTrsMsgsDs, nodes, broadcastSessions){
+  lapply(nodes, function(n){
+    lapply(broadcastSessions, function(b){
+      subset(subset(rcvOrTrsMsgsDs, resultkey==n), y==b)$x
+    })
+  })
+}
+
 
 time.of.powerlevels <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separate list for each power level
@@ -190,22 +198,25 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
 
 
 ######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (BEGIN) ############################################
-getPowerConsumption <- function(ds, algo, timeLine) {
-  nRow <- length( ds[[1]] )
-  nCol <- 1 + length( ds )
-  headers <- paste("", timeLine, sep="")
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", headers)
-  for (i in 1:nRow) {
-    tmp <- c(algo)
-    for (j in 1:length( ds )) {
-      v <- ds[[j]][i]
-      tmp <- c(tmp, v)
-    }
-    df[i,] <- tmp
-  }
-  df
-}
+# DEPRECATED
+# getting power consumption per an X interval of time doesn't
+# provide accurate information about what nodes consume per broadcast session
+#getPowerConsumption <- function(ds, algo, timeLine) {
+#  nRow <- length( ds[[1]] )
+#  nCol <- 1 + length( ds )
+#  headers <- paste("", timeLine, sep="")
+#  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
+#  names(df) <- c("Algorithm", headers)
+#  for (i in 1:nRow) {
+#    tmp <- c(algo)
+#    for (j in 1:length( ds )) {
+#      v <- ds[[j]][i]
+#      tmp <- c(tmp, v)
+#    }
+#    df[i,] <- tmp
+#  }
+#  df
+#}
 
 getNumberOfRelays <- function(msgDs, algo) {
   # create a separate list for each msg_sent vector
@@ -315,6 +326,35 @@ countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
   r[,"algorithm"] = algo
   r
 }
+
+getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsgsDs, algo){
+  nodes <- rcvMsgsDs$resultkey[!duplicated(rcvMsgsDs$resultkey)]
+  broadcastSessions <- sentMsgsDs$y[!duplicated(sentMsgsDs$y)]
+  recTimes <- getRecOrTraTimeByNode_Session(sentMsgsDs, nodes, broadcastSessions)
+  traTimes <- getRecOrTraTimeByNode_Session(rcvMsgsDs,  nodes, broadcastSessions)
+  battConByNode <- lapply(nodes, function(n){
+    subset(powerConDs, resultkey==n)
+  })
+  nRow <- length(nodes) 
+  nCol <- length(broadcastSessions) + 1
+  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
+  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
+  rowNumber <- 1
+  for (i in 1:length(nodes)) {
+    values <- c(algo)
+    eventsVector <- vector()
+    nodeBatCon <- battConByNode[[i]]
+    for (j in 1:length(broadcastSessions)) {
+      m <- max(c(recTimes[[i]][[j]], traTimes[[i]][[j]]))
+      consumpPerSession <- subset(subset(nodeBatCon, x<=m), !(eventno %in% eventsVector) )
+      eventsVector <- c(eventsVector, consumpPerSession$eventno)
+      totalConsump <- sum( (consumpPerSession$y) * (-1.0) )
+      values <- c(values, totalConsump)
+    }
+    df[i, ] <- values
+  }
+  df
+}
 ######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (END) ############################################
 
 plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
@@ -417,9 +457,10 @@ main <- function(args) {
   msgSentDs <- load.datafile(args$file, "name(msg_sent:vector)" )
   msgRcvDs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
   print("DONE!")
-
+  
   print(paste("Loading power consumption data file:", args$file))
-  powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)" )
+  powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
+
   pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
   print("DONE!")
 
@@ -463,11 +504,17 @@ main <- function(args) {
 
   if (args$exportForRaziel) {
     print("Computing distributions of each metric...")
-    pcoDist <- getPowerConsumption(pl.local, args$algorithm, seq(pl.step, args$simTime, by=pl.step))
-    print("DONE")
+    pcoDist <- getPowerConsumptionPerBroadcastSession(
+      powerLevelDs$vectordata,
+      msgSentDs$vectordata,
+      msgRcvDs$vectordata,
+      args$algorithm
+    )
+    #pcoDist <- getPowerConsumption(pl.local, args$algorithm, seq(pl.step, args$simTime, by=pl.step))
     relDist <- getNumberOfRelays(msgSentDs, args$algorithm)
     dupDist <- getDuplicatedMsgs(msgSentDs, msgRcvDs, args$algorithm)
     broDist <- getBroadcastingTime(msgSentDs, msgRcvDs, args$algorithm)
+    print("DONE")
 
     print("Exporting distributions of metrics...")
     filename <- build.filename(args$outputPath, "batteryConsumption", args$density)
