@@ -181,7 +181,7 @@ void Cds_3::applyRule2_1() {
                 vATuUw = isSubset(cpyNeigs, computeUnion(oneHopNeigs[u.first], oneHopNeigs[w.first]));
                 uATvUw = isSubset(oneHopNeigs[u.first], computeUnion(cpyNeigs, oneHopNeigs[w.first]));
                 wATuUv = isSubset(oneHopNeigs[w.first], computeUnion(oneHopNeigs[u.first], cpyNeigs));
-                if (vATuUw && !uATvUw && wATuUv) {
+                if (vATuUw && !uATvUw && !wATuUv) {
                     cerr << getLogHeader() << "Not relay anymore<<<<<\n";
                     cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED1" << endl;
                     amIrelay = false;
