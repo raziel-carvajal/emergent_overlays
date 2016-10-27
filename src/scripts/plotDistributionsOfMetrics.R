@@ -3,7 +3,9 @@ require(reshape2)
 
 doPlot <- function(ds, title, xLabel, yLabel, yLim){
 	ds.m <- melt(ds, id.var="Algorithm")
-	p <- ggplot(data = ds.m, aes(x=variable, y=value, color=Algorithm)) + geom_boxplot(aes(fill=Algorithm))	+
+	#p <- ggplot(data = ds.m, aes(x=variable, y=value, color=Algorithm)) + geom_boxplot(aes(fill=Algorithm))	+
+	#  ggtitle(title) + ylab(yLabel) + xlab(xLabel) + ylim(yLim)
+	p <- ggplot(data = ds.m, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Algorithm))	+
 	  ggtitle(title) + ylab(yLabel) + xlab(xLabel) + ylim(yLim)
         print(p)
 }
@@ -20,14 +22,15 @@ pdf(paste("../../results/", "Results.pdf", sep = ""), width=8, height=8)
 #layout(m_layout, heights=c(0.8,0.8, 0.8))
 #par(mai = c(0.7,0.6,1.2,0.6))
 
-yLim = c(0, 5)
-bc <- read.csv("../../results/RadioModeReception-Zero", header=T)
-doPlot(bc, "Received messages per interval of reception - Small Network (7 nodes)", "Interval of reception", "Number of received messages", yLim)
-
-stop()
-yLim = c(48, 50)
-bc <- read.csv("../../results/batteryConsumption-Zero", header=T)
+#yLim = c(0, 5)
+#bc <- read.csv("../../results/RadioModeReception-Zero", header=T)
+#doPlot(bc, "Received messages per interval of reception - Small Network (7 nodes)", "Interval of reception", "Number of received messages", yLim)
+#
+#stop()
+yLim = c(0, 1)
+bc <- read.csv("../../results/batteryConsumption-", header=T)
 doPlot(bc, "Residual energy - Small Network (7 nodes)", "Time (s)", "Joules (J)", yLim)
+stop()
 #bc <- read.csv("../../results/batteryConsumption-CDSpaper", header=T)
 #doPlot(bc, "Battery consumption - CDS Paper Network (15 nodes)", "Time (s)", "Joules (J)", yLim)
 
