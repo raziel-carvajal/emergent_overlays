@@ -262,6 +262,9 @@ if __name__ == '__main__':
     py = [d[k]['y'] for k in d]
     cc = [getColor(k, d[k]['status']) for k in d]
     scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
+    n = [k[5:] for k in d]
+    for i, txt in enumerate(n):
+        ax.annotate(txt, (px[i]+1, py[i]+1))
     plt.show()
 
     print "Done"
