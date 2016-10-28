@@ -199,16 +199,16 @@ if __name__ == '__main__':
                 dist = (x1-x2)**2 + (y1-y2)**2
                 if dist <= 10**2:
                     # print x1, x2, y1, y2
-                    ax.plot([x1, x2] , [y1, y2], c='red', linewidth=1.3)
+                    ax.plot([x1, x2], [y1, y2], c='red', linewidth=1.3)
 
-    px = [ d[k]['x'] for k in d ]
-    py = [ d[k]['y'] for k in d ]
-    cc = [ 'black' if k == 'hostR54' else 'red' for k in d]
+    px = [d[k]['x'] for k in d]
+    py = [d[k]['y'] for k in d]
+    cc = ['black' if k == 'hostR54' else 'red' for k in d]
 
     scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
 
     def getColor(name, status):
-        if name == 'hostR54':
+        if name == 'hostR123':
             return 'black'
         if status == 'MARKED':
             return 'green'
@@ -229,7 +229,7 @@ if __name__ == '__main__':
         print i, name, time
         if status != 'STANDING':
             d[name]['status'] = status
-            colors = [ getColor(k, d[k]['status']) for k in d]
+            colors = [getColor(k, d[k]['status']) for k in d]
             scatter.set_facecolor(colors)
         return scatter,
 
@@ -255,11 +255,12 @@ if __name__ == '__main__':
                     y2 = d[k2]['y']
                     dist = (x1-x2)**2 + (y1-y2)**2
                     if dist <= 10**2:
-                        ax.plot([x1, x2] , [y1, y2], c='red', linewidth=1.3)
+                        s = '-' if d[k2]['status'] == 'MARKED' else '--'
+                        ax.plot([x1, x2], [y1, y2], c='red', linewidth=1.3, linestyle=s)
 
-    px = [ d[k]['x'] for k in d ]
-    py = [ d[k]['y'] for k in d ]
-    cc = [ 'black' if k == 'hostR54' else 'green' if d[k]['status'] == 'MARKED' else 'red' for k in d]
+    px = [d[k]['x'] for k in d]
+    py = [d[k]['y'] for k in d]
+    cc = [getColor(k, d[k]['status']) for k in d]
     scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
     plt.show()
 
