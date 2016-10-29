@@ -206,6 +206,9 @@ if __name__ == '__main__':
     cc = ['black' if k == 'hostR54' else 'red' for k in d]
 
     scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
+    n = [k[5:] for k in d]
+    for i, txt in enumerate(n):
+        ax.annotate(txt, (px[i]+1, py[i]+1))
 
     def getColor(name, status):
         if name == 'hostR123':
