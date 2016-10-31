@@ -274,6 +274,8 @@ BroadcastingAppBase::processStart()
     socket.bind(local_port);
     socket.setBroadcast(true);
 
+    log_status_for_animation("STANDING");
+
     if (nr_hello_msg > 0) {
     	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
         //ctrlMsg0->setKind(SAY_HELLO);
@@ -488,6 +490,13 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
     msg->setSender(myself.c_str());
     socket.sendTo(msg, addr, remote_port);
     emitSent(key);
+}
+
+
+void
+BroadcastingAppBase::log_status_for_animation(std::string status)
+{
+  cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
 }
 
 } //namespace

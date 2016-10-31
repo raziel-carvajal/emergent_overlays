@@ -125,17 +125,17 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     virtual void broadcast(std::string key, broadcasting::Broadcast* msg);
 
     template <typename T> bool
-	processMessage(cPacket* pkt, std::function<void(const T*)> action)
-	{
-		T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
-		if (t != nullptr) {
-			action(t);
-		    return true;
-		}
-		else {
-		    return false;
-		}
-	}
+  	processMessage(cPacket* pkt, std::function<void(const T*)> action)
+  	{
+  		T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
+  		if (t != nullptr) {
+  			action(t);
+  		    return true;
+  		}
+  		else {
+  		    return false;
+  		}
+  	}
 
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
     virtual void on_flooding_received(const broadcasting::FloodingMessage* m);
@@ -170,6 +170,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool are_control_messages_allowed() { return allowing_control_messages; }
 
     double get_random_delay() { return uniform(0.01, 0.04); }
+
+    void log_status_for_animation(std::string status);
   public:
     BroadcastingAppBase();
 

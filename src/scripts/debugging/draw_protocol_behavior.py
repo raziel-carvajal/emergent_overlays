@@ -6,6 +6,8 @@ import random
 import math
 import csv
 import numpy as np
+import argparse
+
 
 
 import networkx as nx
@@ -13,170 +15,79 @@ from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.patches as mpatches
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Displays the topology in the form of an animation')
+
+    parser.add_argument('cmap_file', metavar='cmap_file', type=str,
+                        help='File with the color map')
+
+    parser.add_argument('log_file', metavar='log_file', type=str,
+                        help='Log file (Produced by omnetpp when a broadcastin protocol is used)')
+
+    args = parser.parse_args()
+    return args
 
 
-def get_graph(pos, tx):
-    print "Positions"
-    print pos, "\n"
-    g = nx.Graph()
-    for i in pos:
-        v = pos[i]
-        x0 = v[0]
-        y0 = v[1]
-        g.add_node(i)
-        for j in pos:
-            if i < j:
-                v2 = pos[j]
-                x1 = v2[0]
-                y1 = v2[1]
-                d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
-                if d < tx*tx:
-                    g.add_edge(i, j)
-
-    return g
+def read_colormap(cmap_file):
+    '''
+    Read the color map from a file. A color map is nothing but a csv file
+    where the first column is the state and the second one is the color in text
+    format.
+    '''
+    cmap = {}
+    with open(cmap_file, 'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            cmap[row[0]] = row[1]
+    # FIXME: what if the file doesn't exist? Discover how to deal with that case
+    # in Python
+    return cmap
 
 
-def compute_mpr(g):
-    H1 = defaultdict(set)
-    for n in g.nodes():
-        for e in g.neighbors(n):
-            H1[n].add(e)
-
-    H2 = defaultdict(set)
-    for n in g.nodes():
-        for e in g.neighbors(n):
-            H2[n] = H2[n] | H1[e]
-        H2[n] = H2[n] - ({n} | H1[n])
-
-    print "", "H1"
-    print H1, "\n"
-    print "", "H2"
-    print H2, "\n"
-
-    # Step 1
-    C = defaultdict(set)
-    Uncovered = defaultdict(set)
-    for v in g.nodes():
-        Uncovered[v] = H2[v]
-        print "\t", v, " trying to cover ", H2[v]
-        covered = {u: Uncovered[v] & H1[u] for u in g.neighbors(v) }
-
-        for h in H2[v]:
-            haveIt = [u for u in g.neighbors(v) if h in covered[u]]
-            if len(haveIt) == 1 and not (haveIt[0] in C[v]):
-                print "\t\tIncluded in step 1: ", haveIt[0]
-                Uncovered[v] = Uncovered[v] - covered[haveIt[0]]
-                C[v].add(haveIt[0])
-
-        print "\tmissing after step 1: ", (Uncovered[v])
-
-        while len(Uncovered[v]) > 0:
-            covered = {u: Uncovered[v] & H1[u] for u in g.neighbors(v) }
-            m = max([ len(covered[u]) for u in g.neighbors(v) if not u in C[v] ])
-            goods = [ u for u in g.neighbors(v) if not u in C[v] and len(covered[u]) == m ]
-            goods.sort()
-            C[v].add(goods[0])
-            Uncovered[v] = Uncovered[v] - covered[goods[0]]
-            print "\t\tIncluded in step 2: ", goods[0]
-
-        print "\tmissing after step 2: ", (Uncovered[v])
-        print ""
-
-    return C
-
-
-def compute_potential_senders(g, C):
-    S = set([0])
-    Covered = set([0])
-
-    msgs = { u: [0] for u in g.neighbors(0) }
-    who_have_msg = { u: [set([0])] for u in g.neighbors(0) }
-
-    while len(msgs) > 0:
-        new_msgs = defaultdict(list)
-        new_who_have_msg = defaultdict(list)
-        for v in msgs:
-            Covered.add(v)
-            sender = msgs[v][0]
-            have_the_msg = who_have_msg[v][0]
-            missing_neighbors = { u for u in g.neighbors(v) if not u in have_the_msg }
-            # MPR Rules
-            if v in C[sender]: # and len(missing_neighbors) > 0:
-                S.add(v)
-                # send to my neighbors
-                for u in g.neighbors(v):
-                    if not u in Covered:
-                        new_msgs[u].append(v)
-                        new_who_have_msg[u].append( have_the_msg | set([v]) | missing_neighbors )
-        msgs = new_msgs
-        who_have_msg = new_who_have_msg
-
-    print "Covered: ", len(Covered)
-
-    return S
-
-
-def simulate(g, pos, l, base_filename):
-    plt.figure()
-    plt.axis('off')
-    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700)
-    plt.savefig(base_filename + " initial")
-
-    C = compute_mpr(g)
-
-    plt.figure()
-    plt.axis('off')
-    IN_C = 1.0 # yellow
-    NOT_IN_C = 0.0 # blue
-    colors = map(lambda(u): IN_C if any(u in C[v] for v in C) else NOT_IN_C , g.nodes())
-
-    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='summer', node_color=colors)
-    plt.savefig(base_filename + " members of mpr.png")
-
-    Senders = compute_potential_senders(g, C)
-
-    print Senders, len(Senders)
-
-    plt.figure()
-    plt.axis('off')
-    SENDERS_COLOR = 1.0 # yellow
-    NOT_SENDERS_COLOR = 0.0 # blue
-    colors = [ SENDERS_COLOR if u in Senders else NOT_SENDERS_COLOR for u in g.nodes()]
-    nx.draw_networkx(g, pos, labels=l, font_size=7, node_size=700, vmin=0, vmax=1, cmap='summer', node_color=colors)
-    plt.savefig(base_filename + " after mpr rule.png")
-
-    pass
-
-def distance(u, v, pos):
-    return (pos[u][0]-pos[v][0])**2 + (pos[u][1]-pos[v][1])**2
-
-if __name__ == '__main__':
-    logFile = sys.argv[1]
-    # output_image_file = sys.argv[2]
-    # communication_range = int(sys.argv[3])
-    #
-    # node_id = 0
-    # pos = defaultdict(list)
-    # l = defaultdict(list)
-    #
-    # with open(topology_file) as fp:
-    #     for line in fp:
-    #         pos[node_id] = map(lambda(s): int(s), line.split(','))
-    #         l[node_id] = "h" + str(node_id)
-    #         node_id = node_id + 1
-    #
-    # # sent by Raziel
-    # g = get_graph(pos, communication_range)
-    # simulate(g, pos, l, "raziel")
-    #
-    # g1, pos1, l1 = generate_topology()
-    # print pos1, g1.nodes()
-    # simulate(g1, pos1, l1, "paper")
+def read_log_file(log_file):
     data = []
-    with open(logFile, 'rb') as csvfile:
+    with open(log_file, 'rb') as csvfile:
         logreader = csv.reader(csvfile, delimiter=',')
         for row in logreader:
             data.append({'name': row[1], 'time': float(row[2]), 'x': float(row[3]), 'y': float(row[4]), 'status': row[5]})
+    return data
+
+
+def plot_egdes(ax, nodes, tx=10, callback_line_style=lambda n1, n2: '-'):
+    for k1 in nodes:
+        x1 = nodes[k1]['x']
+        y1 = nodes[k1]['y']
+        for k2 in nodes:
+            if k1 != k2:
+                x2 = nodes[k2]['x']
+                y2 = nodes[k2]['y']
+                dist = (x1-x2)**2 + (y1-y2)**2
+                if dist <= tx**2:
+                    s = callback_line_style(nodes[k1], nodes[k2])
+                    ax.plot([x1, x2], [y1, y2], c='red', linewidth=1.3, linestyle=s)
+    pass
+
+
+def plot_nodes(ax, nodes, color_map):
+    px = [nodes[k]['x'] for k in nodes]
+    py = [nodes[k]['y'] for k in nodes]
+    cc = [color_map[nodes[k]['status']] for k in nodes]
+    names = [k[5:] for k in nodes]
+    scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
+    for i, txt in enumerate(names):
+        ax.annotate(txt, (px[i]+1, py[i]+1))
+
+    ax.legend([mpatches.Rectangle((0,0),1,1,fc=color_map[k]) for k in color_map],
+              [k for k in color_map])
+    return scatter
+
+
+if __name__ == '__main__':
+    args = get_arguments()
+    data = read_log_file(args.log_file)
+    cmap = read_colormap(args.cmap_file)
 
     # create dictionary
     d = {}
@@ -189,57 +100,20 @@ if __name__ == '__main__':
     # draw initial stuff
     fig, ax = plt.subplots()
 
-    for k1 in d:
-        x1 = d[k1]['x']
-        y1 = d[k1]['y']
-        for k2 in d:
-            if k1 < k2:
-                x2 = d[k2]['x']
-                y2 = d[k2]['y']
-                dist = (x1-x2)**2 + (y1-y2)**2
-                if dist <= 10**2:
-                    # print x1, x2, y1, y2
-                    ax.plot([x1, x2], [y1, y2], c='red', linewidth=1.3)
-
-    px = [d[k]['x'] for k in d]
-    py = [d[k]['y'] for k in d]
-    cc = ['black' if k == 'hostR54' else 'red' for k in d]
-
-    scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
-    n = [k[5:] for k in d]
-    for i, txt in enumerate(n):
-        ax.annotate(txt, (px[i]+1, py[i]+1))
-
-    def getColor(name, status):
-        if name == 'hostR123':
-            return 'black'
-        if status == 'MARKED':
-            return 'green'
-        if status == 'UNMARKED1':
-            return 'blue'
-        if status == 'UNMARKED2':
-            return 'yellow'
-        if status == 'UNMARKED3':
-            return 'gray'
-        if status == 'UNMARKED4':
-            return 'pink'
-        return 'red'
+    plot_egdes(ax=ax, nodes=d)
+    graph_nodes = plot_nodes(ax=ax, nodes=d, color_map=cmap)
 
     def animate(i):
         name = data[i]['name']
         status = data[i]['status']
         time = data[i]['time']
         print i, name, time
-        if status != 'STANDING':
-            d[name]['status'] = status
-            colors = [getColor(k, d[k]['status']) for k in d]
-            scatter.set_facecolor(colors)
-        return scatter,
+        d[name]['status'] = status
+        colors = [cmap[d[k]['status']] for k in d]
+        graph_nodes.set_facecolor(colors)
+        return graph_nodes,
 
-    def init():
-        return scatter,
-
-    ani = animation.FuncAnimation(fig, animate, np.arange(0, len(data)), init_func=init,
+    ani = animation.FuncAnimation(fig, animate, np.arange(0, len(data)),
                                   interval=100, blit=False, repeat=False)
 
     plt.show()
@@ -247,27 +121,10 @@ if __name__ == '__main__':
     print "Plotting final graph"
     fig, ax = plt.subplots()
 
-    for k1 in d:
-        x1 = d[k1]['x']
-        y1 = d[k1]['y']
-        status = d[k1]['status']
-        if status == "MARKED":
-            for k2 in d:
-                if k1 != k2:
-                    x2 = d[k2]['x']
-                    y2 = d[k2]['y']
-                    dist = (x1-x2)**2 + (y1-y2)**2
-                    if dist <= 10**2:
-                        s = '-' if d[k2]['status'] == 'MARKED' else '--'
-                        ax.plot([x1, x2], [y1, y2], c='red', linewidth=1.3, linestyle=s)
-
-    px = [d[k]['x'] for k in d]
-    py = [d[k]['y'] for k in d]
-    cc = [getColor(k, d[k]['status']) for k in d]
-    scatter = ax.scatter(px, py, marker="o", c=cc, s=144)
-    n = [k[5:] for k in d]
-    for i, txt in enumerate(n):
-        ax.annotate(txt, (px[i]+1, py[i]+1))
+    def final_linestyle(n1, n2):
+        return ' ' if n1['status'] != 'MARKED' else '-' if n2['status'] == 'MARKED' else '--'
+    plot_egdes(ax=ax, nodes=d, callback_line_style=final_linestyle)
+    plot_nodes(ax=ax, nodes=d, color_map=cmap)
     plt.show()
 
     print "Done"
