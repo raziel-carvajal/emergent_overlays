@@ -62,8 +62,7 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} --algorithm ${PROTOCOL} --density 0
-        #exit 1
+	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} --algorithm ${PROTOCOL} --density-as-string ${DENSITY}
 	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
