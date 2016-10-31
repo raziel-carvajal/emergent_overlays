@@ -18,6 +18,8 @@ get.arguments <- function() {
                       help='Algorithm used')
   parser$add_argument('-d', '--density', metavar='density', type="integer",
                       help='Density of the topology used')
+  parser$add_argument('-ds', '--density-as-string', metavar='density_string', type="character",
+                      help='Density of the topology used as string')
   parser$add_argument('--radio-mode', dest='computeRadioMode', action="store_true",
                       help='Computing the time spent in each radio mode (a debug only option)')
   parser$add_argument('--save-time-power-level', dest='timeOfPowerLevels', action="store_true",
@@ -517,16 +519,16 @@ main <- function(args) {
     print("DONE")
 
     print("Exporting distributions of metrics...")
-    filename <- build.filename(args$outputPath, "batteryConsumption", args$density)
+    filename <- build.filename(args$outputPath, "batteryConsumption", args$density_as_string)
     exportDataset(pcoDist, filename)
 
-    filename <- build.filename(args$outputPath, "numberOfRelays", args$density)
+    filename <- build.filename(args$outputPath, "numberOfRelays", args$density_as_string)
     exportDataset(relDist, filename)
 
-    filename <- build.filename(args$outputPath, "duplicatedMsgs", args$density)
+    filename <- build.filename(args$outputPath, "duplicatedMsgs", args$density_as_string)
     exportDataset(dupDist, filename)
 
-    filename <- build.filename(args$outputPath, "broadcastSessionTime", args$density)
+    filename <- build.filename(args$outputPath, "broadcastSessionTime", args$density_as_string)
     exportDataset(broDist, filename)
     print("DONE")
   }
