@@ -79,8 +79,11 @@ def plot_nodes(ax, nodes, color_map):
     for i, txt in enumerate(names):
         ax.annotate(txt, (px[i]+1, py[i]+1))
 
+
     ax.legend([mpatches.Rectangle((0,0),1,1,fc=color_map[k]) for k in color_map],
-              [k for k in color_map])
+              [k for k in color_map], loc='upper center', bbox_to_anchor=(0.5, 1.08),
+              ncol=3, fancybox=True, shadow=True)
+
     return scatter
 
 
