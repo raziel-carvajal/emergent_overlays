@@ -114,7 +114,7 @@ if __name__ == '__main__':
         return graph_nodes,
 
     ani = animation.FuncAnimation(fig, animate, np.arange(0, len(data)),
-                                  interval=100, blit=False, repeat=False)
+                                  interval=50, blit=False, repeat=False)
 
     plt.show()
 
