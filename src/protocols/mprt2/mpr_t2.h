@@ -65,46 +65,47 @@ private:
     virtual bool on_network_message_received(cPacket* pkt) override;
 
     virtual void on_neighbors(const mpr_t2::Neighbors* m);
-	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
-	virtual void on_mpr_found(const mpr_t2::MprFound* m);
+  	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
+  	virtual void on_mpr_found(const mpr_t2::MprFound* m);
 
-	void request_hops(int h);
+  	void request_hops(int h);
+    void reply_hops(int n);
 
-	void notify_mpr();
-
-
-	/**
-	 *
-	 * This is the one one should call to get the hops in a level.
-	 * For instance, using l = 0 will return the direct neighbors
-	 * using l = 1 will return nodes you can reach using one of your neighbors
-	 * */
-	set<string> get_hops_in_level(int l);
-
-	/**
-	 * This one is also useful. You can call it to get the position of a host
-	 */
-
-	pair<double, double> get_hop_position(string n) {
-		if (hops_position.find(n) == hops_position.end()) {
-			throw new invalid_argument("unknown hop: " + n);
-		}
-		return hops_position[n];
-	}
-
-	bool is_a_covered_by_b(string a, string b, double b_radius) {
-
-		auto pA = get_hop_position(a);
-		auto pB = get_hop_position(b);
-
-		return (
-				b_radius * b_radius >
-					(pA.first - pB.first)*(pA.first - pB.first)+
-					(pA.second - pB.second)*(pA.second - pB.second)
-			   );
+  	void notify_mpr();
 
 
-	}
+  	/**
+  	 *
+  	 * This is the one one should call to get the hops in a level.
+  	 * For instance, using l = 0 will return the direct neighbors
+  	 * using l = 1 will return nodes you can reach using one of your neighbors
+  	 * */
+  	set<string> get_hops_in_level(int l);
+
+  	/**
+  	 * This one is also useful. You can call it to get the position of a host
+  	 */
+
+  	pair<double, double> get_hop_position(string n) {
+  		if (hops_position.find(n) == hops_position.end()) {
+  			throw new invalid_argument("unknown hop: " + n);
+  		}
+  		return hops_position[n];
+  	}
+
+  	bool is_a_covered_by_b(string a, string b, double b_radius) {
+
+  		auto pA = get_hop_position(a);
+  		auto pB = get_hop_position(b);
+
+  		return (
+  				b_radius * b_radius >
+  					(pA.first - pB.first)*(pA.first - pB.first)+
+  					(pA.second - pB.second)*(pA.second - pB.second)
+  			   );
+
+
+	  }
 
 
 	/** Compute MPR(x) */
