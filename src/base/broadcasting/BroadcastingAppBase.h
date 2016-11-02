@@ -27,22 +27,22 @@ namespace inet {
 class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 {
   public:
-  //Unique (there aren't two nodes with the same delta) number of milliseconds that every node
-  //set (according to its node identifier) to send control messages
-  double delta;
-  // how many hello messages I must send
-  int nr_hello_msg;
-  cMessage* ctrlMsg0 = nullptr;
-  class Neighbor {
-    public:
-        std::string name;
-        L3Address addr;
-        Coord pos;
-        double w;
+    //Unique (there aren't two nodes with the same delta) number of milliseconds that every node
+    //set (according to its node identifier) to send control messages
+    double delta;
+    // how many hello messages I must send
+    int nr_hello_msg;
+    cMessage* ctrlMsg0 = nullptr;
+    class Neighbor {
+      public:
+          std::string name;
+          L3Address addr;
+          Coord pos;
+          double w;
     };
 
-  std::string getLogHeader();
-  protected:
+    std::string getLogHeader();
+
     enum ControlMessageTypes {
         IDLE,
         START,
@@ -57,6 +57,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         First = IDLE,
         Last = FLOODING_DELAY
     };
+
+  protected:
+
 
 
     // is the source of a broadcast
@@ -169,7 +172,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void forbid_control_messages() { allowing_control_messages = false; }
     bool are_control_messages_allowed() { return allowing_control_messages; }
 
-    double get_random_delay() { return uniform(0.01, 0.04); }
+    double get_random_delay() { return uniform(0.03, 0.1); }
 
     void log_status_for_animation(std::string status);
   public:
