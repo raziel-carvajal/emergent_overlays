@@ -85,14 +85,14 @@ bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second
 
 double
 Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
-    int i, j; double sum;
+    double sum = 0;
     if (items.size() == 0) return 0.0;
     if (items.size() == 1) return items[0].second - items[0].first;
     std::sort(items.begin(), items.end());
-    for (i = 0; i < items.size(); i++)
-        sum += items[i].second - items[i].first;
-    for (i = 0; i < items.size() - 1; i++) {
-        for (j = i + 1; j < items.size(); j++) {
+    for (int i = 0; i < items.size(); i++)
+      sum += items[i].second - items[i].first;
+    for (int i = 0; i < items.size() - 1; i++) {
+        for (int j = i + 1; j < items.size(); j++) {
             if ( inPair(items[j].first, items[i]) ) {
                 if (items[j].second < items[i].second) sum -= items[j].second - items[j].first;
                 else sum -= items[i].second - items[j].first;
@@ -114,9 +114,9 @@ Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360.0)
 
 void
 Abba2::on_payload_received(const Broadcast* m) {
+    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     string key = string(m->getId());
     emitBroadcastMsgReceived(key);
-    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     cerr << getLogHeader() + "broadcast message " + key + " was sent by peer " + m->getSender() + "\n";
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
@@ -139,6 +139,7 @@ Abba2::on_payload_received(const Broadcast* m) {
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
                 cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
+                log_status_for_animation("MSG_RECEIVED");
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
                 cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
                 cMessage* old_msg = delayMessages[key];
@@ -172,6 +173,7 @@ Abba2::send_message(string& key)
         m->setX(position.x);
         m->setY(position.y);
         broadcast(key, m);
+        log_status_for_animation("MSG_RECEIVED_SENT");
     } else {
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
     }
@@ -190,6 +192,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
         m->setX(position.x);
         m->setY(position.y);
         broadcast(key, m);
+        emitBroadcastMsgReceived(key);
     } else {
         key = string( (char*)user_data );
         send_message(key);
