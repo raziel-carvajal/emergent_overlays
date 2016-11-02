@@ -21,9 +21,9 @@ namespace inet {
   Define_Module(Cds_3);
 
   void inet::Cds_3::on_payload_received(const broadcasting::Broadcast* m) {
-    string key = string(m->getPayload());
-    emitBroadcastMsgReceived(key);
     if (string(m->getSender()) == myself) return;
+    string key = string(m->getId());
+    emitBroadcastMsgReceived(key);
 
     if (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end()) {
         broadcast(key, new broadcasting::Broadcast("payload"));
@@ -36,6 +36,7 @@ namespace inet {
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
         alreadyDispatched[key] = key;
+        emitBroadcastMsgReceived(key);
         broadcast(key, new broadcasting::Broadcast("payload"));
     }
   }
@@ -54,7 +55,6 @@ namespace inet {
              * having ( (the number of hello messages) MOD 3 )== 1*/
             if (nr_hello_msg % 2 == 1) { doMarkingProcedure(); }
             scheduleAt(simTime() + par("helloTime").doubleValue() + delta, neighsMsg);
-            cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "STANDING" << endl;
             // cancelAndDelete(msg);
             // return;
         } else if (msg->getKind() == ONE_HOP_NEIGHS) {
@@ -103,15 +103,19 @@ namespace inet {
                 if (myNeig.first != neigsMap.first && neigsMap.second.find(myNeig.first) == neigsMap.second.end()) {
                     amIrelay = true;
                     cerr << getLogHeader() << "I am Relay (marking procedure)\n";
-                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "MARKED" << endl;
+                    log_status_for_animation("MARKED");
                     markingProcedureDone = true;
                     return;
                 }
             }
         }
     }
-    if (amIrelay) applyRule2();
-    if (amIrelay) applyRule2_1();
+    // if (amIrelay) applyRule2();
+    if (amIrelay) {
+      bool b = applyRule1_a();
+      if (amIrelay)
+        applyRule2_1();
+    }
   }
 
   map<string, string> Cds_3::cloneNeighbors() {
@@ -156,7 +160,7 @@ namespace inet {
                     // cerr << getLogHeader() + "MIN: " + to_string(m) + "\n";
                     if (str_int[myself] == m) {
                         cerr << getLogHeader() << "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED4" << endl;
+                        log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
                     }
@@ -166,32 +170,61 @@ namespace inet {
     }
   }
 
-void Cds_3::applyRule2_1() {
+  bool Cds_3::applyRule1_a() {
+    auto v = myself;
+    auto N_v = cloneNeighbors();
+    N_v[v] = v;
+    for (auto& n: relaysIcanSee) {
+      auto u = n.first;
+      auto N_u = oneHopNeigs[u];
+      N_v[u] = u;
+      auto id_v = stoi (v.substr(5, v.size()));
+      auto id_u = stoi (u.substr(5, u.size()));
+      if (isSubset(N_v, N_u)) {
+        if (N_v.size() < N_u.size()) {
+          log_status_for_animation("UNMARKED4");
+          amIrelay = false;
+          return true;
+        }
+        else if (N_v.size() == N_u.size() && id_v < id_u) {
+          log_status_for_animation("UNMARKED4");
+          amIrelay = false;
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  void Cds_3::applyRule2_1() {
     if (relaysIcanSee.size() < 2) return;
-    map<string, string> cpyNeigs = cloneNeighbors();
+    map<string, string> N_v = cloneNeighbors();
     map<string, string> uCloseSet, vCloseSet, wCloseSet;
     int idU, idV, idW, m; string::size_type sz;
     bool vATuUw, uATvUw, wATuUv;
     for (auto& u: relaysIcanSee) {
         for (auto& w: relaysIcanSee) {
             if (u.first != w.first) {
-//                cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.1\n";
+                // cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.1\n";
                 //Rule 2.1.1
-//                cerr << getLogHeader() + "Checking rule 2.1.1\n";
-                vATuUw = isSubset(cpyNeigs, computeUnion(oneHopNeigs[u.first], oneHopNeigs[w.first]));
-                uATvUw = isSubset(oneHopNeigs[u.first], computeUnion(cpyNeigs, oneHopNeigs[w.first]));
-                wATuUv = isSubset(oneHopNeigs[w.first], computeUnion(oneHopNeigs[u.first], cpyNeigs));
+                // cerr << getLogHeader() + "Checking rule 2.1.1\n";
+                auto N_u = oneHopNeigs[u.first];
+                auto N_w = oneHopNeigs[w.first];
+                vATuUw = isSubset(N_v, computeUnion(N_u, N_w));
+                uATvUw = isSubset(N_u, computeUnion(N_v, N_w));
+                wATuUv = isSubset(N_w, computeUnion(N_u, N_v));
                 if (vATuUw && !uATvUw && !wATuUv) {
                     cerr << getLogHeader() << "Not relay anymore<<<<<\n";
-                    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED1" << endl;
+                    log_status_for_animation("UNMARKED2a1");
                     amIrelay = false;
                     return;
                 }
-                uCloseSet = oneHopNeigs[u.first];
-                wCloseSet = oneHopNeigs[w.first];
+                uCloseSet = N_u;
+                wCloseSet = N_w;
                 //adding u, v and w to the corresponding set will make it a close set
                 uCloseSet[u.first] = u.first;
-                cpyNeigs[myself] = myself;
+                N_v[myself] = myself;
                 wCloseSet[w.first] = w.first;
 
                 idV = stoi (myself.substr(5, myself.size()), &sz);
@@ -201,10 +234,10 @@ void Cds_3::applyRule2_1() {
 //                cerr << getLogHeader() + "Checking rule 2.1.2\n";
                 if (vATuUw && uATvUw && !wATuUv) {
                     // cerr << getLogHeader() + "Is node 7 here??\n";
-                    if (cpyNeigs.size() < uCloseSet.size() ||
-                            (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
+                    if (N_v.size() < uCloseSet.size() ||
+                            (N_v.size() == uCloseSet.size() && idV < idU)) {
                         cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED2" << endl;
+                        log_status_for_animation("UNMARKED2a2");
                         amIrelay = false;
                         return;
                     }
@@ -214,11 +247,11 @@ void Cds_3::applyRule2_1() {
 
                 m = min( idV, min(idU, idW) );
                 if (vATuUw && uATvUw && wATuUv) {
-                    if ((cpyNeigs.size() < uCloseSet.size() && cpyNeigs.size() < wCloseSet.size()) ||
-                            (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
-                            (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == m)) {
-                        cerr << getLogHeader() + "Not relay anymore<<<<<\n";
-                        cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << "UNMARKED3" << endl;
+                    if ((N_v.size() < uCloseSet.size() && N_v.size() < wCloseSet.size()) ||
+                            (N_v.size() == uCloseSet.size() && N_v.size() < wCloseSet.size() && idV < idU) ||
+                            (N_v.size() == uCloseSet.size() && N_v.size() == wCloseSet.size() && idV == m)) {
+                        cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+                        log_status_for_animation("UNMARKED2a3");
                         amIrelay = false;
                         return;
                     }

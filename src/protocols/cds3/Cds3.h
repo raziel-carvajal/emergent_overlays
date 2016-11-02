@@ -34,18 +34,19 @@ private:
     };
 
     bool markingProcedureDone;
-    bool amIrelay;
+    bool amIrelay = false;
     std::map<std::string, std::map<std::string, std::string> > oneHopNeigs;
     std::map<std::string, std::string> alreadyDispatched;
     std::map<std::string, std::string> relaysIcanSee;
     void applyRule2();
     void applyRule2_1();
+    bool applyRule1_a();
     void doMarkingProcedure();
     std::map<std::string, std::string> computeUnion(std::map<std::string, std::string> a, std::map<std::string, std::string> b);
     bool isSubset(std::map<std::string, std::string> a, std::map<std::string, std::string> b);
     bool equal(std::map<std::string, std::string> a, std::map<std::string, std::string> b);
     std::map<std::string, std::string> cloneNeighbors();
-    
+
 protected:
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     void virtual time_to_broadcast_payload(void* user_data) override;
