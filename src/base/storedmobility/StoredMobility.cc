@@ -126,7 +126,6 @@ StoredMovingMobility::initialize(int stage)
   MovingMobilityBase::initialize(stage);
   if (stage == INITSTAGE_LOCAL) {
 
-    moveTimer = new cMessage("move");
     isMoving = par("isMoving").boolValue();
     filename = par("filename").stdstringValue();
 
@@ -172,6 +171,9 @@ void StoredMovingMobility::handleSelfMessage(cMessage *message)
 {
   if (isMoving)
     MovingMobilityBase::handleSelfMessage(message);
+  else {
+    cancelAndDelete(message);
+  }
 }
 
 void
@@ -210,6 +212,12 @@ Coord StoredMovingMobility::getCurrentPosition()
 Coord StoredMovingMobility::getCurrentSpeed()
 {
     return (isMoving && lastPosition == Coord::ZERO)? MovingMobilityBase::getCurrentSpeed():lastSpeed;
+}
+
+void
+StoredMovingMobility::finish()
+{
+  MovingMobilityBase::finish();
 }
 
 } // namespace

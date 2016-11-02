@@ -44,6 +44,7 @@ namespace inet {
 		protected:
 			void initialize(int stage);
 			void handleSelfMessage(cMessage *message) override;
+			virtual void finish() override;
 		private:
 			bool isMoving = false;
 			std::string filename;
