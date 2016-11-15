@@ -2,3 +2,27 @@
 
 \section{Broadcast Algorithms for MANETs}
 \label{sec:background}
+
+In this paper we focus on broadcasting algorithms for mobile ad-hoc networks.
+To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al.~\cite{Ruiz2015}.
+In such survey, the authors present many broadcasting algorithms and propose a taxonomy of features to classify them.
+In addition, the survey summarizes the terminology used in the literature.
+We use the following subset of those terms in the remainder of this paper:
+
+An ad-hoc network can be represented as a graph $G = (V, E)$, where $V$ is the set of
+nodes composing it, and $E$ is the set of links connecting nodes in the communication range.
+
+\newtheorem{mydef}{Definition}
+
+\begin{mydef}[Dissemination/Broadcast]
+	Given a \textit{source node} $v$ starting a broadcast process, the broadcast problem consists in reaching any $u \in V$ with the message $m$ by following the set of links $e \in E$.
+\end{mydef}
+
+\begin{mydef}[Broadcast Session]
+	In an ad-hoc network, nodes $V^\prime \subseteq V$ may aim at disseminating the messages $m_0, m_1, \dots, m_k$.
+	The dissemination of a message $m_i$ is a \textit{broadcast session}; and it can be uniquely identified by the message.
+\end{mydef}
+
+\begin{mydef}[Underlying Topology]
+	Dissemination algorithms often maintain a subset of nodes -- the underlying topology -- used to drive the broadcasting process. Those nodes, which play a special role during a broadcast session, are determined using strategies specifics to each dissemination technique.
+\end{mydef}
