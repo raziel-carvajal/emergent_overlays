@@ -12,32 +12,21 @@ This increases the error-rate in the network, preventing the correct disseminati
 
 In general, there are two issues to address in designing a broadcast algorithm for MANETs.
 The first issue is guaranteeing a good level of network \textit{coverage} (percentage of nodes that receive a broadcast message).
-Doing so in the context of MANETs is challenging because they may suffer from unique problems such as low throughput, temporary disconnection, high mobility, high bit error rate and varying characteristics over short timescales.
+Dealing with this issue in the context of MANETs is challenging because they may suffer from unique problems such as low throughput, temporary disconnection, high mobility, high bit error rate and varying characteristics over short timescales.
 The second issue is minimizing the amount of resources used to perform the broadcasting.
 For instance, reducing the number of retransmissions to avoid the congestion of the medium is considered a good practice.
-Likewise, since the devices connected to a MANET tend to be running on batteries, it is worthwhile keeping power consumption as low as possible.
+Likewise, since the devices connected to a MANET tend to be running on batteries, it is worthwhile keeping energy consumption as low as possible.
 
 As shown in a thoughtful survey by Ruiz et al.~\cite{Ruiz2015}, the literature on broadcasting algorithms for MANETs is quite large \inti{I don't like large}.
-In the current state of the art, we find similar approaches, but we also find mechanisms that greatly differ.
-Although there are different classifications~\cite{Williams:2002:CBT:513800.513825, WuLou1043098, YiGerla2003}, we prefer the taxonomy presented in the aforementioned survey because it is newer and cover more approaches.  
+For that reason, we find a great diversity of approaches in the current state-of-the-art. 
+To classify them, different criteria have been used~\cite{Williams:2002:CBT:513800.513825, WuLou1043098, YiGerla2003}.
+However, in this paper we prefer the taxonomy presented by Ruiz et al. in the aforementioned survey because it is newer, more systematic and cover more approaches.
+in the rest of this section we briefly discuss such a taxonomy.
 
+First, some algorithms build an \textit{underlying topology} and use it to drive the broadcasting process. This is \textit{topology} is nothing but a subset of nodes with some characteristics that depend on the algorithm.
+Using an underlying topology  aim at reducing both network congestion and energy consumption.
+However, building this topology has a cost that can only be amortized through the usage of the topology in many \textit{broadcast sessions}.     
 
-In this paper we focus on broadcasting algorithms for mobile ad-hoc networks.
-To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al.~\cite{Ruiz2015}.
-In such survey, the authors present many broadcasting algorithms and propose a taxonomy of features to classify them.
-In addition, the survey summarizes the terminology used in the literature.
-We use the following subset of those terms in the remainder of this paper:
-
-An ad-hoc network can be represented as a graph $G = (V, E)$
 
 \newtheorem{mydef}{Definition}
 
-
-\begin{mydef}[Broadcast Session]
-	In an ad-hoc network, nodes $V^\prime \subseteq V$ may aim at disseminating the messages $m_0, m_1, \dots, m_k$.
-	The dissemination of a message $m_i$ is a \textit{broadcast session}; and it can be uniquely identified by the message.
-\end{mydef}
-
-\begin{mydef}[Underlying Topology]
-	Dissemination algorithms often maintain a subset of nodes -- the underlying topology -- used to drive the broadcasting process. Those nodes, which play a special role during a broadcast session, are determined using strategies specifics to each dissemination technique.
-\end{mydef}
