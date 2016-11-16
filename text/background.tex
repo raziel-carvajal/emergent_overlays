@@ -3,20 +3,31 @@
 \section{Broadcast Algorithms for MANETs}
 \label{sec:background}
 
+A mobile ad-hoc network can be seen as a graph $G = (V, E)$, where $V$ is the set of
+nodes, and $E$ is the set of links connecting nodes in the communication range.
+In such networks, the broadcast problem consists in delivering a message to all nodes by only using links in $E$~\cite{Ruiz2015}.
+Unfortunately, the simplest solution, known as \textit{flooding}, has a major drawback -- the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
+Indeed, since in flooding each node retransmits every received message, the medium is rapidly saturated.
+This increases the error-rate in the network, preventing the correct dissemination of the message, affecting the communication in general and wasting resources.
+
+In general, there are two issues to address in designing a broadcast algorithm for MANETs.
+The first issue is guaranteeing a good level of network \textit{coverage} (percentage of nodes that receive a broadcast message).
+Doing so in the context of MANETs is challenging because they may suffer from unique problems such as low throughput, temporary disconnection, high mobility, high bit error rate and varying characteristics over short timescales.
+The second issue is minimizing the amount of resources used to perform the broadcasting.
+For instance, reducing the number of retransmissions to avoid the saturation of the medium is considered a good practice.
+Likewise, since the devices connected to a MANET tend to be running on batteries, it is worthwhile keeping power consumption as low as possible. 
+
+
 In this paper we focus on broadcasting algorithms for mobile ad-hoc networks.
 To ease the discussion about the algorithms that are evaluated hereafter, we rely on the taxonomy proposed  by Ruiz et al.~\cite{Ruiz2015}.
 In such survey, the authors present many broadcasting algorithms and propose a taxonomy of features to classify them.
 In addition, the survey summarizes the terminology used in the literature.
 We use the following subset of those terms in the remainder of this paper:
 
-An ad-hoc network can be represented as a graph $G = (V, E)$, where $V$ is the set of
-nodes composing it, and $E$ is the set of links connecting nodes in the communication range.
+An ad-hoc network can be represented as a graph $G = (V, E)$
 
 \newtheorem{mydef}{Definition}
 
-\begin{mydef}[Dissemination/Broadcast]
-	Given a \textit{source node} $v$ starting a broadcast process, the broadcast problem consists in reaching any $u \in V$ with the message $m$ by following the set of links $e \in E$.
-\end{mydef}
 
 \begin{mydef}[Broadcast Session]
 	In an ad-hoc network, nodes $V^\prime \subseteq V$ may aim at disseminating the messages $m_0, m_1, \dots, m_k$.
