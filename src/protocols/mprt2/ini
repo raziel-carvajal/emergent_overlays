@@ -2,9 +2,9 @@ description = "Broadcasting messages using MPR"
 
 *.host*.udpApp[0].typename = "Mpr_t2"
 
-*.host*.udpApp[0].nr_hello_messages = 3
+*.host*.udpApp[0].nr_hello_messages = 50
 *.host*.udpApp[0].maximumDelay = 0.05s
-*.host*.udpApp[0].helloTime = uniform(0.1s, 0.2s)
+*.host*.udpApp[0].helloTime = uniform(1s, 2s)
 
 # mpr related stuff
 *.host*.udpApp[0].build_hops = true

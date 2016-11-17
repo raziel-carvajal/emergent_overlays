@@ -41,7 +41,8 @@ Define_Module(Mpr_t2);
 
 enum ControlMessageTypes {
 	WAKEUP_HOPS_REQUESTER = BroadcastingAppBase::ControlMessageTypes::Last + 1,
-	DISPLAY_HOPS
+	DISPLAY_HOPS,
+	REFRESH_HOPS
 };
 
 
@@ -53,7 +54,6 @@ Mpr_t2::processStart()
 	// number of times that the information of two-hops neighbors will be exchanged
 	// to compute the MPR set
 	builtMprCounter = 3; //stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
-	bool b = par("build_hops").boolValue();
 
 	delayed_event(DISPLAY_HOPS, "", par("display_time_hops").doubleValue() + get_random_delay());
 
@@ -63,22 +63,28 @@ Mpr_t2::processStart()
 void
 Mpr_t2::handleMessageWhenUp(cMessage *msg)
 {
-
     if (msg->isSelfMessage()) {
-
         switch (msg->getKind()) {
-				case DISPLAY_HOPS:
-					{
-						if (builtMprCounter > 0) {
-							  if (builtMprCounter > 0)
-									delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
+					case SAY_HELLO:
+						delayed_event(REFRESH_HOPS, "", get_random_delay());
+						BroadcastingAppBase::handleMessageWhenUp(msg);
+						break;
+					case DISPLAY_HOPS:
+						{
+							if (builtMprCounter > 0) {
+								  if (builtMprCounter > 0)
+										delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
+							}
 						}
-					}
-					cancelAndDelete(msg);
-					break;
-				default:
-					BroadcastingAppBase::handleMessageWhenUp(msg);
-					break;
+						cancelAndDelete(msg);
+						break;
+					case REFRESH_HOPS:
+						erase_old_hops();
+						cancelAndDelete(msg);
+						break;
+					default:
+						BroadcastingAppBase::handleMessageWhenUp(msg);
+						break;
 			}
 	}
 	else BroadcastingAppBase::handleMessageWhenUp(msg);
@@ -93,56 +99,55 @@ Mpr_t2::on_network_message_received(cPacket* pkt){
 
 
 void
-Mpr_t2::on_mpr_hello(const MprHello *m) {
+Mpr_t2::erase_old_hops()
+{
+	for( auto it = hop1.begin(); it != hop1.end(); ) {
+		bool b = false;
+		double elapsed = (simTime() - it->second.time).dbl();
+		double threshold = 2 * 2;
+		if( elapsed > threshold )  {
+			it = hop1.erase(it);
+			// cerr << getLogHeader() << " removing " << it->first << endl;
+		}
+		else ++it;
+	}
+}
+
+
+void
+Mpr_t2::on_mpr_hello(const MprHello *m)
+{
 	string j = m->getSender();
 	if (j == myself) return;
 
 	/* first, it is obvious that the sender is a member of hops level 0 */
-	hops[0].insert(j);
-	hops_position[j] = make_pair(m->getX(), m->getY());
+	hop1[j] = NodeNeighbor(simTime());
+
+	hops_position[j] = Coord(m->getX(), m->getY());
 
 	for (int i = 0 ; i < m->getNeighborsArraySize() ; i++) {
 		string name(m->getNeighbors(i));
 		if (myself == name) continue;
 
-		bool no_neighbor = hops[0].find(name) == hops[0].end();
-
-		if (no_neighbor) {
-			hops[1].insert(name);
-			hops_position[name] = make_pair(m->getXs(i), m->getYs(i));
-			// cerr << myself << "(" << simTime() << ")===== : Adding " << name << " to level " << h << endl;
-		}
+		hop1[j].hop1.insert(name);
+		hops_position[name] = Coord(m->getXs(i), m->getYs(i));
 	}
 
-	// Ok, clean the mess
-	for (auto& h : hops[0]) {
-		hops[1].erase(h);
-	}
-}
-
-
-
-set<string>
-Mpr_t2::get_hops_in_level(int l)
-{
-	if (l < 0 || l >= (int)hops.size())
-		throw invalid_argument("Level is out of range");
-	return hops[l];
 }
 
 
 inet::broadcasting::Hello*
 Mpr_t2::build_hello_message() {
   auto m = new MprHello("MprHello");
-	int count = hops[0].size();
-	m->setNeighborsArraySize(count);
-	m->setXsArraySize(count);
-	m->setYsArraySize(count);
+	m->setNeighborsArraySize(hop1.size());
+	m->setXsArraySize(hop1.size());
+	m->setYsArraySize(hop1.size());
 	int i = 0;
-	for (const auto& h : hops[0]) {
+	for (const auto& p : hop1) {
+		auto h = p.first;
 		m->setNeighbors(i, h.c_str());
-		m->setXs(i, hops_position[h].first);
-		m->setYs(i, hops_position[h].second);
+		m->setXs(i, hops_position[h].x);
+		m->setYs(i, hops_position[h].y);
 		i++;
 	}
 	return m;
@@ -207,6 +212,22 @@ set<string>
 Mpr_t2::compute_mpr()
 {
 	set<string> mpr;
+	hops[0].clear();
+	hops[1].clear();
+	// first fill the array hops
+	for (const auto& p: hop1) {
+		hops[0].insert(p.first);
+	}
+	for (const auto& p: hop1) {
+		string j = p.first;
+		for (const auto& name: p.second.hop1) {
+			if (name == myself) continue;
+			bool no_neighbor = hops[0].find(name) == hops[0].end();
+			if (no_neighbor) {
+				hops[1].insert(name);
+			}
+		}
+	}
 
 	/* base case (rule 2 in the paper)  */
 	for (const auto& z: hops[1]){

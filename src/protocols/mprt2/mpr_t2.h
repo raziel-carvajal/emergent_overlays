@@ -29,8 +29,12 @@ namespace inet {
 
 class INET_API Mpr_t2 : public BroadcastingAppBase{
 protected:
-    enum mpr2cases{
-        GET_2_HOPS_N
+
+    struct NodeNeighbor {
+      simtime_t time;
+      set<string> hop1;
+      NodeNeighbor(): NodeNeighbor(0) {}
+      NodeNeighbor(simtime_t t) : time(t) {}
     };
 
 	  void handleMessageWhenUp(cMessage *msg);
@@ -43,9 +47,11 @@ private:
   	int builtMprCounter;
   	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
 
-  	array< set<string>, 3 > hops;
+  	array< set<string>, 2 > hops;
 
-  	map< string, pair<double, double> > hops_position;
+    map<string, NodeNeighbor> hop1;
+
+  	map< string, Coord > hops_position;
 
     /* payload of the message to broadcast */
     map< string, string >  payloads;
@@ -61,20 +67,10 @@ private:
 
     inet::mpr_t2::MprBroadcast* build_message_to_broadcast();
 
-
-  	/**
-  	 *
-  	 * This is the one one should call to get the hops in a level.
-  	 * For instance, using l = 0 will return the direct neighbors
-  	 * using l = 1 will return nodes you can reach using one of your neighbors
-  	 * */
-  	set<string> get_hops_in_level(int l);
-
   	/**
   	 * This one is also useful. You can call it to get the position of a host
   	 */
-
-  	pair<double, double> get_hop_position(string n) {
+  	Coord get_hop_position(string n) {
   		if (hops_position.find(n) == hops_position.end()) {
   			throw new invalid_argument("unknown hop: " + n);
   		}
@@ -88,16 +84,15 @@ private:
 
   		return (
   				b_radius * b_radius >
-  					(pA.first - pB.first)*(pA.first - pB.first)+
-  					(pA.second - pB.second)*(pA.second - pB.second)
+  					(pA.x - pB.x)*(pA.x - pB.x)+
+  					(pA.y - pB.y)*(pA.y - pB.y)
   			   );
-
-
 	  }
 
 
-	/** Compute MPR(x) */
-	set<string> compute_mpr();
+  	/** Compute MPR(x) */
+  	set<string> compute_mpr();
+    void erase_old_hops();
 
 
 };
