@@ -6,9 +6,9 @@
 CONFIG_PATH=../../experiments/configs/
 
 usage() {
-  echo "Usage $0: [-p PATH]"
+  echo "Usage $0: [-p PATH] CONFIGURATION_FILENAME"
   echo ""
-  echo -e "\tPATH: used to locate the configurations (../../experiments/configs/builtConfigs/ by default)\n"
+  echo -e "\tPATH: used to locate the configurations (../../experiments/configs/ by default)\n"
 }
 
 # parsing parameters
