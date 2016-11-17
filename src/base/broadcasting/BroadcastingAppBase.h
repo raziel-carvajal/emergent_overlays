@@ -32,7 +32,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double delta;
     // how many hello messages I must send
     int nr_hello_msg;
-    cMessage* ctrlMsg0 = nullptr;
     class Neighbor {
       public:
           std::string name;
@@ -52,15 +51,12 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
         LAST_POWER_REPORT,
-        FLOODING_DELAY,
 
         First = IDLE,
-        Last = FLOODING_DELAY
+        Last = LAST_POWER_REPORT
     };
 
   protected:
-
-
 
     // is the source of a broadcast
     bool is_source;
@@ -70,9 +66,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     // my direct edges (neighbors)
     std::map<std::string, Neighbor> neighbors;
-
-    /* a hack to avoid the problem of two messages being lost when they are send at the same time to the same device */
-    std::queue<cMessage*> old_msgs;
 
     // communication
     int remote_port = 10000;
@@ -88,9 +81,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     // counter to assign ids to broadcast messages
     int last_id = 0;
-
-    // keep all the payloads for flooding
-    std::map<std::string, std::string> payload_in_flooding;
 
   private:
 
@@ -117,11 +107,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual void finish() override;
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
 
     virtual void processStart();
 
@@ -140,8 +127,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
   		}
   	}
 
+
+    virtual inet::broadcasting::Hello* build_hello_message();
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
-    virtual void on_flooding_received(const broadcasting::FloodingMessage* m);
     virtual bool on_network_message_received(cPacket* pkt); // This nasty one must be defined if your protocol is using other type of messages (percolator)
 
     virtual void time_to_broadcast_payload(void* user_data); // it is called sometime after you call delayed_broadcast
@@ -163,8 +151,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     int get_last_id_for_msg();
     std::string createUniqueBroadcastingSessionId();
 
-    void initiateFlooding(std::string payload);
-
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
 
     void send_package(cPacket* m); // send a package to all neirby devices
@@ -175,8 +161,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double get_random_delay() { return uniform(0.03, 0.1); }
 
     void log_status_for_animation(std::string status);
-  public:
-    BroadcastingAppBase();
+
+    Coord get_position();
 
 };
 

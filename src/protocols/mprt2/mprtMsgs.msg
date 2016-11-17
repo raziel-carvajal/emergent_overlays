@@ -22,26 +22,6 @@ packet inet::broadcasting::Hello;
 
 namespace inet::mpr_t2;
 
-packet Neighbors {
-	string neighbors[];
-	int hopLevels[];
-	double xs[];
-	double ys[];
-	int maxHopLevel;
-	string sender;
-	double x;
-	double y;
-}
-
-// Used to request the hops of a node
-// the max_hop_value must be >= 0
-packet RequestNeighbors {
-	string sender;
-	int maxHopLevel;
-	double x;
-	double y;
-}
-
 
 packet MprBroadcast extends inet::broadcasting::Broadcast {
 	string inMpr[];
@@ -50,8 +30,6 @@ packet MprBroadcast extends inet::broadcasting::Broadcast {
 
 packet MprHello extends inet::broadcasting::Hello {
   string neighbors[];
-  int hopLevels[];
   double xs[];
   double ys[];
-  int maxHopLevel;
 }

@@ -43,31 +43,21 @@ private:
   	int builtMprCounter;
   	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
 
-  	array< set<string>, 5 > hops;
-  	array< bool, 5> hops_built;
-  	array< set<string>, 5 > hops_under_construction;
+  	array< set<string>, 3 > hops;
 
   	map< string, pair<double, double> > hops_position;
-
-  	set<string> selectors;
-
-  	bool in_mpr = false;
 
     /* payload of the message to broadcast */
     map< string, string >  payloads;
 
+    virtual inet::broadcasting::Hello* build_hello_message() override;
 
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
 
     virtual bool on_network_message_received(cPacket* pkt) override;
 
-    virtual void on_neighbors(const mpr_t2::Neighbors* m);
-    virtual void on_mpr_hello(const mpr_t2::MprHello* m);
-  	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
-
-  	void request_hops(int h);
-    void reply_hops(int n);
+    void on_mpr_hello(const mpr_t2::MprHello* m);
 
     inet::mpr_t2::MprBroadcast* build_message_to_broadcast();
 
@@ -109,8 +99,6 @@ private:
 	/** Compute MPR(x) */
 	set<string> compute_mpr();
 
-public:
-  Mpr_t2();
 
 };
 

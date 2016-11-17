@@ -28,19 +28,11 @@
 
 using namespace std;
 using inet::broadcasting::Broadcast;
-using inet::broadcasting::FloodingMessage;
 using inet::broadcasting::Hello;
 
 namespace inet {
 
 string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
-
-//Define_Module(BroadcastingAppBase);
-
-
-BroadcastingAppBase::BroadcastingAppBase()
-{
-}
 
 void
 BroadcastingAppBase::initialize(int stage)
@@ -55,8 +47,6 @@ BroadcastingAppBase::initialize(int stage)
 
             remote_port = par("remotePort").longValue();
             local_port = par("localPort").longValue();
-
-            ctrlMsg0 = new cMessage("controlMSG", IDLE);
 
             signal_received_id = this->registerSignal("msg_received");
             signal_sent_id = this->registerSignal("msg_sent");
@@ -87,7 +77,6 @@ BroadcastingAppBase::initialize(int stage)
             }
 
             // stop simulation at some point in the future
-
             {
               double d = par("wakeUpTime").doubleValue();
               d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
@@ -113,13 +102,15 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 
         switch (msg->getKind()) {
             case START: {
-                this->processStart();
+                  this->processStart();
                 }
+                cancelAndDelete(msg);
                 break;
             case SAY_HELLO:{
-                Hello* pkt = new Hello("Hello");
-                pkt->setX(position.x);
-                pkt->setY(position.y);
+                auto pkt = build_hello_message();
+                auto p = get_position();
+                pkt->setX(p.x);
+                pkt->setY(p.y);
                 pkt->setSender(myself.c_str());
                 send_package(pkt);
                 this->nr_hello_msg--;
@@ -149,16 +140,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     cancelAndDelete(msg);
                     break;
                 }
-            case FLOODING_DELAY:
-                {
-                    FloodingMessage* m = new FloodingMessage("a flooding");
-                    m->setSender(myself.c_str());
-                    string key = string((char*)msg->getContextPointer());
-                    m->setId(key.c_str());
-                    m->setPayload(payload_in_flooding[key].c_str());
-                    send_package(m);
-                    break;
-                }
             case DISPLAY_TIME:
                 {
                     cancelAndDelete(msg);
@@ -178,11 +159,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
               cancelAndDelete(msg);
             	endSimulation();
             	break;
-//            case TEST_DELAY:
-//                {
-//                    cancelAndDelete(msg);
-//                }
-                // break;
             default:
                 break;
         }
@@ -194,21 +170,22 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 
 }
 
+inet::broadcasting::Hello*
+BroadcastingAppBase::build_hello_message() {
+  return new Hello("Hello");
+}
 
 bool
 BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 {
 
     bool done = processMessage<Hello>(pkt, [&] (const Hello* m) {
-		this-> on_hello_received(m);
-	});
+  		this-> on_hello_received(m);
+  	});
 
     if (!done) {
         done = processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
 					this->on_payload_received(m);
-			   }) ||
-               processMessage<FloodingMessage>(pkt, [&] (const FloodingMessage* m) {
-					this->on_flooding_received(m);
 			   });
     }
 
@@ -216,39 +193,20 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 }
 
 
-
-void
-BroadcastingAppBase::finish()
-{
-    if (ctrlMsg0)
-        cancelAndDelete(ctrlMsg0);
-    ctrlMsg0 = nullptr;
-}
-
 bool
 BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 {
-    ctrlMsg0->setKind(START);
-    scheduleAt(simTime(), ctrlMsg0);
+    delayed_event(START, "start",  0.001);
     return true;
 }
 
-bool
-BroadcastingAppBase::handleNodeShutdown(IDoneCallback *doneCallback)
-{
-    if (ctrlMsg0)
-        cancelAndDelete(ctrlMsg0);
-    ctrlMsg0 = nullptr;
 
-    return true;
-}
-
-void
-BroadcastingAppBase::handleNodeCrash()
+Coord
+BroadcastingAppBase::get_position()
 {
-    if (ctrlMsg0)
-        cancelAndDelete(ctrlMsg0);
-    ctrlMsg0 = nullptr;
+  cModule* host = getContainingNode(this);
+  IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
+  return position = mobility->getCurrentPosition();
 }
 
 void
@@ -261,10 +219,9 @@ BroadcastingAppBase::processStart()
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
 
     cModule* host = getContainingNode(this);
-    IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
-    physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
+    auto transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
 
-    this->position = mobility->getCurrentPosition();
+    this->position = get_position();
     this->radious = transmitter->getMaxCommunicationRange().get();
 
     EV_TRACE << "My position is " << this->position  << "\n";
@@ -278,8 +235,6 @@ BroadcastingAppBase::processStart()
 
     if (nr_hello_msg > 0) {
     	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
-        //ctrlMsg0->setKind(SAY_HELLO);
-        //scheduleAt(simTime() + par("helloTime").doubleValue(),  ctrlMsg0);
     }
 }
 
@@ -348,17 +303,6 @@ BroadcastingAppBase::on_payload_received(const Broadcast* m)
     //EV_DEBUG << "Message received at " << simTime() << " from " << m->getSender() << "\n";
     //std::cout << myself << ": message received at " << simTime() << " from " << m->getSender() << "\n";
 
-}
-
-void
-BroadcastingAppBase::on_flooding_received(const FloodingMessage* m)
-{
-    string key = m->getId();
-    string p = m->getPayload();
-    if (payload_in_flooding.find(key) == payload_in_flooding.end()) {
-        payload_in_flooding[key] = p;
-        delayed_event(ControlMessageTypes::FLOODING_DELAY, key, uniform(0.01, 0.05));
-    }
 }
 
 
@@ -496,7 +440,7 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 void
 BroadcastingAppBase::log_status_for_animation(std::string status)
 {
-  cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
+  // cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
 }
 
 } //namespace
