@@ -10,14 +10,17 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-cplusplus{{
-    #include "broadcasting/BroadcastingAppBase.h"
-    typedef inet::BroadcastingAppBase::Neighbor *NePo; 
-}};
+
+cplusplus {{
+#include "broadcasting/BroadcastingAppBase_m.h"
+  using inet::broadcasting::Broadcast;
+  using inet::broadcasting::Hello;
+}}
+
+packet inet::broadcasting::Broadcast;
+packet inet::broadcasting::Hello;
 
 namespace inet::mpr_t2;
-
-class noncobject NePo;
 
 packet Neighbors {
 	string neighbors[];
@@ -39,7 +42,16 @@ packet RequestNeighbors {
 	double y;
 }
 
-packet MprFound {
-	string sender;
+
+packet MprBroadcast extends inet::broadcasting::Broadcast {
 	string inMpr[];
+}
+
+
+packet MprHello extends inet::broadcasting::Hello {
+  string neighbors[];
+  int hopLevels[];
+  double xs[];
+  double ys[];
+  int maxHopLevel;
 }

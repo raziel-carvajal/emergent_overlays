@@ -33,27 +33,25 @@ protected:
         GET_2_HOPS_N
     };
 
-	void handleMessageWhenUp(cMessage *msg);
+	  void handleMessageWhenUp(cMessage *msg);
 
     virtual void processStart() override;
 
 private:
 
+  	int nr_hops_required = 2;
+  	int builtMprCounter;
+  	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
 
+  	array< set<string>, 5 > hops;
+  	array< bool, 5> hops_built;
+  	array< set<string>, 5 > hops_under_construction;
 
-	int nr_hops_required = 2;
-	int builtMprCounter;
-	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
+  	map< string, pair<double, double> > hops_position;
 
-	array< set<string>, 5 > hops;
-	array< bool, 5> hops_built;
-	array< set<string>, 5 > hops_under_construction;
+  	set<string> selectors;
 
-	map< string, pair<double, double> > hops_position;
-
-	set<string> selectors;
-
-	bool in_mpr = false;
+  	bool in_mpr = false;
 
     /* payload of the message to broadcast */
     map< string, string >  payloads;
@@ -65,13 +63,13 @@ private:
     virtual bool on_network_message_received(cPacket* pkt) override;
 
     virtual void on_neighbors(const mpr_t2::Neighbors* m);
+    virtual void on_mpr_hello(const mpr_t2::MprHello* m);
   	virtual void on_request_neighbors(const mpr_t2::RequestNeighbors* m);
-  	virtual void on_mpr_found(const mpr_t2::MprFound* m);
 
   	void request_hops(int h);
     void reply_hops(int n);
 
-  	void notify_mpr();
+    inet::mpr_t2::MprBroadcast* build_message_to_broadcast();
 
 
   	/**
