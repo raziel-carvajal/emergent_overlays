@@ -2,7 +2,7 @@ description = "Broadcasting messages using MPR"
 
 *.host*.udpApp[0].typename = "Mpr_t2"
 
-*.host*.udpApp[0].nr_hello_messages = 50
+*.host*.udpApp[0].nr_hello_messages = 500
 *.host*.udpApp[0].maximumDelay = 0.05s
 *.host*.udpApp[0].helloTime = uniform(1s, 2s)
 
