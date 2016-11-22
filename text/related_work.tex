@@ -5,19 +5,31 @@
 
 \er{Related Work should link to other studies of performance of protocols in MANETs. The related work on actual protocols should be covered in the previous section (Section~\ref{sec:background}).}
 
+Previous studies discussing performance issues on broadcasting algorithms for mobile ad-hoc networks fall in two categories: proposal and evaluation of a new broadcast algorithm, and fully dedicated performance study. We have found that the former category is larger than the later. In this section, we mainly discuss the evaluation criteria used in such studies.
+
+In Table~\ref{tbl:rw} we summarize the information regarding the evaluation criteria used in the related work.
+In particular, we consider a few criteria.
+First, in column \textit{multi-protocol} we analyze  whether a study compares several broadcasting protocols.
+Next, we look at how studies perform this comparison in terms of the type of protocols used in the evaluation. This is, in column \textit{multi-class} we show if they are only comparing protocols in the same class instead of comparing many classes.
+Since the network density is extremely important in the context of wireless networks, we highlight in column \textit{multiple densities} what studies vary such a parameter.
+The next two evaluation criteria we consider are related to two characteristics of MANETs -- mobility and energy consumption. We show in the table whether a specific study takes into account the influence of mobility on the overall performance of the protocol and whether the impact on energy consumption is also evaluated.
+Finally, we discuss if the condition of the network usage are taken into consideration. We believe this is an important criterion because in a wireless network, in which there are many collisions, the performance of a broadcasting protocol varies depending on the network load.
+We will later see that there are different ways of examining this criterion.
+
+
 \input{table_related_work}
 
-\begin{itemize}
-	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
-	\begin{itemize}
-		\item Comparison to other protocols or only to the simple flooding process
-		\begin{itemize}
-			\item Should distinguish between: comparison with protocols of the same class or with protocols of other classes (using classes defined in the previous section)
-		\end{itemize}
-		\item Comparison of performance under different densities of nodes or network topologies
-		\item Study of the influence of mobility
-		\item Consideration of energy consumption
-	\end{itemize}
-\end{itemize}
+%\begin{itemize}
+%	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
+%	\begin{itemize}
+%		\item Comparison to other protocols or only to the simple flooding process
+%		\begin{itemize}
+%			\item Should distinguish between: comparison with protocols of the same class or with protocols of other classes (using classes defined in the previous section)
+%		\end{itemize}
+%		\item Comparison of performance under different densities of nodes or network topologies
+%		\item Study of the influence of mobility
+%		\item Consideration of energy consumption
+%	\end{itemize}
+%\end{itemize}
 
 This one is important~\cite{YiGerla2003}. It is quite similar to what we do.
