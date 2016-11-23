@@ -38,25 +38,25 @@ network Small
         radioMedium: <mediumType> like IRadioMedium {
             @display("p=309,24");
         }
-        hostR0: CenterHost {
+        hostR1: CenterHost {
             @display("p=116.928,217.72801;r=75");
         }
-        hostR1: CenterHost {
+        hostR2: CenterHost {
             @display("p=179.42401,217.72801;r=75");
         }
-        hostR2: CenterHost {
+        hostR3: CenterHost {
             @display("p=250,218;r=75");
         }
-        hostR3: CenterHost {
+        hostR4: CenterHost {
             @display("p=280,166;r=75");
         }
-        hostR4: CenterHost {
+        hostR5: CenterHost {
             @display("p=280,273;r=75");
         }
-        hostR5: CenterHost {
+        hostR6: CenterHost {
             @display("p=83,166;r=75");
         }
-        hostR6: CenterHost {
+        hostR7: CenterHost {
             @display("p=96,260;r=75");
         }
 }
