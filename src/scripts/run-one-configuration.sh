@@ -54,6 +54,7 @@ DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
 PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
+step=`cat ${CONF_FILE} |grep intervalBroadcastTime |awk -F "=" '{print $2}'|grep -Eo '[0-9]'`
 
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
@@ -62,8 +63,8 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} --algorithm ${PROTOCOL} --density-as-string ${DENSITY}
-	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} | grep average_values`
+	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${DENSITY} --plot
+	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step}| grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 
