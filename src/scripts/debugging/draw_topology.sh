@@ -37,7 +37,7 @@ dst="./${dst}/"
 loops=`grep ":: POSITION" ${logFile} |awk -F " " '{print $8}'| sort -u| wc -l`
 echo "Creating input files..."
 for (( CNTR=1; CNTR<=${loops}; CNTR+=1 )); do
-  key=`grep ":: POSITION" ${logFile} |awk -F " " '{print $8}'| sort -u| head -${CNTR}`
+  key=`grep ":: POSITION" ${logFile} |awk -F " " '{print $8}'| sort -u| head -${CNTR}| tail -1`
   echo "DOING FOR KEY: ${key}"
   grep "BROADCASTING ${key} TO_NEIGHBORS" ${logFile} >${dst}graph_${CNTR}
   grep "KEY_RECEPTION ${key} FROM_PEER" ${logFile} >${dst}rcvMsgs_${CNTR}
