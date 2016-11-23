@@ -16,6 +16,7 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/mobility/contract/IMobility.h"
 
 #include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/BroadcastingAppBase_m.h"

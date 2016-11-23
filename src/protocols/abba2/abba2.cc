@@ -43,6 +43,7 @@ Abba2::findQuadrant(Coord b) {
 
 void
 Abba2::updateAngleCovered(Coord b, string& key){
+    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
     double d = position.distance(b);
     double alp = acos(abs(position.x - b.x) / d) * 180 / M_PI;
     double bet = acos(d * 0.5 / radious) * 180 / M_PI;
@@ -85,26 +86,27 @@ bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second
 
 double
 Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
-    double sum = 0;
+    int i, j; double sum = 0.0;
     if (items.size() == 0) return 0.0;
     if (items.size() == 1) return items[0].second - items[0].first;
     std::sort(items.begin(), items.end());
-    for (int i = 0; i < items.size(); i++)
-      sum += items[i].second - items[i].first;
-    for (int i = 0; i < items.size() - 1; i++) {
-        for (int j = i + 1; j < items.size(); j++) {
+    for (i = 0; i < (int) items.size(); i++)
+        sum += items[i].second - items[i].first;
+    for (i = 0; i < (int) items.size() - 1; i++) {
+        for (j = i + 1; j < (int) items.size(); j++) {
             if ( inPair(items[j].first, items[i]) ) {
-                if (items[j].second < items[i].second) sum -= items[j].second - items[j].first;
-                else sum -= items[i].second - items[j].first;
+                if (items[j].second < items[i].second)
+                    sum -= items[j].second - items[j].first;
+                else
+                    sum -= items[i].second - items[j].first;
             }
         }
     }
     return sum;
 }
 
-void Abba2::processStart() {
+void Abba2::processStart() { 
     timeOut = par("timeOut").doubleValue();
-    cerr << getLogHeader() + "Timeout: " + to_string(timeOut) << endl;
     BroadcastingAppBase::processStart();
 }
 
@@ -117,16 +119,17 @@ Abba2::on_payload_received(const Broadcast* m) {
     if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     string key = string(m->getId());
     emitBroadcastMsgReceived(key);
-    cerr << getLogHeader() + "broadcast message " + key + " was sent by peer " + m->getSender() + "\n";
+    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
+    cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = (abba::ABBABroadcast*)m;
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
         updateAngleCovered(b,key);
-        cerr << getLogHeader() + "Computing angle covered\n";
+//        cerr << getLogHeader() + "Computing angle covered\n";
         double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
-        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + "\n";
+//        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + "\n";
         double newTimeout = computeTimeout(angleCovered);
-        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + "\n";
+//        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + "\n";
         if (newTimeout <= 0 || newTimeout > timeOut) {// just in case we will considered that the angle is more than 306 degrees which is rare
             // TODO Optimizing messages delivery: find a way to put this event at the top of the scheduler
             // cancel retransmission (ASAP I thought...)
@@ -134,27 +137,22 @@ Abba2::on_payload_received(const Broadcast* m) {
             cancelAndDelete(old_msg);
             ignoredMsgs[key] = key;
             firHalfPairs[key].clear();
-        	  secHalfPairs[key].clear();
-            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
+        	secHalfPairs[key].clear();
+//            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
-                cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
                 log_status_for_animation("MSG_RECEIVED");
+//                cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
-                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
+//                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
                 cMessage* old_msg = delayMessages[key];
                 cancelAndDelete(old_msg);
-            }
-
-            if (std::isnan(newTimeout)) { // FIXME: well, something the previous code tries to go back in time :-)
-              newTimeout = 0.001;
             }
             timeouts[key] = newTimeout;
             delayMessages[key] = delayed_broadcast(key, newTimeout);
         }
-    } else {
-        cerr << getLogHeader() + "ignoring in reception this message " + key + " \n";
-    }
+    } else
+        cout << getLogHeader() + "Message already dispatched " + key + " \n";
 }
 
 
@@ -163,7 +161,7 @@ Abba2::send_message(string& key)
 {
     bool applyRetransmission = ignoredMsgs.find(key) == ignoredMsgs.end();
     if (applyRetransmission) {
-        cerr << getLogHeader() + "broadcasting message " + key + " \n";
+//        cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
         ignoredMsgs[key] = key;
         firHalfPairs[key].clear();
@@ -174,9 +172,8 @@ Abba2::send_message(string& key)
         m->setY(position.y);
         broadcast(key, m);
         log_status_for_animation("MSG_RECEIVED_SENT");
-    } else {
+    } else
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
-    }
 }
 
 
@@ -184,10 +181,11 @@ void
 Abba2::time_to_broadcast_payload(void* user_data)
 {
     string key;
+    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;
-        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
+//        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
         m->setX(position.x);
         m->setY(position.y);
