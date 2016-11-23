@@ -34,6 +34,22 @@ namespace inet {
 
 string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
 
+void BroadcastingAppBase::printBroadcastingLog(std::string key) {
+    string info = "";
+    for (auto& n: neighbors)
+        info += n.first + "_";
+    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
+    cout << getLogHeader() + "POSITION " + to_string(position.x) + " " + to_string(position.y) +
+            " BROADCASTING " + key + " TO_NEIGHBORS " + info + "\n";
+}
+
+//Define_Module(BroadcastingAppBase);
+
+
+BroadcastingAppBase::BroadcastingAppBase()
+{
+}
+
 void
 BroadcastingAppBase::initialize(int stage)
 {
@@ -56,14 +72,21 @@ BroadcastingAppBase::initialize(int stage)
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
             {
                 cModule* host = getContainingNode(this);
-                bool is_center = host->par("isCenter").boolValue();
+
+                IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
+                physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
+
+                this->position = mobility->getCurrentPosition();
+                this->radious = transmitter->getMaxCommunicationRange().get();
+
+                EV_TRACE << "My position is " << this->position  << "\n";
 
                 //bool is_center = host->par("is_source").boolValue();
-
-                if (is_center) {
-                  is_source = true;
-                  cerr << getParentModule()->getName() << ": is center " << is_center << endl;
-                }
+//                bool is_center = par("is_source").boolValue();
+//                if (is_center) {
+//                  is_source = true;
+//                  cerr << getParentModule()->getName() << ": is center " << is_center << endl;
+//                }
 
             }
             break;
@@ -72,18 +95,18 @@ BroadcastingAppBase::initialize(int stage)
             // sending messages if source
             if (is_source && nr_broadcast_msg > 0) {
             	double d = par("wakeUpTime").doubleValue();
-              cerr << "Broadcasting sessions will start at: " << (d) << endl;
             	delayed_event(WAKEUP, "intervalBroadcastTime", d);
+              	cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
             }
 
             // stop simulation at some point in the future
             {
-              double d = par("wakeUpTime").doubleValue();
-              d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
-              d += 3; // some extra seconds
-              delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
+//              delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
               if (is_source) {
-            	   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
+                  double d = par("wakeUpTime").doubleValue();
+                  d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
+//                  cout << getLogHeader() + "TIMEOUT " << (d - 0.5) << endl;
+                  delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
               }
             }
 
@@ -113,10 +136,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 pkt->setY(p.y);
                 pkt->setSender(myself.c_str());
                 send_package(pkt);
+                if (this->nr_hello_msg > 0)
+                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
                 this->nr_hello_msg--;
-                if (this->nr_hello_msg) {
-                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
-                }
                 cancelAndDelete(msg);
                 break;
                 }
@@ -152,11 +174,11 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   pkt->setY(position.y);
                   pkt->setSender(myself.c_str());
                   send_package(pkt);
-	                cancelAndDelete(msg);
-                  break;
+	          cancelAndDelete(msg);
+		  break;
                 }
             case HALT_SIMULATION_DELAY:
-              cancelAndDelete(msg);
+		cancelAndDelete(msg);
             	endSimulation();
             	break;
             default:
@@ -214,8 +236,14 @@ BroadcastingAppBase::processStart()
 {
     std::string::size_type sz;
     myself = this->getParentModule()->getFullName();
-    delta = std::stoi (myself.substr(5, myself.size()), &sz) * 0.001;
-//    cerr << getLogHeader() + "My delta is: " + to_string(delta) + "\n";
+    //this delta is required to cope with collisions of control messages; even if
+    //we are using CSMA it is not enough to cope with this issue
+    int n = std::stoi (myself.substr(5, myself.size()), &sz);
+    if (n % 50 == 0)
+        delta = 0.003;
+    else
+        delta = (n % 50) * 0.002;
+//    cerr << getLogHeader() + "Delta: " + to_string(delta) + "\n";
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
 
     cModule* host = getContainingNode(this);
@@ -232,10 +260,8 @@ BroadcastingAppBase::processStart()
     socket.setBroadcast(true);
 
     log_status_for_animation("STANDING");
-
-    if (nr_hello_msg > 0) {
-    	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
-    }
+    if (nr_hello_msg > 0)
+        delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
 }
 
 
@@ -276,7 +302,7 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 	if (myself == msg->getSender())
 			return;
 
-
+//	cout << getLogHeader() + "HELLO MSG RECEPTION" << endl;
     if (it == neighbors.end()) {
         //EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
         //cerr <<  getLogHeader() + "A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";
@@ -347,7 +373,7 @@ BroadcastingAppBase::emitBroadcastMsgReceived(string value)
 
 void
 BroadcastingAppBase::delay_broadcast(void* user_data) {
-    cMessage* mm = new cMessage("broadcast delay112");
+    cMessage* mm = new cMessage("broadcast delay");
     mm->setKind(BROADCAST_DELAY);
     mm->setContextPointer(user_data);
     scheduleAt(simTime() + par("delay_test").doubleValue(), mm);
@@ -370,7 +396,7 @@ BroadcastingAppBase::get_last_id_for_msg()
 
 cMessage*
 BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
-    cMessage* mm = new cMessage("broadcast delay1123");
+    cMessage* mm = new cMessage("broadcast delay");
     mm->setContextPointer(strdup(key.c_str()));
     mm->setKind(BROADCAST_DELAY);
     scheduleAt(simTime() + delay, mm);
@@ -427,6 +453,7 @@ BroadcastingAppBase::send_package(cPacket* m)
 void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
+    printBroadcastingLog(key);
     L3AddressResolver resolver;
     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
     msg->setPayload(key.c_str());
@@ -440,7 +467,7 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 void
 BroadcastingAppBase::log_status_for_animation(std::string status)
 {
-  // cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
+    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
 }
 
 } //namespace
