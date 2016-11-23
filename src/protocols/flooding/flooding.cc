@@ -37,27 +37,15 @@ Flooding2::on_payload_received(const Broadcast* m) {
     string key = string(m->getId());
     emitBroadcastMsgReceived(key);
     if (string(m->getSender()) == myself) return;
-    cerr << getLogHeader() << "reception of message " << key << " by sender " << m->getSender() << endl;
+    cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {
         payloads[key] = key;
         broadcast(key, new broadcasting::Broadcast("payload"));
+        //to cope with mobility
+        neighbors.empty();
     }
 }
-
-
-void
-Flooding2::send_message(string& key)
-{
-    cerr << getLogHeader() << "doing broadcast of message " << key << endl;
-    Broadcast* m = new Broadcast("payload");
-    m->setPayload(payloads[key].c_str());
-    m->setId(key.c_str());
-    m->setSender(myself.c_str());
-    send_package(m);
-    emitSent(key);
-}
-
 
 void
 Flooding2::time_to_broadcast_payload(void* user_data)
@@ -67,11 +55,9 @@ Flooding2::time_to_broadcast_payload(void* user_data)
         key = createUniqueBroadcastingSessionId();
         payloads[key] = key;
         broadcast(key, new broadcasting::Broadcast("payload"));
+        //to cope with mobility
+        neighbors.empty();
     }
-//    else {
-//        char* s = (char*)user_data;
-//        key = string(s);
-//    }
 }
 
 } //namespace

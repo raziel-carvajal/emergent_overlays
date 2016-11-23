@@ -27,14 +27,10 @@ class INET_API Flooding2 : public inet::BroadcastingAppBase
 {
 
   private:
-
     /* payload of the message to broadcast */
     std::map< std::string, std::string >  payloads;
-
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
-
-    void send_message(std::string& key);
 };
 
 } //namespace
