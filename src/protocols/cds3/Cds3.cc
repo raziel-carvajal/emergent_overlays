@@ -3,254 +3,299 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 #include <cds3/Cds3.h>
-
-using namespace std;
-
 namespace inet {
 
   Define_Module(Cds_3);
 
-  void inet::Cds_3::on_payload_received(const broadcasting::Broadcast* m) {
-    if (string(m->getSender()) == myself) return;
-    string key = string(m->getId());
-    emitBroadcastMsgReceived(key);
+  bool Cds_3::handleNodeStart(IDoneCallback* doneCallback) {
+      doRule2 = par("doRule2").boolValue();
+      doOptiP = par("doOptiP").boolValue();
+      return BroadcastingAppBase::handleNodeStart(doneCallback);
+  }
 
+  void inet::Cds_3::on_payload_received(const broadcasting::Broadcast* m) {
+    std::string key = string(m->getPayload());
+    if (string(m->getSender()) == myself) return;
+    cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
+    emitBroadcastMsgReceived(key);
     if (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end()) {
-        broadcast(key, new broadcasting::Broadcast("payload"));
         alreadyDispatched[key] = key;
+        broadcast(key, new broadcasting::Broadcast("payload"));
+        //having a delay between retransmissions will decrease the number of
+        //collisions but the broadcasting sessions time will increase as well
+        //delayed_broadcast(key, delta);
     }
   }
 
   void inet::Cds_3::time_to_broadcast_payload(void* user_data) {
     string key;
-    if (is_source) {
+    if (is_source)
         key = createUniqueBroadcastingSessionId();
-        alreadyDispatched[key] = key;
-        emitBroadcastMsgReceived(key);
-        broadcast(key, new broadcasting::Broadcast("payload"));
-    }
+    else
+        key = string((char*) user_data);
+    // In general, if method delayed_broadcast() is not called to retransmit messages
+    // these two lines are performed just by the peer who initiate a broadast session
+    broadcast(key, new broadcasting::Broadcast("payload"));
+    alreadyDispatched[key] = key;
   }
 
   void Cds_3::handleMessageWhenUp(cMessage* msg) {
+      if (msg->isSelfMessage()) {
+          if (msg->getKind() == SAY_HELLO) {
+              Neigh emitter;
+              emitter.addr = myAddress; emitter.pos = position; emitter.name = myself;
+              NeighMap myNeigs;
+              for (auto& n: neighbors)
+                  myNeigs[n.first] = n.second;
+              cds3::Cds3* packet = new cds3::Cds3();
+              packet->setEmitter(emitter);
+              packet->setNeighbors(myNeigs);
+              packet->setAmIrelay(amIrelay);
+              send_package(packet);
 
-    if (msg->isSelfMessage()) {
-        if (msg->getKind() == SAY_HELLO) {
-    //	    cerr << getLogHeader() + "Doing Hello\n";
-            cMessage* neighsMsg = new cMessage("controlMSG", ONE_HOP_NEIGHS);
-            neighsMsg->setKind(ONE_HOP_NEIGHS);
-            /*TODO depending how we will solve the problem of having any broadcast message to send
-             * when there are still events in the events queue of Omnet++, the marking procedure
-             * must be triggered in another way. For instance, in the number of hello messages
-             * is computed according to the simulation time we can trigger the marking procedure
-             * having ( (the number of hello messages) MOD 3 )== 1*/
-            if (nr_hello_msg % 2 == 1) { doMarkingProcedure(); }
-            scheduleAt(simTime() + par("helloTime").doubleValue() + delta, neighsMsg);
-            // cancelAndDelete(msg);
-            // return;
-        } else if (msg->getKind() == ONE_HOP_NEIGHS) {
-//            cerr << getLogHeader() + "Sending ONE_HOP_NEIGS\n";
-            Neigh emitter, tmp;
-            emitter.addr = myAddress; emitter.pos = position; emitter.name = myself;
-            NeighMap myNeigs;
-            for (auto& n: neighbors) {
-                // tmp.addr = n.second.addr; tmp.pos = n.second.pos; tmp.name = n.second.name;
-                myNeigs[n.first] = n.second;
-            }
-            cds3::Cds3* packet = new cds3::Cds3();
-            packet->setEmitter(emitter);
-            packet->setNeighbors(myNeigs);
-            packet->setAmIrelay(amIrelay);
-            send_package(packet);
-            cancelAndDelete(msg);
-            return;
-        }
-    }
-    BroadcastingAppBase::handleMessageWhenUp(msg);
+              doMarkingProcedure();
+
+              nr_hello_msg--;
+              cancelAndDelete(msg);
+              if (nr_hello_msg > 0) {
+                  cMessage* neighsMsg = new cMessage("controlMSG", SAY_HELLO);
+                  neighsMsg->setKind(SAY_HELLO);
+                  scheduleAt(simTime() + par("helloTime").doubleValue(), neighsMsg);
+              }
+            } else
+                BroadcastingAppBase::handleMessageWhenUp(msg);
+      } else
+          BroadcastingAppBase::handleMessageWhenUp(msg);
   }
 
   bool Cds_3::on_network_message_received(cPacket* pkt) {
     return BroadcastingAppBase::on_network_message_received(pkt) ||
-	processMessage<cds3::Cds3>(pkt, [&](const cds3::Cds3*m) { this->on_neighbors(m); });
+	processMessage<cds3::Cds3>(pkt, [&](const cds3::Cds3*m) { on_neighbors_reception(m); });
   }
 
-  void Cds_3::doMarkingProcedure() {
-//    string tmp;
-//    for (auto& myNeig: neighbors) {tmp += myNeig.first + " "; }
-//    cerr << getLogHeader() + "\t one-hop neighbors are: " + tmp + "\n";
-//    cerr << getLogHeader() + "\t two-hop neighbors are:\n";
-//    for (auto& neigsMap: oneHopNeigs) {
-//        tmp = neigsMap.first + " >> ";
-//        for (auto& m: oneHopNeigs[neigsMap.first]) { tmp += m.first + ", "; }
-//        cerr << getLogHeader() + "\t" + tmp + '\n';
-//    }
-    /*
-     * TODO if mobility is considered in the network scenario the marking procedure
-     * must be performed if neighbors differ
-     */
+  /*
+   * If peer's vicinity changes the marking procedure must be performed again,
+   * additionally, the way relays inform others must be updated too.
+   * These modifications are required to cope with mobility.
+   * take into consideration that there are two phases while marking peers as
+   * relays; firstly, to launch the marking procedure itself and secondly to
+   * minimize the CDS with peers labeled as relays. In other words, the full
+   * CDS protocol is finished in two SAY_HELLO messages.
+   */
+void Cds_3::doMarkingProcedure() {
+    if (changeAtVicinity()) {
+//        cerr << getLogHeader() + "Change at vicinity\n";
+        markingProcedureDone = false;
+        optimizProcedureDone = false;
+        amIrelay = false;
+        neighbors.empty();
+        relaysIcanSee.empty();
+        neighboursChache.empty();
+        return;
+    }
     if (!markingProcedureDone){
-        for (auto& myNeig: neighbors) {
-            for (auto& neigsMap: oneHopNeigs) {
-                if (myNeig.first != neigsMap.first && neigsMap.second.find(myNeig.first) == neigsMap.second.end()) {
+        cout << getLogHeader() + "Doing marking procedure\n";
+        for (auto& m: neighboursChache) {
+            for (auto& n: neighboursChache) {
+                if (m.first != n.first && n.second.find(m.first) == n.second.end()) {
                     amIrelay = true;
-                    cerr << getLogHeader() << "I am Relay (marking procedure)\n";
-                    log_status_for_animation("MARKED");
+                    cout << getLogHeader() + "I am Relay (marking procedure)\n";
                     markingProcedureDone = true;
+                    cout << getLogHeader() + "Marking procedure DONE\n";
+                    neighbors.empty();
+                    relaysIcanSee.empty();
                     return;
                 }
             }
         }
+        markingProcedureDone = true;
+        cout << getLogHeader() + "Marking procedure DONE\n";
+    } else if (!optimizProcedureDone){
+        if (relaysIcanSee.size() < 2) return;
+        cout << getLogHeader() + "Doing optimization procedure\n";
+        if (!doRule2) { // Doing Rules 1 and/or 1a
+            applyRule1();
+            if (doOptiP)
+                applyRule1_1();
+        } else { // Doing Rules 2 and/or 2a
+            if (amIrelay) {
+                applyRule2();
+                if (amIrelay && doOptiP)
+                    applyRule2_1();
+            }
+        }
+        optimizProcedureDone = true;
+        cout << getLogHeader() + "Optimization procedure DONE\n";
     }
-    // if (amIrelay) applyRule2();
-    if (amIrelay) {
-      bool b = applyRule1_a();
-      if (amIrelay)
-        applyRule2_1();
-    }
-  }
+    neighbors.empty();
+    relaysIcanSee.empty();
+}
 
-  map<string, string> Cds_3::cloneNeighbors() {
-    map<string, string> _union;
+  std::map<std::string, std::string> Cds_3::cloneNeighbors() {
+    std::map<std::string, std::string> _union;
     for (auto& n: neighbors) { _union[n.first] = n.first; }
     return _union;
   }
 
-  map<string, string> Cds_3::computeUnion(map<string, string> a, map<string, string> b) {
-    for (auto& n: b) { a[n.first] = n.first; }
-    return a;
+  std::map<std::string, std::string> Cds_3::cloneMap(NeighMap a) {
+      std::map<std::string, std::string> _union;
+      for (auto& n: a) { _union[n.first] = n.first; }
+      return _union;
   }
 
-  bool Cds_3::isSubset(map<string, string> a, map<string, string> b) {
+  std::map<std::string, std::string> Cds_3::computeUnion(NeighMap a, NeighMap b) {
+    std::map<std::string, std::string> _union;
+    for (auto& n: a) { _union[n.first] = n.first; }
+    for (auto& n: b) { _union[n.first] = n.first; }
+    return _union;
+  }
+
+  bool Cds_3::isSubset(std::map<std::string, std::string> a, std::map<std::string, std::string> b) {
       for (auto& n: a) { if (b.find(n.first) == b.end()) return false; }
       return true;
   }
 
-  bool Cds_3::equal(map<string, string> a,
-      map<string, string> b) {
-      if (a.size() != b.size()) return false;
-      return isSubset(a, b);
-  }
-
-  void Cds_3::applyRule2() {
-//    cerr << getLogHeader() + "Checking rule 2.0\n";
-    if (relaysIcanSee.size() < 2) return;
-    int i, j, k; string::size_type sz;
-    map<string, int> str_int;
-    for (auto& u: relaysIcanSee) {
-        for (auto& w: relaysIcanSee) {
-            if (u.first != w.first) {
-//                cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.0\n";
-                if (isSubset(cloneNeighbors(), computeUnion(oneHopNeigs[u.first], oneHopNeigs[w.first]))) {
-                    i = stoi (myself.substr(5, myself.size()), &sz);
-                    j = stoi (u.first.substr(5, u.first.size()), &sz);
-                    k = stoi (w.first.substr(5, w.first.size()), &sz);
-                    str_int = { {myself, i}, {u.first, j}, {w.first, k} };
-                    // cerr << getLogHeader() + "my min [" + to_string(i) + "], Umin [" + to_string(j) + "], Wmin [" +
-                    //         to_string(k) + "]\n";
-                    int m = min( i, min(j, k) );
-                    // cerr << getLogHeader() + "MIN: " + to_string(m) + "\n";
-                    if (str_int[myself] == m) {
-                        cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+  void Cds_3::applyRule1() {
+      int uId, vId; std::string::size_type sz;
+      std::map<std::string, std::string> uCloseSet, vCloseSet;
+      for (auto& v: relaysIcanSee) {
+            for (auto& u: relaysIcanSee) {
+                if (v.first != u.first) {
+                    vCloseSet = cloneMap(neighboursChache[v.first]);
+                    vCloseSet[v.first] = v.first;
+                    uCloseSet = cloneMap(neighboursChache[u.first]);
+                    uCloseSet[u.first] = u.first;
+                    vId = std::stoi (v.first.substr(5, v.first.size()), &sz);
+                    uId = std::stoi (u.first.substr(5, u.first.size()), &sz);
+                    if (isSubset(vCloseSet, uCloseSet) && vId < uId) {
+                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
                     }
                 }
             }
-        }
-    }
+      }
   }
 
-  bool Cds_3::applyRule1_a() {
-    auto v = myself;
-    auto N_v = cloneNeighbors();
-    N_v[v] = v;
-    for (auto& n: relaysIcanSee) {
-      auto u = n.first;
-      auto N_u = oneHopNeigs[u];
-      N_v[u] = u;
-      auto id_v = stoi (v.substr(5, v.size()));
-      auto id_u = stoi (u.substr(5, u.size()));
-      if (isSubset(N_v, N_u)) {
-        if (N_v.size() < N_u.size()) {
-          log_status_for_animation("UNMARKED4");
-          amIrelay = false;
-          return true;
-        }
-        else if (N_v.size() == N_u.size() && id_v < id_u) {
-          log_status_for_animation("UNMARKED4");
-          amIrelay = false;
-          return true;
-        }
+  void Cds_3::applyRule1_1() {
+      int uId, vId; std::string::size_type sz;
+      std::map<std::string, std::string> uCloseSet, vCloseSet;
+      for (auto& v: relaysIcanSee) {
+            for (auto& u: relaysIcanSee) {
+                if (v.first != u.first) {
+                    vCloseSet = cloneMap(neighboursChache[v.first]);
+                    vCloseSet[v.first] = v.first;
+                    uCloseSet = cloneMap(neighboursChache[u.first]);
+                    uCloseSet[u.first] = u.first;
+                    vId = std::stoi (v.first.substr(5, v.first.size()), &sz);
+                    uId = std::stoi (u.first.substr(5, u.first.size()), &sz);
+                    if (isSubset(vCloseSet, uCloseSet)) {
+                        if (neighboursChache[v.first].size() < neighboursChache[v.first].size() ||
+                                (neighboursChache[v.first].size() == neighboursChache[v.first].size() && vId < uId))
+                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                        log_status_for_animation("UNMARKED4");
+                        amIrelay = false;
+                        return;
+                    }
+                }
+            }
       }
-    }
+  }
 
-    return false;
+  void Cds_3::applyRule2() {
+//    string info = getLogHeader() + "RELAYS: ";
+//    for (auto & r: relaysIcanSee)
+//        info += r.first + ", ";
+//    cerr << info + "\n";
+//    cerr << getLogHeader() + "Checking rule 2.0\n";
+    int i, j, k; std::string::size_type sz;
+    std::map<std::string, int> str_int;
+    for (auto& u: relaysIcanSee) {
+        for (auto& w: relaysIcanSee) {
+            if (u.first != w.first) {
+//                cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.0\n";
+                if (isSubset(cloneNeighbors(), computeUnion(neighboursChache[u.first], neighboursChache[w.first]))) {
+                    i = std::stoi (myself.substr(5, myself.size()), &sz);
+                    j = std::stoi (u.first.substr(5, u.first.size()), &sz);
+                    k = std::stoi (w.first.substr(5, w.first.size()), &sz);
+                    str_int = { {myself, i}, {u.first, j}, {w.first, k} };
+//                    cerr << getLogHeader() + "my min [" + to_string(i) + "], Umin [" + to_string(j) + "], Wmin [" +
+//                            to_string(k) + "]\n";
+                    int min = std::min( i, std::min(j, k) );
+//                    cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
+                    if (str_int[myself] == min) {
+                        log_status_for_animation("UNMARKED4");
+                        cout << getLogHeader() + "Not relay anymore" << endl;
+                        amIrelay = false;
+                        return;
+                    }
+                }
+            }
+        }
+    }
   }
 
   void Cds_3::applyRule2_1() {
     if (relaysIcanSee.size() < 2) return;
-    map<string, string> N_v = cloneNeighbors();
-    map<string, string> uCloseSet, vCloseSet, wCloseSet;
-    int idU, idV, idW, m; string::size_type sz;
-    bool vATuUw, uATvUw, wATuUv;
+//    cerr << getLogHeader() + "Checking rule 2.1.1\n";
+    std::map<std::string, std::string> cpyNeigs = cloneNeighbors();
+    std::map<std::string, std::string> uCloseSet, vCloseSet, wCloseSet;
+    int idU, idV, idW, min; std::string::size_type sz;
+    bool vATuUw = false, uATvUw = false, wATuUv = false;
     for (auto& u: relaysIcanSee) {
         for (auto& w: relaysIcanSee) {
             if (u.first != w.first) {
-                // cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.1\n";
+//                cerr << getLogHeader() + "Pair of relays U: " + u.first + " and W: " + w.first + " from rule 2.1.1\n";
                 //Rule 2.1.1
-                // cerr << getLogHeader() + "Checking rule 2.1.1\n";
-                auto N_u = oneHopNeigs[u.first];
-                auto N_w = oneHopNeigs[w.first];
-                vATuUw = isSubset(N_v, computeUnion(N_u, N_w));
-                uATvUw = isSubset(N_u, computeUnion(N_v, N_w));
-                wATuUv = isSubset(N_w, computeUnion(N_u, N_v));
+                vATuUw = isSubset(cpyNeigs, computeUnion(neighboursChache[u.first], neighboursChache[w.first]));
+                uATvUw = isSubset(cloneMap(neighboursChache[u.first]), computeUnion(neighbors, neighboursChache[w.first]));
+                wATuUv = isSubset(cloneMap(neighboursChache[w.first]), computeUnion(neighboursChache[u.first], neighbors));
                 if (vATuUw && !uATvUw && !wATuUv) {
-                    cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+                    cout << getLogHeader() + "Not relay anymore<<<<<\n";
                     log_status_for_animation("UNMARKED2a1");
                     amIrelay = false;
                     return;
                 }
-                uCloseSet = N_u;
-                wCloseSet = N_w;
+                uCloseSet = cloneMap(neighboursChache[u.first]);
+                wCloseSet = cloneMap(neighboursChache[w.first]);
                 //adding u, v and w to the corresponding set will make it a close set
                 uCloseSet[u.first] = u.first;
-                N_v[myself] = myself;
                 wCloseSet[w.first] = w.first;
 
-                idV = stoi (myself.substr(5, myself.size()), &sz);
-                idU = stoi (u.first.substr(5, u.first.size()), &sz);
-                idW = stoi (w.first.substr(5, w.first.size()), &sz);
+                idV = std::stoi (myself.substr(5, myself.size()), &sz);
+                idU = std::stoi (u.first.substr(5, u.first.size()), &sz);
+                idW = std::stoi (w.first.substr(5, w.first.size()), &sz);
                 //Rule 2.1.2
-//                cerr << getLogHeader() + "Checking rule 2.1.2\n";
                 if (vATuUw && uATvUw && !wATuUv) {
-                    // cerr << getLogHeader() + "Is node 7 here??\n";
-                    if (N_v.size() < uCloseSet.size() ||
-                            (N_v.size() == uCloseSet.size() && idV < idU)) {
-                        cerr << getLogHeader() + "Not relay anymore<<<<<\n";
+                    if (cpyNeigs.size() < uCloseSet.size() ||
+                            (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
+                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         log_status_for_animation("UNMARKED2a2");
                         amIrelay = false;
                         return;
                     }
                 }
+//                cerr << getLogHeader() + "my min [" + to_string(idV) + "], Umin [" + to_string(idU) + "], Wmin [" +
+//                                            to_string(idW) + "] from rule 2.1.3\n";
                 //Rule 2.1.3
-//                cerr << getLogHeader() + "Checking rule 2.1.3\n";
-
-                m = min( idV, min(idU, idW) );
+                min = std::min( idV, std::min(idU, idW) );
+//                cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
                 if (vATuUw && uATvUw && wATuUv) {
-                    if ((N_v.size() < uCloseSet.size() && N_v.size() < wCloseSet.size()) ||
-                            (N_v.size() == uCloseSet.size() && N_v.size() < wCloseSet.size() && idV < idU) ||
-                            (N_v.size() == uCloseSet.size() && N_v.size() == wCloseSet.size() && idV == m)) {
-                        cerr << getLogHeader() << "Not relay anymore<<<<<\n";
+                    if ((cpyNeigs.size() < uCloseSet.size() && cpyNeigs.size() < wCloseSet.size()) ||
+                            (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
+                            (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == min)) {
+                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         log_status_for_animation("UNMARKED2a3");
                         amIrelay = false;
                         return;
@@ -261,23 +306,29 @@ namespace inet {
     }
 }
 
-  void Cds_3::on_neighbors(const cds3::Cds3* m) {
-    string emitter = m->getEmitter().name;
-    //cerr << getLogHeader() + "Neighbors reception from peer " + emitter + "\n";
-    /*
-     * TODO apparently the emiter of a broadcast will receive
-     *  the message as well. So, this case must be avoided for
-     *  some protocols. Given that CDS cope with open sets to
-     *  chose relays the fact of receiving a peer's own vicinity
-     *  have an impact
-     */
-    if (emitter == myself) return;
-    if (relaysIcanSee.find(emitter) == relaysIcanSee.end() && m->getAmIrelay())
-        relaysIcanSee[emitter] = emitter;
-    else if (!m->getAmIrelay())
-        relaysIcanSee.erase(emitter);
-    NeighMap emitterNeigs = m->getNeighbors();
-    for (auto& n: emitterNeigs) { oneHopNeigs[emitter][n.first] = n.second.name; }
+  bool Cds_3::changeAtVicinity() {
+    //first, check whether the number of neighbors is changed or not
+    if (lastSize != (int) neighbors.size()) {
+        lastSize = neighbors.size();
+        return true;
+    }
+    if (neighbors.size() != neighboursChache.size()) return true;
+    for (auto& n: neighbors) {
+        if (neighboursChache.find(n.first) == neighboursChache.end()) return true;
+    }
+    age++;
+    return false;
   }
 
+  void Cds_3::on_neighbors_reception(const cds3::Cds3* m) {
+     Neigh emitter = m->getEmitter();
+    //Avoiding that peers receive their own neighbors
+    if (emitter.name == myself) return;
+    // One-hop neighbors
+    neighbors[emitter.name] = emitter;
+    // Two-hop neighbors
+    neighboursChache[emitter.name] = m->getNeighbors();
+    if (m->getAmIrelay())
+        relaysIcanSee[emitter.name] = emitter.name;
+  }
 }

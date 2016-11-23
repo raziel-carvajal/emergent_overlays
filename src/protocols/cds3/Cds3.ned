@@ -26,4 +26,6 @@ simple Cds_3 extends BroadcastingBase like IUDPApp
 {
     parameters:
         @class(inet::Cds_3);
+        bool doRule2 = default(false);
+        bool doOptiP = default(false);
 }
