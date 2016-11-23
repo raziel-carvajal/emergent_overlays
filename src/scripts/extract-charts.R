@@ -14,6 +14,8 @@ get.arguments <- function() {
                       help='Simulation time in seconds')
   parser$add_argument('configuration', metavar='configuration', type="character",
                       help='Name of the configuration')
+  parser$add_argument('step', metavar='step', type="integer",
+                      help='Every broadcasting metric as function of time will use this value as xtics to be plotted')
   parser$add_argument('-a','--algorithm', dest='algorithm', type="character",
                       help='Algorithm used')
   parser$add_argument('-d', '--density', metavar='density', type="integer",
@@ -393,17 +395,17 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
   	 main="Coverage per session Id"
   	)
   
-  print(ts)
   #print(nr.dead.nodes)
   
   # TODO: PLOT THIS USING LINES
   
   #plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l", main="Dead Nodes")
   
-  boxplot(power.level, names = sapply(ts, function(x) paste("", x, sep="")  ) )
+  boxplot(power.level, names = sapply(ts, function(x) { paste("", x, sep="") }) )
+  
   #boxplot(
   #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ),
-  #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)", ylim=c(49, 50)
+  #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)"
   #)
 
 }
@@ -451,7 +453,7 @@ main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
 
   #TODO find a way to adapt this parameter in an automatic way
-  pl.step <- 3
+  pl.step <- args$step
 
   # mandatory behavior
 
@@ -535,7 +537,9 @@ main <- function(args) {
 
   if (args$plot) {
     print("Plotting :-P")
-    plot.charts.for.single.experiment(pl.local, bs, max = args$sim.time, step=pl.step)
+    id <- paste(args$algorithm, args$density_as_string, sep="-")
+    pdf( build.filename(args$outputPath, "IndividualPlots", id) )
+    plot.charts.for.single.experiment(pl.local, bs, max = args$simTime, step=pl.step)
   }
 
   if (args$showAverages) {
