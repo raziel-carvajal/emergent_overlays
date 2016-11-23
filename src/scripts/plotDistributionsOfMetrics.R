@@ -86,7 +86,7 @@ getPlotInfo <- function() {
   yLabe <- "Relays"
   pInfo$relNum <- c(title, xLabe, yLabe)
   title <- "Number of duplicated messages per broadcast session"
-  tlabe <- "Duplicated Messages"
+  yLabe <- "Duplicated Messages"
   pInfo$dupMsg <- c(title, xLabe, yLabe)
   title <- "Broadcast session time per broadcast session"
   yLabe <- "Broadcast Session Time (ms)"
