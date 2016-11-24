@@ -24,10 +24,26 @@ We discuss hereafter that there are different ways of examining this criterion.
 In their foundational work on the topic, Ni et al.~\cite{Ni:1999:BSP:313451.313525} identify some problems that negatively affect the broadcasting process when a blind flooding approach is used.
 To avoid such problems, the authors propose different algorithms that, by construction, outperform blind flooding in a set of metrics.
 Since by construction such approaches are an improvement, the authors do not consider blind flooding in the simulation results.
-This is common in evaluating broadcasting protocols.
+This is common in evaluating broadcasting protocols and it is a main motivation to select other evaluation criteria.
 Looking at column \textit{multi-protocol} in Table \ref{tbl:rw}, we see that most studies compare many protocols.
 However, we also see that they do not consider blind flooding in their evaluation.
 As shown in~\cite{YiGerla2003, ??}, comparing against blind flooding is nevertheless important when metrics such as energy consumption and mobility are taken into consideration.
+
+Interestingly, many studies only consider protocols in the same class.
+For instance, in~\cite{Wu2004}, the authors only compare algorithms with \textit{fixed transmission range} that build a \textit{CDS} as \textit{underlying topology}.
+Likewise, only the construction of \textit{cluster-based underlaying topologies} is evaluated in~\cite{Nocetti2003}.
+Meanwhile, in~\cite{Cartigny:2003:BNR:2727141.2727459} only \textit{probabilistic} approaches with \textit{context awareness} are considered.
+Finally, in~\cite{Cagalj2002} the authors only compare algorithms that build a \textit{tree} by \textit{varying the transmission range}.
+On the other hand, other studies compare classes of protocols that are somehow close such as \textit{probabilistic and area-based}~\cite{Ni:1999:BSP:313451.313525}; and \textit{CDS and cluster-based topologies}~\cite{Stojmenovic:2002:DSN:506156.506158, WCM:WCM109}.
+Finally, some studies compare protocols from truly diverse classes~\cite{YiGerla2003}.
+
+In general, most performance studies compare similar protocols because they are based on the same assumptions.
+For instance, it is assumed that the overall energy consumption decreases when less nodes rebroadcast messages.
+As a consequence, many studies only focus on measuring the improvement in term of this latter metric instead of looking at the real energy consumption.
+However, it is worth mentioning that such an approach has a disadvantage -- the cost of building and maintaining an underlying topology is not taken into consideration.
+As you can see in Table~\ref{tbl:rw}, many studies do not evaluate energy consumption nor the influence of mobility.
+Finally, a couple of performance studies measure how the network load influences the broadcasting process.
+Usually, this is done by introducing a simulated probability of dropping packages~\cite{Ni:1999:BSP:313451.313525, Qayyum2002}, but we think it is possible to better measure the effect of network load considering more realistic models of the MAC layer.
 
 %\begin{itemize}
 %	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
@@ -41,5 +57,3 @@ As shown in~\cite{YiGerla2003, ??}, comparing against blind flooding is neverthe
 %		\item Consideration of energy consumption
 %	\end{itemize}
 %\end{itemize}
-
-This one is important~\cite{YiGerla2003}. It is quite similar to what we do.
