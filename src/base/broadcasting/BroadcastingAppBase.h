@@ -50,6 +50,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         DISPLAY_TIME,
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
+        PRINT_POS_NEIGS,
         LAST_POWER_REPORT,
 
         First = IDLE,
@@ -162,7 +163,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     void log_status_for_animation(std::string status);
 
-    Coord get_position();
+    void updatePosition();
     void printBroadcastingLog (std::string key);
 
   public:

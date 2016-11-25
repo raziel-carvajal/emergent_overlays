@@ -33,7 +33,6 @@ Define_Module(Flooding2);
 
 void
 Flooding2::on_payload_received(const Broadcast* m) {
-
     string key = string(m->getId());
     emitBroadcastMsgReceived(key);
     if (string(m->getSender()) == myself) return;

@@ -129,7 +129,7 @@ StoredMovingMobility::initialize(int stage)
     isMoving = par("isMoving").boolValue();
     filename = par("filename").stdstringValue();
 
-    cModule* host = getContainingNode(this);
+    //cModule* host = getContainingNode(this);
     string hostName = this->getParentModule()->getFullName();
     auto id = hostName.substr( string("hostR").length(), string::npos);
     int idx = stoi(id);

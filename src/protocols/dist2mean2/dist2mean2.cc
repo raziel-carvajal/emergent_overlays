@@ -80,9 +80,9 @@ Dist2Mean2::send_message(string& key)
   	double norm_d = dist / radious;
 
 
-  	int n = (neighbors.size() > 0) ? neighbors.size() : 0;
+  	//int n = (neighbors.size() > 0) ? neighbors.size() : 0;
 
-  	double t_c = 0.95 - 0.7 * exp(-0.11*n);
+    //double t_c = 0.95 - 0.7 * exp(-0.11*n);
 
     must_send = must_send || norm_d > 0.40; // || norm_d > t_c;
 

@@ -43,6 +43,7 @@ Abba2::findQuadrant(Coord b) {
 
 void
 Abba2::updateAngleCovered(Coord b, string& key){
+    updatePosition();
     position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
     double d = position.distance(b);
     double alp = acos(abs(position.x - b.x) / d) * 180 / M_PI;
@@ -181,7 +182,7 @@ void
 Abba2::time_to_broadcast_payload(void* user_data)
 {
     string key;
-    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
+    updatePosition();
     if (is_source) {
         key = createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;

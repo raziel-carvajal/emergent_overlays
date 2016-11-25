@@ -35,6 +35,7 @@ namespace inet {
         //collisions but the broadcasting sessions time will increase as well
         //delayed_broadcast(key, delta);
     }
+
   }
 
   void inet::Cds_3::time_to_broadcast_payload(void* user_data) {

@@ -102,7 +102,7 @@ void
 Mpr_t2::erase_old_hops()
 {
 	for( auto it = hop1.begin(); it != hop1.end(); ) {
-		bool b = false;
+		//bool b = false;
 		double elapsed = (simTime() - it->second.time).dbl();
 		double threshold = 2 * 2;
 		if( elapsed > threshold )  {
@@ -125,7 +125,7 @@ Mpr_t2::on_mpr_hello(const MprHello *m)
 
 	hops_position[j] = Coord(m->getX(), m->getY());
 
-	for (int i = 0 ; i < m->getNeighborsArraySize() ; i++) {
+	for (int i = 0 ; i < (int) m->getNeighborsArraySize() ; i++) {
 		string name(m->getNeighbors(i));
 		if (myself == name) continue;
 
@@ -183,7 +183,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
 		bool from_selector = false;
-		for (int i = 0 ; !from_selector && i < mprBroadcast->getInMprArraySize() ; i++) {
+		for (int i = 0 ; !from_selector && i < (int) mprBroadcast->getInMprArraySize() ; i++) {
 			string j = mprBroadcast->getInMpr(i);
 			from_selector = j == myself;
 		}

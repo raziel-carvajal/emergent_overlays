@@ -38,9 +38,7 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     string info = "";
     for (auto& n: neighbors)
         info += n.first + "_";
-    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
-    cout << getLogHeader() + "POSITION " + to_string(position.x) + " " + to_string(position.y) +
-            " BROADCASTING " + key + " TO_NEIGHBORS " + info + "\n";
+    cout << getLogHeader() + "BROADCASTING " + key + " TO_NEIGHBORS " + info << endl;
 }
 
 //Define_Module(BroadcastingAppBase);
@@ -81,36 +79,18 @@ BroadcastingAppBase::initialize(int stage)
 
                 EV_TRACE << "My position is " << this->position  << "\n";
 
-                //bool is_center = host->par("is_source").boolValue();
-//                bool is_center = par("is_source").boolValue();
-//                if (is_center) {
-//                  is_source = true;
-//                  cerr << getParentModule()->getName() << ": is center " << is_center << endl;
-//                }
-
             }
             break;
-        case INITSTAGE_LAST:
-
-            // sending messages if source
-            if (is_source && nr_broadcast_msg > 0) {
-            	double d = par("wakeUpTime").doubleValue();
-            	delayed_event(WAKEUP, "intervalBroadcastTime", d);
-              	cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+        case INITSTAGE_LAST:{
+            double d = par("wakeUpTime").doubleValue();
+            delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
+            if (is_source) {
+                delayed_event(WAKEUP, "intervalBroadcastTime", d);
+                cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+                d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
+                delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
             }
-
-            // stop simulation at some point in the future
-            {
-//              delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
-              if (is_source) {
-                  double d = par("wakeUpTime").doubleValue();
-                  d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
-//                  cout << getLogHeader() + "TIMEOUT " << (d - 0.5) << endl;
-                  delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
-              }
-            }
-
-            break;
+        }break;
         default:
             break;
     }
@@ -131,9 +111,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 break;
             case SAY_HELLO:{
                 auto pkt = build_hello_message();
-                auto p = get_position();
-                pkt->setX(p.x);
-                pkt->setY(p.y);
+                updatePosition();
+                pkt->setX(position.x);
+                pkt->setY(position.y);
                 pkt->setSender(myself.c_str());
                 send_package(pkt);
                 if (this->nr_hello_msg > 0)
@@ -149,8 +129,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 //                  this->time_to_broadcast_payload(nullptr);
 //                }
                 if (is_source && nr_broadcast_msg > 0) {
-                  nr_broadcast_msg--;
                   this->time_to_broadcast_payload(nullptr);
+                  nr_broadcast_msg--;
                   delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
                 }
 
@@ -178,9 +158,19 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 		  break;
                 }
             case HALT_SIMULATION_DELAY:
-		cancelAndDelete(msg);
+                cancelAndDelete(msg);
             	endSimulation();
             	break;
+            case PRINT_POS_NEIGS:{
+                if (nr_broadcast_msg > 0) {
+                    cout << getLogHeader() + "TIC " + to_string((int)nr_broadcast_msg) + " POSITION " +
+                            to_string(position.x) + " " + to_string(position.y) << endl;
+                    delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", par("intervalBroadcastTime").doubleValue() - 0.2);
+                }
+                if (!is_source)
+                    nr_broadcast_msg--;
+
+            }break;
             default:
                 break;
         }
@@ -223,12 +213,12 @@ BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 }
 
 
-Coord
-BroadcastingAppBase::get_position()
+void
+BroadcastingAppBase::updatePosition()
 {
   cModule* host = getContainingNode(this);
   IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
-  return position = mobility->getCurrentPosition();
+  position = mobility->getCurrentPosition();
 }
 
 void
@@ -249,7 +239,7 @@ BroadcastingAppBase::processStart()
     cModule* host = getContainingNode(this);
     auto transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
 
-    this->position = get_position();
+    updatePosition();
     this->radious = transmitter->getMaxCommunicationRange().get();
 
     EV_TRACE << "My position is " << this->position  << "\n";
