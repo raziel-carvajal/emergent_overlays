@@ -30,17 +30,24 @@ if [ ! -f "${logFile}" ]; then
   echo "Error: The log file ${logFile} doesn't exists"
   exit 1
 fi
+if [ "${algo}" == "" ]; then
+  echo "Algorithm or Relays name can not be the empty string"
+  exit 1
+fi
 dst="topology_"$(basename "${logFile}")
 rm -fr ${dst} 
 mkdir ${dst}
 dst="./${dst}/"
-loops=`grep ":: POSITION" ${logFile} |awk -F " " '{print $8}'| sort -u| wc -l`
+loops=`grep ":: TIC " ${logFile} |awk -F " " '{print $5}'| sort -u| wc -l`
+loopI=${loops}
 echo "Creating input files..."
 for (( CNTR=1; CNTR<=${loops}; CNTR+=1 )); do
-  key=`grep ":: POSITION" ${logFile} |awk -F " " '{print $8}'| sort -u| head -${CNTR}| tail -1`
+  grep ":: TIC ${loopI}" ${logFile} >${dst}nodes_${CNTR}
+  key=`grep ":: BROADCASTING" ${logFile} |awk -F " " '{print $5}'| sort -u| head -${CNTR}| tail -1`
   echo "DOING FOR KEY: ${key}"
-  grep "BROADCASTING ${key} TO_NEIGHBORS" ${logFile} >${dst}graph_${CNTR}
-  grep "KEY_RECEPTION ${key} FROM_PEER" ${logFile} >${dst}rcvMsgs_${CNTR}
+  grep "BROADCASTING ${key} TO_NEIGHBORS" ${logFile} >${dst}senders_${CNTR}
+  grep "KEY_RECEPTION ${key} FROM_PEER" ${logFile} >${dst}receivers_${CNTR}
+  let loopI=loopI-1
 done
 echo -e "\tDONE\nDrawing topology per loop..."
 python draw_overlay.py ${loops} ${dst} ${algo}

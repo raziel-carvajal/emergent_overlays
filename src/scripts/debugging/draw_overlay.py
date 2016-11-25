@@ -2,21 +2,34 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def getNodesAndEdges(fileName):
-    nodes = []; edges = []; f = open(fileName, 'r')
+def getNodesAndPos(dstDir, sessionId):
+    nodes = []; pos = {}; f = open(dstDir + "nodes_" + sessionId, 'r')
     try:
         for l in f:
             ar = l.split()
-            peer = ar[1]; pos = (float(ar[4]), float(ar[5]))
-            neigs = ar[9].split('_')
-            nodes.append( (peer, {'pos': pos}) )
+            peer = ar[1]
+            p = (float(ar[6]), float(ar[7]))
+            pos[peer] = p
+            nodes.append(peer)
+    finally: f.close()
+    return nodes, pos
+
+def getEdgesAndRelays(dstDir, sessionId):
+    relays = {}; edges = []
+    f = open(dstDir + "senders_" + sessionId, 'r')
+    try:
+        for l in f:
+            ar = l.split()
+            peer = ar[1]
+            neigs = ar[6].split('_')
             for n in neigs:
                 if n != '':
                     edges.append((peer, n))
+            relays[peer] = 'blue'
     finally: f.close()
-    return nodes, edges
+    return edges, relays
 
-def getCollisionsRate(G, fileName, sessionId, dstDi, algo):
+def getCollisionsRate(G, fileName, sessionId, dstDi, algo, relays):
     f = open(fileName, 'r'); nodesDegree = {}
     try:
         for l in f:
@@ -26,10 +39,26 @@ def getCollisionsRate(G, fileName, sessionId, dstDi, algo):
     finally: f.close()
     f = open(dstDi + 'collisions.dat', 'a')
     try:
-        for n in nodesDegree:
-            err = 1 - (nodesDegree[n]*1.0) / len(G.neighbors(n))
-            line = algo + ', ' + str(sessionId) + ', ' + str(err) + '\n'
+        for n in relays:
+            if n in nodesDegree:
+                err = 1 - (nodesDegree[n]*1.0) / len(G.neighbors(n))
+            else:
+                err = 1
+            line = algo + ', ' + sessionId + ', ' + str(err) + ', ' + n + '\n'
             f.write(line)
+    finally: f.close()
+
+
+def isGraphConnected(G, algo, sessionId, fileName):
+    f = open(fileName, 'a')
+    try:
+        try:
+            nx.average_shortest_path_length(G)
+            connected = '1'
+        except NetworkXError:
+            connected = '0'
+        line = algo + ', ' + sessionId + ', ' + connected + '\n'
+        f.write(line)
     finally: f.close()
 
 if __name__ == '__main__':
@@ -39,18 +68,18 @@ if __name__ == '__main__':
     graphs = {}
     for i in range(1, loops + 1):
         graphs[i] = nx.Graph(); iD = str(i)
-        nodes, edges = getNodesAndEdges(dstDi + "graph_" + iD)
+        nodes, positions = getNodesAndPos(dstDi, iD)
         graphs[i].add_nodes_from(nodes)
+        edges, relays = getEdgesAndRelays(dstDi, iD)
         graphs[i].add_edges_from(edges)
-        #TODO if the protocol bulds an spine, mark relays with a different color
-        #TODO mark non connected graphs
-        #for r in relays: relayC[r] = 'blue'
-        #colors = [relayC.get(node, 'red') for node in graphs[i].nodes()]
-        #nx.draw(graphs[i], pos=nx.spring_layout(graphs[i]), node_color=colors)
-        nx.draw(graphs[i])
-        getCollisionsRate(graphs[i], dstDi + "rcvMsgs_" + iD, iD, dstDi, algo)
-        #nx.draw(graphs[i], positions, node_color=colors, with_labels=False)
-        #nx.draw_networkx(g)
+        # option for nx.draw :: labels=False
+        colors = [relays.get(node, 'red') for node in graphs[i].nodes()]
+        nx.draw(graphs[i], positions, node_color=colors)
+        print('plotting graph_' + iD)
         plt.savefig(dstDi + "graph" + iD + ".png")
+        print('computing porportion of collisions for graph_' + iD)
+        getCollisionsRate(graphs[i], dstDi + "receivers_" + iD, iD, dstDi, algo, relays)
+        print('computing connectivity of graph_' + iD)
+        isGraphConnected(graphs[i], algo, iD, dstDi + "graphConnectivity.dat")
         graphs[i].clear()
         plt.clf()
