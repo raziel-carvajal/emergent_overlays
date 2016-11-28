@@ -29,14 +29,37 @@ This kind of strategy where the relays are selected during the broadcasting proc
 
 \begin{enumerate}
 	\item A node $w$ is in $MPR(v)$ if it is the only member of $N(v)$ that is neighbor of some node in $N^2(v)$.
-	\item While there exists a node $w \in N^2(v)$ which is not covered by a node in $MPR(v)$:
-	\begin{itemize}
-		\item Select the node $z \in N(v)$, but not in $MPR(v)$, that covers more uncovered nodes in $N^2(v)$.
-			Add it to $MPR(v)$.
-	\end{itemize}
+	\item While there exists a node $w \in N^2(v)$ which is not covered by a node in $MPR(v)$: select the node $z \in N(v)$, but not in $MPR(v)$, that covers more uncovered nodes in $N^2(v)$. Add $w$ to $MPR(v)$.
 \end{enumerate}
 
 
-\textit{CDS}
+Wu et al. propose \textit{node-degree-based} rules to reduce the size of the connected dominating set~\cite{Wu2001}. Observe that to broadcast a message it is not necessary to apply all rules -- rule 1 is enough. Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$. The rules proceed as follows:
+
+\begin{enumerate}
+	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \textit{and} \quad w \notin N(w)$.
+	\item Consider two marked vertices $v$ and $u$. Then, $v$ is unmarked if one of the following conditions holds:
+	\begin{itemize}
+		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(u)$.
+		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \\ \textit{id}(v) < \textit{id}(u)$.
+	\end{itemize}
+	
+\end{enumerate} 
+
+In addition we can further refine the connected dominating sets using another rule. \inti{I would stop here and just put a reference, but here it is if you believe it is worth using it}
+Given $u$ and $w$, two marked neighbors of $v$. We unmarked $v$ if one of the following conditions holds:
+\begin{itemize}
+	\item $N(v) \subseteq N(u) \cup N(w), \textit{but} \quad N(u) \not\subset N(v) \cup N(w) \\ \quad \textit{and} \quad N(w) \not\subset N(v) \cup N(u) $.
+	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w), \\\textit{but} \quad N(w) \not\subset N(v) \cup N(u) $; and one of the following conditions hold:
+	\begin{itemize}
+		\item $\textit{nd}(v) < \textit{nd}(u)$
+		\item $\textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
+	\end{itemize}
+	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w) \\\textit{and} \quad N(w) \subset N(v) \cup N(u) $; and one of the following conditions hold:
+	\begin{itemize}
+		\item $\textit{nd}(v) < \textit{nd}(u) \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(w) $
+		\item $\textit{nd}(v) = \textit{nd}(u) < \textit{nd}(w) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
+		\item $\textit{nd}(v) = \textit{nd}(u) = \textit{nd}(w) \\ \textit{and} \quad \textit{id}(v) = \min\lbrace\textit{id}(v),\textit{id}(u),\textit{id}(w)\rbrace$
+	\end{itemize}
+\end{itemize}
 
 
