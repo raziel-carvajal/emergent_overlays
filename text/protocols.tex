@@ -20,7 +20,7 @@ In an attempt to reduce resource consumption, and given the fact that the proble
 As part of this paper, we have implemented two CDS-based protocols.
 
 The first approach we implement is the well-know \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002}.
-In the protocol, each node computes its own set of multipoint relays.
+In this protocol, each node computes its own set of multipoint relays.
 To do so, information regarding the 1-hop and 2-hops neighbors is required; hence, \textit{HELLO} messages containing such data are periodically sent.
 When a \textit{relay} node $n$ receives a messages, it computes its own multipoints relays ($\textit{MPR}(n)$), attaches it to the message and retransmits it to its neighbors.
 Then, a neighbor of $n$ retransmits the message if it belongs to $\textit{MPR}(n)$.
@@ -28,12 +28,12 @@ This kind of strategy where the relays are selected during the broadcasting proc
 
 
 \begin{enumerate}
-	\item A node $w \in N(v)$ is member of MPR if $w$ is the only neighbor of a node in $N^2(v)$.
-	\item While there exist a node $w \in N^2(v)$ which is not covered by a node in MPR:
+	\item A node $w$ is in $MPR(v)$ if it is the only member of $N(v)$ that is neighbor of some node in $N^2(v)$.
+	\item While there exists a node $w \in N^2(v)$ which is not covered by a node in $MPR(v)$:
 	\begin{itemize}
-		\item Select the node $z \in N(v)$, but not in MPR, that covers more uncovered nodes in $N^2(v)$. Add it to MPR.
+		\item Select the node $z \in N(v)$, but not in $MPR(v)$, that covers more uncovered nodes in $N^2(v)$.
+			Add it to $MPR(v)$.
 	\end{itemize}
-	\item Notify to each member of MPR that it must retransmit messages.
 \end{enumerate}
 
 
