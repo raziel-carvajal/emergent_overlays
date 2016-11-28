@@ -5,6 +5,20 @@
 
 \inti{We should add some kind of introduction here to explain how we selected these protocols}
 
+\subsection*{Topology-free protocols}
+We discuss in Section~\ref{sec:background} how some protocols do not require to build an underlying topology.
+The canonical algorithms with this property is \textit{blind flooding}, in where a node retransmits a message upon receiving for the first time.
+However, we are interested in more efficient protocols.
+
+In~\cite{Ovalle-Martinez2006}, the authors present the \textit{Area-based beaconles protocol} (ABBA).
+This is an algorithm where the flooding process is controlled in both space and time.
+Notice that the algorithm requires that each node knows its physical location as well as the transmission radio of each node.
+Upon the reception of a message, a node first computes the angle $\alpha$ covered by the received transmission.
+Using this information it then schedules a timer with a timeout $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is the maximum waiting time.
+If the same message is received before the timer expires, the node updates $\alpha$, cancels the previous timer and creates a new one.
+No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
+When a timer expires, the message is retransmitted by the node.
+
 \subsection*{CDS-based protocols}
 
 A connected dominating set of a graph G is a set D of vertices with two properties:
@@ -61,5 +75,7 @@ Given $u$ and $w$, two marked neighbors of $v$. We unmarked $v$ if one of the fo
 		\item $\textit{nd}(v) = \textit{nd}(u) = \textit{nd}(w) \\ \textit{and} \quad \textit{id}(v) = \min\lbrace\textit{id}(v),\textit{id}(u),\textit{id}(w)\rbrace$
 	\end{itemize}
 \end{itemize}
+
+
 
 
