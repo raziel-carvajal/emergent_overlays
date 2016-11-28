@@ -2,3 +2,41 @@
 
 \section{Protocols Considered in the Study}
 \label{sec:protocols}
+
+\inti{We should add some kind of introduction here to explain how we selected these protocols}
+
+\subsection*{CDS-based protocols}
+
+A connected dominating set of a graph G is a set D of vertices with two properties:
+
+\begin{enumerate}
+	\item Any node in D can reach any other node in D by a path that stays entirely within D.
+	\item Every vertex in G either belongs to D or is adjacent to a vertex in D.
+\end{enumerate}
+
+In MANETs, several protocols use the CDS rule to drive the broadcasting process.
+It states that a node retransmits a message once and only once if it belongs to the CDS.
+In an attempt to reduce resource consumption, and given the fact that the problem is NP, many protocols use a distributed and heuristic-based approach to compute an approximation of the \textbf{minimum connected dominating set}.
+As part of this paper, we have implemented two CDS-based protocols.
+
+The first approach we implement is the well-know \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002}.
+In the protocol, each node computes its own set of multipoint relays.
+To do so, information regarding the 1-hop and 2-hops neighbors is required; hence, \textit{HELLO} messages containing such data are periodically sent.
+When a \textit{relay} node $n$ receives a messages, it computes its own multipoints relays ($\textit{MPR}(n)$), attaches it to the message and retransmits it to its neighbors.
+Then, a neighbor of $n$ retransmits the message if it belongs to $\textit{MPR}(n)$.
+This kind of strategy where the relays are selected during the broadcasting process is \textit{source-dependent}.
+
+
+\begin{enumerate}
+	\item A node $w \in N(v)$ is member of MPR if $w$ is the only neighbor of a node in $N^2(v)$.
+	\item While there exist a node $w \in N^2(v)$ which is not covered by a node in MPR:
+	\begin{itemize}
+		\item Select the node $z \in N(v)$, but not in MPR, that covers more uncovered nodes in $N^2(v)$. Add it to MPR.
+	\end{itemize}
+	\item Notify to each member of MPR that it must retransmit messages.
+\end{enumerate}
+
+
+\textit{CDS}
+
+
