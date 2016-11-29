@@ -42,7 +42,7 @@ loops=`grep ":: TIC " ${logFile} |awk -F " " '{print $5}'| sort -u| wc -l`
 loopI=${loops}
 echo "Creating input files..."
 for (( CNTR=1; CNTR<=${loops}; CNTR+=1 )); do
-  grep ":: TIC ${loopI}" ${logFile} >${dst}nodes_${CNTR}
+  grep ":: TIC ${loopI} POSITION" ${logFile} >${dst}nodes_${CNTR}
   key=`grep ":: BROADCASTING" ${logFile} |awk -F " " '{print $5}'| sort -u| head -${CNTR}| tail -1`
   echo "DOING FOR KEY: ${key}"
   grep "BROADCASTING ${key} TO_NEIGHBORS" ${logFile} >${dst}senders_${CNTR}

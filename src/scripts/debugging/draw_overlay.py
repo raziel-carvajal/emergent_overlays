@@ -1,3 +1,4 @@
+import os
 import sys
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -29,7 +30,7 @@ def getEdgesAndRelays(dstDir, sessionId):
     finally: f.close()
     return edges, relays
 
-def getCollisionsRate(G, fileName, sessionId, dstDi, algo, relays):
+def getCollisionsRate(G, fileName, relays):
     f = open(fileName, 'r'); nodesDegree = {}
     try:
         for l in f:
@@ -37,35 +38,60 @@ def getCollisionsRate(G, fileName, sessionId, dstDi, algo, relays):
             if not(node in nodesDegree): nodesDegree[node] = 1
             else: nodesDegree[node] = nodesDegree[node] + 1
     finally: f.close()
-    f = open(dstDi + 'collisions.dat', 'a')
+    datP = {}
+    for n in relays:
+        if n in nodesDegree:
+            err = 1 - (nodesDegree[n]*1.0) / len(G.neighbors(n))
+        else:
+            err = 1
+        datP[n] = round(err, 2)
+    return datP
+
+def isGraphConnected(G):
     try:
-        for n in relays:
-            if n in nodesDegree:
-                err = 1 - (nodesDegree[n]*1.0) / len(G.neighbors(n))
+        nx.average_shortest_path_length(G)
+        connected = '1'
+    except Exception: connected = '0'
+    return connected
+
+def saveCollRateAndCon(fileName, algo, maP, dataSi, sesN, wKey):
+    line = '"Algorithm",'; firstLine = False
+    if not os.path.isfile(fileName):
+        firstLine = True
+        for j in range(1, sesN + 1):
+            if j < sesN:
+                line = line + '"B' + str(j) + '"' + ','
             else:
-                err = 1
-            line = algo + ', ' + sessionId + ', ' + str(err) + ', ' + n + '\n'
-            f.write(line)
-    finally: f.close()
+                line = line + '"B' + str(j) + '"' + '\n'
 
-
-def isGraphConnected(G, algo, sessionId, fileName):
     f = open(fileName, 'a')
     try:
-        try:
-            nx.average_shortest_path_length(G)
-            connected = '1'
-        except NetworkXError:
-            connected = '0'
-        line = algo + ', ' + sessionId + ', ' + connected + '\n'
-        f.write(line)
+        if firstLine:
+            f.write(line)
+        for i in range(0, dataSi):
+            line = '"' + algo + '"' + ','
+            for j in range(1, sesN + 1):
+                if wKey:
+                    key = 'hostR' + str(i)
+                    if key in maP[j]:
+                        value = str(maP[j][key])
+                    else:
+                        value = 'NA'
+                else:
+                    value = str(maP[j][i])
+                if j < sesN:
+                    line = line + '"' + value + '"' + ','
+                else:
+                    line = line + '"' + value + '"' + '\n'
+            f.write(line)
     finally: f.close()
 
 if __name__ == '__main__':
     loops = int(sys.argv[1])
     dstDi = sys.argv[2]
     algo  = sys.argv[3]
-    graphs = {}
+    colM = {}; conM = {}
+    graphs= {}; bigst = []
     for i in range(1, loops + 1):
         graphs[i] = nx.Graph(); iD = str(i)
         nodes, positions = getNodesAndPos(dstDi, iD)
@@ -78,8 +104,14 @@ if __name__ == '__main__':
         print('plotting graph_' + iD)
         plt.savefig(dstDi + "graph" + iD + ".png")
         print('computing porportion of collisions for graph_' + iD)
-        getCollisionsRate(graphs[i], dstDi + "receivers_" + iD, iD, dstDi, algo, relays)
+        colM[i] = getCollisionsRate(graphs[i], dstDi + "receivers_" + iD, relays)
+        bigst.append(len(colM[i]))
         print('computing connectivity of graph_' + iD)
-        isGraphConnected(graphs[i], algo, iD, dstDi + "graphConnectivity.dat")
+        conM[i] = [ isGraphConnected(graphs[i]) ]
         graphs[i].clear()
         plt.clf()
+    density = dstDi.split('_')[4]
+    saveCollRateAndCon('../../../results/collisions_' + density, algo, colM, max(bigst), loops, True)
+    saveCollRateAndCon('../../../results/graphConnectivity_' + density, algo, conM, 1, loops, False)
+    #f = open('../../../results/collisions_' + density, 'a')
+    #f = open( + density, 'a')
