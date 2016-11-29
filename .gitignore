@@ -70,3 +70,6 @@ results/n*.pdf
 
 #CVS
 results/summary.csv
+
+#LOGS
+src/scripts/debugging/logs/n_*
