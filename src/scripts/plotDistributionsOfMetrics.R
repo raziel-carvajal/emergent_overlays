@@ -57,19 +57,26 @@ get.arguments <- function() {
   parser$parse_args()
 }
 
-doPlot <- function(ds, yLabel, yLim, leftPos=NULL, density="Zero"){
+doPlot <- function(ds, yLabel, yLim, leftPos=NULL, density="Zero", metric) {
   ds.m <- melt(ds, id.var="Algorithm")
+  if (metric == "collisions_" || metric == "dupMsg" || metric == "broSeT"){
+    opt <- aes(x=variable, y=value)
+    geomBx <- geom_boxplot(aes(fill=Algorithm))
+  } else {
+    opt <- aes(x=variable, y=value, colour=Algorithm)
+    geomBx <- geom_boxplot(aes(fill=Algorithm))
+  }
   if (is.null(leftPos)) {
-    p <- ggplot(data = ds.m, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Algorithm)) +
-      theme(legend.position = "none") + ylim(c(0, yLim)) + ylab("") + xlab("") + 
+    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+      theme(legend.position = "top") + ylim(c(0, yLim)) + ylab("") + xlab("") + 
       ggtitle(density)
   } else if (leftPos) {
-    p <- ggplot(data = ds.m, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Algorithm)) +
-      theme(legend.position = "none") + ylim(c(0, yLim)) + ylab(yLabel) + xlab("") + 
+    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+      theme(legend.position = "top") + ylim(c(0, yLim)) + ylab(yLabel) + xlab("") + 
       ggtitle(density)
   } else {
-    p <- ggplot(data = ds.m, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Algorithm)) +
-      theme(legend.position = "none") + ylim(c(0, yLim)) + ylab("") + xlab("") +
+    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+      theme(legend.position = "top") + ylim(c(0, yLim)) + ylab("") + xlab("") +
       ggtitle(density)
   }
   p
@@ -79,8 +86,8 @@ getPlotInfo <- function() {
   title <- "Power consumption of nodes per broadcast session"
   xLabe <- "Broadcast Session ID"
   yLabe <- "Joules (J)"
-  pInfo <- as.data.frame(matrix(seq(3*4), nrow=3, ncol=4))
-  names(pInfo) <- c("powerC", "relNum", "dupMsg", "broSeT")
+  pInfo <- as.data.frame(matrix(seq(3*6), nrow=3, ncol=6))
+  names(pInfo) <- c("powerC", "relNum", "dupMsg", "broSeT", "collisions_", "graphConnectivity_")
   pInfo$powerC <- c(title, xLabe, yLabe)
   title <- "Number of relays per broadcast session"
   yLabe <- "Relays"
@@ -91,6 +98,12 @@ getPlotInfo <- function() {
   title <- "Broadcast session time per broadcast session"
   yLabe <- "Broadcast Session Time (ms)"
   pInfo$broSeT <- c(title, xLabe, yLabe)
+  title <- "Proportion of collisions per broadcast session"
+  yLabe <- "Percentage of collisions"
+  pInfo$collisions_ <- c(title, xLabe, yLabe)
+  title <- "Network connectivity"
+  yLabe <- "Network connectivity"
+  pInfo$graphConnectivity_ <- c(title, xLabe, yLabe)
   pInfo
 }
 
@@ -103,15 +116,24 @@ getYlimit <- function(files){
   max(unique(unlist(r)))
 }
 
+getYlimitForColiOrConn <- function(files){
+  r <- lapply(files, function(f) {
+    max(read.csv(f)[, 3])
+  })
+  max(unique(unlist(r)))
+}
+
 getYlimits <- function(files) {
-  c("powerC", "relNum", "dupMsg", "broSeT")
   yLimits<- vector()
   yLimits<- c(yLimits, getYlimit(files$powerC))
   yLimits<- c(yLimits, getYlimit(files$relNum))
   yLimits<- c(yLimits, getYlimit(files$dupMsg))
   yLimits<- c(yLimits, getYlimit(files$broSeT))
-  df <- as.data.frame(matrix(seq(4), nrow=1, ncol=4))
-  names(df) <- c("powerC", "relNum", "dupMsg", "broSeT")
+  yLimits<- c(yLimits, getYlimit(files$connec))
+  #yLimits<- c(yLimits, getYlimit(files$collis))
+  yLimits<- c(yLimits, 1)
+  df <- as.data.frame(matrix(seq(6), nrow=1, ncol=6))
+  names(df) <- c("powerC", "relNum", "dupMsg", "broSeT", "collisions_", "graphConnectivity_")
   df[1, ] <- yLimits
   df
 }
@@ -121,7 +143,9 @@ verifyDensities <- function(datasetsDir) {
   r <- list.files(datasetsDir, pattern=paste(broaMetrics$relNum, "[a-z]*", sep=""))
   d <- list.files(datasetsDir, pattern=paste(broaMetrics$dupMsg, "[a-z]*", sep=""))
   br<- list.files(datasetsDir, pattern=paste(broaMetrics$broSeT, "[a-z]*", sep=""))
-  if ( length(pmax(r, b, d, br)) != length(pmin(r, b, d, br)) ) {
+  cl<- list.files(datasetsDir, pattern=paste("collisions_", "[a-z]*", sep=""))
+  cn<- list.files(datasetsDir, pattern=paste("graphConnectivity_", "[a-z]*", sep=""))
+  if ( length(pmax(r, b, d, br, cl, cn)) != length(pmin(r, b, d, br, cl, cn)) ) {
     msg1 <- "The network densities is not the same on each dataset. As a consequence, the final PDF"
     msg2 <- "could contain empty frames OR duplicated plots per page."
     msg <- paste(msg1, msg2, sep=" ")
@@ -133,8 +157,10 @@ verifyDensities <- function(datasetsDir) {
   r <- paste(datasetsDir, r, sep='/')
   d <- paste(datasetsDir, d, sep='/')
   br<- paste(datasetsDir, br,sep='/')
-  l <- list(b, r, d, br)
-  names(l) <- c("powerC", "relNum", "dupMsg", "broSeT")
+  cl<- paste(datasetsDir, cl,sep='/')
+  cn<- paste(datasetsDir, cn,sep='/')
+  l <- list(b, r, d, br, cl, cn)
+  names(l) <- c("powerC", "relNum", "dupMsg", "broSeT", "collis", "connec")
   l
 }
 
@@ -143,6 +169,39 @@ getDensities <- function(files) {
     unlist(strsplit(f, "_"))[2]
   })
   sort(unique(unlist(densities)), decreasing=T)
+}
+
+positionPlot <- function(ds, yLabel, yLimit, d, mod, i, metric) {
+  if (i %% mod == 1)
+    p <- doPlot(ds, yLabel, yLimit, leftPos=T, density=d, metric)
+  else if (i %% mod == 0)
+    p <- doPlot(ds, yLabel, yLimit, leftPos=F, density=d, metric)
+  else
+    p <- doPlot(ds, yLabel,yLimit,leftPos=NULL,density=d, metric)
+  p
+}
+
+fixPowerConsDs <- function(ds) {
+  nCol <- length(ds[1, ]) - 1
+  nRow <- length(ds[, 1])
+  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
+  for (r in 1:nRow) {
+    veCol <- length(ds[r, ])
+    v <- vector()
+    for (vC in 2:veCol) {
+      v <- c(v, ds[r, vC])
+    }
+    vCpy <- vector()
+    vCpy <- c(vCpy, v)
+    v[length(v)] <- NA
+    v <- c(0.0, v)
+    v <- v[!is.na(v)]
+    df[r, ] <- abs(vCpy - v)
+  }
+  for (c in 1:nCol) {
+    ds[, c + 1] <- df[, c]
+  }
+  ds
 }
 
 main <- function(args) {
@@ -160,22 +219,30 @@ main <- function(args) {
     fName <- paste(args$datasets_dir, broaMetrics[[metric]], sep='/')
     for (d in densities) {
       ds <- read.csv(paste(fName, d, sep=""), header=T)
+      #if (metric == "powerC") {
+      #  ds <- fixPowerConsDs(ds)
+      #}
       yLabel <- plotInfo[[metric]][3]
       yLimit <- yLimits[[metric]]
-      if (i %% deNo == 1) {
-        plotList[[length(plotList) + 1]] <- doPlot(ds, yLabel, yLimit, leftPos=T, density=d)
-      } else if (i %% deNo == 0) {
-        plotList[[length(plotList) + 1]] <- doPlot(ds, yLabel, yLimit, leftPos=F, density=d)
-      } else {
-        plotList[[length(plotList) + 1]] <- doPlot(ds, yLabel, yLimit, density=d)
-      }
+      plotList[[length(plotList) + 1]] <- positionPlot(ds, yLabel, yLimit, d, deNo, i, metric)
       i <- i + 1
     }
+    for (otherM in c("collisions_", "graphConnectivity_")) {
+      fName <- paste(args$datasets_dir, otherM, sep='/')
+      for (d in densities) {
+        ds <- read.csv(paste(fName, d, sep=""), header=T)
+        yLabel <- plotInfo[[otherM]][3]
+        yLimit <- yLimits[[otherM]]
+        plotList[[length(plotList) + 1]] <- positionPlot(ds, yLabel, yLimit, d, deNo, i, otherM)
+        i <- i + 1
+      }
+    }
   }
-  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"))
+  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"),width=100, height=50)
+  noMetrics <- length(names(broaMetrics))
   multiplot(
     plotlist=plotList,
-    layout=matrix(seq(1, length(plotList)), nrow=length(names(broaMetrics)), byrow=TRUE)
+    layout=matrix(seq(1, length(plotList)), nrow=noMetrics*2 + noMetrics, byrow=TRUE)
   )
 }
 broaMetrics <- data.frame(
