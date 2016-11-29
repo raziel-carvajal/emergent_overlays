@@ -27,5 +27,6 @@ for config in ${CONFIG_PATH}/*.ini ; do
 
 		algorithms+=("-a" $protocol)
 done
-
+echo "DONE!!!!"
+exit 1
 ./run-selected-protocols-all-configs.sh -d $minimum_density -D $maximum_density -p ${CONFIG_PATH} ${algorithms[@]}
