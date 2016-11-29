@@ -16,8 +16,12 @@ In this paper, we use density and number of nodes as independent variables in ou
 However, we also use another fixed value, the transmission range ($tx$) of network nodes, to configure the generation process. This value is used to compute the size of the network layout using $m_{\textit{size}} = \lceil {\frac{tx}{r}} \rceil$.
 Once we have generated a topology with the expected density we check whether it is connected and discard disconnected topologies.
 The concrete values we use are $n=200$, $tx=10$ and $d=\lbrace 5, 10, 15, 20 \rbrace$.
+In selecting the values for $n$ and $d$ we take into account the values used in the related works.
+Meanwhile, the value of $tx$ is compute to ease the generation of mobility traces as we show in the next section.  
 
 \subsection*{Generating Mobility Traces. Presenting the model and how we configure it}
+
+Truncated-Levy Walks~\cite{Rhee:2011}
 
 
 \begin{itemize}
