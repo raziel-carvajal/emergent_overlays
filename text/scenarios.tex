@@ -7,7 +7,7 @@
 
 We are interested in evaluating the performance of protocols under different conditions. 
 In particular, it is important to compare their behavior with networks of different densities.
-In our study we consider the density of a network topology as the average number of neighbors in the vicinity of a node -- that is, the degree in the graph.
+In our study, the density of a network topology is the average number of neighbors in the vicinity of a node -- that is, the degree in the graph.
 Taking this definition, we can generate network topologies using \textbf{random geometric graphs} ($\textit{RGG}_{n,r}$), with $n$ being the number of nodes and $0<r<1$ the transmission radius~\cite{Penrose2003}.
 To guarantee that a generated topology has the required density we rely on a property of RGG.  
 In a $\textit{RGG}$ with uniform distribution of nodes over the area $[0,1]^2$, the expected degree ($d$) of vertices is equal to $\pi n r^2$. 
@@ -15,14 +15,22 @@ Then, given fixed values for two of the involved variables $n$, $\textit{d}$ or 
 In this paper, we use density and number of nodes as independent variables in our experiments and so different network topologies have different transmission radius.
 However, we also use another fixed value, the transmission range ($tx$) of network nodes, to configure the generation process. This value is used to compute the size of the network layout using $m_{\textit{size}} = \lceil {\frac{tx}{r}} \rceil$.
 Once we have generated a topology with the expected density we check whether it is connected and discard disconnected topologies.
-The concrete values we use are $n=200$, $tx=10$ and $d=\lbrace 5, 10, 15, 20 \rbrace$.
+The concrete values we use are $n=200$, $tx=30$ and $d=\lbrace 5, 10, 15, 20 \rbrace$.
 In selecting the values for $n$ and $d$ we take into account the values used in the related works.
-Meanwhile, the value of $tx$ is compute to ease the generation of mobility traces as we show in the next section.  
+Meanwhile, the value of $tx$ is computed to ease the generation of mobility traces as we show in the next section.  
 
-\subsection*{Generating Mobility Traces. Presenting the model and how we configure it}
+\subsection*{Generating Mobility Traces}
 
-Truncated-Levy Walks~\cite{Rhee:2011}
+A parameter we consider in this paper is the mobility of devices. 
+To look at its effect, we simulate the movement of devices' carriers by generating mobility traces using an implementation of the Truncated-Levy Walks mobility model~\cite{Rhee:2011}.
+This model emulates the ways humans moves when they are mostly walking. That is, frequent short walks to nearby locations, and occasional long rides to distant locations. 
+Since the implementation of the model that we use is unit-agnostic, we enforce the right walking speed by tying it to the previously mentioned transmission range $tx$.
+The preferred walking speed of human is, by some estimations, around $1.4$m/s~\cite{Browning390}.
+Combining this information with the fact that WiFi networks have a range up to 30-100 meters depending on the line of sight~\cite{??}, we set $tx=30$ and configure the parameters of the truncated-levy walk model to generate traces with an average speed of $1.4$. \inti{I cannot find a descent reference for the range of Wifi}
+In other words, we are considering an environment with many obstacles and people walking at a \textit{normal} speed.
 
+
+\subsection*{Other such as battery and power consumption of the radio}
 
 \begin{itemize}
 	\item Experimental Setup
