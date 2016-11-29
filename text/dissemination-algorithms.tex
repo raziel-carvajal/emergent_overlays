@@ -64,57 +64,6 @@ They share the following common structure, where $T$ is a value related to the c
 	\caption{Taxonomy to classify broadcasting algorithms}\label{fig:taxonomy}
 \end{figure*}
 
-In the rest of this section we briefly present the methods evaluated in the present work.
- 
-\subsection{Using underlying topology}
-
-To build an underlying topology for a given method, the nodes in the network must exchange messages.
-Some dissemination algorithms require relatively simple data from the context in order to build this topology.
-However, in some cases the complexity of creating the underlying topology far exceeds that of disseminating messages.
-
-A common type of information required is the set of neighbors of a node $v$ that can be reached using exactly a certain number $k$ of hops -- this is written as $N^{k}(v)$.
-For instance $N(v)$ is the set of direct neighbors of $v$ (notice that no superscript is used when $k = 1$).
-In the same way, $u \in N^2(v)$ if $\exists w \in V, \{(v, w), (w,u)\} \subseteq E$, but $(v, u) \notin E$.
-This indicates the nodes reachable from $v$ using exactly one hop.
-
-The \textbf{multipoint relaying  (MPR)} is an efficient technique for flooding in wireless networks~\cite{Qayyum2002}.
-Using $N(v)$ and $N^2(v)$, each node determines if it is a member of the MPR set (it must retransmit broadcast messages).
-To do so, it uses two rules:
-\begin{enumerate}
-	\item A node $w \in N(v)$ is member of MPR if $w$ is the only neighbor of a node in $N^2(v)$.
-	\item While there exist a node $w \in N^2(v)$ which is not covered by a node in MPR:
-		\begin{itemize}
-			\item Select the node $z \in N(v)$, but not in MPR, that covers more uncovered nodes in $N^2(v)$. Add it to MPR.
-		\end{itemize}
-	\item Notify to each member of MPR that it must retransmit messages.
-\end{enumerate}
-
-Using this topology, a node simply retransmit a message the first time it is received.
-
-Another technique determines the relay points using the \textbf{connected dominating sets (CDS)}~\cite{Wu2001}.
-In this approach, a node retransmit a message if it is member of an approximation of the CDS.
-Such an approximation is computed in a distributed manner by means of a proposed heuristic. 
-Initially a node $v$ is marked as member of CDS if there exists two unconnected nodes $u, w \in N(v)$. This initial approximation can be improved using two rules
-
-\newtheorem{myrule}{Rule}
-
-\begin{myrule}
-	Given nodes $v$, $u$ in $G^\prime$, 
-	let $N\left[v\right] = N(v) \cup \{v\}$ and $N\left[u\right] = N(u) \cup \{u\}$,
-	if $N\left[v\right] \subseteq N\left[u\right]$ and $id(v) < id(u)$
-	then $G^\prime$ becomes $G^\prime - \{v\}$.
-\end{myrule}
-
-\begin{myrule}
-	Assume that Given nodes $v$, $u$, $w$ in $G^\prime$. 
-	if $N(v) \subseteq N(u) \cup N(w)$ and $id(v) = min \{ id(v), id(u), id(w) \}$, then $G^\prime$ is changed to $G^\prime - \{v\}$.
-\end{myrule}
-
-The above rules can be modified to take into account the battery level of each node.
-In this way, the method can ensure that nodes will last longer.
-
-\textbf{Embedded Wireless Multicast Advantage (EWMA)}~\cite{Cagalj2002} using~\cite{Gallager1983} to compute the minimum-weighted spanning tree.
-
 \subsection{Without underlying topology}
 
 The \textbf{distance-to-mean} (dist2mean) approach~\cite{Slavik2011} is based on a simple observation: if a node $v$ receives a message from all directions, there is little benefit in retransmitting it because likely all neighbors already received the message.
