@@ -43,16 +43,19 @@ echo "Protocols: ${PROTOCOLS_LIBRARY}"
 echo "Config File: ${CONF_FILE}"
 echo "Executing command: ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}"
 
-${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} 1>debugging/logs/${CONF_NAME}
+NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
+DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
+densityAsString=`grep "${DENSITY}" densities| head -1| awk '{print $2}'`
+PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
+algoN=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
+logFile="n_${NODES}_d_${densityAsString}_p_${algoN}"
+
+${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} 1>debugging/logs/${logFile}
 r=$?
 if [ $r -ne 0 ]; then
         echo -e "\nERROR: for more details check this file: debugging/logs/${CONF_NAME}"
 	exit 1
 fi
-
-NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
-DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
-PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
 
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 step=`cat ${CONF_FILE} |grep intervalBroadcastTime |awk -F "=" '{print $2}'|grep -Eo '[0-9]'`
@@ -64,7 +67,8 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${DENSITY} --plot 
+	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
+        #exit 1
 	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step}| grep average_values`
 	echo "Repetition $i"
 	echo "$results"
