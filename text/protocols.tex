@@ -9,6 +9,7 @@
 We discuss in Section~\ref{sec:background} how some protocols do not require to build an underlying topology.
 The canonical algorithms with this property is \textit{blind flooding}, in where a node retransmits a message upon receiving it for the first time.
 However, we are interested in more efficient protocols.
+In addition to \textit{blind flooding}, in this paper we also implement other protocols that belong to this category.
 
 In~\cite{Ovalle-Martinez2006}, the authors present the \textit{Area-based beaconles protocol} (ABBA).
 This is an algorithm where the flooding process is controlled in both space and time.
@@ -18,6 +19,18 @@ Using this information it then schedules a timer with a timeout $T = T_\textit{m
 If the same message is received before the timer expires, the node updates $\alpha$, cancels the previous timer and creates a new one.
 No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
 When a timer expires, the message is retransmitted by the node.
+
+We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{CartignyProbabilistic}.
+In this protocol, a node retransmits a message with a probability that depends on two contextual values.
+The first value is the number of neighbors a node has.
+In using this value, the function used to compute the probability of retransmitting a message decreases as the number of neighbors increases.
+The rationale is that if a node has many neighbors they are most likely to be closely packed in a dense area.
+This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless the density.
+The second contextual value taken into account is the gain in terms of new area that a node covers when it retransmits the message.
+In this case, the motivation is the same as in ABBA; hence, the larger the new area to cover the higher the probability of sending a message. 
+Combining this two values the authors propose a protocol that delivers almost 100\% coverage with relatively low number of relay nodes.
+However, although the protocol requires both \textit{HELLO} messages and piggybacking of information in the broadcast messages, no experiment is presented to discuss important parameters such energy consumption. 
+
 
 \subsection*{CDS-based protocols}
 
