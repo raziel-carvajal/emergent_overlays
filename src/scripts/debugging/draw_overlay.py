@@ -68,13 +68,19 @@ def saveCollRateAndCon(fileName, algo, maP, dataSi, sesN, wKey):
     try:
         if firstLine:
             f.write(line)
+        if wKey:
+            for s in maP:
+                if len(maP[s]) == dataSi:
+                    keys = []
+                    for key in maP[s]:
+                        keys.append(key)
+                    break
         for i in range(0, dataSi):
             line = '"' + algo + '"' + ','
             for j in range(1, sesN + 1):
                 if wKey:
-                    key = 'hostR' + str(i)
-                    if key in maP[j]:
-                        value = str(maP[j][key])
+                    if keys[i] in maP[j]:
+                        value = str(maP[j][ keys[i] ])
                     else:
                         value = 'NA'
                 else:
