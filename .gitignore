@@ -73,3 +73,8 @@ results/summary.csv
 
 #LOGS
 src/scripts/debugging/logs/n_*
+
+#NON USED DATASETS
+results/batteryConsumptionDistribution-*
+results/broadcastSession-*
+results/duplicatedMsgsDistribution-*
