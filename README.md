@@ -68,3 +68,14 @@ Detailed list:
 [List (sorry, it has a mix of some languages: English, Spanish, some words in French and some gibberish I tend to write under pressure :-))](TODO.md)
 
 ## Installation instructions
+
+## Running experiments
+We evaluate a group of broadcasting algorithms for MANET's in three configuration of networks where N peers communicate with each other. Each network is described by its density, our understanding of density is the amount of neighbors that each peer reaches within its transmission range; we consider three types of density: sparse, medium and dense.
+
+To set up one experiment refer to `experiments/configs/experimet.cnf` where three options are allowed:
+
+- Algorithms: list of broadcasting algorithms (separated by one space). Every name must be equal to one of the folders located at  `src/protocols` where you will find the implementation of each broadcasting protocol
+- Densities: three integers (separated by underscores) to represent networks densities
+- ExpeName: string without spaces to name one experiment. IMPORTANT: avoid using underscores in this string
+
+To execute one experiment go to `src/scripts` and run this script `./all.sh`, you will find the plots and datasets at the `results` directory.
