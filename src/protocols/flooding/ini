@@ -1,3 +1,2 @@
 description = "Broadcasting messages using Flooding"
-
 *.host*.udpApp[0].typename = "Flooding2"

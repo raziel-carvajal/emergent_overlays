@@ -1,4 +1,3 @@
 description = "Broadcasting messages using ABBA"
-
 *.host*.udpApp[0].typename = "Abba2"
 *.host*.udpApp[0].timeOut = 0.01
