@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 3 ]; then
    echo "Wrong number of parameters"
-   echo "Usage: $0 ConfigurationFile InetPath"
+   echo "Usage: $0 ConfigurationFile InetPath ExpeForCollisions"
    exit 1
 fi
 
@@ -25,6 +25,9 @@ OMNET=opp_run
 
 # path to inet
 INET_PATH=$2
+
+# whe this flags values 1 just collisions are computed
+EXPE_FOR_COLLISIONS=$3
 
 # path to inet library. Observe the string INET at the end
 INET_LIBRARY_PATH=${INET_PATH}/out/gcc-debug/src/INET
@@ -57,6 +60,16 @@ if [ $r -ne 0 ]; then
 	exit 1
 fi
 
+
+if [ ${EXPE_FOR_COLLISIONS} -eq "1" ]; then
+  echo "COMPUTATION FOR COLLISIONS STARTS..."
+  cd debugging
+  ./draw_topology.sh logs/${logFile} ${PROTOCOL}
+  cd ..
+  echo -e "\tEND OF COMPUATION OF COLLISIONS"
+  exit 1
+fi
+
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 step=`cat ${CONF_FILE} |grep intervalBroadcastTime |awk -F "=" '{print $2}'|grep -Eo '[0-9]'`
 
@@ -67,8 +80,8 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
-        #exit 1
+	Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
+        exit 1
 	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step}| grep average_values`
 	echo "Repetition $i"
 	echo "$results"

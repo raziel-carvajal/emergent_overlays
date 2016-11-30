@@ -32,3 +32,22 @@ get_protocol_from_config_name() {
 get_nrnodes_from_config_name() {
   echo "$1" | awk -F "_" '{print $2 }'
 }
+
+chooseRightCnf() {
+  file=$1
+  dens=$2
+  algo=$3
+  newName=""
+  for (( CNTR=1; CNTR<13; CNTR+=1 )); do
+    if [ ${CNTR} -eq 4 ] ; then
+      newName="${newName}${dens}_"
+    fi
+    if [ ${CNTR} -eq 12 ] ; then
+      newName="${newName}${algo}.ini"
+    else
+      str=`echo ${file} |awk -F "_" -v I=${CNTR} '{print $I}'`
+      newName="${newName}${str}_"
+    fi
+  done
+  echo ${newName}
+}

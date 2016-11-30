@@ -83,6 +83,10 @@ cd $here
 cd $tPath
 topologiesFiles=`ls *.ned`
 cd ${here}
+#INFO: this is required to plot the proportion of collisions on each experiment
+#WATCH_OUT: be sure that frequency of control messages is the same as in common.ini
+ctrMsgsForColl=`grep "nr_hello_messages" ${pPath}mprt2/ini`
+ctrMsgsForColl="${ctrMsgsForColl}\n"`grep "helloTime" ${pPath}mprt2/ini`
 for t in $topologiesFiles; do
   srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
   index=$(( ${#t} - 4 ))
@@ -97,8 +101,20 @@ for t in $topologiesFiles; do
   		cat $iniCommon >$tId
   		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
   		cat $pPath$p'/ini' >>$tId
-      echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
+                echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
   		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+                case ${p} in
+                  flooding)
+                    cat ${tId} >>"${tId}_forCol.ini"
+                    echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
+                    mv "${tId}_forCol.ini" ${cPath}
+                    ;;
+                  abba2)
+                    cat ${tId} >>"${tId}_forCol.ini"
+                    echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
+                    mv "${tId}_forCol.ini" ${cPath}
+                    ;;
+                esac
   		mv $tId $tId'.ini'
   		mv $tId'.ini' $cPath
   	fi
