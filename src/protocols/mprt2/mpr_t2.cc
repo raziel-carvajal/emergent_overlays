@@ -119,7 +119,8 @@ Mpr_t2::on_mpr_hello(const MprHello *m)
 {
 	string j = m->getSender();
 	if (j == myself) return;
-
+	//for being able to measure collisions
+	neighbors[j] = Neighbor();
 	/* first, it is obvious that the sender is a member of hops level 0 */
 	hop1[j] = NodeNeighbor(simTime());
 
@@ -174,6 +175,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 	// Store in a map a a broadcast session ID
 	if (m->getSender() == myself) return;
 	string key = m->getId();
+	cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
 	emitBroadcastMsgReceived( key );
 
 	bool first = (!is_source && payloads.find(key) == payloads.end());
