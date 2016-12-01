@@ -331,6 +331,24 @@ countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
   r
 }
 
+getRcvOrSentBroadcastMessagesPerSession = function(ds, algo) {
+  nodes <- ds$resultkey[!duplicated(ds$resultkey)]
+  sess  <- ds$y[!duplicated(ds$y)]
+  nRow <- length(nodes) 
+  nCol <- length(sess) + 1
+  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
+  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
+  for (i in 1:nRow) {
+    values <- c(vector(), algo)
+    for (j in 2:nCol - 1) {# why 2 ??
+      msgs <- subset(ds, y == j)
+      values <- c(values, length(msgs$y))
+    }
+    df[i, ] <- values
+  }
+  df
+}
+
 getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsgsDs, algo, step){
   nodes <- rcvMsgsDs$resultkey[!duplicated(rcvMsgsDs$resultkey)]
   broadcastSessions <- sentMsgsDs$y[!duplicated(sentMsgsDs$y)]
@@ -368,6 +386,18 @@ getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsg
   df
 }
 
+getCoveragePerBroadcastSession = function(broInfo, algo, nodes) {
+  sess <- length(broInfo$id)
+  nCol <- sess + 1
+  df <- as.data.frame(matrix(seq(nCol), nrow=1, ncol=nCol))
+  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
+  values <- c(vector(), algo)
+  for (i in 1:sess){
+    values <- c(values, broInfo$n.received[i]/nodes*100)
+  }
+  df[1, ] <- values
+  df
+}
 #getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsgsDs, algo){
 #  nodes <- rcvMsgsDs$resultkey[!duplicated(rcvMsgsDs$resultkey)]
 #  broadcastSessions <- sentMsgsDs$y[!duplicated(sentMsgsDs$y)]
@@ -497,6 +527,7 @@ main <- function(args) {
   print("Reading vectors with messages sent and received")
   msgSentDs <- load.datafile(args$file, "name(msg_sent:vector)" )
   msgRcvDs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+
   print("DONE!")
 
   print(paste("Loading power consumption data file:", args$file))
@@ -555,6 +586,10 @@ main <- function(args) {
     relDist <- getNumberOfRelays(msgSentDs, args$algorithm)
     dupDist <- getDuplicatedMsgs(msgSentDs, msgRcvDs, args$algorithm)
     broDist <- getBroadcastingTime(msgSentDs, msgRcvDs, args$algorithm)
+    nodes   <- max(sapply(pl.local, function(p) length(p)))
+    netCove <- getCoveragePerBroadcastSession(bs, args$algorithm, nodes)
+    sentMsg <- getRcvOrSentBroadcastMessagesPerSession(msgSentDs$vectordata, args$algorithm)
+    rcvdMsg <- getRcvOrSentBroadcastMessagesPerSession(msgRcvDs$vectordata, args$algorithm)
     print("DONE")
 
     print("Exporting distributions of metrics...")
@@ -569,6 +604,15 @@ main <- function(args) {
 
     filename <- build.filename(args$outputPath, "broadcastSessionTime", args$density_as_string, seP="_")
     exportDataset(broDist, filename)
+
+    filename <- build.filename(args$outputPath, "networkCoverage", args$density_as_string, seP="_")
+    exportDataset(netCove, filename)
+    
+    filename <- build.filename(args$outputPath, "sentMsgs", args$density_as_string, seP="_")
+    exportDataset(sentMsg, filename)
+    
+    filename <- build.filename(args$outputPath, "rcvdMsgs", args$density_as_string, seP="_")
+    exportDataset(rcvdMsg, filename)
     print("DONE")
   }
 

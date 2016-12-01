@@ -32,6 +32,9 @@ rm -fr ../../results/batteryConsumptionDistribution-*
 rm -fr ../../results/broadcastSession-*
 rm -fr ../../results/duplicatedMsgsDistribution-*
 
+rm -fr ../../results/sentMsgs_*
+rm -fr ../../results/rcvdMsgs_*
+rm -fr ../../results/networkCoverage_*
 rm -fr ../../results/IndividualPlots-* 
 rm -fr ../../results/collisions_*
 rm -fr ../../results/graphConnectivity_*
@@ -116,6 +119,9 @@ mv ../../results/batteryConsumption_* ${resuD}
 mv ../../results/numberOfRelays_* ${resuD}
 mv ../../results/duplicatedMsgs_* ${resuD}
 mv ../../results/broadcastSessionTime_* ${resuD}
+mv ../../results/networkCoverage_* ${resuD}
+mv ../../results/sentMsgs_* ${resuD}
+mv ../../results/rcvdMsgs_* ${resuD}
 mv ../../experiments/configs/builtConfigs/results ${resuD}
 
 echo -e "\tSECOND ROUND IS DONE\nPLOTTING BROADCAST METRICS"
