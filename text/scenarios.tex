@@ -35,20 +35,19 @@ In other words, we are considering an environment with many obstacles and people
 \begin{table}[ht]
 \footnotesize
 \centering
-
-
 	
 \begin{tabular}{ccc}
 \textbf{Mode} & \textbf{Unit} & \textbf{Consumption} \\
 
 \midrule
-
-Sleep & nA & 400 \\
-Receive (RX) & mA & 17.0 \\
-Transmit (RX) & mA & 21.5 \\
+Off	  & nA & 16 \\
+Sleep & nA & 180 \\
+Receiver Listen (RX) & mA & 68 \\
+Receiver Active (RX) & mA & 82 \\
+Transmitter Active (RX) & mA & 335 \\
 \end{tabular}
 
-\caption{http://www.ti.com/lit/ds/symlink/cc2500.pdf. http://www.cypress.com/documentation/datasheets/bcm4354-single-chip-5g-wifi-ieee-80211ac-macbasebandradio-integrated}
+\caption{Power consumption of the BCM4329~\cite{BCM4329}. A Wi-FI chip used in modern mobile devices such as \textit{iPhone 4}, \textit{Samsung Galaxy S4G} and even in cars. }
 \end{table}
 
 
@@ -60,5 +59,6 @@ Transmit (RX) & mA & 21.5 \\
 		\item Number of executions
 		\item Different parameters used to configure it
 		\item Details for each protocol 
+		\item Simulation used, MAC layer
 	\end{itemize}
 \end{itemize}
