@@ -3,12 +3,12 @@
 \section{Deployment Scenarios}
 \label{sec:scenarios}
 
-To perform the simulations we use OMNET++ 4.6 with Inet 3.3.
+To perform the simulations we use OMNET++ 4.6 plus INET 3.3.
 By doing so we can rely on widely tested models of energy consumption and 802.11g wireless communication~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
-In addition, Inet offers an implementation of UDP and other layers of the network stack that help to make the simulation more realistic.
+INET also offers an implementation of UDP, ARP and other layers of the network stack that help to make the simulation more realistic.
+In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation. 
 Finally, using OMNEY++ we can collect a wide range of statistics regarding the simulation.
-
-\inti{Intro here about the fact that we are using omnet++/inet to perform the simulations. Then we describe that we need models to represent the different aspects/parameters involved in the experiments}
+In the rest of this section, we discuss how we collect the data to feed the INET models used in the simulations.
 
 \subsection*{Topology generation using Random Geometric Graphs}
 
