@@ -63,6 +63,26 @@ Transmitter Active (RX) & mA & 335 \\
 To consider this chip in the simulation we plug these values in the \textit{StateBasedEnergyConsumer} model provided by Inet.
 This model simply measures the consumption taking into account how much time the chip/radio spends in each mode and use it to along the data in Table~\ref{tbl:wifi-chip} to compute the consumption.
 
+\subsection*{Configuration of the experiments}
+In his section we discuss how we configure the experiments.
+\begin{itemize}
+	\item How many broadcast messages
+	\item Interval between broadcast messages
+	\item That we have a warm-up phase
+	\item How we stop the experiment
+	\item What data we collect
+	\item Stress the fact that we are using 802.11g
+\end{itemize}
+
+\subsection*{Details for each protocol}
+In this section we discuss the parameters used for each protocol.
+\begin{itemize}
+	\item \textbf{ABBA}: Maximum waiting time
+	\item \textbf{Probabilistic approach}: \textit{k}, $\sigma$, hello time.
+	\item \textbf{MPR}: hello time
+	\item \textbf{CDS}: hello time
+\end{itemize}
+
 
 \subsection*{Other such as battery and power consumption of the radio}
 
@@ -73,8 +93,5 @@ This model simply measures the consumption taking into account how much time the
 		\item Reproducibility of the experiments
 		\item Fairness of the experiments
 		\item Number of executions
-		\item Different parameters used to configure it
-		\item Details for each protocol 
-		\item Simulation used, MAC layer
 	\end{itemize}
 \end{itemize}
