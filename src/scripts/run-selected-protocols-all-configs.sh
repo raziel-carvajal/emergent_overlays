@@ -65,21 +65,20 @@ echo "Simulating"
 
 for c in ${CONFIG_PATH}*.ini ; do
 	filename=$(basename "$c")
-	config_name="${filename%.*}"
-  nodes=$(get_nrnodes_from_config_name $config_name)
-  density=$(get_density_from_config_name $config_name)
-  protocol=$(get_protocol_from_config_name $config_name)
-  if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
-    array_contains "$protocol" "${ALGORITHMS[@]}"
-    if [ $? -eq 0 ]; then
-      echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
-      sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet
+  my_substring="_forCol"
+  if [[ ! "$filename" =~ "$my_substring" ]]; then
+  	config_name="${filename%.*}"
+    nodes=$(get_nrnodes_from_config_name $config_name)
+    density=$(get_density_from_config_name $config_name)
+    protocol=$(get_protocol_from_config_name $config_name)
+    if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
+      array_contains "$protocol" "${ALGORITHMS[@]}"
+      if [ $? -eq 0 ]; then
+        echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
+        sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet 0
+      fi
     fi
   fi
-  # if [ "$protocol" == "abba2" ] || [ "$protocol" == "mprt2" ] || [ "$protocol" == "cds3" ] || [ "$protocol" == "flooding"  ] ; then
-  #
-  #   #exit 1
-  # fi
 
 done
 
