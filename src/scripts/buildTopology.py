@@ -65,7 +65,10 @@ def get_arguments():
                         help='Maximum density (default: 65)')
     parser.add_argument('--idx', dest='last_idx', type=int, default=0,
                         help='last id number used to identify topologies (default: 0)')
+    parser.add_argument('--nodes', dest='nr_nodes', type=int, default=200,
+                        help='Number of nodes (default: 200)')
     parser.add_argument("--mobility", help="Generate mobility files")
+
     args = parser.parse_args()
     return args
 
@@ -91,7 +94,7 @@ def build_graph(pos, tx):
         y0 = v[1]
         c = 0
         for j, v2 in enumerate(pos):
-            if i != j:
+            if i < j:
                 x1 = v2[0]
                 y1 = v2[1]
                 d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
@@ -195,7 +198,7 @@ if __name__ == '__main__':
     index = args.last_idx
     min_density = args.min_density
     max_density = args.max_density
-    nr_nodes = 200
+    nr_nodes = args.nr_nodes
     mobility = args.mobility
 
     step = 5
