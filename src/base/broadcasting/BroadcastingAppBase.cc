@@ -83,6 +83,13 @@ BroadcastingAppBase::initialize(int stage)
             break;
         case INITSTAGE_LAST:{
             double d = par("wakeUpTime").doubleValue();
+            // DON'T REMOVE THIS THREE LINES. IT IS IMPORTANT TO GUARANTEE A PROPER MEASUREMENT
+            d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
+            d += 3; // some extra seconds
+            delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
+            // ==========================================================================
+
+            d = par("wakeUpTime").doubleValue();
             delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
             if (is_source) {
                 delayed_event(WAKEUP, "intervalBroadcastTime", d);
@@ -154,9 +161,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   pkt->setY(position.y);
                   pkt->setSender(myself.c_str());
                   send_package(pkt);
-	          cancelAndDelete(msg);
-		  break;
+	                cancelAndDelete(msg);
                 }
+		              break;
             case HALT_SIMULATION_DELAY:
                 cancelAndDelete(msg);
             	endSimulation();
@@ -165,7 +172,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 if (nr_broadcast_msg > 0) {
                     cout << getLogHeader() + "TIC " + to_string((int)nr_broadcast_msg) + " POSITION " +
                             to_string(position.x) + " " + to_string(position.y) << endl;
-                    delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", par("intervalBroadcastTime").doubleValue() - 0.2);
+                    auto p  = par("intervalBroadcastTime").doubleValue() / 5;
+                    delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
                 }
                 if (!is_source)
                     nr_broadcast_msg--;
