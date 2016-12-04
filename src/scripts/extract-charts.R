@@ -164,6 +164,16 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   )
 }
 
+save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
+  broSes <- data.frame( whatever = broadcast.info$n.sent)
+  colnames(broSes) <- c(expeId)
+  write.table(
+            broSes,
+            file = build.filename(outputPath, "relays", expeId),
+            row.names = F, append = F
+  )
+}
+
 
 save.duplicated.messages <- function(data, outputPath, expeId){
   dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
@@ -316,7 +326,7 @@ countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
   headers <- c(headers, "algorithm")
   nrow <- length(keys)
   ncol <- length(headers)
-  r <- as.data.frame(matrix(0, nrow=nrow, ncol=ncol)) 
+  r <- as.data.frame(matrix(0, nrow=nrow, ncol=ncol))
   names(r) <- headers
   for (i in 1:length(keys)) {
     a <- subset(radiomodeds, resultkey == keys[i])
@@ -334,7 +344,7 @@ countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
 getRcvOrSentBroadcastMessagesPerSession = function(ds, algo) {
   nodes <- ds$resultkey[!duplicated(ds$resultkey)]
   sess  <- ds$y[!duplicated(ds$y)]
-  nRow <- length(nodes) 
+  nRow <- length(nodes)
   nCol <- length(sess) + 1
   df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
   names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
@@ -355,7 +365,7 @@ getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsg
   battConByNode <- lapply(nodes, function(n){
     subset(powerConDs, resultkey==n)
   })
-  nRow <- length(nodes) 
+  nRow <- length(nodes)
   nCol <- length(broadcastSessions) + 1
   df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
   names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
@@ -406,7 +416,7 @@ getCoveragePerBroadcastSession = function(broInfo, algo, nodes) {
 #  battConByNode <- lapply(nodes, function(n){
 #    subset(powerConDs, resultkey==n)
 #  })
-#  nRow <- length(nodes) 
+#  nRow <- length(nodes)
 #  nCol <- length(broadcastSessions) + 1
 #  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
 #  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
@@ -432,7 +442,7 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
   nr.nodes <- max(sapply(power.level, function(p) length(p)))
   n <- length(broadcast.info$id) # number of broadcast messages
-  
+
   valid.time <- broadcast.info$time[broadcast.info$time <= max ]
   if (length(valid.time) == 0) {
   	valid.time <- broadcast.info$time
@@ -447,12 +457,12 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
   #     type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?",
   #     ylim=c(1, 3)
   #)
-  
+
   plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
-  
+
   # nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
   #nr.dead.nodes <- apply(power.level, 2, function(e) 0 )
-  
+
   plot(y=broadcast.info$n.received/nr.nodes*100,
   	 x = broadcast.info$sending ,
   	 type="l",
@@ -461,15 +471,15 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
   	 ylab="Coverage (%)",
   	 main="Coverage per session Id"
   	)
-  
+
   #print(nr.dead.nodes)
-  
+
   # TODO: PLOT THIS USING LINES
-  
+
   #plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l", main="Dead Nodes")
-  
+
   boxplot(power.level, names = sapply(ts, function(x) { paste("", x, sep="") }) )
-  
+
   #boxplot(
   #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ),
   #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)"
@@ -546,6 +556,7 @@ main <- function(args) {
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
+  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
@@ -607,10 +618,10 @@ main <- function(args) {
 
     filename <- build.filename(args$outputPath, "networkCoverage", args$density_as_string, seP="_")
     exportDataset(netCove, filename)
-    
+
     filename <- build.filename(args$outputPath, "sentMsgs", args$density_as_string, seP="_")
     exportDataset(sentMsg, filename)
-    
+
     filename <- build.filename(args$outputPath, "rcvdMsgs", args$density_as_string, seP="_")
     exportDataset(rcvdMsg, filename)
     print("DONE")

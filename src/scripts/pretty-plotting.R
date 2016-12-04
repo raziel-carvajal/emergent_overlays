@@ -16,8 +16,16 @@ get_arguments <- function() {
                       help='Duplicated messages file name')
   parser$add_argument('-bs', '--broadcast-session-file', dest='bs', type="character",
                       help='Broadcast session file name')
+  parser$add_argument('-rf', '--relays-file', dest='rf', type="character",
+                      help='Relays file name')
+  parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
+                      help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
                       help='useless')
+
+  parser$add_argument('-final', '--final-version', dest='final', action="store_true",
+                      help='If used, the script generates a version good enough for the paper')
+
   # parser$print_help()
   parser$parse_args()
 }
@@ -106,6 +114,19 @@ get.attrSet <- function(dfNames, attri) {
 }
 
 
+get.plot.theme.style <- function() {
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(0.4,0.4,0.4,0.4), "cm")) +
+  # all this is to remove the beautiful grid (not good for the paper :-( )
+  theme(
+    panel.background = element_rect(fill = 'white', colour = 'black')
+    ,panel.grid.major = element_blank()
+    ,panel.grid.minor = element_blank()
+    ,panel.border = element_blank()
+  )
+}
+
+
 plot.broadcasting.time2 <- function(df, densities, pal){
   print('Plotting ECDF of broadcasting time ...')
   data.list <- lapply(densities, function(density) {
@@ -129,18 +150,22 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 
   data <- do.call("rbind", data.list)
 
+  caption <- "Maximum delay time"
+
   p <- ggplot( data, aes(dat, ecdf, colour = alg) ) +
       facet_grid(. ~ density) +
       theme(legend.position="bottom") +
       xlab("Time (ms)") +
-      labs(title="Maximum delay time", colour="Algorithms") +
-      theme(plot.title=element_text(size=15, vjust=3)) +
-      theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+      (if (print.titles)
+ 		   labs(title=caption, colour="Algorithms")
+      else
+        labs(colour="Algorithms")
+      ) +
+      get.plot.theme.style() +
       geom_step()
 
   print(p)
 }
-
 
 plot.data.using.boxes <- function(data, densities, ylabel, caption) {
   data.list <- lapply(densities, function(density) {
@@ -166,10 +191,56 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
 		 facet_grid(. ~ density) +
 		 theme(legend.position="bottom") +
-		 ylab(ylabel) + xlab("Algortihm") +
-		 labs(title=caption, fill="Algorithms") +
-		 theme(plot.title=element_text(size=15, vjust=3)) +
-		 theme(plot.margin = unit(c(1,1,1,1), "cm"))
+		 ylab(ylabel) + xlab("Algorithm") +
+     (if (print.titles)
+       labs(title=caption, fill="Algorithms")
+     else
+       labs(fill="Algorithms")
+     ) +
+     get.plot.theme.style()
+
+	print(p)
+}
+
+plot.saved_rebroadcast.per.session <- function(data, densities) {
+  data.list <- lapply(densities, function(density) {
+		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
+		dd <- lapply(dd, function(e) {
+			cn <- colnames(e)[1]
+			s <- unlist( strsplit(cn,'_'))
+	  	cn <- s[which(s == "p") + 1]
+      nr.nodes <- as.numeric(s[which(s == "n") + 1])
+			y <- rep(nr.nodes, length(e[,1])) -  e[,1]
+      x <- 1:length(y)
+      p <- lowess(x, y, f=1/15)
+			data.frame( dat = p$y,
+						alg = rep(cn, length(y)),
+            idx = p$x,
+						density=rep(as.factor(paste("Density", density)), length(data))
+			)
+		})
+
+		do.call("rbind", dd)
+	})
+
+	data <- do.call("rbind", data.list)
+  # data$idx <- 1:length(data$dat)
+
+  ylabel <- "Saved rebroadcast messages"
+  caption <- "Saved rebroadcast messages per session"
+  # print(head(data,4))
+
+	p <- ggplot(data) +
+		 geom_line(aes(x=idx, y=dat, colour=alg)) +
+		 facet_grid(. ~ density) +
+		 theme(legend.position="bottom") +
+		 ylab(ylabel) + xlab("Broadcast Session") +
+     (if (print.titles)
+		   labs(title=caption, colour="Algorithms")
+     else
+       labs(colour="Algorithms")
+     ) +
+     get.plot.theme.style()
 
 	print(p)
 }
@@ -192,6 +263,27 @@ plot.duplicated.messages <- function(df, densities) {
                         "Distribution of duplicated messages along the experiment")
 }
 
+plot.saved.rebroadcasts <- function(df, algos) {
+  ylabel <- "Saved Rebroadcasts"
+  df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
+  caption <- "Saved rebroadcasts"
+  p <- ggplot(df) +
+		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
+     geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg),   # Shape depends on cond
+               size = 4) +        # Large points
+		 theme(legend.position="bottom") +
+		 ylab(ylabel) + xlab("Density") +
+     (if (print.titles)
+		   labs(title=caption, colour="Algorithms", shape="Algorithms")
+     else
+       labs(colour="Algorithms", shape="Algorithms")
+     ) +
+		 get.plot.theme.style()
+
+	print(p)
+}
+
+
 #
 # Extract metadata such as the protocols, the densities and a palette for plotting
 #
@@ -212,15 +304,36 @@ load.dataset.with.metadata <- function(path, filename, metadata) {
   data <- import.data(file)
   if (is.null(metadata)) {
     metadata = extract.metadata(data)
-    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=4*length(metadata$densities), height=8)
+    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*length(metadata$densities), height=4)
   }
   l <- list(data, metadata)
   names(l) <- c("data", "metadata")
   l
 }
 
+load.summary <- function(path, filename) {
+  file <- paste(path, filename, sep = '')
+  data <- read.csv(file, header=F)
+  colnames(data) <- c("config", "protocols_fancy_name", "nodes", "density", "coverage", "bt", "pc", "dm", "relays")
+  algos <- sapply(data$config, function(s) {
+    s <- as.character(s)
+    pp <- unlist(strsplit(s, split="_"))
+    idx <- which(pp == "p")[1] + 1
+    pp[idx]
+  })
+  data$alg <- algos
+  data$saved.rebroadcasts <- data$nodes - data$relays
+  data
+}
+
+
 args <- get_arguments()
 metadata = NULL
+
+
+# should plot titles?
+print.titles <- !args$final
+
 
 if (!is.null(args$pc)) {
   print("Importing power consumption dataset")
@@ -228,6 +341,22 @@ if (!is.null(args$pc)) {
   metadata <- r$metadata
   print("Plotting power consumption")
   plot.power.consumption(r$data, metadata$densities)
+}
+
+
+if (!is.null(args$rf)) {
+  print("Importing relays dataset")
+  r <- load.dataset.with.metadata(args$path, args$rf, metadata)
+  metadata <- r$metadata
+  print("Plotting saved rebroadcasts")
+  plot.saved_rebroadcast.per.session(r$data, metadata$densities)
+}
+
+if (!is.null(args$sf)) {
+  print("Importing summary CSV file")
+  r <- load.summary(args$path, args$sf)
+  print("Plotting Saved Rebroadcasts")
+  plot.saved.rebroadcasts(r, metadata$algos)
 }
 
 if (!is.null(args$dm)) {
