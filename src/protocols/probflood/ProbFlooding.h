@@ -22,6 +22,8 @@
 
 #include <algorithm>
 #include <vector>
+#include <mutex>
+
 const double M = 0.601;
 
 using namespace std;
@@ -40,6 +42,7 @@ private:
     double miTreb;
     double maTreb;
     double probLim;
+    mutex mtx;
 
     enum SCHEME {
         DENSITY_AWARE,

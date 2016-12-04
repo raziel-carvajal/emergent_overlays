@@ -19,7 +19,7 @@ namespace inet {
 Define_Module(ProbFlooding);
 
 void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
-    double probability = 0.0; bool doRetransmission;
+    double probability = 0.0; bool doRetransmission = false;
     NeigsMap toDel;
     std::string key = string(m->getPayload());
     if (string(m->getSender()) == myself) return;
@@ -27,12 +27,14 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
     emitBroadcastMsgReceived(key);
     if (alreadyDispatched.find(key) != alreadyDispatched.end()) return;
     probflood::ProbFlooBroadcast* msg = (probflood::ProbFlooBroadcast*) m;
-    for (auto &n: neighbors) {
+    mtx.lock();
+    for (auto& n: neighbors) {
         if (n.second.w > 0.0)
             toDel[n.first] = n.first;
     }
-    for (auto &old: toDel)
+    for (auto& old: toDel)
         neighbors.erase(old.first);
+    mtx.unlock();
     switch(scheme) {
     case DENSITY_AWARE:
         if (neighbors.size() == 0.0) {
@@ -50,6 +52,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
         doRetransmission = doDensityAndBorderAwareScheme(msg->getSenderNeigs(), true);
         break;
     case DENSITY_BORDER_AWARE_NEIGS_ELIMINATION:
+        mtx.lock();
         if (broadcastTable.find(key) == broadcastTable.end())
             broadcastTable[key] = msg->getSenderNeigs();
         else {
@@ -58,6 +61,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
                     broadcastTable[key].erase(n.first);
             }
         }
+        mtx.unlock();
         doRetransmission = doDensityAndBorderAwareScheme(msg->getSenderNeigs(), true);
         if (!doRetransmission) {
 //            cout << getLogHeader() << "Doing delayed broadcast for key " << key << " and T: " << T << endl;
@@ -65,21 +69,27 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
         }
         break;
     }
-    for (auto &n: neighbors) n.second.w = n.second.w + 1.0;
+    mtx.lock();
+    for (auto& n: neighbors) n.second.w = n.second.w + 1.0;
+    mtx.unlock();
     if (doRetransmission) {
         NeigsMap myNeigs;
-        for (auto& n: neighbors) myNeigs[n.first] = n.first;
-        probflood::ProbFlooBroadcast* msg = new probflood::ProbFlooBroadcast("payload");
-        msg->setSenderNeigs(myNeigs);
+        mtx.lock();
+        for (auto& n1: neighbors) myNeigs[n1.first] = n1.first;
+        mtx.unlock();
+        probflood::ProbFlooBroadcast* newMsg = new probflood::ProbFlooBroadcast("payload");
+        newMsg->setSenderNeigs(myNeigs);
         alreadyDispatched[key] = key;
-        broadcast(key, msg);
+        broadcast(key, newMsg);
     }
 }
 
 void inet::ProbFlooding::time_to_broadcast_payload(void* user_data) {
     string key;
     NeigsMap myNeigs;
+    mtx.lock();
     for (auto& n: neighbors) myNeigs[n.first] = n.first;
+    mtx.unlock();
     probflood::ProbFlooBroadcast* msg = new probflood::ProbFlooBroadcast("payload");
     msg->setSenderNeigs(myNeigs);
     if (is_source) {
@@ -101,47 +111,62 @@ void ProbFlooding::on_hello_received(const broadcasting::Hello* msg) {
     if (myself == msg->getSender())
         return;
 //    cout << getLogHeader() << "HELLO from: " << msg->getSender() << endl;
-    Neighbor node;
-    node.name = msg->getSender();
-    node.addr = getAddr(msg->getSender());
-    node.pos.x = msg->getX();
-    node.pos.y = msg->getY();
-    node.w = 0.0;
-    neighbors[node.name] = node;
+    string senderStr = msg->getSender();
+    mtx.lock();
+    if (neighbors.find(senderStr) == neighbors.end()) {
+        Neighbor node;
+        node.name = senderStr;
+        node.addr = getAddr(msg->getSender());
+        node.pos.x = msg->getX();
+        node.pos.y = msg->getY();
+        node.w = 0.0;
+        neighbors[node.name] = node;
+    } else {
+        neighbors[senderStr].addr = getAddr(msg->getSender());
+        neighbors[senderStr].pos.x= msg->getX();
+        neighbors[senderStr].pos.y= msg->getY();
+        neighbors[senderStr].w = 0.0;
+    }
+    mtx.unlock();
 }
 
 bool ProbFlooding::doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both) {
-    int i = 0;
-    string src[neighbors.size()], tmp = "";
+    mtx.lock();
+    int neigSize = neighbors.size();
+    mtx.unlock();
+    string src[neigSize];
     string dest[senderNeigs.size()];
-    for (auto &n: senderNeigs) {
-        dest[i] = n.first;
-        tmp += n.first + ", ";
-        i++;
-    }
+//    string tmp = "";
+//    for (auto& n: senderNeigs) {
+//        dest[i] = n.first;
+//        tmp += n.first + ", ";
+//        i++;
+//    }
 //    cout << getLogHeader() << "DST neighbrs: " << tmp << endl;
-    tmp = "";
-    i = 0;
-    for (auto &n: neighbors) {
-        src[i] = n.first;
-        tmp += n.first + ", ";
-        i++;
-    }
+//    tmp = "";
+//    i = 0;
+//    mtx.lock();
+//    for (auto& n: neighbors) {
+//        src[i] = n.first;
+//        tmp += n.first + ", ";
+//        i++;
+//    }
+//    mtx.unlock();
 //    cout << getLogHeader() << "SRC neighbrs: " << tmp << endl;
     double Na, Nb, Nc = 0.0;
-    vector<string> v( max(senderNeigs.size(), neighbors.size()) );
+    vector<string> v( math::max(senderNeigs.size(), neigSize) );
     vector<string>::iterator it = set_difference(
-            src, src + neighbors.size(), dest, dest + senderNeigs.size(), v.begin());
+            src, src + neigSize, dest, dest + senderNeigs.size(), v.begin());
     v.resize(it - v.begin());
     Na = v.size(); v.empty();
 //    cout << getLogHeader() << "SRC / DST size: " << Na << endl;
     it = set_difference(
-            dest, dest + senderNeigs.size(), src, src + neighbors.size(), v.begin());
+            dest, dest + senderNeigs.size(), src, src + neigSize, v.begin());
     v.resize(it - v.begin());
     Nb = v.size(); v.empty();
 //    cout << getLogHeader() << "DST / SRC size: " << Nb << endl;
     it = set_intersection(
-            src, src + neighbors.size(), dest, dest + senderNeigs.size(), v.begin());
+            src, src + neigSize, dest, dest + senderNeigs.size(), v.begin());
     v.resize(it - v.begin());
     Nc = v.size();
 //    cout << getLogHeader() << "DST intersection SRC size: " << Nc << endl;
@@ -149,7 +174,7 @@ bool ProbFlooding::doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both
 //    cout << getLogHeader() << "Mu: " << mu << endl;
     double probability;
     if (both)
-        probability = pow(mu, sigma)*(k/neighbors.size() - alpha)/(pow(M, sigma)) + alpha;
+        probability = pow(mu, sigma)*(k/neigSize - alpha)/(pow(M, sigma)) + alpha;
     else
         probability = pow(mu, sigma)*(A - alpha)/(pow(M, sigma)) + alpha;
     cout << getLogHeader() << "Probability: " << probability << endl;
