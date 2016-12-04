@@ -188,15 +188,20 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 	data <- do.call("rbind", data.list)
 
 	p <- ggplot(data) +
+		#  geom_boxplot(aes(x=alg, y=dat)) +
 		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
 		 facet_grid(. ~ density) +
-		 theme(legend.position="bottom") +
-		 ylab(ylabel) + xlab("Algorithm") +
+		 ylab(ylabel) +
+    #  xlab("Algorithm") +
+    #  theme(legend.position="none") +
+     theme(legend.position="bottom") +
      (if (print.titles)
+      #  labs(title=caption, x=NULL)
        labs(title=caption, fill="Algorithms")
      else
        labs(fill="Algorithms")
      ) +
+     theme(axis.title.x=element_blank()) +
      get.plot.theme.style()
 
 	print(p)
