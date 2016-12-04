@@ -26,7 +26,7 @@ OMNET=opp_run
 # path to inet
 INET_PATH=$2
 
-# whe this flags values 1 just collisions are computed
+# when this flags values 1 just collisions are computed
 EXPE_FOR_COLLISIONS=$3
 
 # path to inet library. Observe the string INET at the end
@@ -80,9 +80,9 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-	Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
-        exit 1
-	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step}| grep average_values`
+	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
+  #      exit 1
+	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5 | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 
