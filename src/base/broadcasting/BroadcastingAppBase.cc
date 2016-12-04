@@ -465,7 +465,7 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 void
 BroadcastingAppBase::log_status_for_animation(std::string status)
 {
-    cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
+    // cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
 }
 
 } //namespace
