@@ -97,7 +97,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     bool already_configured = false;
 
-    void on_hello_received(const broadcasting::Hello* msg);
+
 
     bool allowing_control_messages = true;
 
@@ -108,6 +108,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void on_hello_received(const broadcasting::Hello* msg);
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
 
