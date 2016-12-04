@@ -78,3 +78,5 @@ src/scripts/debugging/logs/n_*
 results/batteryConsumptionDistribution-*
 results/broadcastSession-*
 results/duplicatedMsgsDistribution-*
+results/collisions_*
+results/graphConnectivity_*
