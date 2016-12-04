@@ -58,6 +58,7 @@ rm -f ../../results/broadcastSession* \
       ../../results/duplicatedMsgs* \
       ../../results/batteryConsumption* \
       ../../results/networkCoverage* \
+      ../../results/relays* \
       ../../results/*.pdf \
       ../../results/summary.csv
 
@@ -75,7 +76,7 @@ for c in ${CONFIG_PATH}*.ini ; do
       array_contains "$protocol" "${ALGORITHMS[@]}"
       if [ $? -eq 0 ]; then
         echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
-        sem -j+0 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet 0
+        sem -j-1 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet 0
       fi
     fi
   fi
@@ -90,11 +91,13 @@ cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
 cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgsDistribution
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
 cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
+cat ../../results/relays-n_* >> ../../results/relays
 
 rm -f ../../results/broadcastSession-n_* \
       ../../results/duplicatedMsgsDistribution-n_* \
       ../../results/batteryConsumptionDistribution-n_* \
-      ../../results/batteryConsumptionDistributionTime-n_*
+      ../../results/batteryConsumptionDistributionTime-n_* \
+      ../../results/relays-n_*
 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
@@ -104,4 +107,6 @@ Rscript pretty-plotting.R \
       -pc batteryConsumptionDistribution \
       -dm duplicatedMsgsDistribution \
       -bs broadcastSession \
+      -rf relays \
+      -sf summary.csv \
       ../../results/
