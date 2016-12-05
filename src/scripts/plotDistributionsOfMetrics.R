@@ -91,7 +91,7 @@ getRepresentativeValueAsDs <- function(ds, metric='avg') {
 
 doPlot <- function(ds, yLabel, yLim, leftPos=NULL, density="Zero", metric) {
   ds <- getRepresentativeValueAsDs(ds)
-  if (metric == "collisions_" || metric == "dupMsg" || metric == "broSeT")
+  if (metric == "dupMsg" || metric == "broSeT" || metric == "relNum" || metric == "netCov" || metric == "rcvMsg" || metric=="senMsg")
     opt <- aes(x=Algorithm, y=value)
   else 
     opt <- aes(x=Algorithm, y=value, colour=Algorithm)
@@ -275,7 +275,8 @@ main <- function(args) {
       plotList[[length(plotList) + 1]] <- positionPlot(ds, yLabel, yLimit, d, deNo, i, metric)
       i <- i + 1
     }
-    for (otherM in c("collisions_", "graphConnectivity_")) {
+    #for (otherM in c("collisions_", "graphConnectivity_")) {
+    for (otherM in c("collisions_")) {
       fName <- paste(args$datasets_dir, otherM, sep='/')
       for (d in densities) {
         ds <- read.csv(paste(fName, d, sep=""), header=T)
@@ -286,11 +287,11 @@ main <- function(args) {
       }
     }
   }
-  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"), width=20, height=40)
+  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"), width=40, height=50)
   noMetrics <- length(names(broaMetrics))
   multiplot(
     plotlist=plotList,
-    layout=matrix(seq(1, length(plotList)), nrow=noMetrics*2 + noMetrics, byrow=TRUE)
+    layout=matrix(seq(1, length(plotList)), nrow=noMetrics + noMetrics, byrow=TRUE)
   )
 }
 broaMetrics <- data.frame(
