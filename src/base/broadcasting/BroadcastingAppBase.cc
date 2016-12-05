@@ -125,7 +125,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 send_package(pkt);
                 if (this->nr_hello_msg > 0)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
-                this->nr_hello_msg--;
+                // this->nr_hello_msg--;
                 cancelAndDelete(msg);
                 break;
                 }
@@ -169,14 +169,14 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             	endSimulation();
             	break;
             case PRINT_POS_NEIGS:{
-                if (nr_broadcast_msg > 0) {
-                    cout << getLogHeader() + "TIC " + to_string((int)nr_broadcast_msg) + " POSITION " +
-                            to_string(position.x) + " " + to_string(position.y) << endl;
-                    auto p  = par("intervalBroadcastTime").doubleValue() / 5;
-                    delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
-                }
-                if (!is_source)
-                    nr_broadcast_msg--;
+                // if (nr_broadcast_msg > 0) {
+                //     cout << getLogHeader() + "TIC " + to_string((int)nr_broadcast_msg) + " POSITION " +
+                //             to_string(position.x) + " " + to_string(position.y) << endl;
+                //     auto p  = par("intervalBroadcastTime").doubleValue() / 5;
+                //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
+                // }
+                // if (!is_source)
+                //     nr_broadcast_msg--;
 
             }break;
             default:
