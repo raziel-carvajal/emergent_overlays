@@ -64,6 +64,20 @@
   comment=[l]{--},%
   escapeinside={(*@}{@*)}
 }
+%%%%% Environment for change tracking (Etienne)
+% Very convenient to add comments on the paper. Just set the boolean
+% to false before sending the paper:
+\newboolean{showchanges}
+\setboolean{showchanges}{true}
+\ifthenelse{\boolean{showchanges}}
+{ 
+	\newcommand{\changed}[1]{\color{blue}{#1}\xspace\color{black}}
+	\newcommand{\deleted}[1]{\color{red} {#1}\xspace\color{black}}
+} {
+	\newcommand{\changed}[1]{#1}
+	\newcommand{\deleted}[1]{}
+}
+%%%%% End environment for changes (Etienne)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% algorithm2e
