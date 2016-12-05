@@ -60,8 +60,13 @@ Transmitter Active (RX) & mA & 335 \\
 \label{tbl:wifi-chip}
 \end{table}
 
-To consider this chip in the simulation we plug these values in the \textit{StateBasedEnergyConsumer} model provided by Inet.
-This model simply measures the consumption taking into account how much time the chip/radio spends in each mode and use it to along the data in Table~\ref{tbl:wifi-chip} to compute the consumption.
+To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
+This model simply measures the consumption taking into account how much time the chip/radio spends in different operation modes (e.g., as in Table~\ref{tbl:wifi-chip}).
+Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip in each mode, and $r_m, t_m$ are functions mapping from simulation time to the operation modes of the \textit{receiver} and \textit{transceiver}.
+INET then computes the energy consumption using $\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
+To do so, we provide the function $m$ and INET computes both $r_m$ and $t_m$ during the simulation.
+  
+% and use it to along the data in Table~\ref{tbl:wifi-chip} to compute the consumption.
 
 \subsection*{Configuration of the experiments}
 In his section we discuss how we configure the experiments.
