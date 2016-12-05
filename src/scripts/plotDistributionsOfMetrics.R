@@ -57,25 +57,55 @@ get.arguments <- function() {
   parser$parse_args()
 }
 
-doPlot <- function(ds, yLabel, yLim, leftPos=NULL, density="Zero", metric) {
-  ds.m <- melt(ds, id.var="Algorithm")
-  if (metric == "collisions_" || metric == "dupMsg" || metric == "broSeT"){
-    opt <- aes(x=variable, y=value)
-    geomBx <- geom_boxplot(aes(fill=Algorithm))
-  } else {
-    opt <- aes(x=variable, y=value, colour=Algorithm)
-    geomBx <- geom_boxplot(aes(fill=Algorithm))
+getMode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+getRepresentativeValueAsDs <- function(ds, metric='avg') {
+  algos <- unique(ds[, 1])
+  algos <- sort(algos)
+  broSe <- length(names(ds)) - 1
+  r <- 1
+  nCol <- 2
+  nRow <- broSe * length(algos)
+  j <- 1
+  df <- as.data.frame(matrix(seq(nCol*nRow), nrow=nRow, ncol=nCol))
+  for (algo in algos) {
+    for (ses in 1:broSe) {
+      data <- subset(ds, Algorithm == algo)[, ses + 1]
+      data <- data[!is.na(data)]
+      if (metric == 'avg')
+        v <- mean(data)
+      else if (metric == 'mode')
+        v <- getMode(data)
+      df[r, ] <- c(j, v)
+      r <- r + 1
+    }
+    j <- j + 1
   }
+  names(df) <- c("Algorithm", "value")
+  df$Algorithm <- factor(df$Algorithm, labels=algos)
+  df
+}
+
+doPlot <- function(ds, yLabel, yLim, leftPos=NULL, density="Zero", metric) {
+  ds <- getRepresentativeValueAsDs(ds)
+  if (metric == "collisions_" || metric == "dupMsg" || metric == "broSeT")
+    opt <- aes(x=Algorithm, y=value)
+  else 
+    opt <- aes(x=Algorithm, y=value, colour=Algorithm)
+  geomBx <- geom_boxplot(aes(fill=Algorithm))
   if (is.null(leftPos)) {
-    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+    p <- ggplot(data = subset(ds, !is.na(value)), opt) + geomBx +
       theme(legend.position = "top") + ylim(c(0, yLim)) + ylab("") + xlab("") + 
       ggtitle(density)
   } else if (leftPos) {
-    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+    p <- ggplot(data = subset(ds, !is.na(value)), opt) + geomBx +
       theme(legend.position = "top") + ylim(c(0, yLim)) + ylab(yLabel) + xlab("") + 
       ggtitle(density)
   } else {
-    p <- ggplot(data = subset(ds.m, !is.na(value)), opt) + geomBx +
+    p <- ggplot(data = subset(ds, !is.na(value)), opt) + geomBx +
       theme(legend.position = "top") + ylim(c(0, yLim)) + ylab("") + xlab("") +
       ggtitle(density)
   }
@@ -256,7 +286,7 @@ main <- function(args) {
       }
     }
   }
-  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"),width=600, height=210)
+  pdf(paste(args$datasets_dir, "plot.pdf", sep = "/"), width=20, height=40)
   noMetrics <- length(names(broaMetrics))
   multiplot(
     plotlist=plotList,

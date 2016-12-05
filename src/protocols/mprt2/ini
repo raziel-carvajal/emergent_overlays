@@ -1,7 +1,7 @@
 description = "Broadcasting messages using MPR"
 *.host*.udpApp[0].typename = "Mpr_t2"
-*.host*.udpApp[0].nr_hello_messages = 3060
-*.host*.udpApp[0].helloTime = 0.1s
+*.host*.udpApp[0].nr_hello_messages = 306
+*.host*.udpApp[0].helloTime = 1s
 
 # mpr related stuff; not required in experiment automatization (default values)
 #*.host*.udpApp[0].maximumDelay = 0.05s

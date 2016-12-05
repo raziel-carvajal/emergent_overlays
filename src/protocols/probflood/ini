@@ -1,7 +1,7 @@
 description = "Broadcasting messages using Probabilistic Flooding"
 *.host*.udpApp[0].typename = "ProbFlooding"
-*.host*.udpApp[0].nr_hello_messages = 3060
-*.host*.udpApp[0].helloTime = 0.1s
+*.host*.udpApp[0].nr_hello_messages = 306
+*.host*.udpApp[0].helloTime = 1s
 # Particula options
 *.host*.udpApp[0].scheme = "DENSITY_BORDER_AWARE_NEIGS_ELIMINATION"
 *.host*.udpApp[0].k = 15
