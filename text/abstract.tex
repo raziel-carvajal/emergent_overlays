@@ -1,11 +1,32 @@
 %!TEX root = main.tex
 
 \begin{abstract}
-%Wireless communication has becoming a constant in our daily routine 
-Wireless communication has an ubiquitous influence in our daily routine, mobile phones, IoT devices and other cutting-edge gadgets communicate with each other through protocols like those who follow the widely known IEEE 802.11 standard. Broadcast is a fundamental operation in MANETs with the aim of disseminating messages to reach every participant in one network, while pure-flooding efficiently spread messages its lack of performance on broadcasting metrics such as nodes reachability, saved broadcast messages, collisions rate and energy consumption, it is very well known.
+% Wireless communication has an ubiquitous influence in our daily routine, mobile phones, IoT devices and other cutting-edge gadgets communicate with each other through protocols like those who follow the widely known IEEE 802.11 standard. %% ER: this is useless and the sentence is too convoluted. An abstract shoud be as short as possible.
 
-Many algorithms have been proposed to performed a control flooding of broadcast messages and preserve the resources of mobile nodes. Interestingly, when it comes to decide which is the algorithm that could fit one scenario, such as a network where node's vicinity is smaller than V neighbors per transmission range and messages dissemination must reach at least 90\% of nodes, it is difficult to name one particular algorithm due to the heterogeneous broadcast metrics that authors consider on their works. Far for being exhaustive, we propose a performance evaluation study of 5 broadcasting algorithms for MANETs over a fixed number of broadcast metrics; our algorithms choice covers a representative part of the taxonomy referred at a recent survey~\cite{Ruiz2015}. Our algorithms implementations are open to the community, we conduct simulations over different networks configurations with and without mobility, finally, our results show which algorithms adapt better to preserve nodes resources.
+Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs).
+A large variety of broadcast algorithms have been proposed. 
+They differ in the way message forwarding between nodes is controlled in time and space, and in the knowledge about the topology this control requires.
+%
+Deployment scenarios for MANETs vary widely, and in particular in terms of nodes density and mobility.
+%
+The choice of a broadcast algorithm depends on its expected coverage and energy cost, but is also highly impacted by its deployment context.
+%
+In this work, we are interested in overcoming the lack of comprehensive comparison of these costs and effectiveness, and ease the informed choice of broadcast algorithm based on the target environmental conditions.
+%
+We describe the results of an independent experimental study of five algorithms, representative of the principal design alternatives for broadcast algorithms in MANETs.
+%
+Our study reveals that the best algorithm for a given situation, such as a high density and a stable network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+We identify the algorithms characteristics that are correlated with these differences and discuss the pros and cons of each designs.
+%
+Our experimental framework and results are available in the open for use by the community.
 
+%%% ER Previous text, remove if you don't want to use
+% Many algorithms have been proposed to performed a control flooding of broadcast messages and preserve the resources of mobile nodes.
+% Interestingly, when it comes to decide which is the algorithm that could fit one scenario, such as a network where node's vicinity is smaller than V neighbors per transmission range and messages dissemination must reach at least 90\% of nodes, it is difficult to name one particular algorithm due to the heterogeneous broadcast metrics that authors consider on their works.
+% Far for being exhaustive, we propose a performance evaluation study of 5 broadcasting algorithms for MANETs over a fixed number of broadcast metrics; our algorithms choice covers a representative part of the taxonomy referred at a recent survey~\cite{Ruiz2015}.
+% Our algorithms implementations are open to the community, we conduct simulations over different networks configurations with and without mobility, finally, our results show which algorithms adapt better to preserve nodes resources.
+
+%%% ER: not needed for submission, but does not hurt to keep them
 \begin{IEEEkeywords}
 Control Flooding, Distributed Algorithms,  MANETs
 \end{IEEEkeywords}
