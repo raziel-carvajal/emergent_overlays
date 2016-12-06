@@ -12,7 +12,9 @@ install_omnet() {
     tar -zxf omnetpp-4.6-src.tgz
     cp configure omnetpp-4.6
     tar -zxf inet-3.3.0-src.tgz
-    mv inet omnetpp-4.6/samples
+    tar -zxf csmaca.tar.gz
+    mv inet omnetpp-4.6/samples/
+    mv csmaca omnetpp-4.6/samples/inet/src/inet/linklayer/
     cd omnetpp-4.6
     source ../../src/scripts/local-omnet-setenv.sh `pwd`
     ./configure NO_TCL=0 && make -j 4 && cd samples/inet && make makefiles && make -j 4 && echo "happy"
