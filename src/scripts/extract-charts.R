@@ -164,6 +164,18 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   )
 }
 
+save.coverage <- function(broadcast.info, max, outputPath, expeId){
+  cov <- broadcast.info$n.received
+  broSes <- data.frame( whatever = cov )
+  colnames(broSes) <- c(expeId)
+  write.table(
+            broSes,
+            file = build.filename(outputPath, "coverage", expeId),
+            row.names = F, append = F
+  )
+}
+
+
 save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
   broSes <- data.frame( whatever = broadcast.info$n.sent)
   colnames(broSes) <- c(expeId)
@@ -504,13 +516,13 @@ average.values <- function(pl, broadcast.info, max) {
 
 	rt <- mean(broadcast.info$n.sent)
 
-	tail(data.frame(
-		coverage = c,
-		broadcasting.time = bt,
-		power_consumption = pc,
-		duplicated_messages = dm,
-		retransmitted_messages = rt
-	),1)
+	data.frame(
+		coverage = mean(c),
+		broadcasting.time = mean(bt),
+		power_consumption = tail(pc,1),
+		duplicated_messages = mean(dm),
+		retransmitted_messages = mean(rt)
+	)
 }
 
 exportDataset <- function(ds, dst){
@@ -557,6 +569,7 @@ main <- function(args) {
   save.power.level(pl.local, args$outputPath, args$configuration)
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
+  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)

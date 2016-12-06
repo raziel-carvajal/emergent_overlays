@@ -18,6 +18,8 @@ get_arguments <- function() {
                       help='Broadcast session file name')
   parser$add_argument('-rf', '--relays-file', dest='rf', type="character",
                       help='Relays file name')
+  parser$add_argument('-cv', '--coverage-file', dest='cv', type="character",
+                      help='Coverage file name')
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -250,6 +252,50 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 	print(p)
 }
 
+plot.coverage.per.session <- function(data, densities) {
+  data.list <- lapply(densities, function(density) {
+		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
+		dd <- lapply(dd, function(e) {
+			cn <- colnames(e)[1]
+			s <- unlist( strsplit(cn,'_'))
+	  	cn <- s[which(s == "p") + 1]
+      nr.nodes <- as.numeric(s[which(s == "n") + 1])
+			y <-  e[,1]/rep(nr.nodes, length(e[,1]))*100
+      x <- 1:length(y)
+      p <- lowess(x, y, f=1/15)
+			data.frame( dat = p$y,
+						alg = rep(cn, length(y)),
+            idx = p$x,
+						density=rep(as.factor(paste("Density", density)), length(data))
+			)
+		})
+
+		do.call("rbind", dd)
+	})
+
+	data <- do.call("rbind", data.list)
+  # data$idx <- 1:length(data$dat)
+
+  ylabel <- "Coverage"
+  caption <- "Coverage per session"
+  # print(head(data,4))
+
+	p <- ggplot(data) +
+		 geom_line(aes(x=idx, y=dat, colour=alg)) +
+		 facet_grid(. ~ density) +
+		 theme(legend.position="bottom") +
+		 ylab(ylabel) + xlab("Broadcast Session") +
+     (if (print.titles)
+		   labs(title=caption, colour="Algorithms")
+     else
+       labs(colour="Algorithms")
+     ) +
+     get.plot.theme.style()
+
+	print(p)
+}
+
+
 plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Power Consumption (J)",
@@ -287,6 +333,29 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 	print(p)
 }
+
+
+plot.simple.coverage <- function(df, algos) {
+  ylabel <- "Coverage"
+  df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
+  caption <- "Coverage"
+  p <- ggplot(df) +
+		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
+     geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),   # Shape depends on cond
+               size = 4) +        # Large points
+		 theme(legend.position="bottom") +
+		 ylab(ylabel) + xlab("Density") +
+     (if (print.titles)
+		   labs(title=caption, colour="Algorithms", shape="Algorithms")
+     else
+       labs(colour="Algorithms", shape="Algorithms")
+     ) +
+		 get.plot.theme.style()
+
+	print(p)
+}
+
+
 
 
 #
@@ -357,11 +426,21 @@ if (!is.null(args$rf)) {
   plot.saved_rebroadcast.per.session(r$data, metadata$densities)
 }
 
+if (!is.null(args$cv)) {
+  print("Importing coverage dataset")
+  r <- load.dataset.with.metadata(args$path, args$cv, metadata)
+  metadata <- r$metadata
+  print("Plotting coverage")
+  plot.coverage.per.session(r$data, metadata$densities)
+}
+
 if (!is.null(args$sf)) {
   print("Importing summary CSV file")
   r <- load.summary(args$path, args$sf)
-  print("Plotting Saved Rebroadcasts")
+  print("Plotting Simple Saved Rebroadcasts")
   plot.saved.rebroadcasts(r, metadata$algos)
+  print("Plotting Simple Coverage")
+  plot.simple.coverage(r, metadata$algos)
 }
 
 if (!is.null(args$dm)) {

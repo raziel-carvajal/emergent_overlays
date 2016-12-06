@@ -92,12 +92,14 @@ cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgs
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
 cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
 cat ../../results/relays-n_* >> ../../results/relays
+cat ../../results/coverage-n_* >> ../../results/coverage
 
 rm -f ../../results/broadcastSession-n_* \
       ../../results/duplicatedMsgsDistribution-n_* \
       ../../results/batteryConsumptionDistribution-n_* \
       ../../results/batteryConsumptionDistributionTime-n_* \
-      ../../results/relays-n_*
+      ../../results/relays-n_* \
+      ../../results/coverage-n_*
 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
@@ -108,5 +110,6 @@ Rscript pretty-plotting.R \
       -dm duplicatedMsgsDistribution \
       -bs broadcastSession \
       -rf relays \
+      -cv coverage \
       -sf summary.csv \
       ../../results/
