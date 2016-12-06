@@ -1,30 +1,63 @@
 %!TEX root = main.tex
-
-\section{Deployment Scenarios}
+\section{Experimental Scenarios}
 \label{sec:scenarios}
+\changed{
+%
+Our experimental scenarios are built considering three typical variables one can find in MANETs: construction of nodes network, power consumption of mobile devices and message dissemination while nodes move or remain static.
+%
+Our inspiration came from a real life scenario: one \textit{protest movement}, where message dissemination must reach all participants as the manifestation evolves.
+%
+}
 
-To perform the simulations we use OMNET++ 4.6 plus INET 3.3.
-By doing so we can rely on widely tested models of energy consumption and 802.11g wireless communication~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+
+\deleted{
+To perform the simulations we use OMNET++ 4.6 plus INET 3.3. By doing so we can rely on widely tested models of energy consumption and 802.11g wireless communication~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+%
 INET also offers an implementation of UDP, ARP and other layers of the network stack that help to make the simulation more realistic.
-In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation. 
-Finally, using \deleted{OMNEY++} \changed{OMNET++} we can collect a wide range of statistics regarding the simulation.
+%
+In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation.
+%
+Finally, using OMNET++ we can collect a wide range of statistics regarding the simulation.
 In the rest of this section, we discuss how we collect the data to feed the INET models used in the simulations.
+}
 
-\subsection*{Topology generation using Random Geometric Graphs}
 
+\raziel{Proposal (\ref{sec:scenarios}): instead of talking about technical details, here we most describe our use cases and the models involved in without talking about the simulation tool. Simulation details will be reused in a section below}
+\subsection*{
+\deleted{Topology generation using Random Geometric Graphs}
+\changed{Network Construction through Random Geometric Graphs}
+}
+%
 We are interested in evaluating the performance of protocols under different conditions. 
+%
 In particular, it is important to compare their behavior with networks of different densities.
+%
+\deleted{
 In our study, the density of a network topology is the average number of neighbors in the vicinity of a node -- that is, the degree in the graph.
+}
+\changed{
+We consider the density of a network as the number of neighbors each node reaches within its communication range.
+}
+%
 Taking this definition, we can generate network topologies using \textbf{random geometric graphs} ($\textit{RGG}_{n,r}$), with $n$ being the number of nodes and $0<r<1$ the transmission radius~\cite{Penrose2003}.
-To guarantee that a generated topology has the required density we rely on a property of RGG.  
-In a $\textit{RGG}$ with uniform distribution of nodes over the area $[0,1]^2$, the expected degree ($d$) of vertices is equal to $\pi n r^2$. 
+%
+To guarantee that a generated topology has the required density we rely on a property of RGG.
+%
+In a $\textit{RGG}$ with uniform distribution of nodes over the area $[0,1]^2$, the expected degree ($d$) of vertices is equal to $\pi n r^2$.
+%
 Then, given fixed values for two of the involved variables $n$, $\textit{d}$ or $r$ we can easily compute the missing value.
+%
 In this paper, we use density and number of nodes as independent variables in our experiments and so different network topologies have different transmission radius.
+%
 However, we also use another fixed value, the transmission range ($tx$) of network nodes, to configure the generation process. This value is used to compute the size of the network layout using $m_{\textit{size}} = \lceil {\frac{tx}{r}} \rceil$.
+%
 Once we have generated a topology with the expected density we check whether it is connected and discard disconnected topologies.
+%
 The concrete values we use are $n=200$, $tx=30$ and $d=\lbrace 5, 10, 15, 20 \rbrace$.
+%
 In selecting the values for $n$ and $d$ we take into account the values used in the related works.
-Meanwhile, the value of $tx$ is computed to ease the generation of mobility traces as we show in the next section.  
+Meanwhile, the value of $tx$ is computed to ease the generation of mobility traces as we show in the next section.
+%
 
 \subsection*{Generating Mobility Traces}
 
