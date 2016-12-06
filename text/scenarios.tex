@@ -1,11 +1,16 @@
 %!TEX root = main.tex
-\section{Experimental Scenarios}
+%DECLARATION OF SOME CONSTANS
+\newcommand{\nodesNumber}{1000}
+\newcommand{\densitiesNumber}{8}
+%END---
+
+\section{Experimental Scenario}
 \label{sec:scenarios}
 \changed{
 %
-Our experimental scenarios are built considering three typical variables one can find in MANETs: construction of nodes network, power consumption of mobile devices and message dissemination while nodes move or remain static.
+Our experimental scenarios are built considering three typical variables found in MANETs: construction of a network of nodes, power consumption of mobile devices and message dissemination while nodes move or remain static.
 %
-Our inspiration came from a real life scenario: one \textit{protest movement}, where message dissemination must reach all participants as the manifestation evolves.
+Our inspiration came from a real life scenario: \textit{protest march}, where these three variables take place, people uses their mobile phones to communicate and message dissemination to all participants is critical. Additionally, we are interested in proposing a benchmark of metrics to evaluate the performance of broadcasting protocols.
 %
 }
 
@@ -21,23 +26,32 @@ Finally, using OMNET++ we can collect a wide range of statistics regarding the s
 In the rest of this section, we discuss how we collect the data to feed the INET models used in the simulations.
 }
 
-
 \raziel{Proposal (\ref{sec:scenarios}): instead of talking about technical details, here we most describe our use cases and the models involved in without talking about the simulation tool. Simulation details will be reused in a section below}
 \subsection*{
 \deleted{Topology generation using Random Geometric Graphs}
-\changed{Network Construction through Random Geometric Graphs}
+\changed{Network Construction through Disk Graphs}
 }
 %
-We are interested in evaluating the performance of protocols under different conditions. 
+\changed{
+Disk graphs are used to model the positioning of random points uniformly distributed in the plane, offering the reflexive property $C$ (read as \textit{is close to}) among the vertex of such a graph. If $\{v_{a}, v_{b}, v_{c}\}$ is a set of vertex in a disk graph and $v_{a} C v_{b}$, $v_{b} C v_{c}$ are both true then, $v_{a} C v_{c}$ is true as well.
+%
+$C$ is a fundamental property that models realistic scenarios~\cite{Penrose2003}, more importantly, it allows us to build wireless networks with density $d$ following the formula $d=\pi nr^{2}$ where $r$ refers to the communication range of nodes and $n$ is the total number of nodes.
+%
+For positioning nodes in a randomly way we use an implementation of the Mersenne Twister algorithm~\cite{?}.\raziel{this is the algorithm cited at the doc of the python library, one is needed. Mention size of the area where nodes are positioning (which section?)}
+
+%
+We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the density to  5,10,15,20,25,30,35 and 40, such a range of values is frequently found at the literature.
+%
+Following our inspirational scenario, a thousand of nodes is a representative sampling one finds at the media when people bring together to protest, whereas the communication range of nodes is correlated with the mobility model we use, as it is mentioned in the following subsection.
+}
+\raziel{I replace this next text by what now remains at the intro of section \ref{sec:scenarios} and the last subsection}
+\deleted{
+We consider the \textit{density} of a network as the number of neighbors each node reaches within its communication range.
+\raziel{This definition must be mentioned at the Related Work (or maybe Introduction), here it is too late}
 %
 In particular, it is important to compare their behavior with networks of different densities.
 %
-\deleted{
 In our study, the density of a network topology is the average number of neighbors in the vicinity of a node -- that is, the degree in the graph.
-}
-\changed{
-We consider the density of a network as the number of neighbors each node reaches within its communication range.
-}
 %
 Taking this definition, we can generate network topologies using \textbf{random geometric graphs} ($\textit{RGG}_{n,r}$), with $n$ being the number of nodes and $0<r<1$ the transmission radius~\cite{Penrose2003}.
 %
@@ -48,19 +62,35 @@ In a $\textit{RGG}$ with uniform distribution of nodes over the area $[0,1]^2$, 
 Then, given fixed values for two of the involved variables $n$, $\textit{d}$ or $r$ we can easily compute the missing value.
 %
 In this paper, we use density and number of nodes as independent variables in our experiments and so different network topologies have different transmission radius.
+\raziel{we fixed the transmission range, did I miss something while creating topologies?}
 %
-However, we also use another fixed value, the transmission range ($tx$) of network nodes, to configure the generation process. This value is used to compute the size of the network layout using $m_{\textit{size}} = \lceil {\frac{tx}{r}} \rceil$.
+However, we also use another fixed value, the transmission range ($tx$) of network nodes, to configure the generation process.
+%
+This value is used to compute the size of the network layout using $m_{\textit{size}} = \lceil {\frac{tx}{r}} \rceil$.
 %
 Once we have generated a topology with the expected density we check whether it is connected and discard disconnected topologies.
 %
 The concrete values we use are $n=200$, $tx=30$ and $d=\lbrace 5, 10, 15, 20 \rbrace$.
 %
 In selecting the values for $n$ and $d$ we take into account the values used in the related works.
-Meanwhile, the value of $tx$ is computed to ease the generation of mobility traces as we show in the next section.
+}
+
+
+\subsection*{
+\deleted{Generating Mobility Traces}
+\changed{Mobility Model of Nodes}
+}
+\changed{
+%
+The movement of nodes in our experimental scenario follows a recent study that characterize a thousand hours of GPS traces among 44 participants~\cite{Rhee:2011}. This study concludes that the Levy walk model is a good fit to evaluate the performance of routing protocols in a mobile network.
 %
 
-\subsection*{Generating Mobility Traces}
+%
+That is, frequent short walks and occasional long rides to distant locations.
+%
 
+%
+}
 A parameter we consider in this paper is the mobility of devices. 
 To look at its effect, we simulate the movement of devices' carriers by generating mobility traces using an implementation of the Truncated-Levy Walks mobility model~\cite{Rhee:2011}.
 This model emulates the ways humans moves when they are mostly walking. That is, frequent short walks to nearby locations, and occasional long rides to distant locations. 
@@ -70,6 +100,9 @@ Combining this information with the fact that WiFi networks have a range up to 3
 In other words, we are considering an environment with many obstacles and people walking at a \textit{normal} speed.
 
 \subsection*{Power consumption}
+\changed{
+Power consumption
+}
 To evaluate the effect of each broadcasting algorithm in terms of power consumption, we need a model representing the consumption of actual devices.
 Table~\ref{tbl:wifi-chip} shows the relevant data for the BCM4329~\cite{BCM4329}; the chip we use in this paper to model the power consumption of a real device that in compliance with 802.11g.
 This chip can be found in smart phones and other handhelds.
@@ -100,6 +133,8 @@ INET then computes the energy consumption using $\int_{0}^{t_\textit{simulation}
 To do so, we provide the function $m$ and INET computes both $r_m$ and $t_m$ during the simulation.
   
 % and use it to along the data in Table~\ref{tbl:wifi-chip} to compute the consumption.
+
+\subsection*{Broadcasting Metrics}
 
 \subsection*{Configuration of the experiments}
 In this section we discuss how we configure the experiments.
