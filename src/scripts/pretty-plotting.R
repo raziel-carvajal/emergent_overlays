@@ -176,7 +176,8 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	cn <- s[which(s == "p") + 1]
+	  	cn <- as.character(s[which(s == "p") + 1])
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -216,6 +217,7 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
 			y <- rep(nr.nodes, length(e[,1])) -  e[,1]
       x <- 1:length(y)
@@ -259,6 +261,7 @@ plot.coverage.per.session <- function(data, densities) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
 			y <-  e[,1]/rep(nr.nodes, length(e[,1]))*100
       x <- 1:length(y)
