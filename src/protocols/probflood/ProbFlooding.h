@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #ifndef PROBFLOODING_H_
 #define PROBFLOODING_H_
@@ -22,7 +22,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <mutex>
+#include <set>
 
 const double M = 0.601;
 
@@ -42,7 +42,6 @@ private:
     double miTreb;
     double maTreb;
     double probLim;
-    mutex mtx;
 
     enum SCHEME {
         DENSITY_AWARE,
@@ -50,7 +49,7 @@ private:
         DENSITY_BORDER_AWARE,
         DENSITY_BORDER_AWARE_NEIGS_ELIMINATION,
     };
-    map<string, string> alreadyDispatched;
+    set<string> alreadyDispatched;
     map<string, NeigsMap>  broadcastTable;
     bool doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both);
 
@@ -59,6 +58,8 @@ protected:
     void virtual time_to_broadcast_payload(void* user_data);
     virtual void on_hello_received(const broadcasting::Hello* msg);
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    void handleMessageWhenUp(cMessage *msg);
+    void erase_old_hops();
 
 };
 
