@@ -1,51 +1,65 @@
 %!TEX root = main.tex
 
-\section{Broadcast Algorithms for MANETs}
+\section{Motivations}
 \label{sec:background}
 
-A mobile ad-hoc network can be seen as a graph $G = (V, E)$, where $V$ is the set of
+With the rise of what we call the Internet of Things (IoT). Both the number and the diversity of devices that become connected is staggering. We are entering in a new era where all objects of our daily life, for instance, from mobile to wearable devices can be interconnected. Industrials, such as Cisco, predict that there will be 25 billion devices connected together by 2015 and 50 billion by 2020. The IoT aim is not really to enable users to interact with everything connected. It is more about crosslinking objects to promote machine-to-machine interactions, enabling so to massively collect and/or distribute data to be turned into information delivered to end-users to improve their interactions with their social and/or environmental context. 
+IoT leads to a strong revival of interest in how to disseminate and/or collect data in mobile \textit{ad hoc} networks (MANET). In such networks, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus frequent and temporary disconnections. 
+
+Over the last decade, hundreds of algorithms dedicated to such networks have emerged to either control, adapt or maintain network topology, making MANET networks a key enabler for connecting anything at anytime. However, determining which algorithm to leverage on to build an IoT application that provides the best trade of among low latency, low hop count distance, low energy consumption, with fault tolerant properties, seems difficult or even impossible or counterproductive. Most of the related network functions in a MANET network, such as routing for instance, rely on the fundamental broadcasting operation. 
+Unfortunately, the simplest broadcast, also known as \textit{blind flooding}, to send a message from one node to all other nodes of the network suffers from a major drawback -- the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}. Since nodes interact with each other \textit{via} radio communication, and each node retransmits every received message, the medium becomes rapidly saturated. In fact, when a single message is broadcasted, several hosts are covered according to the sender's transmission range. This implicitly increases the error-rate in the network. It has several consequences such as preventing the correct dissemination of messages, affecting the communication and wasting resources. 
+
+Accordingly, designing a broadcast algorithm for MANETs is a trade of between two aims: (i) guaranteeing a suitable level of network coverage to optimize the percentage of nodes that receive a message, (ii) minimizing the amount of resources used when a broadcast operation is achieved. The underlaying hypothesis is that it is not required for a node to retransmit a received message from a given neighbor to other neighbors if they are already covered by the sender’s transmission range. As a consequence, reducing the number of retransmissions enables to avoid energy depletion of nodes than run on batteries, and thus to improve the overall network life time. 
+
+However,  determining the minimum energy broadcast tree is NP-Hard. 
+Hence, many approximate solutions have emerged based on various heuristics. Some algorithms adjust dynamically the transmission range $\textit{Tx}$ during the broadcasting process to either improve the coverage and/or reduce resource usage.
+Other algorithms with no underlying topology and fixed transmission range can have different degree of \textit{context awareness}.\david{please complete by introducing what is context awareness..} We have algorithms such as ABBA~\cite{Ovalle-Martinez2006}, a1, a2 and a3 where information about about the context is used. \david{rephrase not clear, what are a1?, a2?, a3? }
+But we also have algorithms that use little or no information about the context~\cite{??,??,??,??,??,??,??}.
+Meanwhile, the underlying topology built and used in different algorithms can have different forms: tree~\cite{??, ??, ??}, connected dominating set (CDS)~\cite{??} and clusters~\cite{??}. \david{please complete the references and rephrase}
+
+To summarize, each algorithm has its own advantages and shortcomings in terms of performance and cost depending on the context. None of the current state of art enables us to evaluate existing algorithms in a systematic, clear and reproducible manner
+to select the right algorithm according to a dedicated IoT application requirements. 
+
+\sout{In the remainder of this paper we give more details on some of these features as well as on particular algorithms. }
+
+\sout{A mobile ad-hoc network can be seen as a graph $G = (V, E)$, where $V$ is the set of
 nodes, and $E$ is the set of links connecting nodes in the communication range.
-In such networks, the broadcast problem consists in delivering a message to all nodes by only using links in $E$~\cite{Ruiz2015}.
-Unfortunately, the simplest solution, known as \textit{blind flooding}, has a major drawback -- the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
-Indeed, since in blind flooding each node retransmits every received message, the medium is rapidly saturated.
-This increases the error-rate in the network, preventing the correct dissemination of the message, affecting the communication and wasting resources.
+In such networks, the broadcast problem consists in delivering a message to all nodes by only using links in $E$.} 
+~\cite{Ruiz2015}
+\david{it is useless, 
+or you must reuse it later but this is not the case}
 
-In general, there are two goals to reach in designing a broadcast algorithm for MANETs.
-The first one is guaranteeing a good level of network \textit{coverage}, which is the percentage of nodes that receive a message.
-The second one is minimizing the amount of resources used to broadcast.
-As concrete examples of this second objective we can aim at reducing the \textit{number of retransmissions} to avoid the congestion of the medium, and keeping \textit{energy consumption} as low as possible because the devices connected to MANETs tend to run on batteries.
-To measure the \textit{quality} of a broadcasting algorithm, we consider how well it fulfills these objectives.
-In practice, it is challenging to perform well in all the scenarios we find in the context of MANETs because they have different characteristics.
-To name a few, broadcasting algorithms must deal with unique problems such as low throughput, temporary disconnection, high mobility, high bit error rate and varying characteristics over short timescales.
-
-
-As shown in a thoughtful survey by Ruiz et al.~\cite{Ruiz2015}, the literature on broadcasting algorithms for MANETs is quite large \inti{I don't like large}.
+\sout{As shown in a thoughtful survey by Ruiz et al. the literature on broadcasting algorithms for MANETs is quite large \inti{I don't like large}.
 For that reason, we find a great diversity of approaches in the current state-of-the-art. 
-To classify them, different criteria have been used~\cite{Williams:2002:CBT:513800.513825, WuLou1043098, YiGerla2003}.
+To classify them, different criteria have been used
 However, in this paper we prefer the taxonomy presented by Ruiz et al. in the aforementioned survey because it is newer, more systematic and covers more approaches.
 In the rest of this section we briefly discuss such a taxonomy and the features used to classify broadcasting algorithms.
 In addition, we mention algorithms belonging to different classifications. 
+}
+~\cite{Ruiz2015},
+~\cite{Williams:2002:CBT:513800.513825, WuLou1043098, YiGerla2003}.
 
-An \textit{underlying topology} is a structure built by some algorithms to drive the broadcasting process.
+\sout{An \textit{underlying topology} is a structure built by some algorithms to drive the broadcasting process.
 Usually, this \textit{topology} simply is a subset $S$ of nodes with some characteristics that depend on the algorithm.
 Then, a node only retransmits a message if it belongs to the underlying topology.
 The rationale is that by reducing the cardinality of $S$ we can reduce both network congestion and the overall energy consumption.
 Nonetheless, building an underlying topology is costly in terms of time and energy consumption.
-Hence, doing so is only worth if this cost can be amortized because the topology will be used in many \textit{broadcast sessions}~\cite{???}.
+Hence, doing so is only worth if this cost can be amortized because the topology will be used in many \textit{broadcast sessions}} \david{what it is the aim of the paragraph?, or better introduce it}
+
 \inti{Name and reference a few algorithms in each class. No description}
 
-In many mobile devices it is possible to adjust the \textit{transmission range} ($\textit{Tx}$) of the radio.
+\sout{In many mobile devices it is possible to adjust the \textit{transmission range} ($\textit{Tx}$) of the radio.
 Some algorithms adjust $\textit{Tx}$ during the broadcasting process in order to improve the coverage and reduce resource usage.
-In particular, changing $\textit{Tx}$ has a few potential benefits: the radio consumes less energy when $\textit{Tx}$ decreases~\cite{???}, there is also less medium congestion when you reduce $\textit{Tx}$ because the transmission area of different nodes do not overlap~\cite{??}, and increasing $\textit{Tx}$ may prove useful to reduce the number of nodes that must retransmit the message~\cite{??}.
-Since there are algorithms using this feature, we can classify them based on whether they fix or vary the transmission range.
+In particular, changing $\textit{Tx}$ has a few potential benefits: the radio consumes less energy when $\textit{Tx}$ decreases~{???}, there is also less medium congestion when you reduce $\textit{Tx}$ because the transmission area of different nodes do not overlap~{??}, and increasing $\textit{Tx}$ may prove useful to reduce the number of nodes that must retransmit the message~{??}.
+Since there are algorithms using this feature, we can classify them based on whether they fix or vary the transmission range.}
+\david{too repetitive}
+
+
 \inti{Name and reference a few algorithms in each class. No description}
 
-Others features are also useful to further refine the classification of broadcasting algorithms.
-For instance, algorithms with no underlying topology and fixed transmission range can have different degree of \textit{context awareness}.
-We have algorithms such as ABBA~\cite{Ovalle-Martinez2006}, a1, a2 and a3 where information about about the context is used.
-But we also have algorithms that use little or no information about the context~\cite{??,??,??,??,??,??,??}.
-Meanwhile, the underlying topology built and used in different algorithms can have three forms: tree~\cite{??, ??, ??}, connected dominating set (CDS)~\cite{??} and clusters~\cite{??}.
-In the remainder of this paper we give more details on some of these features as well as on particular algorithms. 
+\sout{Others features are also useful to further refine the classification of broadcasting algorithms.} \david{what is a feature here?}
+
+
 
 
 \newtheorem{mydef}{Definition}
