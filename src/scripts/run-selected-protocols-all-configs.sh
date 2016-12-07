@@ -59,6 +59,7 @@ rm -f ../../results/broadcastSession* \
       ../../results/batteryConsumption* \
       ../../results/networkCoverage* \
       ../../results/relays* \
+      ../../results/coverage* \
       ../../results/*.pdf \
       ../../results/summary.csv
 
