@@ -210,7 +210,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 	print(p)
 }
 
-plot.saved_rebroadcast.per.session <- function(data, densities) {
+plot.data.using.lines <- function(data, densities, ylabel, caption, transformation) {
   data.list <- lapply(densities, function(density) {
 		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
 		dd <- lapply(dd, function(e) {
@@ -219,13 +219,14 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 	  	cn <- s[which(s == "p") + 1]
       cn <- toupper(gsub("[[:digit:]]", "", cn))
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
-			y <- rep(nr.nodes, length(e[,1])) -  e[,1]
+      y <- transformation(e[,1], nr.nodes)
       x <- 1:length(y)
-      p <- lowess(x, y, f=1/15)
+      p <- data.frame( x = x, y = y )
+      # p <- lowess(x, y, f=1/3)
 			data.frame( dat = p$y,
 						alg = rep(cn, length(y)),
             idx = p$x,
-						density=rep(as.factor(paste("Density", density)), length(data))
+						density=rep(as.factor(paste("Density", density)), length(y))
 			)
 		})
 
@@ -233,11 +234,6 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 	})
 
 	data <- do.call("rbind", data.list)
-  # data$idx <- 1:length(data$dat)
-
-  ylabel <- "Saved rebroadcast messages"
-  caption <- "Saved rebroadcast messages per session"
-  # print(head(data,4))
 
 	p <- ggplot(data) +
 		 geom_line(aes(x=idx, y=dat, colour=alg)) +
@@ -254,48 +250,23 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 	print(p)
 }
 
+
+plot.saved_rebroadcast.per.session <- function(data, densities) {
+  plot.data.using.lines(data, densities,
+    "Saved rebroadcast messages", "Saved rebroadcast messages per session",
+    function(d, nr.nodes) {
+      rep(nr.nodes, length(d)) -  d
+    }
+  )
+}
+
 plot.coverage.per.session <- function(data, densities) {
-  data.list <- lapply(densities, function(density) {
-		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
-		dd <- lapply(dd, function(e) {
-			cn <- colnames(e)[1]
-			s <- unlist( strsplit(cn,'_'))
-	  	cn <- s[which(s == "p") + 1]
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
-      nr.nodes <- as.numeric(s[which(s == "n") + 1])
-			y <-  e[,1]/rep(nr.nodes, length(e[,1]))*100
-      x <- 1:length(y)
-      p <- lowess(x, y, f=1/15)
-			data.frame( dat = p$y,
-						alg = rep(cn, length(y)),
-            idx = p$x,
-						density=rep(as.factor(paste("Density", density)), length(data))
-			)
-		})
-
-		do.call("rbind", dd)
-	})
-
-	data <- do.call("rbind", data.list)
-  # data$idx <- 1:length(data$dat)
-
-  ylabel <- "Coverage"
-  caption <- "Coverage per session"
-  # print(head(data,4))
-
-	p <- ggplot(data) +
-		 geom_line(aes(x=idx, y=dat, colour=alg)) +
-		 facet_grid(. ~ density) +
-		 theme(legend.position="bottom") +
-		 ylab(ylabel) + xlab("Broadcast Session") +
-     (if (print.titles)
-		   labs(title=caption, colour="Algorithms")
-     else
-       labs(colour="Algorithms")
-     ) +
-     get.plot.theme.style()
-
-	print(p)
+  plot.data.using.lines(data, densities,
+    "Coverage", "Coverage per session",
+    function(d, nr.nodes) {
+      d/rep(nr.nodes, length(d))*100
+    }
+  )
 }
 
 
