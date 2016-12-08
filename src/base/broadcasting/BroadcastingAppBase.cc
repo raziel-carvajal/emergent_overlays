@@ -107,12 +107,17 @@ BroadcastingAppBase::initialize(int stage)
             }
 
             if (is_source) {
-                delayed_event(WAKEUP, "intervalBroadcastTime", d);
-                cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+              msgs.clear();
+              // delayed_event(WAKEUP, "intervalBroadcastTime", d);
+              cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+              for (int i = 0 ; i < nr_broadcast_msg; i++)
+                msgs.insert(i);
             }
-            else if (msgs.size() > 0) {
-              int idx = *msgs.begin();
-              msgs.erase(idx);
+
+            if (msgs.size() > 0) {
+              is_source = true;
+              next_to_send = msgs.begin();
+              int idx = *next_to_send;
               delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
             }
 
@@ -151,14 +156,10 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             case WAKEUP:
                 //configure_neighbors();
                 cancelAndDelete(msg);
-                if (is_source && nr_broadcast_msg > 0) {
-                  this->time_to_broadcast_payload(nullptr);
-                  nr_broadcast_msg--;
-                  delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
-                }
-                else if (msgs.size() > 0) {
-                  int idx = *msgs.begin();
-                  msgs.erase(idx);
+                this->time_to_broadcast_payload(nullptr);
+                next_to_send++;
+                if (next_to_send != msgs.end()) {
+                  int idx = *next_to_send;
                   double d = par("wakeUpTime").doubleValue();
                   delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
                 }

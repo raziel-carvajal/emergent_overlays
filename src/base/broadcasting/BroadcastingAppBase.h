@@ -67,6 +67,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     // when to send broadcast messages
     std::set<int> msgs;
+    std::set<int>::iterator next_to_send;
 
     // my direct edges (neighbors)
     std::map<std::string, Neighbor> neighbors;
