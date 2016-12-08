@@ -106,7 +106,7 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     return sum;
 }
 
-void Abba2::processStart() { 
+void Abba2::processStart() {
     timeOut = par("timeOut").doubleValue();
     BroadcastingAppBase::processStart();
 }
@@ -183,7 +183,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
 {
     string key;
     updatePosition();
-    if (is_source) {
+    if (!user_data) {
         key = createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;
 //        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";

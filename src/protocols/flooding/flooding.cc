@@ -50,7 +50,7 @@ void
 Flooding2::time_to_broadcast_payload(void* user_data)
 {
     string key;
-    if (is_source) {
+    if (!user_data) {
         key = createUniqueBroadcastingSessionId();
         payloads[key] = key;
         broadcast(key, new broadcasting::Broadcast("payload"));

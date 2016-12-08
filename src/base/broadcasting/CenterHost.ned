@@ -31,5 +31,6 @@ module CenterHost extends WirelessHost
 {
     @display("i=device/wifilaptop");
     bool isCenter = default(false);
+    string id_messages_to_send = default("");
     //numRadios = default(1);
 }

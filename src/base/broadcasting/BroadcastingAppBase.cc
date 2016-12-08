@@ -79,6 +79,8 @@ BroadcastingAppBase::initialize(int stage)
 
                 EV_TRACE << "My position is " << this->position  << "\n";
 
+                //   cout << getLogHeader() << " " << atoi(tokenizer.nextToken()) << endl;
+
             }
             break;
         case INITSTAGE_LAST:{
@@ -91,12 +93,35 @@ BroadcastingAppBase::initialize(int stage)
 
             d = par("wakeUpTime").doubleValue();
             delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
-            if (is_source) {
-                delayed_event(WAKEUP, "intervalBroadcastTime", d);
-                cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
-                d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
-                delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
+
+            if (!par("single_source").boolValue()) {
+              cModule* host = getContainingNode(this);
+              const char* s = host->par("id_messages_to_send");
+              cStringTokenizer tokenizer(s);
+              while (tokenizer.hasMoreTokens()) {
+                int idx = atoi(tokenizer.nextToken());
+                if (idx <= nr_broadcast_msg) {
+                  idx = idx - 1;
+                  msgs.insert(idx);
+                }
+              }
             }
+
+            if (is_source) {
+              msgs.clear();
+              // delayed_event(WAKEUP, "intervalBroadcastTime", d);
+              cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+              for (int i = 0 ; i < nr_broadcast_msg; i++)
+                msgs.insert(i);
+            }
+
+            if (msgs.size() > 0) {
+              is_source = true;
+              next_to_send = msgs.begin();
+              int idx = *next_to_send;
+              delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
+            }
+
         }break;
         default:
             break;
@@ -132,13 +157,12 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             case WAKEUP:
                 //configure_neighbors();
                 cancelAndDelete(msg);
-//                if (is_source) {
-//                  this->time_to_broadcast_payload(nullptr);
-//                }
-                if (is_source && nr_broadcast_msg > 0) {
-                  this->time_to_broadcast_payload(nullptr);
-                  nr_broadcast_msg--;
-                  delayed_event(WAKEUP, "intervalBroadcastTime", par("intervalBroadcastTime").doubleValue());
+                this->time_to_broadcast_payload(nullptr);
+                next_to_send++;
+                if (next_to_send != msgs.end()) {
+                  int idx = *next_to_send;
+                  double d = par("wakeUpTime").doubleValue();
+                  delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
                 }
 
                 break;
@@ -162,6 +186,10 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   pkt->setSender(myself.c_str());
                   send_package(pkt);
 	                cancelAndDelete(msg);
+
+                  auto d =  par("wakeUpTime").doubleValue() + nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
+
+                  delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
                 }
 		              break;
             case HALT_SIMULATION_DELAY:
@@ -175,8 +203,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 //     auto p  = par("intervalBroadcastTime").doubleValue() / 5;
                 //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
                 // }
-                // if (!is_source)
-                //     nr_broadcast_msg--;
 
             }break;
             default:
@@ -381,14 +407,16 @@ BroadcastingAppBase::delay_broadcast(void* user_data) {
 int
 BroadcastingAppBase::get_next_id_for_msg()
 {
-    return ++last_id;
+  static int last_id = 0;
+  return ++last_id;
 }
 
 
 int
 BroadcastingAppBase::get_last_id_for_msg()
 {
-    return last_id;
+  throw std::runtime_error("This has been deprecated");
+  return -1;
 }
 
 

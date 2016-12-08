@@ -127,7 +127,7 @@ void inet::ProbFlooding::time_to_broadcast_payload(void* user_data) {
     for (auto& n: neighbors) myNeigs[n.first] = n.first;
     probflood::ProbFlooBroadcast* msg = new probflood::ProbFlooBroadcast("payload");
     msg->setSenderNeigs(myNeigs);
-    if (is_source) {
+    if (!user_data) {
         key = createUniqueBroadcastingSessionId();
         alreadyDispatched.insert(key);
         broadcast(key, msg);

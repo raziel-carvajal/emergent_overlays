@@ -1,5 +1,7 @@
 #!/bin/bash
 
+USE_SINGLE_SOURCE=0
+
 # configuring path to omnet++
 . download-omnet.sh
 source local-omnet-setenv.sh ${OMNET_PATH}
@@ -55,7 +57,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility 1
+    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
@@ -76,6 +78,10 @@ cPath='../../experiments/configs/builtConfigs/'
 [ ! -d "$cPath" ] &&	mkdir "${cPath}"
 
 
+nr_msg=`grep 'nr_broadcast_msg' $iniCommon | awk -F '=' '{ print $2 }' | grep -Eo '[0-9]{1,7}'`
+echo "The number of broadcasts is ${nr_msg}"
+
+
 here=`pwd`
 cd $pPath
 protocols=`ls -d */`
@@ -89,32 +95,36 @@ ctrMsgsForColl=`grep "nr_hello_messages" ${pPath}mprt2/ini`
 ctrMsgsForColl="${ctrMsgsForColl}\n"`grep "helloTime" ${pPath}mprt2/ini`
 for t in $topologiesFiles; do
   srcId=`grep isCenter $tPath$t | grep -Eo '[0-9]{1,5}' | head -1`
+
   index=$(( ${#t} - 4 ))
   tName=${t:0:$index}
   mobFile="${t:0:$((index-3))}.mobility"
   for p in $protocols; do
   	pp="${pPath}$p"
   	if [ -d $pp ]; then
-          	s=$(( ${#p} - 1))
-          	p=${p:0:$s}
+    	s=$(( ${#p} - 1))
+    	p=${p:0:$s}
   		tId=$tName$p
   		cat $iniCommon >$tId
   		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
   		cat $pPath$p'/ini' >>$tId
-                echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
-  		sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
-                case ${p} in
-                  flooding)
-                    cat ${tId} >>"${tId}_forCol.ini"
-                    echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
-                    mv "${tId}_forCol.ini" ${cPath}
-                    ;;
-                  abba2)
-                    cat ${tId} >>"${tId}_forCol.ini"
-                    echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
-                    mv "${tId}_forCol.ini" ${cPath}
-                    ;;
-                esac
+      echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
+      if [ "$USE_SINGLE_SOURCE" -eq "1" ]; then
+        sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+        echo "*.host*.udpApp[0].single_source = true" >> $tId
+      fi
+      case ${p} in
+        flooding)
+          cat ${tId} >>"${tId}_forCol.ini"
+          echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
+          mv "${tId}_forCol.ini" ${cPath}
+          ;;
+        abba2)
+          cat ${tId} >>"${tId}_forCol.ini"
+          echo -e "${ctrMsgsForColl}" >>"${tId}_forCol.ini"
+          mv "${tId}_forCol.ini" ${cPath}
+          ;;
+      esac
   		mv $tId $tId'.ini'
   		mv $tId'.ini' $cPath
   	fi

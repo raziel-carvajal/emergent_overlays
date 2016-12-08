@@ -178,9 +178,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 	cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
 	emitBroadcastMsgReceived( key );
 
-	bool first = (!is_source && payloads.find(key) == payloads.end());
-
-	if (first) {
+	if (payloads.find(key) == payloads.end()) {
 		log_status_for_animation("MSG_RECEIVED");
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
@@ -201,7 +199,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 void
 Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
-    if (is_source) {
+    if (!user_data) {
         string key = createUniqueBroadcastingSessionId();
 				payloads[key] = key;
         emitBroadcastMsgReceived(key);
