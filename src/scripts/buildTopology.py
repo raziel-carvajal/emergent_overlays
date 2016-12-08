@@ -67,22 +67,14 @@ def get_arguments():
                         help='last id number used to identify topologies (default: 0)')
     parser.add_argument('--nodes', dest='nr_nodes', type=int, default=200,
                         help='Number of nodes (default: 200)')
-    parser.add_argument("--mobility", help="Generate mobility files")
+    parser.add_argument("--mobility", dest="mobility", action='store_true',
+                        help="Generate mobility files")
+
+    parser.add_argument("--distributed", dest="distributed", action='store_true',
+                        help="Should generate broadcasts from many nodes.")
 
     args = parser.parse_args()
     return args
-
-
-class RandomGeometricGraphTopologyGenerator:
-    def __init__(self, d):
-        self.density = d
-        pass
-
-
-class FixedRadiusTopologyGenerator(RandomGeometricGraphTopologyGenerator):
-
-    def __init__(self, s):
-        pass
 
 
 def build_graph(pos, tx):
@@ -153,7 +145,28 @@ def fillSurfaceBase(r, n, density, w, h):
     return result
 
 
-def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, idx_source):
+def get_callback_single_source_code(idx_source):
+    def tmp(i, p):
+        return "isCenter=true;" if (i == idx_source) else ""
+
+    return tmp
+
+
+def get_callback_multiple_source_code(nr_nodes, nr_max_msgs):
+    d = { i:[] for i in range(0, nr_nodes) }
+    for i in range(1, nr_max_msgs+1):
+        idx = random.randint(0, nr_nodes - 1)
+        d[idx].append(i)
+
+    def tmp(i, p):
+        if len(d[i]) == 0:
+            return ""
+        return "id_messages_to_send=\"" + reduce(lambda s, v: s+" "+str(v), d[i], "") + "\";"
+
+    return tmp
+
+
+def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, callback_source):
     global NED_HEADER, NED_HEADER1
     fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, index)
 
@@ -166,10 +179,7 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, idx_source)
         f.write(NED_HEADER1)
 
         for i, p in enumerate(pos):
-            if i == idx_source:
-                f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); isCenter=true; }}\n\n'.format(i, p[0], p[1]))
-            else:
-                f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); }}\n\n'.format(i, p[0], p[1]))
+            f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); {3} }}\n\n'.format(i, p[0], p[1], callback_source(i, p)))
 
         f.write("}\n")
     finally:
@@ -180,19 +190,14 @@ def get_still_connected_callback(tx, idx_source):
     def l(p):
         G = build_graph(p, tx)
         b = nx.is_connected(G)
-        if not b:
-            x = [len(c) for c in nx.connected_components(G) if idx_source in c]
-            logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
+        # if not b:
+        #     x = [len(c) for c in nx.connected_components(G) if idx_source in c]
+        #     logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
         return True
         # return b
     return l
 
 if __name__ == '__main__':
-    # trRan = initConf[0]['val']
-    # minL = initConf[1]['val']
-    # maxL = initConf[2]['val']
-    #
-    # index = initConf[3]['val']
     args = get_arguments()
     trRan = args.tx
     index = args.last_idx
@@ -212,10 +217,17 @@ if __name__ == '__main__':
             topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
 
         print "Selecting source of broadcasting"
-        idx_source = random.randint(0, len(topology) - 1)
+
 
         print "Writing NED file"
-        createNedFile(d, topology, index, int(w), int(w), trRan, idx_source)
+        idx_source = random.randint(0, len(topology) - 1)
+        if (args.distributed):
+            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 100)
+        else:
+            fn_create_sources = get_callback_single_source_code(idx_source)
+        createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)
+
+
         if mobility:
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)

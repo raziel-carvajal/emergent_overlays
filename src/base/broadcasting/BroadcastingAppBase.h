@@ -65,6 +65,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     // number of broadcast message to send
     double nr_broadcast_msg;
 
+    // when to send broadcast messages
+    std::set<int> msgs;
+
     // my direct edges (neighbors)
     std::map<std::string, Neighbor> neighbors;
 
@@ -79,9 +82,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     // my position
     Coord position;
     double radious;
-
-    // counter to assign ids to broadcast messages
-    int last_id = 0;
 
   private:
 
