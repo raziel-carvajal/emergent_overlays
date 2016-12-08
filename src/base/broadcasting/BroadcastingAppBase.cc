@@ -94,15 +94,16 @@ BroadcastingAppBase::initialize(int stage)
             d = par("wakeUpTime").doubleValue();
             delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
 
-
-            cModule* host = getContainingNode(this);
-            const char* s = host->par("id_messages_to_send");
-            cStringTokenizer tokenizer(s);
-            while (tokenizer.hasMoreTokens()) {
-              int idx = atoi(tokenizer.nextToken());
-              if (idx <= nr_broadcast_msg) {
-                idx = idx - 1;
-                msgs.insert(idx);
+            if (!par("single_source").boolValue()) {
+              cModule* host = getContainingNode(this);
+              const char* s = host->par("id_messages_to_send");
+              cStringTokenizer tokenizer(s);
+              while (tokenizer.hasMoreTokens()) {
+                int idx = atoi(tokenizer.nextToken());
+                if (idx <= nr_broadcast_msg) {
+                  idx = idx - 1;
+                  msgs.insert(idx);
+                }
               }
             }
 

@@ -152,16 +152,18 @@ def get_callback_single_source_code(idx_source):
     return tmp
 
 
-def get_callback_multiple_source_code(nr_nodes, nr_max_msgs):
+def get_callback_multiple_source_code(nr_nodes, nr_max_msgs, idx_source):
     d = { i:[] for i in range(0, nr_nodes) }
     for i in range(1, nr_max_msgs+1):
         idx = random.randint(0, nr_nodes - 1)
         d[idx].append(i)
 
+    f2 = get_callback_single_source_code(idx_source)
+
     def tmp(i, p):
         if len(d[i]) == 0:
-            return ""
-        return "id_messages_to_send=\"" + reduce(lambda s, v: s+" "+str(v), d[i], "") + "\";"
+            return f2(i, p)
+        return "id_messages_to_send=\"" + reduce(lambda s, v: s+" "+str(v), d[i], "") + "\";" + f2(i, p)
 
     return tmp
 
@@ -222,7 +224,7 @@ if __name__ == '__main__':
         print "Writing NED file"
         idx_source = random.randint(0, len(topology) - 1)
         if (args.distributed):
-            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 100)
+            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 3000, idx_source)
         else:
             fn_create_sources = get_callback_single_source_code(idx_source)
         createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)

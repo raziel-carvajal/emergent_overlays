@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USE_SINGLE_SOURCE=1
+USE_SINGLE_SOURCE=0
 
 # configuring path to omnet++
 . download-omnet.sh
@@ -57,11 +57,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    BUILD_TOP_FLG=""
-    if [ "$USE_SINGLE_SOURCE" -eq "0" ]; then
-      BUILD_TOP_FLG="--distributed"
-    fi
-    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility ${BUILD_TOP_FLG}
+    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
@@ -115,6 +111,7 @@ for t in $topologiesFiles; do
       echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
       if [ "$USE_SINGLE_SOURCE" -eq "1" ]; then
         sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
+        echo "*.host*.udpApp[0].single_source = true" >> $tId
       fi
       case ${p} in
         flooding)
