@@ -25,6 +25,7 @@ import networkx as nx
 import argparse
 import logging
 import genmobility
+import matplotlib.pyplot as plt
 
 NED_HEADER = ''
 NED_HEADER += 'package builtTopologies;\n\n'
@@ -73,6 +74,10 @@ def get_arguments():
     parser.add_argument("--distributed", dest="distributed", action='store_true',
                         help="Should generate broadcasts from many nodes.")
 
+    parser.add_argument("--save-fig", dest="savedfigure", type=str,
+                        help="Save an image of the topology at.")
+
+
     args = parser.parse_args()
     return args
 
@@ -80,7 +85,8 @@ def get_arguments():
 def build_graph(pos, tx):
     g = nx.Graph()
     for i, v in enumerate(pos):
-        g.add_node(i)
+        n = g.add_node(i)
+
     for i, v in enumerate(pos):
         x0 = v[0]
         y0 = v[1]
@@ -95,6 +101,57 @@ def build_graph(pos, tx):
                     c = c + 1
     return g
 
+
+def find_closest(pos, components, node_idx, component_idx):
+    x0 = pos[node_idx][0]
+    y0 = pos[node_idx][1]
+    dm = 100000000
+    idx_min = -1
+    for i, c in enumerate(components):
+        if i != component_idx:
+            indexes = c[1]
+            for i in indexes:
+                x1 = pos[i][0]
+                y1 = pos[i][1]
+                d = math.sqrt((x1 - x0)**2 + (y1- y0)**2)
+                if d < dm:
+                    dm = d
+                    idx_min = i
+    return (dm, idx_min, node_idx)
+
+
+def fix_connectivity_of_network(pos, tx, threshold=80.0):
+    g = build_graph(pos, tx)
+    x = [(len(c), c) for c in nx.connected_components(g)]
+    maximum = max(c[0] for c in x)
+    if maximum < len(pos)*threshold/100:
+        return False
+    while len(x) > 1:
+        x.sort(lambda a, b: -1 if a[0] < b[0] else 1)
+        sizes = [c[0] for c in x]
+        # print len(x), " components with sizes: ", sizes
+        idx_c = 0
+        c = x[0]
+        # print "\thola: ", c[1]
+        ttt = [ find_closest(pos, x, idx, idx_c) for idx in c[1] ]
+        ttt.sort(lambda a, b: -1 if a[0] < b[0] else 1)
+        pair = ttt[0]
+        # print "\t\tminimum distance : ", pair[0] - tx, ", to node:", pair[1]
+        toward = pair[1]
+        x0 = pos[pair[2]][0]
+        y0 = pos[pair[2]][1]
+        x1 = pos[toward][0]
+        y1 = pos[toward][1]
+        d = pair[0] - tx + 1
+        px = (x1 - x0)/d
+        py = (y1 - y0)/d
+        # move all nodes in this component
+        for idx in c[1]:
+            pos[idx][0] += px
+            pos[idx][1] += py
+        g = build_graph(pos, tx)
+        x = [(len(c), c) for c in nx.connected_components(g)]
+    return True
 
 def is_valid_network(pos, tx, density, allowed_error):
     g = build_graph(pos, tx)
@@ -111,7 +168,13 @@ def is_valid_network(pos, tx, density, allowed_error):
         h = {d: len(filter(lambda(x): x == d,  degrees)) for d in u}
         print avg_degree, max_degree, min_degree, expected, "Nr Nodes", nx.number_of_nodes(g), "Nr Edges", nx.number_of_edges(g), density, cond1, cond2
         print h
+    if cond2 and not cond1:
+        b = fix_connectivity_of_network(pos, tx)
+        if b:
+            g = build_graph(pos, tx)
+            cond1 = nx.is_connected(g)
     return cond1 and cond2
+    return cond2
 
 
 def fillSurfaceWithFixedRadio(tx, tilesWidth, tilesHeight, density):
@@ -199,6 +262,18 @@ def get_still_connected_callback(tx, idx_source):
         # return b
     return l
 
+
+def draw(pos, tx, filename):
+    g = build_graph(pos, tx)
+    plt.figure()
+    plt.axis('off')
+    nx.draw_networkx(g, pos, font_size=7, node_size=10)
+    plt.savefig(filename)
+
+    pass
+
+
+
 if __name__ == '__main__':
     args = get_arguments()
     trRan = args.tx
@@ -228,6 +303,9 @@ if __name__ == '__main__':
         else:
             fn_create_sources = get_callback_single_source_code(idx_source)
         createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)
+
+        if args.savedfigure:
+            draw(topology, trRan, args.savedfigure)
 
 
         if mobility:
