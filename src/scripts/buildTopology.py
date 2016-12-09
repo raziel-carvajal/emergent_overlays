@@ -91,14 +91,14 @@ def build_graph(pos, tx):
         x0 = v[0]
         y0 = v[1]
         c = 0
-        for j, v2 in enumerate(pos):
-            if i < j:
-                x1 = v2[0]
-                y1 = v2[1]
-                d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
-                if d < tx*tx:
-                    g.add_edge(i, j)
-                    c = c + 1
+        for j in range(i+1, len(pos)):
+            v2 = pos[j]
+            x1 = v2[0]
+            y1 = v2[1]
+            d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
+            if d < tx*tx:
+                g.add_edge(i, j)
+                c = c + 1
     return g
 
 
@@ -120,8 +120,8 @@ def find_closest(pos, components, node_idx, component_idx):
     return (dm, idx_min, node_idx)
 
 
-def fix_connectivity_of_network(pos, tx, threshold=80.0):
-    g = build_graph(pos, tx)
+def fix_connectivity_of_network(initial_g, pos, tx, threshold=80.0):
+    g = initial_g
     x = [(len(c), c) for c in nx.connected_components(g)]
     maximum = max(c[0] for c in x)
     if maximum < len(pos)*threshold/100:
@@ -169,7 +169,7 @@ def is_valid_network(pos, tx, density, allowed_error):
         print avg_degree, max_degree, min_degree, expected, "Nr Nodes", nx.number_of_nodes(g), "Nr Edges", nx.number_of_edges(g), density, cond1, cond2
         print h
     if cond2 and not cond1:
-        b = fix_connectivity_of_network(pos, tx)
+        b = fix_connectivity_of_network(g, pos, tx)
         if b:
             g = build_graph(pos, tx)
             cond1 = nx.is_connected(g)
@@ -253,8 +253,8 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, callback_so
 
 def get_still_connected_callback(tx, idx_source):
     def l(p):
-        G = build_graph(p, tx)
-        b = nx.is_connected(G)
+        # G = build_graph(p, tx)
+        # b = nx.is_connected(G)
         # if not b:
         #     x = [len(c) for c in nx.connected_components(G) if idx_source in c]
         #     logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
