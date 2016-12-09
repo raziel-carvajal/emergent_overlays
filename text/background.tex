@@ -3,6 +3,8 @@
 \section{Motivations}
 \label{sec:background}
 
+\laurent{Locked by Inti to apply changes}
+
 With the rise of what we call the Internet of Things (IoT), both the number and the diversity of devices that become connected is staggering. We are entering in a new era where all objects of our daily life, for instance, from mobile to wearable devices can be interconnected. Industrials, such as Cisco, predict that there will be 25 billion devices connected together by 2015 and 50 billion by 2020. The IoT aim is not really to enable users to interact with everything connected. It is more about crosslinking objects to promote machine-to-machine interactions, enabling so to massively collect and/or distribute data to be turned into information delivered to end-users to improve their interactions with their social and/or environmental context. 
 IoT leads to a strong revival of interest in how to disseminate and/or collect data in mobile \textit{ad hoc} networks (MANET). In such networks, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus frequent and temporary disconnections. 
 
@@ -20,16 +22,16 @@ Meanwhile, the underlying topology built and used in different algorithms can ha
 To summarize, each algorithm has its own advantages and shortcomings in terms of performance and cost depending on the context. None of the current state of art enables us to evaluate existing algorithms in a systematic, clear and reproducible manner
 to select the right algorithm according to a dedicated IoT application requirements. 
 
-\sout{In the remainder of this paper we give more details on some of these features as well as on particular algorithms. }
+\deleted{In the remainder of this paper we give more details on some of these features as well as on particular algorithms. }
 
-\sout{A mobile ad-hoc network can be seen as a graph $G = (V, E)$, where $V$ is the set of
+\deleted{A mobile ad-hoc network can be seen as a graph $G = (V, E)$, where $V$ is the set of
 nodes, and $E$ is the set of links connecting nodes in the communication range.
 In such networks, the broadcast problem consists in delivering a message to all nodes by only using links in $E$.} 
 ~\cite{Ruiz2015}
 \david{it is useless, 
 or you must reuse it later but this is not the case}
 
-\sout{As shown in a thoughtful survey by Ruiz et al. the literature on broadcasting algorithms for MANETs is quite large \inti{I don't like large}.
+\deleted{As shown in a thoughtful survey by Ruiz et al. the literature on broadcasting algorithms for MANETs is quite large \inti{I don't like large}.
 For that reason, we find a great diversity of approaches in the current state-of-the-art. 
 To classify them, different criteria have been used
 However, in this paper we prefer the taxonomy presented by Ruiz et al. in the aforementioned survey because it is newer, more systematic and covers more approaches.
@@ -39,7 +41,7 @@ In addition, we mention algorithms belonging to different classifications.
 ~\cite{Ruiz2015},
 ~\cite{Williams:2002:CBT:513800.513825, WuLou1043098, YiGerla2003}.
 
-\sout{An \textit{underlying topology} is a structure built by some algorithms to drive the broadcasting process.
+\deleted{An \textit{underlying topology} is a structure built by some algorithms to drive the broadcasting process.
 Usually, this \textit{topology} simply is a subset $S$ of nodes with some characteristics that depend on the algorithm.
 Then, a node only retransmits a message if it belongs to the underlying topology.
 The rationale is that by reducing the cardinality of $S$ we can reduce both network congestion and the overall energy consumption.
@@ -48,7 +50,7 @@ Hence, doing so is only worth if this cost can be amortized because the topology
 
 \inti{Name and reference a few algorithms in each class. No description}
 
-\sout{In many mobile devices it is possible to adjust the \textit{transmission range} ($\textit{Tx}$) of the radio.
+\deleted{In many mobile devices it is possible to adjust the \textit{transmission range} ($\textit{Tx}$) of the radio.
 Some algorithms adjust $\textit{Tx}$ during the broadcasting process in order to improve the coverage and reduce resource usage.
 In particular, changing $\textit{Tx}$ has a few potential benefits: the radio consumes less energy when $\textit{Tx}$ decreases~{???}, there is also less medium congestion when you reduce $\textit{Tx}$ because the transmission area of different nodes do not overlap~{??}, and increasing $\textit{Tx}$ may prove useful to reduce the number of nodes that must retransmit the message~{??}.
 Since there are algorithms using this feature, we can classify them based on whether they fix or vary the transmission range.}
@@ -57,7 +59,7 @@ Since there are algorithms using this feature, we can classify them based on whe
 
 \inti{Name and reference a few algorithms in each class. No description}
 
-\sout{Others features are also useful to further refine the classification of broadcasting algorithms.} \david{what is a feature here?}
+\deleted{Others features are also useful to further refine the classification of broadcasting algorithms.} \david{what is a feature here?}
 
 
 
