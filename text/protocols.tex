@@ -20,7 +20,7 @@ If the same message is received before the timer expires, the node updates $\alp
 No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
 When a timer expires, the message is retransmitted by the node.
 
-We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{CartignyProbabilistic}.
+We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{Cartigny:2003:BNR:2727141.2727459}.
 In this protocol, a node retransmits a message with a probability that depends on two contextual values.
 The first value is the number of neighbors a node has.
 In using this value, the function used to compute the probability of retransmitting a message decreases as the number of neighbors increases.
@@ -72,22 +72,23 @@ Wu et al. propose \textit{node-degree-based} rules to reduce the size of the con
 	
 \end{enumerate} 
 
-In addition we can further refine the connected dominating sets using another rule. \inti{I would stop here and just put a reference, but here it is if you believe it is worth using it}
-Given $u$ and $w$, two marked neighbors of $v$. We unmarked $v$ if one of the following conditions holds:
-\begin{itemize}
-	\item $N(v) \subseteq N(u) \cup N(w), \textit{but} \quad N(u) \not\subset N(v) \cup N(w) \\ \quad \textit{and} \quad N(w) \not\subset N(v) \cup N(u) $.
-	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w), \\\textit{but} \quad N(w) \not\subset N(v) \cup N(u) $; and one of the following conditions hold:
-	\begin{itemize}
-		\item $\textit{nd}(v) < \textit{nd}(u)$
-		\item $\textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
-	\end{itemize}
-	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w) \\\textit{and} \quad N(w) \subset N(v) \cup N(u) $; and one of the following conditions hold:
-	\begin{itemize}
-		\item $\textit{nd}(v) < \textit{nd}(u) \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(w) $
-		\item $\textit{nd}(v) = \textit{nd}(u) < \textit{nd}(w) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
-		\item $\textit{nd}(v) = \textit{nd}(u) = \textit{nd}(w) \\ \textit{and} \quad \textit{id}(v) = \min\lbrace\textit{id}(v),\textit{id}(u),\textit{id}(w)\rbrace$
-	\end{itemize}
-\end{itemize}
+In addition we can further refine the connected dominating sets using another rule. Various refinements can be found in~\cite{Wu2001}.
+%\inti{I would stop here and just put a reference, but here it is if you believe it is worth using it}
+%Given $u$ and $w$, two marked neighbors of $v$. We unmarked $v$ if one of the following conditions holds:
+%\begin{itemize}
+%	\item $N(v) \subseteq N(u) \cup N(w), \textit{but} \quad N(u) \not\subset N(v) \cup N(w) \\ \quad \textit{and} \quad N(w) \not\subset N(v) \cup N(u) $.
+%	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w), \\\textit{but} \quad N(w) \not\subset N(v) \cup N(u) $; and one of the following conditions hold:
+%	\begin{itemize}
+%		\item $\textit{nd}(v) < \textit{nd}(u)$
+%		\item $\textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
+%	\end{itemize}
+%	\item $N(v) \subseteq N(u) \cup N(w), \textit{and} \quad N(u) \subset N(v) \cup N(w) \\\textit{and} \quad N(w) \subset N(v) \cup N(u) $; and one of the following conditions hold:
+%	\begin{itemize}
+%		\item $\textit{nd}(v) < \textit{nd}(u) \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(w) $
+%		\item $\textit{nd}(v) = \textit{nd}(u) < \textit{nd}(w) \quad \textit{and} \quad \textit{id}(v) < \textit{id}(u)$
+%		\item $\textit{nd}(v) = \textit{nd}(u) = \textit{nd}(w) \\ \textit{and} \quad \textit{id}(v) = \min\lbrace\textit{id}(v),\textit{id}(u),\textit{id}(w)\rbrace$
+%	\end{itemize}
+%\end{itemize}
 
 
 
