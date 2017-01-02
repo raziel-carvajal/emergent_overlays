@@ -3,39 +3,44 @@
 \section{Motivations}
 \label{sec:background}
 
-\inti{Locked by Laurent to review}
-
 With the rise of what we call the Internet of Things (IoT), both the number and the diversity of connected devices is staggering.
 We are entering in a new era where all objects of our daily life, from mobile to wearable devices, can be interconnected.
 Leaders of the industry, such as Cisco, predict that there will be 25 billion devices connected together by 2015 and 50 billion by 2020.
 The goal of IoT is not really to enable users to interact with everything.
 Instead, it is more about cross-linking objects to promote machine-to-machine interactions.
 These interactions enable the massive capture and/or distribution of data that can be turned into information and delivered to end-users to improve their interaction with their social and environmental context.
+\laurent{This first paragraph should be moved backward in the Introduction. We can start this section with the following one.}
  
-IoT has led to a strong revival of interest in how to disseminate and/or collect data in mobile \textit{ad-hoc} networks (MANET).
-In such networks, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus frequent and temporary disconnections.
-Over the last decade, many algorithms dedicated to such networks have emerged to either control, adapt or maintain their topologies.
-Such advances have made MANET a key enabler for connecting anything at anytime.
+IoT has led to a strong revival of interest in how to disseminate and collect data in mobile ad-hoc networks (MANET).
+In such a network, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus leading to temporary disconnections.
+Over the last decade, many algorithms have emerged to either control, adapt or maintain the topologies of such networks.
+These advances have made MANET a key enabler for connecting anything at anytime.
 However, determining which algorithm to leverage on to build an IoT application that provides the best trade-off among low latency, low energy consumption, and fault tolerant properties, remains a challenging endeavour.
 
-Most of the related network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcasting operation}, which consists in delivering a message from a source node to all other nodes in a network.
-Unfortunately, the straightforward broadcast mechanism, known as \textit{blind flooding}, suffers from a number of  drawbacks as a consequence of what has been described as the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
-The \textit{storm problem} occurs because in using \textit{blind flooding} each node retransmits every received message. 
-Since they do so \textit{via} radio waves and the transmission range of different nodes tend to overlap, the communication medium becomes rapidly saturated.
-This has several negative consequences such as increasing the error-rate, which in turn forces nodes to keep resending messages and to maintain the radio on.
-In other words, both network bandwidth and energy are wasted. 
+Most of network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcasting operation} which consists in delivering a message from a source node to all other nodes in a network.
+A straight-forward approach to broadcast is by \textit{flooding}.
+A host, on receiving a broadcast message for the first time, has the obligation to rebroadcast the message to its neighbors. 
+Although simple, this approach suffers from a number of  drawbacks known as the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
+Because each node retransmits every received message, the number of redundant rebroadcasts becomes high. In addition, since they they do so \textit{via} radio waves and the transmission range of different nodes tend to overlap, the communication medium becomes rapidly saturated. Collisions are more likely to occur and cause more damage. In other words, both network bandwidth and energy are wasted. 
 
-Accordingly, designing a broadcast algorithm for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of network coverage, which is the percentage of nodes that receive a message, and (ii) minimizing the amount of resources used when a broadcast operation is performed.
-As a direct consequence of these goals, all broadcasting algorithms attempt to reduce the number of nodes retransmitting a message to the bare minimum required to reach an acceptable coverage.
+
+
+Because of the broadcast storm problem, designing a broadcasting algorithm for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of network coverage, which is the percentage of nodes that receive a message, and (ii) minimizing the amount of resources used when a broadcast operation is performed.
+As a consequence, broadcasting algorithms attempt to reduce the number of nodes retransmitting a message to the minimum required to reach an acceptable coverage.
 This avoids energy depletion of nodes than run on batteries, and thus improves the overall network life time.
-In practice, it is hard to decide which nodes should retransmit a message.
-For instance, since there is no central authority in MANETs, the algorithms must be distributed.
-Thus, only ``local'' data are available and in these conditions it is difficult to design an optimal solution.
-On top of that, there are many variables to consider, such as mobility, and the heterogeneity of the IoT devices that can use different types of antenna and have different battery capacity.
-In general, state-of-the-art approaches use such data along some heuristics to decide whether a node must retransmit a message. 
+In practice, however, it is hard to decide which nodes should retransmit a message.
 
-Many broadcasting algorithms for MANETs have been proposed.
-Three families of algorithms are particularly important due to the their behavior in terms of reliability and resource consumption~\cite{Ruiz2015}.
+
+For instance, the lack of a central authority in MANETs implies that the algorithms must be fully distributed and rely only on \textit{local} data available on each node.
+In addition, they must take into account a variety of parameters such as the mobility patterns of the nodes and their heterogeneous characteristics (type of antenna, battery capacity \dots).
+Many different techniques have been proposed for efficient message dissemination based on local data along with some heuristics. 
+\laurent{This seems too specific to context-aware class. I guess that a topology-based algo does not need local data to decide.}
+
+Among them, the most relevant existing algorithms can be classified in three  classes depending on their behavior in terms of reliability and resource consumption~\cite{Ruiz2015}.
+
+\laurent{I am here but I do not understand the classification, why do you say 3 classes. I see only 2. And I think they are not exclusives, so classes may not be adequate as adjective }
+
+\paragraph{topology-based algorithms}
 
 A large family is composed by algorithms that build and use an \textit{underlaying topology} (or backbone) to drive the broadcast operation.
 This underlaying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcasting.
@@ -55,6 +60,7 @@ However, there are others types of underlaying topologies such as \textit{trees}
 	\label{fig:explaining-backbone}
 \end{figure*}
 
+\paragraph{\textit{context-aware} algorithms}
 
 Another important family is known as \textit{context-aware} algorithms.
 The members of this family look at their local \textit{context} to decide if a node should retransmit a message.
