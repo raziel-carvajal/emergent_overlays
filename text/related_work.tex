@@ -5,45 +5,50 @@
 
 \er{Related Work should link to other studies of performance of protocols in MANETs. The related work on actual protocols should be covered in the previous section (Section~\ref{sec:background}).}
 
-Previous studies discussing performance issues on broadcasting algorithms for mobile ad-hoc networks fall in two categories: proposal and evaluation of a new broadcast algorithm, and fully dedicated performance study.
-These studies evaluate broadcasting protocols using different criteria.
-%We have found that the former category is larger than the later.
-In this section, we mainly discuss such evaluation criteria and the results obtained in a representative subset of studies \inti{I took A* and A papers}.
+Many previous studies tackle the performance of broadcast algorithms for MANETs.
+These studies are of two types: proposal and evaluation of new broadcast algorithms (NPE), and fully dedicated performance comparison studies (CS).
+In this section, we discuss the evaluation criteria and the results obtained in a representative set of previous works \inti{I took A* and A papers}.
 
-In Table~\ref{tbl:rw} we summarize the information regarding the evaluation criteria used in the related work.
-First, in column \textit{multi-protocol} we analyze  whether a study compares several broadcasting protocols.
-Next, we look at how studies perform this comparison in terms of the type of protocols used in the evaluation. This is, in column \textit{multi-class} we show if they are only comparing protocols in the same class instead of comparing many classes.
+In Table~\ref{tbl:rw} we summarize the related work.
+First, in column \textit{multi-protocol} we analyze  whether a study compares several broadcast protocols.
+Next, we look at how studies perform this comparison in terms of the types of protocol used in the evaluation. That is, column \textit{multi-class} indicates if a study only compares protocols in the same class instead of comparing many classes.
 Since the network density is extremely important in the context of wireless networks, we highlight in column \textit{multiple densities} what studies vary such a parameter.
-The next two evaluation criteria we consider are related to two characteristics of MANETs -- mobility and energy consumption. We show in the table whether a specific study takes into account the influence of mobility on the overall performance of the protocol and whether the impact on energy consumption is also evaluated.
-Finally, we discuss if the condition of the network usage are taken into consideration. We believe this is an important criterion because in a wireless network, in which there are many collisions, the performance of a broadcasting protocol varies depending on the network load.
-We discuss hereafter that there are different ways of examining this criterion.
-
+The next two evaluation criteria we consider are related to two characteristics of MANETs -- mobility and energy consumption.
+We show in Table~\ref{tbl:rw} whether a specific study takes into account the influence of mobility on the overall performance of the protocol and whether the impact on energy consumption is also evaluated.
+Finally, the last column indicates whether the condition of the network usage are taken into consideration.
+We believe this last criterion is important because in a wireless network, in which there are many collisions, the performance of a broadcast protocol varies depending on the network load.
+%We discuss hereafter that there are different ways of examining this criterion.
+In the remanider of this Section we discuss further details of how broadcast algorithms are evaluated in previous works.
 
 \input{table_related_work}
 
-In their foundational work on the topic, Ni et al.~\cite{Ni:1999:BSP:313451.313525} identify some problems that negatively affect the broadcasting process when a blind flooding approach is used.
-To avoid such problems, the authors propose different algorithms that, by construction, outperform blind flooding in a set of metrics.
-Since by construction such approaches are an improvement, the authors do not consider blind flooding in the simulation results.
-This is common in evaluating broadcasting protocols and it is a main motivation to select other evaluation criteria.
-Looking at column \textit{multi-protocol} in Table \ref{tbl:rw}, we see that most studies compare many protocols.
-However, we also see that they do not consider blind flooding in their evaluation.
-As shown in~\cite{YiGerla2003, ??}, comparing against blind flooding is nevertheless important when metrics such as energy consumption and mobility are taken into consideration.
+In their foundational work on the topic, Ni et al.~\cite{Ni:1999:BSP:313451.313525} identify the drawbacks of using blind flooding to broadcast.
+To avoid the main problems, the authors propose different algorithms that, by construction, outperform blind flooding in a set of metrics.
+Since by construction such approaches are an improvement, the authors then proceed to evaluate them without considering blind flooding.
+This is common pattern in evaluating broadcast algortihms.
+% For that reason, it is important to use additional metrics, not considered in~\cite{Ni:1999:BSP:313451.313525}, to evaluate protocols.
+For instance, column \textit{multi-protocol} in Table \ref{tbl:rw} shows that although most studies compare many protocols, many of them do not consider blind flooding in their evaluation.
+This form of evaluation is nevertheless limited because, as shown in~\cite{YiGerla2003, ??}, comparing against blind flooding is important when metrics such as energy consumption and mobility are taken into consideration.
 
-Interestingly, many studies only consider protocols in the same class.
+Interestingly, most studies only consider protocols in the same class.
 For instance, in~\cite{Wu2004}, the authors only compare algorithms with \textit{fixed transmission range} that build a \textit{CDS} as \textit{underlying topology}.
 Likewise, only the construction of \textit{cluster-based underlaying topologies} is evaluated in~\cite{Nocetti2003}.
 Meanwhile, in~\cite{Cartigny:2003:BNR:2727141.2727459} only \textit{probabilistic} approaches with \textit{context awareness} are considered.
 Finally, in~\cite{Cagalj2002} the authors only compare algorithms that build a \textit{tree} by \textit{varying the transmission range}.
-On the other hand, other studies compare classes of protocols that are somehow close such as \textit{probabilistic and area-based}~\cite{Ni:1999:BSP:313451.313525}; and \textit{CDS and cluster-based topologies}~\cite{Stojmenovic:2002:DSN:506156.506158, WCM:WCM109}.
-Finally, some studies compare protocols from truly diverse classes~\cite{YiGerla2003}.
+That being said, there are indeed studies that compare protocols in different classes.
+To name a few, previous work compare \textit{probabilistic} and \textit{area-based} algorithms~\cite{Ni:1999:BSP:313451.313525, Garbinato2010}; while some previous studies evaluate the construction of \textit{CDS-based} and \textit{cluster-based} topologies for broadcasting~\cite{Stojmenovic:2002:DSN:506156.506158, WCM:WCM109}.
+Finally, we also find previous work comparing protocols from many diverses classes~\cite{YiGerla2003}.
+Since most previous studies don't consider multiple classes or only take into account few classes of algorithms, we think that this is one of the main limitations in the related work.
 
-In general, most performance studies compare similar protocols because they are based on the same assumptions.
-For instance, it is assumed that the overall energy consumption decreases when less nodes rebroadcast messages.
-As a consequence, many studies only focus on measuring the improvement in term of this latter metric instead of looking at the real energy consumption.
-However, it is worth mentioning that such an approach has a disadvantage -- the cost of building and maintaining an underlying topology is not taken into consideration.
-As you can see in Table~\ref{tbl:rw}, many studies do not evaluate energy consumption nor the influence of mobility.
-Finally, a couple of performance studies measure how the network load influences the broadcasting process.
-Usually, this is done by introducing a simulated probability of dropping packages~\cite{Ni:1999:BSP:313451.313525, Qayyum2002}, but we think it is possible to better measure the effect of network load considering more realistic models of the MAC layer.
+%In general, most performance studies compare similar protocols because they are based on the same assumptions.
+In most previous work, it is assumed that the overall energy consumption decreases when fewer nodes rebroadcast messages.
+As a consequence, many studies only focus on measuring the improvement in terms of this latter metric instead of looking at the real energy consumption.
+However, it is worth mentioning that such an approach has disadvantages because
+the cost of building and maintaining an underlying topology is not taken into consideration.
+Despict of this, Table~\ref{tbl:rw} shows that most studies do not directly evaluate energy consumption.
+Other criteria such as mobility and the influence of the network load on the performance of broadcast algorithms are barely evaluated.
+In particular, this latter criterion is only evaluated by adding a probability of dropping packages~\cite{Ni:1999:BSP:313451.313525, Qayyum2002} to the MAC layer.
+Although this is a valid initial approximation, we think it is possible to better measure the effect of network load considering more realistic models of the MAC layer.
 
 %\begin{itemize}
 %	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
