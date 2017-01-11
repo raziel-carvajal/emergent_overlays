@@ -6,13 +6,14 @@
 \inti{We should add some kind of introduction here to explain how we selected these protocols}
 
 \subsection*{Topology-free protocols}
-We discuss in Section~\ref{sec:background} how some protocols do not require to build an underlying topology.
-The canonical algorithms with this property is \textit{blind flooding}, in where a node retransmits a message upon receiving it for the first time.
-However, we are interested in more efficient protocols.
-In addition to \textit{blind flooding}, in this paper we also implement other protocols that belong to this category.
+We discuss in Section~\ref{sec:background} that some protocols require no contextual information nor a topology to perform the flooding operation.
+A well-known algorithm with this property is \textit{simple flooding}, in which a node retransmits a message upon receiving it for the first time.
+This is a straghforward algorithm that belong to the family of \textit{context-oblivious} protocols.
+In addition to \textit{simple flooding}, in this paper we also implement two other protocols that do not require the construction of a topology.
+These algortihms are briefly presented hereafter.
 
-In~\cite{Ovalle-Martinez2006}, the authors present the \textit{Area-based beaconles protocol} (ABBA).
-This is an algorithm where the flooding process is controlled in both space and time.
+In~\cite{Ovalle-Martinez2006}, the authors propose the \textit{Area-based beaconles protocol} (ABBA).
+This is a \textit{context-aware} algorithm in which the flooding process is controlled in both space and time.
 Notice that the algorithm requires that each node knows its physical location as well as the transmission radio of each node.
 Upon the reception of a message, a node first computes the angle $\alpha$ covered by the received transmission.
 Using this information it then schedules a timer with a timeout $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is the maximum waiting time.
@@ -21,46 +22,52 @@ No retransmission occurs if at some point the angle $\alpha$ covers the complete
 When a timer expires, the message is retransmitted by the node.
 
 We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{Cartigny:2003:BNR:2727141.2727459}.
-In this protocol, a node retransmits a message with a probability that depends on two contextual values.
+In this \textit{context-aware} protocol, a node retransmits a message with a probability that depends on two contextual values.
 The first value is the number of neighbors a node has.
 In using this value, the function used to compute the probability of retransmitting a message decreases as the number of neighbors increases.
-The rationale is that if a node has many neighbors they are most likely to be closely packed in a dense area.
+The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
 This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless the density.
 The second contextual value taken into account is the gain in terms of new area that a node covers when it retransmits the message.
 In this case, the motivation is the same as in ABBA; hence, the larger the new area to cover the higher the probability of sending a message. 
-Combining this two values the authors propose a protocol that delivers almost 100\% coverage with relatively low number of relay nodes.
+Combining these two values the authors propose a protocol that delivers almost 100\% coverage with relatively low number of relay nodes.
 However, although the protocol requires both \textit{HELLO} messages and piggybacking of information in the broadcast messages, no experiment is presented to discuss important parameters such energy consumption. 
 
 
-\subsection*{CDS-based protocols}
+\subsection*{Topology-based protocols}
 
-A connected dominating set of a graph G is a set D of vertices with two properties:
+A type of topology often built to drive the broadcast operation is the connected dominating set (CDS).
+A CDS of a graph G is a set D of vertices with two properties:
 
 \begin{enumerate}
 	\item Any node in D can reach any other node in D by a path that stays entirely within D.
 	\item Every vertex in G either belongs to D or is adjacent to a vertex in D.
 \end{enumerate}
 
-In MANETs, several protocols use the CDS rule to drive the broadcasting process.
-It states that a node retransmits a message once and only once if it belongs to the CDS.
-In an attempt to reduce resource consumption, and given the fact that the problem is NP, many protocols use a distributed and heuristic-based approach to compute an approximation of the \textbf{minimum connected dominating set}.
-As part of this paper, we have implemented two CDS-based protocols.
+It is simple to broadcast a message if each node knows the CDS structure.
+Simply, each node retransmits a message only once, but only if it belongs to the CDS.
+Unfortunately, computing the minimum CDS is a NP problem; hence, many protocols that build different approximations of the minimum CDS have been proposed.
+As part of this paper, we have implemented two of these CDS-based protocols.
 
-The first approach we implement is the well-know \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002}.
-In this protocol, each node computes its own set of multipoint relays.
-To do so, information regarding the 1-hop and 2-hops neighbors is required; hence, \textit{HELLO} messages containing such data are periodically sent.
-When a \textit{relay} node $n$ receives a messages, it computes its own multipoints relays ($\textit{MPR}(n)$), attaches it to the message and retransmits it to its neighbors.
-Then, a neighbor of $n$ retransmits the message if it belongs to $\textit{MPR}(n)$.
-This kind of strategy where the relays are selected during the broadcasting process is \textit{source-dependent}.
+The first approach we implement is the well-known \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002}.
+In this prococol, the flooding operation proceed as follows: i) each node $n$ computes a set $\textit{MPR}_n \subset \textit{Neighbors}_n$ (refers to ~\cite{Qayyum2002} for a detailed description); ii) when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$; iii) before retransmitting a message, a node $m$ computes its own $\textit{MPR}_m$, attaches it to the message and only them retransmits the message to its neighbors.
+The aforementioned $\textit{MPR}_n \subset \textit{Neighbors}_n$ is an approximation of the CDS in the vicinity of $n$.
+To compute it, a node uses information from its 1 and 2 hops neighbors; hence, \textit{HELLO} messages containing such data are periodically sent.
+Finally, it is worth noticing that this is \textit{source-dependent}, meaning that the relays selected during the broadcast process vary depending on the initial source of the message.
 
-
-\begin{enumerate}
-	\item A node $w$ is in $MPR(v)$ if it is the only member of $N(v)$ that is neighbor of some node in $N^2(v)$.
-	\item While there exists a node $w \in N^2(v)$ which is not covered by a node in $MPR(v)$: select the node $z \in N(v)$, but not in $MPR(v)$, that covers more uncovered nodes in $N^2(v)$. Add $w$ to $MPR(v)$.
-\end{enumerate}
+%\begin{enumerate}
+%	\item A node $w$ is in $MPR(v)$ if it is the only member of $N(v)$ that is neighbor of some node in $N^2(v)$.
+%	\item While there exists a node $w \in N^2(v)$ which is not covered by a node in $MPR(v)$: select the node $z \in N(v)$, but not in $MPR(v)$, that covers more uncovered nodes in $N^2(v)$. Add $w$ to $MPR(v)$.
+%\end{enumerate}
 
 
-Wu et al. propose \textit{node-degree-based} rules to reduce the size of the connected dominating set~\cite{Wu2001}. Observe that to broadcast a message it is not necessary to apply all rules -- rule 1 is enough. Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$. The rules proceed as follows:
+
+The second approach we implement proposes a set of \textit{node-degree-based} rules to build a good approximation of the minimum CDS~\cite{Wu2001}.
+A rule decides if a node that belongs to the CDS remains in that set or it must be removed from it.  
+The mechanism proposed can be seen as a pipeline of rules where only the first one is mandatory.
+That is, succesive rules are used to improve an intitial approximation of the minimum CDS.
+As usual with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
+As example of rules, we present the first two proposed in~\cite{Wu2001}.
+Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$:
 
 \begin{enumerate}
 	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \textit{and} \quad w \notin N(w)$.
@@ -72,7 +79,7 @@ Wu et al. propose \textit{node-degree-based} rules to reduce the size of the con
 	
 \end{enumerate} 
 
-In addition we can further refine the connected dominating sets using another rule. Various refinements can be found in~\cite{Wu2001}.
+%In addition we can further refine the connected dominating sets using another rule. Various refinements can be found in~\cite{Wu2001}.
 %\inti{I would stop here and just put a reference, but here it is if you believe it is worth using it}
 %Given $u$ and $w$, two marked neighbors of $v$. We unmarked $v$ if one of the following conditions holds:
 %\begin{itemize}
