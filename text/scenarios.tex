@@ -8,12 +8,60 @@
 \label{sec:scenarios}
 \changed{
 %
-Our experimental scenarios are built considering three variables typically found in MANETs: construction of a network of nodes, power consumption of mobile devices and message dissemination while nodes move or remain static.
+Our experimental scenarios are built considering three variables found in MANETs: power consumption of mobile devices, message dissemination while nodes move or remain static and construction of networks of nodes.
 %
-Our inspiration came from a real life scenario: \textit{protest march}, where these three variables take place, people uses their mobile phones to communicate and message dissemination to all participants is critical. Additionally, we are interested in proposing a benchmark of metrics to evaluate the performance of broadcasting protocols.
+Our inspiration came from a real life scenario: \textit{protest march}, where these three variables take place, people uses their mobile phones to communicate and message dissemination to all participants is critical.
 %
+Furthermore, we are interested in proposing a benchmark to evaluate the performance of broadcasting protocols.
+%
+More details about the broadcasting metrics we chose are given in section \ref{sec:evaluation}.
 }
 
+\subsection*{Power consumption}
+\changed{
+Efficient utilization of energy in wireless communication must be taken into consideration and power consumption highly depends on the Wi-Fi chip used by mobile devices.
+%
+We chose the power consumption model of the chip Broadcom BCM4329, which is found in modern mobile devices, Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different modes.
+%
+Additionally, this chip supports the protocol Wi-Fi 802.11g on the 2.4 GHz band~\cite{BCM4329}.
+}
+
+\deleted{
+%
+To evaluate the effect of each broadcasting algorithm in terms of power consumption, we need a model representing the consumption of actual devices.
+%
+ the chip we use in this paper to model the power consumption of a real device that in compliance with 802.11g.
+ %
+This chip can be found in smart phones and other handhelds.
+}
+\begin{table}[ht]
+\footnotesize
+\centering
+	
+\begin{tabular}{lcr}
+\textbf{Mode} & \textbf{Unit} & \textbf{Consumption} \\
+
+\midrule
+%Off	  & nW & 57.6 \\
+Sleep & nW & 648 \\
+Receiver Listen & mW & 244.8 \\
+Receiver Active (RX) & mW & 295.2 \\
+Transmitter Active (TX) & mW & 1206 \\
+\end{tabular}
+
+\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
+\label{tbl:wifi-chip}
+\end{table}
+
+To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
+%
+This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
+%
+Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operational modes of the \textit{receiver} and \textit{transceiver}, respectively.
+%
+INET then computes the energy consumption with the integral equation as follows:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$. Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
+
+\raziel{Proposal (\ref{sec:scenarios}): instead of talking about technical details, here we most describe our use cases and the models involved in without talking about the simulation tool. Simulation details will be reused in a section below}
 
 \deleted{
 To perform the simulations we use OMNET++ 4.6 plus INET 3.3. By doing so we can rely on widely tested models of energy consumption and 802.11g wireless communication~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
@@ -26,7 +74,7 @@ Finally, using OMNET++ we can collect a wide range of statistics regarding the s
 In the rest of this section, we discuss how we collect the data to feed the INET models used in the simulations.
 }
 
-\raziel{Proposal (\ref{sec:scenarios}): instead of talking about technical details, here we most describe our use cases and the models involved in without talking about the simulation tool. Simulation details will be reused in a section below}
+
 \subsection*{
 \deleted{Topology generation using Random Geometric Graphs}
 \changed{Network Construction through Disk Graphs}
@@ -83,63 +131,27 @@ In selecting the values for $n$ and $d$ we take into account the values used in 
 \changed{
 Mobility of nodes in our simulations follow a Levy Walk (LW) model to characterize routing performance of networks where humans carry mobile devices~\cite{Rhee:2011}.
 %
-This truncated LW model approximates how humans move (frequent short walks and occasional long rides to distant locations) and does not take into account obstacles, i. e., when there is an obstacle for every pair of movements, these movements are linked. The authors of this study stated that unique performance characteristics were found for MANETs but they do not report these results.
+This truncated LW model approximates how humans move (frequent short walks and occasional long rides to distant locations) and does not take into account obstacles, i. e., when there is an obstacle for every pair of movements, these movements are linked.
+%
+The authors of this study stated that unique performance characteristics were found for MANETs but they do not report these results.
 %
 \raziel{here it could be nice to show two or three samples of nodes movements as shown in the mobility model paper. Justify that it is not our intention to cope with obstacles}
-%
-
-
-%
-
-%
-
-%
-
-%
 }
+\deleted{
 A parameter we consider in this paper is the mobility of devices. 
 To look at its effect, we simulate the movement of devices' carriers by generating mobility traces using an implementation of the Truncated-Levy Walks mobility model~\cite{Rhee:2011}.
-This model emulates the ways humans moves when they are mostly walking. That is, frequent short walks to nearby locations, and occasional long rides to distant locations. 
+This model emulates the ways humans moves when they are mostly walking. That is, frequent short walks to nearby locations, and occasional long rides to distant locations.}
+
 Since the implementation of the model that we use is unit-agnostic, we enforce the right walking speed by tying it to the previously mentioned transmission range $tx$.
 The preferred walking speed of human is, by some estimations, around $1.4$m/s~\cite{Browning390}.
 Combining this information with the fact that WiFi networks have a range up to 30-100 meters depending on the line of sight~\cite{??}, we set $tx=30$ and configure the parameters of the truncated-levy walk model to generate traces with an average speed of $1.4$. \inti{I cannot find a descent reference for the range of Wifi}
 In other words, we are considering an environment with many obstacles and people walking at a \textit{normal} speed.
 
-\subsection*{Power consumption}
-\changed{
-Power consumption
-}
-To evaluate the effect of each broadcasting algorithm in terms of power consumption, we need a model representing the consumption of actual devices.
-Table~\ref{tbl:wifi-chip} shows the relevant data for the BCM4329~\cite{BCM4329}; the chip we use in this paper to model the power consumption of a real device that in compliance with 802.11g.
-This chip can be found in smart phones and other handhelds.
 
-\begin{table}[ht]
-\footnotesize
-\centering
-	
-\begin{tabular}{lcr}
-\textbf{Mode} & \textbf{Unit} & \textbf{Consumption} \\
-
-\midrule
-%Off	  & nW & 57.6 \\
-Sleep & nW & 648 \\
-Receiver Listen & mW & 244.8 \\
-Receiver Active (RX) & mW & 295.2 \\
-Transmitter Active (TX) & mW & 1206 \\
-\end{tabular}
-
-\caption{Power consumption of the BCM4329. A Wi-FI chip used in modern mobile devices.}
-\label{tbl:wifi-chip}
-\end{table}
-
-To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
-This model simply measures the consumption taking into account how much time the chip/radio spends in different operation modes (e.g., as in Table~\ref{tbl:wifi-chip}).
-Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip in each mode, and $r_m, t_m$ are functions mapping from simulation time to the operation modes of the \textit{receiver} and \textit{transceiver}.
-INET then computes the energy consumption using $\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
-To do so, we provide the function $m$ and INET computes both $r_m$ and $t_m$ during the simulation.
   
 % and use it to along the data in Table~\ref{tbl:wifi-chip} to compute the consumption.
-
+\raziel{Given that in this section just the experimental scenario is described, I think that the broadcasting metrics and its explanation must be given at the Evaluation. If you guys consider that section for is an appropriate place, then I have to change the introduction and add that part; for the moment this final part is left with a deleted tag}
+\deleted{
 \subsection*{Broadcasting Metrics}
 
 \subsection*{Configuration of the experiments}
@@ -174,3 +186,4 @@ In this section we discuss the parameters used for each protocol.
 		\item Number of executions
 	\end{itemize}
 \end{itemize}
+}
