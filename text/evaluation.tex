@@ -7,7 +7,19 @@
 \subsection{Experimental Setup}
 \label{sub:setup}
 
-\subsubsection*{Performance Metrics}
+
+For our performance comparison, we use OMNET++4.6/INET3.3, a simulation framework specifically aimed at networking algorithms.
+%
+This tool provides models of many protocols of the network stack such as UDP, ARP, MAC, 802.11g wireless communication and energy consumption ~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+%
+In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation.
+%
+Finally, using OMNET++ we can also collect a wide range of statistics regarding the simulation.
+%
+In the following, we describe the simulation environment and the parameters used. 
+
+
+\subsection{Performance Metrics}
 
 \paragraph{\textbf{Saved rebroadcasts}}
 is the number of messages that the network do not send thanks to the use of a particular broadcast algorithm.
@@ -47,17 +59,6 @@ For instance, we use 0.5 seconds as the \textit{hello time} for both \textit{MPR
 In the case of \textit{ABBA}, we use 0.6 seconds as the maximum waiting time.
 Finally, for \textit{ProbFlood} we assign the values $k=$, $\sigma$, and \textit{hello time} = 0.5.
 
-\subsubsection*{Simulation Tools}
-
-To perform the simulations, we use OMNET++ 4.6 and INET 3.3.
-%
-These tools provide models of many protocols of the network stack such as UDP, ARP, MAC, 802.11g wireless communication and energy consumption ~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
-%
-In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation.
-%
-All this helps to make the simulation more realistic.
-%
-Finally, using OMNET++ we can collect a wide range of statistics regarding the simulation.
 
 
 
