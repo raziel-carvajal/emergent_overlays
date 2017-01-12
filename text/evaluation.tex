@@ -18,6 +18,20 @@ In the following, we describe the simulation environment and the parameters used
 
 \subsubsection*{Communication Scenario}
 
+Our experiments are inspired by the scenario discussed in Section~\ref{sec:scenarios}.
+%
+In this scenario, attendees have a mobile device with IEEE 802.11 capability.
+%
+Many participants might attempt to broadcast messages at nearly the same time using a MANET.
+%
+Taking this into consideration, in our performance comparison  we set the number of broadcast messages to 300 and the interval among messages to the values $0.01$ and $0.5$ seconds, which are less than the speed of moving nodes.
+%
+These two values allow us to evaluate the protocols under heavy and light network load.
+%
+Since some algorithms build a topology to drive the flooding operation, there is a warm-up period before the first message is broadcasted that protocols can use to create any initial structure.
+%
+Finally, in our evaluation we stop each experiment a fixed amount of time after the beginning of the last flooding operation.
+
 \subsubsection*{Density}
 
 \subsubsection*{Mobility}
@@ -30,7 +44,7 @@ In our context, we define two scenarios: with mobility at walking speed and with
 %
 We set the parameter of our LW model in such a way that the average walking speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
 %
-To so, we use the following values:
+To do so, we use the following values:
 
 \begin{table}[ht]
 	\footnotesize
@@ -50,8 +64,9 @@ To so, we use the following values:
 	\label{tbl:mobility-parameters}
 \end{table}
 
+Afterwards, we check the trace to guarantee that the average speed of the mobility traces is indeed close to $1.4m/s$ and that the topology remains connected all the time.
 
-\subsection*{Energy Consumption}
+\subsubsection*{Energy Consumption}
 
 
 \subsubsection*{Configuration of the protocols}
