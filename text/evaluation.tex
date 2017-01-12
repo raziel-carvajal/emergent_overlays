@@ -10,14 +10,25 @@
 
 For our performance comparison, we use OMNET++4.6/INET3.3, a simulation framework specifically aimed at networking algorithms.
 %
-This tool provides models of many protocols of the network stack such as UDP, ARP, MAC, 802.11g wireless communication and energy consumption ~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+This tool provides models of many protocols of the network stack such as MAC, 802.11g wireless communication and energy consumption ~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
 %
-In addition, it contains models to describe and deal with mobility and other physical aspects of the simulation.
-%
-Finally, using OMNET++ we can also collect a wide range of statistics regarding the simulation.
+In addition, it contains models to describe and deal with the mobility aspect.
 %
 In the following, we describe the simulation environment and the parameters used. 
 
+\subsubsection*{Communication Scenario}
+
+\subsubsection*{Density}
+
+\subsubsection*{Mobility}
+
+\subsubsection*{Configuration of the protocols}
+
+The behavior of each protocol depends on the values of its parameters.
+To configure these parameters in a meaningful way, we choose values previously reported in the literature.
+For instance, we use 0.5 seconds as the \textit{hello time} for both \textit{MPR} and \textit{node-degree-based} CDS.
+In the case of \textit{ABBA}, we use 0.6 seconds as the maximum waiting time.
+Finally, for \textit{ProbFlood} we assign the values $k=$, $\sigma$, and \textit{hello time} = 0.5.
 
 \subsection{Performance Metrics}
 
@@ -49,15 +60,6 @@ In other words, this metric cannot be analyzed in isolation; instead, we should 
 
 \paragraph{\textbf{Energy consumption}}
 is the energy consumed for each node during the experiment.
-
-
-\subsubsection*{Configuration of the protocols}
-
-The behavior of each protocol depends on the values of its parameters.
-To configure these parameters in a meaningful way, we choose values previously reported in the literature.
-For instance, we use 0.5 seconds as the \textit{hello time} for both \textit{MPR} and \textit{node-degree-based} CDS.
-In the case of \textit{ABBA}, we use 0.6 seconds as the maximum waiting time.
-Finally, for \textit{ProbFlood} we assign the values $k=$, $\sigma$, and \textit{hello time} = 0.5.
 
 
 
