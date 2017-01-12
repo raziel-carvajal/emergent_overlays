@@ -9,7 +9,7 @@ Leaders of the industry, such as Cisco, predict that there will be 25 billion de
 The goal of IoT is not really to enable users to interact with everything.
 Instead, it is more about cross-linking objects to promote machine-to-machine interactions.
 These interactions enable the massive capture and/or distribution of data that can be turned into information and delivered to end-users to improve their interaction with their social and environmental context.
-\laurent{This first paragraph should be moved backward in the Introduction. We can start this section with the following one.}
+\laurent{The previous paragraph should be moved backward in the Introduction. We can start this section with the following one.}
  
 IoT has led to a strong revival of interest in how to disseminate and collect data in mobile ad-hoc networks (MANET).
 In such a network, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus leading to temporary disconnections.
@@ -27,50 +27,43 @@ Because each node retransmits every received message, the number of redundant re
 
 Because of the broadcast storm problem, designing a broadcasting algorithm for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of network coverage, which is the percentage of nodes that receive a message, and (ii) minimizing the amount of resources used when a broadcast operation is performed.
 As a consequence, broadcasting algorithms attempt to reduce the number of nodes retransmitting a message to the minimum required to reach an acceptable coverage.
-This avoids energy depletion of nodes than run on batteries, and thus improves the overall network life time.
+This avoids energy depletion of nodes than run on battery, and thus improves the overall network life time.
 In practice, however, it is hard to decide which nodes should retransmit a message.
 
 
 For instance, the lack of a central authority in MANETs implies that the algorithms must be fully distributed and rely only on \textit{local} data available on each node.
 In addition, they must take into account a variety of parameters such as the mobility patterns of the nodes and their heterogeneous characteristics (type of antenna, battery capacity \dots).
-Many different techniques have been proposed for efficient message dissemination based on local data along with some heuristics. 
-\laurent{This seems too specific to context-aware class. I guess that a topology-based algo does not need local data to decide.}
+Many different algorithms 	have been proposed so far for efficient message dissemination based on local data along with some heuristics. 
+The choice of a specific broadcast algorithm depends on its expected coverage and energy cost, but is also highly impacted by its deployment context.
+%
 
-Among them, the most relevant existing algorithms can be classified in three  classes depending on their behavior in terms of reliability and resource consumption~\cite{Ruiz2015}.
-
-\laurent{I am here but I do not understand the classification, why do you say 3 classes. I see only 2. And I think they are not exclusives, so classes may not be adequate as adjective }
-
-\paragraph{Protocols:}
-From the root of the taxonomy to the protocol. The references are in Section V.
-\begin{enumerate}
-	\item No topology -- Fixed Range -- Context-aware -- Area Based --  \textbf{Abba}
-	\item Underlaying topology -- Fixed Range -- CDS -- \textbf{MPR}
-	\item No topology -- Fixed Range -- Context-Oblivious -- \textbf{Simple-flooding}
-	\item Underlaying topology -- Fixed Range -- CDS -- \textbf{node-degree-based}
-	\item No topology -- Fixed Range -- Context-aware -- Probabilistic/counter-based -- \textbf{ProbFlooding}
-	\item No topology -- Fixed Range -- Context-aware -- Area Based -- \textbf{dist2mean}
-\end{enumerate}
-
-The probabilistic flooding is a mix of two approaches. There are two branches in the last level. They don't make the distinction in the survey, but it is clear when you read the paper.
-
-I also made a mistake, we have two area-based and no counter-based alone. 
-
-
-\paragraph{topology-based algorithms}
-
-A large family is composed by algorithms that build and use an \textit{underlaying topology} (or backbone) to drive the broadcast operation.
-This underlaying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcasting.
+Recently, Ruiz et al.~\cite{Ruiz2015} performed a survey on broadcasting algorithms for MANETs.
+They defined a  taxonomy to classify most current state of the art algorithms based on their main characteristics. 
+%
+However, to the best of our knowledge, there is a lack of comprehensive comparison of these costs and effectiveness. 
+%
+To overcome this lack, we perform an experimental study of six protocols, representative of the principal design alternatives.
+%
+For the sake of clarity, we consider in this study only protocols in which the antenna transmission range is fixed. 
+%
+These protocols rely mainly on two different approaches: using or not an underlying topology. 
+	 
+\subsection{Underlying topology}
+	 
+Many algorithms build and use an \textit{underlying topology} (or backbone) to drive the broadcast operation.
+This underlying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcasting.
 For instance, Figure~\ref{fig:explaining-backbone}a depicts a small network.
 Considering the transmission range of each node, we can build an underlying topology as shown in Figure~\ref{fig:explaining-backbone}b.
 It is easy to show that to reach full network coverage during broadcasting, it is sufficient that only the nodes in the backbone retransmit messages upon reception~\cite{Wu2001}.
 The backbone depicted in Figure~\ref{fig:explaining-backbone}b is a connected dominating set (CDS).
 In using this kind of backbone, nodes are partitioned in such a way that they either belong to the CDS or are directly connected to a node in the CDS.
 The second property of this backbone is that all nodes in the CDS must be connected.
-This kind of underlaying topology is widely used due to its efficiency and to the fact that it is relatively easy to build.
-However, there are others types of underlaying topologies such as \textit{trees} and \textit{clusters} that we are not discussing in this paper~\cite{Ruiz2015}.
 
+This kind of underlying topology is widely used due to its efficiency and relative simplicity to build.
+We thus consider two protocols that refer to this category: node-degree and MPR.
+\laurent{describe the algo by moving what is in the related work section}
 
-\begin{figure*}[t!]
+\begin{figure*}[htb]
 	\centering
 	\subfigure[Communication range with omnidirectional antennas ]{\label{fig:a}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_a.pdf}}
 	~
@@ -79,22 +72,51 @@ However, there are others types of underlaying topologies such as \textit{trees}
 	\label{fig:explaining-backbone}
 \end{figure*}
 
-\paragraph{\textit{context-aware} algorithms}
 
-Another important family is known as \textit{context-aware} algorithms.
-The members of this family look at their local \textit{context} to decide if a node should retransmit a message.
+\subsection{No underlying topology}
+
+In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible. 
+Thus, many protocols do not rely on any underlying topology. 
+Instead, they use context information to decide how to forward broadcast messages. 
+
+\paragraph{Context-aware}
+
+Some protocols use their local \textit{context} to decide if a node should retransmit a message.
 For instance, nodes can consider, among other, the number of neighbors, their speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last message received.
-As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.
+As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.\laurent{not sure to get it}
+
+\laurent{Explain and refer the following protocols}
+\begin{enumerate}
+	
+	\item Area Based --  \textbf{Abba}
+	\item Area Based -- \textbf{dist2mean}
+	
+	\item Probabilistic/counter-based -- \textbf{ProbFlooding}
+		
+\end{enumerate}
+
+\paragraph{Context-Oblivious}
+ -- \textbf{Simple-flooding}
+
+
+%The probabilistic flooding is a mix of two approaches. There are two branches in the last level. They don't make the distinction in the survey, but it is clear when you read the paper.
 In opposition to the \textit{context-aware} family, there are also \textit{context-oblivious} algorithms that do not build a backbone.
 The advantages of this strategy are that they are easy to implement and are reliable in most situations.
 The downside is that they often waste resource both in terms of energy and network bandwidth.
+\laurent{do not understand what you try to explain}
 
-This diversity of approaches to perform the broadcast operation is a challenge for engineers because it is hard to choose an algorithm.
-One of the problems is that most algorithms are often devised to target specific operation conditions, neglecting their evaluation in other scenarios.
-Moreover, despite of targeting MANETs, many studies don't consider important variables such as mobility and energy consumption.
-A last factor that further complicates assessing the merit of algorithms is that frequently they have only been compared against members of their own family.
-Since these limitations exists, we think it is important to compare algorithms from different families under the same conditions.
-We think that, contrary to previous studies where an algorithm outperforms all others, 
-the best fit for different scenarios often differ.
-That is it, there is no one size fit all.
-In the next Section, we discuss in details the characteristics and limitations of previous comparison studies on broadcast algorithms.
+
+
+The diversity of  approaches to perform the broadcast operation is a challenge for engineers because it complicates the choice of the protocol to use.
+%
+Although evaluation have been proposed to compare existing approaches, they usually target well defined operational conditions preventing them to be useful in other contexts.
+%
+Moreover, despite of targeting MANETs, many studies do not consider important parameters such as mobility and energy consumption.
+%
+In addition, existing evaluation mostly focus on protocols that share some common characteristics and do not reflect the diversity that exists. 
+%
+In this work, we define an experimental framework to fairly assess representative algorithms  for broadcast in MANETs. 
+%
+Our study reveals that the best algorithm for a given situation, such as a high density and a stable network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+%
+In the next section, we discuss in details the characteristics and limitations of previous comparison studies on broadcast algorithms.
