@@ -22,6 +22,38 @@ In the following, we describe the simulation environment and the parameters used
 
 \subsubsection*{Mobility}
 
+In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
+%
+This model generates traces composed of frequent short walks and occasional long rides to distant locations.
+%
+In our context, we define two scenarios: with mobility at walking speed and without mobility.
+%
+We set the parameter of our LW model in such a way that the average walking speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
+%
+To so, we use the following values:
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lcp{3.5cm}}
+		\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+		
+		\midrule
+		FL\_EXP & -3.9 & Exponent of the flight length distribution \\
+		FL\_MAX & 50 & Maximum value of the flight length distribution \\
+		WT\_EXP & -1.8 & Exponent of the waiting time distribution \\
+		WT\_MAX & 100 & Maximum value of the waiting time distribution \\
+	\end{tabular}
+	
+	\caption{Configuration of the LW mobility model.}
+	\label{tbl:mobility-parameters}
+\end{table}
+
+
+\subsection*{Energy Consumption}
+
+
 \subsubsection*{Configuration of the protocols}
 
 The behavior of each protocol depends on the values of its parameters.
