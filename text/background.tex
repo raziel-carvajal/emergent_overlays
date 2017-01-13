@@ -2,26 +2,18 @@
 
 \section{Motivations}
 \label{sec:background}
-
-With the rise of what we call the Internet of Things (IoT), both the number and the diversity of connected devices is staggering.
-We are entering in a new era where all objects of our daily life, from mobile to wearable devices, can be interconnected.
-Leaders of the industry, such as Cisco, predict that there will be 25 billion devices connected together by 2015 and 50 billion by 2020.
-The goal of IoT is not really to enable users to interact with everything.
-Instead, it is more about cross-linking objects to promote machine-to-machine interactions.
-These interactions enable the massive capture and/or distribution of data that can be turned into information and delivered to end-users to improve their interaction with their social and environmental context.
-\laurent{The previous paragraph should be moved backward in the Introduction. We can start this section with the following one.}
  
-IoT has led to a strong revival of interest in how to disseminate and collect data in mobile ad-hoc networks (MANET).
+IoT has led to a strong revival of interest in how to disseminate and collect data in MANETs.
 In such a network, nodes are moving around, randomly appearing or disappearing, causing frequent changes in the network topology, and thus leading to temporary disconnections.
 Over the last decade, many algorithms have emerged to either control, adapt or maintain the topologies of such networks.
 These advances have made MANET a key enabler for connecting anything at anytime.
 However, determining which algorithm to leverage on to build an IoT application that provides the best trade-off among low latency, low energy consumption, and fault tolerant properties, remains a challenging endeavour.
 
-Most of network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcasting operation} which consists in delivering a message from a source node to all other nodes in a network.
-A straight-forward approach to broadcast is by \textit{flooding}.
-A host, on receiving a broadcast message for the first time, has the obligation to rebroadcast the message to its neighbors. 
+As previously mentioned, many of network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation}.
+A straight-forward approach to broadcast is \textit{blind flooding}.
+A host, on receiving a broadcast message, has the obligation to rebroadcast the message to its neighbors. 
 Although simple, this approach suffers from a number of  drawbacks known as the \textit{broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
-Because each node retransmits every received message, the number of redundant rebroadcasts becomes high. In addition, since they they do so \textit{via} radio waves and the transmission range of different nodes tend to overlap, the communication medium becomes rapidly saturated. Collisions are more likely to occur and cause more damage. In other words, both network bandwidth and energy are wasted. 
+Because each node retransmits every received message, the number of redundant rebroadcasts becomes high. In addition, since they do so \textit{via} radio waves and the transmission range of different nodes tend to overlap, the communication medium becomes rapidly saturated. Collisions are more likely to occur and cause more damage. In other words, both network bandwidth and energy are wasted. 
 
 
 
@@ -32,13 +24,16 @@ In practice, however, it is hard to decide which nodes should retransmit a messa
 
 
 For instance, the lack of a central authority in MANETs implies that the algorithms must be fully distributed and rely only on \textit{local} data available on each node.
+%
 In addition, they must take into account a variety of parameters such as the mobility patterns of the nodes and their heterogeneous characteristics (type of antenna, battery capacity \dots).
-Many different algorithms 	have been proposed so far for efficient message dissemination based on local data along with some heuristics. 
+%
+Many algorithms have been proposed so far for efficient message dissemination based on local data along with some heuristics. 
+%
 The choice of a specific broadcast algorithm depends on its expected coverage and energy cost, but is also highly impacted by its deployment context.
 %
 
 Recently, Ruiz et al.~\cite{Ruiz2015} performed a survey on broadcasting algorithms for MANETs.
-They defined a  taxonomy to classify most current state of the art algorithms based on their main characteristics. 
+They defined a  taxonomy to classify most current state-of-the-art algorithms based on their main characteristics. 
 %
 However, to the best of our knowledge, there is a lack of comprehensive comparison of these costs and effectiveness. 
 %
