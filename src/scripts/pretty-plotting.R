@@ -136,7 +136,8 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 	  dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	cn <- s[which(s == "p") + 1]
+      cn <- as.character(s[which(s == "p") + 1])
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
 			data <-e[,1]
       den <-rep(as.factor(paste("Density", density)), length(data))
 			data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
@@ -204,8 +205,9 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
      else
        labs(fill="Algorithms")
      ) +
-     theme(axis.title.x=element_blank()) +
+     theme(axis.title.x=element_blank(),axis.text.x = element_text(angle = 30, hjust = 1)) +
      get.plot.theme.style()
+
 
 	print(p)
 }
@@ -291,6 +293,7 @@ plot.duplicated.messages <- function(df, densities) {
 plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "Saved Rebroadcasts"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
+  df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   caption <- "Saved rebroadcasts"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
@@ -312,6 +315,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
 plot.simple.coverage <- function(df, algos) {
   ylabel <- "Coverage"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
+  df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
