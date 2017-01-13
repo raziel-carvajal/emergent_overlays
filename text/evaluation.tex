@@ -34,6 +34,39 @@ Finally, in our evaluation we stop each experiment a fixed amount of time after 
 
 \subsubsection*{Density}
 
+We use three parameters to characterize the density of the network: the transmission range, the map size and the number of nodes.
+%
+As shown in~\cite{Penrose2003}, there is dependency relationship between these parameters that is captured by the theory of random geometric graphs and allows us to build network topologies with a given density.
+%
+In our experiments, all nodes have a transmission range of 20m. \footnote{
+	Theoretically, IEEE 802.11 devices allow communication in a range between 20 and 140 meters depending on the line of sight.
+	Previous empirical tests show that it can effectively be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
+while the number of nodes in the network is 200.~\footnote{comment on this number}
+%
+To vary the node density, we simply vary the map size but keep it as squared map.
+%
+Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{ll}
+		\textbf{Parameter} & \textbf{Setting} \\
+		
+		\midrule
+		Number of Nodes & 200 \\
+		Transmission Range & 20 m \\
+		Min. Map Size & 224 m x 224 m \\
+		Max. Map Size & 79 m x 79 m \\
+		Densities & 5--40 \\
+	\end{tabular}
+	
+	\caption{Simulations parameters affecting node density.}
+	\label{tbl:densisty-parameters}
+\end{table}
+
+
 \subsubsection*{Mobility}
 
 In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
