@@ -8,9 +8,9 @@
 \subsection*{Topology-free protocols}
 We discuss in Section~\ref{sec:background} that some protocols require no contextual information nor a topology to perform the flooding operation.
 A well-known algorithm with this property is \textit{simple flooding}, in which a node retransmits a message upon receiving it for the first time.
-This is a straghforward algorithm that belong to the family of \textit{context-oblivious} protocols.
+This is a straightforward algorithm that belong to the family of \textit{context-oblivious} protocols.
 In addition to \textit{simple flooding}, in this paper we also implement two other protocols that do not require the construction of a topology.
-These algortihms are briefly presented hereafter.
+These algorithms are briefly presented hereafter.
 
 In~\cite{Ovalle-Martinez2006}, the authors propose the \textit{Area-based beaconles protocol} (ABBA).
 This is a \textit{context-aware} algorithm in which the flooding process is controlled in both space and time.
@@ -24,13 +24,13 @@ When a timer expires, the message is retransmitted by the node.
 We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{Cartigny:2003:BNR:2727141.2727459}.
 In this \textit{context-aware} protocol, a node retransmits a message with a probability that depends on two contextual values.
 The first value is the number of neighbors a node has.
-In using this value, the function used to compute the probability of retransmitting a message decreases as the number of neighbors increases.
+In using this value, the function used to compute the probability of retransmitting a message decreases as the local density increases.
 The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
 This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless the density.
 The second contextual value taken into account is the gain in terms of new area that a node covers when it retransmits the message.
 In this case, the motivation is the same as in ABBA; hence, the larger the new area to cover the higher the probability of sending a message. 
 Combining these two values the authors propose a protocol that delivers almost 100\% coverage with relatively low number of relay nodes.
-However, although the protocol requires both \textit{HELLO} messages and piggybacking of information in the broadcast messages, no experiment is presented to discuss important parameters such energy consumption. 
+However, although the protocol requires both \textit{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
 
 
 \subsection*{Topology-based protocols}
@@ -49,7 +49,7 @@ Unfortunately, computing the minimum CDS is a NP problem; hence, many protocols 
 As part of this paper, we have implemented two of these CDS-based protocols.
 
 The first approach we implement is the well-known \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002}.
-In this prococol, the flooding operation proceed as follows: i) each node $n$ computes a set $\textit{MPR}_n \subset \textit{Neighbors}_n$ (refers to ~\cite{Qayyum2002} for a detailed description); ii) when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$; iii) before retransmitting a message, a node $m$ computes its own $\textit{MPR}_m$, attaches it to the message and only them retransmits the message to its neighbors.
+In this protocol, the flooding operation proceed as follows: i) each node $n$ computes a set $\textit{MPR}_n \subset \textit{Neighbors}_n$ (refers to ~\cite{Qayyum2002} for a detailed description); ii) when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$; iii) before transmitting a message, a node $m$ computes its own $\textit{MPR}_m$, attaches it to the message and only them retransmits.
 The aforementioned $\textit{MPR}_n \subset \textit{Neighbors}_n$ is an approximation of the CDS in the vicinity of $n$.
 To compute it, a node uses information from its 1 and 2 hops neighbors; hence, \textit{HELLO} messages containing such data are periodically sent.
 Finally, it is worth noticing that this is \textit{source-dependent}, meaning that the relays selected during the broadcast process vary depending on the initial source of the message.
@@ -64,7 +64,7 @@ Finally, it is worth noticing that this is \textit{source-dependent}, meaning th
 The second approach we implement proposes a set of \textit{node-degree-based} rules to build a good approximation of the minimum CDS~\cite{Wu2001}.
 A rule decides if a node that belongs to the CDS remains in that set or it must be removed from it.  
 The mechanism proposed can be seen as a pipeline of rules where only the first one is mandatory.
-That is, succesive rules are used to improve an intitial approximation of the minimum CDS.
+That is, successive rules are used to improve an initial approximation of the minimum CDS.
 As usual with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
 As example of rules, we present the first two proposed in~\cite{Wu2001}.
 Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$:
