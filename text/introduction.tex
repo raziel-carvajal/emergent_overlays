@@ -57,7 +57,14 @@ We propose to explore the relative performance and costs of representative MANET
 
 
 
-Our study considers five protocols, in addition to the simple flooding algorithm, that are representative of their class:
+In addition to the \textit{simple flooding} algorithm, our study considers five protocols that are representative of their class:
+\begin{itemize}
+	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
+	\item \textit{MPR}, a well-known algorithm that maintains an overlay structure to control the broadcasting process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
+	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum CDS. This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
+	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density of each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
+	\item \textit{Dist2Mean}
+\end{itemize}
 
 \er{This is a proposal for an introduction structure, to be discussed}
 
@@ -83,11 +90,11 @@ Our study considers five protocols, in addition to the simple flooding algorithm
 %	\item But the efficiency of protocols is also largely influenced by external factors, and primarily by the density of the network, and the mobility rate of its nodes. \er{not sure we should mention other aspects, such as the loosiness of channels, the presence of obstacles, etc.?}
 %	\item The relative efficiency of each of the broadcast protocols against the simple and inefficient flooding algorithm, where no control is performed on the flooding operation, has been studied but the relative performance of advanced protocols between them is largely unstudied
 %	\item We propose to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions.
-	\item Our study considers three \er{more?} protocols, in addition to the baseline flooding algorithm, that are representative of their class:
-	\begin{itemize}
-		\item ABBA controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the message will be received from its neighbors from other sources
-		\item CDS builds and maintain an overlay independently from dissemination, allowing to control the latter in space by selecting which node should or should not propagate incoming messages
-		\item MPR is another well-known algorithms that maintains an overlay structure to control the broadcasting process in space. This overlay is built using a heuristic that aims at minimizing the number of relay nodes required to reach full coverage.
-	\end{itemize}
+%	\item Our study considers three \er{more?} protocols, in addition to the baseline flooding algorithm, that are representative of their class:
+%	\begin{itemize}
+%		\item ABBA controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the message will be received from its neighbors from other sources
+%		\item CDS builds and maintain an overlay independently from dissemination, allowing to control the latter in space by selecting which node should or should not propagate incoming messages
+%		\item MPR is another well-known algorithms that maintains an overlay structure to control the broadcasting process in space. This overlay is built using a heuristic that aims at minimizing the number of relay nodes required to reach full coverage.
+%	\end{itemize}
 	\item Our study allows answering the question of what is the most appropriate protocol for a certain deployment scenario, and concludes that there is no one-size-fits-all in MANET broadcasting \er{provide summary of main findings}
 \end{itemize}
