@@ -314,7 +314,7 @@ if __name__ == '__main__':
             while True:
                 b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                                  map_x=int(w), map_y=int(h),
-                                                 sim_time=100, positions=topology,
+                                                 sim_time=200, positions=topology,
                                                  outputFile=filename,
                                                  test=get_still_connected_callback(trRan, idx_source))
                 if b:

@@ -235,7 +235,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
       y <- transformation(e[,1], nr.nodes)
       x <- 1:length(y)
       p <- data.frame( x = x, y = y )
-      # p <- lowess(x, y, f=1/3)
+      p <- lowess(x, y, f=1/10)
 			data.frame( dat = p$y,
 						alg = rep(cn, length(y)),
             idx = p$x,

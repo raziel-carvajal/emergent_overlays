@@ -187,7 +187,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   send_package(pkt);
 	                cancelAndDelete(msg);
 
-                  auto d =  par("wakeUpTime").doubleValue() + nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 3;//some extra seconds
+                  auto d =  par("wakeUpTime").doubleValue() + nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 5;//some extra seconds
 
                   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
                 }
