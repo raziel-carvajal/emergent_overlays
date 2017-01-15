@@ -180,23 +180,15 @@ For each broadcasting approach,  we present the results for several scenarios as
 To do so, we present the results for each metric with and without mobility.
 %
 
-\subsubsection{Energy Consumption}  
+\subsubsection{Energy Consumption}
 
-
-\begin{figure*}[!ht]
+\begin{figure*}[htb]
 	\centering
-	\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}
-	\vspace{-0.5cm}
-	\caption{Power consumption when there is no mobility}
-	\label{fig:power-consumption-static}
-\end{figure*}
-
-\begin{figure*}[!ht]
-	\centering
-	\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}
-	\vspace{-0.5cm}
-	\caption{Power consumption with mobility}
-	\label{fig:power-consumption-mobility}
+	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}}
+	\caption{Energy consumption for different densities and mobility scenarios. Each box show the distribution of energy consumption for all the nodes in a scenario.}
+	\label{fig:energy-consumption}
 \end{figure*}
 
 
@@ -204,23 +196,35 @@ To do so, we present the results for each metric with and without mobility.
 \subsubsection{Coverage}
 
 
-\begin{figure*}[!ht]
+\begin{figure*}[htb]
 	\centering
-	\includegraphics[page=2, width=0.95\textwidth]{fig/results-static.pdf}
-	\vspace{-0.7cm}
-	\includegraphics[page=4, width=0.95\textwidth]{fig/results-static.pdf}
-	\vspace{-0.0cm}
-	\caption{Network usage when there is no mobility: a) number of saved rebroadcasts, b) number of duplicated messages}
-	\label{fig:network-usage-static}
+	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=2, width=0.45\textwidth]{fig/results-static-summary.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=2, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
+	\caption{Broadcast coverage for different scenarios: densities, mobility and broadcasting approaches.}
+	\label{fig:coverage}
 \end{figure*}
 
 
-\begin{figure*}[!ht]
+
+\subsubsection{Network bandwidth}
+
+
+\begin{figure*}[htb]
 	\centering
-	\includegraphics[page=2, width=0.95\textwidth]{fig/results-mobility.pdf}
-	\vspace{-0.7cm}
-	\includegraphics[page=4, width=0.95\textwidth]{fig/results-mobility.pdf}
-	\vspace{-0.0cm}
-	\caption{Network usage with mobility: a) number of saved rebroadcasts, b) number of duplicated messages}
-	\label{fig:network-usage-mobility}
+	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=1, width=0.45\textwidth]{fig/results-static-summary.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=1, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
+	\caption{Saved Rebroadcasts}
+	\label{fig:saved-rebroadcasts}
 \end{figure*}
+
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=4, width=0.90\textwidth]{fig/results-static.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=4, width=0.90\textwidth]{fig/results-mobility.pdf}}
+	\caption{Duplicated Messages}
+	\label{fig:duplicated-messages}
+\end{figure*}
+
