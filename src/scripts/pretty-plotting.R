@@ -28,6 +28,8 @@ get_arguments <- function() {
   parser$add_argument('-final', '--final-version', dest='final', action="store_true",
                       help='If used, the script generates a version good enough for the paper')
 
+  parser$add_argument('-ed', '--excluded-density', dest='excluded.densities', type='integer', action='append')
+
   # parser$print_help()
   parser$parse_args()
 }
@@ -134,13 +136,13 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   data.list <- lapply(densities, function(density) {
 	  dd <- df[grepl(paste("d", density, "tr", sep="_"), sapply(df, function(e) colnames(e) ))]
 	  dd <- lapply(dd, function(e) {
-			cn <- colnames(e)[1]
-			s <- unlist( strsplit(cn,'_'))
-      cn <- as.character(s[which(s == "p") + 1])
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
-			data <-e[,1]
-      den <-rep(as.factor(paste("Density", density)), length(data))
-			data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
+    	cn <- colnames(e)[1]
+    	s <- unlist( strsplit(cn,'_'))
+        cn <- as.character(s[which(s == "p") + 1])
+        cn <- toupper(gsub("[[:digit:]]", "", cn))
+		data <-e[,1]
+        den <-rep(as.factor(paste("Density", density)), length(data))
+		data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
 	  })
 	  dd <- unname(dd)
 	  data <- do.call("rbind", dd)
@@ -177,8 +179,8 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	cn <- as.character(s[which(s == "p") + 1])
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
+	  	    cn <- as.character(s[which(s == "p") + 1])
+            cn <- toupper(gsub("[[:digit:]]", "", cn))
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -188,6 +190,8 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 
 		do.call("rbind", dd)
 	})
+
+
 
 	data <- do.call("rbind", data.list)
 
@@ -264,7 +268,7 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
 
 plot.coverage.per.session <- function(data, densities) {
   plot.data.using.lines(data, densities,
-    "Coverage", "Coverage per session",
+    "Coverage (%)", "Coverage per session",
     function(d, nr.nodes) {
       d/rep(nr.nodes, length(d))*100
     }
@@ -313,21 +317,21 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
 plot.simple.coverage <- function(df, algos) {
-  ylabel <- "Coverage"
+  ylabel <- "Coverage (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
-     geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),   # Shape depends on cond
-               size = 4) +        # Large points
-		 theme(legend.position="bottom") +
-		 ylab(ylabel) + xlab("Density") +
-     (if (print.titles)
-		   labs(title=caption, colour="Algorithms", shape="Algorithms")
-     else
-       labs(colour="Algorithms", shape="Algorithms")
-     ) +
+         geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),   # Shape depends on cond
+                   size = 4) +        # Large points
+    		 theme(legend.position="bottom") +
+    		 ylab(ylabel) + xlab("Density") +
+         (if (print.titles)
+    		   labs(title=caption, colour="Algorithms", shape="Algorithms")
+         else
+           labs(colour="Algorithms", shape="Algorithms")
+         ) +
 		 get.plot.theme.style()
 
 	print(p)
@@ -339,11 +343,15 @@ plot.simple.coverage <- function(df, algos) {
 #
 # Extract metadata such as the protocols, the densities and a palette for plotting
 #
-extract.metadata <- function(data) {
+extract.metadata <- function(data, excluded.densities) {
   dfNames <- names(data)
   algos <- get.attrSet(dfNames, "p")
   densities <- as.numeric(unlist(get.attrSet(dfNames, "d")))
   densities <- densities[order(densities)]
+  f <- Vectorize(function(d) {  !(d %in% excluded.densities)  })
+  densities <- densities[f(densities)]
+  print (densities)
+  print("mierda")
   pal <- rainbow( length(algos) )
   names(pal) <- algos
   l <- list(algos, densities, pal)
@@ -351,11 +359,11 @@ extract.metadata <- function(data) {
   l
 }
 
-load.dataset.with.metadata <- function(path, filename, metadata) {
+load.dataset.with.metadata <- function(path, filename, metadata, excluded.densities=c()) {
   file <- paste(path, filename, sep = '') # load battery consumption
   data <- import.data(file)
   if (is.null(metadata)) {
-    metadata = extract.metadata(data)
+    metadata = extract.metadata(data, excluded.densities)
     pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*length(metadata$densities), height=4)
   }
   l <- list(data, metadata)
@@ -389,7 +397,7 @@ print.titles <- !args$final
 
 if (!is.null(args$pc)) {
   print("Importing power consumption dataset")
-  r <- load.dataset.with.metadata(args$path, args$pc, metadata)
+  r <- load.dataset.with.metadata(args$path, args$pc, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting power consumption")
   plot.power.consumption(r$data, metadata$densities)
@@ -398,7 +406,7 @@ if (!is.null(args$pc)) {
 
 if (!is.null(args$rf)) {
   print("Importing relays dataset")
-  r <- load.dataset.with.metadata(args$path, args$rf, metadata)
+  r <- load.dataset.with.metadata(args$path, args$rf, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting saved rebroadcasts")
   plot.saved_rebroadcast.per.session(r$data, metadata$densities)
@@ -406,24 +414,15 @@ if (!is.null(args$rf)) {
 
 if (!is.null(args$cv)) {
   print("Importing coverage dataset")
-  r <- load.dataset.with.metadata(args$path, args$cv, metadata)
+  r <- load.dataset.with.metadata(args$path, args$cv, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting coverage")
   plot.coverage.per.session(r$data, metadata$densities)
 }
 
-if (!is.null(args$sf)) {
-  print("Importing summary CSV file")
-  r <- load.summary(args$path, args$sf)
-  print("Plotting Simple Saved Rebroadcasts")
-  plot.saved.rebroadcasts(r, metadata$algos)
-  print("Plotting Simple Coverage")
-  plot.simple.coverage(r, metadata$algos)
-}
-
 if (!is.null(args$dm)) {
   print("Importing duplicated messages dataset")
-  r <- load.dataset.with.metadata(args$path, args$dm, metadata)
+  r <- load.dataset.with.metadata(args$path, args$dm, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting duplicated messages")
   plot.duplicated.messages(r$data, metadata$densities)
@@ -431,8 +430,23 @@ if (!is.null(args$dm)) {
 
 if (!is.null(args$bs)) {
   print("Importing broadcast time dataset")
-  r <- load.dataset.with.metadata(args$path, args$bs, metadata)
+  r <- load.dataset.with.metadata(args$path, args$bs, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting broadcast time")
   plot.broadcasting.time2(r$data, metadata$densities, metadata$pal)
+}
+
+# this most be the last
+if (!is.null(args$sf)) {
+  print("Importing summary CSV file")
+  r <- load.summary(args$path, args$sf)
+  print("Plotting Simple Saved Rebroadcasts")
+  aa <- metadata$algos
+  if (is.null(aa)) {
+    aa <- unique(r$alg)
+    pdf(paste(args$path, "Pretty-Results.pdf", sep = ""), width=7, height=4)
+  }
+  plot.saved.rebroadcasts(r, aa)
+  print("Plotting Simple Coverage")
+  plot.simple.coverage(r, aa)
 }
