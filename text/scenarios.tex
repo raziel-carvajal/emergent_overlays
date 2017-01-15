@@ -26,33 +26,6 @@ We chose the power consumption model of the chip Broadcom BCM4329, which is foun
 Additionally, this chip supports the protocol Wi-Fi 802.11g on the 2.4 GHz band~\cite{BCM4329}.
 }
 
-\deleted{
-%
-To evaluate the effect of each broadcasting algorithm in terms of power consumption, we need a model representing the consumption of actual devices.
-%
- the chip we use in this paper to model the power consumption of a real device that in compliance with 802.11g.
- %
-This chip can be found in smart phones and other handhelds.
-}
-\begin{table}[ht]
-\footnotesize
-\centering
-	
-\begin{tabular}{lcr}
-\textbf{Mode} & \textbf{Unit} & \textbf{Consumption} \\
-
-\midrule
-%Off	  & nW & 57.6 \\
-Sleep & nW & 648 \\
-Receiver Listen & mW & 244.8 \\
-Receiver Active (RX) & mW & 295.2 \\
-Transmitter Active (TX) & mW & 1206 \\
-\end{tabular}
-
-\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
-\label{tbl:wifi-chip}
-\end{table}
-
 To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).

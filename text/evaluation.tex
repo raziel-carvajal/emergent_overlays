@@ -101,6 +101,45 @@ Afterwards, we check the traces to guarantee that the average speeds are indeed 
 
 \subsubsection*{Energy Consumption}
 
+Efficient energy utilization in wireless communication must be taken into consideration.
+%
+Since power consumption highly depends on the Wi-Fi chip used by mobile devices, we chose to model power consumption using the specifications of an actual chip found in modern mobile devices to feed the simulator.
+%
+The Broadcom BCM4329~\cite{BCM4329} can be found in many modern devices because it supports the protocol Wi-Fi 802.11g on the 2.4 GHz band.
+%
+Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different modes.
+%
+This information is used in setting the power consumption model of INET.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Mode} & \textbf{Consumption} \\
+		
+		\midrule
+		%Off	  & nW & 57.6 \\
+		Sleep  & 648 nW \\
+		Receiver Listen & 244.8 mW \\
+		Receiver Active (RX) & 295.2 mW \\
+		Transmitter Active (TX) & 1206 mW \\
+	\end{tabular}
+	
+	\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
+	\label{tbl:wifi-chip}
+\end{table}
+
+
+%To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
+%
+%This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
+%
+%Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operational modes of the \textit{receiver} and \textit{transceiver}, respectively.
+%
+%INET then computes the energy consumption with the integral equation as follows:
+%$C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$. Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
+
 
 \subsubsection*{Algorithm specific parameters}
 
