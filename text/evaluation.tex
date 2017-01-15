@@ -131,16 +131,6 @@ This information is used in setting the power consumption model of INET.
 \end{table}
 
 
-%To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
-%
-%This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
-%
-%Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operational modes of the \textit{receiver} and \textit{transceiver}, respectively.
-%
-%INET then computes the energy consumption with the integral equation as follows:
-%$C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$. Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
-
-
 \subsubsection*{Algorithm specific parameters}
 
 The behavior of each protocol depends on the values of its parameters.
@@ -153,43 +143,65 @@ In the case of \textit{ABBA}, we use 0.5 seconds as the maximum waiting time.
 %
 Finally, for \textit{ProbFlood} we assign the values $k=15$, $\sigma=1$, and $\textit{hello time} = 0.5$.
 
-\subsection{Performance Metrics}
 
-\paragraph{\textbf{Saved rebroadcasts}}
+\subsection{Performance comparison results}
+
+In this Section we present performance results in terms of following five metrics:
+
+
+\textit{Saved rebroadcasts} --
 number of messages that the nodes do not send thanks to the use of a particular broadcast algorithm.
 %
 More formally, let $k$ be the number of observed retransmissions during the flooding of a message using algorithm $a$; and $n$ the number of nodes in the network; then, we save $n - k$ rebroadcast by using $a$ instead of \textit{simple flooding}.
 %
 This metric is useful to measure the efficiency in terms of both network and energy usage. 
 
-\paragraph{\textbf{Duplicated messages}}
- number of extra times a message is received.
+\textit{Duplicated messages} --
+number of extra times a message is received.
 %
 That is, in a perfect situation a node only need to receive a message once.
 %
 But with most algorithms the same messages is usually received multiple times.
 
-\paragraph{\textbf{Coverage}}
- percentage of nodes in the network that receive a message.
+\textit{Coverage} --
+percentage of nodes in the network that receive a message.
 
 
-\paragraph{\textbf{Broadcast time}} time required for a flood operation to reach full coverage.
+\textit{Broadcast time} -- time required for a flood operation to reach full coverage.
 %
 It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
 
-\paragraph{\textbf{Energy consumption}}
- energy consumed for each node during the experiment.
+\textit{Energy consumption} --
+energy consumed for each node during the experiment.
 
+ 
+For each broadcasting approach,  we present the results for several scenarios as we discuss in Section~\ref{sub:setup}.
+%
+To do so, we present the results for each metric with and without mobility.
+%
 
+\subsubsection{Energy Consumption}  
 
 
 \begin{figure*}[!ht]
 	\centering
-	\includegraphics[page=1, width=0.95\textwidth]{fig/results-static.pdf}
+	\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}
 	\vspace{-0.5cm}
 	\caption{Power consumption when there is no mobility}
 	\label{fig:power-consumption-static}
 \end{figure*}
+
+\begin{figure*}[!ht]
+	\centering
+	\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}
+	\vspace{-0.5cm}
+	\caption{Power consumption with mobility}
+	\label{fig:power-consumption-mobility}
+\end{figure*}
+
+
+
+\subsubsection{Coverage}
 
 
 \begin{figure*}[!ht]
@@ -202,14 +214,6 @@ It is only measured when all the participants receive the message because this i
 	\label{fig:network-usage-static}
 \end{figure*}
 
-
-\begin{figure*}[!ht]
-	\centering
-	\includegraphics[page=1, width=0.95\textwidth]{fig/results-mobility.pdf}
-	\vspace{-0.5cm}
-	\caption{Power consumption with mobility}
-	\label{fig:power-consumption-mobility}
-\end{figure*}
 
 \begin{figure*}[!ht]
 	\centering
