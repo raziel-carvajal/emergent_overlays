@@ -299,7 +299,7 @@ if __name__ == '__main__':
         print "Writing NED file"
         idx_source = random.randint(0, len(topology) - 1)
         if (args.distributed):
-            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 3000, idx_source)
+            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 300, idx_source)
         else:
             fn_create_sources = get_callback_single_source_code(idx_source)
         createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)
