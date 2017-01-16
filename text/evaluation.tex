@@ -7,59 +7,78 @@ Details about the scenarios, where each broadcasting algorithm is deployed, were
 Our experimental results are given by the following metrics:
 
 %
-\textit{Saved Rebroadcasts (SRE)} --
+\textbf{Saved Rebroadcasts (SRE)} --
 number of broadcast messages that nodes do not retransmit based on the worse case scenario, \textit{pure flooding}.
 %
 To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number of retransmissions $R$ made by $A$ to disseminate one message. Then, we simply say that $A$ saved $N - R$ messages.
 %
 This metric is useful to measure the efficiency in terms of both network and energy usage. 
 
-\textit{Duplicated messages} --
+\textbf{Duplicated messages} --
 number of times one broadcast message is received after its first reception.
 %
 In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcasting.
 
-\textit{Reachability} --
+\textbf{Reachability} --
 percentage of nodes that successfully receive one broadcast message at least once.
 
-\textit{Broadcast time} --
+\textbf{Broadcast time} --
 time to disseminate one message with reachability of 100\%.
+
 % 
 %It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
-\textit{Energy consumption} --
+\textbf{Energy consumption} --
 energy consumed by nodes during every broadcast session.
 %
+\begin{figure*}[ht]
+	\begin{center}
+	\subfigure[Static Scenarios]{
+		\label{fig:a-saved}
+		\includegraphics[scale=0.29]{fig/results-static-summary.pdf}
+	}
+	~
+	\subfigure[Static Scenarios]{
+		\label{fig:a-duplicated}
+		\includegraphics[scale=0.33, trim = 0 10mm 0 0]{fig/results-static.pdf}
+	}
+	~
+	\subfigure[Mobility Scenarios]{
+		\label{fig:b-saved}
+		\includegraphics[scale=.29]{fig/results-mobility-summary.pdf}
+	}
+	~
+	\subfigure[Mobility Scenarios]{
+		\label{fig:b-duplicated}
+		\includegraphics[scale=0.33]{fig/results-mobility.pdf}
+	}
+	\caption{Saved Rebroadcasts over different de}
+	\label{fig:saved-rebroadcasts}
+	\end{center}
+\end{figure*}
 
-We analyze the last group of broadcasting metrics with and without mobility, following the model described at Section~\ref{sec:scenarios}.
 %
-\subsection{Efficiency in terms of network utilization}
+We analyze every broadcasting metric with/without mobility over different number of neighbors (range of node densities) as described at Section~\ref{sec:scenarios}.
+%
+\subsection{Network overload}
 
-In this section we discuss the efficiency of each approach using two metrics, \textit{saved rebroadcasts} and \textit{received duplicated messages}.
+SRE and the number of duplicated messages determine to which extent the communication medium is saturated.
+%Redundant
+%These metrics are useful to assess if a broadcasting algorithm have to send too many messages in order to reach a good coverage.
+%Redundant
+%This is important because all these messages can quickly saturate the medium and affect the transmission of other messages unrelated to the broadcasting operation.
 %
-These metrics are useful to assess if a broadcasting algorithm have to send too many messages in order to reach a good coverage.
+Figure~\ref{fig:a-saved} depicts the SRE in a static scenario where MPRT outperforms all other protocols.
 %
-This is important because all these messages can quickly saturate the medium and affect the transmission of other messages unrelated to the broadcasting operation.
+The difference between MPRT and all other algorithms decreases as the density increases.
 %
-
-Figure~\ref{fig:saved-rebroadcasts} depicts the saved rebroadcasts.
+Interestingly, \textit{ABBA} rapidly reduce the number of retransmissions even better than a node-degree based technique when the density is above 10.
 %
-The results obtained for scenarios without mobility are shown in Figure~\ref{fig:a-saved}.
-%
-Although \textit{MPR} outperforms all other protocols for every single value of density, the differences between MPR and other algorithms such as \textit{ABBA} decrease as the density increases.
-%
-Interestingly, \textit{ABBA} becomes more efficient than \textit{node-degree} when the density is above 10.
+While a node-degree technique overloads the communication medium with its periodic exchange of control messages, ABBA avoids retransmissions because the bigger the communication range of nodes its is covered
 %
 Finally, \textit{ProbFlood} has a poor performance for all densities.  
 
 
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-saved}\includegraphics[page=1, width=0.45\textwidth]{fig/results-static-summary.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-saved}\includegraphics[page=1, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
-	\caption{Saved Rebroadcasts}
-	\label{fig:saved-rebroadcasts}
-\end{figure*}
+
 
 The behavior changes when we add mobility to the settings.
 %
@@ -100,14 +119,7 @@ Meanwhile, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low 
 \textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  
 
 
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-duplicated}\includegraphics[page=4, width=0.90\textwidth]{fig/results-static.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-duplicated}\includegraphics[page=4, width=0.90\textwidth]{fig/results-mobility.pdf}}
-	\caption{Duplicated Messages}
-	\label{fig:duplicated-messages}
-\end{figure*}
+
 
 
 \subsection{Energy Consumption}
