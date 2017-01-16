@@ -180,25 +180,45 @@ For each broadcasting approach,  we present the results for several scenarios as
 To do so, we present the results for each metric with and without mobility.
 %
 
+\subsubsection{Efficiency in terms of network utilization}
+
+
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a-saved}\includegraphics[page=1, width=0.45\textwidth]{fig/results-static-summary.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b-saved}\includegraphics[page=1, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
+	\caption{Saved Rebroadcasts}
+	\label{fig:saved-rebroadcasts}
+\end{figure*}
+
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a-duplicated}\includegraphics[page=4, width=0.90\textwidth]{fig/results-static.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b-duplicated}\includegraphics[page=4, width=0.90\textwidth]{fig/results-mobility.pdf}}
+	\caption{Duplicated Messages}
+	\label{fig:duplicated-messages}
+\end{figure*}
+
+
 \subsubsection{Energy Consumption}
 
 The following section analyses the energy consumption of the studied approaches.
 %
 The energy consumption of a node depends on several factors: the \textit{number of message sent}, the \textit{number of messages received}, and the \textit{network saturation in the vicinity} of the node.
 %
-The \textit{number of message sent and received} are important because, every time the node sends or receives a message, the \textit{transmitter} and receiver components in the radio change to a more power hungry mode.
+The \textit{number of message sent and received} are important because, every time the node sends or receives a message, the \textit{transmitter} or \textit{receiver} components of the radio change to a more power hungry mode.
 %
-Hence, the messages retransmitted as well as the control messages have a direct influence on energy consumption.
+Hence, the broadcast messages retransmitted as well as the control messages have a direct influence on energy consumption.
 %
 The \textit{network saturation in the vicinity} of the node is also important due to the way the MAC layer is implemented.
 %
 In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is resent.
 %
-The goal of this strategy is to increase the reliability of the network, but it has a negative effect in terms of energy consumption.
+The goal of this strategy is to increase the reliability of the network, but it has a strong negative effect in terms of energy consumption when the network is saturated.
 %
-There are many collisions when the network is saturated.
-%
-Since in this case both messages and ACK notifications are lost, the MAC layer keeps resending message and consuming energy in the process.
+Since in this case both messages and ACK notifications are often lost, the MAC layer keeps resending message and consuming energy in the process.
 %
 
 Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
@@ -207,7 +227,8 @@ Since each node sends and receives different number of messages, we use \textit{
 %
 Due to space limitations, we do not present the plots for all densities.
 %
-Instead, we are only showing plots for those densities were there is a significant change in the patterns of energy consumption. 
+Instead, we are only showing plots for those densities were there is a significant change in the patterns of energy consumption.
+% 
 
 \begin{figure*}[htb]
 	\centering
@@ -219,6 +240,36 @@ Instead, we are only showing plots for those densities were there is a significa
 \end{figure*}
 
 
+The first thing to note is that, as expected, \textit{simple flooding} consumes more energy in all scenarios.
+%
+Also interesting is that both CDS-based approaches, namely \textit{MPR} and \textit{node-degree}, always outperform other approaches when there is no mobility.
+%
+This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\ref{fig:a-duplicated}, which show that nodes send and receive fewer messages in these approaches.
+%
+In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show a single value of density where these algorithms behave better than \textit{MPR}.
+%
+This is interesting because it indicates that properly using control messages to build an underlying topology is worth in terms of power consumption when the interval among two broadcast messages is close to the interval among control messages.
+%
+
+As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols change in the mobility scenarios.
+%
+In such scenarios, \textit{ABBA} outperforms \textit{MPR} when the density is low or medium (5, 10, 15).
+%
+Only when the density is greater than 20, MPR becomes competitive once again.
+%
+In correlating these results with Figures~\ref{fig:b-saved} and ~\ref{fig:b-duplicated} we notice that the nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
+%
+We also notice that the number of duplicated messages received is closer than in the static scenarios.
+%
+%Although This changes when densities above 30 because the control 
+%
+In studying these results we notice that \textit{MPR} cannot maintain a completely up to date underlaying topology due to the mobility.
+%
+As a consequence, it fails in reducing the number of relays nodes and the power consumption is high.
+
+These results are of interest because they show two parameters of a scenario that may impact the decision of what algorithm to use for broadcasting.
+%
+The first parameter is the mobility of nodes and the second is the ratio between the broadcast interval and control message interval.
 
 \subsubsection{Coverage}
 
@@ -230,28 +281,5 @@ Instead, we are only showing plots for those densities were there is a significa
 	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=2, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
 	\caption{Broadcast coverage for different scenarios: densities, mobility and broadcasting approaches.}
 	\label{fig:coverage}
-\end{figure*}
-
-
-
-\subsubsection{Network bandwidth}
-
-
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=1, width=0.45\textwidth]{fig/results-static-summary.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=1, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
-	\caption{Saved Rebroadcasts}
-	\label{fig:saved-rebroadcasts}
-\end{figure*}
-
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=4, width=0.90\textwidth]{fig/results-static.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=4, width=0.90\textwidth]{fig/results-mobility.pdf}}
-	\caption{Duplicated Messages}
-	\label{fig:duplicated-messages}
 \end{figure*}
 
