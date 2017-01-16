@@ -2,17 +2,13 @@
 
 \section{Evaluation}
 \label{sec:evaluation}
+Details about the scenarios, where each broadcasting algorithm is deployed, were given at Section~\ref{sec:scenarios}; besides, we lack a way to compare the performance of these algorithms.
+%
+Our experimental results are given by the following metrics:
 
-
-
-
-%\subsection{Performance comparison results}
-
-In this Section we present performance results in terms of following five metrics:
-
-
-\textit{Saved rebroadcasts} --
-number of messages that the nodes do not send thanks to the use of a particular broadcast algorithm.
+%
+\textit{Saved Rebroadcasts (SRE)} --
+number of messages that nodes do not retransmit per broadcasting session.
 %
 More formally, let $k$ be the number of observed retransmissions during the flooding of a message using algorithm $a$; and $n$ the number of nodes in the network; then, we save $n - k$ rebroadcast by using $a$ instead of \textit{simple flooding}.
 %
