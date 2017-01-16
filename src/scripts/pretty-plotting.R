@@ -211,8 +211,9 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
      ) +
      theme(axis.title.x=element_blank(),axis.text.x = element_text(angle = 30, hjust = 1)) +
      get.plot.theme.style()
-
-
+    if (!print.titles) {
+        p <- p + scale_fill_grey(start = 0, end = .9)
+    }
 	print(p)
 }
 
@@ -252,6 +253,10 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
        labs(colour="Algorithms")
      ) +
      get.plot.theme.style()
+
+     if (!print.titles) {
+         p <- p + scale_colour_grey(start = 0, end = .9)
+     }
 
 	print(p)
 }
@@ -312,6 +317,11 @@ plot.saved.rebroadcasts <- function(df, algos) {
      ) +
 		 get.plot.theme.style()
 
+
+     if (!print.titles) {
+         p <- p + scale_colour_grey(start = 0, end = .9)
+     }
+
 	print(p)
 }
 
@@ -333,6 +343,10 @@ plot.simple.coverage <- function(df, algos) {
            labs(colour="Algorithms", shape="Algorithms")
          ) +
 		 get.plot.theme.style()
+
+     if (!print.titles) {
+         p <- p + scale_colour_grey(start = 0, end = .9)
+     }
 
 	print(p)
 }
