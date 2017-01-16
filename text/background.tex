@@ -125,14 +125,14 @@ Since the contextual information varies over time, these algorithms often delay 
 %As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.\laurent{not sure to get it}
 This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
 
-In~\cite{Ovalle-Martinez2006}, the authors propose the \textit{Area-based beaconles protocol} (ABBA).
+In~\cite{Ovalle-Martinez2006}, the authors propose the \textit{Area-based beacon-less protocol} (ABBA).
 This is a \textit{context-aware} algorithm in which the flooding process is controlled in both space and time.
 Notice that the algorithm requires that each node knows its physical location as well as the transmission radio of each node.
 Upon the reception of a message, a node first computes the angle $\alpha$ covered by the received transmission.
 Using this information, it then schedules a timer with a timeout $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is the maximum waiting time.
 If the same message is received before the timer expires, the node updates $\alpha$, cancels the previous timer and creates a new one.
 No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
-When a timer expires, the message is retransmitted by the node.
+Otherwise, the message is retransmitted by the node when the timer expires.
 
 We also evaluate a probabilistic approach presented by Cartigny et al.~\cite{Cartigny:2003:BNR:2727141.2727459}.
 In this \textit{context-aware} protocol, a node retransmits a message with a probability that depends on two contextual values.
