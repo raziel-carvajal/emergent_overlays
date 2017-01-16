@@ -2,12 +2,13 @@
 %DECLARATION OF SOME CONSTANS
 \newcommand{\nodesNumber}{500}
 \newcommand{\densitiesNumber}{8}
+\newcommand{\nrMessages}{100}
 %END---
 
 \section{Experimental Scenario}
 \label{sec:scenarios}
 
-Our experimental scenarios are built considering three variables found in MANETs: power consumption of mobile devices, message dissemination while nodes move or remain static and construction of networks of nodes.
+Our experiments are built considering two external parameters we found in MANETs: density and mobility.
 %
 The experiments are inspired on a real life scenario: a \textit{demonstration} where people use their mobile phones to communicate, and the dissemination of some messages to all participants is critical.
 %
@@ -25,15 +26,14 @@ In the following, we describe the simulation environment and the parameters used
 
 \subsection*{Communication Scenario}
 
-Our experiments are inspired by the scenario discussed in Section~\ref{sec:scenarios}.
 %
-In this scenario, attendees have a mobile device with IEEE 802.11 capability.
+In a \textit{demonstration} scenario, attendees have a mobile device with IEEE 802.11 capability.
 %
 Many participants might attempt to broadcast messages at nearly the same time using a MANET.
 %
-Taking this into consideration, in our performance comparison  we set the number of broadcast messages to 300 and the interval among messages to the values $0.01$ and $0.5$ seconds, which are less than the speed of moving nodes.
+Taking this into consideration, in our performance comparison  we set the number of broadcast messages to \nrMessages{} and the interval among messages to the value $0.5$ seconds.
 %
-These two values allow us to evaluate the protocols under heavy and light network load.
+%These two values allow us to evaluate the protocols under heavy and light network load.
 %
 Since some algorithms build a topology to drive the flooding operation, there is a warm-up period before the first message is broadcasted that protocols can use to create any initial structure.
 %
@@ -43,17 +43,18 @@ Finally, in our evaluation we stop each experiment a fixed amount of time after 
 
 We use three parameters to characterize the density of the network: the transmission range, the map size and the number of nodes.
 %
-As shown in~\cite{Penrose2003}, there is dependency relationship between these parameters that is captured by the theory of random geometric graphs and allows us to build network topologies with a given density.
+As shown in~\cite{Penrose2003}, there is a dependency relationship between these parameters that is captured by the theory of random geometric graphs and allows us to build network topologies with a given density.
 %
-In our experiments, all nodes have a transmission range of 20 m. \footnote{
+In our experiments, all nodes have a transmission range of 20 m \footnote{
 Theoretically, IEEE 802.11 devices allow communication in a range between 20 and 140 meters depending on the line of sight.
 Previous empirical tests show that it can effectively be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
+while the number of nodes is fixed to \nodesNumber{}.
 %
-To vary the node density, we simply vary the map size and generate maps with square shape.
+To create a network with a given node density, we simply set the map size to the appropriate value and generate maps with square shape using a procedure based on random geometric graphs.
 %
 Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.
 %
-We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the density to  5,10,15,20,25,30,35 and 40, such a range of values is frequently found in the literature.
+We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  5,10,15,20,25,30,35 and 40, a range of values that is frequently found in the literature.
 
 \begin{table}[ht]
 	\footnotesize
@@ -75,7 +76,7 @@ We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the d
 \end{table}
 
 
-\subsection*{Network generation}
+%\subsection*{Network generation}
 
 %Disk graphs are used to model the positioning of random points uniformly distributed in the plane, offering the reflexive property $C$ (read as \textit{is close to}) among the vertex of such a graph. If $\{v_{a}, v_{b}, v_{c}\}$ is a set of vertex in a disk graph and $v_{a} C v_{b}$, $v_{b} C v_{c}$ are both true then, $v_{a} C v_{c}$ is true as well.
 %
@@ -84,7 +85,7 @@ We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the d
 %For positioning nodes in a random way we use an implementation of the Mersenne Twister algorithm~\cite{?}.\raziel{this is the algorithm cited at the doc of the python library, one is needed. Mention size of the area where nodes are positioning (which section?)}
 
 %
-Following our inspirational scenario, a thousand of nodes is a representative sampling one finds at the media when people bring together to protest, whereas the communication range of nodes is correlated with the mobility model we use, as it is mentioned in the following subsection.
+%Following our inspirational scenario, a thousand of nodes is a representative sampling one finds at the media when people bring together to protest, whereas the communication range of nodes is correlated with the mobility model we use, as it is mentioned in the following subsection.
 
 \subsection*{Mobility}
 
@@ -92,11 +93,11 @@ In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, 
 %
 This model generates traces composed of frequent short walks and occasional long rides to distant locations.
 %
-In our context, we define two scenarios: with mobility at walking speed and without mobility.
+In our context, we define two scenarios: with mobility at walking speed and without mobility (static).
 %
-We set the parameter of our LW model in such a way that the average walking speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
+We set the parameter of our LW model in such a way that the average node speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
 %
-To do so, we use the following values:
+To do so, we use the following values to feed the mobility model:
 
 \begin{table}[ht]
 	\footnotesize
@@ -116,7 +117,7 @@ To do so, we use the following values:
 	\label{tbl:mobility-parameters}
 \end{table}
 
-Afterwards, we check the traces to guarantee that the average speeds are indeed close to $1.4m/s$, and the topology remains connected all the time.
+Afterwards, we check the traces to guarantee that the average speeds are indeed close to $1.4 m/s$, and the topology remains connected all the time. \footnote{Except for a very low density (5) where we were not able to generate a topology that remained connected during all the experiments.}
 
 \subsection*{Energy Consumption}
 
@@ -126,7 +127,7 @@ Since power consumption highly depends on the Wi-Fi chip used by mobile devices,
 %
 The Broadcom BCM4329~\cite{BCM4329} can be found in many modern devices because it supports the protocol Wi-Fi 802.11g on the 2.4 GHz band.
 %
-Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different modes.
+Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different operation modes.
 %
 This information is used in setting the power consumption model of INET.
 
@@ -153,11 +154,11 @@ To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provid
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
 %
-Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operational modes of the \textit{receiver} and \textit{transceiver}, respectively.
+Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \textit{receiver} and \textit{transceiver}, respectively.
 %
-INET then computes the energy consumption with the integral equation as follows:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
+INET then computes the energy consumption $C(t)$ using:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
 %
-Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
+The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
 
 
 
@@ -169,7 +170,7 @@ To configure these parameters in a meaningful way, we choose values previously r
 %
 For instance, we use 0.5 seconds as the \textit{hello time} for both \textit{MPR} and \textit{node-degree-based} CDS.
 %
-In the case of \textit{ABBA}, we use 0.5 seconds as the maximum waiting time.
+In the case of \textit{ABBA}, we use 0.3 seconds as the maximum waiting time.
 %
 Finally, for \textit{ProbFlood} we assign the values $k=15$, $\sigma=1$, and $\textit{hello time} = 0.5$.
 
