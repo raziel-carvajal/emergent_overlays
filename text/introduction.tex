@@ -2,91 +2,92 @@
 
 \section{Introduction}
 
-With the rise of the Internet of Things (IoT), both the number and the diversity of connected devices is staggering.
+With the rise of the Internet of Things (IoT), the number and diversity of connected devices is on the rise.
 %
 %We have entered in a new era where the objects of our daily life, from mobile to wearable devices, can be interconnected.
 %
 Leaders of the industry, such as Cisco, predict that 50 billion devices will be connected together by 2020.
 %
-The goal of IoT is not really to enable users to interact with everything.
+The goal of the IoT is to link this diversity of objects and promote machine-to-machine interactions.
 %
-Instead, it is more about cross-linking objects to promote machine-to-machine interactions.
-%
-These interactions enable the capture and/or distribution of data that can be turned into information and delivered to end-users.
+These interactions enable the capture and/or distribution of data that can be turned into information and feedback delivered to end users.
 
 
+The advent of the IoT has led to a strong revival of interest in mobile ad-hoc networks (MANETs).
+%
+A MANET is a mobile network that does not rely on a fixed infrastructure.
+Instead, it is a self-configuring network where nodes connect directly to each other, and where there is no guarantee for end-to-end connectivity.
+%
+The topology of a MANET changes frequently due to the mobility of the participants.
+Nodes are connected using a wireless medium, there is no central entity in charge of routing, and most participants operate on battery-powered devices with limited processing power and bandwidth.
+%
+Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor networks to end-user mobile applications, such as traffic jam prevention system, information dissemination in crowds, data gathering in hostile environments, and peer-to-peer mobile games.
 
 
-IoT has led to a strong revival of interest in mobile ad-hoc networks (MANETs).
+Many network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation}, which consists in delivering a message from a source node to all other nodes in the network.
 %
-A MANET is a mobile network without a fixed infrastructure; meaning that it is self-configuring network where nodes connect directly to each other.
+The broadcasting problem for MANETs has received considerable attention.
 %
-In addition, the topology of the network changes frequently due to the mobility of the participants, nodes are connected using a wireless medium, there is no central entity in charge of routing, and most participants operate on batteries with limited processing power and bandwidth.
-%
-Applications based on MANETs range from sensor networks to end-user mobile applications, such as traffic jam prevention system, information dissemination in crowds, data gathering in hostile environments, and peer-to-peer mobile games.
-
-
-
-Many network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation}, which consists in delivering a message from a source node to all other nodes in a network.
-%
-Since the transmission range of a node is usually smaller than the size of the network, the solution is to have some nodes retransmiting the message to reach all the network.
-%
-The broadcasting problem in MANET has received considerable attention.
-%
-In particular, the solutions attempt to:
-
+In particular, these solutions attempt to:
+\vspace{-1mm}
 \begin{itemize}
-	\item \textit{Maximize coverage.} As many nodes in the network as possible receive a broadcast message $m$.
-	\item \textit{Minimize energy consumption and bandwidth usage.} Ultimately, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth used to disseminate messages.
-	\item \textit{Support mobility patterns.} The velocity, pauses and number of nodes in a location impact both coverage and efficiency. For that reason, it is useful to consider particular deployment scenarios. 
+	\item \textit{Maximize coverage:} As many nodes in the network as possible, and ideally all of them, should receive a broadcast message $m$.
+	\item \textit{Minimize energy consumption and bandwidth usage:} Ultimately, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages, and how it distributes these costs among the nodes of the network.
+	\item \textit{Support mobility patterns:} The coverage and efficiency of the broadcast should be minimally impacted by the mobility of the nodes.
+	More specifically, broadcast should remain efficient and with a high coverage under a large variety of mobility patterns and deployment scenarios, defined by their velocity and density models, or by the evolution of the connectivity between nodes.
 \end{itemize}
-
-
 
 Many algorithms have been proposed to solve the broadcasting problem in MANET~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
-They seek to control the flooding by selecting which nodes should transmit a message during dissemination and when these nodes should transmit.
+All these algorithms achieve broadcast using a form of \emph{controlled flooding}: 
+since the transmission range of a source node is typically much smaller than the physical span of the network, the solution to broadcast is that nodes receiving a message can retransmit it further, eventually covering the entire network.
 %
-The performance of algorithms depend on their ability to use knowledge about the network topology, node location, and network status.
+MANET broadcast algorithms mostly differ in the way they control this forwarding operation.
 %
-However, their performance are also largely influenced by external factors such as the density of the network, and the mobility rate of its nodes.
+In more details, the control happens in space and time by deciding \emph{which} nodes should forward a message during dissemination and \emph{when} this forwarding should happen after the initial message reception.
 %
-Although the performance of previous solutions have been studied~\cite{YiGerla2003, Garbinato2010} and extensive work have been done in classifying algorithms based on their characteristic~\cite{Ruiz2015, Fei1311289}, to the best of our knowledge, there is a lack of comprehensive comparison of the existent solutions.  
+Algorithms can also be distinguished on their use of, or independence from, knowledge about the network topology, nodes locations, and network status.
 %
-In this paper, we explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions.
+Besides these differences in the nature of the forwarding, broadcast algorithms are also largely influenced by external factors such as the density of the network, and the mobility rate of its nodes.
 %
+The performance of broadcast protocols has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done in classifying algorithms based on their algorithmic characteristics~\cite{Ruiz2015, Fei1311289}.
+However, to the best of our knowledge, there is a lack of comprehensive experimental comparison of existing solutions allowing an understanding under various deployment scenarios. 
 
-
+\noindent
+\textbf{Contributions}.
+%
+Our goal in this paper is to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions, in order to ease the task of selecting the most appropriate algorithm for a given situation.
+%
 In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
 \begin{itemize}
 	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
-	\item \textit{MPR}, a well-known algorithm that maintains an overlay structure to control the broadcasting process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
-	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum CDS. This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
-	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density of each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
+	\item \textit{MPR} maintains an overlay structure to control the broadcasting process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
+	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS). This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
+	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
 \end{itemize}
 
-The contributions of the present performance comparison study are answering the question of what is the most appropriate algorithms for a certain deployment scenario, and showing that there is no one-size-fits-all in MANET broadcasting.
+The contributions of our performance comparison study aim at helping practitioners decide which is the most appropriate algorithms for a certain deployment scenario.
+Our results show in particular that there is no one-size-fits-all for MANET broadcasting.
 %
 We show that \dots \inti{copy findings from the discussion}
 %
-These findings can be used to design a broadcasting approach that changes its behavior at runtime based on the context of a node.
+These findings can further be used to design a broadcasting approach that changes its behavior at runtime based on contextual information.
 %
 We envision an adaptation mechanism where the next algorithm to use is the best fit for a given deployment scenario.
 
-
+\noindent
+\textbf{Outline}.
+%
 The rest of this paper is organized as follows.
 %
-Section~\ref{sec:background} address the need of having a comprehensive comparison study of the existent solutions and present the algorithms we evaluate in our experiments.
+Section~\ref{sec:background} presents the algorithms we evaluate in our experiments.
 %
-In Section~\ref{sec:related_work} we look at the limitations of previous studies on the performance of broadcast algorithms for MANET.
+In Section~\ref{sec:related_work} we survey related work on the evaluation of broadcast algorithms for MANETs and discuss its limitations.
 %
-The parameters that describe the experiments setup are discussed in Section~\ref{sec:scenarios}. 
-%
-In Section~\ref{sec:evaluation}, we present our evaluation and Section~\ref{sec:discussion} summarizes the main findings of this paper.
+We present our experimental setup in Section~\ref{sec:scenarios} and our evaluation results in Section~\ref{sec:evaluation}.
+Section~\ref{sec:discussion} summarizes the main findings of this paper.
 %
 Finally, we discuss the perspective of this work in Section~\ref{sec:perspectives}.
-
-
 
 %\er{This is a proposal for an introduction structure, to be discussed}
 
