@@ -1,30 +1,154 @@
 %!TEX root = main.tex
 %DECLARATION OF SOME CONSTANS
-\newcommand{\nodesNumber}{1000}
+\newcommand{\nodesNumber}{500}
 \newcommand{\densitiesNumber}{8}
 %END---
 
 \section{Experimental Scenario}
 \label{sec:scenarios}
-\changed{
-%
+\label{sub:setup}
+
 Our experimental scenarios are built considering three variables found in MANETs: power consumption of mobile devices, message dissemination while nodes move or remain static and construction of networks of nodes.
 %
-Our inspiration came from a real life scenario: \textit{protest march}, where these three variables take place, people uses their mobile phones to communicate and message dissemination to all participants is critical.
+The experiments are inspired on a real life scenario: a \textit{demonstration} where people use their mobile phones to communicate, and the dissemination of some messages to all participants is critical.
 %
 Furthermore, we are interested in proposing a benchmark to evaluate the performance of broadcasting protocols.
 %
-More details about the broadcasting metrics we chose are given in section \ref{sec:evaluation}.
-}
 
-\subsection*{Power consumption}
-\changed{
-Efficient utilization of energy in wireless communication must be taken into consideration and power consumption highly depends on the Wi-Fi chip used by mobile devices.
+
+For our performance comparison, we use OMNET++4.6/INET3.3, a simulation framework specifically aimed at networking algorithms.
 %
-We chose the power consumption model of the chip Broadcom BCM4329, which is found in modern mobile devices, Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different modes.
+This tool provides models of many protocols of the network stack such as MAC, 802.11g wireless communication and energy consumption ~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
 %
-Additionally, this chip supports the protocol Wi-Fi 802.11g on the 2.4 GHz band~\cite{BCM4329}.
-}
+In addition, it contains models to describe and deal with the mobility aspect.
+%
+In the following, we describe the simulation environment and the parameters used. 
+
+\subsection*{Communication Scenario}
+
+Our experiments are inspired by the scenario discussed in Section~\ref{sec:scenarios}.
+%
+In this scenario, attendees have a mobile device with IEEE 802.11 capability.
+%
+Many participants might attempt to broadcast messages at nearly the same time using a MANET.
+%
+Taking this into consideration, in our performance comparison  we set the number of broadcast messages to 300 and the interval among messages to the values $0.01$ and $0.5$ seconds, which are less than the speed of moving nodes.
+%
+These two values allow us to evaluate the protocols under heavy and light network load.
+%
+Since some algorithms build a topology to drive the flooding operation, there is a warm-up period before the first message is broadcasted that protocols can use to create any initial structure.
+%
+Finally, in our evaluation we stop each experiment a fixed amount of time after the beginning of the last flooding operation.
+
+\subsection*{Density}
+
+We use three parameters to characterize the density of the network: the transmission range, the map size and the number of nodes.
+%
+As shown in~\cite{Penrose2003}, there is dependency relationship between these parameters that is captured by the theory of random geometric graphs and allows us to build network topologies with a given density.
+%
+In our experiments, all nodes have a transmission range of 20 m. \footnote{
+Theoretically, IEEE 802.11 devices allow communication in a range between 20 and 140 meters depending on the line of sight.
+Previous empirical tests show that it can effectively be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
+%
+To vary the node density, we simply vary the map size and generate maps with square shape.
+%
+Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.
+%
+We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the density to  5,10,15,20,25,30,35 and 40, such a range of values is frequently found in the literature.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{ll}
+		\textbf{Parameter} & \textbf{Setting} \\
+		
+		\midrule
+		Number of Nodes & \nodesNumber \\
+		Transmission Range & 20 m \\
+		Densities & 5--40 \\
+		Map Size for smallest density & 224 m x 224 m \\
+		Map Size for largest density & 79 m x 79 m \\
+	\end{tabular}
+	
+	\caption{Simulations parameters affecting node density.}
+	\label{tbl:densisty-parameters}
+\end{table}
+
+
+\subsection*{Network generation}
+
+%Disk graphs are used to model the positioning of random points uniformly distributed in the plane, offering the reflexive property $C$ (read as \textit{is close to}) among the vertex of such a graph. If $\{v_{a}, v_{b}, v_{c}\}$ is a set of vertex in a disk graph and $v_{a} C v_{b}$, $v_{b} C v_{c}$ are both true then, $v_{a} C v_{c}$ is true as well.
+%
+%$C$ is a fundamental property that models realistic scenarios~\cite{Penrose2003}, more importantly, it allows us to build wireless networks with density $d$ following the formula $d=\pi nr^{2}$ where $r$ refers to the communication range of nodes and $n$ is the total number of nodes.
+%
+%For positioning nodes in a random way we use an implementation of the Mersenne Twister algorithm~\cite{?}.\raziel{this is the algorithm cited at the doc of the python library, one is needed. Mention size of the area where nodes are positioning (which section?)}
+
+%
+Following our inspirational scenario, a thousand of nodes is a representative sampling one finds at the media when people bring together to protest, whereas the communication range of nodes is correlated with the mobility model we use, as it is mentioned in the following subsection.
+
+\subsection*{Mobility}
+
+In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
+%
+This model generates traces composed of frequent short walks and occasional long rides to distant locations.
+%
+In our context, we define two scenarios: with mobility at walking speed and without mobility.
+%
+We set the parameter of our LW model in such a way that the average walking speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
+%
+To do so, we use the following values:
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lcp{3.5cm}}
+		\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+		
+		\midrule
+		FL\_EXP & -3.9 & Exponent of the flight length distribution \\
+		FL\_MAX & 50 & Maximum value of the flight length distribution \\
+		WT\_EXP & -1.8 & Exponent of the waiting time distribution \\
+		WT\_MAX & 100 & Maximum value of the waiting time distribution \\
+	\end{tabular}
+	
+	\caption{Configuration of the LW mobility model.}
+	\label{tbl:mobility-parameters}
+\end{table}
+
+Afterwards, we check the traces to guarantee that the average speeds are indeed close to $1.4m/s$, and the topology remains connected all the time.
+
+\subsection*{Energy Consumption}
+
+Efficient energy utilization in wireless communication must be taken into consideration.
+%
+Since power consumption highly depends on the Wi-Fi chip used by mobile devices, we chose to model power consumption using the specifications of an actual chip found in modern mobile devices to feed the simulator.
+%
+The Broadcom BCM4329~\cite{BCM4329} can be found in many modern devices because it supports the protocol Wi-Fi 802.11g on the 2.4 GHz band.
+%
+Table~\ref{tbl:wifi-chip} shows the amount of Watts that this chip requires in its different modes.
+%
+This information is used in setting the power consumption model of INET.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Mode} & \textbf{Consumption} \\
+		
+		\midrule
+		%Off	  & nW & 57.6 \\
+		Sleep  & 648 nW \\
+		Receiver Listen & 244.8 mW \\
+		Receiver Active (RX) & 295.2 mW \\
+		Transmitter Active (TX) & 1206 mW \\
+	\end{tabular}
+	
+	\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
+	\label{tbl:wifi-chip}
+\end{table}
 
 To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
 %
@@ -32,45 +156,30 @@ This model measures how many Joules were consumed based on the time the chip spe
 %
 Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operational modes of the \textit{receiver} and \textit{transceiver}, respectively.
 %
-INET then computes the energy consumption with the integral equation as follows:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$. Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
+INET then computes the energy consumption with the integral equation as follows:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
+%
+Function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
 
 
-\subsection*{
-\changed{Network Construction through Disk Graphs}
-}
-%
-\changed{
-Disk graphs are used to model the positioning of random points uniformly distributed in the plane, offering the reflexive property $C$ (read as \textit{is close to}) among the vertex of such a graph. If $\{v_{a}, v_{b}, v_{c}\}$ is a set of vertex in a disk graph and $v_{a} C v_{b}$, $v_{b} C v_{c}$ are both true then, $v_{a} C v_{c}$ is true as well.
-%
-$C$ is a fundamental property that models realistic scenarios~\cite{Penrose2003}, more importantly, it allows us to build wireless networks with density $d$ following the formula $d=\pi nr^{2}$ where $r$ refers to the communication range of nodes and $n$ is the total number of nodes.
-%
-For positioning nodes in a randomly way we use an implementation of the Mersenne Twister algorithm~\cite{?}.\raziel{this is the algorithm cited at the doc of the python library, one is needed. Mention size of the area where nodes are positioning (which section?)}
 
+\subsection*{Algorithm specific parameters}
+
+The behavior of each protocol depends on the values of its parameters.
 %
-We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes setting the density to  5,10,15,20,25,30,35 and 40, such a range of values is frequently found at the literature.
+To configure these parameters in a meaningful way, we choose values previously reported in the literature.
 %
-Following our inspirational scenario, a thousand of nodes is a representative sampling one finds at the media when people bring together to protest, whereas the communication range of nodes is correlated with the mobility model we use, as it is mentioned in the following subsection.
-}
-\raziel{I replace this next text by what now remains at the intro of section \ref{sec:scenarios} and the last subsection}
+For instance, we use 0.5 seconds as the \textit{hello time} for both \textit{MPR} and \textit{node-degree-based} CDS.
+%
+In the case of \textit{ABBA}, we use 0.5 seconds as the maximum waiting time.
+%
+Finally, for \textit{ProbFlood} we assign the values $k=15$, $\sigma=1$, and $\textit{hello time} = 0.5$.
+
+
+
+
 \raziel{This definition (density) must be mentioned at the Related Work (or maybe Introduction), here it is too late}
 
 
-\subsection*{
-\changed{Mobility Model of Nodes}
-}
-\changed{
-Mobility of nodes in our simulations follow a Levy Walk (LW) model to characterize routing performance of networks where humans carry mobile devices~\cite{Rhee:2011}.
-%
-This truncated LW model approximates how humans move (frequent short walks and occasional long rides to distant locations) and does not take into account obstacles, i. e., when there is an obstacle for every pair of movements, these movements are linked.
-%
-The authors of this study stated that unique performance characteristics were found for MANETs but they do not report these results.
-%
-}
-
-Since the implementation of the model that we use is unit-agnostic, we enforce the right walking speed by tying it to the previously mentioned transmission range $tx$.
-The preferred walking speed of human is, by some estimations, around $1.4$m/s~\cite{Browning390}.
-Combining this information with the fact that WiFi networks have a range up to 30-100 meters depending on the line of sight~\cite{??}, we set $tx=30$ and configure the parameters of the truncated-levy walk model to generate traces with an average speed of $1.4$. \inti{I cannot find a descent reference for the range of Wifi}
-In other words, we are considering an environment with many obstacles and people walking at a \textit{normal} speed.
 
 
  
