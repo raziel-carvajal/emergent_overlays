@@ -219,7 +219,34 @@ Since the location of each node changes continually, it is expected that this ap
 	\label{fig:coverage}
 \end{figure*}
 
+
 Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
 %
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a-coll}\includegraphics[page=1, width=0.45\textwidth]{fig/collisionsNoMob.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b-coll}\includegraphics[page=1, width=0.45\textwidth]{fig/collisionsMob.pdf}}
+	\caption{Collisions of broadcasting messages.}
+	\label{fig:collisions}
+\end{figure*}
 This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
+
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a-sessT}\includegraphics[page=1, width=0.45\textwidth]{fig/SessionTimeNoMob.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b-sessT}\includegraphics[page=1, width=0.45\textwidth]{fig/sessionTimeMob.pdf}}
+	\caption{Broadcasting session time.}
+	\label{fig:broSessionTime}
+\end{figure*}
+
+\begin{figure*}[htb]
+	\centering
+	\subfigure[Static Scenarios]{\label{fig:a-relays}\includegraphics[page=1, width=0.45\textwidth]{fig/relaysNoMob.pdf}}
+	~
+	\subfigure[Mobility Scenarios]{\label{fig:b-relays}\includegraphics[page=1, width=0.45\textwidth]{fig/relaysMob.pdf}}
+	\caption{Percentage of nodes that performs retransmissions.}
+	\label{fig:broSessionTime}
+\end{figure*}
 
