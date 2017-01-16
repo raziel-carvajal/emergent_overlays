@@ -140,6 +140,7 @@ plot.broadcasting.time2 <- function(df, densities, pal){
     	s <- unlist( strsplit(cn,'_'))
         cn <- as.character(s[which(s == "p") + 1])
         cn <- toupper(gsub("[[:digit:]]", "", cn))
+        cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
 		data <-e[,1]
         den <-rep(as.factor(paste("Density", density)), length(data))
 		data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
@@ -181,6 +182,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 			s <- unlist( strsplit(cn,'_'))
 	  	    cn <- as.character(s[which(s == "p") + 1])
             cn <- toupper(gsub("[[:digit:]]", "", cn))
+            cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -225,6 +227,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
       cn <- toupper(gsub("[[:digit:]]", "", cn))
+      cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
       y <- transformation(e[,1], nr.nodes)
       x <- 1:length(y)
@@ -303,18 +306,23 @@ plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "Saved Rebroadcasts"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
+  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+
+  df <- df[df$alg!="FLOODING",]
+
+
   caption <- "Saved rebroadcasts"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
-     geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg),   # Shape depends on cond
+            geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg),   # Shape depends on cond
                size = 4) +        # Large points
 		 theme(legend.position="bottom") +
 		 ylab(ylabel) + xlab("Density") +
-     (if (print.titles)
-		   labs(title=caption, colour="Algorithms", shape="Algorithms")
-     else
-       labs(colour="Algorithms", shape="Algorithms")
-     ) +
+         (if (print.titles)
+    		   labs(title=caption, colour="Algorithms", shape="Algorithms")
+         else
+           labs(colour="Algorithms", shape="Algorithms")
+         ) +
 		 get.plot.theme.style()
 
 
@@ -330,6 +338,7 @@ plot.simple.coverage <- function(df, algos) {
   ylabel <- "Coverage (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
+  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
   caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
