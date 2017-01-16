@@ -8,36 +8,30 @@ Our experimental results are given by the following metrics:
 
 %
 \textit{Saved Rebroadcasts (SRE)} --
-number of messages that nodes do not retransmit per broadcasting session.
+number of broadcast messages that nodes do not retransmit based on the worse case scenario, \textit{pure flooding}.
 %
-More formally, let $k$ be the number of observed retransmissions during the flooding of a message using algorithm $a$; and $n$ the number of nodes in the network; then, we save $n - k$ rebroadcast by using $a$ instead of \textit{simple flooding}.
+To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number of retransmissions $R$ made by $A$ to disseminate one message. Then, we simply say that $A$ saved $N - R$ messages.
 %
 This metric is useful to measure the efficiency in terms of both network and energy usage. 
 
 \textit{Duplicated messages} --
-number of extra times a message is received.
+number of times one broadcast message is received after its first reception.
 %
-That is, in a perfect situation a node only need to receive a message once.
-%
-But with most algorithms the same messages is usually received multiple times.
+In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcasting.
 
-\textit{Coverage} --
-percentage of nodes in the network that receive a message.
+\textit{Reachability} --
+percentage of nodes that successfully receive one broadcast message at least once.
 
-
-\textit{Broadcast time} -- time required for a flood operation to reach full coverage.
-%
-It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
-
+\textit{Broadcast time} --
+time to disseminate one message with reachability of 100\%.
+% 
+%It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
 \textit{Energy consumption} --
-energy consumed for each node during the experiment.
-
- 
-For each broadcasting approach,  we present the results for several scenarios as we discuss in Section~\ref{sec:scenarios}.
-%
-To do so, we present the results for each metric with and without mobility.
+energy consumed by nodes during every broadcast session.
 %
 
+We analyze the last group of broadcasting metrics with and without mobility, following the model described at Section~\ref{sec:scenarios}.
+%
 \subsection{Efficiency in terms of network utilization}
 
 In this section we discuss the efficiency of each approach using two metrics, \textit{saved rebroadcasts} and \textit{received duplicated messages}.
