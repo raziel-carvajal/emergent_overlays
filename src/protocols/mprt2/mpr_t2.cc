@@ -201,9 +201,9 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
     if (!user_data) {
         string key = createUniqueBroadcastingSessionId();
-				payloads[key] = key;
+		payloads[key] = key;
         emitBroadcastMsgReceived(key);
-				broadcast(key, build_message_to_broadcast());
+		broadcast(key, build_message_to_broadcast());
     }
 }
 
