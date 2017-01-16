@@ -2,3 +2,28 @@
 
 \section{Discussion}
 \label{sec:discussion}
+
+A summary of the main results found in Section~\ref{sec:evaluation} is shown in Table~\ref{tbl:rules}.
+%
+It has the form of a set of advices that allows us to chose a good fit for a given scenario. 
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lrp{1.3cm}|p{1.3cm}p{2.0cm}}
+		\textbf{Mobility} & \textbf{Density} & \textbf{Frequency of broadcasts} & \textbf{Suggestion} & \textbf{Advices}\\
+		
+		\midrule
+		Static & Any & Any & \textit{MPR} & Reduce frequency of control messages \\
+		Walk Speed & 5 & Any & \textit{simple flooding} &  \\
+		Walk Speed & 10 & Low & \textit{MPR} &  \\
+		Walk Speed & 10 & Medium+ & \textit{ABBA} &  \\
+		Walk Speed & 15--25 & Any & \textit{CDS} &  \\
+		Walk Speed & 30+ & Low & \textit{CDS} &  \\
+		Walk Speed & 30+ & Medium+ & \textit{ABBA} &  \\
+	\end{tabular}
+	
+	\caption{Advices on what flooding algorithm uses for different parameters.}
+	\label{tbl:rules}
+\end{table}
