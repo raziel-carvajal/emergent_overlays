@@ -34,22 +34,22 @@ energy consumed by nodes during every broadcast session.
 	\begin{center}
 	\subfigure[Static Scenarios]{
 		\label{fig:a-saved}
-		\includegraphics[scale=0.29]{fig/results-static-summary.pdf}
+		\includegraphics[page=1, scale=0.285, trim = 15mm 0 24mm 0]{fig/results-static-summary.pdf}
 	}
 	~
 	\subfigure[Static Scenarios]{
 		\label{fig:a-duplicated}
-		\includegraphics[scale=0.33, trim = 0 10mm 0 0]{fig/results-static.pdf}
+		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-static.pdf}
 	}
 	~
 	\subfigure[Mobility Scenarios]{
 		\label{fig:b-saved}
-		\includegraphics[scale=.29]{fig/results-mobility-summary.pdf}
+		\includegraphics[page=1, scale=.285, trim = 15mm 0 24mm 0]{fig/results-mobility-summary.pdf}
 	}
 	~
 	\subfigure[Mobility Scenarios]{
 		\label{fig:b-duplicated}
-		\includegraphics[scale=0.33]{fig/results-mobility.pdf}
+		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
 	}
 	\caption{Saved Rebroadcasts over different de}
 	\label{fig:saved-rebroadcasts}
@@ -76,9 +76,6 @@ Interestingly, \textit{ABBA} rapidly reduce the number of retransmissions even b
 While a node-degree technique overloads the communication medium with its periodic exchange of control messages, ABBA avoids retransmissions because the bigger the communication range of nodes its is covered
 %
 Finally, \textit{ProbFlood} has a poor performance for all densities.  
-
-
-
 
 The behavior changes when we add mobility to the settings.
 %
@@ -118,10 +115,6 @@ Meanwhile, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low 
 %
 \textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  
 
-
-
-
-
 \subsection{Energy Consumption}
 
 The following section analyses the energy consumption of the studied approaches.
@@ -133,6 +126,33 @@ The \textit{number of message sent and received} are important because, every ti
 Hence, the broadcast messages retransmitted as well as the control messages have a direct influence on energy consumption.
 %
 The \textit{network saturation in the vicinity} of the node is also important due to the way the MAC layer is implemented.
+
+\begin{figure*}[ht]
+	\begin{center}
+	\subfigure[Static Scenarios]{
+		\label{fig:a-coverage}
+		\includegraphics[page=2, scale=0.285, trim = 15mm 0 24mm 0]{fig/results-static-summary.pdf}
+	}
+	~
+	\subfigure[Static Scenarios]{
+		\label{fig:a-energy}
+		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-static.pdf}
+	}
+	~
+	\subfigure[Mobility Scenarios]{
+		\label{fig:b-coverage}
+		\includegraphics[page=2, scale=.285, trim = 15mm 0 24mm 0]{fig/results-mobility-summary.pdf}
+	}
+	~
+	\subfigure[Mobility Scenarios]{
+		\label{fig:a-energy}
+		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
+	}
+	\caption{Saved Rebroadcasts over different de}
+	\label{fig:coverage-energy}
+	\end{center}
+\end{figure*}
+
 %
 In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is resent.
 %
@@ -143,23 +163,13 @@ Since in this case both messages and ACK notifications are often lost, the MAC l
 
 Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
 %
+
 Since each node sends and receives different number of messages, we use \textit{boxplots} to present the full distribution of power consumption.
 %
 Due to space limitations, we do not present the plots for all densities.
 %
 Instead, we are only showing plots for those densities were there is a significant change in the patterns of energy consumption.
 % 
-
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-energy}\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-energy}\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}}
-	\caption{Energy consumption for different densities and mobility scenarios. Each box show the distribution of energy consumption for all the nodes in a scenario.}
-	\label{fig:energy-consumption}
-\end{figure*}
-
-
 The first thing to note is that, as expected, \textit{simple flooding} consumes more energy in all scenarios.
 %
 Also interesting is that both CDS-based approaches, namely \textit{MPR} and \textit{node-degree}, always outperform other approaches when there is no mobility.
@@ -212,43 +222,26 @@ This is understandably because \textit{ABBA} is an area-based approach where eac
 %
 Since the location of each node changes continually, it is expected that this approach won't be 100\% reliably. 
 
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=2, width=0.45\textwidth]{fig/results-static-summary.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=2, width=0.45\textwidth]{fig/results-mobility-summary.pdf}}
-	\caption{Broadcast coverage for different scenarios: densities, mobility and broadcasting approaches.}
-	\label{fig:coverage}
-\end{figure*}
+
 
 
 Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
-%
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-coll}\includegraphics[page=1, width=0.45\textwidth]{fig/collisionsNoMob.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-coll}\includegraphics[page=1, width=0.45\textwidth]{fig/collisionsMob.pdf}}
-	\caption{Collisions of broadcasting messages.}
-	\label{fig:collisions}
-\end{figure*}
+
 This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-sessT}\includegraphics[page=1, width=0.45\textwidth]{fig/SessionTimeNoMob.pdf}}
+\begin{figure*}[ht]
+	\begin{center}
+	\subfigure[Static Scenarios]{
+		\label{fig:a-sessionTime}
+		\includegraphics[scale=0.25]{fig/SessionTimeNoMob.pdf}
+	}
 	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-sessT}\includegraphics[page=1, width=0.45\textwidth]{fig/sessionTimeMob.pdf}}
-	\caption{Broadcasting session time.}
+	\subfigure[Mobility Scenarios]{
+		\label{fig:b-sessionTime}
+		\includegraphics[scale=0.25]{fig/sessionTimeMob.pdf}
+	}
+	\caption{Broadcasting Session Time.}
 	\label{fig:broSessionTime}
-\end{figure*}
-
-\begin{figure*}[htb]
-	\centering
-	\subfigure[Static Scenarios]{\label{fig:a-relays}\includegraphics[page=1, width=0.45\textwidth]{fig/relaysNoMob.pdf}}
-	~
-	\subfigure[Mobility Scenarios]{\label{fig:b-relays}\includegraphics[page=1, width=0.45\textwidth]{fig/relaysMob.pdf}}
-	\caption{Percentage of nodes that performs retransmissions.}
-	\label{fig:broSessionTime}
+	\end{center}
 \end{figure*}
 
