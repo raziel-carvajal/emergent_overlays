@@ -189,6 +189,26 @@ The first parameter is the mobility of nodes and the second is the ratio between
 
 \subsection{Coverage}
 
+Figure~\ref{fig:coverage} presents the coverage of the five algorithms studied in the scenarios with and without mobility.
+%
+All these algorithms tend to be reliables in static settings and densities above 10.
+%
+Some approaches fail to deliver all broadcast messages in settings with very low density because many sections of the network are only connected by a single link that can be point of failure. 
+%
+In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of occurrences.
+%
+
+The results in the mobility scenarios are less stables.
+%
+As expected, some protocols such as \textit{MPR} and \textit{node-degree} behave worse because the underlying topology they build to drive the communication must be constantly updated due to the movement of nodes.
+%
+This problem can be observed for all the densities, but it is more clear in denser topologies.
+%
+We can also see that \textit{ABBA} tends to fail with different values of density, although far less than the CDS-based approaches.
+%
+This is understandably because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.
+%
+Since the location of each node changes continually, it is expected that this approach won't be 100\% reliably. 
 
 \begin{figure*}[htb]
 	\centering
@@ -198,4 +218,8 @@ The first parameter is the mobility of nodes and the second is the ratio between
 	\caption{Broadcast coverage for different scenarios: densities, mobility and broadcasting approaches.}
 	\label{fig:coverage}
 \end{figure*}
+
+Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
+%
+This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
