@@ -5,7 +5,10 @@
 
 A summary of the main results found in Section~\ref{sec:evaluation} is shown in Table~\ref{tbl:rules}.
 %
-It has the form of a set of advices that allows us to chose a good fit for a given scenario. 
+It has the form of a set of advices that allows us to chose a good fit for a given scenario.
+%
+For instance, when there is no mobility, it is better to use \textit{MPR} no matter the density nor the frequency of messages because, as our experiments show, in such scenarios \textit{MPR} consumes less energy, guarantees good coverages and uses efficiently the medium.
+%
 
 \begin{table}[ht]
 	\footnotesize
@@ -18,12 +21,18 @@ It has the form of a set of advices that allows us to chose a good fit for a giv
 		Static & Any & Any & \textit{MPR} & Reduce frequency of control messages \\
 		Walk Speed & 5 & Any & \textit{simple flooding} &  \\
 		Walk Speed & 10 & Low & \textit{MPR} &  \\
-		Walk Speed & 10 & Medium+ & \textit{ABBA} &  \\
-		Walk Speed & 15--25 & Any & \textit{CDS} &  \\
-		Walk Speed & 30+ & Low & \textit{CDS} &  \\
-		Walk Speed & 30+ & Medium+ & \textit{ABBA} &  \\
+		Walk Speed & 15+ & Any & \textit{node-degree} &  \\
+		
 	\end{tabular}
 	
-	\caption{Advices on what flooding algorithm uses for different parameters.}
+	\caption{Advices on what flooding algorithm to use in different deployment scenarios.}
 	\label{tbl:rules}
 \end{table}
+
+The advices for deployment scenarios with mobility at walking speed are more complex, they take into account other external parameters such as the density and the frequency of broadcasts.
+%
+To suggest an algorithms, we first aim at increasing the coverage, then the energy consumption and we consider that the medium usage is the least important metric.
+%
+For that reason, we propose \textit{simple flooding} when the density is very low.
+%
+
