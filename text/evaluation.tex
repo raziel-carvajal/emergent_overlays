@@ -182,11 +182,38 @@ To do so, we present the results for each metric with and without mobility.
 
 \subsubsection{Energy Consumption}
 
+The following section analyses the energy consumption of the studied approaches.
+%
+The energy consumption of a node depends on several factors: the \textit{number of message sent}, the \textit{number of messages received}, and the \textit{network saturation in the vicinity} of the node.
+%
+The \textit{number of message sent and received} are important because, every time the node sends or receives a message, the \textit{transmitter} and receiver components in the radio change to a more power hungry mode.
+%
+Hence, the messages retransmitted as well as the control messages have a direct influence on energy consumption.
+%
+The \textit{network saturation in the vicinity} of the node is also important due to the way the MAC layer is implemented.
+%
+In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is resent.
+%
+The goal of this strategy is to increase the reliability of the network, but it has a negative effect in terms of energy consumption.
+%
+There are many collisions when the network is saturated.
+%
+Since in this case both messages and ACK notifications are lost, the MAC layer keeps resending message and consuming energy in the process.
+%
+
+Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
+%
+Since each node sends and receives different number of messages, we use \textit{boxplots} to present the full distribution of power consumption.
+%
+Due to space limitations, we do not present the plots for all densities.
+%
+Instead, we are only showing plots for those densities were there is a significant change in the patterns of energy consumption. 
+
 \begin{figure*}[htb]
 	\centering
-	\subfigure[Static Scenarios]{\label{fig:a}\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}}
+	\subfigure[Static Scenarios]{\label{fig:a-energy}\includegraphics[page=1, width=0.90\textwidth]{fig/results-static.pdf}}
 	~
-	\subfigure[Mobility Scenarios]{\label{fig:b}\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}}
+	\subfigure[Mobility Scenarios]{\label{fig:b-energy}\includegraphics[page=1, width=0.90\textwidth]{fig/results-mobility.pdf}}
 	\caption{Energy consumption for different densities and mobility scenarios. Each box show the distribution of energy consumption for all the nodes in a scenario.}
 	\label{fig:energy-consumption}
 \end{figure*}
