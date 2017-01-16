@@ -57,13 +57,12 @@ In this paper, we explore the relative performance and costs of representative M
 %
 
 
-In addition to the \textit{simple flooding} algorithm, our study considers five algorithms that are representative of their class:
+In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
 \begin{itemize}
 	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
 	\item \textit{MPR}, a well-known algorithm that maintains an overlay structure to control the broadcasting process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
 	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum CDS. This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
 	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density of each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
-	\item \textit{Dist2Mean}
 \end{itemize}
 
 The contributions of the present performance comparison study are answering the question of what is the most appropriate algorithms for a certain deployment scenario, and showing that there is no one-size-fits-all in MANET broadcasting.
