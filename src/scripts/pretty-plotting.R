@@ -160,7 +160,7 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 
   p <- ggplot( data, aes(dat, ecdf, colour = alg) ) +
       facet_grid(. ~ density) +
-      theme(legend.position="bottom") +
+      theme(legend.position="top", text=element_text(size=18)) +
       xlab("Time (ms)") +
       (if (print.titles)
  		   labs(title=caption, colour="Algorithms")
@@ -204,15 +204,18 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 		 ylab(ylabel) +
     #  xlab("Algorithm") +
     #  theme(legend.position="none") +
-     theme(legend.position="bottom") +
+     theme(legend.position="top", text=element_text(size=18)) +
      (if (print.titles)
       #  labs(title=caption, x=NULL)
        labs(title=caption, fill="Algorithms")
      else
        labs(fill="Algorithms")
      ) +
-     theme(axis.title.x=element_blank(),axis.text.x = element_text(angle = 30, hjust = 1)) +
-     get.plot.theme.style()
+    #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
+     get.plot.theme.style() +
+     theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
     if (!print.titles) {
         p <- p + scale_fill_grey(start = 0, end = .9)
     }
@@ -248,7 +251,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 	p <- ggplot(data) +
 		 geom_line(aes(x=idx, y=dat, colour=alg)) +
 		 facet_grid(. ~ density) +
-		 theme(legend.position="bottom") +
+		 theme(legend.position="top", text=element_text(size=18)) +
 		 ylab(ylabel) + xlab("Broadcast Session") +
      (if (print.titles)
 		   labs(title=caption, colour="Algorithms")
@@ -316,7 +319,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
             geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg),   # Shape depends on cond
                size = 4) +        # Large points
-		 theme(legend.position="bottom") +
+		 theme(legend.position="top", text=element_text(size=18)) +
 		 ylab(ylabel) + xlab("Density") +
          (if (print.titles)
     		   labs(title=caption, colour="Algorithms", shape="Algorithms")
@@ -344,7 +347,7 @@ plot.simple.coverage <- function(df, algos) {
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
          geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),   # Shape depends on cond
                    size = 4) +        # Large points
-    		 theme(legend.position="bottom") +
+    		 theme(legend.position="top", text=element_text(size=18)) +
     		 ylab(ylabel) + xlab("Density") +
          (if (print.titles)
     		   labs(title=caption, colour="Algorithms", shape="Algorithms")
