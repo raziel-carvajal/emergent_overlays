@@ -26,18 +26,20 @@ Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor ne
 
 Many network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation}, which consists in delivering a message from a source node to all other nodes in the network.
 %
-The broadcasting problem for MANETs has received considerable attention.
+The broadcast problem for MANETs has received considerable attention.
 %
 In particular, these solutions attempt to:
 \vspace{-1mm}
 \begin{itemize}
-	\item \textit{Maximize coverage:} As many nodes in the network as possible, and ideally all of them, should receive a broadcast message $m$.
-	\item \textit{Minimize energy consumption and bandwidth usage:} Ultimately, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages, and how it distributes these costs among the nodes of the network.
-	\item \textit{Support mobility patterns:} The coverage and efficiency of the broadcast should be minimally impacted by the mobility of the nodes.
+	\item \textit{Maximize coverage} as many nodes as possible in the network, and ideally all of them, should receive a broadcast message $m$.
+	
+	\item \textit{Minimize energy consumption and bandwidth usage.} Ultimately, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages, and how it distributes these costs among the nodes of the network.
+	
+	\item \textit{Support mobility patterns.} The coverage and efficiency of the broadcast should be minimally impacted by the mobility of the nodes.
 	More specifically, broadcast should remain efficient and with a high coverage under a large variety of mobility patterns and deployment scenarios, defined by their velocity and density models, or by the evolution of the connectivity between nodes.
 \end{itemize}
 
-Many algorithms have been proposed to solve the broadcasting problem in MANET~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
+Many algorithms have been proposed to solve the broadcast problem in MANET~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
 All these algorithms achieve broadcast using a form of \emph{controlled flooding}: 
 since the transmission range of a source node is typically much smaller than the physical span of the network, the solution to broadcast is that nodes receiving a message can retransmit it further, eventually covering the entire network.
@@ -61,17 +63,17 @@ Our goal in this paper is to explore the relative performance and costs of repre
 In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
 \begin{itemize}
 	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
-	\item \textit{MPR} maintains an overlay structure to control the broadcasting process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
+	\item \textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
 	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS). This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
 	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
 \end{itemize}
 
 The contributions of our performance comparison study aim at helping practitioners decide which is the most appropriate algorithms for a certain deployment scenario.
-Our results show in particular that there is no one-size-fits-all for MANET broadcasting.
+Our results show in particular that there is no one-size-fits-all for MANET broadcast.
 %
 We show that it is possible to identify what are the algorithms that better match the studied deployment scenarios.
 %
-These findings can further be used to design a broadcasting approach that changes its behavior at runtime based on contextual information.
+These findings can further be used to design a broadcast approach that changes its behavior at runtime based on contextual information.
 %
 We envision an adaptation mechanism where the next algorithm to use is the best fit for a given deployment scenario.
 
