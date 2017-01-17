@@ -3,17 +3,17 @@
 \section{Background}
 \label{sec:background}
 
-We provide in this section a characterization of broadcast algorithms for MANETs and motivate our study.
-
-
-Over the last decade, many algorithms have been proposed to provide services over MANETs.
+%We provide in this section a characterization of broadcast algorithms for MANETs and motivate our study.
 %
-In particular, a large body of work has been dedicated to the definition of efficient solutions for group communications and in particular broadcasting, where one message must be propagated from one source node to all other nodes in the network.
 %
-Broadcast is actually a fundamental operation upon which other operations are built, such as routing~\cite{Patel7033833}.
-%
-However, determining which of these broadcast algorithms is adequate for a particular MANET, for example in a IoT application, remains a difficult operation.
-This choice is a complex tradeoff between several parameters, leading to different costs and performance expectations on latency, energy consumption, and fault tolerance.
+%Over the last decade, many algorithms have been proposed to provide services over MANETs.
+%%
+%In particular, a large body of work has been dedicated to the definition of efficient solutions for group communications and in particular broadcast, where one message must be propagated from one source node to all other nodes in the network.
+%%
+%Broadcast is actually a fundamental operation upon which other operations are built, such as routing~\cite{Patel7033833}.
+%%
+%However, determining which of these broadcast algorithms is adequate for a particular MANET, for example in a IoT application, remains a difficult operation.
+%This choice is a complex tradeoff between several parameters, leading to different costs and performance expectations on latency, energy consumption, and fault tolerance.
 
 
 A straightforward approach to broadcast is \textit{blind flooding}.
@@ -28,9 +28,9 @@ Collisions are more likely to occur and have a greater impact on message loss.
 As a result, both network bandwidth and energy are wasted. 
 
 
-Due to the broadcast storm problem, designing a broadcasting algorithm for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of network coverage, i.e., the percentage of nodes that receive a message, and (ii) minimizing the amount of resources used by the broadcast protocol, prior to and during the actual dissemination.
+Due to the broadcast storm problem, designing a broadcast algorithm for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of network coverage, i.e., the percentage of nodes that receive a message, and (ii) minimizing the amount of resources used by the broadcast protocol, prior to and during the actual dissemination.
 %
-As a consequence, broadcasting algorithms attempt to reduce the number of nodes retransmitting a message to the minimum required to reach an acceptable coverage.
+As a consequence, broadcast algorithms attempt to reduce the number of nodes retransmitting a message to the minimum required to reach an acceptable coverage.
 %
 This avoids energy depletion of nodes than run on a battery, and thus improves the overall network life time.
 %
@@ -46,21 +46,24 @@ Many algorithms have been proposed so far for efficient message dissemination ba
 The choice of a specific broadcast algorithm depends on its expected coverage and energy cost, but is also highly impacted by its deployment context.
 
 
-Ruiz and Bouvry~\cite{Ruiz2015} propose a survey of broadcasting algorithms for MANETs.
+Ruiz and Bouvry~\cite{Ruiz2015} propose a survey of broadcast algorithms for MANETs.
 The authors define a taxonomy to classify current state-of-the-art algorithms based on their main algorithmic characteristics, and in particular on how they control the forwarding operation.
 %
-However, to the best of our knowledge, there is a lack of comprehensive \emph{experimental} comparison of these costs and of the effectiveness of different protocols.
+In this study, we have selected five algorithms, including simple flooding, that are representative of their class.
 %
-To overcome this, we propose in this study an experimental study of six protocols, each representative of one of the principal design alternatives.
+%However, to the best of our knowledge, there is a lack of comprehensive \emph{experimental} comparison of these costs and of the effectiveness of different protocols.
+%%
+%To overcome this, we propose in this study an experimental study of six protocols, each representative of one of the principal design alternatives.
 %
-We consider in this study only protocols in which the antenna transmission range is fixed, and will consider variable-range protocols in a future study.
+We consider only protocols in which the antenna transmission range is fixed.  
+Variable-range protocols would complexify the experimental setup and evaluation analysis and will be considered in future work.
 %
-Broadcast protocols can be first classified in two main classes, depending on whether or not they maintain and use an underlying virtual topology between the nodes in the MANET.
+Broadcast algorithms can be first classified in two main classes, depending on whether or not they maintain and use an underlying virtual topology between the nodes in the MANET.
 
 \subsection{Using an underlying topology}
 
 Many algorithms build and use an \textit{underlying topology} (or backbone) to drive the broadcast operation.
-This underlying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcasting.
+This underlying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcast.
 For instance, Figure~\ref{fig:explaining-backbone:a} depicts a small network.
 Considering the transmission range of each node, we can build an underlying topology as shown in Figure~\ref{fig:explaining-backbone:b}.
 With this topology, it is possible to reach a full coverage of the network if only the nodes that are part of the backbone retransmit messages upon their first reception~\cite{Wu2001}.
@@ -78,32 +81,34 @@ We consider two protocols that refer to this category: \textit{MPR} and \textit{
 	\label{fig:explaining-backbone}
 \end{figure*}
 
-In the \textit{Multipoint Relays Set (MPR)}~\cite{Qayyum2002} protocol, the flooding operation proceeds as follows: 
-	i) each node $n$ computes a set $\textit{MPR}_n \subset \textit{Neighbors}_n$; 
-	ii) when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$; 
-	iii) before transmitting a message, a node $m$ computes its own $\textit{MPR}_m$, attaches it to the message and finally retransmits the message.
+\paragraph{MPR} Multipoint Relays Set~\cite{Qayyum2002}.
+Flooding in MPR is a three step operation.
+First, each node $n$ computes a set $\textit{MPR}_n$ which is a subset of its neighbors. 
+Second, when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$.
+Finally, before transmitting a message, a node $m$ computes its own set $\textit{MPR}_m$ and attach it to the message.
+%
 The aforementioned set $\textit{MPR}_n$ is an approximation of the CDS in the vicinity of $n$.
 To compute it, a node uses information from its 1- and 2-hop neighbors.
 In order to obtain this information, \textit{HELLO} messages containing the corresponding data are periodically sent by all nodes towards their neighbors.
-Finally, it is worth noticing that MPR is a \textit{source-dependent} solution, meaning that the relays selected during the broadcast process vary, depending on the initial source of the message.
+It is worth noticing that MPR is a \textit{source-dependent} solution, meaning that the relays selected during the broadcast process vary, depending on the initial source of the message.
 
-The second algorithm, described in~\cite{Wu2001}, proposes a set of rules based on the \textit{node-degree} to build a good approximation of the minimum CDS.
-A rule decides if a node that belongs to the CDS remains in that set or if it must be removed.  
-The mechanism proposed can be seen as a pipeline of rules where only the first one is mandatory.
-Successive rules are used to improve an initial approximation of the minimum CDS.
-As typically found with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
-As example of rules, we present the first two proposed in~\cite{Wu2001}.
-Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$ where $N(v)$ is the set of neighbors of $v$:
-
-\begin{enumerate}
-	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \textit{and} \quad w \notin N(w)$.
-	\item Consider two marked vertices $v$ and $u$. Then, $v$ is unmarked if one of the following conditions holds:
-	\begin{itemize}
-		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(u)$.
-		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \\ \textit{id}(v) < \textit{id}(u)$.
-	\end{itemize}
+\paragraph{node-degree} 
+The \textit{node-degree} algorithm~\cite{Wu2001} proposes a set of rules to build a good approximation of the minimum CDS.
+Rules are used to decide if a node that belongs to the CDS remains in that set or if it must be removed.  
+Rules are applied using a pipeline approach to further improve the approximation of the minimum CDS.
+%As typically found with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
+%As example of rules, we present the first two proposed in~\cite{Wu2001}.
+%Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$ where $N(v)$ is the set of neighbors of $v$:
+%
+%\begin{enumerate}
+%	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \textit{and} \quad w \notin N(w)$.
+%	\item Consider two marked vertices $v$ and $u$. Then, $v$ is unmarked if one of the following conditions holds:
+%	\begin{itemize}
+%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(u)$.
+%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \\ \textit{id}(v) < \textit{id}(u)$.
+%	\end{itemize}
 	
-\end{enumerate} 
+%\end{enumerate} 
 
 
 
@@ -115,10 +120,10 @@ Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree 
 \subsection{Using no underlying topology}
 
 In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
-Thus, many protocols do not rely on any underlying topology. 
+Thus, some protocols do not rely on any underlying topology. 
 % Instead, they either use no information about the local node context, or only information that can be piggybacked with the dissemination messages.
 
-\paragraph{Context-aware}
+\subsubsection{Context-aware}
 
 Some protocols use their local \textit{context} to decide if a node should retransmit a message.
 For instance, nodes can consider, among others, the number of neighbors, their mobility speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last sender of a received message.
@@ -127,23 +132,21 @@ Since this contextual information varies over time, these algorithms often delay
 %As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.\laurent{not sure to get it}
 This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
 
-In~\cite{Ovalle-Martinez2006}, the authors propose the \textit{Area-based beacon-less protocol} (ABBA).
-This is a \textit{context-aware} algorithm in which the flooding process is controlled in both space and time.
-Notice that the algorithm requires that each node knows its physical location as well as the transmission range of each node.
+\paragraph{ABBA} Area-based beacon-less protocol~\cite{Ovalle-Martinez2006}.
+The flooding process in ABBA is controlled in both space and time.
+The algorithm requires that each node knows its physical location as well as the transmission range of each node.
 Upon the reception of a message, a node first computes the angle $\alpha$ covered by the received transmission.
 Using this information, it then schedules a timer with a timeout $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is the maximum waiting time, a network-wide protocol constant.
 If the same message is received before the timer expires, the node updates $\alpha$, cancels the previous timer and creates a new one.
 No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
 Otherwise, the message is retransmitted by the node when the timer expires.
 
-We also evaluate a probabilistic approach presented by Cartigny and Simplot~\cite{Cartigny:2003:BNR:2727141.2727459}.
-In this \textit{context-aware} protocol, a node retransmits a message with a probability that depends on two contextual values.
-The first value is the number of neighbors of the node.
-In using this value, the function used to compute the probability of retransmitting a message decreases as the local density increases.
+\paragraph{ProbFlood} probabilistic approach presented by Cartigny and Simplot~\cite{Cartigny:2003:BNR:2727141.2727459}.
+A node retransmits a message with a probability that depends on two contextual values : the number of neighbors of the node and the gain in terms of new area that a node covers if it retransmits the message.
+The probability of retransmitting a message decreases as the local density increases.
 The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
 This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
-The second value is the gain in terms of new area that a node covers if it retransmits the message.
-In this case, the motivation is the same as in ABBA; hence, the larger the new area to cover, the higher the probability of sending a message. 
+Similarly to ABBA, the probability of sending a message increases when the size of the new area to cover increases.
 %Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
 %However, although the protocol requires both \textit{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
 
@@ -153,8 +156,7 @@ In this case, the motivation is the same as in ABBA; hence, the larger the new a
 		
 %\end{enumerate}
 
-\paragraph{Context-Oblivious}
- -- \textbf{Simple-flooding}
+\subsubsection{Context-Oblivious}
 
 
 %The probabilistic flooding is a mix of two approaches. There are two branches in the last level. They don't make the distinction in the survey, but it is clear when you read the paper.
