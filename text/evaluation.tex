@@ -117,37 +117,33 @@ The \textit{network saturation in the vicinity} of the node is also important du
 
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[Reachability of nodes in static scenario.]{
-		\label{fig:a-coverage}
-		\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
-	}
-	~
-	\subfigure[Power consumption per algorithm in static scenario.]{
+	\subfigure[Static scenarios]{
 		\label{fig:a-energy}
-		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
+		\includegraphics[page=1, scale=0.44, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[Reachability of nodes in dynamic scenario.]{
-		\label{fig:b-coverage}
-		\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
-	}
-	~
-	\subfigure[Power consumption per algorithm in dynamic scenario.]{
+	\subfigure[Dynamic scenarios]{
 		\label{fig:b-energy}
-		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
+		\includegraphics[page=1, scale=0.44, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
-	~
-	\subfigure[Broadcasting session t]{
-		\label{fig:a-sessionTime}
-		\includegraphics[scale=0.28, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
-	}
-	~
-	\subfigure[Mobility Scenarios]{
-		\label{fig:b-sessionTime}
-		\includegraphics[scale=0.28, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
-	}
-	\caption{}
-	\label{fig:coverage-energy}
+	\caption{Power consumption per algorithm}
+	\label{fig:energy}
+	\end{center}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\begin{center}
+		\subfigure[Static Scenarios]{
+			\label{fig:a-sessionTime}
+			\includegraphics[scale=0.28, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
+		}
+		~
+		\subfigure[Dynamic Scenarios]{
+			\label{fig:b-sessionTime}
+			\includegraphics[scale=0.28, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
+		}
+		\caption{Broadcasting session time}
+		\label{fig:coverage-energy}
 	\end{center}
 \end{figure*}
 
@@ -207,6 +203,23 @@ Some approaches fail to deliver all broadcast messages in settings with very low
 %
 In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of occurrences.
 %
+
+\begin{figure*}[!ht]
+	\begin{center}
+		\subfigure[Reachability of nodes in static scenario.]{
+			\label{fig:a-coverage}
+			\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
+		}
+		~
+		\subfigure[Reachability of nodes in dynamic scenario.]{
+			\label{fig:b-coverage}
+			\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
+		}
+		~
+		\caption{}
+		\label{fig:coverage}
+	\end{center}
+\end{figure*}
 
 The results in the mobility scenarios are less stables.
 %
