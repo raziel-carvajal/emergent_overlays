@@ -14,14 +14,14 @@ For instance, when there is no mobility, it is better to use \textit{MPR} no mat
 	\footnotesize
 	\centering
 	
-	\begin{tabular}{lrp{1.3cm}|p{1.5cm}p{2.0cm}}
-		\textbf{Mobility} & \textbf{Density} & \textbf{Frequency of broadcasts} & \textbf{Suggestion} & \textbf{Advices}\\
+	\begin{tabular}{lr|p{2.4cm}p{2.3cm}}
+		\textbf{Mobility} & \textbf{Density} &  \textbf{Suggestion} & \textbf{Advices}\\
 		
 		\midrule
-		Static & Any & Any & \textit{MPR} & Reduce frequency of control messages \\
-		Walk Speed & 5 & Any & \textit{simple flooding} &  \\
-		Walk Speed & 10 & Low & \textit{MPR} &  \\
-		Walk Speed & 15+ & Any & \textit{node-degree} &  \\
+		Static & Any & \textit{MPR} & Reduce frequency of control messages \\
+		Walking Speed & 5 & \textit{simple flooding} & Best coverage  \\
+		Walking Speed & 10  & \textit{MPR} &   \\
+		Walking Speed & 15+ & \textit{node-degree} &  \\
 		
 	\end{tabular}
 	
@@ -29,7 +29,7 @@ For instance, when there is no mobility, it is better to use \textit{MPR} no mat
 	\label{tbl:rules}
 \end{table}
 
-The advices for deployment scenarios with mobility at walking speed are more complex, they take into account other external parameters such as the density and the frequency of broadcasts.
+The advices for deployment scenarios with mobility at walking speed are more complex, they take into account other external parameters such as the density.
 %
 To suggest an algorithms, we first aim at increasing the coverage, then the energy consumption and we consider that the medium usage is the least important metric.
 %
