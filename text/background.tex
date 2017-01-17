@@ -5,16 +5,12 @@
 
 We provide in this section a characterization of broadcast algorithms for MANETs and motivate our study.
 
-The advent of the IoT and the needs of its applications have led to a revival of interest in protocols designed for MANETs.
-%
-In such networks, nodes are mobile and randomly appearing or disappearing.
-This causes frequent changes in the network topology, and can lead to temporary disconnections.
-%
+
 Over the last decade, many algorithms have been proposed to provide services over MANETs.
 %
 In particular, a large body of work has been dedicated to the definition of efficient solutions for group communications and in particular broadcasting, where one message must be propagated from one source node to all other nodes in the network.
 %
-Broadcast is actually a fundamental operation upon which other operations are built, such as routing \er{add a reference to a routing protocol here}.
+Broadcast is actually a fundamental operation upon which other operations are built, such as routing~\cite{Patel7033833}.
 %
 However, determining which of these broadcast algorithms is adequate for a particular MANET, for example in a IoT application, remains a difficult operation.
 This choice is a complex tradeoff between several parameters, leading to different costs and performance expectations on latency, energy consumption, and fault tolerance.
@@ -148,7 +144,7 @@ The rationale is that the neighbors of a node are likely closely packed in a den
 This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
 The second value is the gain in terms of new area that a node covers if it retransmits the message.
 In this case, the motivation is the same as in ABBA; hence, the larger the new area to cover, the higher the probability of sending a message. 
-Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
+%Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
 %However, although the protocol requires both \textit{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
 
 %\laurent{Explain and refer the following protocols}
@@ -166,10 +162,10 @@ In opposition to the \textit{context-aware} family, there are also \textit{conte
 %
 These protocols are in general easy to implement and have no limiting requirements such as knowing the location of nodes nor exchanging extra messages with control information.
 %
-However, they also have some disadvantages.
+However, it has been shown that for some algorithms such as the \textit{basic probabilistic} approach this simplicity comes at the expenses of a low coverage~\cite{Ni:1999:BSP:313451.313525}.
 %
-For instance, some protocols in this category are not efficient in terms of energy and bandwidth consumption, while others such as the \textit{basic probabilistic} approach have a poor coverage~\cite{Ni:1999:BSP:313451.313525}.
-\er{this is a bit strange, again, to give opinions about the protocols while we intend to stay neutral.}
+In this paper, we are only considering one protocol in this class, the \textit{simple flooding}. 
+%\er{this is a bit strange, again, to give opinions about the protocols while we intend to stay neutral.}
 
 
 
