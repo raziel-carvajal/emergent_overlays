@@ -148,6 +148,16 @@ The \textit{network saturation in the vicinity} of the node is also important du
 		\label{fig:a-energy}
 		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
 	}
+	~
+	\subfigure[Static Scenarios]{
+		\label{fig:a-sessionTime}
+		\includegraphics[scale=0.25, trim = 0 0 62mm 0]{fig/SessionTimeNoMob.pdf}
+	}
+	~
+	\subfigure[Mobility Scenarios]{
+		\label{fig:b-sessionTime}
+		\includegraphics[scale=0.25, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
+	}
 	\caption{Saved Rebroadcasts over different de}
 	\label{fig:coverage-energy}
 	\end{center}
@@ -228,20 +238,3 @@ Since the location of each node changes continually, it is expected that this ap
 Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
 
 This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
-
-\begin{figure*}[ht]
-	\begin{center}
-	\subfigure[Static Scenarios]{
-		\label{fig:a-sessionTime}
-		\includegraphics[scale=0.25]{fig/SessionTimeNoMob.pdf}
-	}
-	~
-	\subfigure[Mobility Scenarios]{
-		\label{fig:b-sessionTime}
-		\includegraphics[scale=0.25]{fig/sessionTimeMob.pdf}
-	}
-	\caption{Broadcasting Session Time.}
-	\label{fig:broSessionTime}
-	\end{center}
-\end{figure*}
-
