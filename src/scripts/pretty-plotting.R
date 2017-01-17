@@ -317,9 +317,8 @@ plot.saved.rebroadcasts <- function(df, algos) {
   caption <- "Saved rebroadcasts"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
-            geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg),   # Shape depends on cond
-               size = 4) +        # Large points
-		 theme(legend.position="top", text=element_text(size=18)) +
+         geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg), size = 4) +        # Large points
+		 theme(legend.position="top", text=element_text(size=17)) +
 		 ylab(ylabel) + xlab("Density") +
          (if (print.titles)
     		   labs(title=caption, colour="Algorithms", shape="Algorithms")
@@ -345,10 +344,9 @@ plot.simple.coverage <- function(df, algos) {
   caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
-         geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),   # Shape depends on cond
-                   size = 4) +        # Large points
-    		 theme(legend.position="top", text=element_text(size=18)) +
-    		 ylab(ylabel) + xlab("Density") +
+         geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),size = 4) +        # Large points
+         theme(legend.position="top", text=element_text(size=14)) +
+		 ylab(ylabel) + xlab("Density") +
          (if (print.titles)
     		   labs(title=caption, colour="Algorithms", shape="Algorithms")
          else
