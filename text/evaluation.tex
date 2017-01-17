@@ -2,7 +2,7 @@
 
 \section{Evaluation}
 \label{sec:evaluation}
-Details about the scenarios, where each broadcasting algorithm is deployed, were given at Section~\ref{sec:scenarios}; besides, we lack a way to compare the performance of these algorithms.
+Details about the scenarios where each broadcasting algorithm is deployed were given at Section~\ref{sec:scenarios}, besides, we lack a way to compare the performance of these algorithms.
 %
 Our experimental results are given by the following metrics:
 
@@ -10,14 +10,14 @@ Our experimental results are given by the following metrics:
 \textbf{Saved Rebroadcasts (SRE)} --
 number of broadcast messages that nodes do not retransmit based on the worse case scenario, \textit{pure flooding}.
 %
-To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number of retransmissions $R$ made by $A$ to disseminate one message. Then, we simply say that $A$ saved $N - R$ messages.
+To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number $R$ of retransmissions made by $A$ to disseminate one message. Then, we simply compute SRE as $N - R$.
 %
-This metric is useful to measure the efficiency in terms of both network and energy usage. 
+This metric is useful to measure the performance of algorithms in terms of both network and energy usage. 
 
 \textbf{Duplicated messages} --
 number of times one broadcast message is received after its first reception.
 %
-In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcasting.
+%In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcasting.
 
 \textbf{Reachability} --
 percentage of nodes that successfully receive one broadcast message at least once.
@@ -28,40 +28,40 @@ time to disseminate one message with reachability of 100\%.
 % 
 %It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
 \textbf{Energy consumption} --
-energy consumed by nodes during every broadcast session.
+energy consumed by nodes during all broadcast session.
 %
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[Static Scenarios]{
+	\subfigure[SRE messages in static scenario.]{
 		\label{fig:a-saved}
 		\includegraphics[page=1, scale=0.285, trim = 15mm 0 24mm 0]{fig/results-static-summary.pdf}
 	}
 	~
-	\subfigure[Static Scenarios]{
+	\subfigure[Duplicated messages per algorithm in static scenario.]{
 		\label{fig:a-duplicated}
 		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[Mobility Scenarios]{
+	\subfigure[SRE messages in dynamic scenario.]{
 		\label{fig:b-saved}
 		\includegraphics[page=1, scale=.285, trim = 15mm 0 24mm 0]{fig/results-mobility-summary.pdf}
 	}
 	~
-	\subfigure[Mobility Scenarios]{
+	\subfigure[Duplicated messages per algorithm in dynamic scenario.]{
 		\label{fig:b-duplicated}
 		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
 	}
-	\caption{Saved Rebroadcasts over different de}
+	\caption{Overload of wireless communication through \textit{SRE} and \textit{duplicated} messages.}
 	\label{fig:saved-rebroadcasts}
 	\end{center}
 \end{figure*}
 
 %
-We analyze every broadcasting metric with/without mobility over different number of neighbors (range of node densities) as described at Section~\ref{sec:scenarios}.
+We analyze every broadcasting metric with and without mobility over different number of neighbors (range of node densities) as refereed at Section~\ref{sec:scenarios}.
 %
 \subsection{Network overload}
 
-SRE and the number of duplicated messages determine to which extent the communication medium is saturated.
+The proportion of SRE and duplicated messages determine to which extent the communication medium is saturated.
 %Redundant
 %These metrics are useful to assess if a broadcasting algorithm have to send too many messages in order to reach a good coverage.
 %Redundant
@@ -71,57 +71,45 @@ Figure~\ref{fig:a-saved} depicts the SRE in a static scenario where MPRT outperf
 %
 The difference between MPRT and all other algorithms decreases as the density increases.
 %
-Interestingly, \textit{ABBA} rapidly reduce the number of retransmissions even better than a node-degree based technique when the density is above 10.
+Interestingly, ABBA reduce the number of retransmissions as efficient as the node-degree technique. 
 %
-While a node-degree technique overloads the communication medium with its periodic exchange of control messages, ABBA avoids retransmissions because the bigger the communication range of nodes its is covered
+This behavior was expected, if the transmission range of nodes is cover by their neighbors, ABBA cancels retransmissions of messages.
 %
-Finally, \textit{ProbFlood} has a poor performance for all densities.  
 
-The behavior changes when we add mobility to the settings.
+In a dynamic scenario, as shown in Figure~\ref{fig:b-saved}, we observe a negative impact at topology based algorithms.
 %
-In those cases, the best results are displayed by algorithms that do not require the construction of an underlaying topology.
+MPR and node-degree techniques keep nodes' neighbors out of date due to the constant changes. 
 %
-In particular, \textit{ABBA} is best for all densities.
+Additionally, collisions of control messages in these algorithms is another explanation of such a bad performance.
 %
-We can even observe how its behavior is similar with and without mobility.
+While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not consider in this paper.
 %
-On the contrary, \textit{MPR} and \textit{node-degree} are much worse when nodes are moving around.
-%
-In studying these results we notice that the CDS-based approaches cannot maintain a completely up to date underlaying topology due to the mobility.
-%
-As a consequence, they do not properly limit the number of nodes that must retransmit a broadcast message.
-% 
 
-
-The number of duplicated messages received for each nodes is shown in Figure~\ref{fig:duplicated-messages}.
+The proportion of duplicated messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and ~\ref{fig:b-duplicated}.
 %
-As this value varies for each node, we are using \textit{boxplots} to present  a distribution for each setting.
+As this value varies per each broadcast session, we are using \textit{boxplots} to present a distribution of this metric.
 %
-It is important to highlight that the number of duplicated messages is never equal to the density of the network because there are many collisions causing the lost of messages.
+One can notice that the number of duplicated messages is never equal to the density of nodes because collisions provokes the lost of broadcast messages.
 %
-For instance, with density 30 and using \textit{simple flooding} we would expect a distribution where most nodes received around 30 duplicated messages.
+For instance, with density 30 in a \textit{pure flooding} technique it is expected a distribution where all nodes receive around 30 duplicated messages.
 %
 However, as shown in Figure~\ref{fig:a-duplicated}, most nodes barely receive 10 duplicated messages.
 %
-This simply happens due to the high number of collisions produced when \textit{simple flooding} is chosen.
-%
-In general, there are three reasons for obtaining a low number of duplicated messages: i) few messages are sent (high number of saved rebroadcasts); ii) there are many collisions; and iii) the coverage is ``low'', meaning that some nodes never receive some messages.
+In general, there are three reasons to get a low number of duplicated messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low coverage or reachability).
 
 
 %
-Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated} show that \textit{MPR} is again best for all densities with and without mobility.
+On the one hand, the topology based technique MPR is again suitable to cope with all densities in both scenarios of mobility.
 %
-Meanwhile, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
+On the other hand, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
 %
 \textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  
 
-\subsection{Energy Consumption}
+\subsection{Power Consumption}
 
-The following section analyses the energy consumption of the studied approaches.
+Power consumption of nodes depends, for instance, on the number of messages nodes exchange or on the amount of time nodes' transceivers spend in their operational modes.
 %
-The energy consumption of a node depends on several factors: the \textit{number of message sent}, the \textit{number of messages received}, and the \textit{network saturation in the vicinity} of the node.
-%
-The \textit{number of message sent and received} are important because, every time the node sends or receives a message, the \textit{transmitter} or \textit{receiver} components of the radio change to a more power hungry mode.
+The number of received and sent messages are important because, every time the node sends or receives a message, the \textit{transmitter} or \textit{receiver} components of the radio change to a more power hungry mode.
 %
 Hence, the broadcast messages retransmitted as well as the control messages have a direct influence on energy consumption.
 %
@@ -145,7 +133,7 @@ The \textit{network saturation in the vicinity} of the node is also important du
 	}
 	~
 	\subfigure[Mobility Scenarios]{
-		\label{fig:a-energy}
+		\label{fig:b-energy}
 		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
 	}
 	~
@@ -174,7 +162,7 @@ Since in this case both messages and ACK notifications are often lost, the MAC l
 Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
 %
 
-Since each node sends and receives different number of messages, we use \textit{boxplots} to present the full distribution of power consumption.
+We use again \textit{boxplots} to present the full distribution of power consumption.
 %
 Due to space limitations, we do not present the plots for all densities.
 %
@@ -211,7 +199,7 @@ The first parameter is the mobility of nodes and the second is the ratio between
 
 \subsection{Coverage}
 
-Figure~\ref{fig:coverage} presents the coverage of the five algorithms studied in the scenarios with and without mobility.
+Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} presents the coverage of the five algorithms studied in the scenarios with and without mobility.
 %
 All these algorithms tend to be reliables in static settings and densities above 10.
 %
