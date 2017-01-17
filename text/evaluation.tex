@@ -2,33 +2,38 @@
 
 \section{Evaluation}
 \label{sec:evaluation}
-In the previous section, we describe the deployment scenarios where each broadcast algorithm is evaluated.
+In the previous section, we described the deployment scenarios where each broadcast algorithm is evaluated.
 %
 In this section we present the results of our experiments.
 %
 Such results are expressed in terms of the following metrics:
 
 %
+\noindent $\triangleright$
 \textbf{Saved Rebroadcasts (SRE)} --
-number of broadcast messages that nodes do not retransmit based on the worse case scenario, \textit{pure flooding}.
+number of broadcast messages that nodes do not retransmit based on the worst case scenario, \textit{pure flooding}.
 %
 To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number $R$ of retransmissions made by $A$ to disseminate one message. Then, we simply compute SRE as $N - R$.
 %
 This metric is useful to measure the performance of algorithms in terms of both network and energy usage. 
 
+\noindent $\triangleright$
 \textbf{Duplicated messages} --
 number of times one broadcast message is received after its first reception.
 %
 %In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcast.
 
+\noindent $\triangleright$
 \textbf{Reachability} --
 percentage of nodes that successfully receive one broadcast message at least once.
 
+\noindent $\triangleright$
 \textbf{Broadcast time} --
-time to disseminate one message with reachability of 100\%.
+time to disseminate one message with a reachability of 100\%.
 
 % 
-%It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage. 
+%It is only measured when all the participants receive the message because this is the only way of comparing protocols with different coverage.
+\noindent $\triangleright$
 \textbf{Energy consumption} --
 energy consumed by nodes during all broadcast session.
 %
@@ -73,31 +78,31 @@ Figure~\ref{fig:a-saved} depicts the SRE in a static scenario where MPRT outperf
 %
 The difference between MPRT and all other algorithms decreases as the density increases.
 %
-Interestingly, ABBA reduce the number of retransmissions as efficient as the node-degree technique. 
+Interestingly, ABBA reduces the number of retransmissions as efficiently as the node-degree technique. 
 %
-This behavior was expected, if the transmission range of nodes is cover by their neighbors, ABBA cancels retransmissions of messages.
+This behavior was expected, as when the transmission range of nodes is already covered by their neighbors, ABBA cancels retransmissions of messages.
 %
 
-In a dynamic scenario, as shown in Figure~\ref{fig:b-saved}, we observe a negative impact at topology based algorithms.
+In a dynamic scenario, as shown in Figure~\ref{fig:b-saved}, we observe a negative impact for topology-based algorithms.
 %
-MPR and node-degree techniques keep nodes' neighbors out of date due to the constant changes. 
+MPR and node-degree protocols keep nodes' neighbors information that is soon out of date due to the constant changes. 
 %
-Additionally, collisions of control messages in these algorithms is another explanation of such a bad performance.
+Additionally, collisions of control messages in these algorithms is another explanation for the bad performance.
 %
 While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not consider in this paper.
 %
 
-The proportion of duplicated messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and ~\ref{fig:b-duplicated}.
+The proportion of duplicated messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
 %
-As this value varies per each broadcast session, we are using \textit{boxplots} to present a distribution of this metric.
+As this value varies per each broadcast session, we are using \textit{boxplots} to present a distribution of the metric.
 %
-One can notice that the number of duplicated messages is never equal to the density of nodes because collisions provokes the lost of broadcast messages.
+One can notice that the number of duplicate messages is never equal to the density of nodes because collisions provoke the loss of broadcast messages.
 %
-For instance, with density 30 in a \textit{pure flooding} technique it is expected a distribution where all nodes receive around 30 duplicated messages.
+For instance, with density 30 in a \textit{pure flooding} scenario one can expect a distribution where all nodes receive around 30 duplicate messages.
 %
-However, as shown in Figure~\ref{fig:a-duplicated}, most nodes barely receive 10 duplicated messages.
+However, as shown in Figure~\ref{fig:a-duplicated}, most nodes barely receive 10 duplicate messages.
 %
-In general, there are three reasons to get a low number of duplicated messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low coverage or reachability).
+In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low coverage or reachability).
 
 
 %
@@ -109,7 +114,7 @@ On the other hand, \textit{node-degree} behaves similarly to \textit{ProbFlood} 
 
 \subsection{Power Consumption}
 
-Power consumption of nodes depends, for instance, on the number of messages nodes exchange or on the amount of time nodes' transceivers spend in their operational modes.
+Power consumption of nodes depends, for instance, on the number of messages that nodes exchange or on the amount of time nodes' transceivers spend in their operational modes.
 %
 The number of received and sent messages are important because, every time the node sends or receives a message, the \textit{transmitter} or \textit{receiver} components of the radio change to a more power hungry mode.
 %
@@ -150,7 +155,7 @@ The \textit{network saturation in the vicinity} of the node is also important du
 \end{figure*}
 
 %
-In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is resent.
+In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is sent again.
 %
 The goal of this strategy is to increase the reliability of the network, but it has a strong negative effect in terms of energy consumption when the network is saturated.
 %
@@ -177,21 +182,21 @@ In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show
 This is interesting because it indicates that properly using control messages to build an underlying topology is worth in terms of power consumption when the interval among two broadcast messages is close to the interval among control messages.
 %
 
-As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols change in the mobility scenarios.
+As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in the scenarios that include mobility.
 %
 In such scenarios, \textit{ABBA} outperforms \textit{MPR} when the density is low or medium (5, 10, 15).
 %
-Only when the density is greater than 20, MPR becomes competitive once again.
+Only when the density is greater than 20, MPR becomes competitive again.
 %
-In correlating these results with Figures~\ref{fig:b-saved} and ~\ref{fig:b-duplicated} we notice that the nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
+In correlating these results with Figures~\ref{fig:b-saved} and~\ref{fig:b-duplicated} we notice that the nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
 %
-We also notice that the number of duplicated messages received is closer than in the static scenarios.
+We also notice that the number of duplicated messages received is closer than that of the static scenarios.
 %
 %Although This changes when densities above 30 because the control 
 %
-Since \textit{MPR} cannot maintain a completely up to date underlaying topology due to the mobility, it fails in reducing the number of relays nodes and the power consumption is high.
+Since \textit{MPR} cannot maintain a completely up-to-date underlaying topology due to mobility, it fails in reducing the number of relay nodes and the power consumption is high.
 
-These results are of interest because they show two parameters of a scenario that may impact the decision of what algorithm to use to broadcast.
+These results are of interest because they highlight two parameters of a scenario that may impact the decision of what algorithm to use to broadcast.
 %
 The first parameter is the mobility of nodes and the second is the ratio between the broadcast interval and control message interval.
 
@@ -199,11 +204,11 @@ The first parameter is the mobility of nodes and the second is the ratio between
 
 Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} presents the coverage of the five algorithms studied in the scenarios with and without mobility.
 %
-All these algorithms tend to be reliables in static settings and densities above 10.
+All these algorithms tend to be reliables in static settings and for densities above 10.
 %
-Some approaches fail to deliver all broadcast messages in settings with very low density because many sections of the network are only connected by a single link that can be point of failure. 
+Some approaches fail to deliver all broadcast messages in settings with very low density because many sections of the network are only connected by a single link that can be a point of failure. 
 %
-In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of occurrences.
+In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of situations.
 %
 
 \begin{figure*}[!ht]
@@ -222,17 +227,18 @@ In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of occ
 	\end{center}
 \end{figure*}
 
-The results in the mobility scenarios are less stables.
+The results in the mobility scenarios are less stable.
 %
 As expected, some protocols such as \textit{MPR} and \textit{node-degree} behave worse because the underlying topology they build to drive the communication must be constantly updated due to the movement of nodes.
 %
-This problem can be observed for all the densities, but it is more clear in denser topologies.
+This problem can be observed for all the densities, but it is more clear for denser topologies.
 %
 We can also see that \textit{ABBA} tends to fail with different values of density, although far less than the CDS-based approaches.
 %
-This is understandably because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.
+This is understandable because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.
 %
-Since the location of each node changes continually, it is expected that this approach won't be 100\% reliably. This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
+Since the location of each node changes continuously, it is expected that this approach will not reach a 100\% reliably.
+This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
 
 
