@@ -3,7 +3,7 @@
 \section{Perspectives}
 \label{sec:perspectives}
 
-The experiments presented in Section~\ref{sec:evaluation} and discussed in the previous section show that external parameters such as mobility, density, and the interval between broadcast messages have a strong impact on the performance of flooding algorithms.
+The experiments presented in Section~\ref{sec:evaluation} and discussed in the previous section show that external parameters such as mobility, density, and the interval between broadcast messages have a strong impact on the actual performance of broadcast algorithms.
 %
 Interestingly, all these parameters can be monitored at runtime.
 %
@@ -13,15 +13,15 @@ In the same way, many modern mobile devices are equipped with positioning system
 %
 
 
-Our next step is using the results of this paper to guide the design of an overlay for disseminating messages in MANETs.
+Our next step is using the results of this paper to guide the design of an adaptive overlay for disseminating messages in MANETs.
 %
-In our vision, a monitoring process in each node provides data to a management layer that, in a distributed way, decides what basic approach a node should use to flood messages (e.g., \textit{MPR}, \textit{ABBA}, \textit{simple flooding}).
+In our vision, a monitoring process in each node provides data to a management layer that, in a distributed way, decides what basic approach a node should use to disseminate messages (e.g., \textit{MPR}, \textit{ABBA}, or \textit{simple flooding}).
 %
 The main challenge in this case is replacing the algorithm used at runtime without losing any message.
 %
 Fortunately, most dissemination protocols do not require keeping a complex state on each node.
 %
-Hence, we think that they are easily interchangeable and it is possible to have, for instance, an implementation of \textit{ABBA} talking to an implementation of \textit{simple flooding} or \textit{MPR}.   
+Hence, we think that they are interchangeable while keeping strong guarantees on message delivery and broadcast correctness, and that it is possible to have, for instance, an implementation of \textit{ABBA} interacting with an implementation of \textit{simple flooding} or \textit{MPR} through simple translation layers.   
 
 %\begin{itemize}
 %	\item having obstacles as the main source of interference
