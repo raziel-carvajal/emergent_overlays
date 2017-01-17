@@ -34,22 +34,22 @@ energy consumed by nodes during all broadcast session.
 	\begin{center}
 	\subfigure[SRE messages in static scenario.]{
 		\label{fig:a-saved}
-		\includegraphics[page=1, scale=0.285, trim = 15mm 0 24mm 0]{fig/results-static-summary.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
 	}
 	~
 	\subfigure[Duplicated messages per algorithm in static scenario.]{
 		\label{fig:a-duplicated}
-		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-static.pdf}
+		\includegraphics[page=4, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
 	\subfigure[SRE messages in dynamic scenario.]{
 		\label{fig:b-saved}
-		\includegraphics[page=1, scale=.285, trim = 15mm 0 24mm 0]{fig/results-mobility-summary.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
 	}
 	~
 	\subfigure[Duplicated messages per algorithm in dynamic scenario.]{
 		\label{fig:b-duplicated}
-		\includegraphics[page=4, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
+		\includegraphics[page=4, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
 	\caption{Overload of wireless communication through \textit{SRE} and \textit{duplicated} messages.}
 	\label{fig:saved-rebroadcasts}
@@ -117,36 +117,36 @@ The \textit{network saturation in the vicinity} of the node is also important du
 
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[Static Scenarios]{
+	\subfigure[Reachability of nodes in static scenario.]{
 		\label{fig:a-coverage}
-		\includegraphics[page=2, scale=0.285, trim = 15mm 0 24mm 0]{fig/results-static-summary.pdf}
+		\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
 	}
 	~
-	\subfigure[Static Scenarios]{
+	\subfigure[Power consumption per algorithm in static scenario.]{
 		\label{fig:a-energy}
-		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-static.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[Mobility Scenarios]{
+	\subfigure[Reachability of nodes in dynamic scenario.]{
 		\label{fig:b-coverage}
-		\includegraphics[page=2, scale=.285, trim = 15mm 0 24mm 0]{fig/results-mobility-summary.pdf}
+		\includegraphics[page=2, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
 	}
 	~
-	\subfigure[Mobility Scenarios]{
+	\subfigure[Power consumption per algorithm in dynamic scenario.]{
 		\label{fig:b-energy}
-		\includegraphics[page=1, scale=0.35, trim = 0 11.6mm 15mm 0]{fig/results-mobility.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
 	~
-	\subfigure[Static Scenarios]{
+	\subfigure[Broadcasting session t]{
 		\label{fig:a-sessionTime}
-		\includegraphics[scale=0.25, trim = 0 0 62mm 0]{fig/SessionTimeNoMob.pdf}
+		\includegraphics[scale=0.28, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
 	}
 	~
 	\subfigure[Mobility Scenarios]{
 		\label{fig:b-sessionTime}
-		\includegraphics[scale=0.25, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
+		\includegraphics[scale=0.28, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
 	}
-	\caption{Saved Rebroadcasts over different de}
+	\caption{}
 	\label{fig:coverage-energy}
 	\end{center}
 \end{figure*}
@@ -218,11 +218,11 @@ We can also see that \textit{ABBA} tends to fail with different values of densit
 %
 This is understandably because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.
 %
-Since the location of each node changes continually, it is expected that this approach won't be 100\% reliably. 
+Since the location of each node changes continually, it is expected that this approach won't be 100\% reliably. This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
 
 
 
-Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
+%Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
 
-This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
+
