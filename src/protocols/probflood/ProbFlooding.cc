@@ -165,45 +165,39 @@ void ProbFlooding::on_hello_received(const broadcasting::Hello* msg) {
 
 bool ProbFlooding::doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both) {
     int neigSize = neighbors.size();
-    string src[neigSize];
-    string dest[senderNeigs.size()];
-//    string tmp = "";
-//    for (auto& n: senderNeigs) {
-//        dest[i] = n.first;
-//        tmp += n.first + ", ";
-//        i++;
-//    }
-//    cout << getLogHeader() << "DST neighbrs: " << tmp << endl;
-//    tmp = "";
-//    i = 0;
-//    for (auto& n: neighbors) {
-//        src[i] = n.first;
-//        tmp += n.first + ", ";
-//        i++;
-//    }
-//    cout << getLogHeader() << "SRC neighbrs: " << tmp << endl;
+    set<string> src;
+    set<string> dest;
+   for (auto& n: senderNeigs) {
+		 dest.insert(n.first);
+   }
+   for (auto& n: neighbors) {
+		 src.insert(n.first);
+   }
+   cout << getLogHeader() << "SRC neighbrs:" << endl;
     double Na, Nb, Nc = 0.0;
     vector<string> v;
-    set_difference(src, src + neigSize, dest, dest + senderNeigs.size(), inserter(v, v.begin()));
+    set_difference(src.begin(), src.end(), dest.begin(), dest.end(), inserter(v, v.begin()));
     Na = v.size();
     v.clear();
-//    cout << getLogHeader() << "SRC / DST size: " << Na << endl;
-    set_difference(dest, dest + senderNeigs.size(), src, src + neigSize, inserter(v, v.begin()));
+   cout << getLogHeader() << "SRC / DST size: " << Na << endl;
+    set_difference(dest.begin(), dest.end(), src.begin(), src.end(), inserter(v, v.begin()));
     Nb = v.size();
     v.clear();
-//    cout << getLogHeader() << "DST / SRC size: " << Nb << endl;
-    set_intersection(src, src + neigSize, dest, dest + senderNeigs.size(), inserter(v, v.begin()));
+   cout << getLogHeader() << "DST / SRC size: " << Nb << endl;
+    set_intersection(src.begin(), src.end(), dest.begin(), dest.end(), inserter(v, v.begin()));
     Nc = v.size();
     v.clear();
-//    cout << getLogHeader() << "DST intersection SRC size: " << Nc << endl;
+   cout << getLogHeader() << "DST intersection SRC size: " << Nc << endl;
     double mu = Nb / (Na + Nc);
-//    cout << getLogHeader() << "Mu: " << mu << endl;
+   cout << getLogHeader() << "Mu: " << mu << endl;
     double probability;
     if (both)
         probability = pow(mu, sigma)*(k/neigSize - alpha)/(pow(M, sigma)) + alpha;
     else
         probability = pow(mu, sigma)*(A - alpha)/(pow(M, sigma)) + alpha;
-    cout << getLogHeader() << "Probability: " << probability << endl;
+
+		cout << pow(mu, sigma)*(A - alpha)/(pow(M, sigma)) << pow(mu, sigma) << pow(M, sigma) << endl;
+    cout << getLogHeader() << "Probability: " << probability << " probLim=" << probLim << endl;
     return probability >= probLim;
 }
 
