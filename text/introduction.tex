@@ -6,7 +6,7 @@ With the rise of the Internet of Things (IoT), the number and diversity of conne
 %
 %We have entered in a new era where the objects of our daily life, from mobile to wearable devices, can be interconnected.
 %
-Leaders of the industry, such as Cisco, predict that 50 billion devices will be connected together by 2020.
+Leaders of the industry, such as Cisco, predict that 50 billion devices will be connected together by 2020~\cite{DaveEvans-IoT}.
 %
 The goal of the IoT is to link this diversity of objects and promote machine-to-machine interactions.
 %
@@ -18,42 +18,49 @@ The advent of the IoT has led to a strong revival of interest in mobile ad-hoc n
 A MANET is a mobile network that does not rely on a fixed infrastructure.
 Instead, it is a self-configuring network where nodes connect directly to each other, and where there is no guarantee for end-to-end connectivity.
 %
-The topology of a MANET changes frequently due to the mobility of the participants.
+The topology of a MANET changes frequently due to the mobility of participants.
+%
 Nodes are connected using a wireless medium, there is no central entity in charge of routing, and most participants operate on battery-powered devices with limited processing power and bandwidth.
 %
 Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor networks to end-user mobile applications, such as traffic jam prevention system, information dissemination in crowds, data gathering in hostile environments, and peer-to-peer mobile games.
 
 
-Many network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation}, which consists in delivering a message from a source node to all other nodes in the network.
+Many network functions in MANETs, such as routing for instance, rely on the fundamental \textit{broadcast operation} that consists in delivering a message from a source node to all other nodes in the network.
 %
 The broadcast problem for MANETs has received considerable attention.
 %
+
 In particular, these solutions attempt to:
+\raziel{I try to keep one idea per bullet}
 \vspace{-1mm}
 \begin{itemize}
-	\item \textit{Maximize coverage} as many nodes as possible in the network, and ideally all of them, should receive a broadcast message $m$.
+	\item \textit{Maximize reachability.} Ideally, broadcast messages must reach every node in a network.
 	
-	\item \textit{Minimize energy consumption and bandwidth usage.} Ultimately, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages, and how it distributes these costs among the nodes of the network.
+	\item \textit{Minimize energy consumption and bandwidth usage.} Generally, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages.
 	
-	\item \textit{Support mobility patterns.} The coverage and efficiency of the broadcast should be minimally impacted by the mobility of the nodes.
-	More specifically, broadcast should remain efficient and with a high coverage under a large variety of mobility patterns and deployment scenarios, defined by their velocity and density models, or by the evolution of the connectivity between nodes.
+	\item \textit{Be mobility-tolerant and density aware.} Broadcasting should guarantee high reachability and cope with mobility patterns under a large variety of deployment scenarios, where connectivity between nodes is changing constantly.
+	
 \end{itemize}
 
-Many algorithms have been proposed to solve the broadcast problem in MANET~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
+Many algorithms have been proposed to solve the broadcast problem in MANETs~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
-All these algorithms achieve broadcast using a form of \emph{controlled flooding}: 
-since the transmission range of a source node is typically much smaller than the physical span of the network, the solution to broadcast is that nodes receiving a message can retransmit it further, eventually covering the entire network.
+All these algorithms broadcast by using a form of \emph{controlled flooding}: 
+since the transmission range of a source node is typically much smaller than the network area, broadcasting is achieved by message retransmission between nodes to cover the entire network.
 %
-MANET broadcast algorithms mostly differ in the way they control this forwarding operation.
+Broadcast algorithms for MANETs mostly differ in the way they control this forwarding operation.
 %
-In more details, the control happens in space and time by deciding \emph{which} nodes should forward a message during dissemination and \emph{when} this forwarding should happen after the initial message reception.
+Particularly, the control happens in space and time by deciding \emph{which} nodes should forward a message and \emph{when} this operation take place.
 %
 Algorithms can also be distinguished on their use of, or independence from, knowledge about the network topology, nodes locations, and network status.
+
 %
-Besides these differences in the nature of the forwarding, broadcast algorithms are also largely influenced by external factors such as the density of the network, and the mobility rate of its nodes.
+Besides these differences in the nature of messages forwarding, broadcast algorithms are also largely influenced by external factors such as the density of the network, and the mobility rate of its nodes.
 %
-The performance of broadcast protocols has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done in classifying algorithms based on their algorithmic characteristics~\cite{Ruiz2015, Fei1311289}.
-However, to the best of our knowledge, there is a lack of comprehensive experimental comparison of existing solutions allowing an understanding under various deployment scenarios. 
+The performance of broadcast protocols has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done on their classification taking into account the way they work~\cite{Ruiz2015, Fei1311289}.
+%
+However, to the best of our knowledge, there is a lack of comprehensive experimental comparison of existing solutions allowing an understanding under various deployment scenarios.
+%
+Moreover, there is not a common set of \textit{broadcasting metrics} follow by the network community to overview the assets of solutions one can find at the literature.
 
 \noindent
 \textbf{Contributions}.

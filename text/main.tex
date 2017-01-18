@@ -30,7 +30,7 @@
 
 %%%% Environment for comments. Set the boolean to false to produce a comment-free version.
 \newboolean{showcomments}
-\setboolean{showcomments}{false}
+\setboolean{showcomments}{true}
 \ifthenelse{\boolean{showcomments}}
 { \newcommand{\mynote}[3]{
     \fbox{\bfseries\sffamily\scriptsize\color{#3}{#1}}
