@@ -8,22 +8,25 @@
 \section{Experimental Scenario}
 \label{sec:scenarios}
 
-Our experiments are built considering two fundamental external parameters influencing the performance of MANETs: nodes density and nodes mobility.
 %
-The experiments are inspired by a real life scenario: a physical and spontaneous \emph{demonstration} gathering where the infrastructure for mobile communication is not able to serve the amount of clients and where individuals use their mobile phones in a ad-hoc mode to communicate.
+Our experiments are inspired by a real life scenario: a physical and spontaneous \emph{demonstration} gathering where the infrastructure for mobile communication is not able to serve the amount of clients and where individuals use their mobile phones in an ad-hoc mode to communicate.
+%
 In this scenario, the efficient dissemination of some messages to all participants is critical.
 %
-Furthermore, we are interested in proposing a benchmark to evaluate the performance of broadcast protocols.
+To simulate this kind of scenario, we must consider two parameters that influence the performance of broadcast in MANETs: \textit{network density} and \textit{nodes mobility}.
 %
+%Furthermore, we are interested in proposing a benchmark to evaluate the performance of broadcast protocols.
+%
+In the following, we describe the simulation environment and the parameters used in our study.
 
+\subsection*{Simulation tool}
 
-For our performance comparison, we use OMNET++4.6/INET3.3, a simulation framework specifically aimed at evaluating networking algorithms.
+For our performance comparison study, we rely on INET3.3/OMNET++4.6, a simulation framework specifically aimed at evaluating networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
-This tool provides models for many protocols of the network stack such as MAC, 802.11g wireless communication and energy consumption~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+This tool provides models for many protocols of the network stack such as 802.11g wireless communication~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
 %
-In addition, it contains models to describe and deal with mobility aspects.
+In addition, it contains models to describe and deal with mobility and energy consumption aspects.
 %
-In the following, we describe the simulation environment and the parameters used in our study. 
 
 \subsection*{Communication Scenario}
 
