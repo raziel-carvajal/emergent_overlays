@@ -22,7 +22,7 @@ When one host receives a broadcast message $m$ for the first time, it forwards $
 %
 This approach suffers from a number of drawbacks known as \textit{the broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525}.
 %
-Given that each message is retransmitted at least once, the communication medium rapidly becomes saturated, the likelihood of collisions increases and message loss as well. As a result, both network bandwidth and energy are wasted. 
+Given that nodes forward each message at least once, the communication medium rapidly becomes saturated, the likelihood of collisions increases and message loss as well.
 
 %
 Generally, the design of broadcast algorithms for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of reachability, and (ii) optimize resources usage of nodes, prior to and during the actual dissemination.
@@ -32,16 +32,11 @@ As a consequence, broadcast algorithms attempt to reduce the number of forwardin
 In practice, however, it is hard to decide which nodes should retransmit a message.
 
 
-Naturally, the lack of a central authority in MANETs implies that broadcast algorithms must be fully distributed and rely only on \textit{local} data available at each node.
+Naturally, the lack of a central authority in MANETs implies that broadcast algorithms must be fully distributed and rely only on \textit{local} data available at each node. One can find many solutions for efficient message dissemination at the literature.
 %
-In addition, a variety of parameters should be taken into consideration, such as mobility patterns of nodes and their heterogeneous characteristics (type of antenna, battery capacity, etc.).
-
-%
-Many solutions have been proposed so far for efficient message dissemination based on local data along with some heuristics. 
-%
-%The choice of a specific broadcast algorithm depends on its expected coverage and energy cost, but is also highly impacted by its deployment context.
 Ruiz and Bouvry~\cite{Ruiz2015} propose a survey of broadcast algorithms for MANETs.
-The authors define a taxonomy to classify current state-of-the-art algorithms based on their main algorithmic characteristics, and in particular on how they control the forwarding operation.
+%
+The authors define a taxonomy to classify current state-of-the-art algorithms based the way they control the forwarding operation.
 %
 In this study, we have selected five algorithms, including simple flooding, that are representative of their class.
 %
@@ -51,25 +46,31 @@ In this study, we have selected five algorithms, including simple flooding, that
 %
 We consider only protocols in which the transmission range of the antenna is fixed.
 %
-Variable-range broadcast protocols will be kept as future work.
+Variable-range broadcast protocols are kept as future work.
+
 %
-Broadcast algorithms can be first classified in two main classes, depending on whether or not they maintain and use an underlying virtual topology between the nodes in the MANET.
+Broadcast algorithms can be first classified in two main classes, depending on whether or not they maintain an underlying virtual topology between nodes.
 
-\subsection{Using an underlying topology}
+\subsection{Coping with underlying topologies}
+One way to broadcast is through the use of an underlying topology.
+%
+A backbone or spine is a subset of nodes where its members are allowed to forward messages due to their position in space.
+%
+Any other node out of the backbone act as message receiver.
+%
+For instance, Figure~\ref{fig:explaining-backbone:a} depicts a small network of nodes where node $A$ starts with the message dissemination.
+%
+If only nodes $B$ and $C$ perform the retransmission of any incoming message, the reachability of this network will be 100\%.
+%
+Of course, the complexity of a topology based algorithm remains in the construction of this backbone.
+%
+Connected dominating set (CDS) is the formal term for such a backbone~\cite{Wu2001}, formally talking, nodes are partitioned in such a way that they either belong to the CDS or are adjacent to any other node at it. Additionally, connectivity is another property of a graph containing a CDS.
 
-Many algorithms build and use an \textit{underlying topology} (or backbone) to drive the broadcast operation.
-This underlying topology is simply a subset of nodes that, due to their position in space, play a special role in broadcast.
-For instance, Figure~\ref{fig:explaining-backbone:a} depicts a small network.
-Considering the transmission range of each node, we can build an underlying topology as shown in Figure~\ref{fig:explaining-backbone:b}.
-With this topology, it is possible to reach a full coverage of the network if only the nodes that are part of the backbone retransmit messages upon their first reception~\cite{Wu2001}.
-The backbone depicted in Figure~\ref{fig:explaining-backbone:b} is a connected dominating set (CDS).
-In using this kind of topology, nodes are partitioned in such a way that they either belong to the CDS or are directly connected to a node in the CDS.
-The second property of this topology is that all nodes in the CDS must form a connected graph.
-We consider two protocols that refer to this category: \textit{MPR} and \textit{node-degree}.
-
+%
+We consider two topology-based algorithms: \textit{MPR} and \textit{node-degree}.
 \begin{figure*}[t]
 	\centering
-	\subfigure[Transmission range with omnidirectional antennas]{\label{fig:explaining-backbone:a}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_a.pdf}}
+	\subfigure[Transmission range with omnidirectional antennas]{\label{fig:explaining-backbone:a}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_b.pdf}}
 	~
 	\subfigure[Example of underlying topology (minimal CDS)]{\label{fig:explaining-backbone:b}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_b.pdf}}
 	\caption{A small and connected MANET.}
