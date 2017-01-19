@@ -70,19 +70,19 @@ Our goal in this paper is to explore the relative performance and costs of repre
 In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
 \begin{itemize}
 	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
-	\item \textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of relay nodes~\cite{Qayyum2002}.
+	\item \textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of forwarding nodes~\cite{Qayyum2002}.
 	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS). This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
 	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
 \end{itemize}
 
-The contributions of our performance comparison study aim at helping practitioners decide which is the most appropriate algorithms for a certain deployment scenario.
-Our results show in particular that there is no one-size-fits-all for MANET broadcast.
+The contributions of our performance comparison study aim at helping practitioners to decide which is the most appropriate algorithm for a certain deployment scenario. Firstly,
+our results show that there is no one-size-fits-all to broadcast in MANETs.
 %
-We show that it is possible to identify what are the algorithms that better match the studied deployment scenarios.
+Secondly, we identify which are the algorithms that better match the studied deployment scenarios.
 %
 These findings can further be used to design a broadcast approach that changes its behavior at runtime based on contextual information.
 %
-We envision an adaptation mechanism where the next algorithm to use is the best fit for a given deployment scenario.
+Finally, we envision an adaptation mechanism where the next algorithm to use is the best fit for a given deployment scenario.
 
 \noindent
 \textbf{Outline}.
