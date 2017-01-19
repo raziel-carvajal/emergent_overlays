@@ -30,15 +30,14 @@ Many network functions in MANETs, such as routing for instance, rely on the fund
 The broadcast problem for MANETs has received considerable attention.
 %
 
-In particular, these solutions attempt to:
-\raziel{I try to keep one idea per bullet}
+In particular, existing solutions attempt to:
 \vspace{-1mm}
 \begin{itemize}
 	\item \textit{Maximize reachability.} Ideally, broadcast messages must reach every node in a network.
 	
 	\item \textit{Minimize energy consumption and bandwidth usage.} Generally, the efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses to disseminate messages.
 	
-	\item \textit{Be mobility-tolerant and density aware.} Broadcasting should guarantee high reachability and cope with mobility patterns under a large variety of deployment scenarios, where connectivity between nodes is changing constantly.
+	\item \textit{Be mobility-tolerant and density aware.} A broadcast algorithm should guarantee high reachability and cope with mobility patterns under a large variety of deployment scenarios, where the connectivity between nodes is changing constantly.
 	
 \end{itemize}
 
@@ -49,7 +48,7 @@ since the transmission range of a source node is typically much smaller than the
 %
 Broadcast algorithms for MANETs mostly differ in the way they control this forwarding operation.
 %
-Particularly, the control happens in space and time by deciding \emph{which} nodes should forward a message and \emph{when} this operation take place.
+Particularly, the control happens in space and time by deciding \emph{which} nodes should forward a message and \emph{when} this operation takes place.
 %
 Algorithms can also be distinguished on their use of, or independence from, knowledge about the network topology, nodes locations, and network status.
 
@@ -82,7 +81,7 @@ Secondly, we identify which are the algorithms that better match the studied dep
 %
 These findings can further be used to design a broadcast approach that changes its behavior at runtime based on contextual information.
 %
-Finally, we envision an adaptation mechanism where the next algorithm to use is the best fit for a given deployment scenario.
+Finally, we outline an adaptive broadcast mechanism in which the algorithm to use is always the best fit for a given deployment scenario.
 
 \noindent
 \textbf{Outline}.
