@@ -31,17 +31,21 @@ In addition, it contains models to describe and deal with mobility and energy co
 \subsection*{Communication Scenario}
 
 %
-In a \textit{demonstration} scenario, attendees have a mobile device with IEEE 802.11 capability.
+In the \textit{demonstration} scenarios, attendees have a mobile device with IEEE 802.11 capability.
 %
-Many participants might attempt to broadcast messages at nearly the same time using a MANET.
+Participants use such devices to broadcast messages using a MANET and they might attempt to do so at nearly the same time.
 %
-Taking this into consideration, in our performance comparison  we set the number of broadcast messages to \nrMessages{} and the interval among messages to $0.5$ seconds.
+The messages to broadcast are usually \textit{short} because most of them are generated using the input capabilities of mobile devices.
+%
+
+To simulate these conditions,  we set the number of broadcast messages to \nrMessages{} and the interval between messages to $0.5$ seconds in our experiments.
+%
+In addition, the source of each message is randomly selected during the generation of the network (see next subsection).
+%
+Finally, the content of each message is randomly generated, unique and with a length of 32 bytes at most. 
 %
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
-Since some algorithms build a topology to drive the broadcast operation, there is a warm-up period before the first message is broadcast that protocols can use to create any initial structure.
-%
-Finally, in our evaluation we stop each experiment a fixed amount of time after the beginning of the last flooding operation.
 
 \subsection*{Density}
 
@@ -178,6 +182,10 @@ In the case of \textit{ABBA}, we use 0.3 seconds as the maximum waiting time.
 Finally, for \textit{ProbFlood} we assign the values $k=15$, $\sigma=1$, and $\textit{hello time} = 0.5$.
 
 
+\subsection*{Warm-up period}
+Since some algorithms build a topology to drive the broadcast operation, there is a warm-up period before the first message is broadcast that protocols can use to create any initial structure.
+%
+Finally, in our evaluation we stop each experiment a fixed amount of time after the beginning of the last flooding operation.
 
 
 %\raziel{This definition (density) must be mentioned at the Related Work (or maybe Introduction), here it is too late}
