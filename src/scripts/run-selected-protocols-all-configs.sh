@@ -113,4 +113,22 @@ Rscript pretty-plotting.R \
       -rf relays \
       -cv coverage \
       -sf summary.csv \
+      --final \
+      ../../results/
+mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
+
+Rscript pretty-plotting.R \
+      -sf summary.csv \
+      --final \
+      ../../results/
+mv ../../results/Pretty-Results.pdf ../../results/summary-results.pdf
+
+
+Rscript pretty-plotting.R \
+      -pc batteryConsumptionDistribution \
+      -dm duplicatedMsgsDistribution \
+      -bs broadcastSession \
+      -rf relays \
+      -cv coverage \
+      -sf summary.csv \
       ../../results/

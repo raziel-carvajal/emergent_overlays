@@ -217,7 +217,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
     if (!print.titles) {
-        p <- p + scale_fill_grey(start = 0, end = .9)
+        p <- p + scale_fill_grey(start = 0.0, end = .85)
     }
 	print(p)
 }
@@ -261,7 +261,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
      get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0, end = .9)
+         p <- p + scale_colour_grey(start = 0.0, end = .85)
      }
 
 	print(p)
@@ -306,15 +306,14 @@ plot.duplicated.messages <- function(df, densities) {
 }
 
 plot.saved.rebroadcasts <- function(df, algos) {
-  ylabel <- "Saved Rebroadcasts"
+  ylabel <- "SRB (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
 
   df <- df[df$alg!="FLOODING",]
 
-
-  caption <- "Saved rebroadcasts"
+  caption <- "% of Saved Rebroadcast"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
          geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg), size = 4) +        # Large points
@@ -329,7 +328,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0, end = .9)
+         p <- p + scale_colour_grey(start = 0.0, end = .85)
      }
 
 	print(p)
@@ -355,7 +354,7 @@ plot.simple.coverage <- function(df, algos) {
 		 get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0, end = .9)
+         p <- p + scale_colour_grey(start = 0.0, end = .85)
      }
 
 	print(p)
@@ -406,7 +405,8 @@ load.summary <- function(path, filename) {
     pp[idx]
   })
   data$alg <- algos
-  data$saved.rebroadcasts <- data$nodes - data$relays
+  nr.nodes <- data$nodes * data$coverage/100
+  data$saved.rebroadcasts <- (nr.nodes - data$relays)/nr.nodes*100
   data
 }
 
