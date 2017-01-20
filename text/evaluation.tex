@@ -104,7 +104,7 @@ For instance, with density 30 in a \textit{pure flooding} scenario one can expec
 %
 However, as shown in Figure~\ref{fig:a-duplicated}, most nodes barely receive 10 duplicate messages.
 %
-In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low coverage or reachability).
+In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low reachability).
 
 
 %
@@ -202,11 +202,11 @@ These results are of interest because they highlight two parameters of a scenari
 %
 The first parameter is the mobility of nodes and the second is the ratio between the broadcast interval and control message interval.
 
-\subsection{Coverage}
+\subsection{Reachability}
 
-Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} presents the coverage of the five algorithms studied in the scenarios with and without mobility.
+Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} depict the reachability of the five algorithms studied, in both \textit{static} and \textit{dynamic} scenarios.
 %
-All these algorithms tend to be reliables in static settings and for densities above 10.
+All these algorithms tend to be reliable in static settings and for densities above 10.
 %
 Some approaches fail to deliver all broadcast messages in settings with very low density because many sections of the network are only connected by a single link that can be a point of failure. 
 %
@@ -224,7 +224,7 @@ In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of sit
 			\label{fig:b-coverage}
 			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
 		}
-		\caption{Node Reachability}
+		\caption{Node reachability}
 		\label{fig:coverage}
 	\end{center}
 \end{figure*}
