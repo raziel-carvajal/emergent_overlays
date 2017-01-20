@@ -2,20 +2,22 @@
 
 \section{Evaluation}
 \label{sec:evaluation}
-In the previous section, we described the deployment scenarios where each broadcast algorithm is evaluated.
+In the previous section, we describe the deployment scenarios we use to evaluate  the broadcast algorithms.
 %
-In this section we present the results of our experiments.
+In this section, we present the results of our experiments.
 %
 Such results are expressed in terms of the following metrics:
 
 %
 \noindent $\triangleright$
 \textbf{Saved Rebroadcasts (SRE)} --
-number of broadcast messages that nodes do not retransmit based on the worst case scenario, \textit{pure flooding}.
+number of retransmissions we avoid by using an algorithm $A$ instead of \textit{simple flooding}, which is considered the worst case.
 %
-To compute the SRE of one algorithm $A$ over $N$ nodes, we count the number $R$ of retransmissions made by $A$ to disseminate one message. Then, we simply compute SRE as $N - R$.
+To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
 %
-This metric is useful to measure the performance of algorithms in terms of both network and energy usage. 
+Since in our experiments we are disseminating many messages, we simply compute the mean \textit{SRE} and use it as metric for our comparison study.
+%
+This metric is useful to assess the performance of algorithms in terms of both network and energy usage. 
 
 \noindent $\triangleright$
 \textbf{Duplicated messages} --
