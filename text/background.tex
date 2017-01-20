@@ -56,7 +56,7 @@ One way to broadcast is through the use of an underlying topology.
 %
 A backbone or spine is a subset of nodes where its members are allowed to forward messages due to their position in space.
 %
-Any other node out of the backbone act as message receiver.
+Any other node out of the backbone acts as message receiver.
 %
 For instance, Figure~\ref{fig:explaining-backbone:a} depicts a small network of nodes where node $A$ starts with the message dissemination.
 %
@@ -65,27 +65,35 @@ If only nodes $B$ and $C$ perform the retransmission of any incoming message, th
 Of course, the complexity of a topology based algorithm remains in the construction of this backbone.
 %
 Connected dominating set (CDS) is the formal term for such a backbone~\cite{Wu2001}, formally talking, nodes are partitioned in such a way that they either belong to the CDS or are adjacent to any other node at it. Additionally, connectivity is another property of a graph containing a CDS.
-
 %
-We consider two topology-based algorithms: \textit{MPR} and \textit{node-degree}.
+In this study, we consider two topology-based algorithms \textit{Multipoint relaying (MPR)} and one \textit{CDS-based technique}, which require a permanent exchange of control messages (aka \textit{HELLO} messages) among nodes to reduce the number retransmissions.
+
 \begin{figure*}[t]
 	\centering
-	\subfigure[Transmission range with omnidirectional antennas]{\label{fig:explaining-backbone:a}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_b.pdf}}
+	\subfigure[Backbone of 3 nodes shown by the black filled-in circles.]{\label{fig:explaining-backbone:a}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_b.pdf}}
 	~
 	\subfigure[Example of underlying topology (minimal CDS)]{\label{fig:explaining-backbone:b}\includegraphics[width=0.4\textwidth]{fig/explainingbackbone_b.pdf}}
 	\caption{A small and connected MANET.}
 	\label{fig:explaining-backbone}
 \end{figure*}
 
-\paragraph{MPR} Multipoint Relays Set~\cite{Qayyum2002}.
-Flooding in MPR is a three step operation.
-First, each node $n$ computes a set $\textit{MPR}_n$ which is a subset of its neighbors. 
-Second, when a node $m$ receives a message from $n$, $m$ only retransmits the message if it belongs to $\textit{MPR}_n$.
-Finally, before transmitting a message, a node $m$ computes its own set $\textit{MPR}_m$ and attach it to the message.
+\paragraph{MPR} The CDS obtained by the technique propose in~\cite{Qayyum2002} is called a MPR set.
 %
-The aforementioned set $\textit{MPR}_n$ is an approximation of the CDS in the vicinity of $n$.
-To compute it, a node uses information from its 1- and 2-hop neighbors.
-In order to obtain this information, \textit{HELLO} messages containing the corresponding data are periodically sent by all nodes towards their neighbors.
+Nodes start with an empty $MPR$ set knowing their one-hop and two-hop neighbors, represented by the sets $N$ and $N^{2}$ respectively, thanks to previous exchanges of control messages.
+%
+The procedure to find relay nodes is two-fold.
+%
+Firstly, any one-hop neighbor $n \in N$ is chosen as relay nodes of the MPR set if $n$ is an unique neighbor of some other node at $N^{2}$.
+%
+Secondly, while there exists uncovered nodes in $N^{2}$ by the current MPR set, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors are cover by $n$.
+%
+Finally, $n$ is a relay node only if the number of covered two-hop neighbors is maximal.
+
+%
+Figure~\ref{fig:explaining-backbone:b} shows how node $A$ discover its MPR set. In the first step, 
+
+
+
 It is worth noticing that MPR is a \textit{source-dependent} solution, meaning that the relays selected during the broadcast process vary, depending on the initial source of the message.
 
 \paragraph{node-degree} 
