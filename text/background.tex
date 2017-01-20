@@ -83,23 +83,39 @@ Nodes start with an empty $MPR$ set knowing their one-hop and two-hop neighbors,
 %
 The procedure to find relay nodes is two-fold.
 %
-Firstly, any one-hop neighbor $n \in N$ is chosen as relay nodes of the MPR set if $n$ is an unique neighbor of some other node at $N^{2}$.
+Firstly, any one-hop neighbor $n \in N$ is chosen as relay node of the MPR set if $n$ is an unique neighbor of some other node at $N^{2}$.
 %
-Secondly, while there exists uncovered nodes in $N^{2}$ by the current MPR set, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors are cover by $n$.
+Secondly, while the current MPR set do not cover every node in $N^{2}$, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors it covers.
 %
-Finally, $n$ is a relay node only if the number of covered two-hop neighbors is maximal.
+$n$ will be a relay node only if the number of covered two-hop neighbors is maximal.
 
 %
-Figure~\ref{fig:explaining-backbone:b} shows how node $A$ discover its MPR set. In the first step, 
+Figure~\ref{fig:explaining-backbone:b} shows the steps taken by node $A$ to compute its $MPR$ set.
+%
+Once the data about one-hop and two-hop neighbors is exchanged, after applying rule No 1, node $B$ is considered as relay node because it is a unique neighbor of $F$.
+%
+After applying rule No 2, node $C$ is included at $MPR$ given that the number of covered two-hop neighbors (i. e. two) is bigger than those neighbors cover by $G$ (which is zero).
 
+\paragraph{CDS-based technique}
+The decentralize algorithm in~\cite{Wu2001} firstly approximates one CDS via a marking procedure and secondly, the number of relays nodes is minimized.
+%
+As in MPR, data about one-hope and two-hop neighbors is required as well. 
+%
+The marking procedure simply identifies whether one node $n$ has any pair of neighbors that are unconnected, $n$ marks itself as a relay node if the later condition occurs.
+%
+For instance, in Figure~\ref{fig:explaining-backbone:a} node $A$ marks itself as relay node because nodes $B$ and $G$ are unconnected.
+%
+To reduce the elements of a CDS obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either \textit{the degree of nodes} or \textit{the remaining energy in nodes' batteries}.
+%
+We chose the former approach to be fare in the comparison with MPR.
 
+%
+The node-degree-based rules are basically operations of first-order logic between the one-hop and two-hop sets of nodes' neighbors.
+%
+Due to the lack of space we limit our explanation saying that our current implementation of the CDS technique follows rules 2 and 2a.
+%
+One can refer to~\cite{Wu2001} to have more details about these two rules.
 
-It is worth noticing that MPR is a \textit{source-dependent} solution, meaning that the relays selected during the broadcast process vary, depending on the initial source of the message.
-
-\paragraph{node-degree} 
-The \textit{node-degree} algorithm~\cite{Wu2001} proposes a set of rules to build a good approximation of the minimum CDS.
-Rules are used to decide if a node that belongs to the CDS remains in that set or if it must be removed.  
-Rules are applied using a pipeline approach to further improve the approximation of the minimum CDS.
 %As typically found with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
 %As example of rules, we present the first two proposed in~\cite{Wu2001}.
 %Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$ where $N(v)$ is the set of neighbors of $v$:
