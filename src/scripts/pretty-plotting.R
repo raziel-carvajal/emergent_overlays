@@ -336,11 +336,11 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
 plot.simple.coverage <- function(df, algos) {
-  ylabel <- "Coverage (%)"
+  ylabel <- "Reachability (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
-  caption <- "Coverage"
+  caption <- "Reachability"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
          geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),size = 4) +        # Large points
