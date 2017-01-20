@@ -141,6 +141,8 @@ To do so, we use the following values to feed the mobility model:
 \end{table}
 
 Afterwards, we perform several checks on the traces to guarantee that: i) the average speeds are indeed close to $1.4$ $m/s$, ii) the node density is the desired one during all the simulation time, and iii) the topology remains connected all the time.~\footnote{Except for a very low density (5) where we are unable to generate a topology that remained connected during all the experiments.}
+%
+Should any of these checks fail, we discard the mobility traces.
 
 \subsection*{Energy Consumption}
 
