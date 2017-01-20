@@ -47,18 +47,28 @@ Finally, the content of each message is randomly generated, unique and with a le
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
 
-\subsection*{Density}
+\subsection*{Node Density}
 
-We use three parameters to characterize the density of the network: the transmission range, the map size and the number of nodes.
+We are interested in generating scenarios with different node density, this allows us to simulate more accurately the \textit{demostration} use case.
 %
-As shown in~\cite{Penrose2003}, there is a dependency between these parameters that is captured by the theory of random geometric graphs and allows us to build network topologies with a given density.
+%In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
 %
-In our experiments, all nodes have a transmission range of 20~meters\footnote{Theoretically, IEEE 802.11 devices allow communication in a range between 20 and 140 meters depending on the line of sight.
+To characterize the node density we use three parameters: transmission range, map size and number of nodes.
+%
+As shown in~\cite{Penrose2003}, there is a dependency between these parameters that  allows us to build network topologies with a given density by using random geometric graphs.
+%
+
+In our experiments, all nodes have a transmission range of 20~meters.~\footnote{Theoretically, IEEE 802.11 devices allow communication in a range between 20 and 140 meters depending on the line of sight.
 Previous empirical tests show that it can effectively be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
-while the number of nodes is fixed to \nodesNumber{}.
+Meanwhile the number of nodes is fixed to \nodesNumber{}, the mode reported by previous studies on the size of demonstrations in Western Europe~\cite{kriesi1995new}.
 %
-To create a network with a given node density, we simply set the map size to the appropriate value and generate maps with a square shape using a procedure based on random geometric graphs.
+To create a network with a given node density, we use the values of transmission range and number of node to compute the map size using the aforementioned dependency relationship.
 %
+Then, we generate a laying on a square map by using a procedure based on random geometric graphs.
+%
+The output of this procedure is a network topology with the desired density.
+%
+
 Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.
 %
 We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  5,10,15,20,25,30,35 and 40, a range of values that is frequently found in the literature.
@@ -100,9 +110,15 @@ In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, 
 %
 This model generates traces composed of frequent short walks and occasional long rides to distant locations.
 %
-In our context, we define two scenarios: one with mobility at walking speed and another without mobility (static).
+In our experiments, we define two kind of scenarios: one without mobility (\textit{static}) and another with mobility at walking speed (\textit{dynamic}).
 %
-We set the parameter of our LW model in such a way that the average node speed is close to $1.4m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
+The generation of \textit{static} scenarios was presented in the previous subsection.
+%
+To generate \textit{dynamic} scenarios, we begin with a \textit{static one}.
+%
+Then, we use the LW model to generate mobility traces for each node.
+%
+The parameters of the LW model are set in such a way that the average node speed is close to $1.4$ $m/s$, a value reported in the literature~\cite{Browning390} as an estimation of the preferred walking speed.
 %
 To do so, we use the following values to feed the mobility model:
 
@@ -124,7 +140,7 @@ To do so, we use the following values to feed the mobility model:
 	\label{tbl:mobility-parameters}
 \end{table}
 
-Afterwards, we check the traces to guarantee that the average speeds are indeed close to $1.4 m/s$, and that the topology remains connected all the time.\footnote{Except for a very low density (5) where we were not able to generate a topology that remained connected during all the experiments.}
+Afterwards, we perform several checks on the traces to guarantee that: i) the average speeds are indeed close to $1.4$ $m/s$, ii) the node density is the desired one during all the simulation time, and iii) the topology remains connected all the time.~\footnote{Except for a very low density (5) where we are unable to generate a topology that remained connected during all the experiments.}
 
 \subsection*{Energy Consumption}
 
