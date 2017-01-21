@@ -303,8 +303,8 @@ plot.time.power.consumption <- function(df, densities) {
 
 plot.duplicated.messages <- function(df, densities) {
   plot.data.using.boxes(df, densities,
-                        "Duplicated messages",
-                        "Distribution of duplicated messages along the experiment")
+                        "Duplicate messages",
+                        "Distribution of duplicate messages along the experiment")
 }
 
 plot.saved.rebroadcasts <- function(df, algos) {

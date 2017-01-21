@@ -2,7 +2,7 @@
 
 \section{Evaluation}
 \label{sec:evaluation}
-In the previous section, we describe the deployment scenarios we use to evaluate  the broadcast algorithms.
+In the previous section, we describe the deployment scenarios we use to evaluate the broadcast algorithms.
 %
 In this section, we present the results of our experiments.
 %
@@ -20,7 +20,7 @@ Since in our experiments we are disseminating many messages, we simply compute t
 This metric is useful to assess the performance of algorithms in terms of both network and energy usage. 
 
 \noindent $\triangleright$
-\textbf{Duplicated messages} --
+\textbf{Duplicate messages} --
 number of times one broadcast message is received after its first reception.
 %
 %In a perfect situation nodes receive a messages at most once, typically it is not the case while broadcast.
@@ -41,26 +41,26 @@ energy consumed by nodes during all broadcast session.
 %
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[SRE messages in static scenario.]{
+	\subfigure[SRE messages in static scenarios.]{
 		\label{fig:a-saved}
 		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
 	}
 	~
-	\subfigure[Duplicated messages per algorithm in static scenario.]{
+	\subfigure[Duplicate messages per algorithm in static scenarios.]{
 		\label{fig:a-duplicated}
 		\includegraphics[page=4, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[SRE messages in dynamic scenario.]{
+	\subfigure[SRE messages in dynamic scenarios.]{
 		\label{fig:b-saved}
 		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
 	}
 	~
-	\subfigure[Duplicated messages per algorithm in dynamic scenario.]{
+	\subfigure[Duplicate messages per algorithm in dynamic scenarios.]{
 		\label{fig:b-duplicated}
 		\includegraphics[page=4, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
-	\caption{Overload of wireless communication through \textit{SRE} and \textit{duplicated} messages.}
+	\caption{Overload of wireless communication through \textit{SRE} and \textit{duplicate} messages.}
 	\label{fig:saved-rebroadcasts}
 	\end{center}
 \end{figure*}
@@ -70,31 +70,33 @@ We analyze every metric with and without mobility over different number of neigh
 %
 \subsection{Network overload}
 
-The proportion of SRE and duplicated messages determine to which extent the communication medium is saturated.
+The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
 %Redundant
 %These metrics are useful to assess if a broadcasting algorithm have to send too many messages in order to reach a good coverage.
 %Redundant
 %This is important because all these messages can quickly saturate the medium and affect the transmission of other messages unrelated to the broadcasting operation.
 %
-Figure~\ref{fig:a-saved} depicts the SRE in a static scenario where MPRT outperforms all other protocols.
+Figure~\ref{fig:a-saved} depicts the SRE in static scenarios.
 %
-The difference between MPRT and all other algorithms decreases as the density increases.
+As can be seen, MPR outperforms all other protocols.
 %
-Interestingly, ABBA reduces the number of retransmissions as efficiently as the node-degree technique. 
+However, the difference between MPR and all other algorithms decreases as the density increases.
 %
-This behavior was expected, as when the transmission range of nodes is already covered by their neighbors, ABBA cancels retransmissions of messages.
+Interestingly, ABBA reduces the number of retransmissions more efficiently than the node-degree technique for densities above 10 but it do not surpass MPR. 
+%
+The competitiveness of ABBA was expected to increase with the density because ABBA can cancel more retransmissions, but it is surprising to see it surpassing node-degree by 10\%.
 %
 
-In a dynamic scenario, as shown in Figure~\ref{fig:b-saved}, we observe a negative impact for topology-based algorithms.
+In dynamic scenarios, as shown in Figure~\ref{fig:b-saved}, we observe how node mobility has a negative impact on the performance of topology-based algorithms, particularly on MPR.
 %
-MPR and node-degree protocols keep nodes' neighbors information that is soon out of date due to the constant changes. 
+Indeed, MPR and node-degree protocols keep nodes' neighbors information that is soon out of date due to the constant changes. 
 %
 Additionally, collisions of control messages in these algorithms is another explanation for the bad performance.
 %
 While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not consider in this paper.
 %
 
-The proportion of duplicated messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
+The proportion of duplicate messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
 %
 As this value varies per each broadcast session, we are using \textit{boxplots} to present a distribution of the metric.
 %
@@ -108,7 +110,7 @@ In general, there are three reasons to get a low number of duplicate messages: i
 
 
 %
-On the one hand, the topology based technique MPR is again suitable to cope with all densities in both scenarios of mobility.
+On the one hand, the topology based technique MPR is again able to cope with all densities in both scenarios of mobility.
 %
 On the other hand, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
 %
