@@ -158,12 +158,10 @@ The former forwards messages with a predefine probability while the latter use k
 %
 Nodes retransmit messages based on the distance among neighbors and a probabilistic scheme.
 %
-
+This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
 %
 The probability of retransmitting a message decreases as the local density increases.
 The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
-This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
-Similarly to ABBA, the probability of sending a message increases when the size of the new area to cover increases.
 
 \paragraph{ABBA} Area-based beacon-less protocol~\cite{Ovalle-Martinez2006}.
 The flooding process in ABBA is controlled in both space and time.
@@ -184,22 +182,22 @@ Otherwise, the message is retransmitted by the node when the timer expires.
 		
 %\end{enumerate}
 
-\subsubsection{Context-Oblivious}
+%\subsubsection{Context-Oblivious}
 
 
 %The probabilistic flooding is a mix of two approaches. There are two branches in the last level. They don't make the distinction in the survey, but it is clear when you read the paper.
-In opposition to the \textit{context-aware} family, there are also \textit{context-oblivious} algorithms that do not require prior information about the node locality to decide on the retransmission operation.
+%In opposition to the \textit{context-aware} family, there are also \textit{context-oblivious} algorithms that do not require prior information about the node locality to decide on the retransmission operation.
 %
-These protocols are in general easy to implement and have no limiting requirements such as knowing the location of nodes nor exchanging extra messages with control information.
+%These protocols are in general easy to implement and have no limiting requirements such as knowing the location of nodes nor exchanging extra messages with control information.
 %
-However, it has been shown that for some algorithms such as the \textit{basic probabilistic} approach this simplicity comes at the expenses of a low coverage~\cite{Ni:1999:BSP:313451.313525}.
+%However, it has been shown that for some algorithms such as the \textit{basic probabilistic} approach this simplicity comes at the expenses of a low coverage~\cite{Ni:1999:BSP:313451.313525}.
 %
-In this paper, we are only considering one protocol in this class, the \textit{simple flooding}. 
+%In this paper, we are only considering one protocol in this class, the \textit{simple flooding}. 
 %\er{this is a bit strange, again, to give opinions about the protocols while we intend to stay neutral.}
 
 
 
-The diversity of  approaches to perform the broadcast operation is a challenge for engineers because it complicates the choice of the protocol to use.
+The diversity of  approaches to perform the broadcast operation is a challenge because it complicates the choice of the protocol to use.
 %
 Although evaluation have been proposed to compare existing approaches, they usually target well defined operational conditions preventing them to be useful in other contexts.
 %
