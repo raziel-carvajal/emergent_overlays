@@ -101,7 +101,7 @@ The decentralize algorithm in~\cite{Wu2001}, firstly approximates one CDS via a 
 %
 As in MPR, data about one-hop and two-hop neighbors is required as well. 
 %
-The marking procedure simply identifies whether one node $n$ has any pair of neighbors that are unconnected, $n$ marks itself as a relay node if this condition take place.
+The marking procedure simply identifies whether one node $n$ has any pair of neighbors that are unconnected, $n$ marks itself as a relay node if this condition takes place.
 %
 For instance, in Figure~\ref{fig:explaining-backbone:a} node $A$ marks itself as relay node because nodes $B$ and $G$ are unconnected.
 %
@@ -114,9 +114,7 @@ The node-degree-based rules are basically operations of first-order logic betwee
 %
 Due to the lack of space we limit our explanation saying that our current implementation of the CDS technique follows rules 2 and 2a.
 %
-One can refer to~\cite{Wu2001} to have more details about these two rules.
-%
-In Section~\ref{sec:evaluation}, we refer to this algorithm as \textit{node-degree}.
+One can refer to~\cite{Wu2001} for having more details about these two rules.
 
 %As typically found with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
 %As example of rules, we present the first two proposed in~\cite{Wu2001}.
@@ -138,18 +136,34 @@ When nodes move, the frequency on sending these messages must be increased to ke
 %
 This results in a higher probability of collisions.
 %
+Moreover, our study considers a second category of broadcast protocols that do not require the exchange of control messages to build a virtual topology, instead, data is piggybacked in messages before their retransmission.
+%
+This data could be either context-oblivious or context-aware.
+%
+The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes density).
+%
 %Particularly, when nodes move
 %In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
 %Thus, some protocols do not rely on any underlying topology. 
 % Instead, they either use no information about the local node context, or only information that can be piggybacked with the dissemination messages.
-
-
-Some protocols use their local \textit{context} to decide if a node should retransmit a message.
-For instance, nodes can consider, among others, the number of neighbors, their mobility speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last sender of a received message.
+%Some protocols use their local \textit{context} to decide if a node should retransmit a message.
+%For instance, nodes can consider, among others, the number of neighbors, their mobility speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last sender of a received message.
 %
-Since this contextual information varies over time, these algorithms often delay the retransmissions of a message until they can guarantee that doing so is strictly required.
+%Since this contextual information varies over time, these algorithms often delay the retransmissions of a message until they can guarantee that doing so is strictly required.
 %As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.\laurent{not sure to get it}
-This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
+%This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
+
+%
+\paragraph{Probabilistic Flooding} This is a context-aware and context-oblivious approach~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probability to perform retransmissions.
+%
+Nodes retransmit messages based on the distance among neighbors and a probabilistic scheme.
+%
+
+%
+The probability of retransmitting a message decreases as the local density increases.
+The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
+This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
+Similarly to ABBA, the probability of sending a message increases when the size of the new area to cover increases.
 
 \paragraph{ABBA} Area-based beacon-less protocol~\cite{Ovalle-Martinez2006}.
 The flooding process in ABBA is controlled in both space and time.
@@ -160,12 +174,7 @@ If the same message is received before the timer expires, the node updates $\alp
 No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
 Otherwise, the message is retransmitted by the node when the timer expires.
 
-\paragraph{ProbFlood} probabilistic approach presented by Cartigny and Simplot~\cite{Cartigny:2003:BNR:2727141.2727459}.
-A node retransmits a message with a probability that depends on two contextual values : the number of neighbors of the node and the gain in terms of new area that a node covers if it retransmits the message.
-The probability of retransmitting a message decreases as the local density increases.
-The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
-This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
-Similarly to ABBA, the probability of sending a message increases when the size of the new area to cover increases.
+
 %Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
 %However, although the protocol requires both \textit{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
 
