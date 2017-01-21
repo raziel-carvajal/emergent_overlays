@@ -183,6 +183,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 	  	    cn <- as.character(s[which(s == "p") + 1])
             cn <- toupper(gsub("[[:digit:]]", "", cn))
             cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+            cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -231,6 +232,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 	  	cn <- s[which(s == "p") + 1]
       cn <- toupper(gsub("[[:digit:]]", "", cn))
       cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+      cn <- replace(cn, cn == "MPRT", "MPR")
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
       y <- transformation(e[,1], nr.nodes)
       x <- 1:length(y)
@@ -310,6 +312,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
 
   df <- df[df$alg!="FLOODING",]
 
@@ -340,6 +343,7 @@ plot.simple.coverage <- function(df, algos) {
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
   caption <- "Reachability"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
@@ -373,8 +377,6 @@ extract.metadata <- function(data, excluded.densities) {
   densities <- densities[order(densities)]
   f <- Vectorize(function(d) {  !(d %in% excluded.densities)  })
   densities <- densities[f(densities)]
-  print (densities)
-  print("mierda")
   pal <- rainbow( length(algos) )
   names(pal) <- algos
   l <- list(algos, densities, pal)
