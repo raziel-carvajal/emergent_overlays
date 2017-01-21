@@ -120,7 +120,7 @@ On the other hand, \textit{node-degree} behaves similarly to \textit{ProbFlood} 
 
 Power consumption of nodes depends, for instance, on the number of messages that nodes exchange or on the amount of time nodes' transceivers spend in their operational modes.
 %
-The number of received and sent messages are important because, every time the node sends or receives a message, the \textit{transmitter} or \textit{receiver} components of the radio change to a more power hungry mode.
+The number of received and sent messages are important because, every time a node sends or receives a message, the \textit{transmitter} and/or \textit{receiver} components of the radio change to a more power hungry mode.
 %
 Hence, the broadcast messages retransmitted as well as the control messages have a direct influence on energy consumption.
 %
@@ -183,26 +183,25 @@ This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\r
 %
 In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show a single value of density where these algorithms behave better than \textit{MPR}.
 %
-This is interesting because it indicates that properly using control messages to build an underlying topology is worth in terms of power consumption when the interval among two broadcast messages is close to the interval among control messages.
+This is interesting because it indicates that properly using control messages to build an underlying topology is worth in terms of power consumption when the interval among broadcast messages is close to the interval among control messages.
 %
 
-As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in the scenarios that include mobility.
+As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in dynamic scenarios.
 %
 In such scenarios, \textit{ABBA} outperforms \textit{MPR} when the density is low or medium (5, 10, 15).
 %
 Only when the density is greater than 20, MPR becomes competitive again.
 %
-In correlating these results with Figures~\ref{fig:b-saved} and~\ref{fig:b-duplicated} we notice that the nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
+In correlating these results with Figures~\ref{fig:b-saved} and~\ref{fig:b-duplicated} we notice that nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
 %
-We also notice that the number of duplicated messages received is closer than that of the static scenarios.
+We also notice that the number of duplicate messages received using different algorithms in dynamic scenarios is closer than that of the static scenarios.
 %
 %Although This changes when densities above 30 because the control 
 %
-Since \textit{MPR} cannot maintain a completely up-to-date underlaying topology due to mobility, it fails in reducing the number of relay nodes and the power consumption is high.
+We can conclude that, since \textit{MPR} cannot maintain a completely up-to-date underlaying topology due to mobility, it fails in reducing the number of relay nodes and the power consumption is high.
 
-These results are of interest because they highlight two parameters of a scenario that may impact the decision of what algorithm to use to broadcast.
+These results are of interest because they support the idea that two parameters of a scenario, namely node mobility and ratio $\textit{broadcast-interval}/\textit{control-message-interval}$, may impact the decision of which algorithm to use to broadcast.
 %
-The first parameter is the mobility of nodes and the second is the ratio between the broadcast interval and control message interval.
 
 \subsection{Reachability}
 
