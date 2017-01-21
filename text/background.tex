@@ -51,7 +51,7 @@ Variable-range broadcast protocols are kept as future work.
 %
 Broadcast algorithms can be first classified in two main classes, depending on whether or not they maintain an underlying virtual topology between nodes.
 
-\subsection{Coping with underlying topologies}
+\subsection{Topology-based algorithms}
 One way to broadcast is through the use of an underlying topology.
 %
 A backbone or spine is a subset of nodes where its members are allowed to forward messages due to their position in space.
@@ -127,18 +127,18 @@ One can refer to~\cite{Wu2001} to have more details about these two rules.
 %		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(u)$.
 %		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \\ \textit{id}(v) < \textit{id}(u)$.
 %	\end{itemize}
-	
 %\end{enumerate} 
 
+\subsection{Context-aware and context-oblivious algorithms}
+Using a virtual topology implies an overload on the communication medium due to the constant exchange of control messages.
+%
+When nodes move, the frequency on sending these messages must be increased to keep a virtual topology with the correct set of relay nodes.
+%
+This results in a higher probability of collisions.
+%
 
-
-%\laurent{describe the algo by moving what is in the related work section}
-
-
-
-
-\subsection{Using no underlying topology}
-
+%
+Particularly, when nodes move
 In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
 Thus, some protocols do not rely on any underlying topology. 
 % Instead, they either use no information about the local node context, or only information that can be piggybacked with the dissemination messages.
