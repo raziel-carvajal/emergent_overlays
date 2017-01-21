@@ -136,14 +136,11 @@ When nodes move, the frequency on sending these messages must be increased to ke
 %
 This results in a higher probability of collisions.
 %
-
-%
-Particularly, when nodes move
-In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
-Thus, some protocols do not rely on any underlying topology. 
+%Particularly, when nodes move
+%In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
+%Thus, some protocols do not rely on any underlying topology. 
 % Instead, they either use no information about the local node context, or only information that can be piggybacked with the dissemination messages.
 
-\subsubsection{Context-aware}
 
 Some protocols use their local \textit{context} to decide if a node should retransmit a message.
 For instance, nodes can consider, among others, the number of neighbors, their mobility speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last sender of a received message.
