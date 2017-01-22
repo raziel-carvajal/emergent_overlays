@@ -72,7 +72,7 @@ In this study, we consider two topology-based algorithms \textit{Multipoint rela
 	\centering
 	\subfigure[Backbone of 3 nodes shown by the black filled-in circles.]{\label{fig:explaining-backbone:a}\includegraphics[scale=0.55]{fig/explainingbackbone_a.pdf}}
 	~
-	\subfigure[Example to compute the MPR set of peer A]{\label{fig:explaining-backbone:b}\includegraphics[scale=0.3]{fig/explainingbackbone_b.pdf}}
+	\subfigure[Steps to get the MPR set of peer A]{\label{fig:explaining-backbone:b}\includegraphics[scale=0.3]{fig/explainingbackbone_b.pdf}}
 	\caption{Virtual topology to reach 100\% reachability in one MANET.}
 	\label{fig:explaining-backbone}
 \end{figure*}
@@ -141,7 +141,7 @@ Moreover, our study considers a second category of broadcast protocols that do n
 %
 This data could be either context-oblivious or context-aware.
 %
-The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes density).
+The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
 %
 %Particularly, when nodes move
 %In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
@@ -162,16 +162,24 @@ Nodes retransmit messages based on the distance among neighbors and a probabilis
 This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
 %
 The probability of retransmitting a message decreases as the local density increases.
-The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
+%The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
 
 \paragraph{ABBA} Area-based beacon-less protocol~\cite{Ovalle-Martinez2006}.
 The flooding process in ABBA is controlled in both space and time.
-The algorithm requires that each node knows its physical location as well as the transmission range of each node.
-Upon the reception of a message, a node first computes the angle $\alpha$ covered by the received transmission.
-Using this information, it then schedules a timer with a timeout $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is the maximum waiting time, a network-wide protocol constant.
-If the same message is received before the timer expires, the node updates $\alpha$, cancels the previous timer and creates a new one.
-No retransmission occurs if at some point the angle $\alpha$ covers the complete area around a node.
-Otherwise, the message is retransmitted by the node when the timer expires.
+%
+This algorithm requires nodes to know their physical location in addition to the transmission range of nodes' radio.
+%
+When one broadcast message $M$ is received, nodes compute the angle $\alpha$ covered by this reception.
+%
+Note that $\alpha$ is paired to a unique message.
+%
+$M$ is scheduled for being retransmitted after $T$ seconds, this timer is computed as follows $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is a fixed upper bound that represents the maximum waiting time.
+%
+Prior of a new reception of $M$ before $T$ seconds, nodes cancel the current timer and schedule a new one.
+%
+In other words, the bigger the angle covered by message receptions, the shorter the time to wait before performing retransmissions.
+%
+With one exception, message retransmissions are canceled if $\alpha$ reaches a value of $2\pi$.
 
 
 %Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
@@ -198,14 +206,10 @@ Otherwise, the message is retransmitted by the node when the timer expires.
 
 
 
-The diversity of  approaches to perform the broadcast operation is a challenge because it complicates the choice of the protocol to use.
+The diversity of algorithms to broadcast in MANETs is vast and choosing one approach to cope with a particular deployment scenario is a challenging task.
 %
-Although evaluation have been proposed to compare existing approaches, they usually target well defined operational conditions preventing them to be useful in other contexts.
+While some evaluations have been proposed to compare existing approaches, they usually target fixed scenarios; this avoids its use in other contexts.
 %
-Moreover, despite of targeting MANETs, many studies do not consider important parameters such as mobility and energy consumption.
+In this work, our goal is to define an experimental framework to fairly assess representative algorithms  to broadcast in MANETs. 
 %
-In addition, existing evaluation mostly focus on protocols that share some common characteristics and do not reflect the diversity that exists. 
-%
-In this work, our goal is to define an experimental framework to fairly assess representative algorithms  for broadcast in MANETs. 
-%
-In the next section, we discuss the characteristics and limitations of previous work on evaluation and comparison studies on broadcast algorithms.
+In the next section, we discuss previous works one can find in the literature.
