@@ -27,25 +27,8 @@ import logging
 import genmobility
 import matplotlib.pyplot as plt
 
-NED_HEADER = ''
-NED_HEADER += 'package builtTopologies;\n\n'
-NED_HEADER += "import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n"
-NED_HEADER += "import inet.node.inet.INetworkNode;\n"
-NED_HEADER += "import inet.physicallayer.contract.packetlevel.IRadioMedium;\n"
-NED_HEADER += "import broadcasting.CenterHost;\n"
+from omnetFiles import createNedFile
 
-NED_HEADER1 = ''
-NED_HEADER1 += 'string mediumType = default(' + '"' + 'IdealRadioMedium' + '"' + ");\n"
-NED_HEADER1 += "submodules:\n"
-NED_HEADER1 += 'configurator: IPv4NetworkConfigurator { @display(' + '"' + 'p=0,0' + '"' + "); }\n"
-NED_HEADER1 += 'radioMedium: <mediumType> like IRadioMedium { @display(' +'"'+'p=0,0'+'"'+"); }\n"
-
-# default topology
-initConf = {}
-initConf[0] = {'txt': 'transmission range', 'val': 50}
-initConf[1] = {'txt': 'minimum layout length in tiles', 'val': 2}
-initConf[2] = {'txt': 'maximum layout length in tiles', 'val': 6}
-initConf[3] = {'txt': 'last id number used to identify topologies', 'val': 0}
 
 # network density
 density = {}
@@ -74,9 +57,11 @@ def get_arguments():
     parser.add_argument("--distributed", dest="distributed", action='store_true',
                         help="Should generate broadcasts from many nodes.")
 
+    parser.add_argument("--sessions", dest="nr_sessions", type=int, default=300,
+                        help="How many broadcast sessions. Only make sense if distributed source ( default: 300).")
+
     parser.add_argument("--save-fig", dest="savedfigure", type=str,
                         help="Save an image of the topology at.")
-
 
     args = parser.parse_args()
     return args
@@ -95,7 +80,7 @@ def build_graph(pos, tx):
             v2 = pos[j]
             x1 = v2[0]
             y1 = v2[1]
-            d = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0)
+            d = (x1-x0)**2 + (y1-y0)**2
             if d < tx*tx:
                 g.add_edge(i, j)
                 c = c + 1
@@ -113,14 +98,14 @@ def find_closest(pos, components, node_idx, component_idx):
             for i in indexes:
                 x1 = pos[i][0]
                 y1 = pos[i][1]
-                d = math.sqrt((x1 - x0)**2 + (y1- y0)**2)
+                d = math.sqrt((x1 - x0)**2 + (y1 - y0)**2)
                 if d < dm:
                     dm = d
                     idx_min = i
     return (dm, idx_min, node_idx)
 
 
-def fix_connectivity_of_network(initial_g, pos, tx, threshold=80.0):
+def fix_network_connectivity(initial_g, pos, tx, threshold=80.0):
     g = initial_g
     x = [(len(c), c) for c in nx.connected_components(g)]
     maximum = max(c[0] for c in x)
@@ -132,8 +117,7 @@ def fix_connectivity_of_network(initial_g, pos, tx, threshold=80.0):
         # print len(x), " components with sizes: ", sizes
         idx_c = 0
         c = x[0]
-        # print "\thola: ", c[1]
-        ttt = [ find_closest(pos, x, idx, idx_c) for idx in c[1] ]
+        ttt = [find_closest(pos, x, idx, idx_c) for idx in c[1]]
         ttt.sort(lambda a, b: -1 if a[0] < b[0] else 1)
         pair = ttt[0]
         # print "\t\tminimum distance : ", pair[0] - tx, ", to node:", pair[1]
@@ -153,9 +137,10 @@ def fix_connectivity_of_network(initial_g, pos, tx, threshold=80.0):
         x = [(len(c), c) for c in nx.connected_components(g)]
     return True
 
+
 def is_valid_network(pos, tx, density, allowed_error):
     g = build_graph(pos, tx)
-    degrees = map(lambda(k, v): v, nx.degree(g).iteritems())
+    degrees = map(lambda (k, v): v, nx.degree(g).iteritems())
     sum_degree = sum(degrees)
     avg_degree = sum_degree/float(nx.number_of_nodes(g))
     expected = density-density*allowed_error/100.0
@@ -165,16 +150,15 @@ def is_valid_network(pos, tx, density, allowed_error):
         min_degree = min(degrees)
         max_degree = max(degrees)
         u = set(degrees)
-        h = {d: len(filter(lambda(x): x == d,  degrees)) for d in u}
+        h = {d: len(filter(lambda x: x == d,  degrees)) for d in u}
         print avg_degree, max_degree, min_degree, expected, "Nr Nodes", nx.number_of_nodes(g), "Nr Edges", nx.number_of_edges(g), density, cond1, cond2
         print h
     if cond2 and not cond1:
-        b = fix_connectivity_of_network(g, pos, tx)
+        b = fix_network_connectivity(g, pos, tx)
         if b:
             g = build_graph(pos, tx)
             cond1 = nx.is_connected(g)
     return cond1 and cond2
-    return cond2
 
 
 def fillSurfaceWithFixedRadio(tx, tilesWidth, tilesHeight, density):
@@ -216,7 +200,7 @@ def get_callback_single_source_code(idx_source):
 
 
 def get_callback_multiple_source_code(nr_nodes, nr_max_msgs, idx_source):
-    d = { i:[] for i in range(0, nr_nodes) }
+    d = {i: [] for i in range(0, nr_nodes)}
     for i in range(1, nr_max_msgs+1):
         idx = random.randint(0, nr_nodes - 1)
         d[idx].append(i)
@@ -226,29 +210,9 @@ def get_callback_multiple_source_code(nr_nodes, nr_max_msgs, idx_source):
     def tmp(i, p):
         if len(d[i]) == 0:
             return f2(i, p)
-        return "id_messages_to_send=\"" + reduce(lambda s, v: s+" "+str(v), d[i], "") + "\";" + f2(i, p)
+        return str("id_messages_to_send=\"" + reduce(lambda s, v: s+" "+str(v), d[i], "") + "\";" + f2(i, p))
 
     return tmp
-
-
-def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, callback_source):
-    global NED_HEADER, NED_HEADER1
-    fileName = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}_p_".format(len(pos), denType, Tx, layoutSizeW, layoutSizeH, index)
-
-    f = open(fileName + '.ned', 'w')
-
-    try:
-        f.write(NED_HEADER)
-        f.write('network ' + fileName + '\n{\n')
-        f.write('@display("bgb={0}, {1}");\n'.format(layoutSizeW, layoutSizeH))
-        f.write(NED_HEADER1)
-
-        for i, p in enumerate(pos):
-            f.write('hostR{0} : CenterHost {{ @display("p={1:.3f},{2:.3f}"); {3} }}\n\n'.format(i, p[0], p[1], callback_source(i, p)))
-
-        f.write("}\n")
-    finally:
-        f.close()
 
 
 def get_still_connected_callback(tx, idx_source):
@@ -273,7 +237,6 @@ def draw(pos, tx, filename):
     pass
 
 
-
 if __name__ == '__main__':
     args = get_arguments()
     trRan = args.tx
@@ -282,6 +245,7 @@ if __name__ == '__main__':
     max_density = args.max_density
     nr_nodes = args.nr_nodes
     mobility = args.mobility
+    nr_sessions = args.nr_sessions
 
     step = 5
     threshold = 10
@@ -294,19 +258,16 @@ if __name__ == '__main__':
             topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
 
         print "Selecting source of broadcasting"
-
+        idx_source = random.randint(0, len(topology) - 1)
 
         print "Writing NED file"
-        idx_source = random.randint(0, len(topology) - 1)
+        fn_create_sources = get_callback_single_source_code(idx_source)
         if (args.distributed):
-            fn_create_sources = get_callback_multiple_source_code(nr_nodes, 300, idx_source)
-        else:
-            fn_create_sources = get_callback_single_source_code(idx_source)
+            fn_create_sources = get_callback_multiple_source_code(nr_nodes, nr_sessions, idx_source)
         createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)
 
         if args.savedfigure:
             draw(topology, trRan, args.savedfigure)
-
 
         if mobility:
             print "Generating mobility"
