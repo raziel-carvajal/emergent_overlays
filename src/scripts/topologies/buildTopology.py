@@ -264,17 +264,14 @@ def draw(pos, tx, filename):
     pass
 
 
-def build_uniform_topologies(args):
+def build_uniform_topologies(args, densities):
     trRan = args.tx
-    min_density = args.min_density
-    max_density = args.max_density
     nr_nodes = args.nr_nodes
     mobility = args.mobility
     nr_sessions = args.nr_sessions
 
-    step = 5
     threshold = 10
-    for d in range(min_density, max_density + step, step):
+    for d in densities:
 
         print "Building topology with density %d and transmission range %d" % (d, trRan)
         topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
@@ -323,18 +320,12 @@ def find_top_density(densities, node, A, trRan, n, d0):
     return final_idx
 
 
-def build_non_uniform_topologies(args, nr_topologies):
+def build_non_uniform_topologies(args, densities, nr_topologies):
     trRan = args.tx
-    min_density = args.min_density
-    max_density = args.max_density
     nr_nodes = args.nr_nodes
     mobility = args.mobility
     nr_sessions = args.nr_sessions
 
-    step = 5
-    threshold = 10
-    densities = range(min_density, max_density + step, step)
-    median_density = densities[len(densities)/2]
     d0 = 5
     w, h = compute_map_size(trRan, nr_nodes, d0)
     rand = random.Random()
@@ -356,13 +347,10 @@ def build_non_uniform_topologies(args, nr_topologies):
             positions.extend(p)
             n = n - n1
             A = A - node.w*node.h
-            # print "done", n, n1, d
             if n < 0 or A <= 0:
                 break
 
         connected = guarentee_connectivity(positions, trRan)
-        if not connected:
-            print "NOOOOOOOOOOOOOOOOOOOOOOO"
 
         kdTree.save_tree_as_image(tree=tree, image_filename="topology{0}.png".format(i), positions=positions)
     pass
@@ -370,12 +358,17 @@ def build_non_uniform_topologies(args, nr_topologies):
 
 if __name__ == '__main__':
     args = get_arguments()
+    min_density = args.min_density
+    max_density = args.max_density
     non_uniform = args.non_uniform
 
+    step = 5
+    densities = range(min_density, max_density + step, step)
+
     if non_uniform:
-        build_non_uniform_topologies(args, 3)
+        build_non_uniform_topologies(args, densities, 5)
     else:
-        build_uniform_topologies(args)
+        build_uniform_topologies(args, densities)
 
 
     print "Done"
