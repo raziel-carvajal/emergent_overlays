@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader
 
 
 def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, callback_source):
@@ -15,7 +15,6 @@ def createNedFile(denType, pos, index, layoutSizeW, layoutSizeH, Tx, callback_so
         def node_info(self, idx):
             p = self.pos[idx]
             s = callback_source(idx, p)
-            print s
             return str('{}'.format(s))
 
     env = Environment(

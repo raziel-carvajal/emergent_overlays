@@ -28,13 +28,11 @@ import genmobility
 import matplotlib.pyplot as plt
 
 from omnetFiles import createNedFile
+import kdTree
 
 
 # network density
-density = {}
-density['sparse'] = 2
-density['medium'] = 5
-density['dense'] = 10
+density = {'sparse': 2, 'medium': 5, 'dense': 10}
 
 logger = logging.getLogger("mobility-generator")
 
@@ -59,6 +57,9 @@ def get_arguments():
 
     parser.add_argument("--sessions", dest="nr_sessions", type=int, default=300,
                         help="How many broadcast sessions. Only make sense if distributed source ( default: 300).")
+
+    parser.add_argument("--non-uniform", dest="non_uniform", action='store_true',
+                        help="Should generate a a topology with non uniform density.")
 
     parser.add_argument("--save-fig", dest="savedfigure", type=str,
                         help="Save an image of the topology at.")
@@ -138,6 +139,16 @@ def fix_network_connectivity(initial_g, pos, tx, threshold=80.0):
     return True
 
 
+def guarentee_connectivity(pos, tx):
+    g = build_graph(pos, tx)
+    b = nx.is_connected(g)
+    while b is False:
+        b = fix_network_connectivity(g, pos, tx)
+        g = build_graph(pos, tx)
+        b = nx.is_connected(g)
+    return b
+
+
 def is_valid_network(pos, tx, density, allowed_error):
     g = build_graph(pos, tx)
     degrees = map(lambda (k, v): v, nx.degree(g).iteritems())
@@ -171,15 +182,31 @@ def fillSurfaceWithFixedRadio(tx, tilesWidth, tilesHeight, density):
     return fillSurfaceBase(r, n, density, w, h), w, h
 
 
-def fillSurfaceWithFixedNumberOfNodes(tx, n, density):
-    # n*pi*r^2 = d
+def compute_map_size(tx, n, density):
     r = math.sqrt(density/(n*math.pi))
     h = w = math.floor(tx/r)
+    return w, h
+
+
+def fillSurfaceWithFixedNumberOfNodes(tx, n, density):
+    # n*pi*r^2 = d
+    w, h = compute_map_size(tx, n, density)
     return fillSurfaceBase(r, n, density, w, h), w, h
 
 
+def fillSurfaceWithFixedRadioAndSize(tx, x, y, w, h, density):
+    # n*pi*r^2 = d
+    n = int(density * w * h / (math.pi*(tx**2)))
+    r = tx/min(w, h)
+    positions = fillSurfaceBase(r, n, density, w, h)
+    for p in positions:
+        p[0] += x
+        p[1] += y
+    return positions, n
+
+
 def fillSurfaceBase(r, n, density, w, h):
-    assert w == h
+    # assert w == h
     # print r, n, density, w
     result = []
     G = nx.Graph()
@@ -237,10 +264,8 @@ def draw(pos, tx, filename):
     pass
 
 
-if __name__ == '__main__':
-    args = get_arguments()
+def build_uniform_topologies(args):
     trRan = args.tx
-    index = args.last_idx
     min_density = args.min_density
     max_density = args.max_density
     nr_nodes = args.nr_nodes
@@ -249,7 +274,6 @@ if __name__ == '__main__':
 
     step = 5
     threshold = 10
-
     for d in range(min_density, max_density + step, step):
 
         print "Building topology with density %d and transmission range %d" % (d, trRan)
@@ -264,14 +288,14 @@ if __name__ == '__main__':
         fn_create_sources = get_callback_single_source_code(idx_source)
         if (args.distributed):
             fn_create_sources = get_callback_multiple_source_code(nr_nodes, nr_sessions, idx_source)
-        createNedFile(d, topology, index, int(w), int(w), trRan, fn_create_sources)
+        createNedFile(d, topology, 0, int(w), int(w), trRan, fn_create_sources)
 
         if args.savedfigure:
             draw(topology, trRan, args.savedfigure)
 
         if mobility:
             print "Generating mobility"
-            filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), index)
+            filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), 0)
             while True:
                 b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                                  map_x=int(w), map_y=int(h),
@@ -280,7 +304,78 @@ if __name__ == '__main__':
                                                  test=get_still_connected_callback(trRan, idx_source))
                 if b:
                     break
+    pass
 
-        index = index + 1
 
-    print "Done", index
+def find_top_density(densities, node, A, trRan, n, d0):
+    A1 = node.w*node.h
+    A2 = A - A1
+    final_idx = -1 if A2 > 0 else 0
+    for idx, D in enumerate(densities):
+        n1 = int(D*A1/(math.pi*(trRan**2)))
+        if n1 <= n and A2 > 0:
+            n2 = n - n1
+            # print "que es esto?", D, n1, n2, int((math.pi*(trRan**2))/A2*n2)
+            if int((math.pi*(trRan**2))/A2*n2) >= d0:
+                final_idx = idx
+            else:
+                break
+    return final_idx
+
+
+def build_non_uniform_topologies(args, nr_topologies):
+    trRan = args.tx
+    min_density = args.min_density
+    max_density = args.max_density
+    nr_nodes = args.nr_nodes
+    mobility = args.mobility
+    nr_sessions = args.nr_sessions
+
+    step = 5
+    threshold = 10
+    densities = range(min_density, max_density + step, step)
+    median_density = densities[len(densities)/2]
+    d0 = 5
+    w, h = compute_map_size(trRan, nr_nodes, d0)
+    rand = random.Random()
+    for i in range(0, nr_topologies):
+        print w, h, 2*trRan
+        tree = kdTree.generate_tree(map_w=w, map_h=h, min_size=2*trRan)
+        leafs = tree.apply_to_each_leaf(lambda node: node)
+
+        A = w * h
+        n = int(nr_nodes*1.5)
+        positions = []
+        for node in leafs:
+            final_idx = find_top_density(densities, node, A, trRan, n, d0)
+            if final_idx < 0:
+                continue
+            idx = rand.randint(0, final_idx)
+            d = densities[idx]
+            p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, node.x, node.y, node.w, node.h, d)
+            positions.extend(p)
+            n = n - n1
+            A = A - node.w*node.h
+            # print "done", n, n1, d
+            if n < 0 or A <= 0:
+                break
+
+        connected = guarentee_connectivity(positions, trRan)
+        if not connected:
+            print "NOOOOOOOOOOOOOOOOOOOOOOO"
+
+        kdTree.save_tree_as_image(tree=tree, image_filename="topology{0}.png".format(i), positions=positions)
+    pass
+
+
+if __name__ == '__main__':
+    args = get_arguments()
+    non_uniform = args.non_uniform
+
+    if non_uniform:
+        build_non_uniform_topologies(args, 3)
+    else:
+        build_uniform_topologies(args)
+
+
+    print "Done"
