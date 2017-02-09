@@ -27,7 +27,7 @@ import logging
 import genmobility
 import matplotlib.pyplot as plt
 
-from omnetFiles import createNedFile
+from omnetFiles import createNedFile, create_density_file
 import kdTree
 
 
@@ -118,7 +118,8 @@ def fix_network_connectivity(initial_g, pos, tx, threshold=80.0):
         # print len(x), " components with sizes: ", sizes
         idx_c = 0
         c = x[0]
-        ttt = [find_closest(pos, x, idx, idx_c) for idx in c[1]]
+        indices = c[1]
+        ttt = [find_closest(pos, x, idx, idx_c) for idx in indices]
         ttt.sort(lambda a, b: -1 if a[0] < b[0] else 1)
         pair = ttt[0]
         # print "\t\tminimum distance : ", pair[0] - tx, ", to node:", pair[1]
@@ -190,6 +191,7 @@ def compute_map_size(tx, n, density):
 
 def fillSurfaceWithFixedNumberOfNodes(tx, n, density):
     # n*pi*r^2 = d
+    r = math.sqrt(density/(n*math.pi))
     w, h = compute_map_size(tx, n, density)
     return fillSurfaceBase(r, n, density, w, h), w, h
 
@@ -264,6 +266,18 @@ def draw(pos, tx, filename):
     pass
 
 
+def create_nedfile(node_positions, w, h, density, args):
+    print "Selecting source of broadcasting"
+    idx_source = random.randint(0, len(node_positions) - 1)
+
+    print "Writing NED file"
+    fn_create_sources = get_callback_single_source_code(idx_source)
+    if (args.distributed):
+        fn_create_sources = get_callback_multiple_source_code(args.nr_nodes, args.nr_sessions, idx_source)
+    createNedFile(density, node_positions, 0, int(w), int(w), args.tx, fn_create_sources)
+    return idx_source
+
+
 def build_uniform_topologies(args, densities):
     trRan = args.tx
     nr_nodes = args.nr_nodes
@@ -278,14 +292,7 @@ def build_uniform_topologies(args, densities):
         while not is_valid_network(topology, trRan, d, threshold):
             topology, w, h = fillSurfaceWithFixedNumberOfNodes(trRan, nr_nodes, d)
 
-        print "Selecting source of broadcasting"
-        idx_source = random.randint(0, len(topology) - 1)
-
-        print "Writing NED file"
-        fn_create_sources = get_callback_single_source_code(idx_source)
-        if (args.distributed):
-            fn_create_sources = get_callback_multiple_source_code(nr_nodes, nr_sessions, idx_source)
-        createNedFile(d, topology, 0, int(w), int(w), trRan, fn_create_sources)
+        idx_source = create_nedfile(topology, int(w), int(w), d, args)
 
         if args.savedfigure:
             draw(topology, trRan, args.savedfigure)
@@ -322,37 +329,54 @@ def find_top_density(densities, node, A, trRan, n, d0):
 
 def build_non_uniform_topologies(args, densities, nr_topologies):
     trRan = args.tx
-    nr_nodes = args.nr_nodes
     mobility = args.mobility
     nr_sessions = args.nr_sessions
 
-    d0 = 5
-    w, h = compute_map_size(trRan, nr_nodes, d0)
+    d0 = densities[0]
+    w, h = compute_map_size(trRan, int(args.nr_nodes/2.0), d0)
     rand = random.Random()
     for i in range(0, nr_topologies):
-        print w, h, 2*trRan
+        print "w={}, h={}, tx={}".format(w, h, trRan)
         tree = kdTree.generate_tree(map_w=w, map_h=h, min_size=2*trRan)
         leafs = tree.apply_to_each_leaf(lambda node: node)
 
         A = w * h
-        n = int(nr_nodes*1.5)
+        n = int(args.nr_nodes)
         positions = []
+        generated_densities = []
+        random.shuffle(leafs)
         for node in leafs:
             final_idx = find_top_density(densities, node, A, trRan, n, d0)
             if final_idx < 0:
                 continue
             idx = rand.randint(0, final_idx)
             d = densities[idx]
+            print "Using density {}".format(d)
+            node.density = d
             p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, node.x, node.y, node.w, node.h, d)
             positions.extend(p)
+            generated_densities.extend([d for ii in range(0, len(p))])
             n = n - n1
             A = A - node.w*node.h
             if n < 0 or A <= 0:
                 break
 
+        # assign missing nodes
+        for j in range(0, n):
+            x, y = rand.randint(0, w), rand.randint(0, h)
+            positions.append([x, y])
+            generated_densities.append(tree.find_leaf(x, y).density)
+
+        print "Fixing connectivity"
         connected = guarentee_connectivity(positions, trRan)
 
-        kdTree.save_tree_as_image(tree=tree, image_filename="topology{0}.png".format(i), positions=positions)
+        print "{} nodes unassigned".format(n)
+
+        create_nedfile(positions, int(w), int(w), i+1, args)
+        create_density_file(generated_densities, int(w), int(h), i+1, args.tx, 0)
+
+        kdTree.save_tree_as_image(tree=tree, image_filename="topology{}.png".format(i), positions=positions)
+        kdTree.save_tree_as_image(tree=tree, image_filename="topology_colours{}.png".format(i), positions=positions, colorful_densities=True)
     pass
 
 
@@ -366,7 +390,7 @@ if __name__ == '__main__':
     densities = range(min_density, max_density + step, step)
 
     if non_uniform:
-        build_non_uniform_topologies(args, densities, 5)
+        build_non_uniform_topologies(args, densities, nr_topologies=1)
     else:
         build_uniform_topologies(args, densities)
 

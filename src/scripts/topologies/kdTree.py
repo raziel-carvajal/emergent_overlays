@@ -21,6 +21,18 @@ class Node:
     def is_leaf(self):
         return self.child1 is None and self.child2 is None
 
+    def contains(self, x, y):
+        return x >= self.x and x <= (self.x + self.w) and y >= (self.y) and y <= (self.y + self.h)
+
+    def find_leaf(self, x, y):
+        if not self.is_leaf():
+            if (self.child1 is not None) and self.child1.contains(x, y):
+                return self.child1.find_leaf(x, y)
+            if (self.child2 is not None) and self.child2.contains(x, y):
+                return self.child2.find_leaf(x, y)
+        else:
+            return self if self.contains(x, y) else None
+
 
 class KDTree:
 
@@ -42,14 +54,22 @@ class KDTree:
                 stack.append(node.child2)
         return result
 
+    def find_leaf(self, x, y):
+        return self.root.find_leaf(x, y)
 
-def generate_image(tree, map_w, map_h, filename, positions):
+
+def generate_image(tree, map_w, map_h, filename, positions, colorful_densities):
     im = Image.new("RGB", (int(map_w), int(map_h)), "white")
 
     draw = ImageDraw.Draw(im)
 
     def image_generation(node):
-        draw.rectangle([int(node.x), int(node.y), int(node.x + node.w), int(node.y + node.h)], fill=None, outline="red")
+        mapping = {5:'gray', 10:'green', 15:'blue', 20:'brown', 25:'yellow', 30:'pink', 35:'red'}
+        color = None
+        if colorful_densities and hasattr(node, 'density'):
+            if node.density in mapping:
+                color = mapping[node.density]
+        draw.rectangle([int(node.x), int(node.y), int(node.x + node.w), int(node.y + node.h)], fill=color, outline="red")
 
     tree.apply_to_each_leaf(image_generation)
 
@@ -72,8 +92,8 @@ def generate_tree(map_w=1000, map_h=1000, min_size=100):
     return tree
 
 
-def save_tree_as_image(tree, image_filename, positions=[]):
-    generate_image(tree, tree.w, tree.h, image_filename, positions)
+def save_tree_as_image(tree, image_filename, positions=[], colorful_densities=False):
+    generate_image(tree, tree.w, tree.h, image_filename, positions, colorful_densities)
 
 
 if __name__ == '__main__':

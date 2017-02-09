@@ -57,12 +57,14 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    python buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
+    #python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
+    python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 35 --nodes 500 --non-uniform
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
     fi
     mv *.ned $tPath
+    mv *.density $tPath
     mv *.mobility $tPath
     printf "Ok\n"
 else
@@ -107,7 +109,12 @@ for t in $topologiesFiles; do
   		tId=$tName$p
   		cat $iniCommon >$tId
   		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
-  		cat $pPath$p'/ini' >>$tId
+  		#cat $pPath$p'/ini' >> $tId
+      FLAGS_CONFIG=""
+      if [ $p == "fully_adaptive" ]; then
+        FLAGS_CONFIG="--density-aware"
+      fi
+      python generateConfig.py $tName $tPath $pPath$p'/ini' $FLAGS_CONFIG >> $tId
       echo "*.host*.mobility.filename = \"${tPath}/$mobFile\"" >> $tId
       if [ "$USE_SINGLE_SOURCE" -eq "1" ]; then
         sed -i -e s/"SOURCE"/"hostR$srcId"/ $tId
