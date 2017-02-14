@@ -132,7 +132,6 @@ Abba2::on_payload_received(const Broadcast* m) {
         Coord b; b.x = tmp->getX(); b.y = tmp->getY();
         updateAngleCovered(b,key);
 //        cerr << getLogHeader() + "Computing angle covered\n";
-        double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
 //        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + "\n";
         double newTimeout = computeTimeout(angleCovered);
 //        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + "\n";

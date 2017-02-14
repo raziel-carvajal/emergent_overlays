@@ -182,10 +182,12 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		log_status_for_animation("MSG_RECEIVED");
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
-		bool from_selector = false;
-		for (int i = 0 ; !from_selector && i < (int) mprBroadcast->getInMprArraySize() ; i++) {
-			string j = mprBroadcast->getInMpr(i);
-			from_selector = j == myself;
+		bool from_selector = (mprBroadcast == 0);
+		if (mprBroadcast) {
+			for (int i = 0 ; !from_selector && i < (int) mprBroadcast->getInMprArraySize() ; i++) {
+				string j = mprBroadcast->getInMpr(i);
+				from_selector = (j == myself);
+			}
 		}
 
 		if (from_selector || amIbridge) {
