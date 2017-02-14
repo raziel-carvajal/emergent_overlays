@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USE_SINGLE_SOURCE=0
+USE_SINGLE_SOURCE=1
 
 # configuring path to omnet++
 . download-omnet.sh
@@ -57,7 +57,7 @@ isEmpty=$?
 if [ $isEmpty -ne 0 ]; then
     # Check if the experimental area (based in range [$2, $3] args in doTopologies) must be given
     # as an input
-    #python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
+    #python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --nodes 500 --mobility
     python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 35 --nodes 500 --non-uniform
     state=$?
     if [ $state -ne 0 ]; then
@@ -111,7 +111,7 @@ for t in $topologiesFiles; do
   		echo -e "[Config $tId]\nnetwork = builtTopologies.$tName" >>$tId
   		#cat $pPath$p'/ini' >> $tId
       FLAGS_CONFIG=""
-      if [ $p == "fully_adaptive" ]; then
+      if [ $p == "fullyAdaptive" ]; then
         FLAGS_CONFIG="--density-aware"
       fi
       python generateConfig.py $tName $tPath $pPath$p'/ini' $FLAGS_CONFIG >> $tId

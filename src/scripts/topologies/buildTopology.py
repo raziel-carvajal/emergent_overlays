@@ -390,7 +390,7 @@ if __name__ == '__main__':
     densities = range(min_density, max_density + step, step)
 
     if non_uniform:
-        build_non_uniform_topologies(args, densities, nr_topologies=1)
+        build_non_uniform_topologies(args, densities, nr_topologies=4)
     else:
         build_uniform_topologies(args, densities)
 

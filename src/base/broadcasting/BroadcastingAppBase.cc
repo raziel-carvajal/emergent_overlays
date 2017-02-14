@@ -122,7 +122,8 @@ BroadcastingAppBase::initialize(int stage)
               delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
             }
 
-        }break;
+        }
+        break;
         default:
             break;
     }

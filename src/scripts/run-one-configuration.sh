@@ -55,8 +55,9 @@ logFile="n_${NODES}_d_${densityAsString}_p_${algoN}"
 
 ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} 1>debugging/logs/${logFile}
 r=$?
+
 if [ $r -ne 0 ]; then
-        echo -e "\nERROR: for more details check this file: debugging/logs/${CONF_NAME}"
+  echo -e "\nERROR: for more details check this file: debugging/logs/${CONF_NAME}"
 	exit 1
 fi
 

@@ -123,11 +123,14 @@ Abba2::on_payload_received(const Broadcast* m) {
     if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
-        auto tmp = (abba::ABBABroadcast*)m;
-        Coord b; b.x = tmp->getX(); b.y = tmp->getY();
-        updateAngleCovered(b,key);
+        auto tmp = dynamic_cast<const abba::ABBABroadcast*>(m);
+        double angleCovered = 30.0;
+        if (tmp) {
+          Coord b(tmp->getX(), tmp->getY());
+          updateAngleCovered(b, key);
+          angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
+        }
 //        cerr << getLogHeader() + "Computing angle covered\n";
-        double angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
 //        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + "\n";
         double newTimeout = computeTimeout(angleCovered);
 //        cerr << getLogHeader() + "computed timeout " +  to_string(newTimeout) + "\n";
@@ -138,7 +141,7 @@ Abba2::on_payload_received(const Broadcast* m) {
             cancelAndDelete(old_msg);
             ignoredMsgs[key] = key;
             firHalfPairs[key].clear();
-        	secHalfPairs[key].clear();
+            secHalfPairs[key].clear();
 //            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
