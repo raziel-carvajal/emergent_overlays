@@ -27,10 +27,10 @@ namespace inet {
     std::string key = string(m->getPayload());
     if (string(m->getSender()) == myself) return;
     cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
-    emitBroadcastMsgReceived(key);
+    gateway->emitBroadcastMsgReceived(key);
     if (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end()) {
         alreadyDispatched[key] = key;
-        broadcast(key, new broadcasting::Broadcast("payload"));
+        gateway->broadcast(key, new broadcasting::Broadcast("payload"));
         //having a delay between retransmissions will decrease the number of
         //collisions but the broadcasting sessions time will increase as well
         //delayed_broadcast(key, delta);
@@ -41,12 +41,12 @@ namespace inet {
   void inet::Cds_3::time_to_broadcast_payload(void* user_data) {
     string key;
     if (!user_data)
-        key = createUniqueBroadcastingSessionId();
+        key = gateway->createUniqueBroadcastingSessionId();
     else
         key = string((char*) user_data);
     // In general, if method delayed_broadcast() is not called to retransmit messages
     // these two lines are performed just by the peer who initiate a broadast session
-    broadcast(key, new broadcasting::Broadcast("payload"));
+    gateway->broadcast(key, new broadcasting::Broadcast("payload"));
     alreadyDispatched[key] = key;
   }
 
@@ -54,7 +54,7 @@ namespace inet {
       if (msg->isSelfMessage()) {
           if (msg->getKind() == SAY_HELLO) {
               Neigh emitter;
-              emitter.addr = myAddress; emitter.pos = position; emitter.name = myself;
+              emitter.addr = myAddress; emitter.pos = gateway->get_current_position(); emitter.name = myself;
               NeighMap myNeigs;
               for (auto& n: neighbors)
                   myNeigs[n.first] = n.second;
@@ -62,7 +62,7 @@ namespace inet {
               packet->setEmitter(emitter);
               packet->setNeighbors(myNeigs);
               packet->setAmIrelay(amIrelay);
-              send_package(packet);
+              gateway->send_package(packet);
 
               doMarkingProcedure();
 
@@ -180,7 +180,7 @@ void Cds_3::doMarkingProcedure() {
                     uId = std::stoi (u.first.substr(5, u.first.size()), &sz);
                     if (isSubset(vCloseSet, uCloseSet) && vId < uId) {
                         cout << getLogHeader() + "Not relay anymore<<<<<\n";
-                        log_status_for_animation("UNMARKED4");
+                        // log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
                     }
@@ -205,7 +205,7 @@ void Cds_3::doMarkingProcedure() {
                         if (neighboursChache[v.first].size() < neighboursChache[v.first].size() ||
                                 (neighboursChache[v.first].size() == neighboursChache[v.first].size() && vId < uId))
                         cout << getLogHeader() + "Not relay anymore<<<<<\n";
-                        log_status_for_animation("UNMARKED4");
+                        // log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
                     }
@@ -236,7 +236,7 @@ void Cds_3::doMarkingProcedure() {
                     int min = std::min( i, std::min(j, k) );
 //                    cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
                     if (str_int[myself] == min) {
-                        log_status_for_animation("UNMARKED4");
+                        // log_status_for_animation("UNMARKED4");
                         cout << getLogHeader() + "Not relay anymore" << endl;
                         amIrelay = false;
                         return;
@@ -264,7 +264,7 @@ void Cds_3::doMarkingProcedure() {
                 wATuUv = isSubset(cloneMap(neighboursChache[w.first]), computeUnion(neighboursChache[u.first], neighbors));
                 if (vATuUw && !uATvUw && !wATuUv) {
                     cout << getLogHeader() + "Not relay anymore<<<<<\n";
-                    log_status_for_animation("UNMARKED2a1");
+                    // log_status_for_animation("UNMARKED2a1");
                     amIrelay = false;
                     return;
                 }
@@ -282,7 +282,7 @@ void Cds_3::doMarkingProcedure() {
                     if (cpyNeigs.size() < uCloseSet.size() ||
                             (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
                         cout << getLogHeader() + "Not relay anymore<<<<<\n";
-                        log_status_for_animation("UNMARKED2a2");
+                        // log_status_for_animation("UNMARKED2a2");
                         amIrelay = false;
                         return;
                     }
@@ -297,7 +297,7 @@ void Cds_3::doMarkingProcedure() {
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == min)) {
                         cout << getLogHeader() + "Not relay anymore<<<<<\n";
-                        log_status_for_animation("UNMARKED2a3");
+                        // log_status_for_animation("UNMARKED2a3");
                         amIrelay = false;
                         return;
                     }

@@ -31,7 +31,7 @@ ProbFlooding::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
 					case SAY_HELLO:
-						delayed_event(REFRESH_HOPS, "", get_random_delay());
+						gateway->delayed_event(REFRESH_HOPS, "", get_random_delay());
 						BroadcastingAppBase::handleMessageWhenUp(msg);
 						break;
 					case REFRESH_HOPS:
@@ -74,7 +74,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
     std::string key = string(m->getPayload());
     if (string(m->getSender()) == myself) return;
     cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
-    emitBroadcastMsgReceived(key);
+    gateway->emitBroadcastMsgReceived(key);
     if (alreadyDispatched.find(key) != alreadyDispatched.end()) return;
     probflood::ProbFlooBroadcast* msg = (probflood::ProbFlooBroadcast*) m;
     switch(scheme) {
@@ -106,7 +106,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
         doRetransmission = doDensityAndBorderAwareScheme(msg->getSenderNeigs(), true);
         if (!doRetransmission) {
 //            cout << getLogHeader() << "Doing delayed broadcast for key " << key << " and T: " << T << endl;
-            delayed_broadcast(key, T);
+            gateway->delayed_broadcast(key, T);
         }
         break;
     }
@@ -117,7 +117,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
         probflood::ProbFlooBroadcast* newMsg = new probflood::ProbFlooBroadcast("payload");
         newMsg->setSenderNeigs(myNeigs);
         alreadyDispatched.insert(key);
-        broadcast(key, newMsg);
+        gateway->broadcast(key, newMsg);
     }
 }
 
@@ -128,15 +128,15 @@ void inet::ProbFlooding::time_to_broadcast_payload(void* user_data) {
     probflood::ProbFlooBroadcast* msg = new probflood::ProbFlooBroadcast("payload");
     msg->setSenderNeigs(myNeigs);
     if (!user_data) {
-        key = createUniqueBroadcastingSessionId();
+        key = gateway->createUniqueBroadcastingSessionId();
         alreadyDispatched.insert(key);
-        broadcast(key, msg);
+        gateway->broadcast(key, msg);
     } else {
         key = string((char*) user_data);
         if (!broadcastTable[key].empty() && alreadyDispatched.find(key) == alreadyDispatched.end()) {
 //            cout << getLogHeader() << "Broadcasting with neigs elim for key: " << key << endl;
             alreadyDispatched.insert(key);
-            broadcast(key, msg);
+            gateway->broadcast(key, msg);
         } else
             cout << getLogHeader() << "broadcast table is empty or key already dispatched: " << key  << endl;
     }
@@ -150,13 +150,13 @@ void ProbFlooding::on_hello_received(const broadcasting::Hello* msg) {
     if (neighbors.find(senderStr) == neighbors.end()) {
         Neighbor node;
         node.name = senderStr;
-        node.addr = getAddr(msg->getSender());
+        node.addr = gateway->getAddr(msg->getSender());
         node.pos.x = msg->getX();
         node.pos.y = msg->getY();
         node.w = 0.0;
         neighbors[node.name] = node;
     } else {
-        neighbors[senderStr].addr = getAddr(msg->getSender());
+        neighbors[senderStr].addr = gateway->getAddr(msg->getSender());
         neighbors[senderStr].pos.x= msg->getX();
         neighbors[senderStr].pos.y= msg->getY();
         neighbors[senderStr].w = 0.0;

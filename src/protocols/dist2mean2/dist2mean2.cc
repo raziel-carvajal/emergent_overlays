@@ -42,17 +42,18 @@ Dist2Mean2::on_payload_received(const Broadcast* m) {
 
     bool first_time = !is_source && received_from[key].empty(); // is the first time I received this message ?
 
-    emitBroadcastMsgReceived(key);
+    gateway->emitBroadcastMsgReceived(key);
 
     received_from[key].insert(m->getSender());
     if (first_time) {
-        payloads[key] = m->getPayload();
+        Coord position = gateway->get_current_position();
+        // payloads[key] = m->getPayload();
         auto p = neighbors[m->getSender()].pos;
         double d = sqrt((p.x - position.x)*(p.x - position.x) + (p.y - position.y)*(p.y - position.y));
-        double delay = (1 - d/radious) * 0.5;
+        double delay = (1 - d/gateway->get_transmission_radius()) * 0.5;
         // cerr  << "A delay : " << delay << endl;
         // delayed_broadcast();
-        delayed_broadcast(key, delay);
+        gateway->delayed_broadcast(key, delay);
     }
 }
 
@@ -75,9 +76,10 @@ Dist2Mean2::send_message(string& key)
     mx /= received_from[key].size();
     my /= received_from[key].size();
 
+    Coord position = gateway->get_current_position();
     double dist = sqrt((mx - position.x)*(mx - position.x) + (my - position.y)*(my - position.y));
 
-  	double norm_d = dist / radious;
+  	double norm_d = dist / gateway->get_transmission_radius();
 
 
   	//int n = (neighbors.size() > 0) ? neighbors.size() : 0;
@@ -96,12 +98,8 @@ Dist2Mean2::send_message(string& key)
 
       // EV_DEBUG << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
       // cout << myself << ": sending !!! " << "\n";
-      emitSent(key);
       Broadcast* m = new Broadcast("payload");
-      m->setPayload(payloads[key].c_str());
-      m->setId(key.c_str());
-      m->setSender(myself.c_str());
-      send_package(m);
+      gateway->broadcast(key, m);
   }
 }
 
@@ -112,9 +110,8 @@ Dist2Mean2::time_to_broadcast_payload(void* user_data)
     BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
     if (is_source) {
-        key = myself + "-" + to_string(get_next_id_for_msg());
-        payloads[key] = " this is the payload, initially sent from " + myself;
-        emitBroadcastMsgReceived(key);
+        key = gateway->createUniqueBroadcastingSessionId();
+        gateway->emitBroadcastMsgReceived(key);
     }
     else {
         char* s = (char*)user_data;

@@ -34,13 +34,13 @@ Define_Module(Flooding2);
 void
 Flooding2::on_payload_received(const Broadcast* m) {
     string key = string(m->getId());
-    emitBroadcastMsgReceived(key);
+    gateway->emitBroadcastMsgReceived(key);
     if (string(m->getSender()) == myself) return;
     cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {
         payloads[key] = key;
-        broadcast(key, new broadcasting::Broadcast("payload"));
+        gateway->broadcast(key, new broadcasting::Broadcast("payload"));
         //to cope with mobility
         neighbors.empty();
     }
@@ -51,9 +51,9 @@ Flooding2::time_to_broadcast_payload(void* user_data)
 {
     string key;
     if (!user_data) {
-        key = createUniqueBroadcastingSessionId();
+        key = gateway->createUniqueBroadcastingSessionId();
         payloads[key] = key;
-        broadcast(key, new broadcasting::Broadcast("payload"));
+        gateway->broadcast(key, new broadcasting::Broadcast("payload"));
         //to cope with mobility
         neighbors.empty();
     }

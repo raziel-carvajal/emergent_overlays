@@ -10,13 +10,7 @@
 #include <set>
 
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/common/Coord.h"
-
-#include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/mobility/contract/IMobility.h"
 
 #include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/BroadcastingAppBase_m.h"

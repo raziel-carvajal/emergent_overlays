@@ -3,7 +3,7 @@ description = "Broadcasting messages using MPR"
 *.host*.udpApp[0].nr_hello_messages = 906
 *.host*.udpApp[0].helloTime = 0.5s
 
-# mpr related stuff; not required in experiment automatization (default values)
+# mpr related stuff; not required in experiment automation (default values)
 #*.host*.udpApp[0].maximumDelay = 0.05s
 #*.host*.udpApp[0].build_hops = true
 #*.host*.udpApp[0].wakeup_time_to_build_hops = 10s

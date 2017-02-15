@@ -32,6 +32,7 @@ Define_Module(Abba2);
 
 int
 Abba2::findQuadrant(Coord b) {
+    Coord position = gateway->get_current_position();
     if (b.x > position.x) {
         if (b.y >= position.y) return FIRST;
         else return FOURTH;
@@ -43,11 +44,10 @@ Abba2::findQuadrant(Coord b) {
 
 void
 Abba2::updateAngleCovered(Coord b, string& key){
-    updatePosition();
-    position = (check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility")))->getCurrentPosition();
+    Coord position = gateway->get_current_position();
     double d = position.distance(b);
     double alp = acos(abs(position.x - b.x) / d) * 180 / M_PI;
-    double bet = acos(d * 0.5 / radious) * 180 / M_PI;
+    double bet = acos(d * 0.5 / gateway->get_transmission_radius()) * 180 / M_PI;
     switch (findQuadrant(b)) {
     case FIRST:
         if (alp < bet) {
@@ -83,7 +83,7 @@ Abba2::updateAngleCovered(Coord b, string& key){
     }
 }
 
-bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second ? true : false; }
+bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second; }
 
 double
 Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
@@ -111,15 +111,15 @@ void Abba2::processStart() {
     BroadcastingAppBase::processStart();
 }
 
-double
 //Inversely proportional to the angle covered by all receptions
+double
 Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360.0); }
 
 void
 Abba2::on_payload_received(const Broadcast* m) {
     if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     string key = string(m->getId());
-    emitBroadcastMsgReceived(key);
+    gateway->emitBroadcastMsgReceived(key);
     if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
     cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
@@ -145,7 +145,7 @@ Abba2::on_payload_received(const Broadcast* m) {
 //            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
         } else {
             if (timeouts.find(key) == timeouts.end()) {// is this key was received for the first time?
-                log_status_for_animation("MSG_RECEIVED");
+                // log_status_for_animation("MSG_RECEIVED");
 //                cerr << getLogHeader() + "setting first timeout to " + to_string(newTimeout) + " \n";
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
 //                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
@@ -153,7 +153,7 @@ Abba2::on_payload_received(const Broadcast* m) {
                 cancelAndDelete(old_msg);
             }
             timeouts[key] = newTimeout;
-            delayMessages[key] = delayed_broadcast(key, newTimeout);
+            delayMessages[key] = gateway->delayed_broadcast(key, newTimeout);
         }
     } else
         cout << getLogHeader() + "Message already dispatched " + key + " \n";
@@ -172,10 +172,11 @@ Abba2::send_message(string& key)
         secHalfPairs[key].clear();
 
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
+        Coord position = gateway->get_current_position();
         m->setX(position.x);
         m->setY(position.y);
-        broadcast(key, m);
-        log_status_for_animation("MSG_RECEIVED_SENT");
+        gateway->broadcast(key, m);
+        // log_status_for_animation("MSG_RECEIVED_SENT");
     } else
         cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
 }
@@ -185,16 +186,16 @@ void
 Abba2::time_to_broadcast_payload(void* user_data)
 {
     string key;
-    updatePosition();
     if (!user_data) {
-        key = createUniqueBroadcastingSessionId();
+        key = gateway->createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;
 //        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
+        Coord position = gateway->get_current_position();
         m->setX(position.x);
         m->setY(position.y);
-        broadcast(key, m);
-        emitBroadcastMsgReceived(key);
+        gateway->broadcast(key, m);
+        gateway->emitBroadcastMsgReceived(key);
     } else {
         key = string( (char*)user_data );
         send_message(key);

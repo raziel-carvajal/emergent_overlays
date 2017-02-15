@@ -11,12 +11,7 @@
 #include <array>
 #include <stdexcept>
 
-#include "inet/common/INETDefs.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/common/Coord.h"
-
-#include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 #include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
@@ -38,8 +33,6 @@ protected:
     };
 
 	  void handleMessageWhenUp(cMessage *msg);
-
-    virtual void processStart() override;
 
 private:
 
@@ -77,7 +70,9 @@ private:
   		return hops_position[n];
   	}
 
-  	bool is_a_covered_by_b(string a, string b, double b_radius) {
+  	bool is_a_covered_by_b(string a, string b) {
+
+      double b_radius = gateway->get_transmission_radius();
 
   		auto pA = get_hop_position(a);
   		auto pB = get_hop_position(b);

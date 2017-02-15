@@ -32,6 +32,88 @@ using inet::broadcasting::Hello;
 
 namespace inet {
 
+Define_Module(BroadcastingAppBase);
+
+class Pepe: public cObject {
+  int a;
+  int b;
+public:
+  Pepe(): a{12}, b{13} {
+
+  }
+
+  void print() {
+    cout << "a=" << a << ", b=" << b << endl;
+  }
+};
+Register_Class(Pepe);
+
+BroadcastingAppBase::OmnetBroadcastGateway::OmnetBroadcastGateway(BroadcastingAppBase* a): app{a}
+{}
+
+
+Coord
+BroadcastingAppBase::OmnetBroadcastGateway::get_current_position()
+{
+  return app->updatePosition();
+}
+
+
+double
+BroadcastingAppBase::OmnetBroadcastGateway::get_transmission_radius()
+{
+  return app->get_radious();
+}
+
+
+L3Address
+BroadcastingAppBase::OmnetBroadcastGateway::getAddr(const std::string& id)
+{
+  return app->getAddr(id);
+} // so ugly
+
+
+void
+BroadcastingAppBase::OmnetBroadcastGateway::send_package(cPacket* m)
+{
+  app->send_package(m);
+} // send a package to all nearby devices
+
+
+void
+BroadcastingAppBase::OmnetBroadcastGateway::broadcast(std::string key, broadcasting::Broadcast* msg)
+{
+  app->broadcast(key, msg);
+}
+
+
+std::string
+BroadcastingAppBase::OmnetBroadcastGateway::createUniqueBroadcastingSessionId()
+{
+  return app->createUniqueBroadcastingSessionId();
+}
+
+void
+BroadcastingAppBase::OmnetBroadcastGateway::emitBroadcastMsgReceived(const std::string& value)
+{
+  app->emitBroadcastMsgReceived(value);
+} // important. you should use it. log data (statistics in vector)
+
+
+void
+BroadcastingAppBase::OmnetBroadcastGateway::delayed_event(int type, const std::string& key, double delay)
+{
+  app->delayed_event(type, key, delay);
+}
+
+
+cMessage*
+BroadcastingAppBase::OmnetBroadcastGateway::delayed_broadcast(const std::string& key, double delay)
+{
+  app->delayed_broadcast(key, delay);
+}
+
+
 string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
 
 void BroadcastingAppBase::printBroadcastingLog(std::string key) {
@@ -41,12 +123,10 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     cout << getLogHeader() << "BROADCASTING " << key << " TO_NEIGHBORS " << info << endl;
 }
 
-//Define_Module(BroadcastingAppBase);
-
-
-BroadcastingAppBase::BroadcastingAppBase()
-{
+BroadcastingAppBase::BroadcastingAppBase() {
+  gateway = std::make_shared<OmnetBroadcastGateway>(this);
 }
+
 
 void
 BroadcastingAppBase::initialize(int stage)
@@ -55,6 +135,13 @@ BroadcastingAppBase::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LOCAL:
+            {
+
+              auto a_pepe = dynamic_cast<Pepe*>(createOne("inet::Pepe"));
+              if (a_pepe) {
+                a_pepe->print();
+              }
+            }
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
@@ -144,10 +231,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 break;
             case SAY_HELLO:{
                 auto pkt = build_hello_message();
-                updatePosition();
-                pkt->setX(position.x);
-                pkt->setY(position.y);
-                pkt->setSender(myself.c_str());
                 send_package(pkt);
                 if (this->nr_hello_msg > 0)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
@@ -157,7 +240,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
             case WAKEUP:
                 //configure_neighbors();
-                cancelAndDelete(msg);
                 this->time_to_broadcast_payload(nullptr);
                 next_to_send++;
                 if (next_to_send != msgs.end()) {
@@ -165,6 +247,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                   double d = par("wakeUpTime").doubleValue();
                   delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
                 }
+                cancelAndDelete(msg);
 
                 break;
             case BROADCAST_DELAY:
@@ -172,8 +255,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                     void* data = msg->getContextPointer();
                     this->time_to_broadcast_payload(data);
                     cancelAndDelete(msg);
-                    break;
                 }
+                break;
             case DISPLAY_TIME:
                 {
                     cancelAndDelete(msg);
@@ -181,21 +264,17 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
             case LAST_POWER_REPORT:
                 {
-                  Hello* pkt = new Hello("Hello");
-                  pkt->setX(position.x);
-                  pkt->setY(position.y);
-                  pkt->setSender(myself.c_str());
+                  Hello* pkt = build_hello_message();
                   send_package(pkt);
-	                cancelAndDelete(msg);
 
                   auto d =  par("wakeUpTime").doubleValue() + nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 5;//some extra seconds
-
                   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
+                  cancelAndDelete(msg);
                 }
-		              break;
+		            break;
             case HALT_SIMULATION_DELAY:
                 cancelAndDelete(msg);
-            	endSimulation();
+            	  endSimulation();
             	break;
             case PRINT_POS_NEIGS:{
                 // if (nr_broadcast_msg > 0) {
@@ -205,7 +284,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
                 // }
 
-            }break;
+            }
+            break;
             default:
                 break;
         }
@@ -219,7 +299,12 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 
 inet::broadcasting::Hello*
 BroadcastingAppBase::build_hello_message() {
-  return new Hello("Hello");
+  updatePosition();
+  Hello* pkt = new Hello("Hello");
+  pkt->setX(position.x);
+  pkt->setY(position.y);
+  pkt->setSender(myself.c_str());
+  return pkt;
 }
 
 bool
@@ -248,12 +333,20 @@ BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback)
 }
 
 
-void
+Coord
 BroadcastingAppBase::updatePosition()
 {
   cModule* host = getContainingNode(this);
   IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
   position = mobility->getCurrentPosition();
+  return mobility->getCurrentPosition();
+}
+
+
+double
+BroadcastingAppBase::get_radious()
+{
+  return radious;
 }
 
 void
@@ -284,7 +377,7 @@ BroadcastingAppBase::processStart()
     socket.bind(local_port);
     socket.setBroadcast(true);
 
-    log_status_for_animation("STANDING");
+    // log_status_for_animation("STANDING");
     if (nr_hello_msg > 0)
         delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
 }
@@ -307,7 +400,7 @@ BroadcastingAppBase::configure_neighbors()
 
 
 L3Address
-BroadcastingAppBase::getAddr(string id)
+BroadcastingAppBase::getAddr(const string& id)
 {
     if (myself != id) {
         L3Address addr;
@@ -324,7 +417,7 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 
     // add coordinates
     auto it = neighbors.find(msg->getSender());
-	if (myself == msg->getSender())
+    if (myself == msg->getSender())
 			return;
 
 //	cout << getLogHeader() + "HELLO MSG RECEPTION" << endl;
@@ -388,7 +481,7 @@ BroadcastingAppBase::emitPowerLevel(double value)
 
 
 void
-BroadcastingAppBase::emitBroadcastMsgReceived(string value)
+BroadcastingAppBase::emitBroadcastMsgReceived(const string& value)
 {
   auto idx = value.find("-");
   auto v = stoi(value.substr(idx+1).c_str());
@@ -471,7 +564,6 @@ BroadcastingAppBase::send_package(cPacket* m, std::string dst)
 void
 BroadcastingAppBase::send_package(cPacket* m)
 {
-  //send_package(m, "255.255.255.255");
   L3AddressResolver resolver;
   L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
   socket.sendTo(m, addr, remote_port);
@@ -481,20 +573,11 @@ void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
     printBroadcastingLog(key);
-    L3AddressResolver resolver;
-    L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
     msg->setPayload(key.c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
-    socket.sendTo(msg, addr, remote_port);
+    send_package(msg);
     emitSent(key);
-}
-
-
-void
-BroadcastingAppBase::log_status_for_animation(std::string status)
-{
-    // cerr << "<=====>," << myself << "," << simTime() << "," << position.x << "," << position.y << "," << status << endl;
 }
 
 } //namespace

@@ -16,9 +16,6 @@
 #include "mpr_t2.h"
 #include "mprtMsgs_m.h"
 
-
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/mobility/contract/IMobility.h"
 
 #include <algorithm>
@@ -47,36 +44,13 @@ enum ControlMessageTypes {
 
 
 void
-Mpr_t2::processStart()
-{
-	BroadcastingAppBase::processStart();
-	string simT = ev.getConfig()->getConfigValue("sim-time-limit");
-	// number of times that the information of two-hops neighbors will be exchanged
-	// to compute the MPR set
-	builtMprCounter = 3; //stoi(simT.substr(0, simT.size() - 1)) / par("builtMprTimeout").doubleValue();
-
-	delayed_event(DISPLAY_HOPS, "", par("display_time_hops").doubleValue() + get_random_delay());
-
-}
-
-
-void
 Mpr_t2::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
 					case SAY_HELLO:
-						delayed_event(REFRESH_HOPS, "", get_random_delay());
+						gateway->delayed_event(REFRESH_HOPS, "", get_random_delay());
 						BroadcastingAppBase::handleMessageWhenUp(msg);
-						break;
-					case DISPLAY_HOPS:
-						{
-							if (builtMprCounter > 0) {
-								  if (builtMprCounter > 0)
-										delayed_event(DISPLAY_HOPS, "", par("builtMprTimeout").doubleValue() + 2);
-							}
-						}
-						cancelAndDelete(msg);
 						break;
 					case REFRESH_HOPS:
 						erase_old_hops();
@@ -151,6 +125,10 @@ Mpr_t2::build_hello_message() {
 		m->setYs(i, hops_position[h].y);
 		i++;
 	}
+	auto position = gateway->get_current_position();
+	m->setX(position.x);
+  m->setY(position.y);
+  m->setSender(myself.c_str());
 	return m;
 }
 
@@ -176,10 +154,10 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 	if (m->getSender() == myself) return;
 	string key = m->getId();
 	cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
-	emitBroadcastMsgReceived( key );
+	gateway->emitBroadcastMsgReceived( key );
 
 	if (payloads.find(key) == payloads.end()) {
-		log_status_for_animation("MSG_RECEIVED");
+		// log_status_for_animation("MSG_RECEIVED");
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
 		bool from_selector = (mprBroadcast == 0);
@@ -191,8 +169,8 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 		}
 
 		if (from_selector) {
-			broadcast(key, build_message_to_broadcast());
-			log_status_for_animation("MSG_RECEIVED_SENT");
+			gateway->broadcast(key, build_message_to_broadcast());
+			// log_status_for_animation("MSG_RECEIVED_SENT");
 		}
 	}
 }
@@ -202,10 +180,10 @@ void
 Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
     if (!user_data) {
-        string key = createUniqueBroadcastingSessionId();
-		payloads[key] = key;
-        emitBroadcastMsgReceived(key);
-		broadcast(key, build_message_to_broadcast());
+        string key = gateway->createUniqueBroadcastingSessionId();
+				payloads[key] = key;
+        gateway->emitBroadcastMsgReceived(key);
+				gateway->broadcast(key, build_message_to_broadcast());
     }
 }
 
@@ -237,7 +215,7 @@ Mpr_t2::compute_mpr()
 		string unique = "";
 
 		for (const auto& y: hops[0]) {
-			if (is_a_covered_by_b(z, y, radious) ) {
+			if (is_a_covered_by_b(z, y) ) {
 				unique = y;
 				count ++;
 			}
@@ -253,7 +231,7 @@ Mpr_t2::compute_mpr()
 	/* rule 3 from the paper */
 	auto is_not_covered_by_mpr = [&] (string z) {
 		bool r = any_of(mpr.begin(), mpr.end(), [&] (string h) {
-			return is_a_covered_by_b(z, h, radious);
+			return is_a_covered_by_b(z, h);
 		});
 		return !r;
 	};
@@ -267,7 +245,7 @@ Mpr_t2::compute_mpr()
 	set<string> already_covered;
 	for (const auto& z: hops[1]){
 		for (const auto& e: mpr) {
-			if (is_a_covered_by_b(z, e, radious)) {
+			if (is_a_covered_by_b(z, e)) {
 				already_covered.insert(z);
 			}
 		}
@@ -281,7 +259,7 @@ Mpr_t2::compute_mpr()
 			if (mpr.find(y) == mpr.end()) {
 				int c = 0;
 				for (const auto& z: hops[1])
-					if (already_covered.find(z) == already_covered.end() && is_a_covered_by_b(z, y, radious))
+					if (already_covered.find(z) == already_covered.end() && is_a_covered_by_b(z, y))
 						c++;
 
 				if (c > max) {
@@ -295,7 +273,7 @@ Mpr_t2::compute_mpr()
 				mpr.insert(max_y);
 				for (const auto& z: hops[1]){
 					for (const auto& e: mpr) {
-						if (is_a_covered_by_b(z, e, radious)) {
+						if (is_a_covered_by_b(z, e)) {
 							already_covered.insert(z);
 						}
 					}
