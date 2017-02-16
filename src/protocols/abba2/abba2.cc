@@ -28,7 +28,7 @@ using inet::broadcasting::Broadcast;
 
 namespace inet {
 
-Define_Module(Abba2);
+Register_Class(Abba2);
 
 int
 Abba2::findQuadrant(Coord b) {
@@ -106,9 +106,10 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
     return sum;
 }
 
-void Abba2::processStart() {
-    timeOut = par("timeOut").doubleValue();
-    BroadcastingAppBase::processStart();
+void Abba2::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) {
+  BroadcastProtocolAdapter::initialize(node_name, gateway);
+  timeOut = gateway->get_parameter<double>("timeOut");
+    // timeOut = par("timeOut").doubleValue();
 }
 
 //Inversely proportional to the angle covered by all receptions
@@ -116,12 +117,11 @@ double
 Abba2::computeTimeout(double angle) { return timeOut - timeOut * (angle / 360.0); }
 
 void
-Abba2::on_payload_received(const Broadcast* m) {
+Abba2::process_payload(const Broadcast* m) {
     if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
-    string key = string(m->getId());
+    string key(m->getId());
     gateway->emitBroadcastMsgReceived(key);
-    if (m->getSender() == myself) return;//avoiding that the source of a broadcast receives the message
-    cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
+    // cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     if (ignoredMsgs.find(key) == ignoredMsgs.end()) {
         auto tmp = dynamic_cast<const abba::ABBABroadcast*>(m);
         double angleCovered = 30.0;
@@ -138,8 +138,8 @@ Abba2::on_payload_received(const Broadcast* m) {
             // TODO Optimizing messages delivery: find a way to put this event at the top of the scheduler
             // cancel retransmission (ASAP I thought...)
             cMessage* old_msg = delayMessages[key];
-            cancelAndDelete(old_msg);
-            ignoredMsgs[key] = key;
+            gateway->cancel_message(old_msg);
+            ignoredMsgs.insert(key);
             firHalfPairs[key].clear();
             secHalfPairs[key].clear();
 //            cerr << getLogHeader() + "timeout zero for message  " + key + " \n";
@@ -150,13 +150,14 @@ Abba2::on_payload_received(const Broadcast* m) {
             } else if (timeouts[key] != newTimeout) {// just cancel when timeouts differ
 //                cerr << getLogHeader() + "updating timeout to " + to_string(newTimeout) + " \n";
                 cMessage* old_msg = delayMessages[key];
-                cancelAndDelete(old_msg);
+                gateway->cancel_message(old_msg);
             }
             timeouts[key] = newTimeout;
             delayMessages[key] = gateway->delayed_broadcast(key, newTimeout);
         }
-    } else
-        cout << getLogHeader() + "Message already dispatched " + key + " \n";
+    } else {
+      // cout << getLogHeader() + "Message already dispatched " + key + " \n";
+    }
 }
 
 
@@ -167,7 +168,7 @@ Abba2::send_message(string& key)
     if (applyRetransmission) {
 //        cerr << getLogHeader() + "broadcasting message " + key + " \n";
         // this happens when the timeout couldn't be stop (imminent retransmission)
-        ignoredMsgs[key] = key;
+        ignoredMsgs.insert(key);
         firHalfPairs[key].clear();
         secHalfPairs[key].clear();
 
@@ -177,8 +178,9 @@ Abba2::send_message(string& key)
         m->setY(position.y);
         gateway->broadcast(key, m);
         // log_status_for_animation("MSG_RECEIVED_SENT");
-    } else
-        cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
+    } else {
+      // cerr << getLogHeader() + "ignoring message at send_message()" + key + " \n";
+    }
 }
 
 
@@ -188,7 +190,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
     string key;
     if (!user_data) {
         key = gateway->createUniqueBroadcastingSessionId();
-        ignoredMsgs[key] = key;
+        ignoredMsgs.insert(key);
 //        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
         Coord position = gateway->get_current_position();

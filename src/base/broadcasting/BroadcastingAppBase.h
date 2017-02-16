@@ -65,6 +65,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     {
     private:
       BroadcastingAppBase* app;
+      double get_double_parameter(const std::string& param) override;
+      int last_message_assigned;
     public:
 
       OmnetBroadcastGateway(BroadcastingAppBase* app);
@@ -84,6 +86,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;
+
+      void cancel_message(cMessage* m) override;
+      int register_new_control_message() override;
     };
 
     friend class OmnetBroadcastGateway;

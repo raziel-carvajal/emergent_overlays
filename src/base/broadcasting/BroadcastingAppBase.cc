@@ -34,21 +34,7 @@ namespace inet {
 
 // Define_Module(BroadcastingAppBase);
 
-class Pepe: public cObject {
-  int a;
-  int b;
-public:
-  Pepe(): a{12}, b{13} {
-
-  }
-
-  void print() {
-    cout << "a=" << a << ", b=" << b << endl;
-  }
-};
-Register_Class(Pepe);
-
-BroadcastingAppBase::OmnetBroadcastGateway::OmnetBroadcastGateway(BroadcastingAppBase* a): app{a}
+BroadcastingAppBase::OmnetBroadcastGateway::OmnetBroadcastGateway(BroadcastingAppBase* a): app{a}, last_message_assigned{ControlMessageTypes::LAST_POWER_REPORT}
 {}
 
 
@@ -106,12 +92,31 @@ BroadcastingAppBase::OmnetBroadcastGateway::delayed_event(int type, const std::s
   app->delayed_event(type, key, delay);
 }
 
-
 cMessage*
 BroadcastingAppBase::OmnetBroadcastGateway::delayed_broadcast(const std::string& key, double delay)
 {
   app->delayed_broadcast(key, delay);
 }
+
+double
+BroadcastingAppBase::OmnetBroadcastGateway::get_double_parameter(const std::string& param)
+{
+  if (param == "timeOut") return 0.02;
+  return app->par(param.c_str()).doubleValue();
+}
+
+void
+BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m)
+{
+  app->cancelAndDelete(m);
+}
+
+int
+BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
+{
+  return ++last_message_assigned;
+}
+
 
 
 string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
@@ -530,8 +535,6 @@ BroadcastingAppBase::delayed_event_with_strict_time(int type, const std::string&
     mm->setKind(type);
     scheduleAt(SimTime(t), mm);
 }
-
-
 
 
 string
