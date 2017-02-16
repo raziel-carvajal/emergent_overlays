@@ -32,7 +32,7 @@ using inet::broadcasting::Hello;
 
 namespace inet {
 
-Define_Module(BroadcastingAppBase);
+// Define_Module(BroadcastingAppBase);
 
 class Pepe: public cObject {
   int a;
@@ -135,13 +135,6 @@ BroadcastingAppBase::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LOCAL:
-            {
-
-              auto a_pepe = dynamic_cast<Pepe*>(createOne("inet::Pepe"));
-              if (a_pepe) {
-                a_pepe->print();
-              }
-            }
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
@@ -163,11 +156,6 @@ BroadcastingAppBase::initialize(int stage)
 
                 this->position = mobility->getCurrentPosition();
                 this->radious = transmitter->getMaxCommunicationRange().get();
-
-                EV_TRACE << "My position is " << this->position  << "\n";
-
-                //   cout << getLogHeader() << " " << atoi(tokenizer.nextToken()) << endl;
-
             }
             break;
         case INITSTAGE_LAST:{
