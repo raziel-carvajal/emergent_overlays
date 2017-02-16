@@ -34,7 +34,7 @@ namespace inet {
 
 // Define_Module(BroadcastingAppBase);
 
-BroadcastingAppBase::OmnetBroadcastGateway::OmnetBroadcastGateway(BroadcastingAppBase* a): app{a}, last_message_assigned{ControlMessageTypes::LAST_POWER_REPORT}
+BroadcastingAppBase::OmnetBroadcastGateway::OmnetBroadcastGateway(BroadcastingAppBase* a): app{a}, last_message_assigned{ControlMessageTypes::Last}
 {}
 
 
@@ -311,7 +311,7 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
     if (!done) {
         done = processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
 					this->on_payload_received(m);
-			   });
+			  });
     }
 
     return done;

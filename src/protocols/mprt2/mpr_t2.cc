@@ -26,49 +26,38 @@
 
 using namespace std;
 using inet::broadcasting::Broadcast;
-using inet::BroadcastingAppBase;
 
 using inet::mpr_t2::MprBroadcast;
 using inet::mpr_t2::MprHello;
 
 namespace inet {
 
-Define_Module(Mpr_t2);
-
-
-enum ControlMessageTypes {
-	WAKEUP_HOPS_REQUESTER = BroadcastingAppBase::ControlMessageTypes::Last + 1,
-	DISPLAY_HOPS,
-	REFRESH_HOPS
-};
+Register_Class(Mpr_t2);
 
 
 void
-Mpr_t2::handleMessageWhenUp(cMessage *msg)
+Mpr_t2::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway)
 {
-    if (msg->isSelfMessage()) {
-        switch (msg->getKind()) {
-					case SAY_HELLO:
-						gateway->delayed_event(REFRESH_HOPS, "", get_random_delay());
-						BroadcastingAppBase::handleMessageWhenUp(msg);
-						break;
-					case REFRESH_HOPS:
-						erase_old_hops();
-						cancelAndDelete(msg);
-						break;
-					default:
-						BroadcastingAppBase::handleMessageWhenUp(msg);
-						break;
-			}
-	}
-	else BroadcastingAppBase::handleMessageWhenUp(msg);
+	BroadcastProtocolAdapter::initialize(node_name, gateway);
+	refresh_hops_message = gateway->register_new_control_message();
 }
 
+
+void
+Mpr_t2::on_saying_hello()
+{
+	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
+}
+
+
 bool
-Mpr_t2::on_network_message_received(cPacket* pkt){
-    return
-			processMessage<MprHello>(pkt, [&](const MprHello *m) { this->on_mpr_hello(m); }) ||
-			BroadcastingAppBase::on_network_message_received(pkt);
+Mpr_t2::handle(const cMessage *msg)
+{
+	if (msg->getKind() == refresh_hops_message) {
+		erase_old_hops();
+		return true;
+	}
+	return false;
 }
 
 
@@ -78,7 +67,7 @@ Mpr_t2::erase_old_hops()
 	for( auto it = hop1.begin(); it != hop1.end(); ) {
 		//bool b = false;
 		double elapsed = (simTime() - it->second.time).dbl();
-		double threshold = 2 * par("helloTime").doubleValue();
+		double threshold = 2 * gateway->get_parameter<double>("helloTime");
 		if( elapsed > threshold )  {
 			it = hop1.erase(it);
 			// cerr << getLogHeader() << " removing " << it->first << endl;
@@ -87,17 +76,16 @@ Mpr_t2::erase_old_hops()
 	}
 }
 
-
 void
-Mpr_t2::on_mpr_hello(const MprHello *m)
+Mpr_t2::process_hello(const broadcasting::Hello* msg)
 {
-	string j = m->getSender();
+	string j = msg->getSender();
 	if (j == myself) return;
+	auto m = dynamic_cast<const MprHello*>(msg);
 	//for being able to measure collisions
-	neighbors[j] = Neighbor();
+	// neighbors[j] = Neighbor(); FIXME: add this again
 	/* first, it is obvious that the sender is a member of hops level 0 */
 	hop1[j] = NodeNeighbor(simTime());
-
 	hops_position[j] = Coord(m->getX(), m->getY());
 
 	for (int i = 0 ; i < (int) m->getNeighborsArraySize() ; i++) {
@@ -113,7 +101,7 @@ Mpr_t2::on_mpr_hello(const MprHello *m)
 
 inet::broadcasting::Hello*
 Mpr_t2::build_hello_message() {
-  auto m = new MprHello("MprHello");
+	auto m = new MprHello("MprHello");
 	m->setNeighborsArraySize(hop1.size());
 	m->setXsArraySize(hop1.size());
 	m->setYsArraySize(hop1.size());
@@ -127,8 +115,8 @@ Mpr_t2::build_hello_message() {
 	}
 	auto position = gateway->get_current_position();
 	m->setX(position.x);
-  m->setY(position.y);
-  m->setSender(myself.c_str());
+	m->setY(position.y);
+	m->setSender(myself.c_str());
 	return m;
 }
 
@@ -148,12 +136,12 @@ Mpr_t2::build_message_to_broadcast()
 
 
 void
-Mpr_t2::on_payload_received(const Broadcast* m)
+Mpr_t2::process_payload(const Broadcast* m)
 {
 	// Store in a map a a broadcast session ID
 	if (m->getSender() == myself) return;
 	string key = m->getId();
-	cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
+	// cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
 	gateway->emitBroadcastMsgReceived( key );
 
 	if (payloads.find(key) == payloads.end()) {
@@ -170,7 +158,6 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 
 		if (from_selector) {
 			gateway->broadcast(key, build_message_to_broadcast());
-			// log_status_for_animation("MSG_RECEIVED_SENT");
 		}
 	}
 }

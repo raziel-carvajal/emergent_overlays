@@ -13,7 +13,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 
-#include "broadcasting/BroadcastingAppBase.h"
+#include "broadcasting/IBroadcastProtocol.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 
 #include "mprtMsgs_m.h"
@@ -22,7 +22,8 @@ using namespace std;
 
 namespace inet {
 
-class INET_API Mpr_t2 : public BroadcastingAppBase{
+class INET_API Mpr_t2 : public inet::BroadcastProtocolAdapter
+{
 protected:
 
     struct NodeNeighbor {
@@ -32,13 +33,9 @@ protected:
       NodeNeighbor(simtime_t t) : time(t) {}
     };
 
-	  void handleMessageWhenUp(cMessage *msg);
-
 private:
 
-  	int nr_hops_required = 2;
-  	int builtMprCounter;
-  	//long int builtMprCounter = ev.getConfig()-> getAsDouble("General", "sim-time-limit");
+    int refresh_hops_message;
 
   	array< set<string>, 2 > hops;
 
@@ -49,14 +46,16 @@ private:
     /* payload of the message to broadcast */
     map< string, string >  payloads;
 
-    virtual inet::broadcasting::Hello* build_hello_message() override;
+    void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;
 
-    virtual void on_payload_received(const broadcasting::Broadcast* m) override;
-    virtual void time_to_broadcast_payload(void* user_data) override;
+    inet::broadcasting::Hello* build_hello_message() override;
 
-    virtual bool on_network_message_received(cPacket* pkt) override;
+    void process_payload(const broadcasting::Broadcast* m) override;
+    void time_to_broadcast_payload(void* user_data) override;
 
-    void on_mpr_hello(const mpr_t2::MprHello* m);
+    void process_hello(const broadcasting::Hello* msg) override;
+    void on_saying_hello() override;
+    bool handle(const cMessage *msg) override;
 
     inet::mpr_t2::MprBroadcast* build_message_to_broadcast();
 

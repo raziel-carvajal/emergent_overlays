@@ -153,10 +153,11 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     template <typename T> bool
   	processMessage(cPacket* pkt, std::function<void(const T*)> action)
   	{
-  		T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
+  		// T* t = check_and_cast_nullable<T*>(dynamic_cast<T*>(pkt));
+  		T* t = dynamic_cast<T*>(pkt);
   		if (t != nullptr) {
   			action(t);
-  		    return true;
+  		  return true;
   		}
   		else {
   		    return false;
