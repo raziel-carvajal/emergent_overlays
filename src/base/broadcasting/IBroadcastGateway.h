@@ -6,6 +6,7 @@
 
 #include "BroadcastingAppBase_m.h"
 
+
 namespace inet {
 
 template<typename T>
@@ -23,6 +24,7 @@ class IBroadcastGateway {
 protected:
   virtual double get_double_parameter(const std::string& param) = 0;
   virtual bool get_bool_parameter(const std::string& param) = 0;
+  virtual std::string get_string_parameter(const std::string& param) = 0;
 public:
   virtual Coord get_current_position() = 0;
   virtual double get_transmission_radius() = 0;
@@ -50,6 +52,10 @@ public:
 
   double get_parameter(const std::string& param, identity<bool>) {
     return get_bool_parameter(param);
+  }
+
+  std::string get_parameter(const std::string& param, identity<std::string>) {
+    return get_string_parameter(param);
   }
 };
 

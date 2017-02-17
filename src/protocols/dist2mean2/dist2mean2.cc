@@ -27,27 +27,22 @@ using inet::broadcasting::Broadcast;
 
 namespace inet {
 
-Define_Module(Dist2Mean2);
-
-Dist2Mean2::Dist2Mean2()
-{
-}
+Register_Class(Dist2Mean2);
 
 
 void
-Dist2Mean2::on_payload_received(const Broadcast* m) {
-
+Dist2Mean2::process_payload(const Broadcast* m) {
     string key = string(m->getId());
-    BroadcastingAppBase::on_payload_received(m);
+    if (m->getSender() == myself) return;
 
-    bool first_time = !is_source && received_from[key].empty(); // is the first time I received this message ?
+    bool first_time =  payloads.find(m->getPayload()) == payloads.end();
 
     gateway->emitBroadcastMsgReceived(key);
 
     received_from[key].insert(m->getSender());
     if (first_time) {
         Coord position = gateway->get_current_position();
-        // payloads[key] = m->getPayload();
+        payloads[key] = m->getPayload();
         auto p = neighbors[m->getSender()].pos;
         double d = sqrt((p.x - position.x)*(p.x - position.x) + (p.y - position.y)*(p.y - position.y));
         double delay = (1 - d/gateway->get_transmission_radius()) * 0.5;
@@ -59,7 +54,7 @@ Dist2Mean2::on_payload_received(const Broadcast* m) {
 
 
 void
-Dist2Mean2::send_message(string& key)
+Dist2Mean2::send_message(const string& key, bool is_source)
 {
 
   bool must_send = is_source;
@@ -99,6 +94,7 @@ Dist2Mean2::send_message(string& key)
       // EV_DEBUG << "====================== Sending in " << myself << " because the distance to mean  is " << dist << " > " << par("threshold").doubleValue() << "\n";
       // cout << myself << ": sending !!! " << "\n";
       Broadcast* m = new Broadcast("payload");
+      payloads[key] = key;
       gateway->broadcast(key, m);
   }
 }
@@ -107,8 +103,8 @@ Dist2Mean2::send_message(string& key)
 void
 Dist2Mean2::time_to_broadcast_payload(void* user_data)
 {
-    BroadcastingAppBase::time_to_broadcast_payload(user_data);
     string key;
+    bool is_source = (user_data == nullptr);
     if (is_source) {
         key = gateway->createUniqueBroadcastingSessionId();
         gateway->emitBroadcastMsgReceived(key);
@@ -119,7 +115,7 @@ Dist2Mean2::time_to_broadcast_payload(void* user_data)
         delete s;
     }
     // cout << "Broadcasting in " << myself << endl;
-    send_message(key);
+    send_message(key, is_source);
 }
 
 

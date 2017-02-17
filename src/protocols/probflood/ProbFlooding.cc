@@ -16,34 +16,24 @@
 #include <probflood/ProbFlooding.h>
 namespace inet {
 
-Define_Module(ProbFlooding);
+Register_Class(ProbFlooding);
 
 
-enum ControlMessageTypes {
-	WAKEUP_HOPS_REQUESTER = BroadcastingAppBase::ControlMessageTypes::Last + 1,
-	REFRESH_HOPS
-};
+bool
+ProbFlooding::handle(const cMessage *msg)
+{
+	if (msg->getKind() == refresh_hops_message) {
+		erase_old_hops();
+		return true;
+	}
+	return false;
+}
 
 
 void
-ProbFlooding::handleMessageWhenUp(cMessage *msg)
+ProbFlooding::on_saying_hello()
 {
-    if (msg->isSelfMessage()) {
-        switch (msg->getKind()) {
-					case SAY_HELLO:
-						gateway->delayed_event(REFRESH_HOPS, "", get_random_delay());
-						BroadcastingAppBase::handleMessageWhenUp(msg);
-						break;
-					case REFRESH_HOPS:
-						erase_old_hops();
-						cancelAndDelete(msg);
-						break;
-					default:
-						BroadcastingAppBase::handleMessageWhenUp(msg);
-						break;
-			}
-	}
-	else BroadcastingAppBase::handleMessageWhenUp(msg);
+	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
 }
 
 
@@ -67,13 +57,13 @@ ProbFlooding::erase_old_hops()
 
 
 
-void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
+void ProbFlooding::process_payload(const broadcasting::Broadcast* m) {
+		if (string(m->getSender()) == myself) return;
     double probability = 0.0;
     bool doRetransmission = false;
     NeigsMap toDel;
     std::string key = string(m->getPayload());
-    if (string(m->getSender()) == myself) return;
-    cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
+    // cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
     gateway->emitBroadcastMsgReceived(key);
     if (alreadyDispatched.find(key) != alreadyDispatched.end()) return;
     probflood::ProbFlooBroadcast* msg = (probflood::ProbFlooBroadcast*) m;
@@ -84,7 +74,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
             // cout << getLogHeader() << "NOOOOOOOOOOOOOOOOOOOOOOO=============================: " << endl;
         } else {
             probability = k / neighbors.size();
-            cout << getLogHeader() << "Probability 111: " << probability << endl;
+            // cout << getLogHeader() << "Probability 111: " << probability << endl;
             doRetransmission = probability >= probLim;
         }
         break;
@@ -121,7 +111,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
     }
 }
 
-void inet::ProbFlooding::time_to_broadcast_payload(void* user_data) {
+void ProbFlooding::time_to_broadcast_payload(void* user_data) {
     string key;
     NeigsMap myNeigs;
     for (auto& n: neighbors) myNeigs[n.first] = n.first;
@@ -137,12 +127,14 @@ void inet::ProbFlooding::time_to_broadcast_payload(void* user_data) {
 //            cout << getLogHeader() << "Broadcasting with neigs elim for key: " << key << endl;
             alreadyDispatched.insert(key);
             gateway->broadcast(key, msg);
-        } else
-            cout << getLogHeader() << "broadcast table is empty or key already dispatched: " << key  << endl;
+        } else {
+					// cout << getLogHeader() << "broadcast table is empty or key already dispatched: " << key  << endl;
+
+				}
     }
 }
 
-void ProbFlooding::on_hello_received(const broadcasting::Hello* msg) {
+void ProbFlooding::process_hello(const broadcasting::Hello* msg) {
     if (myself == msg->getSender())
         return;
 //    cout << getLogHeader() << "HELLO from: " << msg->getSender() << endl;
@@ -173,23 +165,23 @@ bool ProbFlooding::doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both
    for (auto& n: neighbors) {
 		 src.insert(n.first);
    }
-   cout << getLogHeader() << "SRC neighbrs:" << endl;
+  //  cout << getLogHeader() << "SRC neighbrs:" << endl;
     double Na, Nb, Nc = 0.0;
     vector<string> v;
     set_difference(src.begin(), src.end(), dest.begin(), dest.end(), inserter(v, v.begin()));
     Na = v.size();
     v.clear();
-   cout << getLogHeader() << "SRC / DST size: " << Na << endl;
+  //  cout << getLogHeader() << "SRC / DST size: " << Na << endl;
     set_difference(dest.begin(), dest.end(), src.begin(), src.end(), inserter(v, v.begin()));
     Nb = v.size();
     v.clear();
-   cout << getLogHeader() << "DST / SRC size: " << Nb << endl;
+  //  cout << getLogHeader() << "DST / SRC size: " << Nb << endl;
     set_intersection(src.begin(), src.end(), dest.begin(), dest.end(), inserter(v, v.begin()));
     Nc = v.size();
     v.clear();
-   cout << getLogHeader() << "DST intersection SRC size: " << Nc << endl;
+  //  cout << getLogHeader() << "DST intersection SRC size: " << Nc << endl;
     double mu = Nb / (Na + Nc);
-   cout << getLogHeader() << "Mu: " << mu << endl;
+  //  cout << getLogHeader() << "Mu: " << mu << endl;
     double probability;
     if (both)
         probability = pow(mu, sigma)*(k/neigSize - alpha)/(pow(M, sigma)) + alpha;
@@ -197,30 +189,33 @@ bool ProbFlooding::doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both
         probability = pow(mu, sigma)*(A - alpha)/(pow(M, sigma)) + alpha;
 
 		cout << pow(mu, sigma)*(A - alpha)/(pow(M, sigma)) << pow(mu, sigma) << pow(M, sigma) << endl;
-    cout << getLogHeader() << "Probability: " << probability << " probLim=" << probLim << endl;
+    // cout << getLogHeader() << "Probability: " << probability << " probLim=" << probLim << endl;
     return probability >= probLim;
 }
 
-bool ProbFlooding::handleNodeStart(IDoneCallback* doneCallback) {
-    map<string, int> enumMap;
-    enumMap["DENSITY_AWARE"] = DENSITY_AWARE;
-    enumMap["BORDER_AWARE"] = BORDER_AWARE;
-    enumMap["DENSITY_BORDER_AWARE"] = DENSITY_BORDER_AWARE;
-    enumMap["DENSITY_BORDER_AWARE_NEIGS_ELIMINATION"] = DENSITY_BORDER_AWARE_NEIGS_ELIMINATION;
-    if (enumMap.find(par("scheme").stdstringValue()) == enumMap.end()) {
-        cerr << getLogHeader() << "Unknown scheme policy, stopping simulation.";
-        endSimulation();
-    }
-    scheme= enumMap[par("scheme").stdstringValue()];
-    A     = par("A").doubleValue();
-    k     = par("k").doubleValue();
-    alpha = par("alpha").doubleValue();
-    sigma = par("sigma").doubleValue();
-    miTreb= par("miTreb").doubleValue();
-    maTreb= par("maTreb").doubleValue();
-    probLim=par("probLi").doubleValue();
-    T = miTreb + maTreb * uniform(0.0, 1.0);
-    return BroadcastingAppBase::handleNodeStart(doneCallback);
+
+void ProbFlooding::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway)
+{
+	BroadcastProtocolAdapter::initialize(node_name, gateway);
+	map<string, int> enumMap;
+	enumMap["DENSITY_AWARE"] = DENSITY_AWARE;
+	enumMap["BORDER_AWARE"] = BORDER_AWARE;
+	enumMap["DENSITY_BORDER_AWARE"] = DENSITY_BORDER_AWARE;
+	enumMap["DENSITY_BORDER_AWARE_NEIGS_ELIMINATION"] = DENSITY_BORDER_AWARE_NEIGS_ELIMINATION;
+	if (enumMap.find(gateway->get_parameter<string>("scheme")) == enumMap.end()) {
+		throw std::runtime_error("Unknown scheme policy, stopping simulation.");
+	}
+	scheme= enumMap[gateway->get_parameter<string>("scheme")];
+	A     = gateway->get_parameter<double>("A");
+	k     = gateway->get_parameter<double>("k");
+	alpha = gateway->get_parameter<double>("alpha");
+	sigma = gateway->get_parameter<double>("sigma");
+	miTreb= gateway->get_parameter<double>("miTreb");
+	maTreb= gateway->get_parameter<double>("maTreb");
+	probLim=gateway->get_parameter<double>("probLi");
+	T = miTreb + maTreb * uniform(0.0, 1.0);
+
+	refresh_hops_message = gateway->register_new_control_message();
 }
 
 }

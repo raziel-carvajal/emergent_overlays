@@ -12,21 +12,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-#include <cds3/Cds3.h>
+#include "cds3/Cds3.h"
+
 namespace inet {
 
-  Define_Module(Cds_3);
+  Register_Class(Cds_3);
 
-  bool Cds_3::handleNodeStart(IDoneCallback* doneCallback) {
-      doRule2 = par("doRule2").boolValue();
-      doOptiP = par("doOptiP").boolValue();
-      return BroadcastingAppBase::handleNodeStart(doneCallback);
+  void Cds_3::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway)
+  {
+    BroadcastProtocolAdapter::initialize(node_name, gateway);
+    doRule2 = gateway->get_parameter<bool>("doRule2");
+    doOptiP = gateway->get_parameter<bool>("doOptiP");
   }
 
-  void inet::Cds_3::on_payload_received(const broadcasting::Broadcast* m) {
-    std::string key = string(m->getPayload());
+  void inet::Cds_3::process_payload(const broadcasting::Broadcast* m) {
+    std::string key(m->getPayload());
     if (string(m->getSender()) == myself) return;
-    cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
+    // cout << getLogHeader() + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     gateway->emitBroadcastMsgReceived(key);
     if (amIrelay && alreadyDispatched.find(key) == alreadyDispatched.end()) {
         alreadyDispatched[key] = key;
@@ -38,7 +40,8 @@ namespace inet {
 
   }
 
-  void inet::Cds_3::time_to_broadcast_payload(void* user_data) {
+  void inet::Cds_3::time_to_broadcast_payload(void* user_data)
+  {
     string key;
     if (!user_data)
         key = gateway->createUniqueBroadcastingSessionId();
@@ -50,38 +53,32 @@ namespace inet {
     alreadyDispatched[key] = key;
   }
 
-  void Cds_3::handleMessageWhenUp(cMessage* msg) {
-      if (msg->isSelfMessage()) {
-          if (msg->getKind() == SAY_HELLO) {
-              Neigh emitter;
-              emitter.addr = myAddress; emitter.pos = gateway->get_current_position(); emitter.name = myself;
-              NeighMap myNeigs;
-              for (auto& n: neighbors)
-                  myNeigs[n.first] = n.second;
-              cds3::Cds3* packet = new cds3::Cds3();
-              packet->setEmitter(emitter);
-              packet->setNeighbors(myNeigs);
-              packet->setAmIrelay(amIrelay);
-              gateway->send_package(packet);
 
-              doMarkingProcedure();
+  inet::broadcasting::Hello* Cds_3::build_hello_message()
+  {
+    Neigh emitter;
+    emitter.addr = gateway->getAddr(myself);
+    emitter.pos = gateway->get_current_position();
+    emitter.name = myself;
+    NeighMap myNeigs = neighbors;
+    // for (const auto& n: neighbors)
+    //     myNeigs[n.first] = n.second;
 
-              nr_hello_msg--;
-              cancelAndDelete(msg);
-              if (nr_hello_msg > 0) {
-                  cMessage* neighsMsg = new cMessage("controlMSG", SAY_HELLO);
-                  neighsMsg->setKind(SAY_HELLO);
-                  scheduleAt(simTime() + par("helloTime").doubleValue(), neighsMsg);
-              }
-            } else
-                BroadcastingAppBase::handleMessageWhenUp(msg);
-      } else
-          BroadcastingAppBase::handleMessageWhenUp(msg);
+    auto m = new cds3::Cds3("cds3");
+    m->setEmitter(emitter);
+    m->setNeighbors(myNeigs);
+    m->setAmIrelay(amIrelay);
+
+  	auto position = gateway->get_current_position();
+  	m->setX(position.x);
+  	m->setY(position.y);
+  	m->setSender(myself.c_str());
+  	return m;
   }
 
-  bool Cds_3::on_network_message_received(cPacket* pkt) {
-    return BroadcastingAppBase::on_network_message_received(pkt) ||
-	processMessage<cds3::Cds3>(pkt, [&](const cds3::Cds3*m) { on_neighbors_reception(m); });
+  void Cds_3::on_saying_hello()
+  {
+    doMarkingProcedure();
   }
 
   /*
@@ -105,14 +102,14 @@ void Cds_3::doMarkingProcedure() {
         return;
     }
     if (!markingProcedureDone){
-        cout << getLogHeader() + "Doing marking procedure\n";
+        // cout << getLogHeader() + "Doing marking procedure\n";
         for (auto& m: neighboursChache) {
             for (auto& n: neighboursChache) {
                 if (m.first != n.first && n.second.find(m.first) == n.second.end()) {
                     amIrelay = true;
-                    cout << getLogHeader() + "I am Relay (marking procedure)\n";
+                    // cout << getLogHeader() + "I am Relay (marking procedure)\n";
                     markingProcedureDone = true;
-                    cout << getLogHeader() + "Marking procedure DONE\n";
+                    // cout << getLogHeader() + "Marking procedure DONE\n";
                     neighbors.empty();
                     relaysIcanSee.empty();
                     return;
@@ -120,10 +117,10 @@ void Cds_3::doMarkingProcedure() {
             }
         }
         markingProcedureDone = true;
-        cout << getLogHeader() + "Marking procedure DONE\n";
+        // cout << getLogHeader() + "Marking procedure DONE\n";
     } else if (!optimizProcedureDone){
         if (relaysIcanSee.size() < 2) return;
-        cout << getLogHeader() + "Doing optimization procedure\n";
+        // cout << getLogHeader() + "Doing optimization procedure\n";
         if (!doRule2) { // Doing Rules 1 and/or 1a
             applyRule1();
             if (doOptiP)
@@ -136,7 +133,7 @@ void Cds_3::doMarkingProcedure() {
             }
         }
         optimizProcedureDone = true;
-        cout << getLogHeader() + "Optimization procedure DONE\n";
+        // cout << getLogHeader() + "Optimization procedure DONE\n";
     }
     neighbors.empty();
     relaysIcanSee.empty();
@@ -179,7 +176,7 @@ void Cds_3::doMarkingProcedure() {
                     vId = std::stoi (v.first.substr(5, v.first.size()), &sz);
                     uId = std::stoi (u.first.substr(5, u.first.size()), &sz);
                     if (isSubset(vCloseSet, uCloseSet) && vId < uId) {
-                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                        // cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         // log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
@@ -204,7 +201,7 @@ void Cds_3::doMarkingProcedure() {
                     if (isSubset(vCloseSet, uCloseSet)) {
                         if (neighboursChache[v.first].size() < neighboursChache[v.first].size() ||
                                 (neighboursChache[v.first].size() == neighboursChache[v.first].size() && vId < uId))
-                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                        // cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         // log_status_for_animation("UNMARKED4");
                         amIrelay = false;
                         return;
@@ -236,8 +233,7 @@ void Cds_3::doMarkingProcedure() {
                     int min = std::min( i, std::min(j, k) );
 //                    cerr << getLogHeader() + "MIN: " + to_string(min) + "\n";
                     if (str_int[myself] == min) {
-                        // log_status_for_animation("UNMARKED4");
-                        cout << getLogHeader() + "Not relay anymore" << endl;
+                        // cout << getLogHeader() + "Not relay anymore" << endl;
                         amIrelay = false;
                         return;
                     }
@@ -263,7 +259,7 @@ void Cds_3::doMarkingProcedure() {
                 uATvUw = isSubset(cloneMap(neighboursChache[u.first]), computeUnion(neighbors, neighboursChache[w.first]));
                 wATuUv = isSubset(cloneMap(neighboursChache[w.first]), computeUnion(neighboursChache[u.first], neighbors));
                 if (vATuUw && !uATvUw && !wATuUv) {
-                    cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                    // cout << getLogHeader() + "Not relay anymore<<<<<\n";
                     // log_status_for_animation("UNMARKED2a1");
                     amIrelay = false;
                     return;
@@ -281,7 +277,7 @@ void Cds_3::doMarkingProcedure() {
                 if (vATuUw && uATvUw && !wATuUv) {
                     if (cpyNeigs.size() < uCloseSet.size() ||
                             (cpyNeigs.size() == uCloseSet.size() && idV < idU)) {
-                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                        // cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         // log_status_for_animation("UNMARKED2a2");
                         amIrelay = false;
                         return;
@@ -296,7 +292,7 @@ void Cds_3::doMarkingProcedure() {
                     if ((cpyNeigs.size() < uCloseSet.size() && cpyNeigs.size() < wCloseSet.size()) ||
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() < wCloseSet.size() && idV < idU) ||
                             (cpyNeigs.size() == uCloseSet.size() && cpyNeigs.size() == wCloseSet.size()&& idV == min)) {
-                        cout << getLogHeader() + "Not relay anymore<<<<<\n";
+                        // cout << getLogHeader() + "Not relay anymore<<<<<\n";
                         // log_status_for_animation("UNMARKED2a3");
                         amIrelay = false;
                         return;
@@ -321,10 +317,13 @@ void Cds_3::doMarkingProcedure() {
     return false;
   }
 
-  void Cds_3::on_neighbors_reception(const cds3::Cds3* m) {
-     Neigh emitter = m->getEmitter();
+  void Cds_3::process_hello(const broadcasting::Hello* msg)
+  {
     //Avoiding that peers receive their own neighbors
-    if (emitter.name == myself) return;
+    if (msg->getSender() == myself) return;
+
+    auto m = dynamic_cast<const cds3::Cds3*>(msg);
+    Neigh emitter = m->getEmitter();
     // One-hop neighbors
     neighbors[emitter.name] = emitter;
     // Two-hop neighbors

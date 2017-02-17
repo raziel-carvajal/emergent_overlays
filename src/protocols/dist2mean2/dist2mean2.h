@@ -16,13 +16,13 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
-#include "broadcasting/BroadcastingAppBase.h"
+#include "broadcasting/IBroadcastProtocol.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 
 
 namespace inet {
 
-class INET_API Dist2Mean2 : public inet::BroadcastingAppBase
+class INET_API Dist2Mean2 : public inet::BroadcastProtocolAdapter
 {
   private:
     /* payload of the message to broadcast */
@@ -30,12 +30,10 @@ class INET_API Dist2Mean2 : public inet::BroadcastingAppBase
     /* indicates the set of nodes from whom I received this message */
     std::map< std::string, std::set<std::string>> received_from;
 
-    virtual void on_payload_received(const broadcasting::Broadcast* m) override;
-    virtual void time_to_broadcast_payload(void* user_data) override;
+    void process_payload(const broadcasting::Broadcast* m) override;
+    void time_to_broadcast_payload(void* user_data) override;
 
-    void send_message(std::string& key);
-  public:
-    Dist2Mean2();
+    void send_message(const std::string& key, bool is_source);
 };
 
 } //namespace

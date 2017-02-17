@@ -102,6 +102,13 @@ double
 BroadcastingAppBase::OmnetBroadcastGateway::get_double_parameter(const std::string& param)
 {
   if (param == "timeOut") return 0.02;
+  if (param == "k") return 4;
+  if (param == "sigma") return 1.0;
+  if (param == "probLi") return 0.5;
+  if (param == "alpha") return 1.0;
+  if (param == "miTreb") return 0.1;
+  if (param == "maTreb") return 0.3;
+  if (param == "A") return 0.0;
   return app->par(param.c_str()).doubleValue();
 }
 
@@ -111,6 +118,13 @@ BroadcastingAppBase::OmnetBroadcastGateway::get_bool_parameter(const std::string
   if (param == "doRule2") return false;
   if (param == "doOptiP") return false;
   return app->par(param.c_str()).boolValue();
+}
+
+std::string
+BroadcastingAppBase::OmnetBroadcastGateway::get_string_parameter(const std::string& param)
+{
+  if (param == "scheme") return "DENSITY_BORDER_AWARE";
+  return app->par(param.c_str()).stdstringValue();
 }
 
 void

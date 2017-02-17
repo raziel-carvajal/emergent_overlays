@@ -16,7 +16,7 @@
 #ifndef PROBFLOODING_H_
 #define PROBFLOODING_H_
 
-#include "broadcasting/BroadcastingAppBase.h"
+#include "broadcasting/IBroadcastProtocol.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 #include "ProbFlooding_m.h"
 
@@ -30,7 +30,7 @@ using namespace std;
 
 namespace inet {
 
-class ProbFlooding : public BroadcastingAppBase {
+class ProbFlooding : public inet::BroadcastProtocolAdapter {
 
 private:
     int   scheme;
@@ -51,15 +51,19 @@ private:
     };
     set<string> alreadyDispatched;
     map<string, NeigsMap>  broadcastTable;
-    bool doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both);
 
-protected:
-    virtual void on_payload_received(const broadcasting::Broadcast* m);
-    void virtual time_to_broadcast_payload(void* user_data);
-    virtual void on_hello_received(const broadcasting::Hello* msg);
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    void handleMessageWhenUp(cMessage *msg);
+    int refresh_hops_message;
+
+    bool doDensityAndBorderAwareScheme(NeigsMap senderNeigs, bool both);
     void erase_old_hops();
+protected:
+    void process_payload(const broadcasting::Broadcast* m) override;
+    void time_to_broadcast_payload(void* user_data) override;
+    void process_hello(const broadcasting::Hello* msg) override;
+    void on_saying_hello() override;
+
+    void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;
+    bool handle(const cMessage *msg) override;
 
 };
 
