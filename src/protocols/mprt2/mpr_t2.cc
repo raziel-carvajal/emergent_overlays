@@ -83,7 +83,7 @@ Mpr_t2::process_hello(const broadcasting::Hello* msg)
 	if (j == myself) return;
 	auto m = dynamic_cast<const MprHello*>(msg);
 	//for being able to measure collisions
-	// neighbors[j] = Neighbor(); FIXME: add this again
+	neighbors[j] = Neighbor(); // Ok, I don't like this line
 	/* first, it is obvious that the sender is a member of hops level 0 */
 	hop1[j] = NodeNeighbor(simTime());
 	hops_position[j] = Coord(m->getX(), m->getY());
@@ -138,14 +138,11 @@ Mpr_t2::build_message_to_broadcast()
 void
 Mpr_t2::process_payload(const Broadcast* m)
 {
-	// Store in a map a a broadcast session ID
 	if (m->getSender() == myself) return;
 	string key = m->getId();
-	// cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
 	gateway->emitBroadcastMsgReceived( key );
 
 	if (payloads.find(key) == payloads.end()) {
-		// log_status_for_animation("MSG_RECEIVED");
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
 		bool from_selector = (mprBroadcast == 0);

@@ -48,11 +48,11 @@ private:
 
     void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;
 
-    inet::broadcasting::Hello* build_hello_message() override;
 
     void process_payload(const broadcasting::Broadcast* m) override;
     void time_to_broadcast_payload(void* user_data) override;
 
+    inet::broadcasting::Hello* build_hello_message() override;
     void process_hello(const broadcasting::Hello* msg) override;
     void on_saying_hello() override;
     bool handle(const cMessage *msg) override;
