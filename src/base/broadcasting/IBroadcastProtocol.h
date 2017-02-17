@@ -28,6 +28,7 @@ class BroadcastProtocolAdapter: public IBroadcastProtocol
 protected:
   std::shared_ptr<IBroadcastGateway> gateway;
   std::string myself;
+  std::map<std::string, Neighbor> neighbors;
   double get_random_delay() { return uniform(0.03, 0.1); }
 public:
   void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;

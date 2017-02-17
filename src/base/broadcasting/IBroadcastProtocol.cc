@@ -40,7 +40,24 @@ BroadcastProtocolAdapter::build_hello_message()
 void
 BroadcastProtocolAdapter::process_hello(const broadcasting::Hello* msg)
 {
+  // add coordinates
+  if (myself == msg->getSender())
+    return;
 
+  if (neighbors.find(msg->getSender()) == neighbors.end()) {
+
+    Neighbor node;
+    node.name = msg->getSender();
+    node.addr = gateway->getAddr(msg->getSender());
+    node.pos.x = msg->getX();
+    node.pos.y = msg->getY();
+
+    auto position = gateway->get_current_position();
+    node.w = (position.x - msg->getX())*(position.x - msg->getX())
+                            + (position.y - msg->getY())*(position.y - msg->getY());
+
+    neighbors[node.name] = node;
+  }
 }
 
 } // namespace

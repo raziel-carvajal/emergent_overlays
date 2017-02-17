@@ -11,9 +11,18 @@ namespace inet {
 template<typename T>
 struct identity { typedef T type; };
 
+class Neighbor {
+  public:
+      std::string name;
+      L3Address addr;
+      Coord pos;
+      double w;
+};
+
 class IBroadcastGateway {
 protected:
   virtual double get_double_parameter(const std::string& param) = 0;
+  virtual bool get_bool_parameter(const std::string& param) = 0;
 public:
   virtual Coord get_current_position() = 0;
   virtual double get_transmission_radius() = 0;
@@ -37,6 +46,10 @@ public:
 
   double get_parameter(const std::string& param, identity<double>) {
     return get_double_parameter(param);
+  }
+
+  double get_parameter(const std::string& param, identity<bool>) {
+    return get_bool_parameter(param);
   }
 };
 

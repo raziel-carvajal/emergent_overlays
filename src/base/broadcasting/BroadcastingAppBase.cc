@@ -105,6 +105,14 @@ BroadcastingAppBase::OmnetBroadcastGateway::get_double_parameter(const std::stri
   return app->par(param.c_str()).doubleValue();
 }
 
+bool
+BroadcastingAppBase::OmnetBroadcastGateway::get_bool_parameter(const std::string& param)
+{
+  if (param == "doRule2") return false;
+  if (param == "doOptiP") return false;
+  return app->par(param.c_str()).boolValue();
+}
+
 void
 BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m)
 {
@@ -409,10 +417,10 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 {
 
     // add coordinates
-    auto it = neighbors.find(msg->getSender());
     if (myself == msg->getSender())
 			return;
 
+    auto it = neighbors.find(msg->getSender());
 //	cout << getLogHeader() + "HELLO MSG RECEPTION" << endl;
     if (it == neighbors.end()) {
         //EV_TRACE << " A hello from " << msg->getSender() <<  " at (" << msg->getX() << ", " << msg->getY() << ")\n";

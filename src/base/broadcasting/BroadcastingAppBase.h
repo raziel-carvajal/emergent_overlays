@@ -35,14 +35,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double delta;
     // how many hello messages I must send
     int nr_hello_msg;
-    class Neighbor {
-      public:
-          std::string name;
-          L3Address addr;
-          Coord pos;
-          double w;
-    };
-
 
     enum ControlMessageTypes {
         IDLE,
@@ -66,6 +58,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     private:
       BroadcastingAppBase* app;
       double get_double_parameter(const std::string& param) override;
+      bool get_bool_parameter(const std::string& param) override;
       int last_message_assigned;
     public:
 
