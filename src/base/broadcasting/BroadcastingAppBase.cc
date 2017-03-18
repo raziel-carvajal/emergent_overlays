@@ -23,6 +23,9 @@
 #include "inet/power/contract/IEnergyStorage.h"
 #include "inet/physicallayer/idealradio/IdealTransmitter.h"
 
+#include "inet/common/PatternMatcher.h"
+#include "inet/common/XMLUtils.h"
+
 #include <algorithm>
 #include <math.h>
 
@@ -99,31 +102,43 @@ BroadcastingAppBase::OmnetBroadcastGateway::delayed_broadcast(const std::string&
 }
 
 double
-BroadcastingAppBase::OmnetBroadcastGateway::get_double_parameter(const std::string& param)
+BroadcastingAppBase::OmnetBroadcastGateway::get_double_parameter(const std::string& protocol, const std::string& param)
 {
-  if (param == "timeOut") return 0.02;
-  if (param == "k") return 4;
-  if (param == "sigma") return 1.0;
-  if (param == "probLi") return 0.5;
-  if (param == "alpha") return 1.0;
-  if (param == "miTreb") return 0.1;
-  if (param == "maTreb") return 0.3;
-  if (param == "A") return 0.0;
+  auto it = params[protocol].find(param);
+  if (it != params[protocol].end()) {
+    return std::stod(it->second);
+  }
+  // if (param == "timeOut") return 0.02;
+  // if (param == "k") return 4;
+  // if (param == "sigma") return 1.0;
+  // if (param == "probLi") return 0.5;
+  // if (param == "alpha") return 1.0;
+  // if (param == "miTreb") return 0.1;
+  // if (param == "maTreb") return 0.3;
+  // if (param == "A") return 0.0;
   return app->par(param.c_str()).doubleValue();
 }
 
 bool
-BroadcastingAppBase::OmnetBroadcastGateway::get_bool_parameter(const std::string& param)
+BroadcastingAppBase::OmnetBroadcastGateway::get_bool_parameter(const std::string& protocol, const std::string& param)
 {
-  if (param == "doRule2") return false;
-  if (param == "doOptiP") return false;
+  auto it = params[protocol].find(param);
+  if (it != params[protocol].end()) {
+    return it->second == "true";
+  }
+  // if (param == "doRule2") return false;
+  // if (param == "doOptiP") return false;
   return app->par(param.c_str()).boolValue();
 }
 
 std::string
-BroadcastingAppBase::OmnetBroadcastGateway::get_string_parameter(const std::string& param)
+BroadcastingAppBase::OmnetBroadcastGateway::get_string_parameter(const std::string& protocol, const std::string& param)
 {
-  if (param == "scheme") return "DENSITY_BORDER_AWARE";
+  auto it = params[protocol].find(param);
+  if (it != params[protocol].end()) {
+    return it->second;
+  }
+  // if (param == "scheme") return "DENSITY_BORDER_AWARE";
   return app->par(param.c_str()).stdstringValue();
 }
 
@@ -162,7 +177,7 @@ BroadcastingAppBase::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LOCAL:
-            nr_hello_msg = par("nr_hello_messages").longValue();
+            nr_hello_msg = par("nr_hello_messages").boolValue();
             is_source = par("is_source").boolValue();
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
 
@@ -247,7 +262,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             case SAY_HELLO:{
                 auto pkt = build_hello_message();
                 send_package(pkt);
-                if (this->nr_hello_msg > 0)
+                if (this->nr_hello_msg)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
                 // this->nr_hello_msg--;
                 cancelAndDelete(msg);
@@ -392,8 +407,27 @@ BroadcastingAppBase::processStart()
     socket.bind(local_port);
     socket.setBroadcast(true);
 
+
+    {
+      cXMLElement *configs = par("protocolsConfig").xmlValue();
+      if (configs) {
+        cXMLElementList protocols = configs->getElementsByTagName("Protocol");
+        cXMLElement *routerNode = nullptr;
+        for (const auto& p : protocols) {
+            const char *nodeName = xmlutils::getRequiredAttribute(*p, "name");
+            cXMLElementList params = p->getElementsByTagName("Parameter");
+            for (const auto& param : params){
+              const char* param_name = xmlutils::getRequiredAttribute(*param, "name");
+              const char* param_value = xmlutils::getRequiredAttribute(*param, "value");
+              const char* param_type = xmlutils::getRequiredAttribute(*param, "type");
+              gateway->add_param_value_pair(nodeName, param_name, param_value);
+            }
+        }
+      }
+    }
+
     // log_status_for_animation("STANDING");
-    if (nr_hello_msg > 0)
+    if (nr_hello_msg)
         delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
 }
 

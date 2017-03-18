@@ -31,7 +31,7 @@ simple BroadcastingBase
         // section defining parameters used to identify my neighbors
         double maximumDelay @unit(s) = default(0.5s);
         double helloTime @unit(s) = default(0.8s); // delay between hello messages
-        int nr_hello_messages = default(3); // how many delay messages
+        bool nr_hello_messages = default(false); // how many delay messages
 
         // say if this node is the source of a broadcast
         bool is_source = default(false);
@@ -45,6 +45,8 @@ simple BroadcastingBase
         double display_time @unit(s) = default(5s); // at this point we must show the built MWST
 
         volatile double delay_test @unit(s) = default(uniform(0s,0.05s));
+
+        xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);

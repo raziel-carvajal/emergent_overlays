@@ -12,6 +12,8 @@ namespace inet {
 
 class IBroadcastProtocol: public cObject
 {
+protected:
+  std::string protocol_name;
 public:
   virtual void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) = 0;
   virtual bool handle(const cMessage *msg) = 0;
@@ -20,6 +22,9 @@ public:
   virtual void process_hello(const broadcasting::Hello* msg) = 0;
   virtual void on_saying_hello() = 0;
   virtual void time_to_broadcast_payload(void* user_data) = 0;
+  void set_protocol_name(std::string name) {
+    protocol_name = name;
+  }
 };
 
 
@@ -36,6 +41,7 @@ public:
   inet::broadcasting::Hello* build_hello_message() override;
   void process_hello(const broadcasting::Hello* msg) override;
   void on_saying_hello() override;
+
 };
 
 }

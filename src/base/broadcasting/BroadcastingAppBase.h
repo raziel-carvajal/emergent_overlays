@@ -57,9 +57,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     {
     private:
       BroadcastingAppBase* app;
-      double get_double_parameter(const std::string& param) override;
-      bool get_bool_parameter(const std::string& param) override;
-      std::string get_string_parameter(const std::string& param) override;
+      double get_double_parameter(const std::string& protocol, const std::string& param) override;
+      bool get_bool_parameter(const std::string& protocol, const std::string& param) override;
+      std::string get_string_parameter(const std::string& protocol, const std::string& param) override;
       int last_message_assigned;
     public:
 

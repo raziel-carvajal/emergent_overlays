@@ -108,7 +108,7 @@ Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
 
 void Abba2::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) {
   BroadcastProtocolAdapter::initialize(node_name, gateway);
-  timeOut = gateway->get_parameter<double>("timeOut");
+  timeOut = gateway->get_parameter<double>(protocol_name, "timeOut");
     // timeOut = par("timeOut").doubleValue();
 }
 

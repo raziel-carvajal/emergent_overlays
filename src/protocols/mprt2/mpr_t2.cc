@@ -67,7 +67,7 @@ Mpr_t2::erase_old_hops()
 	for( auto it = hop1.begin(); it != hop1.end(); ) {
 		//bool b = false;
 		double elapsed = (simTime() - it->second.time).dbl();
-		double threshold = 2 * gateway->get_parameter<double>("helloTime");
+		double threshold = 2 * gateway->get_parameter<double>(protocol_name, "helloTime");
 		if( elapsed > threshold )  {
 			it = hop1.erase(it);
 			// cerr << getLogHeader() << " removing " << it->first << endl;

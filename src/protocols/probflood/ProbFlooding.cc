@@ -202,17 +202,17 @@ void ProbFlooding::initialize(const std::string& node_name, const std::shared_pt
 	enumMap["BORDER_AWARE"] = BORDER_AWARE;
 	enumMap["DENSITY_BORDER_AWARE"] = DENSITY_BORDER_AWARE;
 	enumMap["DENSITY_BORDER_AWARE_NEIGS_ELIMINATION"] = DENSITY_BORDER_AWARE_NEIGS_ELIMINATION;
-	if (enumMap.find(gateway->get_parameter<string>("scheme")) == enumMap.end()) {
+	if (enumMap.find(gateway->get_parameter<string>(protocol_name, "scheme")) == enumMap.end()) {
 		throw std::runtime_error("Unknown scheme policy, stopping simulation.");
 	}
-	scheme= enumMap[gateway->get_parameter<string>("scheme")];
-	A     = gateway->get_parameter<double>("A");
-	k     = gateway->get_parameter<double>("k");
-	alpha = gateway->get_parameter<double>("alpha");
-	sigma = gateway->get_parameter<double>("sigma");
-	miTreb= gateway->get_parameter<double>("miTreb");
-	maTreb= gateway->get_parameter<double>("maTreb");
-	probLim=gateway->get_parameter<double>("probLi");
+	scheme= enumMap[gateway->get_parameter<string>(protocol_name, "scheme")];
+	A     = gateway->get_parameter<double>(protocol_name, "A");
+	k     = gateway->get_parameter<double>(protocol_name, "k");
+	alpha = gateway->get_parameter<double>(protocol_name, "alpha");
+	sigma = gateway->get_parameter<double>(protocol_name, "sigma");
+	miTreb= gateway->get_parameter<double>(protocol_name, "miTreb");
+	maTreb= gateway->get_parameter<double>(protocol_name, "maTreb");
+	probLim=gateway->get_parameter<double>(protocol_name, "probLi");
 	T = miTreb + maTreb * uniform(0.0, 1.0);
 
 	refresh_hops_message = gateway->register_new_control_message();

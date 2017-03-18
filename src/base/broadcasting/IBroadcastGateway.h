@@ -1,6 +1,9 @@
 #ifndef __INET_BROADCAST_GATEWAY_H_
 #define __INET_BROADCAST_GATEWAY_H_
 
+#include <map>
+#include <string>
+
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/geometry/common/Coord.h"
 
@@ -22,9 +25,11 @@ class Neighbor {
 
 class IBroadcastGateway {
 protected:
-  virtual double get_double_parameter(const std::string& param) = 0;
-  virtual bool get_bool_parameter(const std::string& param) = 0;
-  virtual std::string get_string_parameter(const std::string& param) = 0;
+  std::map<std::string, std::map<std::string, std::string>> params;
+
+  virtual double get_double_parameter(const std::string& protocol,const std::string& param) = 0;
+  virtual bool get_bool_parameter(const std::string& protocol,const std::string& param) = 0;
+  virtual std::string get_string_parameter(const std::string& protocol, const std::string& param) = 0;
 public:
   virtual Coord get_current_position() = 0;
   virtual double get_transmission_radius() = 0;
@@ -42,20 +47,25 @@ public:
   virtual int register_new_control_message() = 0;
 
 
-  template<typename T> T get_parameter(const std::string& param) {
-    return get_parameter(param, identity<T>());
+  template<typename T> T get_parameter(const std::string& protocol, const std::string& param) {
+    return get_parameter(protocol, param, identity<T>());
   }
 
-  double get_parameter(const std::string& param, identity<double>) {
-    return get_double_parameter(param);
+  double get_parameter(const std::string& protocol, const std::string& param, identity<double>) {
+    return get_double_parameter(protocol, param);
   }
 
-  double get_parameter(const std::string& param, identity<bool>) {
-    return get_bool_parameter(param);
+  double get_parameter(const std::string& protocol, const std::string& param, identity<bool>) {
+    return get_bool_parameter(protocol, param);
   }
 
-  std::string get_parameter(const std::string& param, identity<std::string>) {
-    return get_string_parameter(param);
+  std::string get_parameter(const std::string& protocol, const std::string& param, identity<std::string>) {
+    return get_string_parameter(protocol, param);
+  }
+
+
+  void add_param_value_pair(const std::string& protocol, std::string name, std::string value) {
+    params[protocol][name] = value;
   }
 };
 

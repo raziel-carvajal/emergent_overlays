@@ -21,8 +21,8 @@ namespace inet {
   void Cds_3::initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway)
   {
     BroadcastProtocolAdapter::initialize(node_name, gateway);
-    doRule2 = gateway->get_parameter<bool>("doRule2");
-    doOptiP = gateway->get_parameter<bool>("doOptiP");
+    doRule2 = gateway->get_parameter<bool>(protocol_name, "doRule2");
+    doOptiP = gateway->get_parameter<bool>(protocol_name, "doOptiP");
   }
 
   void inet::Cds_3::process_payload(const broadcasting::Broadcast* m) {
