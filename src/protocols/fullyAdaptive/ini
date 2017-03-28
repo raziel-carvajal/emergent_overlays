@@ -1,0 +1,10 @@
+{% for n in nodes -%}
+{% if n.algorithm() == "mprt2" %}
+*.{{n.name}}.udpApp[0].typename = "Mpr_t2"
+*.{{n.name}}.udpApp[0].nr_hello_messages = 906
+*.{{n.name}}.udpApp[0].helloTime = 0.5s
+{% else %} {% if n.algorithm() == "abba2" %}
+*.{{n.name}}.udpApp[0].typename = "Abba2"
+*.{{n.name}}.udpApp[0].timeOut = 0.02
+{% endif -%} {% endif %}
+{% endfor -%}
