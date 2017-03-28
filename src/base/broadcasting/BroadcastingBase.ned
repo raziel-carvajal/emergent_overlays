@@ -48,6 +48,11 @@ simple BroadcastingBase
         double display_time @unit(s) = default(5s); // at this point we must show the built MWST
 
         volatile double delay_test @unit(s) = default(uniform(0s,0.05s));
+        
+        // Adaptation parameters
+        double adaptationMax @unit(s) = default(0.5s);
+        bool withAdaptation = default(false);
+        string protocolId = default("");
 
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);

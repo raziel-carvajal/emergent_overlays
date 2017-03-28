@@ -51,6 +51,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
         PRINT_POS_NEIGS,
+        TRANSFORMATION_TIMEOUT,
         LAST_POWER_REPORT,
 
         First = IDLE,
@@ -83,6 +84,15 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     // my position
     Coord position;
     double radious;
+
+    double adaptationMax;
+    bool withAdaptation;
+    std::string protocolId;
+
+    //Payloads
+    std::map<std::string, std::string> adaptForeigsMsgs;
+    std::map<std::string, std::string> adaptMyProtoMsgs;
+    std::map<std::string, cMessage*> timeoutMsgs;
 
   private:
 
@@ -146,7 +156,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     void delay_broadcast(void* user_data);
     cMessage* delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
-    void delayed_event(int type, const std::string& key, double delay);
+    cMessage* delayed_event(int type, const std::string& key, double delay);
     void delayed_event_with_strict_time(int type, const std::string& key, double delay);
 
 
@@ -167,6 +177,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     void updatePosition();
     void printBroadcastingLog (std::string key);
+
+    double computeAdaptTimeout();
 
   public:
     BroadcastingAppBase();
