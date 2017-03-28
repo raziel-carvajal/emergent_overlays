@@ -59,7 +59,9 @@ def get_arguments():
                         help="How many broadcast sessions. Only make sense if distributed source ( default: 300).")
 
     parser.add_argument("--non-uniform", dest="non_uniform", action='store_true',
-                        help="Should generate a a topology with non uniform density.")
+                        help="Should generate a topology with non uniform density.")
+    parser.add_argument("--handcrafted", dest="handcrafted", action='store_true',
+                        help="Should generate a handcrafted topology.")
 
     parser.add_argument("--save-fig", dest="savedfigure", type=str,
                         help="Save an image of the topology at.")
@@ -327,6 +329,42 @@ def find_top_density(densities, node, A, trRan, n, d0):
     return final_idx
 
 
+def build_handcrafted_topology(args, densities):
+    trRan = args.tx
+    mobility = args.mobility
+    nr_sessions = args.nr_sessions
+
+    d0 = densities[0]
+    d1 = densities[1]
+    w0, h0 = compute_map_size(trRan, int(args.nr_nodes/2), d0)
+    w1, h1 = compute_map_size(trRan, int(args.nr_nodes/2), d1)
+
+    print (w0, h0)
+    print (w1, h1)
+
+    positions = []
+    generated_densities = []
+
+    p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, 0, 0, w0, h0, d0)
+    positions.extend(p)
+    generated_densities.extend([d0 for ii in range(0, len(p))])
+
+    p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, int(w0/2 - w1/2), int(h0/2 - h1/2), w1, h1, d1)
+    positions.extend(p)
+    generated_densities.extend([d1 for ii in range(0, len(p))])
+
+    print "Fixing connectivity"
+    connected = guarentee_connectivity(positions, trRan)
+
+    #print "{} nodes unassigned".format(n)
+
+    create_nedfile(positions, int(w0), int(h0), 0, args)
+    create_density_file(generated_densities, int(w0), int(h0), 0, trRan, 0)
+
+    kdTree.generate_image(None, w0, h0, "topology{}.png".format(0), positions, False)
+    pass
+
+
 def build_non_uniform_topologies(args, densities, nr_topologies):
     trRan = args.tx
     mobility = args.mobility
@@ -337,7 +375,7 @@ def build_non_uniform_topologies(args, densities, nr_topologies):
     rand = random.Random()
     for i in range(0, nr_topologies):
         print "w={}, h={}, tx={}".format(w, h, trRan)
-        tree = kdTree.generate_tree(map_w=w, map_h=h, min_size=2*trRan)
+        tree = kdTree.generate_tree(map_w=w, map_h=h, min_size=2*trRan, min_number_leaf=2)
         leafs = tree.apply_to_each_leaf(lambda node: node)
 
         A = w * h
@@ -385,12 +423,15 @@ if __name__ == '__main__':
     min_density = args.min_density
     max_density = args.max_density
     non_uniform = args.non_uniform
+    handcrafted = args.handcrafted
 
     step = 5
     densities = range(min_density, max_density + step, step)
 
     if non_uniform:
         build_non_uniform_topologies(args, densities, nr_topologies=1)
+    elif handcrafted:
+	build_handcrafted_topology(args, [min_density, max_density])
     else:
         build_uniform_topologies(args, densities)
 

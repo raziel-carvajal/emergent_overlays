@@ -71,7 +71,9 @@ def generate_image(tree, map_w, map_h, filename, positions, colorful_densities):
                 color = mapping[node.density]
         draw.rectangle([int(node.x), int(node.y), int(node.x + node.w), int(node.y + node.h)], fill=color, outline="red")
 
-    tree.apply_to_each_leaf(image_generation)
+
+    if tree is not None:
+    	tree.apply_to_each_leaf(image_generation)
 
     for p in positions:
         draw.ellipse([p[0], p[1], p[0] + 2, p[1] + 2], fill="green")
@@ -79,14 +81,13 @@ def generate_image(tree, map_w, map_h, filename, positions, colorful_densities):
     im.save(filename, "PNG")
 
 
-def generate_tree(map_w=1000, map_h=1000, min_size=100):
+def generate_tree(map_w=1000, map_h=1000, min_size=100, min_number_leaf=10):
 
     while True:
         tree = KDTree(w=map_w, h=map_h, min_size=min_size)
         l = tree.apply_to_each_leaf(lambda n: 1)
         # print len(l)
-        # FIXME: Hardcoded values
-        if len(l) >= 10:
+        if len(l) == min_number_leaf:
             break
 
     return tree
