@@ -55,6 +55,55 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     return inMyMsgs || inForMsgs;
   }
 
+  bool
+  BroadcastingAppBase::applyMsgsTransformation (cMessage *msg, bool &fwdMsg)
+  {
+    bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
+    	  cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
+    	  if ( !msgReceived(m) ) {
+
+    	    if (protocolId != m->getProtocolId()) {
+    		double timeout = computeAdaptTimeout();
+    		adaptForeigsMsgs[m->getId()] = m->getPayload();
+    		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+    		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+    		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
+    		timeoutMsgs[m->getId()] = delayed_event(
+    		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
+    		    m->getId(), timeout);
+    	    } else {
+    		fwdMsg = true;
+    		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
+    		adaptMyProtoMsgs[m->getId()] = m->getPayload();
+    	    }
+    	  } else {
+    	    if (protocolId == m->getProtocolId()) {
+    		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
+    		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
+    		    auto tmp = timeoutMsgs[m->getId()];
+    		    cancelAndDelete(tmp);
+    		    timeoutMsgs.erase(m->getId());
+    		}
+    		fwdMsg = true;
+    	    }
+    	  }
+    	});
+    return done;
+  }
+
+  bool
+  BroadcastingAppBase::borderDetector (cMessage* msg)
+  {
+    bool done = withAdaptation && processMessage<Hello>(PK(msg), [&] (const Hello* m) {
+      if (m->getProtocolId() != protocolId) {
+	  auto tmp = new broadcasting::Border();
+	  tmp->setProtocolId(protocolId.c_str());
+	  send_package(tmp);
+      }
+    });
+    return done;
+  }
+
 //Define_Module(BroadcastingAppBase);
 
 
@@ -167,6 +216,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 pkt->setX(position.x);
                 pkt->setY(position.y);
                 pkt->setSender(myself.c_str());
+                pkt->setProtocolId (protocolId.c_str());
                 send_package(pkt);
                 if (this->nr_hello_msg > 0)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
@@ -241,36 +291,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
 	bool fwdMsg = false;
-	bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
-	  cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
-	  if ( !msgReceived(m) ) {
-
-	    if (protocolId != m->getProtocolId()) {
-		double timeout = computeAdaptTimeout();
-		adaptForeigsMsgs[m->getId()] = m->getPayload();
-		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
-		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
-		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
-		timeoutMsgs[m->getId()] = delayed_event(
-		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
-		    m->getId(), timeout);
-	    } else {
-		fwdMsg = true;
-		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
-		adaptMyProtoMsgs[m->getId()] = m->getPayload();
-	    }
-	  } else {
-	    if (protocolId == m->getProtocolId()) {
-		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
-		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
-		    auto tmp = timeoutMsgs[m->getId()];
-		    cancelAndDelete(tmp);
-		    timeoutMsgs.erase(m->getId());
-		}
-		fwdMsg = true;
-	    }
-	  }
-	});
+	bool done = applyMsgsTransformation (msg, fwdMsg);
+	borderDetector(msg);
 	if (!done || fwdMsg) {
 	  on_network_message_received(PK(msg));
 	}
@@ -292,12 +314,15 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
   		this-> on_hello_received(m);
   	});
 
-    if (!done) {
+    done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
+      this->on_payload_received(m);
+    });
 
-        done = processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
-					this->on_payload_received(m);
-			   });
-    }
+    done = done || processMessage<broadcasting::Border>(pkt, [&] (const broadcasting::Border* m) {
+	if (m->getProtocolId() != protocolId) {
+	    amIbridge = true;
+	}
+      });
 
     return done;
 }

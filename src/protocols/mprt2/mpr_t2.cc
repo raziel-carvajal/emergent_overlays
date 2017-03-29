@@ -188,7 +188,7 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 			from_selector = j == myself;
 		}
 
-		if (from_selector) {
+		if (from_selector || amIbridge) {
 			broadcast(key, build_message_to_broadcast());
 			log_status_for_animation("MSG_RECEIVED_SENT");
 		}

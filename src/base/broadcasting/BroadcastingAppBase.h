@@ -94,6 +94,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::map<std::string, std::string> adaptMyProtoMsgs;
     std::map<std::string, cMessage*> timeoutMsgs;
 
+    bool amIbridge = false;
   private:
 
     // control messages
@@ -182,6 +183,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     bool msgReceived(const broadcasting::Broadcast* m);
 
+    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
+    bool borderDetector(cMessage *msg);
   public:
     BroadcastingAppBase();
 
