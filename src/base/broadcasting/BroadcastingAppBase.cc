@@ -47,6 +47,14 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     return uniform(0.1, adaptationMax);
   }
 
+  bool
+  BroadcastingAppBase::msgReceived (const broadcasting::Broadcast* m)
+  {
+    bool inMyMsgs = adaptMyProtoMsgs.find(m->getId()) != adaptMyProtoMsgs.end();
+    bool inForMsgs = adaptForeigsMsgs.find(m->getId()) != adaptForeigsMsgs.end();
+    return inMyMsgs || inForMsgs;
+  }
+
 //Define_Module(BroadcastingAppBase);
 
 
@@ -216,7 +224,17 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
                 // }
 
-            }break;
+            }
+            break;
+            case TRANSFORMATION_TIMEOUT: {
+              void* data = msg->getContextPointer();
+              std::string key = string( (char*)data );
+              cerr << getLogHeader()  << "Doing event for key: " << key << endl;
+	      this->time_to_broadcast_payload(data);
+	      timeoutMsgs.erase(key);
+	      cancelAndDelete(msg);
+            }
+            break;
             default:
                 break;
         }
@@ -224,23 +242,36 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
     else if (msg->getKind() == UDP_I_DATA) {
 	bool fwdMsg = false;
 	bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
+	  cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
 	  if ( !msgReceived(m) ) {
+
 	    if (protocolId != m->getProtocolId()) {
 		double timeout = computeAdaptTimeout();
 		adaptForeigsMsgs[m->getId()] = m->getPayload();
+		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
 		timeoutMsgs[m->getId()] = delayed_event(
 		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
 		    m->getId(), timeout);
 	    } else {
 		fwdMsg = true;
+		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
+		adaptMyProtoMsgs[m->getId()] = m->getPayload();
 	    }
 	  } else {
 	    if (protocolId == m->getProtocolId()) {
+		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
+		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
+		    auto tmp = timeoutMsgs[m->getId()];
+		    cancelAndDelete(tmp);
+		    timeoutMsgs.erase(m->getId());
+		}
 		fwdMsg = true;
 	    }
 	  }
 	});
-	if (!withAdaptation || fwdMsg) {
+	if (!done || fwdMsg) {
 	  on_network_message_received(PK(msg));
 	}
 	delete msg;
@@ -520,7 +551,7 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {
-	msg->setProtocolId(protocolId);
+	msg->setProtocolId(protocolId.c_str());
     }
     socket.sendTo(msg, addr, remote_port);
     emitSent(key);

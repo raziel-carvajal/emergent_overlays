@@ -199,12 +199,15 @@ Mpr_t2::on_payload_received(const Broadcast* m)
 void
 Mpr_t2::time_to_broadcast_payload(void* user_data)
 {
+   string key;
     if (!user_data) {
-        string key = createUniqueBroadcastingSessionId();
-		payloads[key] = key;
-        emitBroadcastMsgReceived(key);
-		broadcast(key, build_message_to_broadcast());
+      key = createUniqueBroadcastingSessionId();
+      emitBroadcastMsgReceived(key);
+    }else {
+      key = string( (char*)user_data );
     }
+    payloads[key] = key;
+    broadcast(key, build_message_to_broadcast());
 }
 
 

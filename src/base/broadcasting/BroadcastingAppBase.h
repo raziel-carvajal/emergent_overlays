@@ -180,6 +180,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     double computeAdaptTimeout();
 
+    bool msgReceived(const broadcasting::Broadcast* m);
+
   public:
     BroadcastingAppBase();
 
