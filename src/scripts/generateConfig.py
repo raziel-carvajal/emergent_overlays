@@ -38,6 +38,7 @@ def generate_density_aware_config(network_path, network_name, template_file):
 
     denisty_file = network_path + network_name + ".density"
     if not os.path.isfile(denisty_file):
+        sys.stderr.write("\tCouldn't find density file: {}\n".format(denisty_file))
         sys.exit(1)
     with open(denisty_file, "r") as text_file:
         lines = [line.strip().split(',') for line in text_file.readlines()]

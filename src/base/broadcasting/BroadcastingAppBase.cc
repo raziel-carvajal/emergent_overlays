@@ -63,31 +63,31 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     	  if ( !msgReceived(m) ) {
 
     	    if (protocolId != m->getProtocolId()) {
-    		double timeout = computeAdaptTimeout();
-    		adaptForeigsMsgs[m->getId()] = m->getPayload();
-    		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
-    		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
-    		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
-    		timeoutMsgs[m->getId()] = delayed_event(
-    		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
-    		    m->getId(), timeout);
-    	    } else {
-    		fwdMsg = true;
-    		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
-    		adaptMyProtoMsgs[m->getId()] = m->getPayload();
+        		double timeout = computeAdaptTimeout();
+        		adaptForeigsMsgs[m->getId()] = m->getPayload();
+        		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+        		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+        		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
+        		timeoutMsgs[m->getId()] = delayed_event(
+        		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
+        		    m->getId(), timeout);
+        	} else {
+        		fwdMsg = true;
+        		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
+        		adaptMyProtoMsgs[m->getId()] = m->getPayload();
     	    }
     	  } else {
     	    if (protocolId == m->getProtocolId()) {
-    		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
-    		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
-    		    auto tmp = timeoutMsgs[m->getId()];
-    		    cancelAndDelete(tmp);
-    		    timeoutMsgs.erase(m->getId());
-    		}
-    		fwdMsg = true;
+        		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
+        		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
+        		    auto tmp = timeoutMsgs[m->getId()];
+        		    cancelAndDelete(tmp);
+        		    timeoutMsgs.erase(m->getId());
+        		}
+        		fwdMsg = true;
     	    }
     	  }
-    	});
+    });
     return done;
   }
 
@@ -96,9 +96,16 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
   {
     bool done = withAdaptation && processMessage<Hello>(PK(msg), [&] (const Hello* m) {
       if (m->getProtocolId() != protocolId) {
-	  auto tmp = new broadcasting::Border();
-	  tmp->setProtocolId(protocolId.c_str());
-	  send_package(tmp);
+        // FIXME: doesn't work for mobility
+        if (!contains(m->getProtocolId(), m->getSender())) {
+        // if (customOfficers.find(m->getProtocolId()) == customOfficers.end() ) {
+          auto tmp = new broadcasting::Border();
+          tmp->setProtocolId(protocolId.c_str());
+          tmp->setTarget(m->getSender());
+          send_package(tmp);
+          save_border_node(m->getProtocolId(), m->getSender());
+          // customOfficers[m->getProtocolId()] = m->getSender();
+        }
       }
     });
     return done;
@@ -106,10 +113,23 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
 
 //Define_Module(BroadcastingAppBase);
 
-
-BroadcastingAppBase::BroadcastingAppBase()
+bool
+BroadcastingAppBase::contains(const std::string& protocolId, const std::string& nodeId)
 {
+  if (customOfficers.find(protocolId) == customOfficers.end() )
+    return false;
+  return customOfficers[protocolId].find(nodeId) != customOfficers[protocolId].end();
 }
+
+
+void
+BroadcastingAppBase::save_border_node(const std::string& protocolId, const std::string& nodeId)
+{
+  customOfficers[protocolId].insert(nodeId);
+}
+
+
+BroadcastingAppBase::BroadcastingAppBase() {}
 
 void
 BroadcastingAppBase::initialize(int stage)
@@ -118,7 +138,7 @@ BroadcastingAppBase::initialize(int stage)
 
     switch (stage) {
         case INITSTAGE_LOCAL: {
-	    protocolId = par("protocolId").stdstringValue();
+	          protocolId = par("protocolId").stdstringValue();
 
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
@@ -261,9 +281,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 
                   delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation", d);
                 }
-		              break;
+		            break;
             case HALT_SIMULATION_DELAY:
-                cancelAndDelete(msg);
+              cancelAndDelete(msg);
             	endSimulation();
             	break;
             case PRINT_POS_NEIGS:{
@@ -280,23 +300,30 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
               void* data = msg->getContextPointer();
               std::string key = string( (char*)data );
               cerr << getLogHeader()  << "Doing event for key: " << key << endl;
-	      this->time_to_broadcast_payload(data);
-	      timeoutMsgs.erase(key);
-	      cancelAndDelete(msg);
+      	      this->time_to_broadcast_payload(data);
+      	      timeoutMsgs.erase(key);
+      	      cancelAndDelete(msg);
+            }
+            break;
+            case OFFICER_ELECTION_TIMEOUT: {
+              // auto tmp = new broadcasting::Border();
+              // tmp->setProtocolId(protocolId.c_str());
+              // tmp->setTarget(m->getSender());
+              // send_package(tmp);
             }
             break;
             default:
-                break;
+            break;
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-	bool fwdMsg = false;
-	bool done = applyMsgsTransformation (msg, fwdMsg);
-	borderDetector(msg);
-	if (!done || fwdMsg) {
-	  on_network_message_received(PK(msg));
-	}
-	delete msg;
+    	bool fwdMsg = false;
+    	bool done = applyMsgsTransformation (msg, fwdMsg);
+    	borderDetector(msg);
+    	if (!done || fwdMsg) {
+    	  on_network_message_received(PK(msg));
+    	}
+    	delete msg;
     }
 
 }
@@ -310,21 +337,21 @@ bool
 BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 {
 
-    bool done = processMessage<Hello>(pkt, [&] (const Hello* m) {
-  		this-> on_hello_received(m);
-  	});
+  bool done = processMessage<Hello>(pkt, [&] (const Hello* m) {
+		this-> on_hello_received(m);
+	});
 
-    done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
-      this->on_payload_received(m);
-    });
+  done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
+    this->on_payload_received(m);
+  });
 
-    done = done || processMessage<broadcasting::Border>(pkt, [&] (const broadcasting::Border* m) {
-	if (m->getProtocolId() != protocolId) {
-	    amIbridge = true;
-	}
-      });
+  done = done || processMessage<broadcasting::Border>(pkt, [&] (const broadcasting::Border* m) {
+  	if (m->getProtocolId() != protocolId && myself == m->getTarget()) {
+  	    amIbridge = true;
+  	}
+  });
 
-    return done;
+  return done;
 }
 
 
@@ -412,7 +439,7 @@ BroadcastingAppBase::on_hello_received(const Hello* msg)
 
     // add coordinates
     auto it = neighbors.find(msg->getSender());
-	if (myself == msg->getSender())
+	  if (myself == msg->getSender())
 			return;
 
 //	cout << getLogHeader() + "HELLO MSG RECEPTION" << endl;

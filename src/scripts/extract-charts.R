@@ -78,12 +78,18 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+  print(list_of_sent)
+
 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+  print("feo")
+  print(id_msgs)
 
   # create a separate list for each broadcast_msg_received vector
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
+  print("feo2")
+  print(list_of_received)
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
@@ -102,6 +108,9 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 
   l.recp <- do.call("rbind", l.recp)
+
+  print(l.recp)
+  print(sending.time)
 
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id

@@ -52,6 +52,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         HALT_SIMULATION_DELAY,
         PRINT_POS_NEIGS,
         TRANSFORMATION_TIMEOUT,
+        OFFICER_ELECTION_TIMEOUT,
         LAST_POWER_REPORT,
 
         First = IDLE,
@@ -94,12 +95,18 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::map<std::string, std::string> adaptMyProtoMsgs;
     std::map<std::string, cMessage*> timeoutMsgs;
 
+    // custom officer for foreign protocol
+    // map from protocol to target
+    std::map<std::string, std::set<std::string>> customOfficers;
+
     bool amIbridge = false;
   private:
 
+    bool contains(const std::string& protocolId, const std::string& nodeId);
+    void save_border_node(const std::string& protocolId, const std::string& nodeId);
+
     // control messages
     cMessage* ctrlDisplayTime = nullptr;
-
 
     /* signals used to record statistics */
     simsignal_t signal_received_id;

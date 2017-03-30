@@ -345,13 +345,18 @@ def build_handcrafted_topology(args, densities):
     positions = []
     generated_densities = []
 
-    p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, 0, 0, w0, h0, d0)
-    positions.extend(p)
-    generated_densities.extend([d0 for ii in range(0, len(p))])
+    p1, n1 = fillSurfaceWithFixedRadioAndSize(trRan, 0, 0, w0, h0, d0)
+    positions.extend(p1)
+    x1 = int(w0/2 - w1/2)
+    y1 = int(h0/2 - h1/2)
+    p2, n1 = fillSurfaceWithFixedRadioAndSize(trRan, x1, y1, w1, h1, d1)
+    positions.extend(p2)
 
-    p, n1 = fillSurfaceWithFixedRadioAndSize(trRan, int(w0/2 - w1/2), int(h0/2 - h1/2), w1, h1, d1)
-    positions.extend(p)
-    generated_densities.extend([d1 for ii in range(0, len(p))])
+    def inInner(p, x, y, w, h):
+        return p[0] >= x and p[0] <= (w+x) and p[1] >= y and p[1] <= (h+y)
+
+    generated_densities.extend([(d1 if inInner(p1[ii], x1, y1, w1, h1) else d0) for ii in range(0, len(p1))])
+    generated_densities.extend([d1 for ii in range(0, len(p2))])
 
     print "Fixing connectivity"
     connected = guarentee_connectivity(positions, trRan)
