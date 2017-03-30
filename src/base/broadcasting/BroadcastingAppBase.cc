@@ -41,6 +41,69 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     cout << getLogHeader() << "BROADCASTING " << key << " TO_NEIGHBORS " << info << endl;
 }
 
+  double
+  BroadcastingAppBase::computeAdaptTimeout ()
+  {
+    return uniform(0.1, adaptationMax);
+  }
+
+  bool
+  BroadcastingAppBase::msgReceived (const broadcasting::Broadcast* m)
+  {
+    bool inMyMsgs = adaptMyProtoMsgs.find(m->getId()) != adaptMyProtoMsgs.end();
+    bool inForMsgs = adaptForeigsMsgs.find(m->getId()) != adaptForeigsMsgs.end();
+    return inMyMsgs || inForMsgs;
+  }
+
+  bool
+  BroadcastingAppBase::applyMsgsTransformation (cMessage *msg, bool &fwdMsg)
+  {
+    bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
+    	  cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
+    	  if ( !msgReceived(m) ) {
+
+    	    if (protocolId != m->getProtocolId()) {
+    		double timeout = computeAdaptTimeout();
+    		adaptForeigsMsgs[m->getId()] = m->getPayload();
+    		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+    		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+    		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
+    		timeoutMsgs[m->getId()] = delayed_event(
+    		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
+    		    m->getId(), timeout);
+    	    } else {
+    		fwdMsg = true;
+    		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
+    		adaptMyProtoMsgs[m->getId()] = m->getPayload();
+    	    }
+    	  } else {
+    	    if (protocolId == m->getProtocolId()) {
+    		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
+    		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
+    		    auto tmp = timeoutMsgs[m->getId()];
+    		    cancelAndDelete(tmp);
+    		    timeoutMsgs.erase(m->getId());
+    		}
+    		fwdMsg = true;
+    	    }
+    	  }
+    	});
+    return done;
+  }
+
+  bool
+  BroadcastingAppBase::borderDetector (cMessage* msg)
+  {
+    bool done = withAdaptation && processMessage<Hello>(PK(msg), [&] (const Hello* m) {
+      if (m->getProtocolId() != protocolId) {
+	  auto tmp = new broadcasting::Border();
+	  tmp->setProtocolId(protocolId.c_str());
+	  send_package(tmp);
+      }
+    });
+    return done;
+  }
+
 //Define_Module(BroadcastingAppBase);
 
 
@@ -54,7 +117,9 @@ BroadcastingAppBase::initialize(int stage)
     ApplicationBase::initialize(stage);
 
     switch (stage) {
-        case INITSTAGE_LOCAL:
+        case INITSTAGE_LOCAL: {
+	    protocolId = par("protocolId").stdstringValue();
+
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
@@ -66,6 +131,10 @@ BroadcastingAppBase::initialize(int stage)
             signal_sent_id = this->registerSignal("msg_sent");
             signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
 
+            //initialization of adaptation parameters
+            adaptationMax = par("adaptationMax").longValue();
+            withAdaptation = par("withAdaptation").boolValue();
+        }
             break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
             {
@@ -147,6 +216,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 pkt->setX(position.x);
                 pkt->setY(position.y);
                 pkt->setSender(myself.c_str());
+                pkt->setProtocolId (protocolId.c_str());
                 send_package(pkt);
                 if (this->nr_hello_msg > 0)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
@@ -204,14 +274,29 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
                 // }
 
-            }break;
+            }
+            break;
+            case TRANSFORMATION_TIMEOUT: {
+              void* data = msg->getContextPointer();
+              std::string key = string( (char*)data );
+              cerr << getLogHeader()  << "Doing event for key: " << key << endl;
+	      this->time_to_broadcast_payload(data);
+	      timeoutMsgs.erase(key);
+	      cancelAndDelete(msg);
+            }
+            break;
             default:
                 break;
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        on_network_message_received(PK(msg));
-        delete msg;
+	bool fwdMsg = false;
+	bool done = applyMsgsTransformation (msg, fwdMsg);
+	borderDetector(msg);
+	if (!done || fwdMsg) {
+	  on_network_message_received(PK(msg));
+	}
+	delete msg;
     }
 
 }
@@ -229,11 +314,15 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
   		this-> on_hello_received(m);
   	});
 
-    if (!done) {
-        done = processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
-					this->on_payload_received(m);
-			   });
-    }
+    done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
+      this->on_payload_received(m);
+    });
+
+    done = done || processMessage<broadcasting::Border>(pkt, [&] (const broadcasting::Border* m) {
+	if (m->getProtocolId() != protocolId) {
+	    amIbridge = true;
+	}
+      });
 
     return done;
 }
@@ -430,13 +519,14 @@ BroadcastingAppBase::delayed_broadcast(const string& key, double delay) {
 }
 
 
-void
+cMessage*
 BroadcastingAppBase::delayed_event(int type, const std::string& data, double delay)
 {
     cMessage* mm = new cMessage("some delay");
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
     scheduleAt(simTime() + delay, mm);
+    return mm;
 }
 
 
@@ -485,6 +575,9 @@ BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
     msg->setPayload(key.c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
+    if (withAdaptation) {
+	msg->setProtocolId(protocolId.c_str());
+    }
     socket.sendTo(msg, addr, remote_port);
     emitSent(key);
 }

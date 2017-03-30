@@ -186,7 +186,7 @@ Abba2::time_to_broadcast_payload(void* user_data)
     if (!user_data) {
         key = createUniqueBroadcastingSessionId();
         ignoredMsgs[key] = key;
-//        cerr << getLogHeader() + "doing broadcast of message  " + key + " \n";
+        cerr << getLogHeader() << "doing broadcast of message  1111 " << key << endl;
         abba::ABBABroadcast* m = new abba::ABBABroadcast("payload");
         m->setX(position.x);
         m->setY(position.y);
@@ -194,7 +194,9 @@ Abba2::time_to_broadcast_payload(void* user_data)
         emitBroadcastMsgReceived(key);
     } else {
         key = string( (char*)user_data );
+        cerr << getLogHeader() << "doing broadcast of message  22222 " << key << endl;
         send_message(key);
+        cerr << getLogHeader() << "doing broadcast of message  33333 " << key << endl;
     }
 }
 

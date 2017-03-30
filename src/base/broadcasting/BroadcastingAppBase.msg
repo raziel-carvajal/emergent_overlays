@@ -17,13 +17,19 @@ namespace inet::broadcasting;
 
 
 packet Hello {
-  string sender;
+  	string sender;
 	double x;
 	double y;
+	string protocolId;	//protocol ID
 }
 
 packet Broadcast {
-    string id;
+    string id;			// this is broadcast message ID
     string sender;
     string payload;
+    string protocolId;	//protocol ID
+}
+
+packet Border {
+    string protocolId;	//protocol ID
 }
