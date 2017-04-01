@@ -1,0 +1,22 @@
+%!TEX root = main.tex
+
+\section{Related work}
+\labsection{relatedwork}
+
+\er{
+List of publications to include:
+\begin{itemize}
+	\item Survey~\cite{Ruiz2015}
+	\item Hypergossiping paper~\url{http://www.sciencedirect.com/science/article/pii/S1570870506000096}
+	This paper considers the broadcast in a MANET where some nodes are well connected (and can use gossiping, a term they use for controlled flooding) and some are not, leading to disconnected systems. Nodes can detect partitions by simply comparing the set of recently-received items. When the two sets differ enough for two nodes who communicate then the nodes re-broadcast the missed messages to the other group. The abstract is close to what we want to do (adaptive broadcast) but in the end the contribution is actually a dual-mode broadcasting. There is no protocol switch. However, there is a form of adaptation for one protocol: the gossiping probability can be adapted based on the local density of a node. The density is obtained via active probing and the addition of hello messages, that are normally not needed for flooding based broadcast. This is a difference with us as we want to exploit only available communication and consider that if you send periodic hello messages you are better off using them to build an overlay. Related work to review from this paper (need to read them)
+	\begin{itemize}
+		\item \cite{border_node_retransmission_telsys03} proposes a ``density-aware probabilistic flooding''
+		\item \cite{2001:AAR:876878.879323} proposes two adaptive heuristic-based schemes for broadcast and one adaptive topology-based scheme
+		\item \cite{adaptive_group_com_iscc02} where nodes switch at run time between three flooding schemes: plain flooding, scoped flooding, and hyperflooding (i.e. flooding with repeated retransmissions to avoid lost messages)
+	\end{itemize}
+	\item to consider:
+	\begin{itemize}
+		\item \url{http://ieeexplore.ieee.org/document/7162992/}
+	\end{itemize}
+\end{itemize}
+}
