@@ -91,6 +91,7 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     return done;
   }
 
+
   bool
   BroadcastingAppBase::borderDetector (cMessage* msg)
   {
@@ -98,13 +99,14 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
       if (m->getProtocolId() != protocolId) {
         // FIXME: doesn't work for mobility
         if (!contains(m->getProtocolId(), m->getSender())) {
-        // if (customOfficers.find(m->getProtocolId()) == customOfficers.end() ) {
-          auto tmp = new broadcasting::Border();
-          tmp->setProtocolId(protocolId.c_str());
-          tmp->setTarget(m->getSender());
-          send_package(tmp);
           save_border_node(m->getProtocolId(), m->getSender());
-          // customOfficers[m->getProtocolId()] = m->getSender();
+          if (customOfficers[m->getProtocolId()].size() == 1) {
+            timeoutBorderDet[m->getProtocolId()] =
+              delayed_event(OFFICER_ELECTION_TIMEOUT,
+                strdup(m->getProtocolId()),
+                uniform(0.1, timeoutCustomOfficer)
+              );
+          }
         }
       }
     });
@@ -152,7 +154,9 @@ BroadcastingAppBase::initialize(int stage)
             signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
 
             //initialization of adaptation parameters
-            adaptationMax = par("adaptationMax").longValue();
+            adaptationMax = par("adaptationMax").doubleValue();
+            nr_max_custom_officers = par("nr_max_custom_officers").longValue();
+            timeoutCustomOfficer = par("timeoutCustomOfficer").doubleValue();
             withAdaptation = par("withAdaptation").boolValue();
         }
             break;
@@ -223,7 +227,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 {
 
     if (msg->isSelfMessage()) {
-
         switch (msg->getKind()) {
             case START: {
                   this->processStart();
@@ -306,10 +309,29 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             }
             break;
             case OFFICER_ELECTION_TIMEOUT: {
-              // auto tmp = new broadcasting::Border();
-              // tmp->setProtocolId(protocolId.c_str());
-              // tmp->setTarget(m->getSender());
-              // send_package(tmp);
+              char* foreign_prot = (char*)msg->getContextPointer();
+              broadcasting::TargetSet targets;
+              for (const auto& e: customOfficers[foreign_prot]) {
+                targets.insert(e);
+                if (targets.size() == nr_max_custom_officers)
+                  break;
+              }
+              if (!std::equal(customOfficers[foreign_prot].begin(),
+                              customOfficers[foreign_prot].end(),
+                              lastForeignHelloSenders.begin()
+                            )) {
+
+                auto tmp = new broadcasting::Border();
+                tmp->setSourceProtocol(protocolId.c_str());
+                tmp->setForeignProtocol(foreign_prot);
+                tmp->setTargets(targets);
+                send_package(tmp);
+                free(foreign_prot);
+                timeoutBorderDet.erase(foreign_prot);
+                cancelAndDelete(msg);
+                lastForeignHelloSenders = customOfficers[foreign_prot];
+                customOfficers[foreign_prot].clear();
+              }
             }
             break;
             default:
@@ -346,9 +368,20 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
   });
 
   done = done || processMessage<broadcasting::Border>(pkt, [&] (const broadcasting::Border* m) {
-  	if (m->getProtocolId() != protocolId && myself == m->getTarget()) {
-  	    amIbridge = true;
+  	if (m->getSourceProtocol() != protocolId) {
+      if (m->getTargets().find(myself) != m->getTargets().end()) {
+        amIbridge = true;
+      }
   	}
+    else {
+      // if I have a time out for the same foreign protocol
+      string key(m->getForeignProtocol());
+      if (timeoutBorderDet.find(key) != timeoutBorderDet.end()) {
+        auto mm = timeoutBorderDet[key];
+        cancelAndDelete(mm);
+        timeoutBorderDet.erase(key);
+      }
+    }
   });
 
   return done;

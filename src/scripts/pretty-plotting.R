@@ -27,6 +27,8 @@ get_arguments <- function() {
 
   parser$add_argument('-final', '--final-version', dest='final', action="store_true",
                       help='If used, the script generates a version good enough for the paper')
+  parser$add_argument('-violin', '--use-violin', dest='violin', action="store_true",
+                      help='If used, the script generates a violin plots instead of box plots')
 
   parser$add_argument('-ed', '--excluded-density', dest='excluded.densities', type='integer', action='append')
 
@@ -121,6 +123,7 @@ get.attrSet <- function(dfNames, attri) {
 get.plot.theme.style <- function() {
   theme(plot.title=element_text(size=15, vjust=3)) +
   theme(plot.margin = unit(c(0.4,0.4,0.4,0.4), "cm")) +
+  # scale_fill_brewer(palette="RdBu") + theme_minimal()
   # all this is to remove the beautiful grid (not good for the paper :-( )
   theme(
     panel.background = element_rect(fill = 'white', colour = 'black')
@@ -136,14 +139,14 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   data.list <- lapply(densities, function(density) {
 	  dd <- df[grepl(paste("d", density, "tr", sep="_"), sapply(df, function(e) colnames(e) ))]
 	  dd <- lapply(dd, function(e) {
-    	cn <- colnames(e)[1]
-    	s <- unlist( strsplit(cn,'_'))
+      	cn <- colnames(e)[1]
+      	s <- unlist( strsplit(cn,'_'))
         cn <- as.character(s[which(s == "p") + 1])
         cn <- toupper(gsub("[[:digit:]]", "", cn))
         cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
-		data <-e[,1]
+		    data <-e[,1]
         den <-rep(as.factor(paste("Density", density)), length(data))
-		data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
+		    data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
 	  })
 	  dd <- unname(dd)
 	  data <- do.call("rbind", dd)
@@ -173,17 +176,17 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   print(p)
 }
 
-plot.data.using.boxes <- function(data, densities, ylabel, caption) {
+plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE) {
   data.list <- lapply(densities, function(density) {
 
 		dd <- data[grepl(paste("d",density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	    cn <- as.character(s[which(s == "p") + 1])
-            cn <- toupper(gsub("[[:digit:]]", "", cn))
-            cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
-            cn <- replace(cn, cn == "MPRT", "MPR")
+	  	cn <- as.character(s[which(s == "p") + 1])
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
+      cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+      cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -193,24 +196,27 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 
 		do.call("rbind", dd)
 	})
-
-
-
 	data <- do.call("rbind", data.list)
 
-	p <- ggplot(data) +
-		#  geom_boxplot(aes(x=alg, y=dat)) +
-		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
-		 facet_grid(. ~ density) +
+	p <- ggplot(data)
+  if (!usebox) {
+    p <- p + geom_violin(aes(x=alg, y=dat, fill=alg)) +
+          stat_summary(fun.y=median, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
+  }
+  else {
+    p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg))
+  }
+
+  p <- p + facet_grid(. ~ density) +
 		 ylab(ylabel) +
     #  xlab("Algorithm") +
     #  theme(legend.position="none") +
      theme(legend.position="top", text=element_text(size=18)) +
      (if (print.titles)
       #  labs(title=caption, x=NULL)
-       labs(title=caption, fill="Algorithms")
+       labs(title=caption, fill="Algorithms", shape="Algorithms")
      else
-       labs(fill="Algorithms")
+       labs(shape="Algorithms", fill="Algorithms")
      ) +
     #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
      get.plot.theme.style() +
@@ -292,7 +298,7 @@ plot.coverage.per.session <- function(data, densities) {
 plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Power Consumption (J)",
-                        "Power consumption for different algorithms")
+                        "Power consumption for different algorithms", FALSE)
 }
 
 plot.time.power.consumption <- function(df, densities) {
@@ -428,7 +434,6 @@ if (!is.null(args$pc)) {
   print("Plotting power consumption")
   plot.power.consumption(r$data, metadata$densities)
 }
-
 
 if (!is.null(args$rf)) {
   print("Importing relays dataset")

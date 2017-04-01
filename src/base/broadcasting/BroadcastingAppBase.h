@@ -87,13 +87,17 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double radious;
 
     double adaptationMax;
+    double timeoutCustomOfficer;
     bool withAdaptation;
     std::string protocolId;
+    int nr_max_custom_officers;
+    std::set<std::string> lastForeignHelloSenders;
 
     //Payloads
     std::map<std::string, std::string> adaptForeigsMsgs;
     std::map<std::string, std::string> adaptMyProtoMsgs;
     std::map<std::string, cMessage*> timeoutMsgs;
+    std::map<std::string, cMessage*> timeoutBorderDet;
 
     // custom officer for foreign protocol
     // map from protocol to target
