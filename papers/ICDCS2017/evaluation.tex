@@ -45,7 +45,7 @@ energy consumed by nodes during all broadcast session.
 	\begin{center}
 	\subfigure[SRE messages in static scenarios.]{
 		\label{fig:a-saved}
-		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 20mm 7mm 0 0]{fig/results-static-summary.pdf}
 	}
 	~
 	\subfigure[Duplicate messages per algorithm in static scenarios.]{
@@ -55,7 +55,7 @@ energy consumed by nodes during all broadcast session.
 	~
 	\subfigure[SRE messages in dynamic scenarios.]{
 		\label{fig:b-saved}
-		\includegraphics[page=1, scale=0.34, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 20mm 7mm 0 0]{fig/results-mobility-summary.pdf}
 	}
 	~
 	\subfigure[Duplicate messages per algorithm in dynamic scenarios.]{
@@ -73,25 +73,21 @@ We analyze every metric with and without mobility over different number of neigh
 \subsection{Network overload}
 
 The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
-%Redundant
-%These metrics are useful to assess if a broadcasting algorithm have to send too many messages in order to reach a good coverage.
-%Redundant
-%This is important because all these messages can quickly saturate the medium and affect the transmission of other messages unrelated to the broadcasting operation.
 %
 Figure~\ref{fig:a-saved} depicts the SRE in static scenarios.
 %
 As can be seen, MPR outperforms all other protocols.
 %
-However, the difference between MPR and all other algorithms decreases as the density increases.
+However, the difference between MPR and other algorithms decreases as the density increases.
 %
-Interestingly, ABBA reduces the number of retransmissions more efficiently than the node-degree technique for densities above 10 but it do not surpass MPR. 
+Interestingly, ABBA reduces the number of retransmissions more efficiently than the CDS-based technique for densities above 10 but it do not surpass MPR. 
 %
-The competitiveness of ABBA was expected to increase with the density because ABBA can cancel more retransmissions, but it is surprising to see it surpassing node-degree by 10\%.
+The competitiveness of ABBA was expected to increase with the density because ABBA can cancel more retransmissions, but it is surprising to see it surpassing CDS-based by 10\%.
 %
 
 In dynamic scenarios, as shown in Figure~\ref{fig:b-saved}, we observe how node mobility has a negative impact on the performance of topology-based algorithms, particularly on MPR.
 %
-Indeed, MPR and node-degree protocols keep nodes' neighbors information that is soon out of date due to the constant changes. 
+Indeed, MPR and CDS-based protocols keep nodes' neighbors information that is soon out of date due to the constant changes.
 %
 Additionally, collisions of control messages in these algorithms is another explanation for the bad performance.
 %
@@ -114,7 +110,7 @@ In general, there are three reasons to get a low number of duplicate messages: i
 %
 On the one hand, the topology based technique MPR is again able to cope with all densities in both scenarios of mobility.
 %
-On the other hand, \textit{node-degree} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
+On the other hand, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
 %
 \textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  
 
@@ -130,35 +126,45 @@ The \textit{network saturation in the vicinity} of the node is also important du
 
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[Static scenarios]{
+	\subfigure[Reachebility in static scenarios]{
+		\label{fig:a-coverage}
+		\includegraphics[page=2, scale=0.32, trim = 20mm 5mm 0 0]{fig/results-static-summary.pdf}
+	}
+	\hspace{0.2cm}
+	\subfigure[Energy consumption in static scenarios]{
 		\label{fig:a-energy}
-		\includegraphics[page=1, scale=0.44, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
+		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[Dynamic scenarios]{
-		\label{fig:b-energy}
-		\includegraphics[page=1, scale=0.44, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
+	\subfigure[Reachebility in dynamic scenarios]{
+		\label{fig:b-coverage}
+		\includegraphics[page=2, scale=0.32, trim = 20mm 5mm 0 0]{fig/results-mobility-summary.pdf}
 	}
-	\caption{Power consumption per algorithm}
-	\label{fig:energy}
+	\hspace{0.2cm}
+	\subfigure[Energy consumption in dynamic scenarios]{
+		\label{fig:b-energy}
+		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
+	}
+	\caption{Power consumption and node reachability per algorithm}
+	\label{fig:energy-coverage}
 	\end{center}
 \end{figure*}
 
-\begin{figure*}[ht]
-	\begin{center}
-		\subfigure[Static Scenarios]{
-			\label{fig:a-sessionTime}
-			\includegraphics[scale=0.32, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
-		}
-		~
-		\subfigure[Dynamic Scenarios]{
-			\label{fig:b-sessionTime}
-			\includegraphics[scale=0.32, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
-		}
-		\caption{Broadcasting session time}
-		\label{fig:coverage-energy}
-	\end{center}
-\end{figure*}
+%\begin{figure*}[ht]
+%	\begin{center}
+%		\subfigure[Static Scenarios]{
+%			\label{fig:a-sessionTime}
+%			\includegraphics[scale=0.32, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
+%		}
+%		~
+%		\subfigure[Dynamic Scenarios]{
+%			\label{fig:b-sessionTime}
+%			\includegraphics[scale=0.32, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
+%		}
+%		\caption{Broadcasting session time}
+%		\label{fig:coverage-energy}
+%	\end{center}
+%\end{figure*}
 
 %
 In CSMA, a node must receive an \textit{ACK} notification when a message is received, otherwise the message is sent again.
@@ -170,16 +176,13 @@ Since in this case both messages and ACK notifications are often lost, the MAC l
 
 Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
 %
-
-We use again \textit{boxplots} to present the full distribution of power consumption.
+We use \textit{boxplots} to present the full distribution of power consumption.
 %
-Due to space limitations, we do not present the plots for all densities.
-%
-Instead, we are only showing plots for those densities were there is a significant change in the patterns of energy consumption.
+Due to space limitations, we only show the results for those densities were there is a significant change in the patterns of energy consumption.
 % 
 The first thing to note is that, as expected, \textit{simple flooding} consumes more energy in all scenarios.
 %
-Also interesting is that both CDS-based approaches, namely \textit{MPR} and \textit{node-degree}, always outperform other approaches when there is no mobility.
+Also interesting is that both CDS-based approaches, namely \textit{MPR} and \textit{CDS-based}, always outperform other approaches when there is no mobility.
 %
 This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\ref{fig:a-duplicated}, which show that nodes send and receive fewer messages in these approaches.
 %
@@ -216,25 +219,25 @@ Some approaches fail to deliver all broadcast messages in settings with very low
 In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of situations.
 %
 
-\begin{figure*}[!ht]
-	\begin{center}
-		\subfigure[Static scenario.]{
-			\label{fig:a-coverage}
-			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
-		}
-		~
-		\subfigure[Dynamic scenario.]{
-			\label{fig:b-coverage}
-			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
-		}
-		\caption{Node reachability}
-		\label{fig:coverage}
-	\end{center}
-\end{figure*}
+%\begin{figure*}[!ht]
+%	\begin{center}
+%		\subfigure[Static scenario.]{
+%			\label{fig:a-coverage}
+%			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
+%		}
+%		~
+%		\subfigure[Dynamic scenario.]{
+%			\label{fig:b-coverage}
+%			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
+%		}
+%		\caption{Node reachability}
+%		\label{fig:coverage}
+%	\end{center}
+%\end{figure*}
 
 The results in the mobility scenarios are less stable.
 %
-As expected, some protocols such as \textit{MPR} and \textit{node-degree} behave worse because the underlying topology they build to drive the communication must be constantly updated due to the movement of nodes.
+As expected, some protocols such as \textit{MPR} and \textit{CDS-based} behave worse because the underlying topology they build to drive the communication must be constantly updated due to the movement of nodes.
 %
 This problem can be observed for all the densities, but it is more clear for denser topologies.
 %
@@ -246,8 +249,5 @@ Since the location of each node changes continuously, it is expected that this a
 This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
 
-
-
-%Finally, we observe that \textit{simple flooding} is the most reliably algorithm in our experiments.
 
 
