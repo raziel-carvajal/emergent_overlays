@@ -70,7 +70,7 @@ The output of this procedure is a network topology with the desired density.
 %
 We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 35, 40}; a range of values that is frequently found in the literature.
 %
-This leads to a maximum map size of $354 x 354$ while the minimum map is $125 x 125$.
+This leads to a maximum map size of $354 \times 354$ while the minimum map is $125 \times 125$.
 
 
 \noindent
@@ -165,7 +165,7 @@ The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simu
 
 
 \noindent
-\textbf{Algorithm specific parameters.}
+\textbf{Algorithm-specific parameters.}
 %\subsection*{Algorithm specific parameters}
 The behavior of each protocol depends on the values of its parameters.
 %
@@ -182,8 +182,8 @@ Finally, for \textit{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
 %\subsection*{Simulation time}
 As mentioned in Section~\ref{sec:background}, some algorithms build a topology to drive the broadcast operation.
 %
-To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5 seconds \deleted{before the first message is broadcast}.
-The warm-up phase is used, for instance, to create the initial topology in CDS-based algorithms.
+To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5 seconds\deleted{before the first message is broadcast}.
+The warm-up phase is used to create the initial topology in CDS-based algorithms.
 %
 %This time is used by  protocols can use to create any initial structure.
 Likewise, \deleted{in our evaluation,} we stop each experiment a fixed amount of time (5 seconds) after the beginning of the last broadcast operation.
