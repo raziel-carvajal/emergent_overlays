@@ -95,7 +95,7 @@ We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set 
 
 In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
 %
-This model generates traces composed of frequent short walks and occasional long rides to distant locations.
+This model generates traces composed of frequent short walks and occasional rides to distant locations.
 %
 In our experiments, we define two kind of scenarios: one without mobility (\textit{static}) and another with mobility at walking speed (\textit{dynamic}).
 %
@@ -105,7 +105,7 @@ To generate \textit{dynamic} scenarios, we begin with a \textit{static one}.
 %
 Then, we use the LW model to generate mobility traces for each node.
 %
-The parameters of the LW model are set in such a way that the average node speed is close to $1.4$ $m/s$, a value reported in the literature as an estimation of the preferred walking speed~\cite{Browning390}.
+The parameters of the LW model are set in such a way that the average node speed is close to $1.4$ $m/s$ -- an estimation of the preferred walking speed~\cite{Browning390}.
 %
 \deleted{To do so, we use the following values to feed the mobility model:}
 
@@ -167,9 +167,11 @@ This information is used in setting the power consumption model of INET.
 	\label{tbl:wifi-chip}
 \end{table}
 
+\deleted{
 To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
+}
 %
 \deleted{Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \textit{receiver} and \textit{transceiver}, respectively.
 %

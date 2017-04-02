@@ -15,7 +15,7 @@ number of retransmissions we avoid by using an algorithm $A$ instead of \textit{
 %
 To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
 %
-Since in our experiments we are disseminating many messages, we compute the mean \textit{SRE} and use it as metric for our comparison study.
+\deleted{Since in our experiments we are disseminating many messages, we compute the mean \textit{SRE} and use it as metric for our comparison study.}
 %
 \deleted{This metric is useful to assess the performance of algorithms in terms of both network and energy usage. }
 
@@ -65,10 +65,11 @@ energy consumed by nodes during all broadcast session.
 	\end{center}
 \end{figure*}
 
+
 %
 We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
 %
-\subsection{Network overload}
+\subsection{Network saturation}
 
 The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
 %
@@ -244,8 +245,8 @@ We can also see that \textit{ABBA} tends to fail with different values of densit
 %
 \deleted{This is understandable because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.}
 %
-Indeed, since the location of each node changes continuously, ABBA occasionally fails in properly computing the covered area; as a consequence, some messages are not delivered.
-This result is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
+Indeed, since the location of each node changes continuously, ABBA occasionally fails in computing the covered area; as a consequence, some messages are not delivered.
+This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
 
 
 
