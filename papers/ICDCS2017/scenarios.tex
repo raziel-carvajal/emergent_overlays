@@ -15,20 +15,20 @@ In this scenario, the efficient dissemination of some messages to all participan
 %
 To simulate this kind of scenario, we consider two parameters that influence the performance of broadcast in MANETs: \textit{network density} and \textit{nodes mobility}.
 %
-In the following, we describe the simulation environment and the parameters used in our study.
+In the following, we describe the simulation environment and the parameters used in our study.\\
 
-\subsection*{Simulation tool}
-
+%\subsection*{Simulation tool}
+\noindent
+\textbf{Simulation tool.}
 For our performance comparison study, we rely on INET3.3/OMNET++4.6, a simulation framework specifically aimed at evaluating networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
 This tool provides models for many protocols of the network stack such as 802.11g~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
 %
 In addition, it can model aspects such as mobility and energy consumption aspects.
-%
 
-\subsection*{Communication Scenario}
-
-%
+\noindent
+\textbf{Communication Scenario.}
+%\subsection*{Communication Scenario}
 In a \textit{demonstration} scenario, some attendees have mobile devices with IEEE 802.11 capability.
 %
 Participants use such devices to broadcast messages using a MANET and they might attempt to do so at nearly the same time.
@@ -45,8 +45,9 @@ Finally, the content of each message is randomly generated, unique and with a le
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
 
-\subsection*{Node Density}
-
+\noindent
+\textbf{Node Density.}
+%\subsection*{Node Density}
 We are interested in generating scenarios with different node density; this allows us to simulate more accurately the \textit{demonstration} use case.
 %
 %In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
@@ -108,8 +109,9 @@ We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set 
 %\end{table}
 
 
-\subsection*{Mobility}
-
+\noindent
+\textbf{Mobility.}
+%\subsection*{Mobility}
 In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
 %
 This model generates traces composed of frequent short walks and occasional rides to distant locations.
@@ -153,8 +155,9 @@ Afterwards, we perform several checks on the traces to guarantee that: i) the av
 Should any of these checks fail, we discard the mobility traces.
 }
 
-\subsection*{Energy Consumption}
-
+\noindent
+\textbf{Energy Consumption.}
+%\subsection*{Energy Consumption}
 The power consumption must be considered in evaluating protocols that use wireless communication.
 %
 Since this metric depends on the Wi-Fi chip used \deleted{by mobile devices}, we model power consumption using the specifications of an actual chip found in modern mobile devices.
@@ -197,9 +200,9 @@ INET then computes the energy consumption $C(t)$ using:  $C(t)=\int_{0}^{t_\text
 The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.}
 
 
-
-\subsection*{Algorithm specific parameters}
-
+\noindent
+\textbf{Algorithm specific parameters.}
+%\subsection*{Algorithm specific parameters}
 The behavior of each protocol depends on the values of its parameters.
 %
 To configure these parameters meaningfully, we choose values previously reported in the literature.
@@ -210,9 +213,9 @@ In the case of \textit{ABBA}, we use 0.3 seconds as the maximum waiting time.
 %
 Finally, for \textit{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
 
-
-\subsection*{Simulation time}
-
+\noindent
+\textbf{Simulation time.}
+%\subsection*{Simulation time}
 As mentioned in Section~\ref{sec:background}, some algorithms build a topology to drive the broadcast operation.
 %
 To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5 seconds \deleted{before the first message is broadcast}.
