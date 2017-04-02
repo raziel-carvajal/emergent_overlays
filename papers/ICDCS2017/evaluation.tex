@@ -116,11 +116,11 @@ Meanwhile, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low de
 
 \subsection{Power Consumption}
 
-Power consumption depends on the number of messages exchanged.
+\deleted{Power consumption depends on the number of messages exchanged.}
 %
-The amount of received and sent messages is important because every time a node sends or receives a message \deleted{, the \textit{transmitter} and/or \textit{receiver} components of} its radio changes to a more power hungry mode.
+The amount of received and sent messages is important for power consumption because every time a node exchanges messages \deleted{, the \textit{transmitter} and/or \textit{receiver} components of} its radio changes to a more power hungry mode.
 %
-Thus, the broadcast messages retransmitted as well as the control messages influence the energy consumption.
+Thus, both broadcast and control messages influence the energy consumption.
 %
 However, the network saturation in the vicinity of the node also influences the energy consumption due to the way the MAC layer is implemented.
 %
@@ -138,7 +138,7 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 		\includegraphics[page=2, scale=0.32, trim = 20mm 5mm 0 0]{fig/results-static-summary.pdf}
 	}
 	\hspace{0.2cm}
-	\subfigure[Energy consumption in static scenarios]{
+	\subfigure[Power consumption in static scenarios]{
 		\label{fig:a-energy}
 		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
@@ -148,7 +148,7 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 		\includegraphics[page=2, scale=0.32, trim = 20mm 5mm 0 0]{fig/results-mobility-summary.pdf}
 	}
 	\hspace{0.2cm}
-	\subfigure[Energy consumption in dynamic scenarios]{
+	\subfigure[Power consumption in dynamic scenarios]{
 		\label{fig:b-energy}
 		\includegraphics[page=1, scale=0.34, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
@@ -187,7 +187,7 @@ This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\r
 %
 In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show a single value of density where these algorithms behave better than \textit{MPR}.
 %
-This clearly indicates that using control messages to build an underlying topology is worth in terms of power consumption when there is no mobility \deleted{the interval among broadcast messages is close to the interval among control messages}.
+This clearly indicates that using control messages to build an underlying topology is worth in terms of power consumption when there is no mobility\deleted{the interval among broadcast messages is close to the interval among control messages}.
 %
 
 As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in dynamic scenarios.
