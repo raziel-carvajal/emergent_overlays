@@ -71,24 +71,41 @@ Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use
 %
 We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 35, 40}; a range of values that is frequently found in the literature.
 
-\begin{table}[ht]
+%\begin{table}[ht]
+	\begin{minipage}[t]{0.45\linewidth}
 	\footnotesize
 	\centering
-	
 	\begin{tabular}{ll}
-		\textbf{Parameter} & \textbf{Setting} \\
+		\textbf{Parameter} & \textbf{Value} \\
 		
 		\midrule
-		Number of Nodes & \nodesNumber \\
-		Transmission Range & 20 m \\
+		Nodes No & \nodesNumber \\
+		Tx [m] & 20 \\
 		Densities & 5--40 \\
-		Map Size for smallest density & 354 m x 354 m \\
-		Map Size for largest density & 125 m x 125 m \\
+		Map$_{biggest}$  & 354 x 354 \\
+		Map$_{smallest}$ & 125 x 125 \\
+	\end{tabular}
+%	  \caption{Simulations parameters affecting node density.}
+%  	\label{tbl:densisty-parameters}
+	\end{minipage}
+	\begin{minipage}[t]{0.45\linewidth}
+	\footnotesize
+	\centering
+	\begin{tabular}{lr}
+%		\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
+%  	\label{tbl:wifi-chip}
+		\textbf{Mode} & \textbf{Energy [mW]} \\
+		
+		\midrule
+		%Off	  & nW & 57.6 \\
+		Sleep  & 648 [mW] \\
+		Listen & 244.8 \\
+		Rx & 295.2 \\
+		Tx & 1206 \\
 	\end{tabular}
 	
-	\caption{Simulations parameters affecting node density.}
-	\label{tbl:densisty-parameters}
-\end{table}
+	\end{minipage}
+%\end{table}
 
 
 \subsection*{Mobility}
@@ -148,6 +165,7 @@ Table~\ref{tbl:wifi-chip} shows its consumption in different operation modes.
 %
 This information is used in setting the power consumption model of INET.
 
+\deleted{
 \begin{table}[ht]
 	\footnotesize
 	\centering
@@ -167,7 +185,6 @@ This information is used in setting the power consumption model of INET.
 	\label{tbl:wifi-chip}
 \end{table}
 
-\deleted{
 To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
