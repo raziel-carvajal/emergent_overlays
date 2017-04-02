@@ -44,7 +44,7 @@ In particular, existing solutions attempt to:
 Many algorithms have been proposed to solve the broadcast problem in MANETs~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
 All these algorithms broadcast by using a form of \emph{controlled flooding}: 
-since the transmission range of a source node is typically much smaller than the network area, broadcasting is achieved by message retransmission between nodes to cover the entire network.
+since the transmission range of a source node is smaller than the network area, broadcasting is achieved by message retransmission between nodes to cover the entire network.
 %
 Broadcast algorithms for MANETs mostly differ in the way they control this forwarding operation.
 %
@@ -66,10 +66,10 @@ Moreover, there is not a common set of \textit{broadcasting metrics} follow by t
 %
 Our goal in this paper is to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions, in order to ease the task of selecting the most appropriate algorithm for a given situation.
 %
-In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
+In addition to \textit{simple flooding}, we consider four algorithms that are representative of their class:
 \raziel{overlay-based algorithms are showed first, to follow same order we have in section: Background}
 \begin{itemize}
-	\item The \textit{CDS-based} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS) \changed{to define which nodes forward incoming messages ~\cite{Wu2001}.}\deleted{. This overlay allows controlling which nodes should propagate incoming messages ~\cite{Wu2001}.}
+	\item The \textit{CDS-based} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS) \changed{to define which nodes forward messages ~\cite{Wu2001}.}\deleted{. This overlay allows controlling which nodes should propagate incoming messages ~\cite{Wu2001}.}
 	
 	\item \changed{\textit{MPR} minimize the number of forwarding nodes building a CDS from the node that initiates a broadcast session~\cite{Qayyum2002}.}\deleted{\textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of forwarding nodes~\cite{Qayyum2002}.}
 	
