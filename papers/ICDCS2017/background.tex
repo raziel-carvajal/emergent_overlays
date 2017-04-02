@@ -65,7 +65,7 @@ A backbone or spine is a subset of nodes where its members are allowed to forwar
 %
 Any other node out of the backbone acts as message receiver.
 %
-For instance, Figure~\ref{fig:explaining-backbone:a} depicts a small network of nodes where $A$ starts with the message dissemination.
+For instance, Figure~\ref{explaining-backbone} depicts a small network of nodes where $A$ starts with the message dissemination.
 %
 If only nodes $B$ and $C$ forward any incoming message, the reachability of this network will be 100\%.
 %
@@ -77,22 +77,10 @@ Connected Dominating Set (CDS) is the formal term for such a backbone~\cite{Wu20
 In this study, we consider two topology-based algorithms \textit{Multipoint Relaying (MPR)} and \textit{CDS-based}, which require a periodic exchange of control messages (\textit{Hello} messages) among nodes to build an overlay.
 
 \begin{figure}[htbp]
-  \subfigure[Steps to get the MPR set of peer A]{
-    \label{fig:explaining-backbone:a}
-    \begin{minipage}[t]{\linewidth}
-	    \includegraphics[width=\linewidth]{fig/explainingbackbone_b.pdf}	
-	  \end{minipage}
-	}
-	~
-	\subfigure[Backbone of 3 nodes shown by the black filled-in circles.] {
-    \label{fig:explaining-backbone:b}
-    \begin{minipage}[t]{\linewidth}
-      \centering
-	    \includegraphics[scale=0.42]{fig/explainingbackbone_a.pdf}	
-	  \end{minipage}
-	}
-	\caption{Virtual topology to reach 100\% reachability in one MANET.}
-	\label{fig:explaining-backbone}
+  \centering
+  \includegraphics[width=\linewidth]{fig/explainingbackbone_b.pdf}
+	\caption{Steps to get the MPR set of peer A where forwarding nodes are shown with black filled-in circles.}
+  \label{explaining-backbone}
 \end{figure}
 
 \paragraph{MPR} The CDS obtained in~\cite{Qayyum2002} is called a MPR set.
@@ -103,11 +91,11 @@ The procedure to find relay nodes is two-fold.
 %
 Firstly, any one-hop neighbor $n \in N$ will belong to $MPR$ if $n$ is a unique neighbor of some other node at $N^{2}$.
 %
-Secondly, while the current MPR set do not cover all nodes at $N^{2}$, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors are $n$ covers.
+Secondly, while the current MPR set do not cover all nodes at $N^{2}$, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors $n$ covers.
 %
 $n$ will be a relay node only if the number of covered two-hop neighbors is maximal.
 %
-Figure~\ref{fig:explaining-backbone:a} shows the steps taken by node $A$ to compute its $MPR$ set.
+Figure~\ref{explaining-backbone} shows the steps taken by node $A$ to compute its $MPR$ set.
 %
 Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as relay node because it is the unique neighbor of $F$ (first rule).
 %
@@ -121,7 +109,7 @@ As in MPR, data about one-hop and two-hop neighbors is required.
 \changed{The marking procedure consist of identifying unconnected neighbors, if node $n$ realize that any pair of its neighbors is unconnected then, $n$ marks itself as forwarding node.}
 \deleted{The marking procedure simply identifies whether one node $n$ has any pair of neighbors that are unconnected, $n$ marks itself as a relay node if this condition takes place.}
 %
-For instance, in Figure~\ref{fig:explaining-backbone:b} $A$ marks itself as relay node because nodes $B$ and $G$ are unconnected.
+For instance, in Figure~\ref{explaining-backbone} $A$ will mark itself as relay node because nodes $B$ and $G$ are unconnected.
 %
 To reduce the elements of one CDS, obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either \textit{the degree of nodes} or \textit{the remaining energy in nodes' batteries}.
 %
@@ -147,6 +135,17 @@ Due to the lack of space, we claim that our current implementation of the \texti
 %\end{enumerate} 
 
 \subsection{Context-aware and context-oblivious algorithms}
+\changed{The constant exchange of control messages to build an overlay results in a higher probability of collisions.
+%
+When nodes move the frequency to send these messages must increase to maintain a correct set of forwarding nodes.
+%
+Our study considers broadcast algorithms that avoid building virtual overlays, instead, \textit{meta-data} about the local state of nodes (node-degree, current position, etc) is piggybacked in broadcast messages.
+%
+The decision of whether or not forward messages is based on the meta-data attached to them.
+}
+
+
+\deleted{
 Using a virtual topology implies an overload on the communication medium due to the constant exchange of control messages.
 %
 When nodes move, the frequency on sending these messages must be increased to keep a virtual topology with the correct set of relay nodes.
@@ -158,6 +157,26 @@ Moreover, our study considers a second category of broadcast protocols that do n
 This data could be either context-oblivious or context-aware.
 %
 The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
+}
+
+\paragraph{ABBA} Area-based beacon-less algorithm~\cite{Ovalle-Martinez2006}.
+The flooding process in ABBA is controlled in both space and time.
+%
+This algorithm requires nodes to know their physical location and the transmission range $T_x$ on each node.
+%
+When one broadcast message $M$ is received, nodes compute the angle $\alpha$ of the circle with radio $T_x$ centered at node's position that is covered by this reception.
+%
+%Note that $\alpha$ is paired to a unique message.
+%
+$M$ is scheduled for being retransmitted after $t = t_\textit{max} - t_\textit{max}\frac{\alpha}{2\pi}$ seconds, where $t_\textit{max}$ is the maximum waiting time to give at each retransmission.
+%
+Any new reception of $M$ before $t$ seconds implies in updating $t$ with the actual angle $\alpha$.
+%
+In other words, the bigger the angle covered by receptions of $M$, the shorter the time to wait before performing retransmissions.
+%
+With one exception, message retransmissions are canceled when $\alpha = 2\pi$.
+
+
 %
 %Particularly, when nodes move
 %In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
@@ -171,31 +190,16 @@ The former forwards messages with a predefine probability while the latter use k
 %This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
 
 %
-\paragraph{Probabilistic Flooding} This is a context-aware and context-oblivious approach~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probability to perform retransmissions.
+\paragraph{Probabilistic Flooding} This is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to perform retransmissions.
 %
-Nodes retransmit messages based on the distance among neighbors and a probabilistic scheme.
+Nodes retransmit messages based on the distance among neighbors.
 %
-This differs from the canonical probabilistic approach where every node in the network has the same probability of retransmitting a message regardless of the density.
+This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes-degree.
 %
-The probability of retransmitting a message decreases as the local density increases.
+The probability of retransmitting a message decreases as the number of neighbors on each node increases.
 %The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
 
-\paragraph{ABBA} Area-based beacon-less protocol~\cite{Ovalle-Martinez2006}.
-The flooding process in ABBA is controlled in both space and time.
-%
-This algorithm requires nodes to know their physical location in addition to the transmission range of nodes' radio.
-%
-When one broadcast message $M$ is received, nodes compute the angle $\alpha$ covered by this reception.
-%
-Note that $\alpha$ is paired to a unique message.
-%
-$M$ is scheduled for being retransmitted after $T$ seconds, this timer is computed as follows $T = T_\textit{max} - T_\textit{max}\frac{\alpha}{2\pi}$, where $T_\textit{max}$ is a fixed upper bound that represents the maximum waiting time.
-%
-Prior of a new reception of $M$ before $T$ seconds, nodes cancel the current timer and schedule a new one.
-%
-In other words, the bigger the angle covered by message receptions, the shorter the time to wait before performing retransmissions.
-%
-With one exception, message retransmissions are canceled if $\alpha$ reaches a value of $2\pi$.
+
 
 
 %Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
@@ -222,10 +226,10 @@ With one exception, message retransmissions are canceled if $\alpha$ reaches a v
 
 
 
-The diversity of algorithms to broadcast in MANETs is vast and choosing one approach to cope with a particular deployment scenario is a challenging task.
+The diversity of broadcast algorithms for MANETs is vast and choosing one approach to cope with a particular scenario is a challenging task.
 %
-While some evaluations have been proposed to compare existing approaches, they usually target fixed scenarios; this avoids its use in other contexts.
+While some evaluations have been proposed to compare existing approaches, they usually target fixed scenarios.
 %
-In this work, our goal is to define an experimental framework to fairly assess representative algorithms  to broadcast in MANETs. 
+In this work, our goal is to define an experimental framework to fairly assess representative broadcast algorithms for MANETs. 
 %
-In the next section, we discuss previous works one can find in the literature.
+%In the next section, we discuss previous works one can find in the literature.
