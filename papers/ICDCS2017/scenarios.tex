@@ -184,11 +184,11 @@ To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provid
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
 %
-Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \textit{receiver} and \textit{transceiver}, respectively.
+\deleted{Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \textit{receiver} and \textit{transceiver}, respectively.
 %
 INET then computes the energy consumption $C(t)$ using:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
 %
-The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.
+The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.}
 
 
 
