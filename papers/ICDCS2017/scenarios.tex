@@ -22,7 +22,7 @@ In the following, we describe the simulation environment and the parameters used
 \textbf{Simulation tool.}
 For our performance comparison study, we rely on INET3.3/OMNET++4.6, a simulation framework specifically aimed at evaluating networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
-This tool provides models for many protocols of the network stack such as 802.11g~\cite{10.4108/ICST.SIMUTOOLS2009.5585}.
+This tool provides models for many protocols of the network stack such as 802.11g.
 %
 In addition, it can model aspects such as mobility and energy consumption aspects.
 
@@ -68,45 +68,11 @@ Then, we generate a laying on the map by using a procedure based on random geome
 The output of this procedure is a network topology with the desired density.
 %
 
-Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.
+\deleted{Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.}
 %
 We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 35, 40}; a range of values that is frequently found in the literature.
-
-%\begin{table}[ht]
-	\begin{minipage}[t]{0.45\linewidth}
-	\footnotesize
-	\centering
-	\begin{tabular}{ll}
-		\textbf{Parameter} & \textbf{Value} \\
-		
-		\midrule
-		Nodes No & \nodesNumber \\
-		Tx [m] & 20 \\
-		Densities & 5--40 \\
-		Map$_{biggest}$  & 354 x 354 \\
-		Map$_{smallest}$ & 125 x 125 \\
-	\end{tabular}
-%	  \caption{Simulations parameters affecting node density.}
-%  	\label{tbl:densisty-parameters}
-	\end{minipage}
-	\begin{minipage}[t]{0.45\linewidth}
-	\footnotesize
-	\centering
-	\begin{tabular}{lr}
-%		\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
-%  	\label{tbl:wifi-chip}
-		\textbf{Mode} & \textbf{Energy [mW]} \\
-		
-		\midrule
-		%Off	  & nW & 57.6 \\
-		Sleep  & 648 [mW] \\
-		Listen & 244.8 \\
-		Rx & 295.2 \\
-		Tx & 1206 \\
-	\end{tabular}
-	
-	\end{minipage}
-%\end{table}
+%
+This leads to a maximum map size of $354 x 354$ while the minimum map is $125 x 125$.
 
 
 \noindent
@@ -164,7 +130,7 @@ Since this metric depends on the Wi-Fi chip used \deleted{by mobile devices}, we
 %
 The Broadcom BCM4329~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band, is installed in many modern devices.
 %
-Table~\ref{tbl:wifi-chip} shows its consumption in different operation modes.
+Its consumption in different operation modes follows: \textit{sleep} (648 nW), listen (244.8 mW), receive (295.2 mW), transmit (1206 mW).
 %
 This information is used in setting the power consumption model of INET.
 
