@@ -3,27 +3,27 @@
 \section{Related Work}
 \label{sec:related_work}
 %\er{Related Work should link to other studies of performance of protocols in MANETs. The related work on actual protocols should be covered in the previous section (Section~\ref{sec:background}).}
-Previous studies in broadcast algorithms for MANETs are of two types: proposal and evaluation of new broadcast algorithms (NPE), and fully dedicated performance comparison studies (CS).
+Previous studies on broadcast algorithms for MANETs are of two types: proposal of new broadcast algorithms (NPE), and fully dedicated performance comparison studies (CS).
 %
 \deleted{
 In this section, we discuss the evaluation criteria and the results obtained in a representative set of previous works.
 }
-In Table~\ref{tbl:rw} we summarize the related work.
+In Table~\ref{tbl:rw}, we summarize the related work.
 %
-First, in column \textit{Muliple protocols} we mark whether a study compares more than one protocol.
+First, column \textit{Muliple protocols} shows whether a study compares more than one protocol.
 %
-Next, we look how the evaluation take place.
+Next, we look at how the evaluation take place.
 %
-That is, column \textit{Multiple classes} indicates if the evaluated protocols belog to the same classification.
+That is, column \textit{Multiple classes} indicates if the evaluated protocols belong to the same classification.
 %
 Given that network density is extremely important in MANETs, we highlight in column \textit{Multiple densities} which studies consider this variable.
 %
-Finally, two more variables are considered mobility and energy consumption.
+Then, two more variables are considered: mobility and energy consumption.
 %
 \deleted{
 We show in Table~\ref{tbl:rw} whether a specific study takes into account the influence of mobility on the overall performance of the protocol and whether the impact on energy consumption is evaluated.
 }
-Additionally, the last column of Table~\ref{tbl:rw} shows whether the overhead on the communication medium is measured.
+Additionally, the last column shows whether the overhead on the communication medium is measured.
 %
 We believe this variable is important because in wireless communication, where collisions are a constant, the performance of a broadcast protocol varies depending on the number of sent and received messages.
 %We discuss hereafter that there are different ways of examining this criterion.
@@ -46,9 +46,9 @@ Third column in Table \ref{tbl:rw} shows that most of the studies avoid consider
 %
 As shown in~\cite{YiGerla2003}, this evaluation is limited because comparing against simple flooding is relevant when metrics like mobility is taken into account.
 %
-Interestingly, most of the studies only consider protocols of the same class.
+Interestingly, most studies only consider protocols in the same class.
 %
-For instance, in~\cite{Wu2004} authors only compare algorithms with a fixed transmission range that build one CDS.
+For instance, in~\cite{Wu2004} authors only compare algorithms that build a CDS.
 %
 Similarly, only the construction of \textit{cluster-based} algorithms is evaluated in~\cite{Nocetti2003}.
 %
@@ -57,7 +57,7 @@ Meanwhile, in~\cite{Cartigny:2003:BNR:2727141.2727459} only \textit{probabilisti
 Finally, in~\cite{Cagalj2002} the authors only compare algorithms that build a \textit{tree} by varying the transmission range.
 
 %
-Indeed, there are studies that compare protocols from different classes.
+There are,  nevertheless, a few studies that compare protocols from different classes.
 %
 Previous work compare \textit{probabilistic} and \textit{area-based} algorithms~\cite{Ni:1999:BSP:313451.313525, Garbinato2010}; while some studies evaluate the construction of \textit{CDS-based} and \textit{cluster-based} topologies~\cite{Stojmenovic:2002:DSN:506156.506158, WCM:WCM109}.
 %
@@ -67,9 +67,9 @@ In terms of power consumption, many studies avoid to measure the cost of buildin
 %
 In fact, Table~\ref{tbl:rw} shows that most studies do not measure energy consumption.
 %
-Other variables such as mobility and how the latter decrease the performance of broadcast algorithms is barely evaluated, as it is shown in ~\cite{Ni:1999:BSP:313451.313525, Qayyum2002} where there is a probabilistic model to represent dropped packages at the MAC layer.
+Other variables such as mobility and how the latter affects the performance of broadcast algorithms is seldom evaluated. \deleted{, as it is shown in ~\cite{Ni:1999:BSP:313451.313525, Qayyum2002} where there is a probabilistic model to represent dropped packages at the MAC layer.
 %
-While this is a valid approximation, we think it is possible to better measure the effect of network overhead considering more realistic models of the MAC layer.
+While this is a valid approximation, we think it is possible to better measure the effect of network overhead considering more realistic models of the MAC layer.}
 
 %\begin{itemize}
 %	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
