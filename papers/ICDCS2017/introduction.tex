@@ -67,10 +67,15 @@ Moreover, there is not a common set of \textit{broadcasting metrics} follow by t
 Our goal in this paper is to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions, in order to ease the task of selecting the most appropriate algorithm for a given situation.
 %
 In addition to the \textit{simple flooding} algorithm, our study considers four algorithms that are representative of their class:
+\raziel{overlay-based algorithms are showed first, to follow same order we have in section: Background}
 \begin{itemize}
+	\item The \textit{CDS-based} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS) \changed{to define which nodes forward incoming messages ~\cite{Wu2001}.}\deleted{. This overlay allows controlling which nodes should propagate incoming messages ~\cite{Wu2001}.}
+	
+		\item \changed{\textit{MPR} minimize the number of forwarding nodes building one CDS from the node who initiates a broadcast session~\cite{Qayyum2002}.}\deleted{\textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of forwarding nodes~\cite{Qayyum2002}.}
+	
 	\item \textit{ABBA} controls the dissemination process in time, by setting up timers prior to dissemination that are inversely proportional to the probability that the same message will be received from other neighbors~\cite{Ovalle-Martinez2006}.
-	\item \textit{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of forwarding nodes~\cite{Qayyum2002}.
-	\item The \textit{node-degree} approach builds a source-independent approximation of the minimum Connected Dominating Set (CDS). This overlay allows controlling which nodes should propagate incoming messages~\cite{Wu2001}.
+
+
 	\item \textit{ProbFlood}, a probabilistic approach where the likelihood of transmitting a message depends on the local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
 \end{itemize}
 
@@ -83,19 +88,23 @@ These findings can further be used to design a broadcast approach that changes i
 %
 Finally, we outline an adaptive broadcast mechanism in which the algorithm to use is always the best fit for a given deployment scenario.
 
-\noindent
-\textbf{Outline}.
-%
-The rest of this paper is organized as follows.
-%
-Section~\ref{sec:background} presents the algorithms we evaluate in our experiments.
-%
-In Section~\ref{sec:related_work} we survey related work on the evaluation of broadcast algorithms for MANETs and discuss its limitations.
-%
-We present our experimental setup in Section~\ref{sec:scenarios} and our evaluation results in Section~\ref{sec:evaluation}.
-Section~\ref{sec:discussion} summarizes the main findings of this paper.
-%
-Finally, we discuss the perspective of this work in Section~\ref{sec:perspectives} and conclude in Section~\ref{sec:conclusion}.
+\raziel{not required in a short paper}
+
+\deleted{
+  \noindent
+  \textbf{Outline}.
+  %
+  The rest of this paper is organized as follows.
+  %
+  Section~\ref{sec:background} presents the algorithms we evaluate in our experiments.
+  %
+  In Section~\ref{sec:related_work} we survey related work on the evaluation of broadcast algorithms for MANETs and discuss its limitations.
+  %
+  We present our experimental setup in Section~\ref{sec:scenarios} and our evaluation results in Section~\ref{sec:evaluation}.
+  Section~\ref{sec:discussion} summarizes the main findings of this paper.
+  %
+  Finally, we discuss the perspective of this work in Section~\ref{sec:perspectives} and conclude in Section~\ref{sec:conclusion}.
+}
 
 %\er{This is a proposal for an introduction structure, to be discussed}
 
