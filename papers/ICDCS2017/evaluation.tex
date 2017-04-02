@@ -11,13 +11,13 @@ Such results are expressed in terms of the following metrics:
 %
 \noindent $\triangleright$
 \textbf{Saved Rebroadcasts (SRE)} --
-number of retransmissions we avoid by using an algorithm $A$ instead of \textit{simple flooding}, which is considered the worst case.
+number of retransmissions we avoid by using an algorithm $A$ instead of \textit{simple flooding}\deleted{, which is considered the worst case}.
 %
 To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
 %
-Since in our experiments we are disseminating many messages, we simply compute the mean \textit{SRE} and use it as metric for our comparison study.
+Since in our experiments we are disseminating many messages, we compute the mean \textit{SRE} and use it as metric for our comparison study.
 %
-This metric is useful to assess the performance of algorithms in terms of both network and energy usage. 
+\deleted{This metric is useful to assess the performance of algorithms in terms of both network and energy usage. }
 
 \noindent $\triangleright$
 \textbf{Duplicate messages} --
@@ -66,7 +66,7 @@ energy consumed by nodes during all broadcast session.
 \end{figure*}
 
 %
-We analyze every metric with and without mobility over different number of neighbors (range of node densities) as refereed at Section~\ref{sec:scenarios}.
+We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
 %
 \subsection{Network overload}
 
@@ -78,35 +78,36 @@ As can be seen, MPR outperforms all other protocols.
 %
 However, the difference between MPR and other algorithms decreases as the density increases.
 %
-Interestingly, ABBA reduces the number of retransmissions more efficiently than the CDS-based technique for densities above 10 but it do not surpass MPR. 
+Interestingly, ABBA reduces the number of retransmissions more efficiently than the CDS-based technique for densities above 10 but it does not surpass MPR. 
 %
-The competitiveness of ABBA was expected to increase with the density because ABBA can cancel more retransmissions, but it is surprising to see it surpassing CDS-based by 10\%.
-%
-
-In dynamic scenarios, as shown in Figure~\ref{fig:b-saved}, we observe how node mobility has a negative impact on the performance of topology-based algorithms, particularly on MPR.
-%
-Indeed, MPR and CDS-based protocols keep nodes' neighbors information that is soon out of date due to the constant changes.
-%
-Additionally, collisions of control messages in these algorithms is another explanation for the bad performance.
-%
-While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not consider in this paper.
+The competitiveness of ABBA was expected to increase with the density because ABBA can then cancel more retransmissions, but it is surprising to see it outperforming CDS-based by 10\%.
 %
 
-The proportion of duplicate messages per algorithm is shown in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
+In dynamic scenarios, as shown in Figure~\ref{fig:b-saved}, we observe that node mobility affects the performance of topology-based algorithms -- particularly MPR.
 %
-As this value varies per each broadcast session, we are using \textit{boxplots} to present a distribution of the metric.
+Indeed, nodes in MPR and CDS-based protocols collects information about their neighbors that quickly becomes out of date due to the constant changes.
 %
-One can notice that the number of duplicate messages is never equal to the density of nodes because collisions provoke the loss of broadcast messages.
+\deleted{Additionally, collisions of control messages in these algorithms is another explanation for the poor performance.}
 %
-For instance, with density 30 in a \textit{pure flooding} scenario one can expect a distribution where all nodes receive around 30 duplicate messages.
+While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not considered in this paper.
 %
-However, as shown in Figure~\ref{fig:a-duplicated}, most nodes barely receive 10 duplicate messages.
+
+The proportion of duplicate messages per algorithm is depicted in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
 %
-In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low reachability).
+As this value varies per each broadcast session, we use \textit{boxplots} to present a distribution of the metric.
+%
+In general, the lower the number of duplicate messages the better a protocol is in using the communication medium. 
+%
+However, in analyzing this metric, it is important to compare it against SRE because the occurrence of collisions also affects the received duplicate messages.
+%
+For instance, in the \textit{simple flooding} scenario with density 30, each node receives at most 10 duplicate messages instead of the expected 30.
+
+%
+\deleted{In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low reachability).}
 
 
 %
-On the one hand, the topology based technique MPR is again able to cope with all densities in both scenarios of mobility.
+On the one hand, the results show that \textit{MPR} is again able to cope with all densities in both static and dynamic scenarios.
 %
 On the other hand, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
 %
