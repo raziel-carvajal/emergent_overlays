@@ -198,11 +198,11 @@ Finally, for \textit{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
 
 As mentioned in Section~\ref{sec:background}, some algorithms build a topology to drive the broadcast operation.
 %
-To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5 seconds before the first message is broadcast.
-The warm-up phase can be used, for instance, to create the initial underlying topology in CDS-based algorithms.
+To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5 seconds \deleted{before the first message is broadcast}.
+The warm-up phase is used, for instance, to create the initial topology in CDS-based algorithms.
 %
 %This time is used by  protocols can use to create any initial structure.
-Likewise, in our evaluation, we stop each experiment a fixed amount of time (5 seconds) after the beginning of the last broadcast operation.
+Likewise, \deleted{in our evaluation,} we stop each experiment a fixed amount of time (5 seconds) after the beginning of the last broadcast operation.
 %
 This grace period allows the last message to reach all nodes.
 %

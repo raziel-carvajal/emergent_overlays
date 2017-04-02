@@ -13,7 +13,7 @@ Such results are expressed in terms of the following metrics:
 \textbf{Saved Rebroadcasts (SRE)} --
 number of retransmissions we avoid by using an algorithm $A$ instead of \textit{simple flooding}\deleted{, which is considered the worst case}.
 %
-To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
+\deleted{To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.}
 %
 \deleted{Since in our experiments we are disseminating many messages, we compute the mean \textit{SRE} and use it as metric for our comparison study.}
 %
@@ -75,27 +75,27 @@ The proportion of SRE and duplicate messages determine to which extent the commu
 %
 Figure~\ref{fig:a-saved} depicts the SRE in static scenarios.
 %
-As can be seen, MPR outperforms all other protocols.
+As can be seen, \textit{MPR} outperforms all other protocols.
 %
-However, the difference between MPR and other algorithms decreases as the density increases.
+However, the difference between \textit{MPR} and other algorithms decreases as the density increases.
 %
-Interestingly, ABBA reduces the number of retransmissions more efficiently than the CDS-based technique for densities above 10 but it does not surpass MPR. 
+Interestingly, \textit{ABBA} reduces the number of retransmissions more efficiently than the \textit{CDS-based} technique for densities above 10 but it does not surpass \textit{MPR}. 
 %
-The competitiveness of ABBA was expected to increase with the density because ABBA can then cancel more retransmissions, but it is surprising to see it outperforming CDS-based by 10\%.
+The competitiveness of \textit{ABBA} was expected to increase with the density because \textit{ABBA} can then cancel more retransmissions, but it is surprising to see it outperforming \textit{CDS-based} by 10\%.
 %
 
-In dynamic scenarios, as shown in Figure~\ref{fig:b-saved}, we observe that node mobility affects the performance of topology-based algorithms -- particularly MPR.
+In dynamic scenarios, shown in Figure~\ref{fig:b-saved}, we observe that mobility affects the performance of topology-based algorithms -- particularly \textit{MPR}.
 %
-Indeed, nodes in MPR and CDS-based protocols collects information about their neighbors that quickly becomes out of date due to the constant changes.
+Indeed, nodes in \textit{MPR} and \textit{CDS-based} collects information about their neighbors that quickly becomes out of date due to the constant changes.
 %
 \deleted{Additionally, collisions of control messages in these algorithms is another explanation for the poor performance.}
 %
-While ABBA maintains its robustness when nodes moves, it must be said that this algorithm requires a GPS in its functioning; the impact of such a service is not considered in this paper.
+Although \textit{ABBA} maintains its robustness when nodes moves, it requires a GPS whose power consumption is not considered in this paper.
 %
 
 The proportion of duplicate messages per algorithm is depicted in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
 %
-As this value varies per each broadcast session, we use \textit{boxplots} to present a distribution of the metric.
+As this value varies per each broadcast session, we present a distribution of the metric.
 %
 In general, the lower the number of duplicate messages the better a protocol is in using the communication medium. 
 %
@@ -108,21 +108,28 @@ For instance, in the \textit{simple flooding} scenario with density 30, each nod
 
 
 %
-On the one hand, the results show that \textit{MPR} is again able to cope with all densities in both static and dynamic scenarios.
+The results on duplicate messages confirm that \textit{MPR} reduces network saturation in all scenarios.
 %
-On the other hand, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
+Meanwhile, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
 %
-\textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  
+\deleted{\textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  }
 
 \subsection{Power Consumption}
 
-The power consumption depends on the number of messages that nodes exchange.
+Power consumption depends on the number of messages exchanged.
 %
-The amount of received and sent messages is important because, every time a node sends or receives a message, the \textit{transmitter} and/or \textit{receiver} components of its radio change to a more power hungry mode.
+The amount of received and sent messages is important because every time a node sends or receives a message \deleted{, the \textit{transmitter} and/or \textit{receiver} components of} its radio changes to a more power hungry mode.
 %
-Hence, the broadcast messages retransmitted as well as the control messages have a direct influence on energy consumption.
+Thus, the broadcast messages retransmitted as well as the control messages influence the energy consumption.
 %
-However, the \textit{network saturation in the vicinity} of the node also influences the energy consumption due to the way the MAC layer is implemented.
+However, the network saturation in the vicinity of the node also influences the energy consumption due to the way the MAC layer is implemented.
+%
+In CSMA, a node keeps resending a message until the destination replies with an \textit{ACK} notification.
+%
+Although this strategy increases network reliability, it increments the energy consumption when the network is saturated.
+%
+Since in such a case packets are often lost, CSMA keeps resending messages and consuming energy in the process.
+%
 
 \begin{figure*}[ht]
 	\begin{center}
@@ -166,15 +173,7 @@ However, the \textit{network saturation in the vicinity} of the node also influe
 %	\end{center}
 %\end{figure*}
 
-%
-In CSMA, a node keeps resending a message until the destination replies with an \textit{ACK} notification.
-%
-Although this strategy increases network reliability, it increments the energy consumption when the network is saturated.
-%
-Since in such a case packets are often lost, CSMA keeps resending messages and consuming energy in the process.
-%
-
-Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings respectively.
+Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings.
 %
 We use \textit{violin plots} to present the full distribution of power consumption.
 %
@@ -188,7 +187,7 @@ This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\r
 %
 In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show a single value of density where these algorithms behave better than \textit{MPR}.
 %
-This is interesting because it indicates that properly using control messages to build an underlying topology is worth in terms of power consumption when there is no mobility \deleted{the interval among broadcast messages is close to the interval among control messages}.
+This clearly indicates that using control messages to build an underlying topology is worth in terms of power consumption when there is no mobility \deleted{the interval among broadcast messages is close to the interval among control messages}.
 %
 
 As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in dynamic scenarios.
