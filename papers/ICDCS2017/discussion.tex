@@ -13,14 +13,14 @@ For instance, when there is no mobility, it is better to use \textit{MPR} no mat
 	\footnotesize
 	\centering
 	
-	\begin{tabular}{lr|p{2.4cm}p{2.3cm}}
-		\textbf{Mobility} & \textbf{Density} &  \textbf{Suggestion} & \textbf{Advices}\\
+	\begin{tabular}{lr|p{1.9cm}l}
+		\textbf{Mobility} & \textbf{Density} &  \textbf{Suggestion} & \textbf{Notes}\\
 		
 		\midrule
-		Static & Any & \textit{MPR} & Reduce frequency of control messages \\
-		Walking Speed & 5 & \textit{simple flooding} & Best coverage  \\
-		Walking Speed & 10  & \textit{MPR} &   \\
-		Walking Speed & 15+ & \textit{node-degree} &  \\
+		Static & Any & \textit{MPR} & Fewer control messages \\
+		Walking & 5 & \textit{simple flooding} & Best coverage  \\
+		Walking & 10  & \textit{MPR} and \textit{ABBA} &   \\
+		Walking & 15+ & \textit{CDS-based} &  \\
 		
 	\end{tabular}
 	
@@ -30,11 +30,10 @@ For instance, when there is no mobility, it is better to use \textit{MPR} no mat
 
 The rules for deployment scenarios with mobility at walking speed are more complex, as they take into account other external parameters such as the density.
 %
-To suggest an algorithm, we first aim at increasing the coverage, then the energy consumption and we consider that the medium usage is the least important of the metrics.
+To suggest an algorithm, we first aim at increasing the reachability, then the energy consumption and we consider that the medium usage is the least important of the metrics.
 %
 For that reason, we propose \textit{simple flooding} when the density is very low.
 %
-
-Finally, the results show that \textit{ABBA} would be a good alternative when there is mobility and when the density is above 10.
+Finally, the results show that \textit{MPR} and \textit{ABBA} are good alternatives when there is mobility and the density is close to 10.
 %
-Although for walking speed \textit{ABBA} is outperformed by CDS-based protocols, it is worth considering it as the main alternative for scenarios where there nodes move at higher speeds.  
+Although for walking speed \textit{ABBA} is outperformed by CDS-based protocols, it is worth considering it as the main alternative for scenarios where nodes move at higher speeds.  
