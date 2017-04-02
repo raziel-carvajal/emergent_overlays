@@ -3,25 +3,27 @@
 \section{Perspectives}
 \label{sec:perspectives}
 
-The experiments presented in Section~\ref{sec:evaluation} and discussed in the previous section show that external parameters such as mobility and density have a strong impact on the actual performance of broadcast algorithms.
+The experiments presented in Section~\ref{sec:evaluation} show that external parameters such as mobility and density impact the performance of broadcast algorithms.
 %
-Interestingly, all these parameters can be monitored at runtime.
+Interestingly, these parameters can be monitored at runtime.
 %
-For instance, nodes in the network can detects the density in its vicinity by sending periodic \textit{HELLO} messages or by listening to the traffic.
+For instance, nodes can detects the density in its vicinity by sending control messages or by listening to the traffic.
 %
-In the same way, many modern mobile devices are equipped with positioning systems and/or accelerometers that can be used to sense the movement of nodes.
+Likewise, mobile devices are equipped with positioning systems and/or accelerometers to sense the movement of nodes.
 %
 
 
-Our next step is using the results of this paper to guide the design of an adaptive overlay for disseminating messages in MANETs.
+Our next step is using the results of this paper to drive an adaptive overlay for disseminating messages.
 %
-In our vision, a monitoring process in each node provides data to a management layer that, in a distributed way, decides what basic approach a node should use to disseminate messages (e.g., \textit{MPR}, \textit{ABBA}, or \textit{simple flooding}).
+In our vision, a monitoring process provides data to a management layer that decides which approach a node should use to disseminate messages (e.g., \textit{MPR}, \textit{ABBA}, or \textit{simple flooding}).
 %
 The main challenge in this case is replacing the algorithm used at runtime without losing any message.
 %
 Fortunately, most dissemination protocols do not require keeping a complex state on each node.
 %
-Hence, we think that they are interchangeable while keeping strong guarantees on message delivery and broadcast correctness, and that it is possible to have, for instance, an implementation of \textit{ABBA} interacting with an implementation of \textit{simple flooding} or \textit{MPR} through simple translation layers.   
+Hence, we think that they are interchangeable while keeping strong guarantees on message delivery.
+%
+We also see possible having, for instance, an implementation of \textit{ABBA} ``talking'' to \textit{simple flooding} or \textit{MPR} through a translation layers.
 
 %\begin{itemize}
 %	\item having obstacles as the main source of interference
