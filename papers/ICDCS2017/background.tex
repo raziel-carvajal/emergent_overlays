@@ -36,11 +36,11 @@ In practice, however, it is hard to decide which nodes should retransmit a messa
 }
 
 
-Naturally, the lack of a central authority in MANETs implies that broadcast algorithms must be fully distributed and rely only on \textit{local} data available at each node. One can find many solutions for efficient message dissemination at the literature.
+Naturally, the lack of a central authority in MANETs implies that broadcast algorithms must be fully distributed and rely only on \textit{local} data available at each node. One can find many solutions for efficient message dissemination in the literature.
 %
-Ruiz and Bouvry~\cite{Ruiz2015} propose a survey of broadcast algorithms for MANETs.
+Ruiz and Bouvry~\cite{Ruiz2015} present a survey of broadcast algorithms for MANETs.
 %
-The authors define a taxonomy to classify current state-of-the-art algorithms based on the way they control message retransmissions.
+The authors define a taxonomy to classify state-of-the-art algorithms based on the way they control message retransmissions.
 %
 In this study, we have selected five algorithms, including simple flooding, that are representative of their class.
 %
@@ -48,9 +48,9 @@ In this study, we have selected five algorithms, including simple flooding, that
 %%
 %To overcome this, we propose in this study an experimental study of six protocols, each representative of one of the principal design alternatives.
 %
-We consider only protocols where the transmission range of the wireless antenna is fixed.
+\deleted{We only consider protocols where the transmission range of the wireless antenna is fixed.}
 %
-Variable-range broadcast protocols are kept as future work.
+\deleted{Variable-range broadcast protocols are kept as future work.}
 
 \raziel{this paragraph is not required because the title on each subsection describes each category}
 %
@@ -61,20 +61,20 @@ Broadcast algorithms can be first classified in two main classes, depending on w
 \subsection{Topology-based algorithms}
 One way to broadcast is through the use of an underlying topology.
 %
-A backbone or spine is a subset of nodes where its members are allowed to forward messages due to their position in space.
+A backbone is a subset of nodes where its members are allowed to forward messages due to their position in space.
 %
 Any other node out of the backbone acts as message receiver.
 %
-For instance, Figure~\ref{explaining-backbone} depicts a small network of nodes where $A$ starts with the message dissemination.
+For instance, Figure~\ref{explaining-backbone} depicts a network of nodes where $A$ starts the message dissemination.
 %
-If only nodes $B$ and $C$ forward any incoming message, the reachability of this network will be 100\%.
+To observe 100\% reachability, only nodes $B$ and $C$ are required to forward incoming message.
 %
-Clearly, the complexity of a topology based algorithm remains in the construction of this backbone.
+Clearly, the complexity of a topology-based algorithm is in the construction of this backbone.
 %
 Connected Dominating Set (CDS) is the formal term for such a backbone~\cite{Wu2001} where nodes are partitioned in such a way that they either belong to the CDS or are adjacent to any other node at the backbone.\deleted{ Additionally, connectivity is another property of a graph containing a CDS.}
 
 %
-In this study, we consider two topology-based algorithms \textit{Multipoint Relaying (MPR)} and \textit{CDS-based}, which require a periodic exchange of control messages (\textit{Hello} messages) among nodes to build an overlay.
+In this study, we consider two topology-based algorithms \textit{Multipoint Relaying (MPR)} and \textit{CDS-based}, which require a periodic exchange of control messages \deleted{(\textit{Hello} messages)} among nodes to build an overlay.
 
 \begin{figure}[htbp]
   \centering
@@ -178,18 +178,6 @@ With one exception, message retransmissions are canceled when $\alpha = 2\pi$.
 
 
 %
-%Particularly, when nodes move
-%In some situations, creating and maintaining the underlying virtual topology is too costly or simply not feasible, in particular when the mobility of nodes would make a topology obsolete before it could be put to actual use.
-%Thus, some protocols do not rely on any underlying topology. 
-% Instead, they either use no information about the local node context, or only information that can be piggybacked with the dissemination messages.
-%Some protocols use their local \textit{context} to decide if a node should retransmit a message.
-%For instance, nodes can consider, among others, the number of neighbors, their mobility speed, how many neighbors have received a message~\cite{Ovalle-Martinez2006}, and the direction of the last sender of a received message.
-%
-%Since this contextual information varies over time, these algorithms often delay the retransmissions of a message until they can guarantee that doing so is strictly required.
-%As the contextual data may depend on the variable time, a node may choose to retransmit a message at time $t_0$ and avoid doing so at $t_0+\delta t$.\laurent{not sure to get it}
-%This approach usually saves energy and bandwidth, but it has a negative impact on other performance metrics as we discuss in Section~\ref{sec:evaluation}. 
-
-%
 \paragraph{Probabilistic Flooding} This is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to perform retransmissions.
 %
 Nodes retransmit messages based on the distance among neighbors.
@@ -230,6 +218,6 @@ The diversity of broadcast algorithms for MANETs is vast and choosing one approa
 %
 While some evaluations have been proposed to compare existing approaches, they usually target fixed scenarios.
 %
-In this work, our goal is to define an experimental framework to fairly assess representative broadcast algorithms for MANETs. 
+In this work, our goal is \deleted{to define an experimental framework} to fairly assess representative broadcast algorithms for MANETs. 
 %
 %In the next section, we discuss previous works one can find in the literature.
