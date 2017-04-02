@@ -224,7 +224,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
     if (!print.titles) {
-        p <- p + scale_fill_grey(start = 0.0, end = .85)
+        p <- p + scale_fill_grey(start = 0.3, end = .85)
     }
 	print(p)
 }
@@ -269,7 +269,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
      get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
@@ -337,7 +337,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
@@ -364,7 +364,7 @@ plot.simple.coverage <- function(df, algos) {
 		 get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
