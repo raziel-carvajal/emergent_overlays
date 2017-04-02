@@ -143,7 +143,7 @@ plot.broadcasting.time2 <- function(df, densities, pal){
       	s <- unlist( strsplit(cn,'_'))
         cn <- as.character(s[which(s == "p") + 1])
         cn <- toupper(gsub("[[:digit:]]", "", cn))
-        cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+        cn <- replace(cn, cn == "CDS", "CDS-based")
 		    data <-e[,1]
         den <-rep(as.factor(paste("Density", density)), length(data))
 		    data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
@@ -185,7 +185,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- as.character(s[which(s == "p") + 1])
       cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+      cn <- replace(cn, cn == "CDS", "CDS-based")
       cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
 			data.frame( dat = data,
@@ -237,7 +237,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
       cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+      cn <- replace(cn, cn == "CDS", "CDS-based")
       cn <- replace(cn, cn == "MPRT", "MPR")
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
       y <- transformation(e[,1], nr.nodes)
@@ -317,7 +317,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "SRB (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
-  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
   df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
 
   df <- df[df$alg!="FLOODING",]
@@ -348,7 +348,7 @@ plot.simple.coverage <- function(df, algos) {
   ylabel <- "Reachability (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
-  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
   df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
   caption <- "Reachability"
   p <- ggplot(df) +
