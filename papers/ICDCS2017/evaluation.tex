@@ -11,7 +11,7 @@ Such results are expressed in terms of the following metrics:
 %
 \noindent $\triangleright$
 \textbf{Saved Rebroadcasts (SRE)} --
-number of retransmissions we avoid by using an algorithm $A$ instead of \textit{simple flooding}\deleted{, which is considered the worst case}.
+number of retransmissions we avoid by using an algorithm instead of \textit{simple flooding}\deleted{, which is considered the worst case}.
 %
 \deleted{To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.}
 %
@@ -70,19 +70,17 @@ energy consumed by nodes during all broadcast session.
 %
 %We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
 %
-\subsection{Network saturation}
+\subsection{Network overhead}
 
 The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
 %
-Figure~\ref{fig:a-saved} depicts the SRE in static scenarios.
-%
-As can be seen, \textit{MPR} outperforms all other protocols.
+Figure~\ref{fig:a-saved} depicts the SRE in static scenarios where \textit{MPR} outperforms all other protocols.
 %
 However, the difference between \textit{MPR} and other algorithms decreases as the density increases.
 %
-Interestingly, \textit{ABBA} reduces the number of retransmissions more efficiently than the \textit{CDS-based} technique for densities above 10 but it does not surpass \textit{MPR}. 
+Interestingly, \textit{ABBA} avoids retransmissions more efficiently than the \textit{CDS-based} technique for densities above 10. 
 %
-The competitiveness of \textit{ABBA} was expected to increase with the density because \textit{ABBA} can then cancel more retransmissions, but it is surprising to see it outperforming \textit{CDS-based} by 10\%.
+This pattern was expected in higher densities because ABBA cancels retransmissions and it outperforms \textit{CDS-based} by 10\%.
 %
 
 In dynamic scenarios, shown in Figure~\ref{fig:b-saved}, we observe that mobility affects the performance of topology-based algorithms -- particularly \textit{MPR}.
