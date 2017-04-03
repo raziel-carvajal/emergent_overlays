@@ -36,17 +36,19 @@ In addition, it contains models to cope with mobility and energy consumption.
 %\noindent
 \textbf{Communication Scenario.}
 %\subsection*{Communication Scenario}
-In our experimental scenario, all attendees have mobile devices with IEEE 802.11 capability.
+In our experimental scenario, all attendees have mobile phones to communicate through WiFi.
 %
 Participants use such devices to broadcast and they might attempt to do so at nearly the same time.
 %
+\deleted{
 The payload of messages is usually \textit{small} because most of them are generated using the input capabilities of mobile devices.
+}
 %
-To simulate these conditions,  we set the number of broadcast messages to \nrMessages{} and the interval between messages to $0.5$ seconds in our experiments.
+To simulate these conditions, we set our experiments to perform \nrMessages{} broadcast messages and the frequency between them is $0.5$s.
 %
 In addition, the source of each message is randomly selected during the generation of the network (see next subsection).
 %
-Finally, the content of each message is randomly generated, unique and with a length of 32 bytes at most. 
+Finally, the content of each message is randomly generated, unique and with a length of 32 bytes. 
 %
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
@@ -54,19 +56,18 @@ Finally, the content of each message is randomly generated, unique and with a le
 %\noindent
 \textbf{Nodes Density.}
 %\subsection*{Node Density}
-We are interested in generating scenarios with different node density; this allows us to simulate more accurately the \textit{demonstration} use case.
+We are interested in generating scenarios with different nodes densities to simulate more accurately our use case.
 %
 %In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
 %
-To characterize the node density, we use three parameters: transmission range, map size and number of nodes.
+We use three parameters: transmission range (Tx), map size and number of nodes.
 %
-As shown in~\cite{Penrose2003}, there is a dependency between these parameters that  allows us to build network topologies with a given density by using random geometric graphs.
+As shown in~\cite{Penrose2003}, there is a dependency between these parameters that  allows us to build networks with a given density, by using random geometric graphs.
 %
-In our experiments, all nodes have a transmission range of 20~meters.~\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
-Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
-Meanwhile the number of nodes is fixed to \nodesNumber{}, the mode reported by previous studies on the size of demonstrations in Western Europe~\cite{kriesi1995new}.
+In our experiments, all nodes have a Tx of 20~m.~\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
+Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.} The number of nodes $N$ is fixed to \nodesNumber{}, which is the mean value reported by previous studies on the size of manifestations in Western Europe~\cite{kriesi1995new}.
 %
-To create a network with a given density, we use the values of transmission range and number of node to compute the map size \deleted{using the aforementioned dependency relationship}.
+To create a network with a given density, we use Tx and $N$ to compute the map size \deleted{using the aforementioned dependency relationship}.
 %
 Then, we generate a laying on the map by using a procedure based on random geometric graphs.
 %
@@ -75,9 +76,9 @@ The output of this procedure is a network topology with the desired density.
 %
 \deleted{Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.}
 %
-We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 35, 40}; a range of values that is frequently found in the literature.
+We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 40} nodes, a range of values that is frequently found in the literature.
 %
-This leads to a maximum map size of $354 \times 354$ while the minimum map is $125 \times 125$.
+This leads to a map size of $354 \times 354$m while the smallest map is $125 \times 125$m.
 
 
 %\noindent
@@ -87,7 +88,7 @@ In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, 
 %
 This model generates traces composed of frequent short walks and occasional rides to distant locations.
 %
-In our experiments, we define two kind of scenarios: one without mobility (\textit{static}) and another with mobility at walking speed (\textit{dynamic}).
+We define two kind of scenarios: one without mobility (\textit{static}) and another with mobility at walking speed (\textit{dynamic}).
 %
 The generation of \textit{static} scenarios was presented in the previous subsection.
 %
