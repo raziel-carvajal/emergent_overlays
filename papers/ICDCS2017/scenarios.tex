@@ -24,9 +24,9 @@ We consider two parameters that influence the performance of broadcast in MANETs
 %
 In the following, we describe\deleted{ the simulation environment and} the parameters used in our study.
 
-%\subsection*{Simulation tool}
+\subsection*{Simulation tool}
 %\noindent
-\textbf{Simulation tool.}
+%\textbf{Simulation tool.}
 We rely on OMNET++4.6/INET3.3, a simulation framework to evaluate networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
 This tool provides a full implementation of the standard IEEE 802.11g.
@@ -34,8 +34,8 @@ This tool provides a full implementation of the standard IEEE 802.11g.
 In addition, it contains models to cope with mobility and energy consumption.
 
 %\noindent
-\textbf{Communication Scenario.}
-%\subsection*{Communication Scenario}
+%\textbf{Communication Scenario.}
+\subsection*{Communication Scenario}
 In our experimental scenario, all attendees have mobile phones to communicate through WiFi.
 %
 Participants use such devices to broadcast and they might attempt to do so at nearly the same time.
@@ -54,8 +54,8 @@ Finally, the content of each message is randomly generated, unique and with a le
 %
 
 %\noindent
-\textbf{Nodes Density.}
-%\subsection*{Node Density}
+%\textbf{Nodes Density.}
+\subsection*{Nodes Density}
 We are interested in generating scenarios with different nodes densities to simulate more accurately our use case.
 %
 %In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
@@ -81,8 +81,8 @@ This leads to a map size of $354 \times 354$m while the smallest map is $125 \ti
 
 
 %\noindent
-\textbf{Mobility.}
-%\subsection*{Mobility}
+%\textbf{Mobility.}
+\subsection*{Mobility}
 In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
 %
 This model generates traces composed of frequent short walks and occasional rides to distant locations.
@@ -129,8 +129,8 @@ Should any of these checks fail, we discard the mobility traces.
 }
 
 %\noindent
-\textbf{Energy Settings.}
-%\subsection*{Energy Consumption}
+%\textbf{Energy Settings.}
+\subsection*{Energy Consumption}
 \deleted{
 The power consumption must be considered in evaluating protocols that use wireless communication.
 }
@@ -176,8 +176,8 @@ The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simu
 
 
 %\noindent
-\textbf{Algorithm-specific parameters.}
-%\subsection*{Algorithm specific parameters}
+%\textbf{Algorithm-specific parameters.}
+\subsection*{Algorithm-specific parameters}
 The behavior of each protocol depends on the values of its parameters.
 %
 To configure these parameters meaningfully, we choose values previously reported in the literature.
