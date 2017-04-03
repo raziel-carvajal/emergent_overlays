@@ -24,31 +24,49 @@ Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor ne
 
 Many network functions in MANETs, such as routing, rely on the \textit{broadcast operation} that delivers a message from a source node to all other nodes in the network.
 %
-Efficiently supporting broadcast in MANETs has received considerable attention.
+A considerable amount of attention has been spent to provide efficient
+broadcast algorithms in MANETs~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
+%Efficiently supporting broadcast in MANETs has received considerable attention.
 %
-In particular, existing solutions aim to:
+In particular, their efficiency can be achieved from
+different perspectives: 
+%existing solutions aim to:
 
 % \vspace{-1mm}
 \begin{itemize}
-	\item \textit{Maximize coverage.} 
-	This is defined as the percentage of nodes that receive a message. 
-	Ideally, every broadcast messages must reach all nodes.
+	\item \textit{Maximize coverage.} Ideally, every broadcast message
+    must reach all nodes. Hence, a
+    broadcast algorithm is evaluated from its coverage, i.e. the percentage of nodes
+    that receive a broadcast message. Higher the coverage is, better
+    it is.
 	
-	\item \textit{Minimize energy consumption and bandwidth usage.}
-	The efficiency of an algorithm is measured by the amount of energy, processing power and network bandwidth it uses.
+	\item \textit{Minimize energy consumption and bandwidth usage.} The
+    amount of energy, processing power and network bandwidth a
+    broadcast algorithm uses have an impact on its efficiency. So the key
+    aim is to provide a maximum coverage while consuming fewer resources.
 	
 	\item \textit{Be mobility-tolerant and density aware.}
-	A broadcast algorithm should guarantee high coverage and cope with mobility patterns under a large variety of scenarios, where the connectivity between nodes is changing constantly.
+	Additionally, a broadcast algorithm should also cope with mobility
+  patterns under a large variety of scenarios, where the connectivity
+  between nodes is changing constantly.
+%should guarantee high coverage and
 \end{itemize}
 
-Many algorithms have been proposed to support broadcast in MANETs~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
+%Many algorithms have been proposed to support broadcast in MANETs
+%~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
-All these algorithms implement the broadcast with a form of \emph{controlled flooding}: 
-Since the transmission range of a source node is typically much smaller than the network deployment area, broadcasting is achieved by message forwarding between nodes.
+All these algorithms implement the broadcast with a form of
+\emph{controlled flooding} to reach a specific tradeoff: 
+since the transmission range of a source node is typically much
+smaller than the network deployment area, broadcasting is achieved by
+message forwarding between nodes.
+
 %
 Broadcast algorithms for MANETs mostly differ in the way they control this forwarding operation.
 %
-Particularly, the control happens in space and time by deciding \emph{which} nodes should forward a message and \emph{when} this operation should take place.
+Particularly, the control happens in space and time by deciding
+\emph{which} nodes should forward a message and \emph{when} this
+operation should take place.
 %
 Algorithms can also be distinguished based on their use of, or independence from, knowledge about the network topology, nodes locations, and network status.
 
@@ -56,7 +74,7 @@ Broadcast algorithms are largely influenced by external factors such as the dens
 %
 The performance of broadcast protocols has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done on their classification~\cite{Ruiz2015, Fei1311289}.
 %
-However, and to the best of our knowledge, there is still no comprehensive experimental comparison of existing solutions, that would allow an understanding of different broadcast algorithms under different deployment scenarios.
+However, and to the best of our knowledge, there is still no comprehensive experimental comparison of existing solutions that would allow an understanding of different broadcast algorithms under different deployment scenarios.
 %
 % There is also a lack of a common set of \textit{broadcasting metrics} followed by the network community to overview the assets of solutions one can find at the literature. %% ER this is a bit too harsh and we do not really solve this problem either. We can safely remove.
 
@@ -75,9 +93,9 @@ In addition to simple flooding, we consider four algorithms that are representat
 	% \deleted{\emph{MPR} maintains an overlay structure to control the broadcast process. This overlay is built using a heuristic that aims at minimizing the number of forwarding nodes~\cite{Qayyum2002}.}
 	
 	\item
-	\emph{MPR} also uses a subset of nodes as relays but employs heuristics aiming at minimizing their number~\cite{Qayyum2002}.
+	\emph{MPR} (\textit{Multipoint Relaying}) also uses a subset of nodes as relays but employs heuristics aiming at minimizing their number~\cite{Qayyum2002}.
 	
-	\item \emph{ABBA} controls the dissemination process in time, by setting up timers that must elapse with no duplicate reception to trigger the forwarding.
+	\item \emph{ABBA} (\textit{Area Based Beacon less Algorithm}) controls the dissemination process in time, by setting up timers that must elapse with no duplicate reception to trigger the forwarding.
 	A timer duration is inversely proportional to the probability that the same message will be received from the node neighbors~\cite{Ovalle-Martinez2006}.
 
 	\item \emph{ProbFlood} is a probabilistic approach where the likelihood of forwarding a message is proportional to the measured local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
