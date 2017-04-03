@@ -115,19 +115,20 @@ Meanwhile, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low de
 \textbf{Power Consumption.}
 \deleted{Power consumption depends on the number of messages exchanged.}
 %
-The amount of received and sent messages impacts power consumption because in every message exchange the radio switch to a more power hungry mode.
+The amount of received and sent messages impacts power consumption due to the changes of mode the radio performs.
 %
-Thus, both broadcast and control messages influence the energy consumption.
+Thus, broadcast and control messages influence the energy consumption.
 %
-However, the network saturation in the vicinity of the node also influences the energy consumption due to the way the MAC layer is implemented.
+However, the network saturation in nodes vicinities influences energy consumption due to the way the MAC works.
 %
-In CSMA, a node keeps resending messages until the destination replies with an \textit{ACK} notification.
+In CSMA, nodes keep sending messages until receivers reply with an \textit{ACK}.
 %
-This strategy increases network reliability but it increments the energy consumption.
+This strategy increases network reliability and energy consumption.
 %
+\deleted{
 Since in such a case packets are often lost, CSMA keeps resending messages and consuming energy in the process.
+}
 %
-
 \begin{figure*}[ht]
 	\begin{center}
 	\subfigure[Reachebility in static scenarios]{
@@ -154,7 +155,6 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 	\end{center}
 	\vspace*{-0.7cm}
 \end{figure*}
-
 %\begin{figure*}[ht]
 %	\begin{center}
 %		\subfigure[Static Scenarios]{
@@ -170,39 +170,35 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 %		\label{fig:coverage-energy}
 %	\end{center}
 %\end{figure*}
-
-Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show the values of energy consumption for the static and mobility settings.
 %
-We use \textit{violin plots} to present the full distribution of power consumption.
+Figures~\ref{fig:a-energy}, ~\ref{fig:b-energy} show energy consumption in static and dynamic scenarios using \textit{violin plots} to present the full distribution.
 %
-Due to space limitations, we only show the results for those densities where there is a significant change in the patterns of energy consumption.
+We only show those densities with a significant change in energy consumption.
 % 
-The first thing to note is that, as expected, \textit{simple flooding} consumes more energy in all scenarios.
+We observe that \textit{simple flooding} consumes more energy in all scenarios.
 %
-Also interesting is that \textit{MPR} always outperform other approaches when there is no mobility.
+\textit{MPR} always outperforms other approaches when there is no mobility.
 %
-This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\ref{fig:a-duplicated}, which show that nodes send and receive fewer messages in this approach.
+This is consistent with the results depicted in Figures~\ref{fig:a-saved},~\ref{fig:a-duplicated} where nodes send/receive fewer messages.
 %
-In the case of \textit{ABBA} and \textit{ProbFlood}, our experiments do not show a single value of density where these algorithms behave better than \textit{MPR}.
+\textit{ABBA} and \textit{ProbFlood} do not show a single value of density where these algorithms behave better than \textit{MPR}.
 %
-This clearly indicates that using control messages to build an underlying topology is worth in terms of power consumption when there is no mobility\deleted{the interval among broadcast messages is close to the interval among control messages}.
+This indicates that the cost of control messages is worth in terms of power consumption when there is no mobility\deleted{the interval among broadcast messages is close to the interval among control messages}. On the other hand, when nodes moves Figure~\ref{fig:b-energy} shows a different behaviour.
 %
-
-As depicted in Figure~\ref{fig:b-energy}, the behavior of these protocols changes in dynamic scenarios.
-%
-In such scenarios, \textit{ABBA} outperforms \textit{MPR} when the density is low or medium (5, 10, 15).
+\textit{ABBA} outperforms \textit{MPR} when the density is between 5 to 15.
 %
 Only when the density is greater than 20, MPR becomes competitive again.
 %
-In correlating these results with Figures~\ref{fig:b-saved} and~\ref{fig:b-duplicated} we notice that nodes send fewer messages with \textit{ABBA} than with \textit{MPR}.
+In correlation with Figures~\ref{fig:b-saved},~\ref{fig:b-duplicated}, we notice that nodes send less messages with \textit{ABBA} than with \textit{MPR}.
 %
-We also notice that the number of duplicate messages received using different algorithms in dynamic scenarios is closer than that of the static scenarios.
+%\deleted{
+%We also notice that the number of duplicate messages received using different algorithms in dynamic scenarios is closer than that of the static scenarios.}
 %
 %Although This changes when densities above 30 because the control 
 %
-We can conclude that, since \textit{MPR} cannot maintain a completely up-to-date underlaying topology due to mobility, it fails in reducing the number of relay nodes and the power consumption is high.
-
-These results are of interest because they support the idea that two parameters of a scenario, namely node mobility and ratio $\textit{broadcast-interval}/\textit{control-message-interval}$, may impact the decision of which algorithm to use to broadcast.
+Given that the latter cannot maintain a completely up-to-date backbone, it fails in reducing the number of relay nodes and the power consumption increases.
+%
+These results confirm that mobility and the ratio $\frac{broadcast-freq}{control-message-freq}$, may impact the decision of which algorithm to use to broadcast.
 %
 
 %\subsection{Reachability}
@@ -216,7 +212,6 @@ Some approaches fail to deliver all broadcast messages in settings with very low
 %
 In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of situations.
 %
-
 %\begin{figure*}[!ht]
 %	\begin{center}
 %		\subfigure[Static scenario.]{
@@ -232,7 +227,7 @@ In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of sit
 %		\label{fig:coverage}
 %	\end{center}
 %\end{figure*}
-
+%
 The results in the mobility scenarios are less stable.
 %
 As expected, some protocols such as \textit{MPR} and \textit{CDS-based} behave worse because the underlying topology they build must be constantly updated due to the movement of nodes.
