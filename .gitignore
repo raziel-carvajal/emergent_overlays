@@ -80,3 +80,10 @@ results/broadcastSession-*
 results/duplicatedMsgsDistribution-*
 results/collisions_*
 results/graphConnectivity_*
+
+#ICDCS paper
+papers/ICDCS2017/main.aux
+papers/ICDCS2017/main.bbl
+papers/ICDCS2017/main.blg
+papers/ICDCS2017/main.log
+papers/ICDCS2017/main.pdf
