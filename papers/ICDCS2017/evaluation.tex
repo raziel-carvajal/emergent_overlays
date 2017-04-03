@@ -70,8 +70,8 @@ energy consumed by nodes during all broadcast session.
 %
 %We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
 %
-\subsection{Network overhead}
-
+%\subsection{Network overhead}
+\textbf{Network overhead}.
 The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
 %
 Figure~\ref{fig:a-saved} depicts the SRE in static scenarios where \textit{MPR} outperforms all other protocols.
@@ -82,50 +82,48 @@ Interestingly, \textit{ABBA} avoids retransmissions more efficiently than the \t
 %
 This pattern was expected in higher densities because ABBA cancels retransmissions and it outperforms \textit{CDS-based} by 10\%.
 %
-
-In dynamic scenarios, shown in Figure~\ref{fig:b-saved}, we observe that mobility affects the performance of topology-based algorithms -- particularly \textit{MPR}.
+Figure~\ref{fig:b-saved} depicts dynamic scenarios, we observe that mobility affects the performance of topology-based algorithms.
 %
-Indeed, nodes in \textit{MPR} and \textit{CDS-based} collects information about their neighbors that quickly becomes out of date due to the constant changes.
+Indeed, the build virtual topologies quickly becomes out of date due to the constant changes.
 %
 \deleted{Additionally, collisions of control messages in these algorithms is another explanation for the poor performance.}
 %
-Although \textit{ABBA} maintains its robustness when nodes moves, it requires a GPS whose power consumption is not considered in this paper.
+\textit{ABBA} maintains its robustness but the cost of getting GPS coordinates is not considered.
 %
 
-The proportion of duplicate messages per algorithm is depicted in Figures~\ref{fig:a-duplicated} and~\ref{fig:b-duplicated}.
+The Proportion of Duplicate Messages (PDM) per algorithm is shown in Figures~\ref{fig:a-duplicated},~\ref{fig:b-duplicated} as a distribution with whishkers.
 %
-As this value varies per each broadcast session, we present a distribution of the metric.
+%As this value varies per each broadcast session, we present a distribution of the metric.
 %
-In general, the lower the number of duplicate messages the better a protocol is in using the communication medium. 
+In general, the lower the PDM the better the utilisation of the medium. 
 %
-However, in analyzing this metric, it is important to compare it against SRE because the occurrence of collisions also affects the received duplicate messages.
+However, when PDM is compared against SRE the occurrence of collisions also affects message receptions.
 %
-For instance, in the \textit{simple flooding} scenario with density 30, each node receives at most 10 duplicate messages instead of the expected 30.
-
+For instance, using \textit{simple flooding} with density 30 nodes receive at most 10 duplicated messages instead of 30.
 %
 \deleted{In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low reachability).}
-
-
 %
-The results on duplicate messages confirm that \textit{MPR} reduces network saturation in all scenarios.
+Our results in PDM confirm that \textit{MPR} avoids saturation in all scenarios.
 %
+\deleted{
 Meanwhile, \textit{CDS-based} behaves similarly to \textit{ProbFlood} for low densities; but it outperforms \textit{ProbFlood} for density 20 and beyond.
+}
 %
 \deleted{\textit{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \textit{simple flooding} when the density is high.  }
 
-\subsection{Power Consumption}
-
+%\subsection{Power Consumption}
+\textbf{Power Consumption.}
 \deleted{Power consumption depends on the number of messages exchanged.}
 %
-The amount of received and sent messages is important for power consumption because every time a node exchanges messages \deleted{, the \textit{transmitter} and/or \textit{receiver} components of} its radio consumes more power.
+The amount of received and sent messages impacts power consumption because in every message exchange the radio switch to a more power hungry mode.
 %
 Thus, both broadcast and control messages influence the energy consumption.
 %
 However, the network saturation in the vicinity of the node also influences the energy consumption due to the way the MAC layer is implemented.
 %
-In CSMA, a node keeps resending a message until the destination replies with an \textit{ACK} notification.
+In CSMA, a node keeps resending messages until the destination replies with an \textit{ACK} notification.
 %
-Although this strategy increases network reliability, it increments the energy consumption when the network is saturated.
+This strategy increases network reliability but it increments the energy consumption.
 %
 Since in such a case packets are often lost, CSMA keeps resending messages and consuming energy in the process.
 %
@@ -207,8 +205,9 @@ We can conclude that, since \textit{MPR} cannot maintain a completely up-to-date
 These results are of interest because they support the idea that two parameters of a scenario, namely node mobility and ratio $\textit{broadcast-interval}/\textit{control-message-interval}$, may impact the decision of which algorithm to use to broadcast.
 %
 
-\subsection{Reachability}
-
+%\subsection{Reachability}
+\textbf{Reachability.}
+%
 Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} depict the reachability of the five algorithms studied, in both \textit{static} and \textit{dynamic} scenarios.
 %
 All these algorithms tend to be reliable in static settings and for densities above 10.
