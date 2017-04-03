@@ -196,21 +196,23 @@ In correlation with Figures~\ref{fig:b-saved},~\ref{fig:b-duplicated}, we notice
 %
 %Although This changes when densities above 30 because the control 
 %
-Given that the latter cannot maintain a completely up-to-date backbone, it fails in reducing the number of relay nodes and the power consumption increases.
+Given that the latter cannot maintain a completely up-to-date backbone, it fails in reducing the number of relay nodes.
 %
-These results confirm that mobility and the ratio $\frac{broadcast-freq}{control-message-freq}$, may impact the decision of which algorithm to use to broadcast.
+\deleted{ confirm that mobility and the ratio between the frequencies of broadcast and control messages 
+ \textit{broadcast-freq/control-message-freq}, may impact the decision of which algorithm to use to broadcast.
+ }
 %
-
 %\subsection{Reachability}
+
 \textbf{Reachability.}
 %
-Figures~\ref{fig:a-coverage} and ~\ref{fig:b-coverage} depict the reachability of the five algorithms studied, in both \textit{static} and \textit{dynamic} scenarios.
+Figures~\ref{fig:a-coverage},~\ref{fig:b-coverage} depict reachability of nodes of the studied algorithms, in both \textit{static} and \textit{dynamic} scenarios.
 %
-All these algorithms tend to be reliable in static settings and for densities above 10.
+%All these algorithms tend to be reliable in static settings and for densities above 10.
 %
-Some approaches fail to deliver all broadcast messages in settings with very low density because many sections of the network are only connected by a single link that can be a point of failure. 
+Some approaches fail to broadcast messages in configurations with low density because the network is connected by a single node in some partitions. 
 %
-In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of situations.
+In particular, \textit{ABBA} and \textit{MPR} are susceptible to this situation.
 %
 %\begin{figure*}[!ht]
 %	\begin{center}
@@ -228,18 +230,20 @@ In particular, \textit{ABBA} and \textit{MPR} are more prone to this kind of sit
 %	\end{center}
 %\end{figure*}
 %
-The results in the mobility scenarios are less stable.
+%The results in the mobility scenarios are less stable.
 %
-As expected, some protocols such as \textit{MPR} and \textit{CDS-based} behave worse because the underlying topology they build must be constantly updated due to the movement of nodes.
+%\raziel{this is mention before}
+%\deleted{
+%When nodes move \textit{MPR} and \textit{CDS-based} behave worse because the underlying topology they build must be constantly updated due to the movement of nodes.
+%}
 %
-We observe this problem for all the densities, but it is clearer for sparser topologies.
+%We observe this problem for all the densities, but it is clearer for sparser topologies.
 %
 We can also see that \textit{ABBA} tends to fail with different values of density, although far less than topology-based approaches.
 %
 \deleted{This is understandable because \textit{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.}
 %
-Indeed, since the location of each node changes continuously, ABBA occasionally fails in computing the covered area; as a consequence, some messages are not delivered.
-This is consistent with previous studies~\cite{YiGerla2003, Garbinato2010}. 
+Indeed, since the location of each node changes continuously, ABBA occasionally fails in computing the covered area; as a consequence, some messages are not delivered as mentioned in~\cite{YiGerla2003, Garbinato2010}. 
 
 
 
