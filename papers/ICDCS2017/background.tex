@@ -16,13 +16,13 @@
 %This choice is a complex tradeoff between several parameters, leading to different costs and performance expectations on latency, energy consumption, and fault tolerance.
 
 
-A straightforward approach to broadcast is \textit{simple flooding}.
+A straightforward approach to broadcast is \emph{simple flooding}.
 %
-When one host receives a broadcast message $m$ for the first time, it forwards $m$ to its neighbors; the reception of further copies of $m$ are ignored.
+When one host receives a broadcast message $m$ for the first time, it forwards it to all of its neighbors; the reception of further copies of $m$ are ignored.
 %
-This approach suffers from a number of drawbacks known as \textit{the broadcast storm problem}~\cite{Ni:1999:BSP:313451.313525} where nodes forward any new message at least once. 
+This approach suffers from a number of drawbacks and in particular from the \emph{broadcast storm} problem~\cite{Ni:1999:BSP:313451.313525} where nodes forward every new message at least once.
 %
-The communication medium rapidly becomes saturated, the likelihood of collisions increases and message loss too.
+The communication medium rapidly becomes saturated, increasing the likelihood of collisions and message loss.
 
 %
 \raziel{this part was already mentioned in Introduction (see description of broadcast measures)}
@@ -35,14 +35,12 @@ As a consequence, broadcast algorithms attempt to reduce the number of forwardin
 In practice, however, it is hard to decide which nodes should retransmit a message.
 }
 
-
-Naturally, the lack of a central authority in MANETs implies that broadcast algorithms must be fully distributed and rely only on \textit{local} data available at each node. One can find many solutions for efficient message dissemination in the literature.
+The lack of a central authority or global knowledge in a MANET implies that broadcast algorithms aiming at improving over simple flooding must remain fully distributed and rely only on local data available at each node.
+Many such solutions have been proposed in the literature, that Ruiz and Bouvry present have surveyed extensively~\cite{Ruiz2015}.
 %
-Ruiz and Bouvry~\cite{Ruiz2015} present a survey of broadcast algorithms for MANETs.
+The authors define a taxonomy to classify state-of-the-art algorithms based on the way they control message forwarding.
 %
-The authors define a taxonomy to classify state-of-the-art algorithms based on the way they control message retransmissions.
-%
-In this study, we have selected five algorithms, including simple flooding, that are representative of their class.
+In this study, we select five algorithms, including simple flooding, that are representative of their class.
 %
 %However, to the best of our knowledge, there is a lack of comprehensive \emph{experimental} comparison of these costs and of the effectiveness of different protocols.
 %%
@@ -59,132 +57,128 @@ Broadcast algorithms can be first classified in two main classes, depending on w
 }
 
 \subsection{Topology-based algorithms}
-One way to broadcast is through the use of an underlying topology.
-%
-A backbone is a subset of nodes where its members are allowed to forward messages due to their position in space.
-%
-Any other node out of the backbone acts as message receiver.
-%
-For instance, Figure~\ref{explaining-backbone} depicts a network of nodes where $A$ starts the message dissemination.
-%
-To observe 100\% reachability, only nodes $B$ and $C$ are required to forward incoming message.
-%
-Clearly, the complexity of a topology-based algorithm is in the construction of this backbone.
-%
-Connected Dominating Set (CDS) is the formal term for such a backbone~\cite{Wu2001} where nodes are partitioned in such a way that they either belong to the CDS or are adjacent to any other node at the backbone.\deleted{ Additionally, connectivity is another property of a graph containing a CDS.}
 
+A first class of broadcast algorithms uses an underlying topology, or backbone, which is a subset of nodes in charge of forwarding messages.
 %
-In this study, we consider two topology-based algorithms \textit{Multipoint Relaying (MPR)} and \textit{CDS-based}, which require a periodic exchange of control messages \deleted{(\textit{Hello} messages)} among nodes to build an overlay.
+Nodes out of the backbone acts solely as message receivers.
+%
+For instance, Figure~\ref{explaining-backbone} depicts a network of nodes where $A$ starts the dissemination.
+%
+To reach a 100\% coverage, nodes $B$ and $C$ must form the backbone.
+%
+The complexity of a topology-based algorithm is in the construction of this topology, formally known as a Connected Dominating Set (CDS).
+%
+Nodes must be partitioned such that they either belong to the CDS or are in range of one of its nodes.
+%
+In this study, we consider two topology-based algorithms: \emph{Multipoint Relaying (MPR)}~\cite{Qayyum2002} and \emph{CDS-based}~\cite{Wu2001}.
+Both require the periodic exchange of control messages between nodes in order to build the overlay.
 
-\begin{figure}[htbp]
-	\vspace*{-0.3cm}
+\paragraph{MPR} The CDS obtained in~\cite{Qayyum2002} is called a Multipoint Relay (MPR) set.
+%
+Nodes start with an empty MPR set but having the knowledge of their one-hop and two-hop neighbors, represented by $N$ and $N^{2}$ respectively.
+This knowledge is build from the previous exchanges of control messages.
+%
+The procedure to determine relay nodes proceeds in two steps.
+%
+First, any one-hop neighbor $n \in N$ will be selected for inclusion in the MPR if $n$ is a unique neighbor of any other node in $N^{2}$.
+%
+Second, while the current MPR set does not cover all nodes in $N^{2}$, the algorithm iterates over each remaining neighbor $n \in N$ and counts how many two-hop neighbors $n$ would cover.
+%
+$n$ is selected as a relay node only if it allows covering two-hop neighbors that are not already covered.
+%
+Figure~\ref{explaining-backbone} shows the steps taken by a node $A$ to compute its MPR set.
+%
+Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as a relay node for it is the unique neighbor of $F$, in application of the first rule.
+%
+The second rule indicates that node $C$ must be part of the MPR set, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $G$ (here, zero).
+
+\begin{figure}[t!]
+ % \vspace{-0.2cm}
   \centering
   \includegraphics[width=\linewidth]{fig/explainingbackbone_b.pdf}
-	\caption{Steps to get the MPR set of peer A where forwarding nodes are shown with black filled-in circles.}
+	\caption{Steps to get the MPR set of peer A. Forwarding nodes are shown as black filled-in circles.}
   \label{explaining-backbone}
-  \vspace*{-0.3cm}
+  \vspace{-0.2cm}
 \end{figure}
 
-\paragraph{MPR} The CDS obtained in~\cite{Qayyum2002} is called a MPR set.
-%
-Nodes start with an empty $MPR$ set having the knowledge of their one-hop and two-hop neighbors, represented by $N$ and $N^{2}$ respectively, thanks to previous exchanges of control messages.
-%
-The procedure to find relay nodes is two-fold.
-%
-Firstly, any one-hop neighbor $n \in N$ will belong to $MPR$ if $n$ is a unique neighbor of some other node at $N^{2}$.
-%
-Secondly, while the current MPR set do not cover all nodes at $N^{2}$, we iterate over each remaining neighbor $n \in N$ and we count how many two-hop neighbors $n$ covers.
-%
-$n$ will be a relay node only if the number of covered two-hop neighbors is maximal.
-%
-Figure~\ref{explaining-backbone} shows the steps taken by node $A$ to compute its $MPR$ set.
-%
-Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as relay node because it is the unique neighbor of $F$ (first rule).
-%
-The second rule indicates that node $C$ must be part of the $MPR$ set, because the number of covered two-hop neighbors (i. e. two) is bigger than those neighbors cover by $G$ (which is zero).
-
 \paragraph{CDS-based technique}
-The decentralize algorithm in~\cite{Wu2001}, firstly approximates one CDS via a marking procedure and secondly, the number of relay nodes is minimized.
-%
-As in MPR, data about one-hop and two-hop neighbors is required. 
-%
-\changed{The marking procedure consist of identifying unconnected neighbors, if node $n$ realize that any pair of its neighbors is unconnected then, $n$ marks itself as forwarding node.}
-\deleted{The marking procedure simply identifies whether one node $n$ has any pair of neighbors that are unconnected, $n$ marks itself as a relay node if this condition takes place.}
-%
-For instance, in Figure~\ref{explaining-backbone} $A$ will mark itself as relay node because nodes $B$ and $G$ are unconnected.
-%
-To reduce the elements of one CDS, obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either \textit{the degree of nodes} or \textit{the remaining energy in nodes' batteries}.
-%
-We chose the former approach to be fair in the comparison with MPR.
 
+The decentralized algorithm in~\cite{Wu2001} first approximates the CDS using a marking procedure.
+Then, it proceeds to the minimization of the number of relay nodes.
 %
+As for MPR, the knowledge of one-hop and two-hop neighbors is required. 
+%
+The marking procedure consist of identifying unconnected neighbors.
+If node $n$ realizes that a pair of its neighbors is not connected, it marks itself as a forwarding node.
+%
+For instance, in Figure~\ref{explaining-backbone} $A$ would mark itself as a relay node because nodes $B$ and $G$ are not connected.
+%
+To reduce the number of elements in the CDS obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either the degree of nodes or the remaining energy in the nodes' batteries.
+%
+We chose the former approach to be fair in the comparison with MPR, which does not take the energy level into account.
+
 The node-degree-based rules are operations of first-order logic between the one-hop and two-hop sets of nodes' neighbors.
 %
-Due to the lack of space, we claim that our current implementation of the \textit{CDS-based technique} follows rules 2 and 2a (further details about these rules are found in~\cite{Wu2001}).
+Our implementation of the \emph{CDS-based technique} follows the rules 2 and 2a described in~\cite{Wu2001}.
 
 
 %As typically found with CDS-based approaches, during the flooding operation, nodes retransmit a message only if they have been marked as members of the CDS.
 %As example of rules, we present the first two proposed in~\cite{Wu2001}.
-%Notice that in the definition of such rules $\textit{nd}(v)$ is the node degree of $v$, $\textit{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$ where $N(v)$ is the set of neighbors of $v$:
+%Notice that in the definition of such rules $\emph{nd}(v)$ is the node degree of $v$, $\emph{id}(v)$ is an unique identifier assigned to $v$ and $N\left[v\right] = N(v) \cup \lbrace v \rbrace$ where $N(v)$ is the set of neighbors of $v$:
 %
 %\begin{enumerate}
-%	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \textit{and} \quad w \notin N(w)$.
+%	\item A node is marked if it has two unconnected neighbors. That is, $\exists u, w \in N(v), u \notin N(w)  \quad \emph{and} \quad w \notin N(w)$.
 %	\item Consider two marked vertices $v$ and $u$. Then, $v$ is unmarked if one of the following conditions holds:
 %	\begin{itemize}
-%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) < \textit{nd}(u)$.
-%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \textit{and} \quad \textit{nd}(v) = \textit{nd}(u) \quad \textit{and} \quad \\ \textit{id}(v) < \textit{id}(u)$.
+%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \emph{and} \quad \emph{nd}(v) < \emph{nd}(u)$.
+%		\item $N\left[v\right] \subseteq N\left[u\right] \quad \emph{and} \quad \emph{nd}(v) = \emph{nd}(u) \quad \emph{and} \quad \\ \emph{id}(v) < \emph{id}(u)$.
 %	\end{itemize}
 %\end{enumerate} 
 
 \subsection{Context-aware and context-oblivious algorithms}
-\changed{The constant exchange of control messages to build an overlay results in a higher probability of collisions.
-%
-When nodes move the frequency to send these messages must increase to maintain a correct set of forwarding nodes.
-%
-Our study considers broadcast algorithms that avoid building virtual overlays, instead, \textit{meta-data} about the local state of nodes (node-degree, current position, etc) is piggybacked in broadcast messages.
-%
-The decision of whether or not forward messages is based on the meta-data attached to them.
-}
 
+The periodic exchange of control messages required to build an overlay results in a higher probability of collisions and associated message loss.
+%
+When nodes move, the frequency at which these messages are sent must increase in order to maintain up-to-date topological information and henceforth a correct set of forwarding nodes.
+%
+We consider now a second class of protocols that do not require building virtual overlays.
+Instead, forwarding decisions are based on metadata associated to the nodes and piggybacked with broadcast messages themselves.
 
-\deleted{
-Using a virtual topology implies an overload on the communication medium due to the constant exchange of control messages.
-%
-When nodes move, the frequency on sending these messages must be increased to keep a virtual topology with the correct set of relay nodes.
-%
-This results in a higher probability of collisions.
-%
-Moreover, our study considers a second category of broadcast protocols that do not require the exchange of control messages to build a virtual topology, instead, data is piggybacked in messages before their retransmission.
-%
-This data could be either context-oblivious or context-aware.
-%
-The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
-}
+% \deleted{
+% Using a virtual topology implies an overload on the communication medium due to the constant exchange of control messages.
+% %
+% When nodes move, the frequency on sending these messages must be increased to keep a virtual topology with the correct set of relay nodes.
+% %
+% This results in a higher probability of collisions.
+% %
+% Moreover, our study considers a second category of broadcast protocols that do not require the exchange of control messages to build a virtual topology, instead, data is piggybacked in messages before their retransmission.
+% %
+% This data could be either context-oblivious or context-aware.
+% %
+% The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
+% }
 
-\paragraph{ABBA} Area-based beacon-less algorithm~\cite{Ovalle-Martinez2006}.
-The flooding process in ABBA is controlled in both space and time.
+\paragraph{ABBA} In the area-based beacon-less algorithm (ABBA~\cite{Ovalle-Martinez2006}), the flooding process is controlled in both space and time.
 %
-This algorithm requires nodes to know their physical location and the transmission range $T_x$ on each node.
+This algorithm requires nodes to know their physical location and their transmission range $T_x$.
 %
-When one broadcast message $M$ is received, nodes compute the angle $\alpha$ of the circle with radio $T_x$ centered at node's position that is covered by this reception.
+When a broadcast message $m$ is received, a node computes the angle $\alpha$ of the circle with radius $T_x$ centered at its position that is covered by this reception. \er{this is totally unclear, please fix.}
 %
 %Note that $\alpha$ is paired to a unique message.
 %
-$M$ is scheduled for being retransmitted after $t = t_\textit{max} - t_\textit{max}\frac{\alpha}{2\pi}$ seconds, where $t_\textit{max}$ is the maximum waiting time to give at each retransmission.
+$m$ is scheduled for being retransmitted after $t = t_\emph{max} - t_\emph{max}\frac{\alpha}{2\pi}$ seconds, where $t_\emph{max}$ is a maximum waiting time before retransmission.
 %
-Any new reception of $M$ before $t$ seconds implies in updating $t$ with the actual angle $\alpha$.
+Any new reception of $m$ before the timer expires updates $t$ with the actual angle $\alpha$. \er{unclear too. A duplicate reception does not cancel the transmission, but reduces the timer? How does one calculate the new alpha? If it is too complicated to explain we should not get into the details and use formulas.}
 %
-In other words, the bigger the angle covered by receptions of $M$, the shorter the time to wait before performing retransmissions.
+In other words, the bigger the angle covered by receptions of $m$ is, the shorter the time to wait before forwarding will be.
 %
-With one exception, message retransmissions are canceled when $\alpha = 2\pi$.
+With one exception, \er{what do you mean by this?} message forwarding is canceled when $\alpha = 2\pi$, indicating that the region surrounding the local node has been entirely covered.
 
-
+\paragraph{Probabilistic flooding} is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to forwarding.
 %
-\paragraph{Probabilistic Flooding} This is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to perform retransmissions.
+Nodes retransmit messages based on the distance between their neighbors.
 %
-Nodes retransmit messages based on the distance among neighbors.
-%
-This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes-degree.
+This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes-degree. \er{do we use the distance between neighbors, or do we use the node degree? This is not the same thing.}
 %
 The probability of retransmitting a message decreases as the number of neighbors on each node increases.
 %The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
@@ -193,7 +187,7 @@ The probability of retransmitting a message decreases as the number of neighbors
 
 
 %Combining these two values, the authors propose a protocol that aims at delivering a full coverage with relatively low number of relay nodes. \er{i rephrased the previous but it reads as a judgment of the protocol, while we aim at being neutral}
-%However, although the protocol requires both \textit{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
+%However, although the protocol requires both \emph{HELLO} messages and piggybacking, no experiment is presented to discuss important metrics such as energy consumption. 
 
 %\laurent{Explain and refer the following protocols}
 %\begin{enumerate}
@@ -205,21 +199,21 @@ The probability of retransmitting a message decreases as the number of neighbors
 
 
 %The probabilistic flooding is a mix of two approaches. There are two branches in the last level. They don't make the distinction in the survey, but it is clear when you read the paper.
-%In opposition to the \textit{context-aware} family, there are also \textit{context-oblivious} algorithms that do not require prior information about the node locality to decide on the retransmission operation.
+%In opposition to the \emph{context-aware} family, there are also \emph{context-oblivious} algorithms that do not require prior information about the node locality to decide on the retransmission operation.
 %
 %These protocols are in general easy to implement and have no limiting requirements such as knowing the location of nodes nor exchanging extra messages with control information.
 %
-%However, it has been shown that for some algorithms such as the \textit{basic probabilistic} approach this simplicity comes at the expenses of a low coverage~\cite{Ni:1999:BSP:313451.313525}.
+%However, it has been shown that for some algorithms such as the \emph{basic probabilistic} approach this simplicity comes at the expenses of a low coverage~\cite{Ni:1999:BSP:313451.313525}.
 %
-%In this paper, we are only considering one protocol in this class, the \textit{simple flooding}. 
+%In this paper, we are only considering one protocol in this class, the \emph{simple flooding}. 
 %\er{this is a bit strange, again, to give opinions about the protocols while we intend to stay neutral.}
 
-
-
-The diversity of broadcast algorithms for MANETs is vast and choosing one approach to cope with a particular scenario is a challenging task.
+\deleted{
+There is a large diversity of broadcast algorithms for MANETs.
+Choosing one approach to cope with a particular scenario is a challenging task.
 %
 While some evaluations have been proposed to compare existing approaches, they usually target fixed scenarios.
 %
-In this work, our goal is \deleted{to define an experimental framework} to fairly assess representative broadcast algorithms for MANETs. 
+In this work, our goal is \deleted{to define an experimental framework} to fairly assess representative broadcast algorithms for MANETs. } %% ER this is redundant with the intro
 %
 %In the next section, we discuss previous works one can find in the literature.
