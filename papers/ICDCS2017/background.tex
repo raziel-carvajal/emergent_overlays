@@ -18,7 +18,7 @@
 
 A straightforward approach to broadcast is \emph{simple flooding}.
 %
-When one host receives a broadcast message $m$ for the first time, it forwards it to all of its neighbors; the reception of further copies of $m$ are ignored.
+When one host receives a broadcast message $m$ for the first time, it is forwarded; the reception of further copies of $m$ are ignored.
 %
 This approach suffers from a number of drawbacks and in particular from the \emph{broadcast storm} problem~\cite{Ni:1999:BSP:313451.313525} where nodes forward every new message at least once.
 %
@@ -26,7 +26,6 @@ The communication medium rapidly becomes saturated, increasing the likelihood of
 
 %
 \raziel{this part was already mentioned in Introduction (see description of broadcast measures)}
-%
 \deleted{
   Generally, the design of broadcast algorithms for MANETs is a trade-off between two goals: (i) guaranteeing a suitable level of reachability, and (ii) optimize resources usage of nodes, prior to and during the actual dissemination.
 %
@@ -35,7 +34,7 @@ As a consequence, broadcast algorithms attempt to reduce the number of forwardin
 In practice, however, it is hard to decide which nodes should retransmit a message.
 }
 
-The lack of a central authority, or global knowledge, in a MANET implies
+The lack of a central authority in MANETs implies
 that broadcast algorithms, aiming at improving over simple flooding,
 must both remain fully distributed, and rely only on local data available at each node.
 Ruiz and Bouvry have surveyed extensively such solutions~\cite{Ruiz2015}.
@@ -69,7 +68,7 @@ Nodes out of the backbone acts solely as message receivers.
 %
 For instance, Figure~\ref{explaining-backbone} depicts a network of nodes where $A$ starts the dissemination.
 %
-To reach a 100\% coverage, nodes $B$ and $C$ must form the backbone.
+To reach 100\% coverage, nodes $B$ and $C$ must form the backbone.
 %
 The complexity of a topology-based algorithm is in the construction of this topology, formally known as a Connected Dominating Set (CDS).
 %
@@ -89,7 +88,7 @@ First, any one-hop neighbor $n \in N$ will be selected for inclusion in the MPR 
 %
 Second, while the current MPR set does not cover all nodes in $N^{2}$, the algorithm iterates over each remaining neighbor $n \in N$ and counts how many two-hop neighbors $n$ would cover.
 %
-$n$ is selected as a relay node only if it allows covering two-hop neighbors that are not already covered.
+$n$ is selected as a relay node only if it allows covering two-hop neighbors that are not already chosen.
 %
 Figure~\ref{explaining-backbone} shows the steps taken by a node $A$ to compute its MPR set.
 %
@@ -98,12 +97,12 @@ Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as a rel
 The second rule indicates that node $C$ must be part of the MPR set, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $G$ (here, zero).
 
 \begin{figure}[t!]
- % \vspace{-0.2cm}
+% \vspace{-0.1cm}
   \centering
   \includegraphics[width=\linewidth]{fig/explainingbackbone_b.pdf}
-	\caption{Steps to get the MPR set of peer A. Forwarding nodes are shown as black filled-in circles.}
+  \caption{Steps to get the MPR set of peer A. Forwarding nodes are shown as black filled-in circles.}
   \label{explaining-backbone}
-  % \vspace{-0.2cm}
+  \vspace{-0.5cm}
 \end{figure}
 
 \paragraph{CDS-based technique}
@@ -118,11 +117,13 @@ If node $n$ realizes that a pair of its neighbors is not connected, it marks its
 %
 For instance, in Figure~\ref{explaining-backbone} $A$ would mark itself as a relay node because nodes $B$ and $G$ are not connected.
 %
-To reduce the number of elements in the CDS obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either the degree of nodes or the remaining energy in the nodes' batteries.
+To reduce the number of elements in the CDS obtained by the marking procedure, authors in~\cite{Wu2001} take into consideration either the degree of nodes or the remaining energy in nodes' batteries.
 %
 We chose the former approach to be fair in the comparison with MPR, which does not take the energy level into account.
-
+\raziel{this is pretty obvious, given the way MPR was built}
+\deleted{
 The node-degree-based rules are operations of first-order logic between the one-hop and two-hop sets of nodes' neighbors.
+}
 %
 Our implementation of the \emph{CDS-based technique} follows the rules 2 and 2a described in~\cite{Wu2001}.
 
@@ -197,7 +198,9 @@ New receptions of $M$ result in updating the timeout, with one exception. If $C_
 %
 Messages are retransmitted based on nodes degree.
 %
-This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes degree. \er{do we use the distance between neighbors, or do we use the node degree? This is not the same thing.}
+This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes degree.
+%
+\er{do we use the distance between neighbors, or do we use the node degree? This is not the same thing.}
 %
 The probability of retransmitting a message decreases as the number of neighbors on each node increases.
 %The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
