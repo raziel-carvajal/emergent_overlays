@@ -35,12 +35,17 @@ As a consequence, broadcast algorithms attempt to reduce the number of forwardin
 In practice, however, it is hard to decide which nodes should retransmit a message.
 }
 
-The lack of a central authority or global knowledge in a MANET implies that broadcast algorithms aiming at improving over simple flooding must remain fully distributed and rely only on local data available at each node.
-Many such solutions have been proposed in the literature, that Ruiz and Bouvry present have surveyed extensively~\cite{Ruiz2015}.
+The lack of a central authority, or global knowledge, in a MANET implies
+that broadcast algorithms, aiming at improving over simple flooding,
+must both remain fully distributed, and rely only on local data available at each node.
+Ruiz and Bouvry have surveyed extensively such solutions~\cite{Ruiz2015}.
 %
 The authors define a taxonomy to classify state-of-the-art algorithms based on the way they control message forwarding.
 %
-In this study, we select five algorithms, including simple flooding, that are representative of their class.
+From this work, we have selected the four most representative
+algorithms, two algorithms that are topology aware, and two others
+that are context aware.    
+%In this study, we select five algorithms, including simple flooding, that are representative of their class.
 %
 %However, to the best of our knowledge, there is a lack of comprehensive \emph{experimental} comparison of these costs and of the effectiveness of different protocols.
 %%
@@ -76,11 +81,11 @@ Both require the periodic exchange of control messages between nodes in order to
 \paragraph{MPR} The CDS obtained in~\cite{Qayyum2002} is called a Multipoint Relay (MPR) set.
 %
 Nodes start with an empty MPR set but having the knowledge of their one-hop and two-hop neighbors, represented by $N$ and $N^{2}$ respectively.
-This knowledge is build from the previous exchanges of control messages.
+This knowledge is built from the previous exchanges of control messages.
 %
 The procedure to determine relay nodes proceeds in two steps.
 %
-First, any one-hop neighbor $n \in N$ will be selected for inclusion in the MPR if $n$ is a unique neighbor of any other node in $N^{2}$.
+First, any one-hop neighbor $n \in N$ will be selected for inclusion in the MPR if $n$ is an unique neighbor of any other node in $N^{2}$.
 %
 Second, while the current MPR set does not cover all nodes in $N^{2}$, the algorithm iterates over each remaining neighbor $n \in N$ and counts how many two-hop neighbors $n$ would cover.
 %
@@ -88,7 +93,7 @@ $n$ is selected as a relay node only if it allows covering two-hop neighbors tha
 %
 Figure~\ref{explaining-backbone} shows the steps taken by a node $A$ to compute its MPR set.
 %
-Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as a relay node for it is the unique neighbor of $F$, in application of the first rule.
+Once $A$ receives its one-hop and two-hop neighbors, node $B$ is marked as a relay node as it is the unique neighbor of $F$, in application of the first rule.
 %
 The second rule indicates that node $C$ must be part of the MPR set, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $G$ (here, zero).
 
@@ -137,12 +142,17 @@ Our implementation of the \emph{CDS-based technique} follows the rules 2 and 2a 
 
 \subsection{Context-aware and context-oblivious algorithms}
 
-The periodic exchange of control messages required to build an overlay results in a higher probability of collisions and associated message loss.
+The periodic exchange of control messages, required in
+\textit{topology-based algorithms} to build the CDS overlay,
+results in a high probability of collisions, and inherently implies loss of messages.
 %
-When nodes move, the frequency at which these messages are sent must increase in order to maintain up-to-date topological information and henceforth a correct set of forwarding nodes.
+Moreover, when nodes move, the frequency at which these messages are sent must increase in order to maintain up-to-date topological information and henceforth a correct set of forwarding nodes.
 %
-We consider now a second class of protocols that do not require building virtual overlays.
-Instead, forwarding decisions are based on metadata associated to the nodes and piggybacked with broadcast messages themselves.
+To overcome the aforementioned issue, we consider now
+\textit{context-aware algorithms}, which are a second class of
+protocols, which does not require building virtual overlays.
+In these algorithms, forwarding decisions are based on metadata
+associated to nodes. Metadata informations are piggybacked with broadcast messages themselves.
 
 % \deleted{
 % Using a virtual topology implies an overload on the communication medium due to the constant exchange of control messages.
@@ -158,7 +168,7 @@ Instead, forwarding decisions are based on metadata associated to the nodes and 
 % The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
 % }
 
-\paragraph{ABBA} In the Area-Based Beacon-less Algorithm~\cite{Ovalle-Martinez2006}, the flooding process is controlled in both space and time.
+\paragraph{ABBA} in the Area-Based Beacon-less Algorithm~\cite{Ovalle-Martinez2006}, the flooding process is controlled in both space and time.
 %
 This algorithm requires nodes to know their physical location and their transmission range $T_x$.
 %
@@ -166,7 +176,8 @@ The reception area of node $N$ can be seen as a circle $C_x$ with radius $T_x$ c
 %
 When $N$ receives a message $M$ part of $C_x$ perimeter is covered, $N$ then sets a timeout that is inversely proportional to the length of the covered perimeter.
 %
-In other words, the bigger the covered perimeter by $M$ reception, the shorter the time to wait before forward $M$.
+In other words, higher the length of the covered perimeter for $M$ is,
+shorter the time to wait to forward $M$ is.
 %
 New receptions of $M$ result in updating the timeout, with one exception. If $C_x$ perimeter is totally covered then the retransmission of $M$ is canceled.
 %
@@ -182,7 +193,7 @@ New receptions of $M$ result in updating the timeout, with one exception. If $C_
 %
 %With one exception, \er{what do you mean by this?} message forwarding is canceled when $\alpha = 2\pi$, indicating that the region surrounding the local node has been entirely covered.
 
-\paragraph{Probabilistic flooding} is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to forwarding.
+\paragraph{Probabilistic flooding} such algorithms use both information about one-hop neighbors, and a probabilistic approach to forwarding ~\cite{Cartigny:2003:BNR:2727141.2727459}.
 %
 Messages are retransmitted based on nodes degree.
 %
