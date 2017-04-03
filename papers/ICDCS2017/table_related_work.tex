@@ -1,7 +1,7 @@
 %!TEX root = main.tex
 
-\newcommand{\YES}{{\color{OliveGreen} $\surd$\xspace}}
-\newcommand{\NO}{{\color{BrickRed} $\times$\xspace}}
+\newcommand{\YES}{{\color{OliveGreen} {\scriptsize $\surd$ }\xspace}}
+\newcommand{\NO}{{\color{BrickRed} {\scriptsize $\times$} \xspace}}
 \newcommand{\DONTKNOW}{{\color{BlueViolet} --\xspace}}
 \newcommand{\USER}{{\color{Black} \textit{User}\xspace}}
 \newcommand{\KERNEL}{{\color{Black} \textit{Kernel}\xspace}}
@@ -20,33 +20,35 @@
 \newcommand{\CS}{{\color{Black} \textit{CS}\xspace}}
 \newcommand{\NP}{{\color{Black} \textit{NPE}\xspace}}
 
-\begin{table*}[ht]
+\begin{table}[ht]
 \setlength\tabcolsep{1pt}
 \renewcommand\arraystretch{0.99}
 \footnotesize
 \centering
 
-\newcolumntype{A}{ >{\raggedright} m{0.22\linewidth} }
-\newcolumntype{C}{ >{\centering\arraybackslash} m{0.090\linewidth} }
-\newcolumntype{D}{ >{\centering\arraybackslash} m{0.135\linewidth} }
+\newcolumntype{A}{ >{\raggedright} m{0.205\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} m{0.105\linewidth} }
+\newcolumntype{D}{ >{\centering\arraybackslash} m{0.13\linewidth} }
+\newcolumntype{E}{ >{\centering\arraybackslash} m{0.11\linewidth} }
+\newcolumntype{F}{ >{\centering\arraybackslash} m{0.05\linewidth} }
 
-\begin{tabular}{ACCCCCCCC}
+\begin{tabular}{AEDCCCCF}
 
-\textbf{Study} & \shortstack{\textbf{Type of} \\ \textbf{Study}} & \textbf{Multiple protocols} & \shortstack{\textbf{Compare with}\\ \textbf{simple flooding}} & \shortstack{\textbf{Multiple} \\ \textbf{classes}} &  \shortstack{\textbf{Multiple}\\ \textbf{densities}} & \textbf{Mobility} & \textbf{Energy Consumption} & \textbf{Network overhead} \\
+{\scriptsize \textbf{Study}} & {\scriptsize \textbf{Many protocols}} & {\scriptsize \shortstack{\textbf{Compare vs}\\ \textbf{flooding}} } & {\scriptsize\shortstack{\textbf{Many} \\ \textbf{classes}}} &  {\scriptsize\shortstack{\textbf{Many}\\ \textbf{densities}}} & {\scriptsize\textbf{Mobility}} & {\scriptsize\textbf{Energy}} & {\scriptsize\shortstack{\textbf{Net}\\ \textbf{load}}} \\
 
 \midrule
 
-Comparative Study~\cite{YiGerla2003} & \CS & \YES & \YES & \YES & \YES & \YES & \NO & \NO  \\ \hline
-Context-aware broadcasting~\cite{Garbinato2010} & \CS & \YES & \YES & \YES & \YES & \YES & \NO & \NO \\ \hline
-Broadcast Storm Problem~\cite{Ni:1999:BSP:313451.313525} & \NP & \YES & \NO  & \YES & \NO  & \NO & \NO & \YES  \\ \hline
-EEMPR~\cite{Wu2004} & \NP & \YES & \NO  & \NO & \YES  & \NO & \NO & \NO \\ \hline
-Neighbor Elimination Scheme~\cite{Stojmenovic:2002:DSN:506156.506158} & \NP & \YES & \NO & \YES & \YES & \YES & \NO & \NO \\ \hline
-EWMA~\cite{Cagalj2002} & \NP & \YES & \NO & \NO & \YES & \NO & \YES & \NO \\ \hline
-FNSB~\cite{WCM:WCM109} & \NP & \YES & \NO & \YES & \YES & \YES & \NO & \NO \\ \hline
-K-HOP~\cite{Nocetti2003} & \NP & \YES & \NO & \NO & \YES & \NO & \NO & \NO \\ \hline
-MPR~\cite{Qayyum2002} & \NP & \NO & \YES & \NO & \NO & \NO & \NO & \YES \\ \hline
-Border Node Retransmission~\cite{Cartigny:2003:BNR:2727141.2727459} & \NP & \YES & \NO & \NO & \YES & \NO & \NO & \NO \\ \hline
-ABBA~\cite{Ovalle-Martinez2006} & \NP & \YES & \NO  & \NO  & \YES & \NO  & \NO  & \YES  \\
+{\scriptsize Yi et al.~\cite{YiGerla2003} \CS } & \YES & \YES & \YES & \YES & \YES & \NO & \NO  \\ \hline
+{\scriptsize Garbinato et al.~\cite{Garbinato2010} \CS } & \YES & \YES & \YES & \YES & \YES & \NO & \NO \\ \hline
+{\scriptsize Ni et al.~\cite{Ni:1999:BSP:313451.313525} \NP } & \YES & \NO  & \YES & \NO  & \NO & \NO & \YES  \\ \hline
+{\scriptsize EEMPR~\cite{Wu2004} \NP } & \YES & \NO  & \NO & \YES  & \NO & \NO & \NO \\ \hline
+{\scriptsize Stojmenovic et al.~\cite{Stojmenovic:2002:DSN:506156.506158} \NP} & \YES & \NO & \YES & \YES & \YES & \NO & \NO \\ \hline
+{\scriptsize EWMA~\cite{Cagalj2002} \NP } & \YES & \NO & \NO & \YES & \NO & \YES & \NO \\ \hline
+{\scriptsize FNSB~\cite{WCM:WCM109} \NP } & \YES & \NO & \YES & \YES & \YES & \NO & \NO \\ \hline
+{\scriptsize K-HOP~\cite{Nocetti2003} \NP } & \YES & \NO & \NO & \YES & \NO & \NO & \NO \\ \hline
+{\scriptsize MPR~\cite{Qayyum2002} \NP } & \NO & \YES & \NO & \NO & \NO & \NO & \YES \\ \hline
+{\scriptsize Cartigny et al.~\cite{Cartigny:2003:BNR:2727141.2727459} \NP } & \YES & \NO & \NO & \YES & \NO & \NO & \NO \\ \hline
+{\scriptsize ABBA~\cite{Ovalle-Martinez2006} \NP} & \YES & \NO  & \NO  & \YES & \NO  & \NO  & \YES  \\
 %Optimized broadcast protocol for sensor networks \\
 
 \midrule
@@ -55,4 +57,4 @@ ABBA~\cite{Ovalle-Martinez2006} & \NP & \YES & \NO  & \NO  & \YES & \NO  & \NO  
 \caption{Survey of evaluation criteria used in different performance studies. In the second column, \textit{CS} stands for \textit{comparison study} and \textit{NPE} for \textit{New Protocol Evaluation}}
 \label{tbl:rw}
 \vspace{-3mm}
-\end{table*}
+\end{table}
