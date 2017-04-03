@@ -1,5 +1,5 @@
 %!TEX root = main.tex
-%DECLARATION OF SOME CONSTANS
+%DECLARATION OF SOME CONSTANTS
 \newcommand{\nodesNumber}{500}
 \newcommand{\densitiesNumber}{8}
 \newcommand{\nrMessages}{100}
@@ -8,93 +8,82 @@
 \section{Experimental Scenario}
 \label{sec:scenarios}
 
+Our experiments are inspired by the scenario of a crowd of humans carrying portable communication devices (e.g., phones) in an area with no infrastructure connectivity.
+The dissemination of information from one individual to all the others is critical, and uses ad-hoc connections between devices.
 %
-\changed{
-Our experiments are inspired by a real life scenario: a \emph{manifestation}, where individuals use their phones to communicate with others and the efficient dissemination of messages to participants is critical.
-}
-\deleted{
-Our experiments are inspired by a real life scenario: a physical \emph{demonstration} where the infrastructure for mobile communication is not able to serve the amount of clients and where individuals use their mobile phones in an ad-hoc mode to communicate.
-}
+Our evaluation of broadcast algorithms for MANETs is mainly driven by two factors: \emph{network density} and \emph{nodes mobility}.
 %
-Our evaluation of broadcast algorithms for MANETs is driven by two variables: \emph{network density} and \emph{nodes mobility}.
-%
-\deleted{
-We consider two parameters that influence the performance of broadcast in MANETs: \emph{network density} and \emph{nodes mobility}.
-}
-%
-In the following, we describe\deleted{ the simulation environment and} the parameters used in our study.
+We describe in the following the parameters used in our study.
 
-%\subsection*{Simulation tool}
+\smallskip
 \noindent
-\textbf{Simulation tool.}
-We rely on OMNET++4.6/INET3.3, a simulation framework to evaluate networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
+\textbf{Simulator.}
+We rely on OMNET++4.6/INET3.3, a simulation framework for the evaluation of networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
-This tool provides a full implementation of the standard IEEE 802.11g.
+This tool provides a full implementation of the IEEE 802.11g standard.
 %
-In addition, it contains models to cope with mobility and energy consumption.
+In addition, it contains models for the mobility of nodes and for energy consumption.
 
+\smallskip
 \noindent
 \textbf{Communication Scenario.}
 %\subsection*{Communication Scenario}
-In our experimental scenario, all attendees have mobile phones to communicate through WiFi.
+Simulated participants use their devices to broadcast messages without external coordination and may attempt to do so at nearly the same time.
 %
-Participants use such devices to broadcast and they might attempt to do so at nearly the same time.
+We set our experiments to perform \nrMessages{} broadcast messages.
+The frequency between broadcasts is $0.5$s.
 %
-\deleted{
-The payload of messages is usually \emph{small} because most of them are generated using the input capabilities of mobile devices.
-}
+The source of each message is randomly selected.
 %
-To simulate these conditions, we set our experiments to perform \nrMessages{} broadcast messages and the frequency between them is $0.5$s.
-%
-In addition, the source of each message is randomly selected during the generation of the network (see next subsection).
-%
-Finally, the content of each message is randomly generated, unique and with a length of 32 bytes. 
+The content of each message is randomly generated, unique and with a length of 32~Bytes. 
 %
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
 
+\smallskip
 \noindent
 \textbf{Nodes Density.}
 %\subsection*{Nodes Density}
-We are interested in generating scenarios with different nodes densities to simulate more accurately our use case.
+We are interested in generating scenarios with different nodes densities.
 %
 %In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
 %
-We use three parameters: transmission range (Tx), map size and number of nodes.
+We consider three parameters: the transmission range (Tx), the map size and the number of nodes.
 %
-As shown in~\cite{Penrose2003}, there is a dependency between these parameters that  allows us to build networks with a given density, by using random geometric graphs.
+As shown in~\cite{Penrose2003}, the dependency between these parameters allows us to build networks with a given density, by using random geometric graphs.
 %
-In our experiments, all nodes have a Tx of 20~m.~\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
-Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.} The number of nodes $N$ is fixed to \nodesNumber{}, which is the mean value reported by previous studies on the size of manifestations in Western Europe~\cite{kriesi1995new}.
+In our experiments, all nodes have a Tx of 20~m.\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
+Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
+The number of nodes $N$ is fixed to \nodesNumber{}. % , which is the mean value reported by previous studies on the size of manifestations in Western Europe~\cite{kriesi1995new}. %% ER useless.
 %
-To create a network with a given density, we use Tx and $N$ to compute the map size \deleted{using the aforementioned dependency relationship}.
+To create a network with a given density, we set Tx and $N$ and compute the map size.
 %
 Then, we generate a laying on the map by using random geometric graphs.
 %
-The output of this procedure is a network with the desired density.
-%
-\deleted{Table~\ref{tbl:densisty-parameters} summarizes the simulations parameters we use to configure the density.}
-%
 We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set the densities to  {5,10, \dots, 40} nodes, a range of values that is frequently found in the literature.
 %
-This leads to a map size of $354 \times 354$m while the smallest map is $125 \times 125$m.
+This leads to a map size ranging from $125 \times 125$m to $354 \times 354$m.
 
-
+\smallskip
 \noindent
 \textbf{Mobility.}
 %\subsection*{Mobility}
-In our evaluation, we use the \emph{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
+We use the \emph{truncated-levy walk} (LW) mobility model, as it characterizes well the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
 %
 This model generates traces composed of frequent short walks and occasional rides to distant locations.
 %
-We define two kind of scenarios: one without mobility (\emph{static}) and another with mobility (\emph{dynamic}) at a walking speed of $1.4$ $m/s$ -- an estimation of the preferred walking speed~\cite{Browning390}.
+We define two scenarios: One without mobility (\emph{static}) and another with mobility (\emph{dynamic}) at a walking speed of $1.4$ $m/s$ -- based on an estimation of the preferred walking speed~\cite{Browning390}.
 %
-The generation of \emph{static} scenarios was presented in the previous subsection.
+We generate the dynamic scenario starting from the static one and applying the mobility based on the model.
+We check that the network remains connected for the duration of the experiment, or discard the data and regenerate using a new random seed.
+
 %
-To generate \emph{dynamic} scenarios, we begin with a \emph{static one}.
-%
-Then, we use the LW model to generate mobility traces for each node.
-%
+% The generation of \emph{static} scenarios was presented in the previous subsection.
+% %
+% To generate \emph{dynamic} scenarios, we begin with a \emph{static one}.
+% %
+% Then, we use the LW model to generate mobility traces for each node.
+% %
 \deleted{
 The parameters of the LW model are set in such a way that the average node speed is close to .
 }
@@ -105,22 +94,21 @@ The parameters of the LW model are set in such a way that the average node speed
 \begin{table}[ht]
 	\footnotesize
 	\centering
-	
+
 	\begin{tabular}{lcp{3.5cm}}
 		\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
-		
+
 		\midrule
 		FL\_EXP & -3.9 & Exponent of the flight length distribution \\
 		FL\_MAX & 50 & Maximum value of the flight length distribution \\
 		WT\_EXP & -1.8 & Exponent of the waiting time distribution \\
 		WT\_MAX & 100 & Maximum value of the waiting time distribution \\
 	\end{tabular}
-	
+
 	\caption{Configuration of the LW mobility model.}
 	\label{tbl:mobility-parameters}
 \end{table}
 }
-
 
 \deleted{
 Afterwards, we perform several checks on the traces to guarantee that: i) the average speeds are indeed close to $1.4$ $m/s$, ii) the node density is the desired one during all the simulation time, and iii) the topology remains connected all the time.~\footnote{Except for a very low density (5) where we are unable to generate a topology that remained connected during all the experiments.}
@@ -128,20 +116,17 @@ Afterwards, we perform several checks on the traces to guarantee that: i) the av
 Should any of these checks fail, we discard the mobility traces.
 }
 
+\smallskip
 \noindent
 \textbf{Energy Settings.}
-%\subsection*{Energy Consumption}
-\deleted{
-The power consumption must be considered in evaluating protocols that use wireless communication.
-}
+This metric depends on the wireless communication chip used.
+We model power consumption using the specifications of a commercial chip found in modern mobile devices.
 %
-Given that this metric depends on the Wi-Fi chip, we model power consumption using the specifications of a commercial chip found in modern mobile devices.
+We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
 %
-The chip Broadcom BCM4329~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
+Its energy consumption per operation modes is as follows: sleep (648~nW), listen (244.8~mW), receive (295.2~mW), transmit (1206~mW).
 %
-Its energy consumption per operation modes is as follows: sleep (648 nW), listen (244.8 mW), receive (295.2 mW), transmit (1206 mW).
-%
-These values are set in the consumption model of INET.
+These values are used for the \emph{StateBasedEnergyConsumer} consumption model integrated with INET.
 
 \deleted{
 \begin{table}[ht]
@@ -174,28 +159,25 @@ INET then computes the energy consumption $C(t)$ using:  $C(t)=\int_{0}^{t_\text
 %
 The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.}
 
-
+\smallskip
 \noindent
 \textbf{Algorithm-specific parameters.}
 %\subsection*{Algorithm-specific parameters}
-The behavior of each protocol depends on the values of its parameters.
-%
-To configure these parameters meaningfully, we choose values previously reported in the literature.
+The behavior of each protocol depends on its parameters, for which we favor values previously reported in the literature.
 %
 For instance, we use 0.5s as the \emph{hello time} for \emph{MPR},  \emph{ProbFlood} and \emph{CDS-based}.
 %
 In the case of \emph{ABBA}, we use 0.3s as the maximum waiting time.
 %
-Finally, for \emph{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
+Finally, for \emph{ProbFlood} we use $k=15$ and $\sigma=1$.
 
-%\noindent
+\smallskip
+\noindent
 \textbf{Simulation time.}
 %\subsection*{Simulation time}
-As mentioned in Section~\ref{sec:background}, some algorithms build a topology to drive the broadcast operation.
+As mentioned in Section~\ref{sec:background}, some algorithms first need to build a topology.
 %
-To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5s\deleted{before the first message is broadcast}.
-%
-This phase is used to create the initial topology in CDS-based algorithms.
+To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5s, allowing CDS-based algorithms to perform this initial construction.
 %
 %This time is used by  protocols can use to create any initial structure.
 \deleted{
