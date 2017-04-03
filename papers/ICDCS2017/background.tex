@@ -158,21 +158,29 @@ Instead, forwarding decisions are based on metadata associated to the nodes and 
 % The former forwards messages with a predefine probability while the latter use knowledge about the current state of the network (for example, nodes' density).
 % }
 
-\paragraph{ABBA} In the area-based beacon-less algorithm (ABBA~\cite{Ovalle-Martinez2006}), the flooding process is controlled in both space and time.
+\paragraph{ABBA} In the Area-Based Beacon-less Algorithm~\cite{Ovalle-Martinez2006}, the flooding process is controlled in both space and time.
 %
 This algorithm requires nodes to know their physical location and their transmission range $T_x$.
 %
-When a broadcast message $m$ is received, a node computes the angle $\alpha$ of the circle with radius $T_x$ centered at its position that is covered by this reception. \er{this is totally unclear, please fix.}
+The reception area of one node $N$ can be seen as a circle $C_x$ with radius $T_x$ centered at node's position.
+%
+When $N$ receives a message $M$ part of $C_x$ perimeter is covered, $N$ then sets a timeout that is inversely proportional to the length of the covered perimeter.
+%
+In other words, the bigger the covered perimeter by $M$ reception, the shorter the time to wait before forward $M$.
+%
+New receptions of $M$ result in updating the timeout, with one exception. If $C_x$ perimeter is totally covered then the retransmission of $M$ is canceled.
+%
+%When a broadcast message $m$ is received, a node computes the angle $\alpha$ of the circle with radius $T_x$ centered at its position that is covered by this reception. \er{this is totally unclear, please fix.}
 %
 %Note that $\alpha$ is paired to a unique message.
 %
-$m$ is scheduled for being retransmitted after $t = t_\emph{max} - t_\emph{max}\frac{\alpha}{2\pi}$ seconds, where $t_\emph{max}$ is a maximum waiting time before retransmission.
+%$m$ is scheduled for being retransmitted after $t = t_\emph{max} - t_\emph{max}\frac{\alpha}{2\pi}$ seconds, where $t_\emph{max}$ is a maximum waiting time before retransmission.
 %
-Any new reception of $m$ before the timer expires updates $t$ with the actual angle $\alpha$. \er{unclear too. A duplicate reception does not cancel the transmission, but reduces the timer? How does one calculate the new alpha? If it is too complicated to explain we should not get into the details and use formulas.}
+%Any new reception of $m$ before the timer expires updates $t$ with the actual angle $\alpha$.
 %
-In other words, the bigger the angle covered by receptions of $m$ is, the shorter the time to wait before forwarding will be.
+\er{unclear too. A duplicate reception does not cancel the transmission, but reduces the timer? How does one calculate the new alpha? If it is too complicated to explain we should not get into the details and use formulas.}
 %
-With one exception, \er{what do you mean by this?} message forwarding is canceled when $\alpha = 2\pi$, indicating that the region surrounding the local node has been entirely covered.
+%With one exception, \er{what do you mean by this?} message forwarding is canceled when $\alpha = 2\pi$, indicating that the region surrounding the local node has been entirely covered.
 
 \paragraph{Probabilistic flooding} is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to forwarding.
 %
