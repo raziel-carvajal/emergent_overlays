@@ -178,15 +178,15 @@ New receptions of $M$ result in updating the timeout, with one exception. If $C_
 %
 %Any new reception of $m$ before the timer expires updates $t$ with the actual angle $\alpha$.
 %
-\er{unclear too. A duplicate reception does not cancel the transmission, but reduces the timer? How does one calculate the new alpha? If it is too complicated to explain we should not get into the details and use formulas.}
+%\er{unclear too. A duplicate reception does not cancel the transmission, but reduces the timer? How does one calculate the new alpha? If it is too complicated to explain we should not get into the details and use formulas.}
 %
 %With one exception, \er{what do you mean by this?} message forwarding is canceled when $\alpha = 2\pi$, indicating that the region surrounding the local node has been entirely covered.
 
 \paragraph{Probabilistic flooding} is a context-aware algorithm~\cite{Cartigny:2003:BNR:2727141.2727459} that uses information about one-hop neighbors and a probabilistic approach to forwarding.
 %
-Nodes retransmit messages based on the distance between their neighbors.
+Messages are retransmitted based on nodes degree.
 %
-This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes-degree. \er{do we use the distance between neighbors, or do we use the node degree? This is not the same thing.}
+This differs from the canonical probabilistic approaches where every node in the network has the same probability of retransmitting messages without taking into account nodes degree. \er{do we use the distance between neighbors, or do we use the node degree? This is not the same thing.}
 %
 The probability of retransmitting a message decreases as the number of neighbors on each node increases.
 %The rationale is that the neighbors of a node are likely closely packed in a dense area if the number of neighbors is large.
