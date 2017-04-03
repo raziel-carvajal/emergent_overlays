@@ -25,13 +25,13 @@ number of times one broadcast message is received after its first reception.
 %
 
 \noindent $\triangleright$
-\textbf{Reachability} --
+\textbf{Coverage} --
 percentage of nodes that successfully receive one broadcast message at least once.
 
 \deleted{
 \noindent $\triangleright$
 \textbf{Broadcast time} --
-time to disseminate one message with a reachability of 100\%.
+time to disseminate one message with a Coverage of 100\%.
 }
 
 % 
@@ -70,8 +70,8 @@ energy consumed by nodes during all broadcast session.
 %
 %We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
 %
-%\subsection{Network overhead}
-\textbf{Network overhead}.
+\subsection{Network overhead}
+%\textbf{Network overhead}.
 The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
 %
 Figure~\ref{fig:a-saved} depicts the SRE in static scenarios where \emph{MPR} outperforms all other protocols.
@@ -101,7 +101,7 @@ However, when PDM is compared against SRE the occurrence of collisions also affe
 %
 For instance, using \emph{simple flooding} with density 30 nodes receive at most 10 duplicated messages instead of 30.
 %
-\deleted{In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low reachability).}
+\deleted{In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low Coverage).}
 %
 Our results in PDM confirm that \emph{MPR} avoids saturation in all scenarios.
 %
@@ -111,8 +111,8 @@ Meanwhile, \emph{CDS-based} behaves similarly to \emph{ProbFlood} for low densit
 %
 \deleted{\emph{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \emph{simple flooding} when the density is high.  }
 
-%\subsection{Power Consumption}
-\textbf{Power Consumption.}
+\subsection{Power Consumption}
+%\textbf{Power Consumption.}
 \deleted{Power consumption depends on the number of messages exchanged.}
 %
 The amount of received and sent messages impacts power consumption due to the changes of mode the radio performs.
@@ -131,7 +131,7 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 %
 \begin{figure*}[ht]
 	\begin{center}
-	\subfigure[Reachability in static scenarios]{
+	\subfigure[Coverage in static scenarios]{
 		\label{fig:a-coverage}
 		\includegraphics[page=2, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-static-summary.pdf}
 	}
@@ -141,7 +141,7 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 		\includegraphics[page=1, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
 	}
 	~
-	\subfigure[Reachability in dynamic scenarios]{
+	\subfigure[Coverage in dynamic scenarios]{
 		\label{fig:b-coverage}
 		\includegraphics[page=2, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-mobility-summary.pdf}
 	}
@@ -150,7 +150,7 @@ Since in such a case packets are often lost, CSMA keeps resending messages and c
 		\label{fig:b-energy}
 		\includegraphics[page=1, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
 	}
-	\caption{Power consumption and node reachability per algorithm}
+	\caption{Power consumption and node Coverage per algorithm}
 	\label{fig:energy-coverage}
 	\end{center}
 	\vspace*{-0.7cm}
@@ -202,11 +202,12 @@ Given that the latter cannot maintain a completely up-to-date backbone, it fails
  \emph{broadcast-freq/control-message-freq}, may impact the decision of which algorithm to use to broadcast.
  }
 %
-%\subsection{Reachability}
 
-\textbf{Reachability.}
+\subsection{Coverage}
+
+%\textbf{Coverage.}
 %
-Figures~\ref{fig:a-coverage},~\ref{fig:b-coverage} depict reachability of nodes of the studied algorithms, in both \emph{static} and \emph{dynamic} scenarios.
+Figures~\ref{fig:a-coverage},~\ref{fig:b-coverage} depict Coverage of nodes of the studied algorithms, in both \emph{static} and \emph{dynamic} scenarios.
 %
 %All these algorithms tend to be reliable in static settings and for densities above 10.
 %
@@ -225,7 +226,7 @@ In particular, \emph{ABBA} and \emph{MPR} are susceptible to this situation.
 %			\label{fig:b-coverage}
 %			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
 %		}
-%		\caption{Node reachability}
+%		\caption{Node Coverage}
 %		\label{fig:coverage}
 %	\end{center}
 %\end{figure*}

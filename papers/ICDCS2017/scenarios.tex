@@ -10,38 +10,38 @@
 
 %
 \changed{
-Our experiments are inspired by a real life scenario: a \textit{manifestation}, where individuals use their phones to communicate with others and the efficient dissemination of messages to participants is critical.
+Our experiments are inspired by a real life scenario: a \emph{manifestation}, where individuals use their phones to communicate with others and the efficient dissemination of messages to participants is critical.
 }
 \deleted{
 Our experiments are inspired by a real life scenario: a physical \emph{demonstration} where the infrastructure for mobile communication is not able to serve the amount of clients and where individuals use their mobile phones in an ad-hoc mode to communicate.
 }
 %
-Our evaluation of broadcast algorithms for MANETs is driven by two variables: \textit{network density} and \textit{nodes mobility}.
+Our evaluation of broadcast algorithms for MANETs is driven by two variables: \emph{network density} and \emph{nodes mobility}.
 %
 \deleted{
-We consider two parameters that influence the performance of broadcast in MANETs: \textit{network density} and \textit{nodes mobility}.
+We consider two parameters that influence the performance of broadcast in MANETs: \emph{network density} and \emph{nodes mobility}.
 }
 %
 In the following, we describe\deleted{ the simulation environment and} the parameters used in our study.
 
-\subsection*{Simulation tool}
-%\noindent
-%\textbf{Simulation tool.}
+%\subsection*{Simulation tool}
+\noindent
+\textbf{Simulation tool.}
 We rely on OMNET++4.6/INET3.3, a simulation framework to evaluate networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
 %
 This tool provides a full implementation of the standard IEEE 802.11g.
 %
 In addition, it contains models to cope with mobility and energy consumption.
 
-%\noindent
-%\textbf{Communication Scenario.}
-\subsection*{Communication Scenario}
+\noindent
+\textbf{Communication Scenario.}
+%\subsection*{Communication Scenario}
 In our experimental scenario, all attendees have mobile phones to communicate through WiFi.
 %
 Participants use such devices to broadcast and they might attempt to do so at nearly the same time.
 %
 \deleted{
-The payload of messages is usually \textit{small} because most of them are generated using the input capabilities of mobile devices.
+The payload of messages is usually \emph{small} because most of them are generated using the input capabilities of mobile devices.
 }
 %
 To simulate these conditions, we set our experiments to perform \nrMessages{} broadcast messages and the frequency between them is $0.5$s.
@@ -53,9 +53,9 @@ Finally, the content of each message is randomly generated, unique and with a le
 %These two values allow us to evaluate the protocols under heavy and light network load.
 %
 
-%\noindent
-%\textbf{Nodes Density.}
-\subsection*{Nodes Density}
+\noindent
+\textbf{Nodes Density.}
+%\subsection*{Nodes Density}
 We are interested in generating scenarios with different nodes densities to simulate more accurately our use case.
 %
 %In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
@@ -80,18 +80,18 @@ We instantiate \densitiesNumber{} networks of \nodesNumber{} nodes each and set 
 This leads to a map size of $354 \times 354$m while the smallest map is $125 \times 125$m.
 
 
-%\noindent
-%\textbf{Mobility.}
-\subsection*{Mobility}
-In our evaluation, we use the \textit{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
+\noindent
+\textbf{Mobility.}
+%\subsection*{Mobility}
+In our evaluation, we use the \emph{truncated-levy walk} (LW) mobility model, as it characterizes the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
 %
 This model generates traces composed of frequent short walks and occasional rides to distant locations.
 %
-We define two kind of scenarios: one without mobility (\textit{static}) and another with mobility (\textit{dynamic}) at a walking speed of $1.4$ $m/s$ -- an estimation of the preferred walking speed~\cite{Browning390}.
+We define two kind of scenarios: one without mobility (\emph{static}) and another with mobility (\emph{dynamic}) at a walking speed of $1.4$ $m/s$ -- an estimation of the preferred walking speed~\cite{Browning390}.
 %
-The generation of \textit{static} scenarios was presented in the previous subsection.
+The generation of \emph{static} scenarios was presented in the previous subsection.
 %
-To generate \textit{dynamic} scenarios, we begin with a \textit{static one}.
+To generate \emph{dynamic} scenarios, we begin with a \emph{static one}.
 %
 Then, we use the LW model to generate mobility traces for each node.
 %
@@ -128,9 +128,9 @@ Afterwards, we perform several checks on the traces to guarantee that: i) the av
 Should any of these checks fail, we discard the mobility traces.
 }
 
-%\noindent
-%\textbf{Energy Settings.}
-\subsection*{Energy Consumption}
+\noindent
+\textbf{Energy Settings.}
+%\subsection*{Energy Consumption}
 \deleted{
 The power consumption must be considered in evaluating protocols that use wireless communication.
 }
@@ -163,30 +163,30 @@ These values are set in the consumption model of INET.
 	\label{tbl:wifi-chip}
 \end{table}
 
-To simulate this chip, we use the \textit{StateBasedEnergyConsumer} model provided by INET.
+To simulate this chip, we use the \emph{StateBasedEnergyConsumer} model provided by INET.
 %
 This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
 }
 %
-\deleted{Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \textit{receiver} and \textit{transceiver}, respectively.
+\deleted{Formally, this energy consumption model uses three functions: $c : M \mapsto \mathbb{R} $, $r_m: \mathbb{R} \mapsto M$ and $t_m: \mathbb{R} \mapsto M$ where $M$ is the set of operation modes of the chip, $c$ is the consumption of the chip on each mode, and functions $r_m, t_m$ map from simulation time to operation modes of the \emph{receiver} and \emph{transceiver}, respectively.
 %
 INET then computes the energy consumption $C(t)$ using:  $C(t)=\int_{0}^{t_\textit{simulation}} (r_m \circ c) (t) + (t_m \circ c) (t) \textit{dt}$.
 %
 The function $m$ is given and INET computes both $r_m$ and $t_m$ during the simulation.}
 
 
-%\noindent
-%\textbf{Algorithm-specific parameters.}
-\subsection*{Algorithm-specific parameters}
+\noindent
+\textbf{Algorithm-specific parameters.}
+%\subsection*{Algorithm-specific parameters}
 The behavior of each protocol depends on the values of its parameters.
 %
 To configure these parameters meaningfully, we choose values previously reported in the literature.
 %
-For instance, we use 0.5s as the \textit{hello time} for \textit{MPR},  \textit{ProbFlood} and \textit{CDS-based}.
+For instance, we use 0.5s as the \emph{hello time} for \emph{MPR},  \emph{ProbFlood} and \emph{CDS-based}.
 %
-In the case of \textit{ABBA}, we use 0.3s as the maximum waiting time.
+In the case of \emph{ABBA}, we use 0.3s as the maximum waiting time.
 %
-Finally, for \textit{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
+Finally, for \emph{ProbFlood} we assign the values $k=15$ and $\sigma=1$.
 
 %\noindent
 %\textbf{Simulation time.}
