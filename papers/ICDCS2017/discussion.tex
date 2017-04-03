@@ -7,9 +7,9 @@ Table~\ref{tbl:rules} summarizes the main results of our experiments.
 %
 It has the form of a set of rules that allows us to choose a good broadcast algorithm for a given deployment scenario.
 %
-For instance, when there is no mobility, it is better to use \textit{MPR} no matter the density.
+For instance, when there is no mobility, it is better to use \emph{MPR} no matter the density.
 %
-As our experiments show, in such scenarios \textit{MPR} consumes less energy, guarantees good reachability and uses efficiently the medium.
+As our experiments show, in such scenarios \emph{MPR} consumes less energy, guarantees good reachability and uses efficiently the medium.
 
 \begin{table}[ht]
 	\footnotesize
@@ -19,10 +19,10 @@ As our experiments show, in such scenarios \textit{MPR} consumes less energy, gu
 		\textbf{Mobility} & \textbf{Density} &  \textbf{Suggestion} & \textbf{Notes}\\
 		
 		\midrule
-		Static & Any & \textit{MPR} & Fewer control messages \\
-		Walking & 5 & \textit{simple flooding} & Best coverage  \\
-		Walking & 10  & \textit{MPR} and \textit{ABBA} &   \\
-		Walking & 15+ & \textit{CDS-based} &  \\
+		Static & Any & \emph{MPR} & Fewer control messages \\
+		Walking & 5 & \emph{simple flooding} & Best coverage  \\
+		Walking & 10  & \emph{MPR} and \emph{ABBA} &   \\
+		Walking & 15+ & \emph{CDS-based} &  \\
 		
 	\end{tabular}
 	
@@ -35,8 +35,8 @@ The rules for deployment scenarios with mobility at walking speed are more compl
 %
 To suggest an algorithm, we first aim at increasing the reachability, then the energy consumption and we consider that the medium usage is the least important of the metrics.
 %
-For that reason, we propose \textit{simple flooding} when the density is very low.
+For that reason, we propose \emph{simple flooding} when the density is very low.
 %
-Finally, the results show that \textit{MPR} and \textit{ABBA} are good alternatives when there is mobility and the density is close to 10.
+Finally, the results show that \emph{MPR} and \emph{ABBA} are good alternatives when there is mobility and the density is close to 10.
 %
-Although for walking speed \textit{ABBA} is outperformed by CDS-based protocols, it is worth considering it as the main alternative for scenarios where nodes move at higher speeds.  
+Although for walking speed \emph{ABBA} is outperformed by CDS-based protocols, it is worth considering it as the main alternative for scenarios where nodes move at higher speeds.  
