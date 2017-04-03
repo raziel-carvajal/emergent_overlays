@@ -345,12 +345,12 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
 plot.simple.coverage <- function(df, algos) {
-  ylabel <- "Reachability (%)"
+  ylabel <- "Coverage (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
   df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
   df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
-  caption <- "Reachability"
+  caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
          geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),size = 4) +        # Large points
