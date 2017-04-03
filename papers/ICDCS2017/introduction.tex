@@ -13,7 +13,8 @@
 The advent of the Internet of Things is leading to a revival of interest in mobile ad-hoc networks (MANETs).
 %
 A MANET is a mobile network that does not rely on a fixed infrastructure.
-It is instead a self-configuring network: 
+It is instead a self-configuring network.
+%
 Nodes connect directly to each other, and there is no guarantee for end-to-end connectivity.
 %
 The topology of a MANET changes frequently due to the mobility of its participants.
@@ -22,14 +23,13 @@ Nodes are connected using a wireless network, there is no central entity in char
 %
 Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor networks to end-user mobile applications, such as systems for traffic jam prevention or alert dissemination.
 
-Many network functions in MANETs, such as routing, rely on the \textit{broadcast operation} that delivers a message from a source node to all other nodes in the network.
+Many network functions in MANETs, such as routing, rely on the \emph{broadcast operation} that delivers a message from a source node to all other nodes in the network.
 %
 A considerable amount of attention has been spent to provide efficient
 broadcast algorithms in MANETs~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %Efficiently supporting broadcast in MANETs has received considerable attention.
 %
-In particular, their efficiency can be achieved from
-different perspectives: 
+In particular, their efficiency can be achieved from different perspectives: 
 %existing solutions aim to:
 
 % \vspace{-1mm}
@@ -37,8 +37,7 @@ different perspectives:
 	\item \textit{Maximize coverage.} Ideally, every broadcast message
     must reach all nodes. Hence, a
     broadcast algorithm is evaluated from its coverage, i.e. the percentage of nodes
-    that receive a broadcast message. Higher the coverage is, better
-    it is.
+    that receive a broadcast message.
 	
 	\item \textit{Minimize energy consumption and bandwidth usage.} The
     amount of energy, processing power and network bandwidth a
@@ -55,11 +54,12 @@ different perspectives:
 %Many algorithms have been proposed to support broadcast in MANETs
 %~\cite{Ovalle-Martinez2006, Qayyum2002, Wu2001, Cartigny:2003:BNR:2727141.2727459, Wu2004, Stojmenovic:2002:DSN:506156.506158}.
 %
-All these algorithms implement the broadcast with a form of
-\emph{controlled flooding} to reach a specific tradeoff: 
-since the transmission range of a source node is typically much
-smaller than the network deployment area, broadcasting is achieved by
-message forwarding between nodes.
+All these algorithms implement broadcasting with a form of
+\emph{controlled flooding}.
+%
+Since the transmission range of a source node is typically much
+smaller than the area of communication, broadcasting is achieved by
+forward messages between nodes.
 
 %
 Broadcast algorithms for MANETs mostly differ in the way they control this forwarding operation.
@@ -69,8 +69,8 @@ Particularly, the control happens in space and time by deciding
 operation should take place.
 %
 Algorithms can also be distinguished based on their use of, or independence from, knowledge about the network topology, nodes locations, and network status.
-
-Broadcast algorithms are largely influenced by external factors such as the density of the network, and the mobility rate of its nodes.
+%
+Broadcast algorithms are largely influenced by external factors such as the density of the network, and the mobility rate of nodes.
 %
 The performance of broadcast protocols has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done on their classification~\cite{Ruiz2015, Fei1311289}.
 %
@@ -81,7 +81,7 @@ However, and to the best of our knowledge, there is still no comprehensive exper
 \noindent
 \textbf{Contributions}.
 %
-Our goal in this paper is to explore the relative performance and costs of representative MANET broadcast algorithms in a variety of deployment conditions, in order to ease the task of selecting the most appropriate algorithm for a given situation.
+We aim to explore the relative performance and costs of representative broadcast algorithms for MANETs in a variety of deployment conditions, in order to ease the task of selecting the most appropriate algorithm for a given situation.
 %
 In addition to simple flooding, we consider four algorithms that are representative of their class:
 \begin{itemize}
@@ -95,15 +95,16 @@ In addition to simple flooding, we consider four algorithms that are representat
 	\item
 	\emph{MPR} (\textit{Multipoint Relaying}) also uses a subset of nodes as relays but employs heuristics aiming at minimizing their number~\cite{Qayyum2002}.
 	
-	\item \emph{ABBA} (\textit{Area Based Beacon less Algorithm}) controls the dissemination process in time, by setting up timers that must elapse with no duplicate reception to trigger the forwarding.
-	A timer duration is inversely proportional to the probability that the same message will be received from the node neighbors~\cite{Ovalle-Martinez2006}.
+	\item \emph{ABBA} (\textit{Area Based Beacon less Algorithm}) controls the dissemination process in time, by setting up timers that must elapse with no duplicate reception to trigger the forwarding~\cite{Ovalle-Martinez2006}.
+	\raziel{I comment this phrase because ABBA is explain in detail later}
+%	A timer duration is inversely proportional to the probability that the same message will be received from the node neighbors~\cite{Ovalle-Martinez2006}.
 
 	\item \emph{ProbFlood} is a probabilistic approach where the likelihood of forwarding a message is proportional to the measured local density around each node~\cite{Cartigny:2003:BNR:2727141.2727459}.
 \end{itemize}
 
 Our study aims at helping practitioners deciding what is the most appropriate algorithm for a given deployment scenario.
 %
-Our results show that there is no one-size-fits-all to broadcast in MANETs.
+We show that there is no one-size-fits-all to broadcast in MANETs.
 %
 % We identify which are the algorithms that better match the studied deployment scenarios. %% ER duplicate of beginning of paragraph
 %
