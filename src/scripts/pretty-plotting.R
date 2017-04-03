@@ -371,8 +371,6 @@ plot.simple.coverage <- function(df, algos) {
 }
 
 
-
-
 #
 # Extract metadata such as the protocols, the densities and a palette for plotting
 #
