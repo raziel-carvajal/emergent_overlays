@@ -80,15 +80,15 @@ echo "Checking ${count} repetitions"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-  ./MapNodeIdProtocolId.sh ${CONF_FILE} ${CONF_NAME}".mapping"
+  withFa=""
   if [ "${algoN}" == "fullyAdaptive" ] ; then
-    echo "Estamos aqui!"
-    exit 1
+    echo "Experiment with FullyAdaptive"
+    ./MapNodeIdProtocolId.sh ${CONF_FILE} ${CONF_NAME}".mapping" 
+    withFa="-mf ${CONF_NAME}.mapping"
   fi
-  Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5
 	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
   #      exit 1
-	results=`Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5 | grep average_values`
+	results=`Rscript extract-charts.R --show-averages ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5 | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 

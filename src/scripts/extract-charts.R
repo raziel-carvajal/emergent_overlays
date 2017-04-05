@@ -82,6 +82,10 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
   print(list_of_sent)
 
+  data.frame(x=ds$vectors[5], y=ds$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, vectorId=df$resultkey)
 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
@@ -554,6 +558,10 @@ main <- function(args) {
 
   #TODO find a way to adapt this parameter in an automatic way
   pl.step <- args$step
+  if (args$mapping_file) {
+      mapNodeAlgoId <- read.table(args$mapping_file)
+
+  }
 
   # mandatory behavior
 
