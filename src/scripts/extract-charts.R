@@ -22,6 +22,8 @@ get.arguments <- function() {
                       help='Density of the topology used')
   parser$add_argument('-ds', '--density-as-string', metavar='density_string', type="character",
                       help='Density of the topology used as string')
+  parser$add_argument('-mf', '--mapping-file', metavar='mapping_file', type="character",
+                      help='File with two columns, NodeId and the protocol ID that runs on that node')
   parser$add_argument('--radio-mode', dest='computeRadioMode', action="store_true",
                       help='Computing the time spent in each radio mode (a debug only option)')
   parser$add_argument('--save-time-power-level', dest='timeOfPowerLevels', action="store_true",
