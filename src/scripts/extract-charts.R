@@ -178,27 +178,42 @@ save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
 }
 
 collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
-  #df <- data.frame(module=msgDs$vectors[5], resultkey=msgDs$vectors[1])
-  #splitted <- strsplit(as.character(df$module), ".", fixed=T)
-  #r <- unlist(lapply(splitted, function(x){ x[2] }))
-  #n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  df <- data.frame(module=broDs$vectors[5], resultkey=broDs$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, resultkey=df$resultkey)
+  
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+ 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
 
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-  #print(n)
-  #print(list_of_received)
-  #print(merge(list_of_received))
-  #stop()
+  if (!is.null(mapNodeAlgoId)) {
+    names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+    mr <- merge(n,mapNodeAlgoId)
+    # create a separate list for each broadcast_msg_received vector
+    list_of_received <- lapply(broDs$vectors$resultkey, function(p){
+                             t <- subset(broDs$vectordata, resultkey == p)
+                             merge(t, mr)
+    })
+  } else {
+    # create a separate list for each broadcast_msg_received vector
+    list_of_received <- lapply(broDs$vectors$resultkey, function(p){
+                             t <- subset(broDs$vectordata, resultkey == p)
+                             t$protocolId <- c(rep("", length(t$resultkey)))
+                             t
+    })
+
+  }
   l.recp <- lapply(id_msgs, function (id) {
     tmp.list <- lapply(list_of_received, function(d){
-      d[d$y == id,]$x 
+     #data.frame(t=d[d$y == id,]$x, protocolId=d[d$y == id,]$protocolId)
+     d[d$y == id,]$protocolId
     })
-    data.frame(dm = sapply(tmp.list, function(d) length(d)) )
+    data.frame(dm = sapply(tmp.list, function(d) length(d)), protocolId=sapply(tmp.list, function(d) unique(d)) )
   })
+
   do.call("rbind", l.recp)
 }
 
@@ -215,25 +230,22 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNode
     names(mapNodeAlgoId) <- c("nodeId", "protocolId")
     mr <- merge(n,mapNodeAlgoId)
     r <- lapply(ts, function(t)  {
-                       z <- lapply(others, function(s) {
-                                               a <- tail(s[s$x <= t,], 1)
-                                               data.frame(y=a$y, vectorId=a$resultkey)
-
-                      })
-                      merge(do.call("rbind", z), mr)
-
-          } )
+      z <- lapply(others, function(s) {
+        a <- tail(s[s$x <= t,], 1)
+        data.frame(y=a$y, vectorId=a$resultkey)
+      })
+      merge(do.call("rbind", z), mr)
+    })
   } else {
     r <- lapply(ts, function(t)  {
-                       z <- lapply(others, function(s) {
-                                               a <- tail(s[s$x <= t,], 1)
-                                               data.frame(y=a$y, vectorId=a$resultkey)
-
-                      })
-                      w <- do.call("rbind", z)
-                      w$protocolId <- c(rep("", length(w$y)))
-                      w
-          } )
+      z <- lapply(others, function(s) {
+        a <- tail(s[s$x <= t,], 1)
+        data.frame(y=a$y, vectorId=a$resultkey)
+      })
+      w <- do.call("rbind", z)
+      w$protocolId <- c(rep("", length(w$y)))
+      w
+    })
   }
   t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
   t
@@ -242,13 +254,18 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNode
 save.duplicated.messages <- function(data, outputPath, expeId){
   dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
   df <- data.frame( whatever = dm)
-  
-  colnames(df) <- c(expeId)
-  write.table(
-            df,
-            file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
-            row.names = F, append = F
-  )
+  u <- unique(data$protocolId)
+  lapply(u, function(protocol){
+    df <- subset(data, protocolId == protocol)
+    name <- gsub('[_]', '', protocol)
+    dupMsgs <- data.frame(wathever=df$dm)
+    colnames(dupMsgs) <- c(paste(expeId, name, sep=""))
+    write.table(
+      dupMsgs,
+      file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
+      row.names = F, append = T
+    )
+  })
 }
 
 
