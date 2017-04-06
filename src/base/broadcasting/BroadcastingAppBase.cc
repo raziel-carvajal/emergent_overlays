@@ -378,7 +378,8 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
       string key(m->getForeignProtocol());
       if (timeoutBorderDet.find(key) != timeoutBorderDet.end()) {
         auto mm = timeoutBorderDet[key];
-        cancelAndDelete(mm);
+        cancelEvent(mm);
+        // cancelAndDelete(mm);
         timeoutBorderDet.erase(key);
       }
     }
