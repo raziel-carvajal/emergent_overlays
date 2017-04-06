@@ -51,6 +51,7 @@ src/base/*/*_m.h
 src/protocols/Makefile
 built/
 experiments/configs/builtConfigs/*.ini
+experiments/configs/builtConfigs/*.density
 experiments/networks/builtTopologies/*.ned
 
 # Non useful experimental results

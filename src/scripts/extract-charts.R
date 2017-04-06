@@ -63,12 +63,8 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNode
   n <- data.frame(nodeId=r, vectorId=df$resultkey)
   vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
 
-  print(n)
   names(mapNodeAlgoId) <- c("nodeId", "protocolId")
-  print(mapNodeAlgoId)
   mr <- merge(n,mapNodeAlgoId)
-  print(mr)
-  print(vId)
   r <- lapply(ts, function(t)  {
                      z <- lapply(others, function(s) {
                                              a <- tail(s[s$x <= t,], 1)
@@ -227,6 +223,9 @@ save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
 save.duplicated.messages <- function(data, outputPath, expeId){
   dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
   df <- data.frame( whatever = dm)
+  print("hola")
+  print(df)
+  
   colnames(df) <- c(expeId)
   write.table(
             df,
@@ -614,12 +613,13 @@ main <- function(args) {
 
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
-  stop()
-  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
-  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-  # FIXME:
+  
+  #save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
+  #save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
+  #save.coverage(bs, args$simTime, args$outputPath, args$configuration)
+  ## FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
+  stop()
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior
