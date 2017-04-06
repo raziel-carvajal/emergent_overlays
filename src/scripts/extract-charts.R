@@ -53,34 +53,6 @@ load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
 }
 
 
-powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNodeAlgoId=NULL) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
-  # vector of power levels for each instant of time
-  df <- data.frame(module=ds$vectors[5], resultkey=ds$vectors[1])
-  splitted <- strsplit(as.character(df$module), ".", fixed=T)
-  r <- unlist(lapply(splitted, function(x){ x[2] }))
-  n <- data.frame(nodeId=r, vectorId=df$resultkey)
-  vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
-
-  print(n)
-  names(mapNodeAlgoId) <- c("nodeId", "protocolId")
-  print(mapNodeAlgoId)
-  mr <- merge(n,mapNodeAlgoId)
-  print(mr)
-  print(vId)
-  r <- lapply(ts, function(t)  {
-                     z <- lapply(others, function(s) {
-                                             a <- tail(s[s$x <= t,], 1)
-                                             data.frame(y=a$y, vectorId=a$resultkey)
-
-                    })
-                    merge(do.call("rbind", z), mr)
-
-        } )
-  t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
-  t
-}
 
 getRecOrTraTimeByNode_Session <- function(rcvOrTrsMsgsDs, nodes, broadcastSessions){
   lapply(nodes, function(n){
@@ -152,24 +124,6 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 }
 
 
-collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
-  # create a separate list for each msg_sent vector
-  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-
-  l.recp <- lapply(id_msgs, function (id) {
-						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
-						data.frame(dm = sapply(tmp.list, function(d) length(d)) )
-			}
-  )
-
-  do.call("rbind", l.recp)
-}
 
 
 export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
@@ -223,12 +177,71 @@ save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
   )
 }
 
+collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
+  #df <- data.frame(module=msgDs$vectors[5], resultkey=msgDs$vectors[1])
+  #splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  #r <- unlist(lapply(splitted, function(x){ x[2] }))
+  #n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  # create a separate list for each msg_sent vector
+  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+  # recover list of msg id
+  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+
+  # create a separate list for each broadcast_msg_received vector
+  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
+  #print(n)
+  #print(list_of_received)
+  #print(merge(list_of_received))
+  #stop()
+  l.recp <- lapply(id_msgs, function (id) {
+    tmp.list <- lapply(list_of_received, function(d){
+      d[d$y == id,]$x 
+    })
+    data.frame(dm = sapply(tmp.list, function(d) length(d)) )
+  })
+  do.call("rbind", l.recp)
+}
+
+powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNodeAlgoId=NULL) {
+  # create a separate list for each power level
+  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+  # vector of power levels for each instant of time
+  df <- data.frame(module=ds$vectors[5], resultkey=ds$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
+  if (!is.null(mapNodeAlgoId)) {
+    names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+    mr <- merge(n,mapNodeAlgoId)
+    r <- lapply(ts, function(t)  {
+                       z <- lapply(others, function(s) {
+                                               a <- tail(s[s$x <= t,], 1)
+                                               data.frame(y=a$y, vectorId=a$resultkey)
+
+                      })
+                      merge(do.call("rbind", z), mr)
+
+          } )
+  } else {
+    r <- lapply(ts, function(t)  {
+                       z <- lapply(others, function(s) {
+                                               a <- tail(s[s$x <= t,], 1)
+                                               data.frame(y=a$y, vectorId=a$resultkey)
+
+                      })
+                      w <- do.call("rbind", z)
+                      w$protocolId <- c(rep("", length(w$y)))
+                      w
+          } )
+  }
+  t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
+  t
+}
 
 save.duplicated.messages <- function(data, outputPath, expeId){
   dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
   df <- data.frame( whatever = dm)
-  print("hola")
-  print(df)
   
   colnames(df) <- c(expeId)
   write.table(
@@ -555,8 +568,8 @@ average.values <- function(pl, broadcast.info, max) {
 
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
-
-	pc <- unlist(lapply(pl, sum))/nr.nodes
+        tmp.list <- lapply(pl, function(i) i$y)
+	pc <- unlist(lapply(tmp.list, sum))/nr.nodes
 
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
@@ -591,6 +604,8 @@ main <- function(args) {
   pl.step <- args$step
   if (!is.null(args$mapping_file)) {
       mapNodeAlgoId <- read.table(args$mapping_file)
+  } else {
+    mapNodeAlgoId <- NULL
   }
 
   # mandatory behavior
@@ -613,8 +628,7 @@ main <- function(args) {
   print("DONE!")
 
   print("Collecting information on number of duplicated messages")
-	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
-
+  dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime, mapNodeAlgoId=mapNodeAlgoId)
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
   # stop()
@@ -623,7 +637,6 @@ main <- function(args) {
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
-  stop()
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior
