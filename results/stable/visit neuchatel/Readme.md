@@ -1,0 +1,8 @@
+ - Network with 494 nodes
+ - A square in the middle with high density
+ - The rest with sparse density
+ - half of the nodes in the middle, the rest outside
+ - 50 btoadcast sessions
+ - Abba in the dense area, mpr in sparse area
+ - messages start in mpr
+ - 5 messages, one every 0.05 seconds
