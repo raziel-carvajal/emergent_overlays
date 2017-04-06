@@ -392,8 +392,12 @@ load.dataset.with.metadata <- function(path, filename, metadata, excluded.densit
   file <- paste(path, filename, sep = '') # load battery consumption
   data <- import.data(file)
   if (is.null(metadata)) {
-    metadata = extract.metadata(data, excluded.densities)
-    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*length(metadata$densities), height=4)
+    metadata <- extract.metadata(data, excluded.densities)
+    nr.elements <- length(metadata$densities)
+    if (nr.elements < 3) {
+      nr.elements <- 3;
+    }
+    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*nr.elements, height=4)
   }
   l <- list(data, metadata)
   names(l) <- c("data", "metadata")

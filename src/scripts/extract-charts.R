@@ -88,8 +88,9 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each broadcast_msg_received vector
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-  #print("feo2")
-  #print(list_of_received)
+  # print("feo2")
+  # print(broDs)
+  # print(list_of_received)
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
@@ -108,8 +109,8 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 
   l.recp <- do.call("rbind", l.recp)
+  # print(l.recp)
 
-  #print(l.recp)
   #print(sending.time)
 
   broadcasting.time <- data.frame(
@@ -182,10 +183,10 @@ collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAl
   splitted <- strsplit(as.character(df$module), ".", fixed=T)
   r <- unlist(lapply(splitted, function(x){ x[2] }))
   n <- data.frame(nodeId=r, resultkey=df$resultkey)
-  
+
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
- 
+
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
 
@@ -204,6 +205,7 @@ collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAl
                              t$protocolId <- c(rep("", length(t$resultkey)))
                              t
     })
+    # print(list_of_received)
 
   }
   l.recp <- lapply(id_msgs, function (id) {
@@ -211,7 +213,9 @@ collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAl
      #data.frame(t=d[d$y == id,]$x, protocolId=d[d$y == id,]$protocolId)
      d[d$y == id,]$protocolId
     })
-    data.frame(dm = sapply(tmp.list, function(d) length(d)), protocolId=sapply(tmp.list, function(d) unique(d)) )
+    # FIXME: the hack in the end doesn't work if you are in fully adaptive case
+    dd <- data.frame(dm = sapply(tmp.list, function(d) length(d)), protocolId=sapply(tmp.list, function(d) if (length(d) >0) unique(d) else "" ) )
+    dd
   })
 
   do.call("rbind", l.recp)
