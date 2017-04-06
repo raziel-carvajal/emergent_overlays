@@ -63,16 +63,20 @@ powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNode
   n <- data.frame(nodeId=r, vectorId=df$resultkey)
   vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
 
+  print(n)
   names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+  print(mapNodeAlgoId)
   mr <- merge(n,mapNodeAlgoId)
+  print(mr)
+  print(vId)
   r <- lapply(ts, function(t)  {
                      z <- lapply(others, function(s) {
                                              a <- tail(s[s$x <= t,], 1)
                                              data.frame(y=a$y, vectorId=a$resultkey)
-                     
-                    }) 
+
+                    })
                     merge(do.call("rbind", z), mr)
-                    
+
         } )
   t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
   t
@@ -603,7 +607,7 @@ main <- function(args) {
   pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step, mapNodeAlgoId=mapNodeAlgoId)
   print("DONE!")
 
-  
+
   print("Computing maximal reception delay")
   bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
   print("DONE!")
@@ -613,11 +617,11 @@ main <- function(args) {
 
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
-  
-  #save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-  #save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
-  #save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-  ## FIXME:
+  # stop()
+  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
+  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
+  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
+  # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
   stop()
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)

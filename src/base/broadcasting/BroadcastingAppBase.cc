@@ -326,11 +326,12 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 tmp->setForeignProtocol(foreign_prot);
                 tmp->setTargets(targets);
                 send_package(tmp);
-                free(foreign_prot);
                 timeoutBorderDet.erase(foreign_prot);
-                cancelAndDelete(msg);
                 lastForeignHelloSenders = customOfficers[foreign_prot];
                 customOfficers[foreign_prot].clear();
+
+                free(foreign_prot);
+                cancelAndDelete(msg);
               }
             }
             break;
@@ -378,8 +379,8 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
       string key(m->getForeignProtocol());
       if (timeoutBorderDet.find(key) != timeoutBorderDet.end()) {
         auto mm = timeoutBorderDet[key];
-        cancelEvent(mm);
-        // cancelAndDelete(mm);
+        // cancelEvent(mm);
+        cancelAndDelete(mm);
         timeoutBorderDet.erase(key);
       }
     }
