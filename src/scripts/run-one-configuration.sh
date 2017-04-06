@@ -81,9 +81,9 @@ END=$(($count))
 
 for ((i=0;i<END;i++)); do
   withFa=""
-  if [ "${algoN}" == "fullyAdaptive" ] ; then
-    echo "Experiment with FullyAdaptive"
-    ./MapNodeIdProtocolId.sh ${CONF_FILE} ${CONF_NAME}".mapping" 
+  if [ "${algoN}" == "fullyAdaptive" ]; then
+    echo "Experiment with FullyAdaptive" >> log.txt
+    ./MapNodeIdProtocolId.sh ${CONF_FILE} ${CONF_NAME}".mapping"
     withFa="-mf ${CONF_NAME}.mapping"
   fi
 	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
