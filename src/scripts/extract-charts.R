@@ -152,7 +152,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 }
 
 
-collect.duplicated.messages <- function(msgDs, broDs, simulation.time) {
+collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
 
