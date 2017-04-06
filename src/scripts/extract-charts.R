@@ -53,11 +53,33 @@ load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
 }
 
 
-powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
+powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNodeAlgoId=NULL) {
   # create a separate list for each power level
   others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
   # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
+  df <- data.frame(module=ds$vectors[5], resultkey=ds$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
+
+  print(n)
+  names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+  print(mapNodeAlgoId)
+  mr <- merge(n,mapNodeAlgoId)
+  print(mr)
+  print(vId)
+  r <- lapply(ts, function(t)  {
+                     z <- lapply(others, function(s) {
+                                             a <- tail(s[s$x <= t,], 1)
+                                             data.frame(y=a$y, vectorId=a$resultkey)
+                     
+                    }) 
+                    merge(do.call("rbind", z), mr)
+                    
+        } )
+  t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
+  t
 }
 
 getRecOrTraTimeByNode_Session <- function(rcvOrTrsMsgsDs, nodes, broadcastSessions){
@@ -80,22 +102,22 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-  print(list_of_sent)
-
-  data.frame(x=ds$vectors[5], y=ds$vectors[1])
-  splitted <- strsplit(as.character(df$module), ".", fixed=T)
-  r <- unlist(lapply(splitted, function(x){ x[2] }))
-  n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  #print(list_of_sent)
+  #print(msgDs)
+  #data.frame(x=ds$vectors[5], y=ds$vectors[1])
+  #splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  #r <- unlist(lapply(splitted, function(x){ x[2] }))
+  #n <- data.frame(nodeId=r, vectorId=df$resultkey)
 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-  print("feo")
-  print(id_msgs)
+  #print("feo")
+  #print(id_msgs)
 
   # create a separate list for each broadcast_msg_received vector
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-  print("feo2")
-  print(list_of_received)
+  #print("feo2")
+  #print(list_of_received)
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
@@ -115,8 +137,8 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   l.recp <- do.call("rbind", l.recp)
 
-  print(l.recp)
-  print(sending.time)
+  #print(l.recp)
+  #print(sending.time)
 
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id
@@ -216,13 +238,19 @@ save.duplicated.messages <- function(data, outputPath, expeId){
 
 save.power.level <- function(power.level, outputPath, expeId){
   pl <- power.level[lapply(power.level, length) > 0]
-  powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(tail(pl, 1)))) )
-  colnames(powerLevelInfo) <- c(expeId)
-  write.table(
-            powerLevelInfo,
-            file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-            row.names = F, append = F
-  )
+  taR <- tail(pl, 1)[[1]]
+  u <- unique(taR$protocolId)
+  lapply(u, function(protocol) {
+    df <- subset(taR, protocolId == protocol)
+    powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(df$y))) )
+    name <- gsub('[_]', '', protocol)
+    colnames(powerLevelInfo) <- c(paste(expeId, name, sep=""))
+    write.table(
+              powerLevelInfo,
+              file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
+              row.names = F, append = T
+    )
+  })
 }
 
 
@@ -558,9 +586,8 @@ main <- function(args) {
 
   #TODO find a way to adapt this parameter in an automatic way
   pl.step <- args$step
-  if (args$mapping_file) {
+  if (!is.null(args$mapping_file)) {
       mapNodeAlgoId <- read.table(args$mapping_file)
-
   }
 
   # mandatory behavior
@@ -574,9 +601,10 @@ main <- function(args) {
   print(paste("Loading power consumption data file:", args$file))
   powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
 
-  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
+  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step, mapNodeAlgoId=mapNodeAlgoId)
   print("DONE!")
 
+  
   print("Computing maximal reception delay")
   bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
   print("DONE!")
@@ -586,6 +614,7 @@ main <- function(args) {
 
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
+  stop()
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)

@@ -21,4 +21,4 @@ set -o nounset                              # Treat unset variables as an error
 
 fileName=$1
 outFile=$2
-grep typename -F "${fileName}" | grep -E "hostR[2-9]+" | awk -F '.' '{print $2, $4}' | awk -F ' ' '{print $1, $4}' >${outFile}
+grep typename -F "${fileName}" | grep -E "hostR[0-9]+" | awk -F '.' '{print $2, $4}' | awk -F ' ' '{print $1, $4}' >${outFile}
