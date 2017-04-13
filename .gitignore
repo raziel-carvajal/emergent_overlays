@@ -89,3 +89,12 @@ papers/ICDCS2017/main.blg
 papers/ICDCS2017/main.log
 papers/ICDCS2017/main.pdf
 papers/ICDCS2017/main.synctex.gz
+
+# Draft for adaptation paper
+papers/adaptation_paper_draft/main.aux
+papers/adaptation_paper_draft/main.bbl
+papers/adaptation_paper_draft/main.blg
+papers/adaptation_paper_draft/main.log
+papers/adaptation_paper_draft/main.pdf
+papers/adaptation_paper_draft/main.out
+papers/adaptation_paper_draft/main.synctex.gz

@@ -1,0 +1,45 @@
+%!TEX root = main.tex
+
+\section{Related Work in adaptive-based broadcast algorithms}
+In this section we are going to describe any work we consider similar to our solution.
+
+\subsection{Hypergossiping}
+Hypergossiping~\cite{hypergossiping} is a combination of two techniques: Probabilistic Flooding (PF) ~\cite{BroadcastStormProblem} (called gossiping at the paper) and HyperFlooding (HF) ~\cite{FloodingDiscovery}.
+%
+It is claimed to be a \emph{generalized broadcast technique} because copes with networks partitions and avoids \emph{broadcast storms}\cite{BroadcastStormProblem}.
+%
+While PF is used to disseminate broadcast messages within partitions, HF and their Partition Detection Technique (PDT) is used to inform border nodes \emph{when} and \emph{what} to share.
+%
+Hypergossiping doesn't change the transmission range of nodes, additionally, this technique piggybacks local information and uses the following meta-data (commonly used in overlay-based and non overlay-based broadcasting techniques for MANET's):
+
+\begin{itemize}
+	\item control messages to get one-hop neighbors
+	\item timers to control when to forward in PF and HF
+	\item probabilistic schemes to avoid broadcast storms
+	\item local data structures to have an history of received broadcast
+\end{itemize}
+
+
+
+\subsubsection{Comparison with our work}
+This work and our ICDCS paper is staggeringly similar:
+\begin{itemize}
+	\item communication area of 1K m $\times$ 1K m with 500 nodes
+	\item experimentation with a group of densities and the \emph{random waypoint} mobility model
+	\item simulations with NS2
+	\item utilization of an implementation of the 802.11 standard and CSMA as congestion control protocol
+\end{itemize}
+
+
+
+\subsection{Adaptive counter-based broadcasting scheme in mobile ad hoc networks}
+~\cite{AdaptiveCounterBasedApproach}\raziel{Reference to read. This work is one of the most recent ones in adaptation. The technique uses dynamic thresholds to cope with mobility and density, but the heterogenous context in MANET's is not aborded.}
+
+\subsection{ProbFlood}
+~\cite{ProbFlood} is a probabilistic flooding technique that uses nodes densities ()
+
+\subsection{General notes in Related Work}
+\begin{itemize}
+	\item \raziel{Apart from ~\cite{Bakhouya:2011:AAI:2030797.2030830} published in 2015, which proposes an adaptive solution to broadcast in Vehicular had hoc Networks, there is a gap between 2007 and 2017 where I can not find works on adaptation to broadcast in heterogeneous MANET's}
+	\item \raziel{The consulted literature let clear that every adaptive technique to broadcast in MANET's requires a mixed solution}
+\end{itemize}

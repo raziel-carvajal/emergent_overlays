@@ -1,0 +1,21 @@
+%!TEX root = main.tex
+
+\section{Our adaptive-based broadcast algorithm for heterogeneous MANET's}
+
+\subsection{Cost of control messages}
+Control messages serve to fetch fresh information about nodes' surroundings with the aim of deciding when to forward broadcast messages.
+%
+Control messages are critical in the latest adaptive-based techniques to broadcast in homogeneous MANET's ~\cite{hypergossiping, ProbFlood} \raziel{If you like the idea, add more referece to adaptive-based approaches, otherwise, to contradict this idea feel free to reference works where adaptation takes place without the use of control messages}.
+%
+However, these techniques perform a pure flooding approach in a periodic way to disseminate control messages.
+%
+As a result, \emph{storms of broadcast and control messages} reduces network coverage \raziel{I propose to rename "network coverage" as "reachability", the latter has been used by the community in seminal works ~\cite{hypergossiping, BroadcastStormProblem}. Reachability will give us the proportion of nodes that successfully received a broadcast message in all partitions of our experimental scenario. Or, we can keep add "reachability" to our list of broadcast metrics.}
+
+In \OurAdaptiveTech, we propose the use of a beacon-less technique (\raziel{An augmented version of ABBA where timers are inversaly proportinal to nodes' density. Particulary, we are interested in maintaning the list of neighbors on each node. Additionally, the upperbounds values to set timers can be dinamically changed too for speeding-up the dissemination time; this is important when a switch of context take place.}) to disseminate control messages with the aim of having updated lists of nodes' neighbors. We formulate the next hypothesis: \textbf{the overall energy consumption of nodes used by a the periodic simple-flooding technique to disseminate control messages is bigger than the cost of control messages dissemination with ABBA $+$ $f_{GPS}(N)$}, where $f_{GPS}$ approximates the cost of fetching $N$' GPS coordinates periodically. This frequency is proportional to $N$ velocity (\raziel{we can gatter this information from mobile's accellerometer}). This will require a deep analysis in ABBA (\raziel{in form a table to map the inpact in our broadcast metrics and the different tunes of ABBA}).
+
+\paragraph{Drawbacks} ABBA requires nodes position to its functioning. 
+
+\subsection{How to get a fresh list of nodes' neighbors?}
+
+\subsection{When to perform a switch of context (change of algorithm)?}
+\subsection{How to disseminate SWITCH\_OF\_CONTEXT messages?}

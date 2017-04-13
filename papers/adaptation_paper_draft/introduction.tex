@@ -1,0 +1,34 @@
+%!TEX root = main.tex
+
+\section{Introduction}
+A Mobile Ad-Hoc Network (MANET) relies on broadcast for message dissemination.
+%
+Due to the nature of self-organization in MANET's, we are interested in decentralized broadcasting protocols.
+%
+There is a large variety of these protocols in the literature.
+%
+Following the taxonomy in~\cite{SurveyRuiz}, the classification of broadcast approaches is two-fold. 
+%
+Firstly, \emph{overlay-based protocols} form a backbone of nodes where its members are responsible of forwarding any incoming message; any other node out of the backbone act as pure receiver.
+%
+The second category of protocols piggyback the local state of nodes (GPS coordinates, registered collisions, etc.) in broadcast messages to decide \emph{when} to forward.
+%
+A typical deployment scenario to broadcast in MANET's is driven by nodes' \emph{density} and \emph{mobility} where only one protocol is operating on every node.
+
+As a result of node's mobility, some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol strongly impacts its performance and nodes' limited resources (particularly, the remaining power on batteries).
+%
+In fact, a recent study~\cite{DensityMobDrivenEval} reveals that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+%
+We believe that the use of an adaptive-based approach to chose (in run time) the appropriate broadcast technique to fit the dynamics in one MANET, it is a main concern.
+
+\paragraph{Motivation}
+Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
+%
+To avoid re-inventing the wheel, we do take advantage of the legacy implementations of broadcast algorithms one can find in the literature.
+%
+This work is a continuation of our previous research~\cite{DensityMobDrivenEval} to answer the following questions:
+\begin{itemize}[{$\triangleright$}]
+	\item \textbf{How nodes realize that a different broadcast technique (switch of context) must be deployed?}
+	\item \textbf{When to perform a switch of context and how to propagate this action to others?}
+	\item \textbf{Which are the nodes that perform a switch of context?}
+\end{itemize}
