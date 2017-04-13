@@ -2,29 +2,42 @@
 
 \section{Introduction}
 A Mobile Ad-Hoc Network (MANET) relies on broadcast for message dissemination.
+\er{circular argument: broadcast and message diss. are the same thing. Rather write that broadcast is a fundamental operation in MANETs.}
 %
 Due to the nature of self-organization in MANET's, we are interested in decentralized broadcasting protocols.
+\er{self-organization is a solution, not a problem. You want to write that the lack of possibility to have a complete knowledge of the participants, their position and their communication possibilities make the use of decentralized protocols the only possibility (even if this is rather obvious)}
 %
 There is a large variety of these protocols in the literature.
 %
 Following the taxonomy in~\cite{SurveyRuiz}, the classification of broadcast approaches is two-fold. 
+\er{broadcast algorithms can be categorized in two main families.}
 %
-Firstly, \emph{overlay-based protocols} form a backbone of nodes where its members are responsible of forwarding any incoming message; any other node out of the backbone act as pure receiver.
+First, \emph{overlay-based protocols} form a backbone of nodes where its members are responsible of forwarding any incoming message; any other node out of the backbone act as pure receiver.
+\er{you can insist on the notion of structure that is created and maintained outside of actual broadcast}
 %
 The second category of protocols piggyback the local state of nodes (GPS coordinates, registered collisions, etc.) in broadcast messages to decide \emph{when} to forward.
+\er{these are already optimizations. The second category, you should write, does not create a structure between nodes and uses  flooding. The flooding can be controlled using information about the local nodes or about the forwarding nodes, but does not use pre-collected information as for the overlay-based ones.}
+\er{I would swap the two categories.}
 %
 A typical deployment scenario to broadcast in MANET's is driven by nodes' \emph{density} and \emph{mobility} where only one protocol is operating on every node.
+\er{unclear. A typical scenario is driven? You want to write the conclusion of the ICDCS paper here. Not one size fits all.}
 
-As a result of node's mobility, some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol strongly impacts its performance and nodes' limited resources (particularly, the remaining power on batteries).
+As a result of nodes mobility, 
+\er{this is not a result of node mobility. This is a result of the fact that some regions are more popular than others for a variety of reasons}
+some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol strongly impacts its performance and nodes' limited resources (particularly, the remaining power on batteries).
+\er{this is a bit too short for someone who is not in the area to understand the difference in resource usage between protocols. We discussed for instance the fact that in dense/less mobile areas it is likely that flooding will lead to lots of collisions, while for highly-mobile areas emerging an overlay that is soon deprecated makes little sense. You can reuse these arguments and present them in an intuitive manner to convey the idea that protocols have their optimal target deployment conditions.}
 %
 In fact, a recent study~\cite{DensityMobDrivenEval} reveals that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
 %
-We believe that the use of an adaptive-based approach to chose (in run time) the appropriate broadcast technique to fit the dynamics in one MANET, it is a main concern.
+We believe that the use of an adaptive-based approach to chose (at run time) the appropriate broadcast technique to fit the dynamics in one MANET, it is a main concern.
+\er{why ``is a concern''? This is our objective, not a concern. I would elaborate a bit more on this but in the following paragraph.}
 
 \paragraph{Motivation}
 Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
+\er{I don't believe this is needed. This is actually confusing: an heterogeneous MANET means a MANET with nodes that are heterogeneous. This is not what we use. I would rather introduce the problem of adaptation explaining that it requires observation about the environment, decision making mechanisms and policies. And that in a fully decentralized setting where resource usage is limited these are difficult aspects.}
 %
 To avoid re-inventing the wheel, we do take advantage of the legacy implementations of broadcast algorithms one can find in the literature.
+\er{remove this last sentence (and avoid cliché wordings if possible)}
 %
 This work is a continuation of our previous research~\cite{DensityMobDrivenEval} to answer the following questions:
 \begin{itemize}[{$\triangleright$}]
@@ -32,3 +45,4 @@ This work is a continuation of our previous research~\cite{DensityMobDrivenEval}
 	\item \textbf{When to perform a switch of context and how to propagate this action to others?}
 	\item \textbf{Which are the nodes that perform a switch of context?}
 \end{itemize}
+\er{we need quite more context and details for the 3 sub-objectives.}
