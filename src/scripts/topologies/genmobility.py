@@ -55,7 +55,8 @@ def read_positions(positionsFile):
     pass
 
 
-def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000, test=lambda p: True):
+def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map_y=100, sim_time=6000, mobility_map=None, testValidPosition=None, test=lambda p: True):
+    assert mobility_map is None or len(mobility_map) == len(positions)
     # np.random.seed(0xffff)
     # Truncated Levy-Walk model, FL_EXP=-3.9 is way to "force" the fligth
     # length to a value close to 1.4 m/s (prefered human walk speed)
@@ -69,16 +70,30 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
     rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
     step_time = 1. / float(sps)
 
+    lastValidxy = [p for p in positions]
+
     with open(outputFile, 'w') as f:
-        f.write('%d\n' % nr_nodes)
+        f.write('%d\n' % (len(positions)))
         f.write('%f\n' % step_time)
         connected = True
+        for (x, y) in lastValidxy:
+            f.write('%f %f\n' % (x, y))
+
         counter = 0
         times = 0.0
         before = 0.0
         for step in range(0, sim_time*sps):
             now = float(step)/float(sps)
             xy = rw.next()
+            # keep static nodes in their position
+            if mobility_map is not None:
+                xy = [ xy[ii] if mobility_map[ii] else positions[ii] for ii in range(0, len(mobility_map)) ]
+
+
+            for (idx, point) in enumerate(xy):
+                if testValidPosition is None or testValidPosition((idx, xy[idx])):
+                    lastValidxy[idx] = [e for e in xy[idx]]
+
             b = test(xy)
             if not b:
                 if connected:
@@ -97,7 +112,7 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
                 logger.info('Simulation Time %s minutes' % (step / (sps*60)))
 
             if connected:
-                for idx, (x, y) in enumerate(xy):
+                for (x, y) in lastValidxy:
                     f.write('%f %f\n' % (x, y))
 
         if not connected:

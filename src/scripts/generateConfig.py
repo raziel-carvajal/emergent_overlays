@@ -49,7 +49,7 @@ def generate_density_aware_config(network_path, network_name, template_file):
             self.density = density
 
         def algorithm(self):
-            return "mprt2" if self.density < 10 else "abba2"
+            return "mprt2" if self.density > 10 else "flooding"
 
     nodes = [Node(line[0].strip(), int(line[1].strip())) for line in lines]
 

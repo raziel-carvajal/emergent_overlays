@@ -340,31 +340,57 @@ def build_handcrafted_topology(args, densities):
     w1, h1 = compute_map_size(trRan, int(args.nr_nodes/2), d1)
 
     print (w0, h0)
-    print (w1, h1)
 
     positions = []
     generated_densities = []
 
+    # nodes with first density
     p1, n1 = fillSurfaceWithFixedRadioAndSize(trRan, 0, 0, w0, h0, d0)
     positions.extend(p1)
+
+    # nodes with second density
     x1 = int(w0/2 - w1/2)
     y1 = int(h0/2 - h1/2)
+    print (x1, y1, x1 + w1, y1 + h1)
     p2, n1 = fillSurfaceWithFixedRadioAndSize(trRan, x1, y1, w1, h1, d1)
     positions.extend(p2)
 
-    def inInner(p, x, y, w, h):
-        return p[0] >= x and p[0] <= (w+x) and p[1] >= y and p[1] <= (h+y)
+    def inInner(ppp, xx, yy, ww, hh):
+        b = ppp[0] >= xx and ppp[0] <= (ww+xx) and ppp[1] >= yy and ppp[1] <= (hh+yy)
+        # if not b and ppp[0] >= xx and ppp[0] <= (ww+xx):
+        # print (ppp[0], ppp[1], b, xx, yy, ww+xx, hh+yy)
+        return b
 
-    generated_densities.extend([(d1 if inInner(p1[ii], x1, y1, w1, h1) else d0) for ii in range(0, len(p1))])
-    generated_densities.extend([d1 for ii in range(0, len(p2))])
+    generated_densities.extend([(d1 if inInner(point, x1, y1, w1, h1) else d0) for point in positions])
+
+    mobility_map = [ (generated_densities[ii] == d0) for ii in range(0, len(generated_densities))]
 
     print "Fixing connectivity"
     connected = guarentee_connectivity(positions, trRan)
 
-    #print "{} nodes unassigned".format(n)
-
-    create_nedfile(positions, int(w0), int(h0), 0, args)
+    idx_source = create_nedfile(positions, int(w0), int(h0), 0, args)
     create_density_file(generated_densities, int(w0), int(h0), 0, trRan, 0)
+
+
+    def IsValidPosition(tu):
+        idx, point = tu
+        if generated_densities[idx] == d1:
+            return False
+        return not inInner(point, x1, y1, w1, h1)
+
+    if mobility:
+        nr_nodes = len(positions)
+        print "Generating mobility"
+        filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, 0, trRan, int(w0), int(h0), 0)
+        while True:
+            b = genmobility.generateMobility(sps=10, nr_nodes=len(positions),
+                                             map_x=int(w0), map_y=int(h0),
+                                             sim_time=200, positions=positions, mobility_map=mobility_map,
+                                             outputFile=filename,
+                                             testValidPosition=IsValidPosition,
+                                             test=get_still_connected_callback(trRan, idx_source))
+            if b:
+                break
 
     kdTree.generate_image(None, w0, h0, "topology{}.png".format(0), positions, False)
     pass
@@ -436,7 +462,7 @@ if __name__ == '__main__':
     if non_uniform:
         build_non_uniform_topologies(args, densities, nr_topologies=1)
     elif handcrafted:
-	build_handcrafted_topology(args, [min_density, max_density])
+	    build_handcrafted_topology(args, [min_density, max_density])
     else:
         build_uniform_topologies(args, densities)
 

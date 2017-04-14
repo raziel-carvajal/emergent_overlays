@@ -133,11 +133,11 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
   broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
   broDupMsgsInfo <- data.frame( whatever = c(broDupMsgs) )
   colnames(broDupMsgsInfo) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broDupMsgsInfo,
             file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
             row.names = F, append = F
-  )
+  ))
 
 }
 
@@ -149,33 +149,33 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   broSes <- valid.time * 1000
   broSes <- data.frame( whatever = broSes)
   colnames(broSes) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broSes,
             file = build.filename(outputPath, "broadcastSession", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 save.coverage <- function(broadcast.info, max, outputPath, expeId){
   cov <- broadcast.info$n.received
   broSes <- data.frame( whatever = cov )
   colnames(broSes) <- c(expeId)
-  write.table(
+  (write.table(
             broSes,
             file = build.filename(outputPath, "coverage", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 
 save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
   broSes <- data.frame( whatever = broadcast.info$n.sent)
   colnames(broSes) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broSes,
             file = build.filename(outputPath, "relays", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
@@ -264,11 +264,11 @@ save.duplicated.messages <- function(data, outputPath, expeId){
     name <- gsub('[_]', '', protocol)
     dupMsgs <- data.frame(wathever=df$dm)
     colnames(dupMsgs) <- c(paste(expeId, name, sep=""))
-    write.table(
+    suppressWarnings(write.table(
       dupMsgs,
       file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
       row.names = F, append = T
-    )
+    ))
   })
 }
 
@@ -282,11 +282,11 @@ save.power.level <- function(power.level, outputPath, expeId){
     powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(df$y))) )
     name <- gsub('[_]', '', protocol)
     colnames(powerLevelInfo) <- c(paste(expeId, name, sep=""))
-    write.table(
+    suppressWarnings(write.table(
               powerLevelInfo,
               file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
               row.names = F, append = T
-    )
+    ))
   })
 }
 
@@ -295,11 +295,11 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
   t.pl <- time.of.data[lapply(data, length) > 0]
   t.powerLevelInfo <- data.frame( whatever = c(tail(t.pl, 1)) )
   colnames(t.powerLevelInfo) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             t.powerLevelInfo,
             file = build.filename(outputPath, "batteryConsumptionDistributionTime", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 
