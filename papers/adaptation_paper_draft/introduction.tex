@@ -27,18 +27,58 @@ As a result of nodes mobility,
 some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol strongly impacts its performance and nodes' limited resources (particularly, the remaining power on batteries).
 \er{this is a bit too short for someone who is not in the area to understand the difference in resource usage between protocols. We discussed for instance the fact that in dense/less mobile areas it is likely that flooding will lead to lots of collisions, while for highly-mobile areas emerging an overlay that is soon deprecated makes little sense. You can reuse these arguments and present them in an intuitive manner to convey the idea that protocols have their optimal target deployment conditions.}
 %
-In fact, a recent study~\cite{DensityMobDrivenEval} reveals that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
-%
-We believe that the use of an adaptive-based approach to chose (at run time) the appropriate broadcast technique to fit the dynamics in one MANET, it is a main concern.
+This behavior is confirmed in a recent study~\cite{DensityMobDrivenEval} where the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+\deleted{
+	We believe that the use of an adaptive-based approach to chose (at run time) the appropriate broadcast technique to fit the dynamics in one MANET, it is a main concern.
+}
 \er{why ``is a concern''? This is our objective, not a concern. I would elaborate a bit more on this but in the following paragraph.}
 
-\paragraph{Motivation}
-Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
+
+\changed{
+	Results in~\cite{DensityMobDrivenEval} allow us to identify which broadcast algorithms  perform better in networks of different densities. This brings up to the problem we aboard in the present research work: which difficulties arise in the design of adaptive solutions that deploy in run-time an algorithm to perform better in a network scenario.
+	
+	and which are the problems that arise in the construction of this desing 
+	
+	
+	of the feasibility to have adaptive-based solutions that select  
+
+	
+	We believe that the use of an adaptive-based approach, for choosing at run time one broadcast technique to cope with the dynamics of MANET's, shows a better performance in the use of nodes' resources and reduces the likelihood of \emph{broadcast storms}~\cite{BroadcastStormProblem}; i.e. presence of collisions, contentions and redundant broadcast.
+}
+
+\deleted{
+	\paragraph{Motivation}
+	Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
+}
 \er{I don't believe this is needed. This is actually confusing: an heterogeneous MANET means a MANET with nodes that are heterogeneous. This is not what we use. I would rather introduce the problem of adaptation explaining that it requires observation about the environment, decision making mechanisms and policies. And that in a fully decentralized setting where resource usage is limited these are difficult aspects.}
+\changed{
+	Our interest is to tackle the problem of deciding \emph{when} one broadcast algorithm 
+	better fits a change in the state of the network, and \emph{which} nodes are involved
+	in this decision.	
+	%
+	For instance, the use of a broadcast algorithm for Vehicular Ad Hoc Networks 
+	will better fit in a situation where nodes increase their velocity (limited to those nodes that double their average speed) in contrast to an overlay-based solution, where nodes have to re-build rapidly a virtual overlay to deal with the change in nodes' velocity.
+	%
+	Before 
+	We conduct the decision of switching from one broadcast algorithm to another based on the
+	following observations:
+	\begin{itemize}[{$\triangleright$}]
+		\item \emph{State of nodes.} We assume that nodes are uniquely identified and their state is a group of descriptors of the following resources: remaining energy in battery, node's speed, fixed transmission range, 
+		\item \emph{Available Data (AD) per broadcast algorithm.} Independently from the approach followed by each algorithm, some information must be kept by nodes \emph{before} or \emph{after} a forward operation take place. We refer to this information as $AD_{p}$ where $p$ is the name of the algorithm in question. This information extends the state of nodes that we mention latter but it is presented apart due to its variety in content. For example, while $AD_{flooding}$ is a list of broadcast messages identifiers to avoid an endless retransmission in a pure-flooding approach, $AD_{overlay-based}$ could contain a list of one-hop or two-hope neighbors to built a virtual overlay.
+		\item \emph{Knowledge of the communication medium.} In our communication model each node is equipped with a CSMA/CA transceiver which 
+	\end{itemize}
+	\raziel{Another approach to the previous list is to differentiate between the available data on each mobile device (power level in battery, node identifier, compass, GPS, GMS, etc) and  the data fetched from nodes' context (one-hop or two-hop neighbors, neighbors' position) and the mean to fetch it (periodic flooding of control messages, GPS coordinates request, by means of piggybacking). Additionally, we consider... talk about the mean to have $AD_{p}$}
+	
+	In this work we only consider nodes' density as the main trigger to decide \emph{when} to stop the execution of the current broadcast protocol and start deploying another one.
+}
 %
-To avoid re-inventing the wheel, we do take advantage of the legacy implementations of broadcast algorithms one can find in the literature.
+\deleted{
+	To avoid re-inventing the wheel, we do take advantage of the legacy implementations of broadcast algorithms one can find in the literature.
+}
 \er{remove this last sentence (and avoid cliché wordings if possible)}
 %
+
+
 This work is a continuation of our previous research~\cite{DensityMobDrivenEval} to answer the following questions:
 \begin{itemize}[{$\triangleright$}]
 	\item \textbf{How nodes realize that a different broadcast technique (switch of context) must be deployed?}

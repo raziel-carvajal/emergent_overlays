@@ -41,6 +41,22 @@
 \newcommand{\inti}[1]{\mynote{Inti}{#1}{Bittersweet}}
 \newcommand{\david}[1]{\mynote{David}{#1}{ForestGreen}}
 
+%%%%% Environment for change tracking (Etienne)
+% Very convenient to add comments on the paper. Just set the boolean
+% to false before sending the paper:
+\newboolean{showchanges}
+\setboolean{showchanges}{true}
+\ifthenelse{\boolean{showchanges}}
+{ 
+	\newcommand{\changed}[1]{\color{blue}{#1}\xspace\color{black}}
+	\newcommand{\deleted}[1]{\color{red} #1\xspace\color{black}}
+	
+} {
+\newcommand{\changed}[1]{#1}
+\newcommand{\deleted}[1]{}
+}
+%%%%% End environment for changes (Etienne)
+
 \newcommand{\OurAdaptiveTech}{OurAdaptiveBasedTechnique}
 
 \begin{document}
