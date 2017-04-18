@@ -33,28 +33,27 @@ This behavior is confirmed in a recent study~\cite{DensityMobDrivenEval} where t
 }
 \er{why ``is a concern''? This is our objective, not a concern. I would elaborate a bit more on this but in the following paragraph.}
 
-
+%
 \changed{
-	Results in~\cite{DensityMobDrivenEval} allow us to identify which broadcast algorithms  perform better in networks of different densities. This brings up to the problem we aboard in the present research work: which difficulties arise in the design of adaptive solutions that deploy in run-time an algorithm to perform better in a network scenario.
-	
-	and which are the problems that arise in the construction of this desing 
-	
-	
-	of the feasibility to have adaptive-based solutions that select  
-
-	
-	We believe that the use of an adaptive-based approach, for choosing at run time one broadcast technique to cope with the dynamics of MANET's, shows a better performance in the use of nodes' resources and reduces the likelihood of \emph{broadcast storms}~\cite{BroadcastStormProblem}; i.e. presence of collisions, contentions and redundant broadcast.
+	Authors in~\cite{DensityMobDrivenEval} identify those broadcast algorithms that show a better performance in networks of different densities, where nodes imitate how humans move.
+	%
+	This result brings up to question ourselves about the complexity of proposing automatic approaches that chose at run-time, the appropriate broadcast algorithm to deal with the dynamics of MANETs.
+	%
+	Our interest is to tackle the later question coping with three aspects.
+	%
+	Firstly, identify the trigger that suggest a change of broadcast algorithm. 
+	%
+	Secondly, select an algorithm to increase the utilization of node's resources and reduce the likelihood of \emph{broadcast storms}~\cite{BroadcastStormProblem}; i.e. presence of collisions, contentions and redundant broadcast messages.
+	%
+	Finally, communicate the new choice of algorithm to a subset of nodes in the network.
 }
-
 \deleted{
 	\paragraph{Motivation}
 	Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
 }
 \er{I don't believe this is needed. This is actually confusing: an heterogeneous MANET means a MANET with nodes that are heterogeneous. This is not what we use. I would rather introduce the problem of adaptation explaining that it requires observation about the environment, decision making mechanisms and policies. And that in a fully decentralized setting where resource usage is limited these are difficult aspects.}
 \changed{
-	Our interest is to tackle the problem of deciding \emph{when} one broadcast algorithm 
-	better fits a change in the state of the network, and \emph{which} nodes are involved
-	in this decision.	
+	
 	%
 	For instance, the use of a broadcast algorithm for Vehicular Ad Hoc Networks 
 	will better fit in a situation where nodes increase their velocity (limited to those nodes that double their average speed) in contrast to an overlay-based solution, where nodes have to re-build rapidly a virtual overlay to deal with the change in nodes' velocity.
