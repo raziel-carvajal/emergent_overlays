@@ -1,30 +1,42 @@
 %!TEX root = main.tex
 
 \section{Introduction}
-A Mobile Ad-Hoc Network (MANET) relies on broadcast for message dissemination.
-\er{circular argument: broadcast and message diss. are the same thing. Rather write that broadcast is a fundamental operation in MANETs.}
+\subsection{Context}
+Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANET's).
 %
-Due to the nature of self-organization in MANET's, we are interested in decentralized broadcasting protocols.
+\er{circular argument: broadcast and message diss. are the same thing. Rather write that broadcast is a fundamental operation in MANETs.}
+\raziel{describe an scenario where broadcast is critical (like a natural disaster scenario or a manifestation)}
+%
+Our focus remains in decentralized broadcasting algorithms to take advantage of the self-configuration characteristic that one finds in these networks.
 \er{self-organization is a solution, not a problem. You want to write that the lack of possibility to have a complete knowledge of the participants, their position and their communication possibilities make the use of decentralized protocols the only possibility (even if this is rather obvious)}
 %
 There is a large variety of these protocols in the literature.
 %
-Following the taxonomy in~\cite{SurveyRuiz}, the classification of broadcast approaches is two-fold. 
-\er{broadcast algorithms can be categorized in two main families.}
+Following the taxonomy in~\cite{SurveyRuiz}, broadcast algorithms can be categorized in two main families.
 %
 First, \emph{overlay-based protocols} form a backbone of nodes where its members are responsible of forwarding any incoming message; any other node out of the backbone act as pure receiver.
+%
+This virtual overlay is built continuously and maintained outside of the actual broadcast.
 \er{you can insist on the notion of structure that is created and maintained outside of actual broadcast}
 %
-The second category of protocols piggyback the local state of nodes (GPS coordinates, registered collisions, etc.) in broadcast messages to decide \emph{when} to forward.
-\er{these are already optimizations. The second category, you should write, does not create a structure between nodes and uses  flooding. The flooding can be controlled using information about the local nodes or about the forwarding nodes, but does not use pre-collected information as for the overlay-based ones.}
+The second category of protocols do not create a structure between nodes and uses flooding.
+%
+The flooding can be controlled using information about the local nodes or about the forwarding nodes, but does not use pre-collected information as for the overlay-based ones.
 \er{I would swap the two categories.}
 %
-A typical deployment scenario to broadcast in MANET's is driven by nodes' \emph{density} and \emph{mobility} where only one protocol is operating on every node.
-\er{unclear. A typical scenario is driven? You want to write the conclusion of the ICDCS paper here. Not one size fits all.}
 
-As a result of nodes mobility, 
+Broadcast algorithms are largely influenced by external factors such as the density of the network, and the mobility rate of nodes.
+%
+The performance of broadcast algorithms has been studied individually~\cite{YiGerla2003, Garbinato2010} and extensive work have been done on their classification~\cite{SurveyRuiz, Fei1311289}.
+%
+The task of selecting a broadcast approach that better fits the dynamics of MANET's is a daunting  task.
+
+\subsection{Problem Statement}
+The deployment scenarios one cand find in the literature to broadcast in MANET's have been conducted by nodes' \emph{density} and \emph{mobility}, where only one protocol is operating on every node.
+\er{unclear. A typical scenario is driven? You want to write the conclusion of the ICDCS paper here. Not one size fits all.}
+As a consequence of nodes mobility, 
 \er{this is not a result of node mobility. This is a result of the fact that some regions are more popular than others for a variety of reasons}
-some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol strongly impacts its performance and nodes' limited resources (particularly, the remaining power on batteries).
+some regions in the communication area would be more populated than others and the systematic use of a unique broadcast protocol could create \emph{broadcast storms}~\cite{BroadcastStormProblem}; i.e. presence of collisions, contentions and redundant broadcast messages.
 \er{this is a bit too short for someone who is not in the area to understand the difference in resource usage between protocols. We discussed for instance the fact that in dense/less mobile areas it is likely that flooding will lead to lots of collisions, while for highly-mobile areas emerging an overlay that is soon deprecated makes little sense. You can reuse these arguments and present them in an intuitive manner to convey the idea that protocols have their optimal target deployment conditions.}
 %
 This behavior is confirmed in a recent study~\cite{DensityMobDrivenEval} where the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
@@ -43,28 +55,31 @@ This behavior is confirmed in a recent study~\cite{DensityMobDrivenEval} where t
 	%
 	Firstly, identify the trigger that suggest a change of broadcast algorithm. 
 	%
-	Secondly, select an algorithm to increase the utilization of node's resources and reduce the likelihood of \emph{broadcast storms}~\cite{BroadcastStormProblem}; i.e. presence of collisions, contentions and redundant broadcast messages.
+	Secondly, select an algorithm to increase the utilization of node's resources and reduce the likelihood of broadcast storms.
 	%
 	Finally, communicate the new choice of algorithm to a subset of nodes in the network.
+	
+	Proposing adaptive-based solutions at run-time in MAET's, it is not an easy task.\raziel{cite works to support this claim}
+	%
+	Considering the vast space of aspects that are involved in wireless communication, obstacles between nodes and their limited resources, heterogeneity of protocols and mobile devices to communicate with, different densities of nodes in the area of communication, etc, one always can find a use case that does not show an efficient use of the communication medium and nodes' resources.
+	%
+	On the other hand, adaptive-based frameworks have been of interest for the network community\raziel{cite current works on adaptation}.
+	%
+	For instance, the use of a location-based broadcast algorithm will better fit in a situation where nodes increase their velocity in contrast to an overlay-based solution, where nodes have to re-build rapidly a virtual overlay to deal with the change in nodes' velocity.
 }
 \deleted{
-	\paragraph{Motivation}
 	Our interest is to tackle the problem of message dissemination in an \emph{heterogeneous MANET}, this is how we name a MANET where more than one broadcast protocol is operating.
 }
 \er{I don't believe this is needed. This is actually confusing: an heterogeneous MANET means a MANET with nodes that are heterogeneous. This is not what we use. I would rather introduce the problem of adaptation explaining that it requires observation about the environment, decision making mechanisms and policies. And that in a fully decentralized setting where resource usage is limited these are difficult aspects.}
+
+\subsection{Decision making mechanism}
 \changed{
-	
-	%
-	For instance, the use of a broadcast algorithm for Vehicular Ad Hoc Networks 
-	will better fit in a situation where nodes increase their velocity (limited to those nodes that double their average speed) in contrast to an overlay-based solution, where nodes have to re-build rapidly a virtual overlay to deal with the change in nodes' velocity.
-	%
-	Before 
 	We conduct the decision of switching from one broadcast algorithm to another based on the
 	following observations:
 	\begin{itemize}[{$\triangleright$}]
-		\item \emph{State of nodes.} We assume that nodes are uniquely identified and their state is a group of descriptors of the following resources: remaining energy in battery, node's speed, fixed transmission range, 
-		\item \emph{Available Data (AD) per broadcast algorithm.} Independently from the approach followed by each algorithm, some information must be kept by nodes \emph{before} or \emph{after} a forward operation take place. We refer to this information as $AD_{p}$ where $p$ is the name of the algorithm in question. This information extends the state of nodes that we mention latter but it is presented apart due to its variety in content. For example, while $AD_{flooding}$ is a list of broadcast messages identifiers to avoid an endless retransmission in a pure-flooding approach, $AD_{overlay-based}$ could contain a list of one-hop or two-hope neighbors to built a virtual overlay.
-		\item \emph{Knowledge of the communication medium.} In our communication model each node is equipped with a CSMA/CA transceiver which 
+		\item \emph{Available data per broadcast algorithm.} Independently from the approach followed by each algorithm, some information must be kept by nodes \emph{before} or \emph{after} a forward operation take place. We refer to this information as $AD_{p}$ where $p$ is the name of the algorithm in question. This information extends the state of nodes that we mention latter but it is presented apart due to its variety in content. For example, while $AD_{flooding}$ is a list of broadcast messages identifiers to avoid an endless retransmission in a pure-flooding approach, $AD_{overlay-based}$ could contain a list of one-hop or two-hope neighbors to built a virtual overlay.
+		\item \emph{State of nodes.} We assume that nodes are uniquely identified and their state is a group of descriptors of the following resources: remaining energy in battery, node's speed, fixed transmission range...
+		\item \emph{Knowledge of the communication medium.} In our communication model each node is equipped with a CSMA/CA transceiver which...
 	\end{itemize}
 	\raziel{Another approach to the previous list is to differentiate between the available data on each mobile device (power level in battery, node identifier, compass, GPS, GMS, etc) and  the data fetched from nodes' context (one-hop or two-hop neighbors, neighbors' position) and the mean to fetch it (periodic flooding of control messages, GPS coordinates request, by means of piggybacking). Additionally, we consider... talk about the mean to have $AD_{p}$}
 	
@@ -77,11 +92,13 @@ This behavior is confirmed in a recent study~\cite{DensityMobDrivenEval} where t
 \er{remove this last sentence (and avoid cliché wordings if possible)}
 %
 
-
+\deleted{
 This work is a continuation of our previous research~\cite{DensityMobDrivenEval} to answer the following questions:
 \begin{itemize}[{$\triangleright$}]
 	\item \textbf{How nodes realize that a different broadcast technique (switch of context) must be deployed?}
 	\item \textbf{When to perform a switch of context and how to propagate this action to others?}
 	\item \textbf{Which are the nodes that perform a switch of context?}
 \end{itemize}
+}
 \er{we need quite more context and details for the 3 sub-objectives.}
+\raziel{done in the new way that the problem statement is presented}
