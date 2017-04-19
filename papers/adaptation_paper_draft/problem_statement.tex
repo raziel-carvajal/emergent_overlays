@@ -1,0 +1,30 @@
+%!TEX root = main.tex
+\section{Problem Statement}
+%- describe the importance of broadcast in MANET's
+%- remark that we focus on decentralized solutions
+%- write a sentence of how these protocols operate
+Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs) that is also use as a routing mechanism~\cite{SurveyRuiz,survey_routing}.
+%
+There is a large variety of broadcast protocols in the literature.\raziel{write the use of decentralized algorithms du to the lack of a global entity}
+%
+Following the taxonomy in~\cite{SurveyRuiz}, broadcast algorithms can be categorized in two main families.
+%
+Protocols of the first family use a form of controlled flooding to decide \emph{when} to forward a message, this action is based on the local knowledge that nodes collect on each message reception.
+%
+Protocols of the second category build a backbone of nodes where its members are responsible of forwarding any incoming message, any other node out of the backbone act as pure receiver.
+%
+Nodes construct and maintain this virtual overlay independently of the broadcast operations.
+
+The performance of broadcast algorithms is mainly influenced by operation conditions such as the density of the network, and the mobility rate of nodes.
+%
+%- emphasize that the operation conditions badly impact these protocols
+A comparison study~\cite{DensityMobDrivenEval} shows that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+
+%- say that an adaptive solution is a logic way to cope with operation conditions in MANETs
+%- describe the adaptation problem as follows:
+%  - observing conditions of node and network conditions
+%  - collect information about the current broadcast algorithm
+%  - define adaptation rules to decide when to switch
+%  - offering interoperability mechanisms
+%- say why this problem is important using the scenario when nodes change their speed
+%- refer to works that work on adaptation and the problem is in the interest of the community
