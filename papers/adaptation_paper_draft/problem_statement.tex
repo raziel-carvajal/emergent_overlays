@@ -5,7 +5,7 @@
 %- write a sentence of how these protocols operate
 Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs) that is also use as a routing mechanism~\cite{SurveyRuiz,survey_routing}.
 %
-There is a large variety of broadcast protocols in the literature.\raziel{write the use of decentralized algorithms due to the lack of a global entity}
+There is a large variety of broadcast protocols in the literature.
 %
 A recent survey~\cite{SurveyRuiz} propose a taxonomy that classifies broadcast protocols in two main groups.
 %
@@ -25,10 +25,23 @@ An adaptive approach for message dissemination copes logically with the dynamics
 On the other hand, the complexity in its design must solve the following problematics:
 \begin{itemize}
 	\item \emph{Monitor the performance of broadcast protocols.}
-	Some metrics to measure the performance of a protocol are: power consumption of nodes' batteries, number of redundant received messages and network coverage, which is the proportion of nodes that receive a broadcast message at least once.
-	\item \emph{Collect information about the operation conditions.}
+	Some broadcast metrics to measure the performance of a protocol are: power consumption of nodes' batteries, number of redundant received messages and network coverage, which is the proportion of nodes that receive a broadcast message at least once.\raziel{I want to mention that some metrics can not get locally by nodes to insit in the fact that we can do something with this information. I am block here}
+	%
+	We do not consider a global entity 
+	\item \emph{Collect information about the operation conditions.} Modern mobile devices have available data of their local state.
+	%
+	In order to get an approximation of the interference in the communication medium, nodes can fetch the number of successful acknowledge messages from the CSMA/CA (carrier sense multiple access with collision avoidance)~\cite{xxx} transceiver. 
+	%
+	Additionally, we can explore the meta-data that some protocols exchange for their functioning; overlay-based approaches share the list of nodes' neighbors, this information can be seen as a sampling of the overall density in the network.
+	%
+	All these information must be collected and filtered in a decentralized manner to have a better understanding on how to deal with the dynamics of MANET's
 	\item \emph{Define adaptation rules and provide runtime support.}
-	\item \emph{Deploy the protocol that better fits the current situation.}
+	Broadcast metrics and operation conditions are indicators for deciding whether a switch in the broadcast technique could take place.
+	%
+	There is then a need of designing adaptation rules for letting nodes apply an informed decision, to answer the following questions: (i) which are the thresholds that the indicators must reach to apply one rule?, (ii) are there common rules that can be apply to any protocol no matter its classification? (iii) which is the mechanism to select a broadcast technique? and (iv) is there any impact on the broadcast metrics in the application of these rules?.
+	%
+	Additionally, a run-time support in the application of the adaptation rules must be given as well. 
+	\item \emph{Deploy the protocol that better fits the current situation.} Once it has been decided that a particular protocol will be deployed (at runtime), there must be a selection of nodes...\raziel{I have difficulties about how to end and resume the importance of an adaptive approach}
 \end{itemize}
 
 %- say that an adaptive solution is a logic way to cope with operation conditions in MANETs
