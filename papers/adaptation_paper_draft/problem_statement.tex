@@ -3,45 +3,69 @@
 %- describe the importance of broadcast in MANET's
 %- remark that we focus on decentralized solutions
 %- write a sentence of how these protocols operate
-Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs) that is also use as a routing mechanism~\cite{SurveyRuiz,survey_routing}.
+Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs)~\cite{SurveyRuiz}.
+Besides allowing to dispatch a message to all nodes, broadcast is often the basis for routing mechanism~\cite{survey_routing}.
 %
-There is a large variety of broadcast protocols in the literature.
+A large variety of broadcast protocols has been proposed.
 %
-A recent survey~\cite{SurveyRuiz} propose a taxonomy that classifies broadcast protocols in two main groups.
+In a recent survey~\cite{SurveyRuiz}, Ruiz \emph{et al.} propose a taxonomy for broadcast protocols.
+We can identify two main groups. \er{we cannot write that Ruiz considers two groups, as they consider more than this in practice. We extract two groups from their taxonomy.}
 %
-Protocols of the first group use a form of controlled flooding to decide \emph{when} to forward a message, this action is based on the local knowledge that nodes collect on each message reception.
+Protocols of the first group use a form of controlled flooding.
+Nodes decide independently \emph{if} and \emph{when} they must forward it to the nodes in range of their wireless communication.
+This decision is made independently for each new incoming message.
+\er{the following sentence is incorrect: there is no reason you cannot collect information otherwise than with message reception in this category. The difference is whether or not you decouple the decision of forwarding from the actual dissemination}
+\emph{These decisions are based on the local knowledge that nodes collect on each message reception.}
 %
-In the second group, nodes built a virtual overlay where its members are responsible of forwarding any incoming message, any other node out of the overlay act as pure receiver.
-%
-Nodes construct and maintain this overlay independently of the broadcast operations.
-%
-The selection of one protocol to cope with the operation conditions in MANET's, such as mobility and density of nodes, is a daunting task.
+Protocols of the second group use a pre-constructed overlay.
+Nodes decide \emph{if} they must forward incoming messages based on their role in this overlay.
+Typically, the overlay distinguishes between relay nodes that forward all incoming messages and passive receiver nodes that do not relay incoming messages.
+The construction of the overlay is independent from broadcast operations.
+This decouples the forwarding decision and the forwarding itself.
 
+Selecting the most appropriate broadcast protocol for a given MANET deployment is a complex task.
+Furthermore, the deployment conditions may change over time, hindering this decision-making.
+Deployment conditions for a MANET include the characteristics of the individual nodes, such as their communication range and battery capacity, but also collective dynamics such as mobility and density in space.
 %- emphasize that the operation conditions badly impact these protocols
-A comparison study~\cite{DensityMobDrivenEval} shows that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
-%
-An adaptive approach for message dissemination copes logically with the dynamics of MANET's.
-%
-On the other hand, the complexity in its design must solve the following problematics:
+A comparison study~\cite{DensityMobDrivenEval} shows that the best algorithm for a given situation, is generally not appropriate for a different situation.
+A typical example is that for a high density network where nodes are mostly static, a protocol of the second class building an overlay is more efficient and robust, but that for a sparse network where nodes are highly mobile, protocols of the first class based on controlled flooding are better.
+
+We are interested in designing an adaptive approach to broadcast in MANETs.
+Adaptation refers to the ability of the system to change its behavior based on the observation of its deployment environment and of its performance.
+In our target context, adaptation refers to the ability to dynamically select the protocol used for broadcast.
+It is important to note that this adaptation and protocol selection should be possible not only for the entire system but also (and more interestingly) just for a part of it.
+Indeed, the deployment conditions may not be homogeneous for all its nodes in a MANET .
+Some nodes may for instance be in a densely-populated areas while other may be in sparsely-populated areas.
+Nodes in some region may be very mobile while nodes in another region may be mostly static.
+The best protocol for the nodes in one region may not be the best for the nodes in another region.
+Nodes in one region should be able to group themselves and decide on the use of a different protocol.
+This requires obviously mechanisms for the integration of this sub-system with the rest of the system, through interoperability mechanisms at the boundary between the two protocols.
+\er{missing: add the fact that the adaptation must be autonomous, as there is no global knowledge or global actuation on the nodes of a manet.}
+
+We break down the problem of providing autonomous adaptation to broadcast in MANETs as follows:
+On the other hand, the complexity in its design must solve the following problematics: \er{the complexity must solve? not sure what this means (remove previous sentence)}
 \begin{itemize}
 	\item \emph{Monitor the performance of broadcast protocols.}
 	Some broadcast metrics to measure the performance of a protocol are: power consumption of nodes' batteries, number of redundant received messages and network coverage, which is the proportion of nodes that receive a broadcast message at least once.\raziel{I want to mention that some metrics can not get locally by nodes to insit in the fact that we can do something with this information. I am block here}
 	%
-	We do not consider a global entity 
-	\item \emph{Collect information about the operation conditions.} Modern mobile devices have available data of their local state.
+	We do not consider a global entity \er{unfinished sentence? This should anyway go in the preamble, this is a context element.}
+	\item \emph{Collect information about the operation conditions.} Modern mobile devices have available data of their local state. \er{I do not see how this fundamentally differs from the previous point. You could distinguish between the collection of information about the node itself (battery) and notification about its surroundings / deployment conditions.}
 	%
 	In order to get an approximation of the interference in the communication medium, nodes can fetch the number of successful acknowledge messages from the CSMA/CA (carrier sense multiple access with collision avoidance)~\cite{xxx} transceiver. 
 	%
 	Additionally, we can explore the meta-data that some protocols exchange for their functioning; overlay-based approaches share the list of nodes' neighbors, this information can be seen as a sampling of the overall density in the network.
 	%
-	All these information must be collected and filtered in a decentralized manner to have a better understanding on how to deal with the dynamics of MANET's
+	All these information must be collected and filtered in a decentralized manner to have a better understanding on how to deal with the dynamics of MANETs.
+	
+	\er{missing: define the observables as a function of the currently-running protocol. This must be done before defining adaptation rules.}
+		
 	\item \emph{Define adaptation rules and provide runtime support.}
 	Broadcast metrics and operation conditions are indicators for deciding whether a switch in the broadcast technique could take place.
 	%
 	There is then a need of designing adaptation rules for letting nodes apply an informed decision, to answer the following questions: (i) which are the thresholds that the indicators must reach to apply one rule?, (ii) are there common rules that can be apply to any protocol no matter its classification? (iii) which is the mechanism to select a broadcast technique? and (iv) is there any impact on the broadcast metrics in the application of these rules?.
 	%
 	Additionally, a run-time support in the application of the adaptation rules must be given as well. 
-	\item \emph{Deploy the protocol that better fits the current situation.} Once it has been decided that a particular protocol will be deployed (at runtime), there must be a selection of nodes...\raziel{I have difficulties about how to end and resume the importance of an adaptive approach}
+	\item \emph{Deploy the protocol that better fits the current situation.} Once it has been decided that a particular protocol will be deployed (at runtime), there must be a selection of nodes...\raziel{I have difficulties about how to end and resume the importance of an adaptive approach} \er{no need for a conclusion, we just want a reference document.}
 \end{itemize}
 
 %- say that an adaptive solution is a logic way to cope with operation conditions in MANETs
