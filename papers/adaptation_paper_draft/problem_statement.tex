@@ -5,20 +5,30 @@
 %- write a sentence of how these protocols operate
 Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs) that is also use as a routing mechanism~\cite{SurveyRuiz,survey_routing}.
 %
-There is a large variety of broadcast protocols in the literature.\raziel{write the use of decentralized algorithms du to the lack of a global entity}
+There is a large variety of broadcast protocols in the literature.\raziel{write the use of decentralized algorithms due to the lack of a global entity}
 %
-Following the taxonomy in~\cite{SurveyRuiz}, broadcast algorithms can be categorized in two main families.
+A recent survey~\cite{SurveyRuiz} propose a taxonomy that classifies broadcast protocols in two main groups.
 %
-Protocols of the first family use a form of controlled flooding to decide \emph{when} to forward a message, this action is based on the local knowledge that nodes collect on each message reception.
+Protocols of the first group use a form of controlled flooding to decide \emph{when} to forward a message, this action is based on the local knowledge that nodes collect on each message reception.
 %
-Protocols of the second category build a backbone of nodes where its members are responsible of forwarding any incoming message, any other node out of the backbone act as pure receiver.
+In the second group, nodes built a virtual overlay where its members are responsible of forwarding any incoming message, any other node out of the overlay act as pure receiver.
 %
-Nodes construct and maintain this virtual overlay independently of the broadcast operations.
+Nodes construct and maintain this overlay independently of the broadcast operations.
+%
+The selection of one protocol to cope with the operation conditions in MANET's, such as mobility and density of nodes, is a daunting task.
 
-The performance of broadcast algorithms is mainly influenced by operation conditions such as the density of the network, and the mobility rate of nodes.
-%
 %- emphasize that the operation conditions badly impact these protocols
 A comparison study~\cite{DensityMobDrivenEval} shows that the best algorithm for a given situation, such as a high density and a static network, is not necessarily the most appropriate for a different situation such as a sparse and mobile network.
+%
+An adaptive approach for message dissemination copes logically with the dynamics of MANET's.
+%
+On the other hand, the complexity in its design must solve the following problematics:
+\begin{itemize}
+	\item \emph{Monitor the performance of broadcast protocols.}
+	\item \emph{Collect information about the operation conditions.}
+	\item \emph{Define adaptation rules and provide runtime support.}
+	\item \emph{Deploy the protocol that better fits the current situation.}
+\end{itemize}
 
 %- say that an adaptive solution is a logic way to cope with operation conditions in MANETs
 %- describe the adaptation problem as follows:
