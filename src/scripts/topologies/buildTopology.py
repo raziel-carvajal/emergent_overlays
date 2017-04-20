@@ -329,7 +329,7 @@ def find_top_density(densities, node, A, trRan, n, d0):
     return final_idx
 
 
-def build_handcrafted_topology(args, densities):
+def build_handcrafted_topology(args, densities, nr_points_of_interests=1):
     trRan = args.tx
     mobility = args.mobility
     nr_sessions = args.nr_sessions
@@ -337,31 +337,37 @@ def build_handcrafted_topology(args, densities):
     d0 = densities[0]
     d1 = densities[1]
     w0, h0 = compute_map_size(trRan, int(args.nr_nodes/2), d0)
-    w1, h1 = compute_map_size(trRan, int(args.nr_nodes/2), d1)
-
     print (w0, h0)
 
     positions = []
     generated_densities = []
-
     # nodes with first density
     p1, n1 = fillSurfaceWithFixedRadioAndSize(trRan, 0, 0, w0, h0, d0)
     positions.extend(p1)
 
+    w1, h1 = compute_map_size(trRan, int(args.nr_nodes/2/nr_points_of_interests), d1)
+
     # nodes with second density
-    x1 = int(w0/2 - w1/2)
-    y1 = int(h0/2 - h1/2)
-    print (x1, y1, x1 + w1, y1 + h1)
-    p2, n1 = fillSurfaceWithFixedRadioAndSize(trRan, x1, y1, w1, h1, d1)
-    positions.extend(p2)
+    count_per_row = int(math.sqrt(nr_points_of_interests))
+    points_of_interest = []
+    for i in range(0, nr_points_of_interests):
+        idx_Col = i % count_per_row
+        idx_Row = i / count_per_row
+        x1 = int(w0/count_per_row)*idx_Col + int(w0/count_per_row/2 - w1/2)
+        y1 = int(h0/count_per_row)*idx_Row + int(h0/count_per_row/2 - h1/2)
+        print (x1, y1, x1 + w1, y1 + h1)
+        points_of_interest.append((x1, y1, w1, h1))
+        p2, n1 = fillSurfaceWithFixedRadioAndSize(trRan, x1, y1, w1, h1, d1)
+        positions.extend(p2)
 
     def inInner(ppp, xx, yy, ww, hh):
-        b = ppp[0] >= xx and ppp[0] <= (ww+xx) and ppp[1] >= yy and ppp[1] <= (hh+yy)
-        # if not b and ppp[0] >= xx and ppp[0] <= (ww+xx):
-        # print (ppp[0], ppp[1], b, xx, yy, ww+xx, hh+yy)
-        return b
+        return ppp[0] >= xx and ppp[0] <= (ww+xx) and ppp[1] >= yy and ppp[1] <= (hh+yy)
 
-    generated_densities.extend([(d1 if inInner(point, x1, y1, w1, h1) else d0) for point in positions])
+    def inPointOfInterest(ppp):
+        return any(map(lambda (e): inInner(ppp, e[0], e[1], e[2], e[3]), points_of_interest))
+
+    print points_of_interest
+    generated_densities.extend([(d1 if inPointOfInterest(point) else d0) for point in positions])
 
     mobility_map = [ (generated_densities[ii] == d0) for ii in range(0, len(generated_densities))]
 
@@ -371,19 +377,18 @@ def build_handcrafted_topology(args, densities):
     idx_source = create_nedfile(positions, int(w0), int(h0), 0, args)
     create_density_file(generated_densities, int(w0), int(h0), 0, trRan, 0)
 
-
     def IsValidPosition(tu):
         idx, point = tu
         if generated_densities[idx] == d1:
             return False
-        return not inInner(point, x1, y1, w1, h1)
+        return not inPointOfInterest(point)
 
     if mobility:
         nr_nodes = len(positions)
         print "Generating mobility"
         filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, 0, trRan, int(w0), int(h0), 0)
         while True:
-            b = genmobility.generateMobility(sps=10, nr_nodes=len(positions),
+            b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                              map_x=int(w0), map_y=int(h0),
                                              sim_time=200, positions=positions, mobility_map=mobility_map,
                                              outputFile=filename,
@@ -462,7 +467,7 @@ if __name__ == '__main__':
     if non_uniform:
         build_non_uniform_topologies(args, densities, nr_topologies=1)
     elif handcrafted:
-	    build_handcrafted_topology(args, [min_density, max_density])
+	    build_handcrafted_topology(args, [min_density, max_density], 4)
     else:
         build_uniform_topologies(args, densities)
 

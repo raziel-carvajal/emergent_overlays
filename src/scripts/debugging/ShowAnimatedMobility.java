@@ -35,6 +35,98 @@ public class ShowAnimatedMobility {
       this.x = x;
       this.y = y;
     }
+
+    public double distance(Point p) {
+      return Math.sqrt((p.x - x)*(p.x - x) + (p.y-y)*(p.y-y));
+    }
+  }
+
+  private Rectangle2D.Double computeBorder(ArrayList<Node> nodes) {
+    double x0 = 10000000;
+    double y0 = 10000000;
+    double x1 = -10000000;
+    double y1 = -10000000;
+    for (Node n: nodes) {
+      if (n.type == Node.NodeType.DENSE) {
+        if (n.positions.get(0).x < x0) x0 = n.positions.get(0).x;
+        if (n.positions.get(0).x > x1) x1 = n.positions.get(0).x;
+        if (n.positions.get(0).y < y0) y0 = n.positions.get(0).y;
+        if (n.positions.get(0).y > y1) y1 = n.positions.get(0).y;
+      }
+    }
+    return new Rectangle2D.Double(x0, y0, x1-x0, y1-y0);
+  }
+
+
+  private ArrayList<ArrayList<Node>> kmeans(int k) {
+    ArrayList<Point> centroids = new ArrayList<>();
+    int[] map2cluster = new int[nodes.size()];
+    Arrays.fill(map2cluster, -1);
+
+    // initial centroids
+    double maxX = -1;
+    double maxY = -1;
+    for (Node n: nodes) {
+      Point p = n.positions.get(0);
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
+    }
+    for (int i = 0 ; i < 4; i++) {
+      Point p = new Point(Math.random()*maxX, Math.random()*maxY);
+      centroids.add(p);
+    }
+
+    // main loop in k-means
+    do {
+      boolean someChange = false;
+      for (int i = 0 ; i < nodes.size() ; i++) {
+        if (nodes.get(i).type == Node.NodeType.DENSE) {
+          Point pn = nodes.get(i).positions.get(0);
+          int i_min = -1;
+          double d_min = 1000000000;
+          for (int j = 0 ; j < centroids.size(); j++) {
+            double dist = pn.distance(centroids.get(j));
+            if (dist < d_min) {
+              i_min = j;
+              d_min = dist;
+            }
+          }
+          if (map2cluster[i] != i_min) {
+            map2cluster[i] = i_min;
+            someChange = true;
+          }
+        }
+      }
+      if (!someChange) break;
+      // recompute centroids
+      int[] count = new int[centroids.size()];
+      for (Point p: centroids) {
+        p.x = 0.0; p.y = 0.0;
+      }
+      for (int i = 0 ; i < nodes.size(); i++) {
+        int idx = map2cluster[i];
+        if (idx != -1) {
+          centroids.get(idx).x += nodes.get(i).positions.get(0).x;
+          centroids.get(idx).y += nodes.get(i).positions.get(0).y;
+          count[idx] ++;
+        }
+      }
+      for (int i = 0 ; i < centroids.size(); i++) {
+        Point p = centroids.get(i);
+        p.x /= count[i]; p.y /= count[i];
+      }
+    } while (true);
+
+    ArrayList<ArrayList<Node>> result = new ArrayList<>();
+    for (Point p : centroids) result.add(new ArrayList<>());
+    for (int i = 0 ; i < nodes.size(); i++) {
+      int idx = map2cluster[i];
+      if (idx != -1) {
+        result.get(idx).add(nodes.get(i));
+      }
+    }
+
+    return result;
   }
 
 
@@ -42,10 +134,18 @@ public class ShowAnimatedMobility {
     double maxX = -1;
     double maxY = -1;
 
+    ArrayList<Rectangle2D.Double> borders;
+
     AnimationPanel() {
       // set a preferred size for the custom panel.
       setPreferredSize(new Dimension(420,420));
       initAnimationIterator();
+
+      borders = new ArrayList<>();
+      ArrayList<ArrayList<Node>> rrr = kmeans(4);
+      for (ArrayList<Node> cluster : rrr) {
+        borders.add(computeBorder(cluster));
+      }
 
       int delay = 10; //milliseconds
       ActionListener taskPerformer = new ActionListener() {
@@ -92,7 +192,9 @@ public class ShowAnimatedMobility {
         }
 
         g2.setColor(Color.BLACK);
-        g2.draw(new Rectangle2D.Double(81/maxX*dimension.getWidth(), 81/maxY*dimension.getHeight(), 88.0/maxX*dimension.getWidth(), 88.0/maxY*dimension.getHeight()));
+        for (Rectangle2D.Double r: borders) {
+          g2.draw(new Rectangle2D.Double(r.getX()/maxX*dimension.getWidth(), r.getY()/maxY*dimension.getHeight(), r.getWidth()/maxX*dimension.getWidth(), r.getHeight()/maxY*dimension.getHeight()));
+        }
       }
       moveAnimationIterator();
     }
