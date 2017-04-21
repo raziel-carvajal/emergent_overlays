@@ -1,4 +1,9 @@
 \documentclass[sigconf]{acmart}
+\usepackage{etex}
+\usepackage{iftex}
+\usepackage{stmaryrd}
+\usepackage{ifsym}
+
 
 \usepackage{main}
 \usepackage{acm_information}
@@ -122,9 +127,10 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 \keywords{fillme, fillme, fillme}
 
 \maketitle
-
 \input{introduction}
+\input{problem_statement}
 \input{related}
+\input{proposal}
 \input{conclusion}
 
 \bibliography{references}

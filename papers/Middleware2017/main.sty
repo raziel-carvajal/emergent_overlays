@@ -80,9 +80,16 @@
     \fbox{\bfseries\sffamily\scriptsize#1}
     {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}}
 { \newcommand{\mynote}[3]{}}
-\newcommand{\ps}[1]{\mynote{Pierre}{#1}{magenta}}
+%\newcommand{\ps}[1]{\mynote{Pierre}{#1}{magenta}}
+%\newcommand{\er}[1]{\mynote{Etienne}{#1}{blue}}
+%\newcommand{\pg}[1]{\mynote{Pedro}{#1}{red}}
+
+\newcommand{\raziel}[1]{\mynote{Raziel}{#1}{green}}
 \newcommand{\er}[1]{\mynote{Etienne}{#1}{blue}}
-\newcommand{\pg}[1]{\mynote{Pedro}{#1}{red}}
+\newcommand{\vicent}[1]{\mynote{Vicent}{#1}{redorange}}
+\newcommand{\laurent}[1]{\mynote{Laurent}{#1}{brown}}
+\newcommand{\inti}[1]{\mynote{Inti}{#1}{bittersweet}}
+\newcommand{\david}[1]{\mynote{David}{#1}{forestGreen}}
 
 %%%%% Environment for change tracking (Etienne)
 % Very convenient to add comments on the paper. Just set the boolean
@@ -100,6 +107,7 @@
 %%%%% End environment for changes (Etienne)
 
 %%% Macros
+\newcommand{\OurAdaptiveTech}{OurAdaptiveBasedTechnique}
 
 \newcommand{\labfigure}[1]{\label{fig:#1}}
 \newcommand{\reffigure}[1]{Figure~\ref{fig:#1}}
