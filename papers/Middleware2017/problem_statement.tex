@@ -10,10 +10,10 @@ A large variety of broadcast protocols have been proposed.
 %
 In a recent survey~\cite{SurveyRuiz}, Ruiz \emph{et al.} propose a taxonomy for classifying broadcast protocols.
 %
-We focus on the two main groups of protocols that they identify in this taxonomy.
+We focus on the two main groups of protocols identified in this taxonomy.
 %
 Protocols of the first group (called ``No Underlying Topology'' in~\cite{SurveyRuiz}) use a form of \emph{controlled flooding}.
-Nodes decide independently \emph{if} and \emph{when} they must forward it to the nodes in range of their wireless communication.
+Nodes decide independently \emph{if} and \emph{when} they must forward broadcast messages to the nodes in range of their wireless communication.
 This decision is made independently, for each new incoming message.
 The forwarding decision and the forwarding itself are therefore coupled.
 %
@@ -24,8 +24,8 @@ The construction of the overlay is independent from broadcast operations.
 This decouples the forwarding decision and the forwarding itself.
 
 Selecting the most appropriate broadcast protocol for a given MANET deployment is a complex task.
-Furthermore, the deployment conditions may change over time, hindering this decision-making.
-Deployment conditions for a MANET include the characteristics of the individual nodes, such as their communication range and battery capacity, but also collective dynamics such as mobility and density in space.
+Furthermore, deployment conditions may change over time, hindering this decision-making.
+Deployment conditions for a MANET include the characteristics of individual nodes, such as their communication range and battery capacity, but also collective dynamics such as mobility and density in space.
 %- emphasize that the operation conditions badly impact these protocols
 A comparison study~\cite{DensityMobDrivenEval} shows that the best protocol for a given situation, is generally not appropriate for a different situation.
 A typical example is that for a high density network where nodes are mostly static.
@@ -42,14 +42,14 @@ Nodes in some region may be very mobile while nodes in another region may be mos
 As a result of this heterogeneity, the best protocol for the nodes in one region may not be the best for the nodes in another region.
 Therefore, nodes in one region should be able to autonomously discover the need for local adaptation and perform a collective decision towards the switch to a different protocol.
 When switching from a protocol of the first group to a protocol of the second group, a local overlay will be created amongst the nodes of the group, leading to the notion of \emph{emergent overlay}.
-Reversely, the switch from a protocol of the second group to a protocol of the first group will lead to the disposal of the previously-constructed overlay.
+Reversely, the switch from a protocol of the second group to a protocol of the first will lead to the disposal of the previously-constructed overlay.
 %
 The existence of sub-systems using a different protocol than the rest of the system requires interoperability mechanisms, acting at the boundary of the systems using different protocols and ensuring continuity of the broadcast operation.
 %
 MANETs are by nature decentralized: there is no global knowledge or centralized coordination between nodes.
-The adaptation process must therefore be autonomous and rely on the local interactions between nodes.
-The decision of switching to a new protocol will depend on the observation made by nodes about the running protocol and their environment.
-The nature of the information that can be collected depends on the protocol(s) that is/are already running, and on the messages that these protocols use for their operation.
+The adaptation process must therefore be autonomous and rely on local interactions between nodes.
+The decision of switching to a new protocol will depend on observation made by nodes about the running protocol and their environment.
+The nature of the information that can be collected depends on the protocol(s) already running, and on the messages that these protocols use for their operation.
 The decision itself must rely on an autonomous process, whereby nodes collectively detect and enforce the boundaries of a sub-system and implement the protocol change for that sub-system.
 
 We break down the problem of providing autonomous adaptation to broadcast in MANETs as follows:
