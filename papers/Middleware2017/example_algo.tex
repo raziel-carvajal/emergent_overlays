@@ -1,19 +1,34 @@
+%!TEX root = main.tex
+
 \begin{algorithm}
 	\scriptsize
 	\caption{\label{alg:adaptation_mechanism}Adaptation mechanism}
 	\DontPrintSemicolon
-	$\mathit{p}$ \tcp*[1]{running protocol}
-	$\mathit{p.id}$ \tcp*[1]{protocol identifier}
-	$\mathit{p.init(payload)}$ \tcp*[1]{create a new message}
-	$\mathit{p.send(msg)}$ \tcp*[1]{send message as source node}
-	$\mathit{p.broadcast(msg)}$ \tcp*[1]{broadcast a message using local protocol}
-	$\mathit{\MapT[]}$ \tcp*[1]{map of timers}
-	$\mathit{\MapT[msg.id].time}$ \tcp*[1]{remining time in timer}
-	$\mathit{\MapT[msg.id].content}$ \tcp*[1]{message content}
+	$\mathit{\Algo, \MapT, default\_time}$ \tcp*[1]{running protocol; map of timers; time to wait per timer}
+	$\mathit{\Algo.id}$ \tcp*[1]{protocol identifier}
+	$\mathit{\Algo.init(payload)}$ \tcp*[1]{create a new message}
+	$\mathit{\Algo.send(\Msg)}$ \tcp*[1]{send message as source node}
+	$\mathit{\Algo.broadcast(\Msg)}$ \tcp*[1]{broadcast message using running protocol}
+	$\mathit{\MapT[\MsgPid].content}$ \tcp*[1]{message content from protocol with identifier $pid$}
+	$\mathit{\MapT[\MsgPid].time}$ \tcp*[1]{remaining time of timer}
 
-	\Fn{\FuncHandler{$f$, $a$, $b$, $\varepsilon$}}{
-		a \tcp*[1]{message content}
-	  	b 
+	\Fn{\FuncHandler{$m$: \Msg}}{
+		\eIf{$\mathit{\Algo.id = \MsgPid}$}{
+			\If{$\mathit{\MapT[\MsgPid] \neq \bot}$}{
+				$\mathit{\textbf{cancel}(\MapT[\MsgPid])}$ \;
+				$\mathit{\MapT[\MsgPid]} \gets \bot$
+			}
+			$\mathit{\Algo.broadcast(m)}$
+		}{
+			\If{$\mathit{\MapT[\MsgPid] = \bot}$}{
+				$\mathit{\MapT[\MsgPid] \gets newTimer(default\_time, m)}$
+			}
+		}
+	}
+	
+	\Fn{\FuncExp{$timer$: \MapT[\Msg.pid]}}{
+		$\mathit{m' \gets \Algo.init(timer.content)}$\;
+		$\mathit{\Algo.send(m')}$
 	}
 \end{algorithm}
 
