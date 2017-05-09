@@ -1,0 +1,34 @@
+%!TEX root = main.tex
+
+%\Comment{reception of a foreing msg}
+%\Comment{fields in t are: msgId and timer}
+
+\begin{algorithm}
+\caption{Adaptation mechanism}\label{adapMech}
+\begin{algorithmic}[1]
+\Function{onMsgReception}{$M$}
+	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
+	\If{$M.algoId = local.algoId \lor id \notin rcvMsgs$}
+		\State $local.handleMsg(M.id, M.payload)$
+		\State \textbf{return}
+	\EndIf \label{endIf}
+	\State $rcvMsgs.add(id)$
+	\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
+	\If{$t \in rcvPayloads$}
+		\State $timer \gets rcvPayloads.get(t)$
+		\State \textbf{cancelEvent}$(timer)$
+		\State \textbf{return}
+	\EndIf
+	\State $rcvPayloads.add(t)$
+	\State \textbf{call} $doEvent(M)$ \textbf{when} $t$ \textbf{expires}
+\EndFunction
+
+\Function{doEvent}{$M$}
+	\State $M.algoId \gets local.algoId$
+	\State $local.handleMsg(M.id, M.payload)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+%\State \Comment{M is a foreing message and its first reception is handled}
