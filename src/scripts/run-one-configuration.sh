@@ -48,15 +48,15 @@ echo "Executing command: ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRA
 
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
-densityAsString=`grep "${DENSITY}" densities| head -1| awk '{print $2}'`
+#densityAsString=`grep "${DENSITY}" densities| head -1| awk '{print $2}'`
 PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
 algoN=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
-logFile="n_${NODES}_d_${densityAsString}_p_${algoN}"
+logFile="n_${NODES}_d_${DENSITY}_p_${algoN}"
 
-${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} 1>debugging/logs/${logFile}
+${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
 r=$?
 if [ $r -ne 0 ]; then
-        echo -e "\nERROR: for more details check this file: debugging/logs/${CONF_NAME}"
+  echo -e "\nERROR: for more details check this file: debugging/logs/${logFile}"
 	exit 1
 fi
 

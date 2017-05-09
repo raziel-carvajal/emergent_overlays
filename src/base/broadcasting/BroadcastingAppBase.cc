@@ -137,10 +137,12 @@ void
 BroadcastingAppBase::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
-
     switch (stage) {
         case INITSTAGE_LOCAL: {
-	          protocolId = par("protocolId").stdstringValue();
+
+            myself = this->getParentModule()->getFullName();
+
+            protocolId = par("protocolId").stdstringValue();
 
             nr_hello_msg = par("nr_hello_messages").longValue();
             is_source = par("is_source").boolValue();
@@ -162,6 +164,7 @@ BroadcastingAppBase::initialize(int stage)
             break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
             {
+
                 cModule* host = getContainingNode(this);
 
                 IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
@@ -177,6 +180,7 @@ BroadcastingAppBase::initialize(int stage)
             }
             break;
         case INITSTAGE_LAST:{
+
             double d = par("wakeUpTime").doubleValue();
             // DON'T REMOVE THIS THREE LINES. IT IS IMPORTANT TO GUARANTEE A PROPER MEASUREMENT
             d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
@@ -203,7 +207,7 @@ BroadcastingAppBase::initialize(int stage)
             if (is_source) {
               msgs.clear();
               // delayed_event(WAKEUP, "intervalBroadcastTime", d);
-              cerr << getLogHeader() + "Broadcasting sessions will star at " << (d) << endl;
+              cout << getLogHeader() << "Broadcasting sessions will star at " << (d) << endl;
               for (int i = 0 ; i < nr_broadcast_msg; i++)
                 msgs.insert(i);
             }
@@ -212,6 +216,7 @@ BroadcastingAppBase::initialize(int stage)
               is_source = true;
               next_to_send = msgs.begin();
               int idx = *next_to_send;
+              cout << getLogHeader() << "Scheduling broadcast at time: " << d + idx*par("intervalBroadcastTime").doubleValue() << endl;
               delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime", d + idx*par("intervalBroadcastTime").doubleValue());
             }
 
@@ -225,7 +230,7 @@ BroadcastingAppBase::initialize(int stage)
 void
 BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 {
-
+    cout << getLogHeader() << "Message: " <<  msg->getKind() << endl;
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
             case START: {
@@ -249,7 +254,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
             case WAKEUP:
                 //configure_neighbors();
+                cout << getLogHeader() << "WAKEUP" << endl;
                 cancelAndDelete(msg);
+                cout << getLogHeader() << "broadcasting" << endl;
                 this->time_to_broadcast_payload(nullptr);
                 next_to_send++;
                 if (next_to_send != msgs.end()) {
@@ -309,30 +316,38 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             }
             break;
             case OFFICER_ELECTION_TIMEOUT: {
+              cout << getLogHeader() << "officer election timeout: " <<  endl;
               char* foreign_prot = (char*)msg->getContextPointer();
+              if (customOfficers.find(foreign_prot) == customOfficers.end())
+                  cout << getLogHeader() << "NOT IN MAP" << endl;
               broadcasting::TargetSet targets;
+              cout << getLogHeader() << "foreing prot: " << foreign_prot <<  endl;
               for (const auto& e: customOfficers[foreign_prot]) {
                 targets.insert(e);
                 if (targets.size() == nr_max_custom_officers)
                   break;
               }
-              if (!std::equal(customOfficers[foreign_prot].begin(),
-                              customOfficers[foreign_prot].end(),
-                              lastForeignHelloSenders.begin()
-                            )) {
-
-                auto tmp = new broadcasting::Border();
-                tmp->setSourceProtocol(protocolId.c_str());
-                tmp->setForeignProtocol(foreign_prot);
-                tmp->setTargets(targets);
-                send_package(tmp);
-                timeoutBorderDet.erase(foreign_prot);
-                lastForeignHelloSenders = customOfficers[foreign_prot];
-                customOfficers[foreign_prot].clear();
-
-                free(foreign_prot);
-                cancelAndDelete(msg);
-              }
+              cout << getLogHeader() << "AFTER LOOP " <<  endl;
+//              if (!std::equal(customOfficers[foreign_prot].begin(),
+//                              customOfficers[foreign_prot].end(),
+//                              lastForeignHelloSenders.begin()
+//                            )) {
+//                cout << getLogHeader() << "IN CONDITION " <<  endl;
+//                auto tmp = new broadcasting::Border();
+//                tmp->setSourceProtocol(protocolId.c_str());
+//                tmp->setForeignProtocol(foreign_prot);
+//                tmp->setTargets(targets);
+//                send_package(tmp);
+//                timeoutBorderDet.erase(foreign_prot);
+//                lastForeignHelloSenders = customOfficers[foreign_prot];
+//                customOfficers[foreign_prot].clear();
+//
+//                cout << getLogHeader() << "BEFORE " <<  endl;
+//                free(foreign_prot);
+//                cancelAndDelete(msg);
+//                cout << getLogHeader() << "AFTER" <<  endl;
+//              }
+              cout << getLogHeader() << "END OF OFFICIER ELECTION TIMEMOU" <<  endl;
             }
             break;
             default:
@@ -340,6 +355,7 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
+        cout << getLogHeader() << "officer election with UDP_I_DATA " <<  endl;
     	bool fwdMsg = false;
     	bool done = applyMsgsTransformation (msg, fwdMsg);
     	borderDetector(msg);
@@ -379,7 +395,6 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
       string key(m->getForeignProtocol());
       if (timeoutBorderDet.find(key) != timeoutBorderDet.end()) {
         auto mm = timeoutBorderDet[key];
-        // cancelEvent(mm);
         cancelAndDelete(mm);
         timeoutBorderDet.erase(key);
       }
@@ -409,8 +424,8 @@ BroadcastingAppBase::updatePosition()
 void
 BroadcastingAppBase::processStart()
 {
+
     std::string::size_type sz;
-    myself = this->getParentModule()->getFullName();
     //this delta is required to cope with collisions of control messages; even if
     //we are using CSMA it is not enough to cope with this issue
     int n = std::stoi (myself.substr(5, myself.size()), &sz);
@@ -631,15 +646,16 @@ BroadcastingAppBase::send_package(cPacket* m)
 void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
-    printBroadcastingLog(key);
+    //printBroadcastingLog(key);
     L3AddressResolver resolver;
     L3Address addr = resolver.resolve("255.255.255.255", L3AddressResolver::ADDR_IPv4);
     msg->setPayload(key.c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {
-	msg->setProtocolId(protocolId.c_str());
+        msg->setProtocolId(protocolId.c_str());
     }
+    cout << getLogHeader() << "broadcasting key: " << key << endl;
     socket.sendTo(msg, addr, remote_port);
     emitSent(key);
 }
