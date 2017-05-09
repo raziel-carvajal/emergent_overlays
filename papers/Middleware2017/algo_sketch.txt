@@ -1,0 +1,53 @@
+local variables:
+\begin{itemize}
+	\item p -> locally running protocol
+	\begin{itemize}
+		\item p.id
+		\item p.init(void* c) -> m // prepares a new message, adding appropriate metadata etc.
+		\item p.send(message m) // send a message as if local node is source
+		\item p.handle(message m) // handle an incoming message received by broadcast
+	\end{itemize}
+	\item t[] -> map of timers currently associated with messages, have an expiration time
+	\begin{itemize}
+		\item t[id] -> timer associated with message of identifier id
+		\item t[id].time -> remaining time for this timer
+		\item t[id].m -> content of the message
+	\end{itemize}
+	% \item R -> set of received message identifiers already delivered to application
+\end{itemize}
+
+functions:
+\begin{itemize}
+	\item handler(m) // a new message m arrives:
+	\begin{itemize}
+		\item m.pid // each protocol has a different id, there can be an arbitrary # of protocols
+		\item m.meta // specific to the protocol that issued the message
+		\item m.payload // raw message, independent of the protocol
+	\end{itemize}
+	
+	function handler(m)
+		if (p.id == m.pid) then
+			// if there already exists a timer for this message id (transmission after border crossing), cancel this timer as we know local community of protocol p.id knows the message
+			if (t[id] != bottom) then
+				t[id].cancel()
+				t[id] = bottom
+			end
+			// let local protocol handle the message
+			p.handle(m)
+		else
+			// the message is from another protocol
+			// set up a timer to send the message, unless one already exists
+			if (t[id] == bottom) then
+				t[id] = new timer(default_time, m)
+			end
+		end
+	end
+	
+	function t.expires()
+		// called when a timer expires
+		// t knows its field m, the message
+		m' = p.init(m.payload)
+		p.send(m')
+	end
+end
+\end{itemize}
