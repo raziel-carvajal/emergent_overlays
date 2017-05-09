@@ -8,7 +8,7 @@
 \begin{algorithmic}[1]
 \Function{onMsgReception}{$M$}
 	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
-	\If{$M.algoId = local.algoId \lor id \notin rcvMsgs$}
+	\If{$M.algoId = local.algoId \lor id \in rcvMsgs$}
 		\State $local.handleMsg(M.id, M.payload)$
 		\State \textbf{return}
 	\EndIf \label{endIf}
