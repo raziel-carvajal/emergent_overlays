@@ -9,9 +9,8 @@
 \Function{onMsgReception}{$M$}
 	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
 	\If{$M.algoId = local.algoId$}
-		\State $cancelTimerIfAny(M.id)$
+		\State cancelTimer($M.id$)
 		\State $local.handleMsg(M.id, M.payload)$
-		\State \textbf{return}
 	\Else
 		\State /*First reception of a foreign message*/
 		\If{$id \notin rcvMsgs$}
@@ -28,7 +27,7 @@
 	\State $local.handleMsg(M.id, M.payload)$
 \EndFunction
 
-\Function{cancelTimerIfAny}{$messageId$}
+\Function{cancelTimer}{$messageId$}
 	\State $t \gets (messageId,$ \textbf{newTimer}$(local.T))$
 	\If{$t \in rcvPayloads$}
 	\State $timer \gets rcvPayloads.get(t)$
