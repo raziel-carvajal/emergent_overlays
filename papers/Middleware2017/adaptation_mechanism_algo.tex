@@ -12,6 +12,7 @@
 		\State $local.handleMsg(M.id, M.payload)$
 		\State \textbf{return}
 	\EndIf \label{endIf}
+	/*First reception of a foreign message*/
 	\State $rcvMsgs.add(id)$
 	\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
 	\If{$t \in rcvPayloads$}
