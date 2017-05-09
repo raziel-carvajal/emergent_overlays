@@ -8,16 +8,19 @@
 \begin{algorithmic}[1]
 \Function{onMsgReception}{$M$}
 	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
-	\If{$M.algoId = local.algoId \lor id \in rcvMsgs$}
+	\If{$M.algoId = local.algoId$}
 		\State $cancelTimerIfAny(M.id)$
 		\State $local.handleMsg(M.id, M.payload)$
 		\State \textbf{return}
+	\Else
+		\State /*First reception of a foreign message*/
+		\If{$id \notin rcvMsgs$}
+			\State $rcvMsgs.add(id)$
+			\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
+			\State $rcvPayloads.add(t)$
+			\State \textbf{call} $doEvent(M)$ \textbf{when} $t$ \textbf{expires}
+		\EndIf
 	\EndIf \label{endIf}
-	/*First reception of a foreign message*/
-	\State $rcvMsgs.add(id)$
-	\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
-	\State $rcvPayloads.add(t)$
-	\State \textbf{call} $doEvent(M)$ \textbf{when} $t$ \textbf{expires}
 \EndFunction
 
 \Function{doEvent}{$M$}
@@ -30,9 +33,7 @@
 	\If{$t \in rcvPayloads$}
 	\State $timer \gets rcvPayloads.get(t)$
 	\State \textbf{cancelEvent}$(timer)$
-	\State \textbf{return true}
 	\EndIf
-	\State \textbf{return false}
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
