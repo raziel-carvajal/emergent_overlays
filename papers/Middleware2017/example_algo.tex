@@ -1,0 +1,38 @@
+  \begin{algorithm}[t]
+  \scriptsize
+  \caption{\label{alg:prefilter}Prefiltering algorithm}
+
+  \PreFilter{\Ev}{\;
+	$\mathit{\Tested[] \gets \{\textup{\textbf{false}}, \hdots, \textup{\textbf{false}}\}}$\tcp*[f]{No subscription tested yet}\;\label{lin:reset}
+	\For(\tcp*[f]{Check every list (including default)}){$i \gets 0 \hdots n$}{\label{lin:traverse1}
+		\If(\tcp*[f]{Default list or bit set in BF?}){$i = n \vee \BF(\Ev)[i] = 1$}{
+    		\ForEach(\tcp*[f]{Traverse list}){$\Sub \in \Cand[i]$}{\label{lin:traverse2}
+				\If(\tcp*[f]{Not yet tested?}){$\neg \Tested[\Sub]$}{\label{lin:check1}
+					$\mathit{m \gets \textup{\textbf{false}}}$\tcp*[f]{Initially not a match}\;
+					\If(\tcp*[f]{Possible match?}){$i = n \vee \BF(\Sub) \subseteq \BF(\Ev)$}{\label{lin:check2}
+						$\mathit{m \gets \ENCMatch(\Ev,\Sub)}$\tcp*[f]{Must do costly test}\;\label{lin:encmatch}
+					}
+					\eIf(\tcp*[f]{Match?}){$\mathit{m}$}{
+						$\mathit{\Forward(\Ev,\Sub)}$\tcp*[f]{Forward to subscriber}\;\label{lin:fwd}
+						\If(\tcp*[f]{Do positive match?}){$\texttt{CB-POSITIVE-MATCH}\;$}{\label{lin:pos1}
+		    			\ForEach{$\Sub' \in \Containers(\Sub)$}{
+							\If(\tcp*[f]{Not yet tested?}){$\neg \Tested[\Sub']$}{
+								$\mathit{\Tested[\Sub'] \gets \textup{\textbf{true}}}$\;
+								$\mathit{\Forward(\Ev,\Sub')}$\tcp*[f]{Forward to subscriber}\;\label{lin:pos2}
+							}
+						}
+					}
+					}(\tcp*[f]{No match}){
+						\If(\tcp*[f]{Do negative match?}){$\texttt{CB-NEGATIVE-MATCH}\;$}{\label{lin:neg1}
+		    				\ForEach{$\Sub' \in \Containees(\Sub)$}{
+								$\mathit{\Tested[\Sub'] \gets \textup{\textbf{true}}}$\;\label{lin:neg2}
+							}
+						}
+					}
+					$\mathit{\Tested[\Sub] \gets \textup{\textbf{true}}}$\;
+				}
+			}
+		}
+	}
+  }
+\end{algorithm}
