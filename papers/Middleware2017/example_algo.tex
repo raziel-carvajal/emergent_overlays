@@ -1,3 +1,22 @@
+\begin{algorithm}
+	\scriptsize
+	\caption{\label{alg:adaptation_mechanism}Adaptation mechanism}
+	\DontPrintSemicolon
+	$\mathit{p}$ \tcp*[1]{running protocol}
+	$\mathit{p.id}$ \tcp*[1]{protocol identifier}
+	$\mathit{p.init(payload)}$ \tcp*[1]{create a new message}
+	$\mathit{p.send(msg)}$ \tcp*[1]{send message as source node}
+	$\mathit{p.broadcast(msg)}$ \tcp*[1]{broadcast a message using local protocol}
+	$\mathit{\MapT[]}$ \tcp*[1]{map of timers}
+	$\mathit{\MapT[msg.id].time}$ \tcp*[1]{remining time in timer}
+	$\mathit{\MapT[msg.id].content}$ \tcp*[1]{message content}
+
+	\Fn{\FuncHandler{$f$, $a$, $b$, $\varepsilon$}}{
+		a \tcp*[1]{message content}
+	  	b 
+	}
+\end{algorithm}
+
   \begin{algorithm}[t]
   \scriptsize
   \caption{\label{alg:prefilter}Prefiltering algorithm}

@@ -11,31 +11,38 @@
 \usepackage{pifont}
 
 % Algorithms
-\usepackage{algorithmicx}
-\usepackage[noend]{algpseudocode}
-\usepackage{algorithm}
+%\usepackage{algorithmicx}
+%\usepackage[noend]{algpseudocode}
+%\usepackage{algorithm}
 
 % % Algo2e
-% \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 %
-% \SetFuncSty{sc}
-% \SetDataSty{em}
-% \SetCommentSty{em}
-% \SetKw{Break}{break}
-% \SetKwFor{func}{function}{}{end}
-% \SetKwFor{upon}{upon}{}{end}
-% \SetKwFor{struct}{struct}{}{end}
-% \SetKwBlock{Block}{}{}
-% \SetKwFunction{PreFilter}{PF-Match}
-% \SetKwFunction{ASPEMatch}{ASPE-Match}
-% \SetKwFunction{ENCMatch}{ENC-Match}
-% \SetKwFunction{Forward}{Forward}
-% \SetKwData{Ev}{$p$} \SetKwData{Sub}{$s$}
-% \SetKwData{BF}{$B$}
-% \SetKwData{Cand}{\ensuremath{\mathit{candidates}}}
-% \SetKwData{Tested}{\ensuremath{\mathit{tested}}}
-% \SetKwData{Containees}{\ensuremath{\mathit{containees}}}
-% \SetKwData{Containers}{\ensuremath{\mathit{containers}}}
+\SetKwData{MapT}{$t$}
+
+%Functions 
+\SetKwFunction{FuncHandler}{Handler}
+\SetKwProg{Fn}{function}{:}{}
+
+ \SetFuncSty{sc}
+ \SetDataSty{em}
+ \SetCommentSty{em}
+ \SetKw{Break}{break}
+ \SetKwFor{func}{function}{}{end}
+ \SetKwFor{upon}{upon}{}{end}
+ \SetKwFor{struct}{struct}{}{end}
+ \SetKwBlock{Block}{}{}
+ \SetKwFunction{PreFilter}{PF-Match}
+ \SetKwFunction{ASPEMatch}{ASPE-Match}
+ \SetKwFunction{ENCMatch}{ENC-Match}
+ \SetKwFunction{Forward}{Forward}
+ \SetKwData{Ev}{$p$}
+ \SetKwData{Sub}{$s$}
+ \SetKwData{BF}{$B$}
+ \SetKwData{Cand}{\ensuremath{\mathit{candidates}}}
+ \SetKwData{Tested}{\ensuremath{\mathit{tested}}}
+ \SetKwData{Containees}{\ensuremath{\mathit{containees}}}
+ \SetKwData{Containers}{\ensuremath{\mathit{containers}}}
 
 % Figures (tikz et al.)
 \usepackage{wrapfig}
