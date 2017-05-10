@@ -4,14 +4,15 @@
 	\scriptsize
 	\caption{\label{alg:adaptation_mechanism}Adaptation mechanism}
 	\DontPrintSemicolon
-	$\mathit{\Algo, \MapT, default\_time}$ \tcp*[1]{running protocol; map of timers; time to wait per timer}
-	$\mathit{\Algo.id}$ \tcp*[1]{protocol identifier}
-	$\mathit{\Algo.init(payload)}$ \tcp*[1]{create a new message}
-	$\mathit{\Algo.send(\Msg)}$ \tcp*[1]{send message as source node}
-	$\mathit{\Algo.broadcast(\Msg)}$ \tcp*[1]{broadcast message using running protocol}
-	$\mathit{\MapT[\MsgPid].content}$ \tcp*[1]{message content from protocol with identifier $pid$}
-	$\mathit{\MapT[\MsgPid].time}$ \tcp*[1]{remaining time of timer}
-
+	\BlockOfVar{
+		$\mathit{\Algo, \MapT, default\_time}$ \tcp*[1]{running protocol; map of timers; waiting time}
+		$\mathit{\Algo.id}$ \tcp*[1]{protocol identifier}
+		$\mathit{\Algo.init(payload)}$ \tcp*[1]{create a new message}
+		$\mathit{\Algo.send(\Msg)}$ \tcp*[1]{send message as source node}
+		$\mathit{\Algo.broadcast(\Msg)}$ \tcp*[1]{broadcast message using running protocol}
+		$\mathit{\MapT[\MsgPid].time}$ \tcp*[1]{remaining time of timer}
+		$\mathit{\MapT[\MsgPid].content}$ \tcp*[1]{content of message from protocol pid}
+	}
 	\Fn{\FuncHandler{$m$: \Msg}}{
 		\eIf{$\mathit{\Algo.id = \MsgPid}$}{
 			\If{$\mathit{\MapT[\MsgPid] \neq \bot}$}{

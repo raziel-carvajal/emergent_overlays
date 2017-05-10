@@ -20,33 +20,37 @@
 %
 \SetKwData{MapT}{$t$}
 \SetKwData{Algo}{$p$}
+\SetKwData{AlgoInit}{$p.init$}
+\SetKwData{AlgoSource}{$p.source$}
+\SetKwData{AlgoBroadcast}{$p.broadcast$}
+\SetKwData{AlgoBroadcast}{$p.source$}
 \SetKwData{Msg}{$message$}
 \SetKwData{MsgPid}{$message.pid$}
-
 %Functions 
 \SetKwFunction{FuncHandler}{Handler}
 \SetKwFunction{FuncExp}{Expires}
-\SetKwProg{Fn}{function}{:}{}
+\SetKwProg{Fn}{function}{}{}
+\SetKwBlock{BlockOfVar}{local variables}{}{}
 
- \SetFuncSty{sc}
- \SetDataSty{em}
- \SetCommentSty{em}
- \SetKw{Break}{break}
- \SetKwFor{func}{function}{}{end}
- \SetKwFor{upon}{upon}{}{end}
- \SetKwFor{struct}{struct}{}{end}
- \SetKwBlock{Block}{}{}
- \SetKwFunction{PreFilter}{PF-Match}
- \SetKwFunction{ASPEMatch}{ASPE-Match}
- \SetKwFunction{ENCMatch}{ENC-Match}
- \SetKwFunction{Forward}{Forward}
- \SetKwData{Ev}{$p$}
- \SetKwData{Sub}{$s$}
- \SetKwData{BF}{$B$}
- \SetKwData{Cand}{\ensuremath{\mathit{candidates}}}
- \SetKwData{Tested}{\ensuremath{\mathit{tested}}}
- \SetKwData{Containees}{\ensuremath{\mathit{containees}}}
- \SetKwData{Containers}{\ensuremath{\mathit{containers}}}
+% \SetFuncSty{sc}
+% \SetDataSty{em}
+% \SetCommentSty{em}
+% \SetKw{Break}{break}
+% \SetKwFor{func}{function}{}{end}
+% \SetKwFor{upon}{upon}{}{end}
+% \SetKwFor{struct}{struct}{}{end}
+% \SetKwBlock{Block}{}{}
+% \SetKwFunction{PreFilter}{PF-Match}
+% \SetKwFunction{ASPEMatch}{ASPE-Match}
+% \SetKwFunction{ENCMatch}{ENC-Match}
+% \SetKwFunction{Forward}{Forward}
+% \SetKwData{Ev}{$p$}
+% \SetKwData{Sub}{$s$}
+% \SetKwData{BF}{$B$}
+% \SetKwData{Cand}{\ensuremath{\mathit{candidates}}}
+ %\SetKwData{Tested}{\ensuremath{\mathit{tested}}}
+ %\SetKwData{Containees}{\ensuremath{\mathit{containees}}}
+ %\SetKwData{Containers}{\ensuremath{\mathit{containers}}}
 
 % Figures (tikz et al.)
 \usepackage{wrapfig}
