@@ -46,9 +46,9 @@
 		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}		
 		$\mathit{\FloodMode}$ \tcp*[1]{bimodal way of flooding (\FloodSimp or \FloodCoun)}
 		$\mathit{\FloodRecpLi}$ \tcp*[1]{maximum number of receptions per message}
-		$\mathit{\SentMsgs, \MapT}$ \tcp*[1]{set of dispatched messages; map of timers}
-		$\mathit{\MapT[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
-		$\mathit{\MapT[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
+		$\mathit{\SentMsgs, \MapFlo}$ \tcp*[1]{set of dispatched messages; map of timers}
+		$\mathit{\MapFlo[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
+		$\mathit{\MapFlo[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
 	}
 	
 	\BlockOfAlgoAPI{
@@ -65,13 +65,13 @@
 			}
 			\Case{\FloodCoun}{
 				\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
-					\eIf{$\mathit{\MapT[\Ms.\Id] = \bot}$}{
-						$\mathit{\MapT[\Ms.\Id] \gets \TimerFunc(\FloodTimer, \Ms)}$ \;
-						$\mathit{\MapT[\Ms.\Id].\RecNo \gets 1}$ \;
+					\eIf{$\mathit{\MapFlo[\Ms.\Id] = \bot}$}{
+						$\mathit{\MapFlo[\Ms.\Id] \gets \TimerFunc(\FloodTimer, \Ms)}$ \;
+						$\mathit{\MapFlo[\Ms.\Id].\RecNo \gets 1}$ \;
 					}{
-					$\mathit{\MapT[\Ms.\Id].\RecNo \gets \MapT[\Ms.\Id].\RecNo + 1}$ \;
-					\If{$\mathit{\MapT[\Ms.\Id].\RecNo = \FloodRecpLi}$}{
-						$\mathit{\textbf{cancel}(\MapT[\Ms.\Id])}$ \;
+					$\mathit{\MapFlo[\Ms.\Id].\RecNo \gets \MapFlo[\Ms.\Id].\RecNo + 1}$ \;
+					\If{$\mathit{\MapFlo[\Ms.\Id].\RecNo = \FloodRecpLi}$}{
+						$\mathit{\textbf{cancel}(\MapFlo[\Ms.\Id])}$ \;
 						$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
 					}
 					
@@ -80,8 +80,8 @@
 		}
 	}
 }
-\tcp*[1]{case $\mathit{\MapT[\MsgIdExt].\RemTime} = 0$}
-\Fn{\FuncExp{m: \Msg}}{
+\tcp*[1]{case $\mathit{\MapFlo[\MsgIdExt].\RemTime} = 0$}
+\Fn{\FuncExpFlo{m: \Msg}}{
 	$\mathit{\AlgoSend(\Ms)}$ \;
 	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
 }
