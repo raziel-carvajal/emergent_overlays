@@ -31,8 +31,8 @@
 		}
 	}
 }
-\tcp*[1]{case: $\mathit{\MapT[\MsgPidExt].\RemTime = 0}$}
-\Fn{\FuncExp{$t$: \Timer}}{
+
+\Fn(\tcp*[f]{case: $\mathit{\MapT[\MsgPidExt].\RemTime = 0}$}){\FuncExp{$t$: \Timer}}{
 	$\mathit{m' \gets \AlgoInit(t.\MsgContent)}$\;
 	$\mathit{\AlgoEmit(m')}$
 }
@@ -80,8 +80,7 @@
 		}
 	}
 }
-\tcp*[1]{case $\mathit{\MapFlo[\MsgIdExt].\RemTime} = 0$}
-\Fn{\FuncExpFlo{m: \Msg}}{
+\Fn(\tcp*[f]{case: $\mathit{\MapFlo[\MsgIdExt].\RemTime} = 0$}){\FuncExpFlo{m: \Msg}}{
 	$\mathit{\AlgoSend(\Ms)}$ \;
 	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
 }
