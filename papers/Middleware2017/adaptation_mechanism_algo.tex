@@ -18,7 +18,7 @@
 		$\mathit{\AlgoBroadcast(m: \Msg)}$ \tcp*[1]{implementation of running protocol}
 	}
 	
-	\Fn{\FuncHandler{$m$: \Msg}}{
+	\Fn(\tcp*[f]{on reception of message $\mathit{\Ms}$}){\FuncHandler{$m$: \Msg}}{
 		\eIf{$\mathit{\AlgoId = \MsgPid}$}{
 			\If{$\mathit{\MapT[\MsgPid] \neq \bot}$}{
 				$\mathit{\textbf{cancel}(\MapT[\MsgPid])}$ \;
