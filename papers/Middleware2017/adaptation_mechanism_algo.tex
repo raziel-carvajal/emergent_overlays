@@ -4,9 +4,9 @@
 	\footnotesize
 	\DontPrintSemicolon
 	
-	$\AlgoInit($\textit{pl}: \MsgContent) : \Msg \tcp*[1]{create a new message}
-	$\AlgoEmit($\textit{m}: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
-	$\AlgoBroadcast($\textit{m}: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
+	$\AlgoInit  ($\textit{pl}: \MsgContent) : \Msg \tcp*[1]{create a new message}
+	$\AlgoEmit  ($\textit{m}: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
+	$\AlgoHandle($\textit{m}: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
 \caption{\label{alg:protocols_api}API of a broadcast protocol}
 \end{algorithm}
@@ -21,20 +21,22 @@
 	}
 
 	\BlockOfVar{
-		\Algo \tcp*[1]{local instance of broadcast protocol}
-		\AlgoPid \tcp*[1]{protocol identifier}
-		$\MapT$[] \tcp*[1]{map from message ids to timers}
-		$\rightarrow$ $\MapT[\MsgId].\RemTime$ \tcp*[1]{remaining time}
-		$\rightarrow$  $\MapT[\MsgId].\MsgContent$ \tcp*[1]{content of message on hold}
+		\Algo     \tcp*[1]{local instance of broadcast protocol}
+		\AlgoPid  \tcp*[1]{protocol identifier}
+		$\MapT[]$ \tcp*[1]{map from message ids to timers}
+		
+		\BlockOfMapAttributes{
+			$\MapT[ \MsgId ].\RemTime$    \tcp*[1]{remaining time}
+			$\MapT[ \MsgId ].\MsgContent$ \tcp*[1]{content of message}
+		}
 	}
 
-	\Fn(\tcp*[f]{on reception of message $\Ms$}){\FuncHandler{$\Ms$: \Msg}}{
-		\eIf{\AlgoPid $=$ \MsgPid}{
-			\If{$\MapT[\MsgId]  \neq \bot$}{
-				% \textbf{cancel}($\MapT[\MsgId]$) \;
+	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
+		\eIf{ \AlgoPid $=$ \MsgPid }{
+			\If{ $\MapT[\MsgId]  \neq \bot$ }{
 				$\MapT[\MsgId] \gets \bot$ \tcp*[1]{cancel timer}
 			}
-			\Algo.$\AlgoBroadcast($m)
+			\Algo.$\AlgoHandle(\Ms)$
 		}{
 			\If{$\MapT[\MsgId] = \bot$}{
 				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
