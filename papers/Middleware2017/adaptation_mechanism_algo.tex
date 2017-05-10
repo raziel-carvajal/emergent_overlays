@@ -1,42 +1,100 @@
 %!TEX root = main.tex
 
-%\Comment{reception of a foreing msg}
-%\Comment{fields in t are: msgId and timer}
-
 \begin{algorithm}
-\caption{Adaptation mechanism}\label{adapMech}
-\begin{algorithmic}[1]
-\Function{onMsgReception}{$M$}
-	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
-	\If{$M.algoId = local.algoId$}
-		\State cancelTimer($M.id$)
-		\State $local.handleMsg(M.id, M.payload)$
-	\Else
-		\State /*First reception of a foreign message*/
-		\If{$id \notin rcvMsgs$}
-			\State $rcvMsgs.add(id)$
-			\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
-			\State $rcvPayloads.add(t)$
-			\State \textbf{call} $doEvent(M)$ \textbf{when} $t$ \textbf{expires}
-		\EndIf
-	\EndIf \label{endIf}
-\EndFunction
-
-\Function{doEvent}{$M$}
-	\State $M.algoId \gets local.algoId$
-	\State $local.handleMsg(M.id, M.payload)$
-\EndFunction
-
-\Function{cancelTimer}{$messageId$}
-	\State $t \gets (messageId,$ \textbf{newTimer}$(local.T))$
-	\If{$t \in rcvPayloads$}
-	\State $timer \gets rcvPayloads.get(t)$
-	\State \textbf{cancelEvent}$(timer)$
-	\EndIf
-\EndFunction
-\end{algorithmic}
+	\scriptsize
+	\caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
+	\DontPrintSemicolon
+	\BlockOfVar{
+		$\mathit{\AdaptTimer, \Algo}$ \tcp*[1]{waiting time; running protocol}
+		$\mathit{\MsgPidExt}$ \tcp*[1]{message of protocol with identifier pid}
+		$\mathit{\AlgoId, \MapT}$ \tcp*[1]{protocol identifier; map of timers}
+		$\mathit{\MapT[\MsgPidExt].\RemTime}$ \tcp*[1]{remaining time of timer}
+		$\mathit{\MapT[\MsgPidExt].\MsgContent}$ \tcp*[1]{content of message}
+	}
+	
+	\BlockOfFuncs{
+		$\mathit{\AlgoInit(c: \MsgContent)}$ \tcp*[1]{create a new message}
+		$\mathit{\AlgoEmit(m: \Msg)}$ \tcp*[1]{send message as source node}
+		$\mathit{\AlgoBroadcast(m: \Msg)}$ \tcp*[1]{implementation of running protocol}
+	}
+	
+	\Fn{\FuncHandler{$m$: \Msg}}{
+		\eIf{$\mathit{\AlgoId = \MsgPid}$}{
+			\If{$\mathit{\MapT[\MsgPid] \neq \bot}$}{
+				$\mathit{\textbf{cancel}(\MapT[\MsgPid])}$ \;
+				$\mathit{\MapT[\MsgPid]} \gets \bot$
+			}
+			$\mathit{\AlgoBroadcast(m)}$
+		}{
+		\If{$\mathit{\MapT[\MsgPid] = \bot}$}{
+			$\mathit{\MapT[\MsgPid] \gets \TimerFunc(\AdaptTimer, \Ms)}$
+		}
+	}
+}
+\tcp*[1]{case: $\mathit{\MapT[\MsgPidExt].\RemTime = 0}$}
+\Fn{\FuncExp{$t$: \Timer}}{
+	$\mathit{m' \gets \AlgoInit(t.\MsgContent)}$\;
+	$\mathit{\AlgoEmit(m')}$
+}
 \end{algorithm}
 
+\begin{algorithm}
+	\scriptsize
+	\caption{\label{alg:flooding} Two flooding approaches}
+	\DontPrintSemicolon
+	\BlockOfVar{
+		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}		
+		$\mathit{\FloodMode}$ \tcp*[1]{bimodal way of flooding (\FloodSimp or \FloodCoun)}
+		$\mathit{\FloodRecpLi}$ \tcp*[1]{maximum number of receptions per message}
+		$\mathit{\SentMsgs, \MapT}$ \tcp*[1]{set of dispatched messages; map of timers}
+		$\mathit{\MapT[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
+		$\mathit{\MapT[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
+	}
+	
+	\BlockOfAlgoAPI{
+		$\mathit{\AlgoSend(m: \Msg)}$ \tcp*[1]{send a message}
+	}
+	
+	\Fn{\AlgoBroFunc{m: \Msg}}{
+		\Switch{\FloodMode}{
+			\Case{\FloodSimp}{
+				\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
+					$\mathit{\AlgoSend(\Ms)}$ \;
+					$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+				}
+			}
+			\Case{\FloodCoun}{
+				\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
+					\eIf{$\mathit{\MapT[\Ms.\Id] = \bot}$}{
+						$\mathit{\MapT[\Ms.\Id] \gets \TimerFunc(\FloodTimer, \Ms)}$ \;
+						$\mathit{\MapT[\Ms.\Id].\RecNo \gets 1}$ \;
+					}{
+					$\mathit{\MapT[\Ms.\Id].\RecNo \gets \MapT[\Ms.\Id].\RecNo + 1}$ \;
+					\If{$\mathit{\MapT[\Ms.\Id].\RecNo = \FloodRecpLi}$}{
+						$\mathit{\textbf{cancel}(\MapT[\Ms.\Id])}$ \;
+						$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+					}
+					
+				}
+			}		
+		}
+	}
+}
+\tcp*[1]{case $\mathit{\MapT[\MsgIdExt].\RemTime} = 0$}
+\Fn{\FuncExp{m: \Msg}}{
+	$\mathit{\AlgoSend(\Ms)}$ \;
+	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+}
 
+\Fn{\AlgoInitFunc{c: \MsgContent}}{
+	$\mathit{\Ms \gets \FloodNewMsgFun()}$ \;
+	$\mathit{\Ms.\MsgContent \gets c}$ \;
+	\textbf{return} $\mathit{\Ms}$
+}
 
-%\State \Comment{M is a foreing message and its first reception is handled}
+\Fn{\AlgoEmitFunc{m: \Msg }}{
+	$\mathit{\AlgoSend(\Ms)}$ \;
+	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+}
+
+\end{algorithm}
