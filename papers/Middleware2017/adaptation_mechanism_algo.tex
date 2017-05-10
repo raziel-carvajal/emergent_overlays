@@ -1,88 +1,92 @@
 %!TEX root = main.tex
 
 \begin{algorithm}
-	\scriptsize
+	\footnotesize
 	\DontPrintSemicolon
-	\caption{\label{alg:protocols_api} API of broadcast protocols}
+	
 	$\AlgoInit($\textit{pl}: \MsgContent) : \Msg \tcp*[1]{create a new message}
-	$\AlgoEmit($\textit{m}: \Msg) : \VoidType \tcp*[1]{send message as source node}
-	$\AlgoBroadcast($\textit{m}: \Msg) : \VoidType \tcp*[1]{send message using the current protocol}
+	$\AlgoEmit($\textit{m}: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
+	$\AlgoBroadcast($\textit{m}: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
+\caption{\label{alg:protocols_api}API of a broadcast protocol}
 \end{algorithm}
 
 \begin{algorithm}
-	\scriptsize
+	\footnotesize
 	\caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
 	\DontPrintSemicolon
+	
 	\BlockOfConstants{
-		\AdaptTimer \tcp*[1]{waiting time}
+		\AdaptTimer \tcp*[1]{default waiting time}
 	}
-	\BlockOfVar{
-		\Algo \tcp*[1]{current broadcat protocol}
-		\AlgoId \tcp*[1]{protocol identifier}
-		$\MapT[]$ \tcp*[1]{map of timers}
-		$\MapT[\MsgPidExt].\RemTime$ \tcp*[1]{remaining time of timer}
-		$\MapT[\MsgPidExt].\MsgContent$ \tcp*[1]{content of message}
-	}
-	
 
-	
-	\Fn(\tcp*[f]{on reception of message $\mathit{\Ms}$}){\FuncHandler{$m$: \Msg}}{
-		\eIf{\AlgoId $=$ \MsgPid}{
-			\If{$\MapT[\MsgPid]  \neq \bot$}{
-				\textbf{cancel}($\MapT[\MsgPid]$) \;
+	\BlockOfVar{
+		\Algo \tcp*[1]{local instance of broadcast protocol}
+		\AlgoPid \tcp*[1]{protocol identifier}
+		$\MapT$[] \tcp*[1]{map from message ids to timers}
+		$\rightarrow$ $\MapT[\MsgId].\RemTime$ \tcp*[1]{remaining time}
+		$\rightarrow$  $\MapT[\MsgId].\MsgContent$ \tcp*[1]{content of message on hold}
+	}
+
+	\Fn(\tcp*[f]{on reception of message $\Ms$}){\FuncHandler{$\Ms$: \Msg}}{
+		\eIf{\AlgoPid $=$ \MsgPid}{
+			\If{$\MapT[\MsgId]  \neq \bot$}{
+				% \textbf{cancel}($\MapT[\MsgId]$) \;
+				$\MapT[\MsgId] \gets \bot$ \tcp*[1]{cancel timer}
 			}
 			\Algo.$\AlgoBroadcast($m)
 		}{
-		\If{$\MapT[\MsgPid] = \bot$}{
-			$\MapT[\MsgPid] \gets \TimerFunc(\AdaptTimer, \Ms)$
+			\If{$\MapT[\MsgId] = \bot$}{
+				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+				$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \;
+				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+			}
 		}
 	}
-}
 
-\Fn(\tcp*[f]{case: $\mathit{\MapT[\MsgPidExt].\RemTime = 0}$}){\FuncExp{$t$: \Timer}}{
-	$\mathit{m' \gets \AlgoInit(t.\MsgContent)}$\;
-	$\mathit{\AlgoEmit(m')}$
+\Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
+	$m' \gets \AlgoInit(\MapT[\MsgId].\MsgContent)$\;
+	$\Algo.\AlgoEmit(m')$\;
 }
 \end{algorithm}
 
 \begin{algorithm}
-	\scriptsize
+	\footnotesize
 	\caption{\label{alg:flooding} Simple flooding}
 	\DontPrintSemicolon
 	\BlockOfVar{
-%		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}		
+%		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}
 %		$\mathit{\FloodMode}$ \tcp*[1]{bimodal way of flooding (\FloodSimp or \FloodCoun)}
 %		$\mathit{\FloodRecpLi}$ \tcp*[1]{maximum number of receptions per message}
 		$\mathit{\SentMsgs}$ \tcp*[1]{set of dispatched messages}
 %		$\mathit{\MapFlo[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
 %		$\mathit{\MapFlo[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
 	}
-	
+
 	\BlockOfAlgoAPI{
 		$\mathit{\AlgoSend(m: \Msg)}$ \tcp*[1]{send a message}
 	}
-	
+
 	\Fn{\AlgoBroFunc{m: \Msg}}{
 						\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
 							$\mathit{\AlgoSend(\Ms)}$ \;
 							$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
 						}
 }
-\Fn(\tcp*[f]{case: $\mathit{\MapFlo[\MsgIdExt].\RemTime} = 0$}){\FuncExpFlo{m: \Msg}}{
-	$\mathit{\AlgoSend(\Ms)}$ \;
-	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+\Fn(\tcp*[f]{case: $\mathit{\MapFlo[\MsgId].\RemTime} = 0$}){\FuncExpFlo{m: \Msg}}{
+	$\AlgoSend(\Ms)$ \;
+	$\SentMsgs \gets \SentMsgs \cup \MsgId$ \;
 }
 
 \Fn{\AlgoInitFunc{c: \MsgContent}}{
-	$\mathit{\Ms \gets \FloodNewMsgFun()}$ \;
-	$\mathit{\Ms.\MsgContent \gets c}$ \;
-	\textbf{return} $\mathit{\Ms}$
+	$\Ms \gets \FloodNewMsgFun()$ \;
+	$\Ms.\MsgContent \gets c$ \;
+	\textbf{return} $\Ms$
 }
 
 \Fn{\AlgoEmitFunc{m: \Msg }}{
-	$\mathit{\AlgoSend(\Ms)}$ \;
-	$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+	$\AlgoSend(\Ms)$ \;
+	$\SentMsgs \gets \SentMsgs \cup \MsgId$ \;
 }
 
 \end{algorithm}
