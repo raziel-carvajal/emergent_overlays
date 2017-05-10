@@ -21,7 +21,7 @@
 \SetKwData{MapT}{t}
 \SetKwData{MapFlo}{f}
 \SetKwData{Id}{id}
-\SetKwData{AdaptTimer}{default\_timer}
+\SetKwData{AdaptTimer}{timeout}
 \SetKwData{FloodTimer}{flooding\_timer}
 \SetKwData{RemTime}{time}
 \SetKwData{RecNo}{receptions}
@@ -45,8 +45,8 @@
 
 \SetKwData{Ms}{$m$}
 \SetKwData{Msg}{message}
-\SetKwData{MsgPid}{m.pid}
-\SetKwData{MsgPidExt}{message.pid}
+\SetKwData{MsgPid}{m.id}
+\SetKwData{MsgPidExt}{message.id}
 \SetKwData{MsgIdExt}{message.id}
 \SetKwData{MsgContent}{content}
 \SetKwData{MsgPayload}{payload}
@@ -59,7 +59,8 @@
 \SetKwFunction{FuncExp}{expires}
 \SetKwFunction{FuncExpFlo}{expiresInFlooding}
 \SetKwProg{Fn}{function}{}{}
-\SetKwBlock{BlockOfVar}{local variables}{}{}
+\SetKwBlock{BlockOfVar}{variables}{}{}
+\SetKwBlock{BlockOfConstants}{constants}{}{}
 \SetKwBlock{BlockOfFuncs}{running protocol API}{}{}
 \SetKwBlock{BlockOfAlgoAPI}{communication primitives}{}{}
 
