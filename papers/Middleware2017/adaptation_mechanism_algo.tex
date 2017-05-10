@@ -2,6 +2,16 @@
 
 \begin{algorithm}
 	\scriptsize
+	\DontPrintSemicolon
+	\caption{\label{alg:protocols_api} API of broadcast protocols}
+	$\AlgoInit($\textit{pl}: \MsgContent) : \Msg \tcp*[1]{create a new message}
+	$\AlgoEmit($\textit{m}: \Msg) : \VoidType \tcp*[1]{send message as source node}
+	$\AlgoBroadcast($\textit{m}: \Msg) : \VoidType \tcp*[1]{send message using the current protocol}
+
+\end{algorithm}
+
+\begin{algorithm}
+	\scriptsize
 	\caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
 	\DontPrintSemicolon
 	\BlockOfConstants{
@@ -10,27 +20,22 @@
 	\BlockOfVar{
 		\Algo \tcp*[1]{current broadcat protocol}
 		\AlgoId \tcp*[1]{protocol identifier}
-		\MapT[] \tcp*[1]{map of timers}
-		\MapT[\MsgPidExt].\RemTime \tcp*[1]{remaining time of timer}
-		\MapT[\MsgPidExt].\MsgContent \tcp*[1]{content of message}
+		$\MapT[]$ \tcp*[1]{map of timers}
+		$\MapT[\MsgPidExt].\RemTime$ \tcp*[1]{remaining time of timer}
+		$\MapT[\MsgPidExt].\MsgContent$ \tcp*[1]{content of message}
 	}
 	
-	\BlockOfFuncs{
-		$\mathit{\AlgoInit(c: \MsgContent)}$ \tcp*[1]{create a new message}
-		$\mathit{\AlgoEmit(m: \Msg)}$ \tcp*[1]{send message as source node}
-		$\mathit{\AlgoBroadcast(m: \Msg)}$ \tcp*[1]{implementation of running protocol}
-	}
+
 	
 	\Fn(\tcp*[f]{on reception of message $\mathit{\Ms}$}){\FuncHandler{$m$: \Msg}}{
-		\eIf{$\mathit{\AlgoId = \MsgPid}$}{
-			\If{$\mathit{\MapT[\MsgPid] \neq \bot}$}{
-				$\mathit{\textbf{cancel}(\MapT[\MsgPid])}$ \;
-				$\mathit{\MapT[\MsgPid]} \gets \bot$
+		\eIf{\AlgoId $=$ \MsgPid}{
+			\If{$\MapT[\MsgPid]  \neq \bot$}{
+				\textbf{cancel}($\MapT[\MsgPid]$) \;
 			}
-			$\mathit{\AlgoBroadcast(m)}$
+			\Algo.$\AlgoBroadcast($m)
 		}{
-		\If{$\mathit{\MapT[\MsgPid] = \bot}$}{
-			$\mathit{\MapT[\MsgPid] \gets \TimerFunc(\AdaptTimer, \Ms)}$
+		\If{$\MapT[\MsgPid] = \bot$}{
+			$\MapT[\MsgPid] \gets \TimerFunc(\AdaptTimer, \Ms)$
 		}
 	}
 }
@@ -43,15 +48,15 @@
 
 \begin{algorithm}
 	\scriptsize
-	\caption{\label{alg:flooding} Two flooding approaches}
+	\caption{\label{alg:flooding} Simple flooding}
 	\DontPrintSemicolon
 	\BlockOfVar{
-		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}		
-		$\mathit{\FloodMode}$ \tcp*[1]{bimodal way of flooding (\FloodSimp or \FloodCoun)}
-		$\mathit{\FloodRecpLi}$ \tcp*[1]{maximum number of receptions per message}
-		$\mathit{\SentMsgs, \MapFlo}$ \tcp*[1]{set of dispatched messages; map of timers}
-		$\mathit{\MapFlo[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
-		$\mathit{\MapFlo[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
+%		$\mathit{\FloodTimer}$ \tcp*[1]{waiting time}		
+%		$\mathit{\FloodMode}$ \tcp*[1]{bimodal way of flooding (\FloodSimp or \FloodCoun)}
+%		$\mathit{\FloodRecpLi}$ \tcp*[1]{maximum number of receptions per message}
+		$\mathit{\SentMsgs}$ \tcp*[1]{set of dispatched messages}
+%		$\mathit{\MapFlo[\MsgIdExt].\RecNo}$ \tcp*[1]{number of times a message is received}
+%		$\mathit{\MapFlo[\MsgIdExt].\RemTime}$ \tcp*[1]{remaining time of timer}
 	}
 	
 	\BlockOfAlgoAPI{
@@ -59,29 +64,10 @@
 	}
 	
 	\Fn{\AlgoBroFunc{m: \Msg}}{
-		\Switch{\FloodMode}{
-			\Case{\FloodSimp}{
-				\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
-					$\mathit{\AlgoSend(\Ms)}$ \;
-					$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
-				}
-			}
-			\Case{\FloodCoun}{
-				\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
-					\eIf{$\mathit{\MapFlo[\Ms.\Id] = \bot}$}{
-						$\mathit{\MapFlo[\Ms.\Id] \gets \TimerFunc(\FloodTimer, \Ms)}$ \;
-						$\mathit{\MapFlo[\Ms.\Id].\RecNo \gets 1}$ \;
-					}{
-					$\mathit{\MapFlo[\Ms.\Id].\RecNo \gets \MapFlo[\Ms.\Id].\RecNo + 1}$ \;
-					\If{$\mathit{\MapFlo[\Ms.\Id].\RecNo = \FloodRecpLi}$}{
-						$\mathit{\textbf{cancel}(\MapFlo[\Ms.\Id])}$ \;
-						$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
-					}
-					
-				}
-			}		
-		}
-	}
+						\If{$\mathit{\Ms.\Id \notin \SentMsgs}$}{
+							$\mathit{\AlgoSend(\Ms)}$ \;
+							$\mathit{\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}}$ \;
+						}
 }
 \Fn(\tcp*[f]{case: $\mathit{\MapFlo[\MsgIdExt].\RemTime} = 0$}){\FuncExpFlo{m: \Msg}}{
 	$\mathit{\AlgoSend(\Ms)}$ \;
