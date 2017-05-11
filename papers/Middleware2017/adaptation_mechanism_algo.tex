@@ -35,7 +35,7 @@
 	\DontPrintSemicolon
 	
 	\BlockOfConstants{
-		\AdaptTimer \tcp*[1]{default waiting time}
+		\AdaptTimer \tcp*[1]{default waiting time} \label{alg:adaptation_mechanism:timeout}
 	}
 
 	\BlockOfVar{
@@ -50,15 +50,15 @@
 	}
 
 	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
-		\eIf{ \AlgoPid $=$ \MsgPid }{
+		\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism:eval_ids}
 			\If{ $\MapT[\MsgId]  \neq \bot$ }{
 				$\MapT[\MsgId] \gets \bot$ 	\tcp*[1]{cancel timer}
 			}
-			\Algo.$\AlgoHandle(\Ms)$
+			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism:handle}
 		}{
 			\If{ $\MapT[\MsgId] = \bot$ }{
-				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer} 
-				$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \;
+				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+				$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \label{alg:adaptation_mechanism:set_timer} \;
 				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
 			}
 		}
@@ -66,7 +66,7 @@
 
 	\Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
 		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
-		$\Algo.\AlgoEmit(\Ms')$
+		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
 	}
 \caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
 \end{algorithm}
