@@ -8,98 +8,37 @@
 \begin{document}
 
 \title{Emergent Overlays: Autonomous Adaptation for Efficient Broadcasting in Heterogeneous Mobile Ad-Hoc Networks}
+\renewcommand{\shorttitle}{Emergent overlays: Adaptation for broadcasting in MANETs}
 % \titlenote{Produces the permission block, and copyright information}
-% \subtitle{Extended Abstract}
+% \subtitle{Paper \#xxx}
 % \subtitlenote{The full version of the author's guide is available as \texttt{acmart.pdf} document}
 
-% \author{Ben Trovato}
-% \authornote{Dr.~Trovato insisted his name be first.}
-% \orcid{1234-5678-9012}
+% \author{Raziel Carvajal G{\'o}mez$^1$, Inti Gonzalez-Herrera$^2$, Vicent Sanz~Marco$^3$, \\ Y{\'e}rom-David Bromberg$^4$, Yehia Elkhatib$^3$, Laurent R{\'e}veill{\`e}re$^2$ and Etienne Rivi{\`e}re$^1$}
 % \affiliation{%
-%   \institution{Institute for Clarity in Documentation}
-%   \streetaddress{P.O. Box 1212}
-%   \city{Dublin}
-%   \state{Ohio}
-%   \postcode{43017-6221}
+%   \institution{1. University of Neuch{\^a}tel, Switzerland, 2. LaBRI/University of Bordeaux, France,\\3. University of Lancaster, United Kingdom, 4. IRISA/University of Rennes 1, France}
 % }
-% \email{trovato@corporation.com}
-%
-% \author{G.K.M. Tobin}
-% \authornote{The secretary disavows any knowledge of this author's actions.}
-% \affiliation{%
-%   \institution{Institute for Clarity in Documentation}
-%   \streetaddress{P.O. Box 1212}
-%   \city{Dublin}
-%   \state{Ohio}
-%   \postcode{43017-6221}
-% }
-% \email{webmaster@marysville-ohio.com}
-%
-% \author{Lars Th{\o}rv{\"a}ld}
-% \authornote{This author is the
-%   one who did all the really hard work.}
-% \affiliation{%
-%   \institution{The Th{\o}rv{\"a}ld Group}
-%   \streetaddress{1 Th{\o}rv{\"a}ld Circle}
-%   \city{Hekla}
-%   \country{Iceland}}
-% \email{larst@affiliation.org}
-%
-% \author{Lawrence P. Leipuner}
-% \affiliation{
-%   \institution{Brookhaven Laboratories}
-%   \streetaddress{P.O. Box 5000}}
-% \email{lleipuner@researchlabs.org}
-%
-% \author{Sean Fogarty}
-% \affiliation{%
-%   \institution{NASA Ames Research Center}
-%   \city{Moffett Field}
-%   \state{California}
-%   \postcode{94035}}
-% \email{fogartys@amesres.org}
-%
-% \author{Charles Palmer}
-% \affiliation{%
-%   \institution{Palmer Research Laboratories}
-%   \streetaddress{8600 Datapoint Drive}
-%   \city{San Antonio}
-%   \state{Texas}
-%   \postcode{78229}}
-% \email{cpalmer@prl.com}
-%
-% \author{John Smith}
-% \affiliation{\institution{The Th{\o}rv{\"a}ld Group}}
-% \email{jsmith@affiliation.org}
-%
-% \author{Julius P.~Kumquat}
-% \affiliation{\institution{The Kumquat Consortium}}
-% \email{jpkumquat@consortium.net}
+% \email{etienne.riviere@unine.ch}
 %
 % % The default list of authors is too long for headers}
-% \renewcommand{\shortauthors}{B. Trovato et al.}
+% \renewcommand{\shortauthors}{R. Carvajal Gómez et al.}
 
 \begin{abstract}
 Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs).
+A large variety of broadcast protocols have been proposed to deal with network dynamics and avoid broadcast storms. %, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
+These protocols follow either an unstructured approach based on reactive controlled flooding or a more structured approach involving the creation of a dissemination overlay.
+Each protocol is better adapted to particular configurations of nodes, depending in particular on their density over space or their mobility.
+The selection of the appropriate broadcast protocol for a MANET is a difficult task.
+For heterogeneous nodes configurations, a single protocol will be adequate only for parts of the network and offer poor performance elsewhere.
 %
-A large variety of broadcast protocols have been proposed to deal with network dynamics and \emph{broadcast storms}, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
+We present an adaptive approach to broadcast in heterogeneous MANETs.
+We develop a novel mechanism allowing MANETs nodes to pick between multiple available broadcast protocols.
+Our approach is independent of the nature of these protocols and ensure their interoperability with no impact on broadcast coverage.
+It allows nodes in dense and relatively static zones to dynamically emerge overlays where they are beneficial, while the rest of the system uses more flexible unstructured approaches.
+Our policies, based on local and collective observation of the MANET state, allow nodes to collectively decide when to switch and aim at minimizing energy costs, while maximizing performance and coverage.
 %
-Selecting the most appropriate broadcast protocol for a given deployment in MANETs is a complex task. 
+% We perform simulations and evaluate our approach using a mobility model that mimics how humans move to zones of interest, where overlays of nodes emerge as a result of applying our adaptive solution.
 %
-Some characteristics of this deployment include the state of individual nodes, such as their communication range and battery capacity, but also the monitoring of network dynamics such as density in space.
-%
-We present an adaptive approach to broadcast in MANETs.
-%
-In our context, adaptation refers to the ability of a dynamic selection and configuration of the protocol used for broadcast.
-%
-This mechanism of adaptation and protocol selection is performed not only for the entire system but also, and more interestingly, just for a part of it.
-%
-We perform simulations and evaluate our approach using a mobility model that mimics how humans move to zones of interest, where overlays of nodes emerge as a result of applying our adaptive solution.
-%
-Our approach is presented as a framework between the network and application layers, to avoid interfering with the way each broadcast protocol operates.
-%
-Our experimental results reveal that network coverage remains high, while other broadcast metrics show a reasonable performance, in an heterogeneous MANET where more than one broadcast protocol is in execution.
-
+Our evaluation results show that our adaptive approach leads to better performance and lower network consumption, by dynamically selecting the most appropriate protocols for different regions of the network.
 \end{abstract}
 
 %
@@ -140,7 +79,7 @@ Our experimental results reveal that network coverage remains high, while other 
 % We no longer use \terms command
 %\terms{Theory}
 
-\keywords{fillme, fillme, fillme}
+\keywords{MANET, broadcast, adaptation, interoperability}
 
 \maketitle
 \input{introduction}
