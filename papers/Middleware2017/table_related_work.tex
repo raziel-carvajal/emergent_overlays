@@ -1,0 +1,44 @@
+%!TEX root = main.tex
+
+\newcommand{\YES}{{\scriptsize $\surd$ }\xspace}
+\newcommand{\NO}{{\scriptsize $\times$} \xspace}
+\newcommand{\DONTKNOW}{ --\xspace}
+\newcommand{\USER}{\textit{User}\xspace}
+\newcommand{\KERNEL}{ \textit{Kernel}\xspace}
+
+
+\begin{table}[t!]
+\setlength\tabcolsep{1pt}
+\renewcommand\arraystretch{0.99}
+\footnotesize
+\centering
+
+\newcolumntype{A}{ >{\raggedright} m{0.20\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} m{0.11\linewidth} }
+\newcolumntype{D}{ >{\centering\arraybackslash} m{0.11\linewidth} }
+\newcolumntype{E}{ >{\centering\arraybackslash} m{0.12\linewidth} }
+\newcolumntype{F}{ >{\centering\arraybackslash} m{0.12\linewidth} }
+
+\begin{tabular}{AEDCCCCF}
+
+{\scriptsize \textbf{Mechanism}} & {\scriptsize \shortstack{\textbf{One-hop }\\ \textbf{neighbour}} } & {\scriptsize \shortstack{\textbf{Two-hop }\\ \textbf{neighbour}} } & {\scriptsize\shortstack{\textbf{Per. control} \\ \textbf{messages}}} &  {\scriptsize\shortstack{\textbf{Use of}\\ \textbf{timers}}} & {\scriptsize\shortstack{\textbf{Use of}\\ \textbf{thresholds}}} & {\scriptsize\shortstack{\textbf{Determ.}\\ \textbf{decision}}} & {\scriptsize\shortstack{\textbf{Piggybacked}\\ \textbf{messages}}} \\
+
+\midrule
+
+{\scriptsize Hypergossiping~\cite{hypergossiping} } & \YES & \NO & \YES & \YES & \YES & \YES & \YES  \\ \hline
+{\scriptsize Networks et al.~\cite{Viswanath02anadaptive} } & \YES & \NO & \YES & \YES & \YES & \YES & \NO  \\ \hline
+{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \YES & \NO & \YES & \YES & \NO & \NO & \NO  \\ \hline
+{\scriptsize Cartigny and Simplot~\cite{border_node_retransmission_telsys03} } & \YES & \NO & \YES & \YES & \YES & \NO & \NO  \\ \hline
+{\scriptsize Kaixin et al.~\cite{Kaixin2002} } & \YES & \YES & \YES & \YES & \YES & \YES & \YES  \\ \hline
+{\scriptsize Our approach } & \NO & \NO & \NO & \YES & \YES & \YES & \NO  \\ \hline
+
+
+%Optimized broadcast protocol for sensor networks \\
+
+\midrule
+
+\end{tabular}
+\caption{Survey of evaluation criteria used in different adaptive broadcast algorithms. In the third column, \textit{Per} stands for \textit{Periodic} and \textit{Determ} for \textit{Deterministic}}
+\label{tbl:rw}
+  \vspace{-0.4cm}
+\end{table}
