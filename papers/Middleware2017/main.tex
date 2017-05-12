@@ -24,14 +24,20 @@
 
 \begin{abstract}
 Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs).
-A large variety of broadcast protocols have been proposed to deal with network dynamics and avoid broadcast storms. %, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
+A large variety of broadcast protocols have been proposed to deal with network dynamics and avoid broadcast storms.
+% TODO: VSM - avoid broadcast stom problems.
+ %, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
 These protocols follow either an unstructured approach based on reactive controlled flooding or a more structured approach involving the creation of a dissemination overlay.
 Each protocol is better adapted to particular configurations of nodes, depending in particular on their density over space or their mobility.
 The selection of the appropriate broadcast protocol for a MANET is a difficult task.
 For heterogeneous nodes configurations, a single protocol will be adequate only for parts of the network and offer poor performance elsewhere.
+% TODO: VSM - heterogeneous node configurations
+% TODO: VSM - a single protocol is only adequate for some regions of the network offering poor performance elsewhere.
 %
 We present an adaptive approach to broadcast in heterogeneous MANETs.
+% TODO: VSM This paper presents a novel adaptive ....
 We develop a novel mechanism allowing MANETs nodes to pick between multiple available broadcast protocols.
+% TODO: VSM I will remove the previous sentence and put "The mechanism develop allows MANET nodes to pick dynamically the most appropriate broadcast protocols for different regions of the network."-----
 Our approach is independent of the nature of these protocols and ensure their interoperability with no impact on broadcast coverage.
 It allows nodes in dense and relatively static zones to dynamically emerge overlays where they are beneficial, while the rest of the system uses more flexible unstructured approaches.
 Our policies, based on local and collective observation of the MANET state, allow nodes to collectively decide when to switch and aim at minimizing energy costs, while maximizing performance and coverage.
@@ -39,6 +45,7 @@ Our policies, based on local and collective observation of the MANET state, allo
 % We perform simulations and evaluate our approach using a mobility model that mimics how humans move to zones of interest, where overlays of nodes emerge as a result of applying our adaptive solution.
 %
 Our evaluation results show that our adaptive approach leads to better performance and lower network consumption, by dynamically selecting the most appropriate protocols for different regions of the network.
+%TODO: VSM This sentence "dynamically selecting the most appropriate protocols for different regions of the network" I think need to be up in the abstract.
 \end{abstract}
 
 %
