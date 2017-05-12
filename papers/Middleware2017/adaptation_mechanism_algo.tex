@@ -1,42 +1,96 @@
 %!TEX root = main.tex
+\begin{figure}
+  \centering
+   \includegraphics[scale=0.35]{figures/architecture}
 
-%\Comment{reception of a foreing msg}
-%\Comment{fields in t are: msgId and timer}
+ \caption{Architecture}
+\end{figure}
+
 
 \begin{algorithm}
-\caption{Adaptation mechanism}\label{adapMech}
-\begin{algorithmic}[1]
-\Function{onMsgReception}{$M$}
-	\State $id \gets$ \textbf{concat}$(M.id, M.algoId)$
-	\If{$M.algoId = local.algoId$}
-		\State cancelTimer($M.id$)
-		\State $local.handleMsg(M.id, M.payload)$
-	\Else
-		\State /*First reception of a foreign message*/
-		\If{$id \notin rcvMsgs$}
-			\State $rcvMsgs.add(id)$
-			\State $t \gets (M.id,$ \textbf{newTimer}$(local.T))$
-			\State $rcvPayloads.add(t)$
-			\State \textbf{call} $doEvent(M)$ \textbf{when} $t$ \textbf{expires}
-		\EndIf
-	\EndIf \label{endIf}
-\EndFunction
+	\footnotesize
+	\DontPrintSemicolon
+	\BlockOfVar{
+		\SentMsgs \tcp*[1]{set of dispatched messages}
+	}
+	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
+	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
+	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
-\Function{doEvent}{$M$}
-	\State $M.algoId \gets local.algoId$
-	\State $local.handleMsg(M.id, M.payload)$
-\EndFunction
-
-\Function{cancelTimer}{$messageId$}
-	\State $t \gets (messageId,$ \textbf{newTimer}$(local.T))$
-	\If{$t \in rcvPayloads$}
-	\State $timer \gets rcvPayloads.get(t)$
-	\State \textbf{cancelEvent}$(timer)$
-	\EndIf
-\EndFunction
-\end{algorithmic}
+\caption{\label{alg:protocol_api} API of a broadcast algorithm}
 \end{algorithm}
 
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	$\AlgoSend  ($\Ms: \Msg) : \VoidType		\tcp*[1]{comm primitive to send a message}
+	$\FuncHandler($\Ms: \Msg) : \VoidType 	\tcp*[1]{comm primitive to receive a message}
 
+\caption{\label{alg:network_api} API of network layer}
+\end{algorithm}
 
-%\State \Comment{M is a foreing message and its first reception is handled}
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfConstants{
+		\AdaptTimer \tcp*[1]{default waiting time} \label{alg:adaptation_mechanism:timeout}
+	}
+
+	\BlockOfVar{
+		\Algo		\tcp*[1]{local instance of broadcast protocol}
+		\AlgoPid  	\tcp*[1]{protocol identifier}
+		$\MapT[]$ 	\tcp*[1]{map from message ids to timers}
+		
+		\BlockOfMapAttributes{
+			$\MapT[ \MsgId ].\RemTime$	\tcp*[1]{remaining time}
+			$\MapT[ \MsgId ].\MsgContent$ 	\tcp*[1]{content of message}
+		}
+	}
+
+	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
+		\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism:eval_ids}
+			\If{ $\MapT[\MsgId]  \neq \bot$ }{
+				$\MapT[\MsgId] \gets \bot$ 	\tcp*[1]{cancel timer}
+			}
+			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism:handle}
+		}{
+			\If{ $\MapT[\MsgId] = \bot$ }{
+				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+				$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \label{alg:adaptation_mechanism:set_timer} \;
+				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+			}
+		}
+	}
+
+	\Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
+		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
+	}
+\caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \SentMsgs$ }{
+			$\AlgoSend(\Ms)$ \;
+			$\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}$
+		}
+	}
+
+	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
+		$\Ms' \gets \FloodNewMsg$ \;
+		$\Ms'.\MsgContent \gets$ pl \;
+		\textbf{return} $\Ms'$
+	}
+
+	\Fn{\AlgoEmit{\Ms: \Msg }}{
+		$\AlgoSend(\Ms)$ \;
+		$\SentMsgs \gets \SentMsgs \cup \{\MsgId\}$
+	}
+\caption{\label{alg:flooding} Simple flooding}
+\end{algorithm}

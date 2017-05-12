@@ -18,39 +18,51 @@
 % % Algo2e
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 %
-\SetKwData{MapT}{$t$}
-\SetKwData{Algo}{$p$}
-\SetKwData{AlgoInit}{$p.init$}
-\SetKwData{AlgoSource}{$p.source$}
-\SetKwData{AlgoBroadcast}{$p.broadcast$}
-\SetKwData{AlgoBroadcast}{$p.source$}
-\SetKwData{Msg}{$message$}
-\SetKwData{MsgPid}{$message.pid$}
-%Functions 
-\SetKwFunction{FuncHandler}{Handler}
-\SetKwFunction{FuncExp}{Expires}
-\SetKwProg{Fn}{function}{}{}
-\SetKwBlock{BlockOfVar}{local variables}{}{}
+\SetKwData{MapT}{t}
+\SetKwData{VoidType}{void}
+\SetKwData{MapFlo}{f}
+\SetKwData{Id}{id}
+\SetKwData{AdaptTimer}{timeout}
+\SetKwData{FloodTimer}{flooding\_}
+\SetKwData{RemTime}{time}
+\SetKwData{SentMsgs}{sent\_msgs}
 
-% \SetFuncSty{sc}
-% \SetDataSty{em}
-% \SetCommentSty{em}
-% \SetKw{Break}{break}
-% \SetKwFor{func}{function}{}{end}
-% \SetKwFor{upon}{upon}{}{end}
-% \SetKwFor{struct}{struct}{}{end}
-% \SetKwBlock{Block}{}{}
-% \SetKwFunction{PreFilter}{PF-Match}
-% \SetKwFunction{ASPEMatch}{ASPE-Match}
-% \SetKwFunction{ENCMatch}{ENC-Match}
-% \SetKwFunction{Forward}{Forward}
-% \SetKwData{Ev}{$p$}
-% \SetKwData{Sub}{$s$}
-% \SetKwData{BF}{$B$}
-% \SetKwData{Cand}{\ensuremath{\mathit{candidates}}}
- %\SetKwData{Tested}{\ensuremath{\mathit{tested}}}
- %\SetKwData{Containees}{\ensuremath{\mathit{containees}}}
- %\SetKwData{Containers}{\ensuremath{\mathit{containers}}}
+\SetKwData{FloodMode}{mode}
+\SetKwData{FloodRecpLi}{max\_receptions}
+\SetKwData{FloodSimp}{SIMPLE}
+\SetKwData{FloodCoun}{COUNTER\_BASE}
+\SetKwData{FloodNewMsg}{newFloodingMsg}
+
+\SetKwData{Algo}{p}
+\SetKwData{AlgoPid}{p.pid}
+\SetKwData{AlgoInit}{init}
+\SetKwData{AlgoEmit}{emit}
+\SetKwData{AlgoHandle}{handle}
+\SetKwData{AlgoSend}{send}
+\SetKwData{AlgoBroFunc}{broadcast}
+\SetKwData{AlgoInitFunc}{init}
+\SetKwData{AlgoEmitFunc}{emit}
+
+\SetKwData{Ms}{m}
+\SetKwData{Msg}{message}
+\SetKwData{MsgId}{m.id}
+\SetKwData{MsgPid}{m.pid}
+\SetKwData{MsgContent}{payload}
+\SetKwData{MsgPayload}{pl}
+
+\SetKwData{Timer}{timer}
+\SetKwData{TimerFunc}{newTimer}
+
+% Function and Blocks
+\SetKwFunction{FuncHandler}{receive}
+\SetKwFunction{FuncExp}{expires}
+\SetKwFunction{FuncExpFlo}{expiresInFlooding}
+\SetKwProg{Fn}{function}{}{}
+\SetKwBlock{BlockOfVar}{variables}{}{}
+\SetKwBlock{BlockOfConstants}{constants}{}{}
+\SetKwBlock{BlockOfFuncs}{running protocol API}{}{}
+\SetKwBlock{BlockOfAlgoAPI}{communication primitives}{}{}
+\SetKwBlock{BlockOfMapAttributes}{attributes of map}{}{}
 
 % Figures (tikz et al.)
 \usepackage{wrapfig}
