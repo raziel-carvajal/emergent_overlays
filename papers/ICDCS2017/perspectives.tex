@@ -1,0 +1,32 @@
+%!TEX root = main.tex
+
+\section{Perspectives}
+\label{sec:perspectives}
+
+Our experiments show that parameters such as mobility and density strongly impact the performance of broadcast algorithms.
+%
+Interestingly, these parameters can be monitored at runtime.
+%
+For instance, nodes can detect the density in their vicinity by sending control messages or by monitoring surrounding traffic.
+%
+Likewise, mobile devices are often equipped with positioning systems and/or accelerometers to sense the movement of nodes.
+%
+The next step is using the knowledge of the performance of various protocols in different contexts, to drive an adaptive overlay for disseminating messages.
+%
+In our vision, a monitoring process provides data to a management layer that decides which approach a node should use to disseminate messages.
+%
+The main challenge in this case is replacing the algorithm used at runtime without losing any message.
+%
+Fortunately, most dissemination protocols do not require keeping a complex state on each node.
+%
+Hence, we think that they are interchangeable while keeping strong guarantees on message delivery.
+%
+% We may also consider, for instance, an implementation of \emph{ABBA} ``talking'' to another algorithm through a translation layers. %% ER no idea what you mean here.
+
+%\begin{itemize}
+%	\item having obstacles as the main source of interference
+%	\item the source of a broadcasting session is choosen in a random way among
+%	those who are still online. 
+%\end{itemize}
+
+%\raziel{which is the impact of having one leader (for example, the one who leads one protest) to broadcast OR using the same node to perform every broadcast session}

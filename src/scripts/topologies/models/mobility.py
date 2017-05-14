@@ -14,7 +14,9 @@ Created on Jan 24, 2012
 @organization: ISI Foundation, Torino, Italy
 '''
 import numpy as np
-from numpy.random import rand
+from numpy.random import rand, binomial, normal, random
+import math as mt
+import sys
 
 # define a Uniform Distribution
 U = lambda MIN, MAX, SAMPLES: rand(*SAMPLES.shape) * (MAX - MIN) + MIN
@@ -193,6 +195,71 @@ class RandomWaypoint(object):
             self.velocity = velocity
             self.wt = wt
             yield positions
+
+
+class HeterogeneousRandomWalk(object):
+    def __init__(self, mapW, mapH, NR_Nodes, NR_Circles, Disk_Radius=20, Variance1_Circle=1, Variance2=2, ConnectivityRange=20):
+        self.mapW = mapW
+        self.mapH = mapH
+        self.N = NR_Nodes
+        self.M = NR_Circles
+        self.rl = Disk_Radius
+        self.v_l = Variance1_Circle
+        self.v_h = Variance2
+        self.r = ConnectivityRange
+
+        self.A_l = self.M*mt.pi*self.rl**2
+        self.A_h = mapW*mapH - self.A_l
+
+        self.beta = 1.0/(self.A_l*self.v_l + self.A_h*self.v_h)
+        self.pi_l = self.beta*self.A_l*self.v_l
+        self.pi_h = self.beta*self.A_h*self.v_h
+
+        self.N_l = binomial(self.N, self.pi_l)
+        self.N_h = self.N - self.N_l
+
+        self.disks = random([self.M, 2])*[(self.mapW, self.mapH)]
+        self.p = []
+
+        # print self.N_l, self.pi_l, self.N
+
+    def inDisk(self, node):
+        return any(map(lambda disk: (disk[0] - node[0])**2 + (disk[1] - node[1])**2 < self.rl**2, self.disks))
+
+    def inRange(self, node):
+        return np.array([ 0 if node[0] < 0 else self.mapW if node[0] > self.mapW else node[0], 0 if node[1] < 0 else self.mapH if node[1] > self.mapH else node[1] ])
+
+    def __iter__(self):
+        self.p = []
+        return self
+
+    def next(self):
+        if len(self.p) == 0:
+            count_l = 0
+            count_h = 0
+            while count_l < self.N_l or count_h < self.N_h:
+                node = (random([1, 2])*[(self.mapW, self.mapH)])[0]
+                in_disk = self.inDisk(node)
+                if in_disk and count_l < self.N_l:
+                    self.p.append(node)
+                    count_l = count_l + 1
+                elif not in_disk and count_h < self.N_h:
+                    self.p.append(node)
+                    count_h = count_h + 1
+
+            self.p = np.array(self.p)
+            return self.p
+
+        tt = np.array([ (normal(0, self.v_l, (1,2)) if self.inDisk(n) else normal(0, self.v_h, (1,2)))[0]  for n in self.p ])
+        self.p = self.p + tt
+
+        self.p = np.array([ self.inRange(n) for n in self.p ])
+        # print tt[499], "coco"
+        # print tt
+        return self.p
+
+        pass
+
 
 class StochasticWalk(object):
 

@@ -1,0 +1,250 @@
+%!TEX root = main.tex
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+In Section~\ref{sec:scenarios} we described the scenarios used to evaluate broadcast algorithms.
+%
+In this section, we present the results of our experiments with and without mobility and over different nodes densities.
+%
+Our results are expressed in terms of the following metrics:
+
+%
+\noindent $\triangleright$
+\textbf{Saved Rebroadcasts (SRE)} --
+the number of forwarding we avoid by using a given algorithm instead of \emph{simple flooding}.
+%
+\deleted{To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.}
+%
+\deleted{Since in our experiments we are disseminating many messages, we compute the mean \emph{SRE} and use it as metric for our comparison study.}
+%
+\deleted{This metric is useful to assess the performance of algorithms in terms of both network and energy usage. }
+
+\noindent $\triangleright$
+\textbf{Duplicate messages} --
+the number of times one broadcast message is received again after its first reception.
+%
+
+\noindent $\triangleright$
+\textbf{Coverage} --
+the percentage of nodes that successfully receive a broadcast message at least once.
+
+\deleted{
+\noindent $\triangleright$
+\textbf{Broadcast time} --
+the time to disseminate a message with a Coverage of 100\%.
+}
+
+% 
+\noindent $\triangleright$
+\textbf{Energy consumption} --
+the energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
+
+\begin{figure*}[ht]
+	\begin{center}
+	\subfigure[SRE messages in static scenarios.]{
+		\label{fig:a-saved}
+		\includegraphics[page=1, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-static-summary.pdf}
+	}
+	~
+	\subfigure[Duplicate messages per algorithm in static scenarios.]{
+		\label{fig:a-duplicated}
+		\includegraphics[page=3, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
+	}
+	~
+	\subfigure[SRE messages in dynamic scenarios.]{
+		\label{fig:b-saved}
+		\includegraphics[page=1, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-mobility-summary.pdf}
+	}
+	~
+	\subfigure[Duplicate messages per algorithm in dynamic scenarios.]{
+		\label{fig:b-duplicated}
+		\includegraphics[page=3, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
+	}
+	\caption{Overload of wireless communication through SRE and duplicate messages.}
+	\label{fig:saved-rebroadcasts}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure*}
+
+
+%
+%We study every metric with and without mobility over different densities as described in Section~\ref{sec:scenarios}.
+%
+\subsection{Network overhead}
+
+The proportion of SRE and duplicate messages determine to which extent the communication medium is saturated.
+%
+Figure~\ref{fig:a-saved} shows the SRE in static scenarios, where \emph{MPR} outperforms all other protocols.
+%
+However, the difference between \emph{MPR} and other algorithms decreases as the density increases.
+%
+Interestingly, \emph{ABBA} avoids retransmissions more efficiently than the \emph{CDS-based} technique, for densities above 10.
+%
+This pattern was expected in higher densities because \emph{ABBA} cancels retransmissions and outperforms \emph{CDS-based} by 10\%.
+%
+Figure~\ref{fig:b-saved} presents dynamic scenarios, where we observe that mobility affects the performance of topology-based algorithms.
+%
+Indeed, the virtual topologies quickly becomes out of date due to the constant changes in nodes neighborhoods.
+%
+\deleted{Additionally, collisions of control messages in these algorithms is another explanation for the poor performance.}
+%
+\emph{ABBA} maintains its robustness in these dynamic conditions but the power and communication cost of obtaining GPS coordinates is not considered.
+
+The Proportion of Duplicate Messages (PDM) per algorithm is shown in Figures~\ref{fig:a-duplicated},~\ref{fig:b-duplicated} as a distribution with whiskers.
+%
+%As this value varies per each broadcast session, we present a distribution of the metric.
+%
+In general, the lower the PDM is, the better the use of the medium is too. 
+%
+However, when PDM is compared against SRE the occurrence of collisions also affects message receptions.
+%
+For instance, using \emph{simple flooding} with a density of 30, nodes receive at most 10 duplicated messages instead of 30.
+%
+\deleted{In general, there are three reasons to get a low number of duplicate messages: i) a higher value of SRE; ii) the occurrence of collisions; and iii) broadcast messages reach few peers (low Coverage).}
+%
+Our results in PDM confirm that \emph{MPR} avoids saturation in all scenarios.
+%
+\deleted{
+Meanwhile, \emph{CDS-based} behaves similarly to \emph{ProbFlood} for low densities; but it outperforms \emph{ProbFlood} for density 20 and beyond.
+}
+%
+\deleted{\emph{ProbFlood}'s behavior is specially poor in this metric, it is as bad as \emph{simple flooding} when the density is high.  }
+
+\subsection{Power Consumption}
+%\textbf{Power Consumption.}
+\deleted{Power consumption depends on the number of messages exchanged.}
+%
+The amount of received and sent messages impacts power consumption due to the mode changes the radio chip must perform.
+%
+Broadcast and control messages both influence this energy consumption.
+%
+However, the network saturation in nodes vicinities influences energy consumption due to the way the MAC layer works.
+%
+In CSMA, nodes keep sending messages until receivers reply with an acknowledgment message.
+%
+This strategy increases network reliability but also energy consumption.
+%
+\deleted{
+Since in such a case packets are often lost, CSMA keeps resending messages and consuming energy in the process.
+}
+%
+\begin{figure*}[ht]
+	\begin{center}
+	\subfigure[Coverage in static scenarios]{
+		\label{fig:a-coverage}
+		\includegraphics[page=2, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-static-summary.pdf}
+	}
+	\hspace{0.2cm}
+	\subfigure[Power consumption in static scenarios]{
+		\label{fig:a-energy}
+		\includegraphics[page=1, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-static.pdf}
+	}
+	~
+	\subfigure[Coverage in dynamic scenarios]{
+		\label{fig:b-coverage}
+		\includegraphics[page=2, scale=0.30, trim = 20mm 7mm 0 0]{fig/results-mobility-summary.pdf}
+	}
+	\hspace{0.2cm}
+	\subfigure[Power consumption in dynamic scenarios]{
+		\label{fig:b-energy}
+		\includegraphics[page=1, scale=0.30, trim = 16mm 0 10mm 0]{fig/results-mobility.pdf}
+	}
+	\caption{Power consumption and node Coverage per algorithm}
+	\label{fig:energy-coverage}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure*}
+%\begin{figure*}[ht]
+%	\begin{center}
+%		\subfigure[Static Scenarios]{
+%			\label{fig:a-sessionTime}
+%			\includegraphics[scale=0.32, trim = 0 0 70mm 0]{fig/SessionTimeNoMob.pdf}
+%		}
+%		~
+%		\subfigure[Dynamic Scenarios]{
+%			\label{fig:b-sessionTime}
+%			\includegraphics[scale=0.32, trim = 0 0 0 0]{fig/sessionTimeMob.pdf}
+%		}
+%		\caption{Broadcasting session time}
+%		\label{fig:coverage-energy}
+%	\end{center}
+%\end{figure*}
+%
+Figures~\ref{fig:a-energy} and~\ref{fig:b-energy} show energy consumption in static and dynamic scenarios using violin plots to present the full distribution.
+%
+We only show these densities with a significant change in energy consumption. \er{I do not understand this last sentence.}
+% 
+We observe that \emph{simple flooding} consumes more energy in all scenarios.
+%
+\emph{MPR} always outperforms other approaches when there is no mobility.
+%
+This is consistent with the results depicted in Figures~\ref{fig:a-saved} and~\ref{fig:a-duplicated} where nodes send/receive fewer messages.
+%
+\emph{ABBA} and \emph{ProbFlood} do not show a single value of density where these algorithms behave better than \emph{MPR}. \er{?? this is also unclear}
+%
+This indicates that the cost of the control messages is worth in terms of power consumption when there is no mobility.
+On the other hand, when nodes moves Figure~\ref{fig:b-energy} shows a different behavior. \er{which is?}
+%
+\emph{ABBA} outperforms \emph{MPR} when the density is between 5 to 15.
+%
+It is only when the density is greater than 20 that MPR becomes competitive again.
+%
+In correlation with Figures~\ref{fig:b-saved} and~\ref{fig:b-duplicated}, we notice that nodes send less messages with \emph{ABBA} than with \emph{MPR}.
+%
+%\deleted{
+%We also notice that the number of duplicate messages received using different algorithms in dynamic scenarios is closer than that of the static scenarios.}
+%
+%Although This changes when densities above 30 because the control 
+%
+Given that the latter cannot maintain a completely up-to-date backbone, it seems to fail in reducing the number of relay nodes.
+%
+\deleted{ confirm that mobility and the ratio between the frequencies of broadcast and control messages 
+ \emph{broadcast-freq/control-message-freq}, may impact the decision of which algorithm to use to broadcast.
+ }
+%
+
+\subsection{Coverage}
+\vspace{-1mm}
+
+%\textbf{Coverage.}
+%
+Figures~\ref{fig:a-coverage} and~\ref{fig:b-coverage} depict the coverage for the studied algorithms in both \emph{static} and \emph{dynamic} scenarios.
+%
+%All these algorithms tend to be reliable in static settings and for densities above 10.
+%
+Some approaches fail to broadcast messages in configurations with low density because the network is connected by a single node in some partitions. 
+%
+In particular, \emph{ABBA} and \emph{MPR} are subject to this situation.
+%
+%\begin{figure*}[!ht]
+%	\begin{center}
+%		\subfigure[Static scenario.]{
+%			\label{fig:a-coverage}
+%			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-static-summary.pdf}
+%		}
+%		~
+%		\subfigure[Dynamic scenario.]{
+%			\label{fig:b-coverage}
+%			\includegraphics[page=2, scale=0.40, trim = 20mm 11mm 0 0]{fig/results-mobility-summary.pdf}
+%		}
+%		\caption{Node Coverage}
+%		\label{fig:coverage}
+%	\end{center}
+%\end{figure*}
+%
+%The results in the mobility scenarios are less stable.
+%
+%\raziel{this is mention before}
+%\deleted{
+%When nodes move \emph{MPR} and \emph{CDS-based} behave worse because the underlying topology they build must be constantly updated due to the movement of nodes.
+%}
+%
+%We observe this problem for all the densities, but it is clearer for sparser topologies.
+%
+We can also see that \emph{ABBA} tends to fail with different values of density, although far less than topology-based approaches.
+%
+\deleted{This is understandable because \emph{ABBA} is an area-based approach where each node uses the location of its neighbors to drive the broadcast process.}
+%
+Indeed, since the location of each node changes continuously, ABBA occasionally fails in computing the covered area; as a consequence, some messages are not delivered.
+This is consistent with the observations in~\cite{YiGerla2003, Garbinato2010}. 

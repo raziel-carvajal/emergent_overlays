@@ -27,6 +27,8 @@ get_arguments <- function() {
 
   parser$add_argument('-final', '--final-version', dest='final', action="store_true",
                       help='If used, the script generates a version good enough for the paper')
+  parser$add_argument('-violin', '--use-violin', dest='violin', action="store_true",
+                      help='If used, the script generates a violin plots instead of box plots')
 
   parser$add_argument('-ed', '--excluded-density', dest='excluded.densities', type='integer', action='append')
 
@@ -121,6 +123,7 @@ get.attrSet <- function(dfNames, attri) {
 get.plot.theme.style <- function() {
   theme(plot.title=element_text(size=15, vjust=3)) +
   theme(plot.margin = unit(c(0.4,0.4,0.4,0.4), "cm")) +
+  # scale_fill_brewer(palette="RdBu") + theme_minimal()
   # all this is to remove the beautiful grid (not good for the paper :-( )
   theme(
     panel.background = element_rect(fill = 'white', colour = 'black')
@@ -136,14 +139,14 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   data.list <- lapply(densities, function(density) {
 	  dd <- df[grepl(paste("d", density, "tr", sep="_"), sapply(df, function(e) colnames(e) ))]
 	  dd <- lapply(dd, function(e) {
-    	cn <- colnames(e)[1]
-    	s <- unlist( strsplit(cn,'_'))
+      	cn <- colnames(e)[1]
+      	s <- unlist( strsplit(cn,'_'))
         cn <- as.character(s[which(s == "p") + 1])
         cn <- toupper(gsub("[[:digit:]]", "", cn))
-        cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
-		data <-e[,1]
+        cn <- replace(cn, cn == "CDS", "CDS-based")
+		    data <-e[,1]
         den <-rep(as.factor(paste("Density", density)), length(data))
-		data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
+		    data.frame( dat = data, alg = rep(cn, length(data)), density=den  )
 	  })
 	  dd <- unname(dd)
 	  data <- do.call("rbind", dd)
@@ -173,17 +176,17 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   print(p)
 }
 
-plot.data.using.boxes <- function(data, densities, ylabel, caption) {
+plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE) {
   data.list <- lapply(densities, function(density) {
 
 		dd <- data[grepl(paste("d",density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
 		dd <- lapply(dd, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	    cn <- as.character(s[which(s == "p") + 1])
-            cn <- toupper(gsub("[[:digit:]]", "", cn))
-            cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
-            cn <- replace(cn, cn == "MPRT", "MPR")
+	  	cn <- as.character(s[which(s == "p") + 1])
+      cn <- toupper(gsub("[[:digit:]]", "", cn))
+      cn <- replace(cn, cn == "CDS", "CDS-based")
+      cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -193,24 +196,27 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
 
 		do.call("rbind", dd)
 	})
-
-
-
 	data <- do.call("rbind", data.list)
 
-	p <- ggplot(data) +
-		#  geom_boxplot(aes(x=alg, y=dat)) +
-		 geom_boxplot(aes(x=alg, y=dat, fill=alg)) +
-		 facet_grid(. ~ density) +
+	p <- ggplot(data)
+  if (!usebox) {
+    p <- p + geom_violin(aes(x=alg, y=dat, fill=alg)) +
+          stat_summary(fun.y=median, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
+  }
+  else {
+    p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg))
+  }
+
+  p <- p + facet_grid(. ~ density) +
 		 ylab(ylabel) +
     #  xlab("Algorithm") +
     #  theme(legend.position="none") +
      theme(legend.position="top", text=element_text(size=18)) +
      (if (print.titles)
       #  labs(title=caption, x=NULL)
-       labs(title=caption, fill="Algorithms")
+       labs(title=caption, fill="Algorithms", shape="Algorithms")
      else
-       labs(fill="Algorithms")
+       labs(shape="Algorithms", fill="Algorithms")
      ) +
     #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
      get.plot.theme.style() +
@@ -218,7 +224,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption) {
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
     if (!print.titles) {
-        p <- p + scale_fill_grey(start = 0.0, end = .85)
+        p <- p + scale_fill_grey(start = 0.3, end = .85)
     }
 	print(p)
 }
@@ -231,7 +237,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
       cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "NODE-DEGREE")
+      cn <- replace(cn, cn == "CDS", "CDS-based")
       cn <- replace(cn, cn == "MPRT", "MPR")
       nr.nodes <- as.numeric(s[which(s == "n") + 1])
       y <- transformation(e[,1], nr.nodes)
@@ -263,7 +269,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
      get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
@@ -292,7 +298,7 @@ plot.coverage.per.session <- function(data, densities) {
 plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Power Consumption (J)",
-                        "Power consumption for different algorithms")
+                        "Power consumption for different algorithms", FALSE)
 }
 
 plot.time.power.consumption <- function(df, densities) {
@@ -311,7 +317,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "SRB (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
-  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
   df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
 
   df <- df[df$alg!="FLOODING",]
@@ -331,7 +337,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
@@ -339,12 +345,12 @@ plot.saved.rebroadcasts <- function(df, algos) {
 
 
 plot.simple.coverage <- function(df, algos) {
-  ylabel <- "Reachability (%)"
+  ylabel <- "Coverage (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
-  df$alg <- replace(df$alg, df$alg == "CDS", "NODE-DEGREE")
+  df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
   df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
-  caption <- "Reachability"
+  caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
          geom_point(aes(x=density, y=coverage, shape=alg, colour=alg),size = 4) +        # Large points
@@ -358,13 +364,11 @@ plot.simple.coverage <- function(df, algos) {
 		 get.plot.theme.style()
 
      if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.0, end = .85)
+         p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
 	print(p)
 }
-
-
 
 
 #
@@ -388,8 +392,12 @@ load.dataset.with.metadata <- function(path, filename, metadata, excluded.densit
   file <- paste(path, filename, sep = '') # load battery consumption
   data <- import.data(file)
   if (is.null(metadata)) {
-    metadata = extract.metadata(data, excluded.densities)
-    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*length(metadata$densities), height=4)
+    metadata <- extract.metadata(data, excluded.densities)
+    nr.elements <- length(metadata$densities)
+    if (nr.elements < 3) {
+      nr.elements <- 3;
+    }
+    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*nr.elements, height=4)
   }
   l <- list(data, metadata)
   names(l) <- c("data", "metadata")
@@ -428,7 +436,6 @@ if (!is.null(args$pc)) {
   print("Plotting power consumption")
   plot.power.consumption(r$data, metadata$densities)
 }
-
 
 if (!is.null(args$rf)) {
   print("Importing relays dataset")

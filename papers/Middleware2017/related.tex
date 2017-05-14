@@ -1,0 +1,30 @@
+%!TEX root = main.tex
+
+\section{Related work}
+\labsection{relatedwork}
+
+
+List of publications to include:
+
+\er{
+\begin{itemize}
+	\item Survey~\cite{Ruiz2015}
+	\item Hypergossiping paper~\url{http://www.sciencedirect.com/science/article/pii/S1570870506000096}
+	This paper considers the broadcast in a MANET where some nodes are well connected (and can use gossiping, a term they use for controlled flooding) and some are not, leading to disconnected systems. Nodes can detect partitions by simply comparing the set of recently-received items. When the two sets differ enough for two nodes who communicate then the nodes re-broadcast the missed messages to the other group. The abstract is close to what we want to do (adaptive broadcast) but in the end the contribution is actually a dual-mode broadcasting. There is no protocol switch. However, there is a form of adaptation for one protocol: the gossiping probability can be adapted based on the local density of a node. The density is obtained via active probing and the addition of hello messages, that are normally not needed for flooding based broadcast. This is a difference with us as we want to exploit only available communication and consider that if you send periodic hello messages you are better off using them to build an overlay. Related work to review from this paper (need to read them)
+	\begin{itemize}
+		\item \cite{border_node_retransmission_telsys03} proposes a ``density-aware probabilistic flooding''
+		\item \cite{2001:AAR:876878.879323} proposes two adaptive heuristic-based schemes for broadcast and one adaptive topology-based scheme
+		\item \cite{adaptive_group_com_iscc02} where nodes switch at run time between three flooding schemes: plain flooding, scoped flooding, and hyperflooding (i.e. flooding with repeated retransmissions to avoid lost messages)
+	\end{itemize}
+	\item to consider:
+	\begin{itemize}
+		\item \url{http://ieeexplore.ieee.org/document/7162992/}
+	\end{itemize}
+\end{itemize}
+}
+
+\raziel{
+	\begin{itemize}
+		\item An Adaptive Approach to Group Communications in Multi-hop Ad Hoc Networks~\cite{Viswanath02anadaptive}. This work allow nodes switching amongst 3 variations of flooding (scoped-, plain- or hyper) to broadcast in MANETs. Scoped-flooding aims to reduce redundant broadcast messages and fits better in MANETs where nodes decrease its velocity. Nodes exchange \emph{hello} messages to keep track of their one-hop neighbors. Senders piggyback their list of neighbors on every broadcast message and retransmissions take place if the sender's list of neighbors is a subset of the receiver's list. Hyperflooding copes with highly mobile scenarios. Nodes update their neighbors whenever a \emph{hello} message is received from a non listed neighbor or from an emitter of a broadcast message that haven't been seen before. Retransmissions take place when nodes added a new neighbor in their list. The trigger to decide when to change the current flooding technique depends on network load and nodes' relative velocity; \emph{hello} messages include both, information of  collisions (MAC-layer collisions that occur in period of time) and their velocity (gather from nodes' accelerometer). The velocity-based adaptation policy states to use scoped-flooding when nodes' velocity is lower than a \emph{low\_threshold}, hyperflooding when nodes' velocity is higher than a \emph{high\_threshold} or plain-flooding otherwise. The network load policy similarly uses two thresholds to decide when to use any of 3 flooding techniques. The authors claim that no single protocol is optimal for all MANETs scenarios and encourage the development of adaptive routing mechanisms which are not based on flooding.
+	\end{itemize}
+}

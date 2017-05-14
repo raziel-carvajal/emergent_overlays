@@ -1,0 +1,100 @@
+%!TEX root = main.tex
+
+\section{Related Work}
+\label{sec:related_work}
+
+Previous works and studies of broadcast algorithms for MANETs can be categorized in two classes: evaluations in the context of the proposal of new broadcast algorithms (\texttt{NBA}), and performance comparison studies (\texttt{CS}).
+%
+Table~\ref{tbl:rw} summarizes the related work (\texttt{RW}).
+%
+The first column ``Study'' lists all the \texttt{RW} that we have
+considered, tagged with either \texttt{NBA} or \texttt{CS} accordingly. For each \texttt{RW}, the column ``Many protocols'' shows whether the related work compares more than one protocol.
+%
+In the next column, we indicate if each \texttt{RW} has been compared to the simple flooding scheme (``Comp. to flooding'').
+%
+Further, the ``Many classes'' column indicates if the \texttt{RW}  is
+compared either with other protocols that belongs to the same class or
+not. 
+%evaluated protocols belong to the same class.
+%
+Then, the columns ``Many densities'', ``Mobility'', and ``Energy''
+highlight if each \texttt{RW} takes
+into account respectively the impact of network density, mobility and energy consumption.
+%
+% Given that network density is extremely important in MANETs, we
+% highlight in column ``Many densities'' the studies that consider this
+% variable.
+%
+%
+%Additionally, two more aspects are considered: mobility and energy consumption.
+%
+\deleted{
+We show in Table~\ref{tbl:rw} whether a specific study takes into account the influence of mobility on the overall performance of the protocol and whether the impact on energy consumption is evaluated.
+}
+Finally, the last column shows whether the overhead on the
+communication medium has been measured.
+%
+Such a measurement matters as the amount of collisions and the performance of broadcast is directly linked to the amount of sent and received messages on the medium, including retransmissions.
+
+\input{table_related_work}
+
+In their seminal work, Ni et al.~\cite{Ni:1999:BSP:313451.313525} identify the drawbacks of using basic flooding to perform broadcast.
+%
+The authors propose different algorithms that, by construction, outperform simple flooding.
+%
+Hence, they do not consider simple flooding in their evaluation.
+%
+\deleted{
+Since by construction such approaches are an improvement, the authors then proceed to evaluate them without considering simple flooding.
+}
+This is a common pattern in evaluating broadcast algorithms.
+% For that reason, it is important to use additional metrics, not considered in~\cite{Ni:1999:BSP:313451.313525}, to evaluate protocols.
+The third column in Table~\ref{tbl:rw} shows that most of the studies avoid considering simple flooding on their evaluation.
+%
+However, as illustrated in~\cite{YiGerla2003}, comparing a broadcast algorithm
+against simple flooding is more than relevant as soon as metrics like mobility are taken into account.
+%
+%this approach to evaluation is a limitation because
+%
+Interestingly, most studies only consider comparisons among protocols
+belonging to the same class.
+%
+For instance, authors only compare algorithms that build a CDS
+in~\cite{Wu2004}, others authors only compare algorithms based on the
+construction of cluster-based algorithms in~\cite{Nocetti2003}, and
+finally, only probabilistic approaches with context awareness are
+considered in~\cite{Cartigny:2003:BNR:2727141.2727459}.
+%
+Additionally, in~\cite{Cagalj2002} the authors only compare algorithms that build a tree by varying the transmission range.
+
+There are, nevertheless, some studies that compare protocols from different classes.
+%
+Previous work compare probabilistic and area-based algorithms~\cite{Ni:1999:BSP:313451.313525, Garbinato2010}; while some studies evaluate the construction of CDS-based and cluster-based topologies~\cite{Stojmenovic:2002:DSN:506156.506158, WCM:WCM109}.
+%
+% Given that few studies compare different categories of protocols, we believe that this is a limitation in the current state of the literature in MANETs. %% ER already said.
+%
+When considering power consumption, many studies do not measure the
+cost of building and maintaining the underlying topology. They take
+only in consideration the propagation of broadcast messages.
+%
+%
+In fact, Table~\ref{tbl:rw} shows that most studies do not measure energy consumption at all.
+%
+Other variables such as mobility and how it affects the performance of algorithms are seldom evaluated.
+
+%  \deleted{, as it is shown in ~\cite{Ni:1999:BSP:313451.313525, Qayyum2002} where there is a probabilistic model to represent dropped packages at the MAC layer.
+% %
+% While this is a valid approximation, we think it is possible to better measure the effect of network overhead considering more realistic models of the MAC layer.}
+
+%\begin{itemize}
+%	\item Study of evaluation criteria used in papers about MANET broadcast algorithms. Should take the form of a table, listing the work where evaluation results are presented. This can include the paper proposing new algorithms, or paper similar to our own that only perform measurement studies.
+%	\begin{itemize}
+%		\item Comparison to other protocols or only to the simple flooding process
+%		\begin{itemize}
+%			\item Should distinguish between: comparison with protocols of the same class or with protocols of other classes (using classes defined in the previous section)
+%		\end{itemize}
+%		\item Comparison of performance under different densities of nodes or network topologies
+%		\item Study of the influence of mobility
+%		\item Consideration of energy consumption
+%	\end{itemize}
+%\end{itemize}

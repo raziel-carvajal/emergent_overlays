@@ -22,6 +22,8 @@ get.arguments <- function() {
                       help='Density of the topology used')
   parser$add_argument('-ds', '--density-as-string', metavar='density_string', type="character",
                       help='Density of the topology used as string')
+  parser$add_argument('-mf', '--mapping-file', metavar='mapping_file', type="character",
+                      help='File with two columns, NodeId and the protocol ID that runs on that node')
   parser$add_argument('--radio-mode', dest='computeRadioMode', action="store_true",
                       help='Computing the time spent in each radio mode (a debug only option)')
   parser$add_argument('--save-time-power-level', dest='timeOfPowerLevels', action="store_true",
@@ -51,12 +53,6 @@ load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
 }
 
 
-powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
-  # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
-}
 
 getRecOrTraTimeByNode_Session <- function(rcvOrTrsMsgsDs, nodes, broadcastSessions){
   lapply(nodes, function(n){
@@ -78,12 +74,23 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+  #print(list_of_sent)
+  #print(msgDs)
+  #data.frame(x=ds$vectors[5], y=ds$vectors[1])
+  #splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  #r <- unlist(lapply(splitted, function(x){ x[2] }))
+  #n <- data.frame(nodeId=r, vectorId=df$resultkey)
 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+  #print("feo")
+  #print(id_msgs)
 
   # create a separate list for each broadcast_msg_received vector
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
+  # print("feo2")
+  # print(broDs)
+  # print(list_of_received)
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
@@ -102,6 +109,9 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 
   l.recp <- do.call("rbind", l.recp)
+  # print(l.recp)
+
+  #print(sending.time)
 
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id
@@ -115,24 +125,6 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 }
 
 
-collect.duplicated.messages <- function(msgDs, broDs, simulation.time) {
-  # create a separate list for each msg_sent vector
-  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-
-  l.recp <- lapply(id_msgs, function (id) {
-						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
-						data.frame(dm = sapply(tmp.list, function(d) length(d)) )
-			}
-  )
-
-  do.call("rbind", l.recp)
-}
 
 
 export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
@@ -141,11 +133,11 @@ export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
   broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
   broDupMsgsInfo <- data.frame( whatever = c(broDupMsgs) )
   colnames(broDupMsgsInfo) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broDupMsgsInfo,
             file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
             row.names = F, append = F
-  )
+  ))
 
 }
 
@@ -157,57 +149,145 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   broSes <- valid.time * 1000
   broSes <- data.frame( whatever = broSes)
   colnames(broSes) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broSes,
             file = build.filename(outputPath, "broadcastSession", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 save.coverage <- function(broadcast.info, max, outputPath, expeId){
   cov <- broadcast.info$n.received
   broSes <- data.frame( whatever = cov )
   colnames(broSes) <- c(expeId)
-  write.table(
+  (write.table(
             broSes,
             file = build.filename(outputPath, "coverage", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 
 save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
   broSes <- data.frame( whatever = broadcast.info$n.sent)
   colnames(broSes) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             broSes,
             file = build.filename(outputPath, "relays", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
+collect.duplicated.messages <- function(msgDs, broDs, simulation.time, mapNodeAlgoId=NULL) {
+  df <- data.frame(module=broDs$vectors[5], resultkey=broDs$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, resultkey=df$resultkey)
+
+  # create a separate list for each msg_sent vector
+  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
+
+  # recover list of msg id
+  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
+
+  if (!is.null(mapNodeAlgoId)) {
+    names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+    mr <- merge(n,mapNodeAlgoId)
+    # create a separate list for each broadcast_msg_received vector
+    list_of_received <- lapply(broDs$vectors$resultkey, function(p){
+                             t <- subset(broDs$vectordata, resultkey == p)
+                             merge(t, mr)
+    })
+  } else {
+    # create a separate list for each broadcast_msg_received vector
+    list_of_received <- lapply(broDs$vectors$resultkey, function(p){
+                             t <- subset(broDs$vectordata, resultkey == p)
+                             t$protocolId <- c(rep("", length(t$resultkey)))
+                             t
+    })
+    # print(list_of_received)
+
+  }
+  l.recp <- lapply(id_msgs, function (id) {
+    tmp.list <- lapply(list_of_received, function(d){
+     #data.frame(t=d[d$y == id,]$x, protocolId=d[d$y == id,]$protocolId)
+     d[d$y == id,]$protocolId
+    })
+    # FIXME: the hack in the end doesn't work if you are in fully adaptive case
+    dd <- data.frame(dm = sapply(tmp.list, function(d) length(d)), protocolId=sapply(tmp.list, function(d) if (length(d) >0) unique(d) else "" ) )
+    dd
+  })
+
+  do.call("rbind", l.recp)
+}
+
+powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30, mapNodeAlgoId=NULL) {
+  # create a separate list for each power level
+  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
+  # vector of power levels for each instant of time
+  df <- data.frame(module=ds$vectors[5], resultkey=ds$vectors[1])
+  splitted <- strsplit(as.character(df$module), ".", fixed=T)
+  r <- unlist(lapply(splitted, function(x){ x[2] }))
+  n <- data.frame(nodeId=r, vectorId=df$resultkey)
+  vId <- unlist(lapply(others, function(x) tail(x$resultkey,1)))
+  if (!is.null(mapNodeAlgoId)) {
+    names(mapNodeAlgoId) <- c("nodeId", "protocolId")
+    mr <- merge(n,mapNodeAlgoId)
+    r <- lapply(ts, function(t)  {
+      z <- lapply(others, function(s) {
+        a <- tail(s[s$x <= t,], 1)
+        data.frame(y=a$y, vectorId=a$resultkey)
+      })
+      merge(do.call("rbind", z), mr)
+    })
+  } else {
+    r <- lapply(ts, function(t)  {
+      z <- lapply(others, function(s) {
+        a <- tail(s[s$x <= t,], 1)
+        data.frame(y=a$y, vectorId=a$resultkey)
+      })
+      w <- do.call("rbind", z)
+      w$protocolId <- c(rep("", length(w$y)))
+      w
+    })
+  }
+  t <- lapply(r, function(r1) data.frame(y=r1$y, protocolId=r1$protocolId))
+  t
+}
 
 save.duplicated.messages <- function(data, outputPath, expeId){
   dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
   df <- data.frame( whatever = dm)
-  colnames(df) <- c(expeId)
-  write.table(
-            df,
-            file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
-            row.names = F, append = F
-  )
+  u <- unique(data$protocolId)
+  lapply(u, function(protocol){
+    df <- subset(data, protocolId == protocol)
+    name <- gsub('[_]', '', protocol)
+    dupMsgs <- data.frame(wathever=df$dm)
+    colnames(dupMsgs) <- c(paste(expeId, name, sep=""))
+    suppressWarnings(write.table(
+      dupMsgs,
+      file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
+      row.names = F, append = T
+    ))
+  })
 }
 
 
 save.power.level <- function(power.level, outputPath, expeId){
   pl <- power.level[lapply(power.level, length) > 0]
-  powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(tail(pl, 1)))) )
-  colnames(powerLevelInfo) <- c(expeId)
-  write.table(
-            powerLevelInfo,
-            file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-            row.names = F, append = F
-  )
+  taR <- tail(pl, 1)[[1]]
+  u <- unique(taR$protocolId)
+  lapply(u, function(protocol) {
+    df <- subset(taR, protocolId == protocol)
+    powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(df$y))) )
+    name <- gsub('[_]', '', protocol)
+    colnames(powerLevelInfo) <- c(paste(expeId, name, sep=""))
+    suppressWarnings(write.table(
+              powerLevelInfo,
+              file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
+              row.names = F, append = T
+    ))
+  })
 }
 
 
@@ -215,11 +295,11 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
   t.pl <- time.of.data[lapply(data, length) > 0]
   t.powerLevelInfo <- data.frame( whatever = c(tail(t.pl, 1)) )
   colnames(t.powerLevelInfo) <- c(expeId)
-  write.table(
+  suppressWarnings(write.table(
             t.powerLevelInfo,
             file = build.filename(outputPath, "batteryConsumptionDistributionTime", expeId),
             row.names = F, append = F
-  )
+  ))
 }
 
 
@@ -509,8 +589,8 @@ average.values <- function(pl, broadcast.info, max) {
 
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
-
-	pc <- unlist(lapply(pl, sum))/nr.nodes
+        tmp.list <- lapply(pl, function(i) i$y)
+	pc <- unlist(lapply(tmp.list, sum))/nr.nodes
 
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
@@ -543,6 +623,11 @@ main <- function(args) {
 
   #TODO find a way to adapt this parameter in an automatic way
   pl.step <- args$step
+  if (!is.null(args$mapping_file)) {
+      mapNodeAlgoId <- read.table(args$mapping_file)
+  } else {
+    mapNodeAlgoId <- NULL
+  }
 
   # mandatory behavior
 
@@ -555,18 +640,19 @@ main <- function(args) {
   print(paste("Loading power consumption data file:", args$file))
   powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
 
-  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
+  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step, mapNodeAlgoId=mapNodeAlgoId)
   print("DONE!")
+
 
   print("Computing maximal reception delay")
   bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
   print("DONE!")
 
   print("Collecting information on number of duplicated messages")
-	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
-
+  dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime, mapNodeAlgoId=mapNodeAlgoId)
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration)
+  # stop()
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)

@@ -48,9 +48,17 @@ simple BroadcastingBase
 
         xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
+        // Adaptation parameters
+        double adaptationMax @unit(s) = default(0.5s);
+        bool withAdaptation = default(false);
+        string protocolId = default("");
+        int nr_max_custom_officers = default(1);
+        double timeoutCustomOfficer @unit(s) = default(0.5s);
+
+
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);
-		    @statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
+		@statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
 
    gates:
         input udpIn @labels(UDPControlInfo/up);

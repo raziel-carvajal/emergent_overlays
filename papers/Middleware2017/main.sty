@@ -1,0 +1,211 @@
+\usepackage[utf8]{inputenc} 
+
+% strikethrough command
+\usepackage[normalem]{ulem}
+
+% Maths
+\usepackage{mathtools}
+\usepackage{amssymb,amsmath}
+
+% Symbols
+\usepackage{pifont}
+
+% Algorithms
+%\usepackage{algorithmicx}
+%\usepackage[noend]{algpseudocode}
+%\usepackage{algorithm}
+
+% % Algo2e
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+%
+\SetKwData{MapT}{t}
+\SetKwData{VoidType}{void}
+\SetKwData{MapFlo}{f}
+\SetKwData{Id}{id}
+\SetKwData{AdaptTimer}{timeout}
+\SetKwData{FloodTimer}{flooding\_}
+\SetKwData{RemTime}{time}
+\SetKwData{SentMsgs}{sent\_msgs}
+
+\SetKwData{FloodMode}{mode}
+\SetKwData{FloodRecpLi}{max\_receptions}
+\SetKwData{FloodSimp}{SIMPLE}
+\SetKwData{FloodCoun}{COUNTER\_BASE}
+\SetKwData{FloodNewMsg}{newFloodingMsg}
+
+\SetKwData{Algo}{p}
+\SetKwData{AlgoPid}{p.pid}
+\SetKwData{AlgoInit}{init}
+\SetKwData{AlgoEmit}{emit}
+\SetKwData{AlgoHandle}{handle}
+\SetKwData{AlgoSend}{send}
+\SetKwData{AlgoBroFunc}{broadcast}
+\SetKwData{AlgoInitFunc}{init}
+\SetKwData{AlgoEmitFunc}{emit}
+
+\SetKwData{Ms}{m}
+\SetKwData{Msg}{message}
+\SetKwData{MsgId}{m.id}
+\SetKwData{MsgPid}{m.pid}
+\SetKwData{MsgContent}{payload}
+\SetKwData{MsgPayload}{pl}
+
+\SetKwData{Timer}{timer}
+\SetKwData{TimerFunc}{newTimer}
+
+% Function and Blocks
+\SetKwFunction{FuncHandler}{receive}
+\SetKwFunction{FuncExp}{expires}
+\SetKwFunction{FuncExpFlo}{expiresInFlooding}
+\SetKwProg{Fn}{function}{}{}
+\SetKwBlock{BlockOfVar}{variables}{}{}
+\SetKwBlock{BlockOfConstants}{constants}{}{}
+\SetKwBlock{BlockOfFuncs}{running protocol API}{}{}
+\SetKwBlock{BlockOfAlgoAPI}{communication primitives}{}{}
+\SetKwBlock{BlockOfMapAttributes}{attributes of map}{}{}
+
+% Figures (tikz et al.)
+\usepackage{wrapfig}
+\usepackage{graphicx} 
+% \usepackage{color}
+% \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{tikz}
+\usepgflibrary{shapes.symbols} % LATEX and plain TEX and pure pgf 
+\usetikzlibrary{shapes.symbols} % LATEX and plain TEX when using Tik Z 
+\usepackage{pstricks}
+
+% % Font type for listings and figures
+% \usepackage{pifont}
+% \newcommand\Small{\fontsize{7.5}{10.5}\selectfont}
+% \newcommand*\LSTfont{\Small\ttfamily\SetTracking{encoding=*}{-60}\lsstyle}
+
+% Code listing
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+\lstset{float,
+  literate={\ \ }{{\ }}1,
+  emph={@Entity},
+  emphstyle=\color{OliveGreen},
+%  otherkeywords={key}, 
+  numbers=left,
+  xleftmargin=2em,
+  stringstyle=\color{RoyalPurple}, 
+  basicstyle=\LSTfont,
+  language=Java,
+  columns=fullflexible,
+  frame=tb,
+  captionpos=b,
+  mathescape=true,
+  tabsize=2,
+  escapeinside={(*@}{@*)}}
+
+% Others
+\usepackage[defblank]{paralist}
+\usepackage{xspace}    
+\usepackage{subfigure}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{relsize}
+\renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
+\usepackage{ifthen}
+
+% Bibliography
+\bibliographystyle{acmref}
+% \usepackage{cite}
+
+% compact itemize
+\usepackage{paralist}
+\setdefaultleftmargin{1em}{}{}{}{.5em}{.5em}
+
+% comments
+\newboolean{showcomments}
+\setboolean{showcomments}{true}
+\ifthenelse{\boolean{showcomments}}
+{ \newcommand{\mynote}[3]{
+    \fbox{\bfseries\sffamily\scriptsize#1}
+    {\small$\blacktriangleright$\textsf{\emph{\color{#3}{#2}}}$\blacktriangleleft$}}}
+{ \newcommand{\mynote}[3]{}}
+%\newcommand{\ps}[1]{\mynote{Pierre}{#1}{magenta}}
+%\newcommand{\er}[1]{\mynote{Etienne}{#1}{blue}}
+%\newcommand{\pg}[1]{\mynote{Pedro}{#1}{red}}
+
+\newcommand{\raziel}[1]{\mynote{Raziel}{#1}{magenta}}
+\newcommand{\er}[1]{\mynote{Etienne}{#1}{blue}}
+\newcommand{\vicent}[1]{\mynote{Vicent}{#1}{redorange}}
+\newcommand{\laurent}[1]{\mynote{Laurent}{#1}{brown}}
+\newcommand{\inti}[1]{\mynote{Inti}{#1}{bittersweet}}
+\newcommand{\david}[1]{\mynote{David}{#1}{forestGreen}}
+
+%%%%% Environment for change tracking (Etienne)
+% Very convenient to add comments on the paper. Just set the boolean
+% to false before sending the paper:
+% \newboolean{showchanges}
+% \setboolean{showchanges}{true}
+% \ifthenelse{\boolean{showchanges}}
+% {
+% 	\newcommand{\changed}[1]{\color{Brown}{#1}\xspace\color{black}}
+% 	\newcommand{\deleted}[1]{\color{OliveGreen} {\sout{#1}}\xspace\color{black}}
+% } {
+% 	\newcommand{\changed}[1]{#1}
+% 	\newcommand{\deleted}[1]{}
+% }
+%%%%% End environment for changes (Etienne)
+
+%%% Macros
+\newcommand{\OurAdaptiveTech}{OurAdaptiveBasedTechnique}
+
+\newcommand{\labfigure}[1]{\label{fig:#1}}
+\newcommand{\reffigure}[1]{Figure~\ref{fig:#1}}
+\newcommand{\reffiguretwo}[2]{Figures~\ref{fig:#1}~and~\ref{fig:#2}}
+
+\newcommand{\labtab}[1]{\label{tab:#1}}
+\newcommand{\reftab}[1]{Table~\ref{tab:#1}}
+
+\newcommand{\labsection}[1]{\label{sect:#1}}
+\newcommand{\refsection}[1]{Section~\ref{sect:#1}}
+\newcommand{\numsection}[1]{\ref{sect:#1}}
+
+\newcommand{\labappendix}[1]{\label{appendix:#1}}
+\newcommand{\refappendix}[1]{Appendix~\ref{appendix:#1}}
+
+\newcommand{\labalg}[1]{\label{alg:#1}}
+\newcommand{\refalg}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\refalgtwo}[2]{Algorithms~\ref{alg:#1}~and~\ref{alg:#2}}
+
+\newcommand{\labline}[1]{\label{line:alg:#1}}
+\newcommand{\refline}[1]{line~\ref{line:alg:#1}}
+\newcommand{\reflines}[2]{lines~\ref{line:alg:#1}~to~\ref{line:alg:#2}}
+\newcommand{\reflinestwo}[2]{lines~\ref{line:alg:#1}~and~\ref{line:alg:#2}}
+\newcommand{\reflinesthree}[3]{lines~\ref{line:alg:#1},~\ref{line:alg:#2}~and~\ref{line:alg:#3}}
+
+\newcommand{\labdef}[1]{\label{def:#1}}
+\newcommand{\refdef}[1]{Definition~\ref{def:#1}}
+
+\newcommand{\labclaim}[1]{\label{claim:#1}}
+\newcommand{\refclaim}[1]{Claim~\ref{claim:#1}}
+\newcommand{\refclaims}[2]{Claims~\ref{claim:#1}~to~\ref{claim:#2}}
+
+\newcommand{\lablem}[1]{\label{lem:#1}}
+\newcommand{\reflem}[1]{Lemma~\ref{lem:#1}}
+
+\newcommand{\labprop}[1]{\label{prop:#1}}
+\newcommand{\refprop}[1]{Proposition~\ref{prop:#1}}
+\newcommand{\refprops}[2]{Proposition~\ref{claim:#1}~to~\ref{claim:#2}}
+
+\newcommand{\labtheo}[1]{\label{theo:#1}}
+\newcommand{\reftheo}[1]{Theorem~\ref{theo:#1}}
+
+\newcommand{\labcor}[1]{\label{cor:#1}}
+\newcommand{\refcor}[1]{Theorem~\ref{cor:#1}}
+
+\newcommand{\labequation}[1]{\label{eq:#1}}
+\newcommand{\refequation}[1]{(\ref{eq:#1})}
+
+\newcommand{\labinv}[1]{\label{inv:#1}}
+\newcommand{\refinv}[1]{Invariant~\ref{inv:#1}}
+\newcommand{\refinvs}[2]{Invariants~\ref{inv:#1}~to~\ref{inv:#2}}
+

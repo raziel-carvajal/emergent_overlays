@@ -87,6 +87,8 @@ bool Abba2::inPair(double x, std::pair<double, double>& p) { return x < p.second
 
 double
 Abba2::getAngleCovered(std::vector<std::pair<double, double>>& items) {
+
+  std::cout << getLogHeader() << "CURIOSO " << items.size() << std::endl;
     int i, j; double sum = 0.0;
     if (items.size() == 0) return 0.0;
     if (items.size() == 1) return items[0].second - items[0].first;
@@ -130,6 +132,12 @@ Abba2::process_payload(const Broadcast* m) {
           updateAngleCovered(b, key);
           angleCovered = getAngleCovered(firHalfPairs[key]) + getAngleCovered(secHalfPairs[key]);
         }
+        else if (tmp == nullptr) {
+          std::cerr << getLogHeader() << " Receiving wrong message type. This shouldn't happen" << '\n';
+        }
+        Coord b; b.x = tmp->getX(); b.y = tmp->getY();
+        updateAngleCovered(b,key);
+
 //        cerr << getLogHeader() + "Computing angle covered\n";
 //        cerr << getLogHeader() + "current angle covered " +  to_string(angleCovered) + "\n";
         double newTimeout = computeTimeout(angleCovered);
@@ -199,8 +207,10 @@ Abba2::time_to_broadcast_payload(void* user_data)
         gateway->broadcast(key, m);
         gateway->emitBroadcastMsgReceived(key);
     } else {
-        key = string( (char*)user_data );
-        send_message(key);
+      key = string( (char*)user_data );
+      cerr << getLogHeader() << "doing broadcast of message  22222 " << key << endl;
+      send_message(key);
+      cerr << getLogHeader() << "doing broadcast of message  33333 " << key << endl;
     }
 }
 

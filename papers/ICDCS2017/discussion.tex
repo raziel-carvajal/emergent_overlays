@@ -1,0 +1,42 @@
+%!TEX root = main.tex
+
+\section{Discussion}
+\label{sec:discussion}
+
+Table~\ref{tbl:rules} summarizes our results.
+%
+It has the form of a set of rules that allows to choose an appropriate broadcast algorithm for a given deployment scenario.
+%
+For instance, when there is no mobility, it is better to use \emph{MPR}, no matter the density.
+%
+As our experiments show, in such scenarios \emph{MPR} consumes less energy, guarantees good coverage and uses efficiently the medium.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr|p{1.9cm}l}
+		\textbf{Mobility} & \textbf{Density} &  \textbf{Suggestion} & \textbf{Notes}\\
+		
+		\midrule
+		Static & Any & \emph{MPR} & Fewer control messages \\
+		Walking & 5 & \emph{simple flooding} & Best coverage  \\
+		Walking & 10  & \emph{MPR} and \emph{ABBA} &   \\
+		Walking & 15+ & \emph{CDS-based} &  \\
+		
+	\end{tabular}
+	
+	\caption{Rules on which broadcast algorithm to use in different deployment scenarios.}
+	\label{tbl:rules}
+	\vspace{-0.2cm}
+\end{table}
+
+The rules for deployment scenarios with mobility at walking speed are more complex, as they take into account other external parameters such as the density.
+%
+To suggest an algorithm, we first aim at increasing coverage, then the energy consumption and we consider that the medium usage is the least important of the metrics.
+%
+For that reason, we suggest \emph{simple flooding} when the density is very low.
+%
+Finally, the results show that \emph{MPR} and \emph{ABBA} are good alternatives when there is mobility and the density is close to 10.
+%
+Although for walking speed \emph{ABBA} is outperformed by CDS-based protocols, it is worth considering it as the main alternative for scenarios where nodes move at higher speeds. 

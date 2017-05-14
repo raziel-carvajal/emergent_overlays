@@ -51,6 +51,7 @@ src/base/*/*_m.h
 src/protocols/Makefile
 built/
 experiments/configs/builtConfigs/*.ini
+experiments/configs/builtConfigs/*.density
 experiments/networks/builtTopologies/*.ned
 
 # Non useful experimental results
@@ -80,3 +81,24 @@ results/broadcastSession-*
 results/duplicatedMsgsDistribution-*
 results/collisions_*
 results/graphConnectivity_*
+
+#ICDCS paper
+papers/ICDCS2017/main.aux
+papers/ICDCS2017/main.bbl
+papers/ICDCS2017/main.blg
+papers/ICDCS2017/main.log
+papers/ICDCS2017/main.pdf
+papers/ICDCS2017/main.synctex.gz
+
+# Draft for adaptation paper
+# Middleware2017
+papers/Middleware2017/main.aux
+papers/Middleware2017/main.bbl
+papers/Middleware2017/main.blg
+papers/Middleware2017/main.log
+papers/Middleware2017/main.pdf
+papers/Middleware2017/main.out
+papers/Middleware2017/main.synctex.gz
+
+#
+src/scripts/algo

@@ -1,0 +1,95 @@
+local variables:
+\begin{itemize}
+	\item p -> locally running protocol
+	\begin{itemize}
+		\item p.id
+		\item p.init(void* c) -> m // prepares a new message, adding appropriate metadata etc.
+		\item p.send(message m) // send a message as if local node is source
+		\item p.handle(message m) // handle an incoming message received by broadcast
+	\end{itemize}
+	\item t[] -> map of timers currently associated with messages, have an expiration time
+	\begin{itemize}
+		\item t[id] -> timer associated with message of identifier id
+		\item t[id].time -> remaining time for this timer
+		\item t[id].m -> content of the message
+	\end{itemize}
+	% \item R -> set of received message identifiers already delivered to application
+\end{itemize}
+
+functions:
+\begin{itemize}
+	\item handler(m) // a new message m arrives:
+	\begin{itemize}
+		\item m.pid // each protocol has a different id, there can be an arbitrary # of protocols
+		\item m.meta // specific to the protocol that issued the message
+		\item m.payload // raw message, independent of the protocol
+	\end{itemize}
+	
+	function handler(m)
+		if (p.id == m.pid) then
+			// if there already exists a timer for this message id (transmission after border crossing), cancel this timer as we know local community of protocol p.id knows the message
+			if (t[id] != bottom) then
+				t[id].cancel()
+				t[id] = bottom
+			end
+			// let local protocol handle the message
+			p.handle(m)
+		else
+			// the message is from another protocol
+			// set up a timer to send the message, unless one already exists
+			if (t[id] == bottom) then
+				t[id] = new timer(default_time, m)
+			end
+		end
+	end
+	
+	function t.expires()
+		// called when a timer expires
+		// t knows its field m, the message
+		m' = p.init(m.payload)
+		p.send(m')
+	end
+end
+\end{itemize}
+
+\\example with algorithm2e
+
+
+  \begin{algorithm}[t]
+  \scriptsize
+  \caption{\label{alg:prefilter}Prefiltering algorithm}
+
+  \PreFilter{\Ev}{\;
+	$\mathit{\Tested[] \gets \{\textup{\textbf{false}}, \hdots, \textup{\textbf{false}}\}}$\tcp*[f]{No subscription tested yet}\;\label{lin:reset}
+	\For(\tcp*[f]{Check every list (including default)}){$i \gets 0 \hdots n$}{\label{lin:traverse1}
+		\If(\tcp*[f]{Default list or bit set in BF?}){$i = n \vee \BF(\Ev)[i] = 1$}{
+    		\ForEach(\tcp*[f]{Traverse list}){$\Sub \in \Cand[i]$}{\label{lin:traverse2}
+				\If(\tcp*[f]{Not yet tested?}){$\neg \Tested[\Sub]$}{\label{lin:check1}
+					$\mathit{m \gets \textup{\textbf{false}}}$\tcp*[f]{Initially not a match}\;
+					\If(\tcp*[f]{Possible match?}){$i = n \vee \BF(\Sub) \subseteq \BF(\Ev)$}{\label{lin:check2}
+						$\mathit{m \gets \ENCMatch(\Ev,\Sub)}$\tcp*[f]{Must do costly test}\;\label{lin:encmatch}
+					}
+					\eIf(\tcp*[f]{Match?}){$\mathit{m}$}{
+						$\mathit{\Forward(\Ev,\Sub)}$\tcp*[f]{Forward to subscriber}\;\label{lin:fwd}
+						\If(\tcp*[f]{Do positive match?}){$\texttt{CB-POSITIVE-MATCH}\;$}{\label{lin:pos1}
+		    			\ForEach{$\Sub' \in \Containers(\Sub)$}{
+							\If(\tcp*[f]{Not yet tested?}){$\neg \Tested[\Sub']$}{
+								$\mathit{\Tested[\Sub'] \gets \textup{\textbf{true}}}$\;
+								$\mathit{\Forward(\Ev,\Sub')}$\tcp*[f]{Forward to subscriber}\;\label{lin:pos2}
+							}
+						}
+					}
+					}(\tcp*[f]{No match}){
+						\If(\tcp*[f]{Do negative match?}){$\texttt{CB-NEGATIVE-MATCH}\;$}{\label{lin:neg1}
+		    				\ForEach{$\Sub' \in \Containees(\Sub)$}{
+								$\mathit{\Tested[\Sub'] \gets \textup{\textbf{true}}}$\;\label{lin:neg2}
+							}
+						}
+					}
+					$\mathit{\Tested[\Sub] \gets \textup{\textbf{true}}}$\;
+				}
+			}
+		}
+	}
+  }
+\end{algorithm}

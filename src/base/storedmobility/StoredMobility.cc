@@ -80,36 +80,39 @@ StoredMobility::readNodeMobilities()
   if (read) return;
 
 	ifstream ifs(filename);
-	string line;
-	getline(ifs, line); // number of nodes
-	int nr_nodes = stoi(line);
-	getline(ifs, line); // time step in seconds
-	double time_step = stod(line);
-	for (int i = 0 ; i < nr_nodes; i++) {
+	if ( !ifs.fail() )
+	{
+		string line;
+		getline(ifs, line); // number of nodes
+		int nr_nodes = stoi(line);
+		getline(ifs, line); // time step in seconds
+		double time_step = stod(line);
+		for (int i = 0 ; i < nr_nodes; i++) {
 
-		mobility.push_back(NodeStoredMobility(time_step));
-	}
-
-  cerr << "Number of node is " << nr_nodes << endl;
-  cerr << "The time step is " << time_step << " seconds" << endl;
-	do {
-
-		for (int i = 0 ; i < nr_nodes; i++ ) {
-			getline(ifs, line);
-			if (line.empty()) break;
-			// cout << "a line |" << line << "|" << endl;
-			auto pos = line.find(" ");
-			double x = stod(line.substr(0, pos));
-			double y = stod(line.substr(pos+1, string::npos));
-			mobility[i].add_location(x, y);
+			mobility.push_back(NodeStoredMobility(time_step));
 		}
-	} while (!ifs.eof());
 
-	for (auto& node : mobility) {
-		node.done_reading();
+	  cerr << "Number of node is " << nr_nodes << endl;
+	  cerr << "The time step is " << time_step << " seconds" << endl;
+		do {
+
+			for (int i = 0 ; i < nr_nodes; i++ ) {
+				getline(ifs, line);
+				if (line.empty()) break;
+				// cout << "a line |" << line << "|" << endl;
+				auto pos = line.find(" ");
+				double x = stod(line.substr(0, pos));
+				double y = stod(line.substr(pos+1, string::npos));
+				mobility[i].add_location(x, y);
+			}
+		} while (!ifs.eof());
+
+		for (auto& node : mobility) {
+			node.done_reading();
+		}
+
+	  read = true;
 	}
-
-  read = true;
 
 }
 

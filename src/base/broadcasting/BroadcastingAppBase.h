@@ -45,6 +45,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
         PRINT_POS_NEIGS,
+        TRANSFORMATION_TIMEOUT,
+        OFFICER_ELECTION_TIMEOUT,
         LAST_POWER_REPORT,
 
         First = IDLE,
@@ -104,6 +106,32 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     int local_port = 10000;
     UDPSocket socket;
 
+
+    double adaptationMax;
+    double timeoutCustomOfficer;
+    bool withAdaptation;
+    std::string protocolId;
+    int nr_max_custom_officers;
+    std::set<std::string> lastForeignHelloSenders;
+
+    //Payloads
+    std::map<std::string, std::string> adaptForeigsMsgs;
+    std::map<std::string, std::string> adaptMyProtoMsgs;
+    std::map<std::string, cMessage*> timeoutMsgs;
+    std::map<std::string, cMessage*> timeoutBorderDet;
+
+    // custom officer for foreign protocol
+    // map from protocol to target
+    std::map<std::string, std::set<std::string>> customOfficers;
+
+    bool amIbridge = false;
+  private:
+
+    bool contains(const std::string& protocolId, const std::string& nodeId);
+    void save_border_node(const std::string& protocolId, const std::string& nodeId);
+
+    // control messages
+    cMessage* ctrlDisplayTime = nullptr;
 
     /* signals used to record statistics */
     simsignal_t signal_received_id;
@@ -192,11 +220,21 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void emitPowerLevel(double value); // (don't call it)
     void emitSent(std::string value); // important. you should use it. log data (statistics in vector)
 
+
     void delay_broadcast(void* user_data);
     void delayed_event_with_strict_time(int type, const std::string& key, double delay);
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
     int get_next_id_for_msg();
     int get_last_id_for_msg();
+
+    double computeAdaptTimeout();
+
+    bool msgReceived(const broadcasting::Broadcast* m);
+
+    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
+    bool borderDetector(cMessage *msg);
+  public:
+    BroadcastingAppBase();
 
 };
 

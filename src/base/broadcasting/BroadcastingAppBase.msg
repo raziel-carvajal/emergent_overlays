@@ -16,14 +16,29 @@
 namespace inet::broadcasting;
 
 
+cplusplus{{
+  #include <set>
+  typedef std::set<std::string> TargetSet;
+}}
+
+class noncobject TargetSet;
+
 packet Hello {
   string sender;
 	double x;
 	double y;
+	string protocolId;	//protocol ID
 }
 
 packet Broadcast {
-    string id;
-    string sender;
-    string payload;
+  string id;			// this is broadcast message ID
+  string sender;
+  string payload;
+  string protocolId;	//protocol ID
+}
+
+packet Border {
+  string sourceProtocol;	//protocol of the sender
+  string foreignProtocol;	// foreign protocol I care about 
+  TargetSet targets;
 }

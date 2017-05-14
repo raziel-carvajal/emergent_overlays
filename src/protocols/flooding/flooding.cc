@@ -50,9 +50,14 @@ Flooding2::time_to_broadcast_payload(void* user_data)
     string key;
     if (!user_data) {
         key = gateway->createUniqueBroadcastingSessionId();
-        payloads[key] = key;
-        gateway->broadcast(key, new broadcasting::Broadcast("payload"));
+
+		//to cope with mobility
+        neighbors.empty();
+    }else {
+		key = string( (char*)user_data );
     }
+    payloads[key] = key;
+    gateway->broadcast(key, new broadcasting::Broadcast("payload"));
 }
 
 } //namespace
