@@ -148,6 +148,14 @@ BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m)
   app->cancelAndDelete(m);
 }
 
+
+bool
+BroadcastingAppBase::OmnetBroadcastGateway::bridge()
+{
+  return app->amIbridge;
+}
+
+
 int
 BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
 {
@@ -190,7 +198,7 @@ BroadcastingAppBase::BroadcastingAppBase() {
   BroadcastingAppBase::applyMsgsTransformation (cMessage *msg, bool &fwdMsg)
   {
     bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
-    	  cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
+    	  // cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
     	  if ( !msgReceived(m) ) {
 
     	    if (protocolId != m->getProtocolId()) {
@@ -204,13 +212,13 @@ BroadcastingAppBase::BroadcastingAppBase() {
         		    m->getId(), timeout);
         	} else {
         		fwdMsg = true;
-        		cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
+        		// cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
         		adaptMyProtoMsgs[m->getId()] = m->getPayload();
     	    }
     	  } else {
     	    if (protocolId == m->getProtocolId()) {
         		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
-        		    cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
+        		    // cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
         		    auto tmp = timeoutMsgs[m->getId()];
         		    cancelAndDelete(tmp);
         		    timeoutMsgs.erase(m->getId());
@@ -262,9 +270,6 @@ BroadcastingAppBase::save_border_node(const std::string& protocolId, const std::
 }
 
 
-BroadcastingAppBase::BroadcastingAppBase() {}
-
-
 void
 BroadcastingAppBase::initialize(int stage)
 {
@@ -274,10 +279,10 @@ BroadcastingAppBase::initialize(int stage)
 
             myself = this->getParentModule()->getFullName();
 
-            protocolId = par("protocolId").stdstringValue();
+            // protocolId = par("protocolId").stdstringValue();
 
             nr_hello_msg = par("nr_hello_messages").boolValue();
-            
+
             is_source = par("is_source").boolValue();
 
             nr_broadcast_msg = par("nr_broadcast_msg").longValue();
@@ -295,19 +300,19 @@ BroadcastingAppBase::initialize(int stage)
             timeoutCustomOfficer = par("timeoutCustomOfficer").doubleValue();
             withAdaptation = par("withAdaptation").boolValue();
         }
-            break;
+        break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
-            {
+        {
 
-                cModule* host = getContainingNode(this);
+            cModule* host = getContainingNode(this);
 
-                IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
-                physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
+            IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
+            physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
 
-                this->position = mobility->getCurrentPosition();
-                this->radious = transmitter->getMaxCommunicationRange().get();
-            }
-            break;
+            this->position = mobility->getCurrentPosition();
+            this->radious = transmitter->getMaxCommunicationRange().get();
+        }
+        break;
         case INITSTAGE_LAST:{
 
             double d = par("wakeUpTime").doubleValue();
@@ -360,7 +365,7 @@ BroadcastingAppBase::initialize(int stage)
 void
 BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 {
-    cout << getLogHeader() << "Message: " <<  msg->getKind() << endl;
+    // cout << getLogHeader() << "Message: " <<  msg->getKind() << endl;
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
             case START: {
@@ -441,38 +446,39 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             }
             break;
             case OFFICER_ELECTION_TIMEOUT: {
-              cout << getLogHeader() << "officer election timeout: " <<  endl;
+              // cout << getLogHeader() << "officer election timeout: " <<  endl;
               char* foreign_prot = (char*)msg->getContextPointer();
-              if (customOfficers.find(foreign_prot) == customOfficers.end())
-                  cout << getLogHeader() << "NOT IN MAP" << endl;
+              // if (customOfficers.find(foreign_prot) == customOfficers.end())
+                  // cout << getLogHeader() << "NOT IN MAP" << endl;
               broadcasting::TargetSet targets;
-              cout << getLogHeader() << "foreing prot: " << foreign_prot <<  endl;
+              // cout << getLogHeader() << "foreing prot: " << foreign_prot <<  endl;
               for (const auto& e: customOfficers[foreign_prot]) {
                 targets.insert(e);
                 if (targets.size() == nr_max_custom_officers)
                   break;
               }
-              cout << getLogHeader() << "AFTER LOOP " <<  endl;
-//              if (!std::equal(customOfficers[foreign_prot].begin(),
-//                              customOfficers[foreign_prot].end(),
-//                              lastForeignHelloSenders.begin()
-//                            )) {
-//                cout << getLogHeader() << "IN CONDITION " <<  endl;
-//                auto tmp = new broadcasting::Border();
-//                tmp->setSourceProtocol(protocolId.c_str());
-//                tmp->setForeignProtocol(foreign_prot);
-//                tmp->setTargets(targets);
-//                send_package(tmp);
-//                timeoutBorderDet.erase(foreign_prot);
-//                lastForeignHelloSenders = customOfficers[foreign_prot];
-//                customOfficers[foreign_prot].clear();
-//
-//                cout << getLogHeader() << "BEFORE " <<  endl;
-//                free(foreign_prot);
-//                cancelAndDelete(msg);
-//                cout << getLogHeader() << "AFTER" <<  endl;
-//              }
-              cout << getLogHeader() << "END OF OFFICIER ELECTION TIMEMOU" <<  endl;
+              // cout << getLogHeader() << "AFTER LOOP " <<  endl;
+              if (customOfficers[foreign_prot].size() != lastForeignHelloSenders.size() ||
+               !std::equal(customOfficers[foreign_prot].begin(),
+                             customOfficers[foreign_prot].end(),
+                             lastForeignHelloSenders.begin()
+                           )) {
+                //  cout << getLogHeader() << "IN CONDITION " <<  endl;
+                auto tmp = new broadcasting::Border();
+                tmp->setSourceProtocol(protocolId.c_str());
+                tmp->setForeignProtocol(foreign_prot);
+                tmp->setTargets(targets);
+                send_package(tmp);
+                timeoutBorderDet.erase(foreign_prot);
+                lastForeignHelloSenders = customOfficers[foreign_prot];
+                customOfficers[foreign_prot].clear();
+
+                //  cout << getLogHeader() << "BEFORE " <<  endl;
+                free(foreign_prot);
+                cancelAndDelete(msg);
+                //  cout << getLogHeader() << "AFTER" <<  endl;
+              }
+            //  cout << getLogHeader() << "END OF OFFICIER ELECTION TIMEMOU" <<  endl;
             }
             break;
             default:
@@ -480,9 +486,10 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        cout << getLogHeader() << "officer election with UDP_I_DATA " <<  endl;
+      // cout << getLogHeader() << "officer election with UDP_I_DATA " <<  endl;
     	bool fwdMsg = false;
-    	bool done = applyMsgsTransformation (msg, fwdMsg);
+      bool done = false;
+    	done = applyMsgsTransformation (msg, fwdMsg);
     	borderDetector(msg);
     	if (!done || fwdMsg) {
     	  on_network_message_received(PK(msg));
@@ -594,19 +601,28 @@ BroadcastingAppBase::processStart()
         cXMLElementList protocols = configs->getElementsByTagName("Protocol");
         cXMLElement *routerNode = nullptr;
         for (const auto& p : protocols) {
-            const char *nodeName = xmlutils::getRequiredAttribute(*p, "name");
+            const char *protocolName = xmlutils::getRequiredAttribute(*p, "name");
             cXMLElementList params = p->getElementsByTagName("Parameter");
             for (const auto& param : params){
               const char* param_name = xmlutils::getRequiredAttribute(*param, "name");
               const char* param_value = xmlutils::getRequiredAttribute(*param, "value");
               const char* param_type = xmlutils::getRequiredAttribute(*param, "type");
-              gateway->add_param_value_pair(nodeName, param_name, param_value);
+              // cerr << "Protocol: " << protocolName << ", parameter: " << param_name << ", value: " << param_value << endl;
+              gateway->add_param_value_pair(protocolName, param_name, param_value);
             }
+            // string tmp(protocolName);
+            // tmp = "inet::" + tmp;
+            // cObject* obj = cObjectFactory::createOne(tmp.c_str());
+            // IBroadcastProtocol* protocol = dynamic_cast<IBroadcastProtocol*>(obj);
+            // if (!protocol) {
+            //   cerr << "Couldn't find class " << tmp << endl;
+            //   endSimulation();
+            // }
+            // knownProtocols.emplace(string(protocolName), std::shared_ptr<IBroadcastProtocol>(protocol));
         }
       }
     }
 
-    // log_status_for_animation("STANDING");
     if (nr_hello_msg)
         delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
 }

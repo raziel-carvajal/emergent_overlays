@@ -22,6 +22,7 @@
 #include "BroadcastingAppBase_m.h"
 
 #include "IBroadcastGateway.h"
+#include "IBroadcastProtocol.h"
 
 
 namespace inet {
@@ -55,8 +56,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
   private:
 
-    class OmnetBroadcastGateway: public IBroadcastGateway
-    {
+    class OmnetBroadcastGateway: public IBroadcastGateway {
     private:
       BroadcastingAppBase* app;
       double get_double_parameter(const std::string& protocol, const std::string& param) override;
@@ -82,6 +82,12 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;
+
+      bool bridge();
+
+      void setProtocolId(const std::string& protocol) override {
+        app->protocolId = protocol;
+      }
 
       void cancel_message(cMessage* m) override;
       int register_new_control_message() override;
@@ -212,14 +218,12 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::string createUniqueBroadcastingSessionId();
     L3Address getAddr(const std::string& id);
     void emitBroadcastMsgReceived(const std::string& value); // important. you should use it. log data (statistics in vector)
-    void delayed_event(int type, const std::string& key, double delay);
+    cMessage* delayed_event(int type, const std::string& key, double delay);
     cMessage* delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
-
 
     void emitReceived(); // this is automatic (don't call it)
     void emitPowerLevel(double value); // (don't call it)
     void emitSent(std::string value); // important. you should use it. log data (statistics in vector)
-
 
     void delay_broadcast(void* user_data);
     void delayed_event_with_strict_time(int type, const std::string& key, double delay);
@@ -233,8 +237,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
     bool borderDetector(cMessage *msg);
-  public:
-    BroadcastingAppBase();
 
 };
 

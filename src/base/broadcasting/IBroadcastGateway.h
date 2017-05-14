@@ -46,6 +46,8 @@ public:
   virtual void cancel_message(cMessage* m) = 0;
   virtual int register_new_control_message() = 0;
 
+  virtual bool bridge() = 0;
+  virtual void setProtocolId(const std::string& protocol) = 0;
 
   template<typename T> T get_parameter(const std::string& protocol, const std::string& param) {
     return get_parameter(protocol, param, identity<T>());

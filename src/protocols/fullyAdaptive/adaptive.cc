@@ -47,12 +47,12 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
                 gateway->delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
               }
               cancelAndDelete(msg);
-              current_protocol->on_saying_hello();
+              knownProtocols[current_protocol_name]->on_saying_hello();
             }
 
           break;
           default:
-            if (!current_protocol->handle(msg)) {
+            if (!knownProtocols[current_protocol_name]->handle(msg)) {
               BroadcastingAppBase::handleMessageWhenUp(msg);
             }
             else {
@@ -69,20 +69,20 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 
 void
 FullyAdaptive::on_payload_received(const Broadcast* m) {
-  current_protocol->process_payload(m);
+  knownProtocols[current_protocol_name]->process_payload(m);
 }
 
 void
 FullyAdaptive::time_to_broadcast_payload(void* user_data)
 {
-    current_protocol->time_to_broadcast_payload(user_data);
+    knownProtocols[current_protocol_name]->time_to_broadcast_payload(user_data);
 }
 
 
 void
 FullyAdaptive::on_hello_received(const broadcasting::Hello* msg)
 {
-  current_protocol->process_hello(msg);
+  knownProtocols[current_protocol_name]->process_hello(msg);
 }
 
 
@@ -90,23 +90,34 @@ void
 FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
-  // select initial protocol
-  current_protocol_name = "Mpr_t2";
-  current_protocol = dynamic_cast<IBroadcastProtocol*>(createOne(std::string("inet::" + current_protocol_name).c_str()));
-  if (!current_protocol) {
-    throw std::runtime_error("Couldn't create instance of class inet::" + current_protocol_name);
+
+  auto protocols = { "Flooding2", "Mpr_t2" };
+  for (const auto& p: protocols) {
+    // select initial protocol
+    current_protocol_name = p;
+    auto current_protocol = dynamic_cast<IBroadcastProtocol*>(createOne(std::string("inet::" + current_protocol_name).c_str()));
+    if (!current_protocol) {
+      throw std::runtime_error("Couldn't create instance of class inet::" + current_protocol_name);
+    }
+    current_protocol->set_protocol_name(current_protocol_name);
+    knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
   }
-  current_protocol->set_protocol_name(current_protocol_name);
 
   // initialize protocol
-  current_protocol->initialize(myself, gateway);
+  current_protocol_name = (gateway->get_current_position().y > 100)?"Flooding2":"Mpr_t2";
+  gateway->setProtocolId(current_protocol_name);
+  knownProtocols[current_protocol_name]->initialize(myself, gateway);
 }
 
 
 inet::broadcasting::Hello*
 FullyAdaptive::build_hello_message()
 {
-  return current_protocol->build_hello_message();
+  auto m = knownProtocols[current_protocol_name]->build_hello_message();
+  m->setX(gateway->get_current_position().x);
+  m->setY(gateway->get_current_position().y);
+  m->setProtocolId (current_protocol_name.c_str());
+  return m;
 }
 
 } //namespace

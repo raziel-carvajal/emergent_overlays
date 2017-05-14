@@ -1,3 +1,5 @@
 description = "Broadcasting messages using FullyAdaptive"
 *.host*.udpApp[0].typename = "FullyAdaptive"
 *.host*.udpApp[0].nr_hello_messages = true
+*.host*.udpApp[0].protocolsConfig = xmldoc("/home/inti/config.xml")
+*.host*.udpApp[0].withAdaptation = true
