@@ -1,11 +1,6 @@
 %!TEX root = main.tex
-\begin{figure}
-  \centering
-   \includegraphics[scale=0.35]{figures/architecture}
 
- \caption{Architecture}
-\end{figure}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{algorithm}
 	\footnotesize
@@ -17,8 +12,10 @@
 	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
 	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
-\caption{\label{alg:protocol_api} API of a broadcast algorithm}
+\caption{\label{alg:protocol_api}Broadcast algorithm API.}
 \end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{algorithm}
 	\footnotesize
@@ -27,8 +24,68 @@
 	$\AlgoSend  ($\Ms: \Msg) : \VoidType		\tcp*[1]{comm primitive to send a message}
 	$\FuncHandler($\Ms: \Msg) : \VoidType 	\tcp*[1]{comm primitive to receive a message}
 
-\caption{\label{alg:network_api} API of network layer}
+\caption{\label{alg:network_api}Network layer API.}
 \end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \SentMsgs$ }{
+			$\AlgoSend(\Ms)$ \;
+			$\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}$
+		}
+	}
+
+	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
+		$\Ms' \gets \FloodNewMsg$ \;
+		$\Ms'.\MsgContent \gets$ pl \;
+		\textbf{return} $\Ms'$
+	}
+
+	\Fn{\AlgoEmit{\Ms: \Msg }}{
+		$\AlgoSend(\Ms)$ \;
+		$\SentMsgs \gets \SentMsgs \cup \{\MsgId\}$
+	}
+\caption{\label{alg:flooding}Simple flooding protocol.}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfConstants{
+		\AdaptTimer \tcp*[1]{default waiting time} \label{alg:adaptation_mechanism:timeout}
+	}
+
+	\BlockOfVar{
+		\Algo		\tcp*[1]{local instance of broadcast protocol}
+		\AlgoPid  	\tcp*[1]{protocol identifier}
+		$\MapT[]$ 	\tcp*[1]{map from message ids to timers}
+		
+		\BlockOfMapAttributes{
+			$\MapT[ \MsgId ].\RemTime$	\tcp*[1]{remaining time}
+			$\MapT[ \MsgId ].\MsgContent$ 	\tcp*[1]{content of message}
+		}
+	}
+
+	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
+		\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism_simple:eval_ids}
+			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism_simple:handle}
+		}{
+			$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit}
+		}
+	}
+\caption{\label{alg:adaptation_mechanism_simple}Simple adaptation mechanism.}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{algorithm}
 	\footnotesize
@@ -68,29 +125,5 @@
 		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
 		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
 	}
-\caption{\label{alg:adaptation_mechanism} Adaptation mechanism}
-\end{algorithm}
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-
-	\Fn{\AlgoHandle{\Ms: \Msg}}{
-		\If{ $\Ms.\Id \notin \SentMsgs$ }{
-			$\AlgoSend(\Ms)$ \;
-			$\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}$
-		}
-	}
-
-	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
-		$\Ms' \gets \FloodNewMsg$ \;
-		$\Ms'.\MsgContent \gets$ pl \;
-		\textbf{return} $\Ms'$
-	}
-
-	\Fn{\AlgoEmit{\Ms: \Msg }}{
-		$\AlgoSend(\Ms)$ \;
-		$\SentMsgs \gets \SentMsgs \cup \{\MsgId\}$
-	}
-\caption{\label{alg:flooding} Simple flooding}
+\caption{\label{alg:adaptation_mechanism}Efficient adaptation mechanism avoiding broadcast storms.}
 \end{algorithm}
