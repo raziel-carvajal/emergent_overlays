@@ -9,7 +9,7 @@
 	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{wireless send to all nodes in range}
 	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when message received}
 
-\caption{\labalg{alg:network_api}Network layer API}
+\caption{\labalg{network_api}Network layer API}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,7 +22,7 @@
 	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
 	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
-\caption{\labalg{alg:protocol_api}Broadcast protocol API}
+\caption{\labalg{protocol_api}Broadcast protocol API}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,7 +53,7 @@
 %		\er{can insert wait here}
 %		$\AlgoSend(\Ms)$ \;
 %	}
-%\caption{\labalg{alg:flooding}Simple flooding protocol}
+%\caption{\labalg{flooding}Simple flooding protocol}
 %\end{algorithm}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,7 +128,7 @@
 		\raziel{I think that we can take rid off emit(), it looks redundant now that the presentation of flooding algorithms is within one algorithm. Otherwise, I do have to repeat the SWITCH shown in handle()}
 		$\AlgoSend(\Ms)$ \;
 	}
-	\caption{\labalg{alg:typesOfFlooding}Group of basic flooding protocols}
+	\caption{\labalg{typesOfFlooding}Group of basic flooding protocols}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,7 +150,7 @@
 			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit} \;
 		}
 	}
-\caption{\labalg{alg:adaptation_mechanism_simple}Simple adaptation mechanism}
+\caption{\labalg{adaptation_mechanism_simple}Simple adaptation mechanism}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,5 +193,5 @@
 		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
 		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
 	}
-\caption{\labalg{alg:adaptation_mechanism}Efficient adaptation mechanism}
+\caption{\labalg{adaptation_mechanism}Efficient adaptation mechanism}
 \end{algorithm}

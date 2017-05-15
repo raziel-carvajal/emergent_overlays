@@ -10,7 +10,7 @@
 \er{suggested outline}
 \begin{itemize}
 	\item define the problem: we have a number of broadcast protocols P and nodes can use any of these protocols. Some protocols have only a reactive approach (their function is called only when an incoming message arrives from the network or when there is a request from the application) or have a mix of a reactive approach together with a daemon that can initiate actions at predefined times (e.g. to send beacons and form an overlay)
-	\item we consider that the network has a simple API (\refalg{alg:network_api}) and that all broadcast protocols also use a common API (\refalg{alg:protocol_api}).
+	\item we consider that the network has a simple API (\refalg{network_api}) and that all broadcast protocols also use a common API (\refalg{protocol_api}).
 	\item a message is initiated at any node and must reach all the others
 	\item a node does not know which protocol its neighbors are running
 	\item if a node receives requests (e.g. for overlay construction) that are not for the locally-running protocol, they ignore them (this does not apply obviously to messages carrying a payload)
@@ -22,19 +22,19 @@
 \er{example protocols for broadcast}
 \begin{itemize}
 	\item detail examples of broadcast protocols of the two classes
-	\item \refalg{alg:flooding} for simple flooding
+	\item \refalg{flooding} for simple flooding
 	\item \er{also need to include others!}
 \end{itemize}
 
 \er{simple adaptation (act as source)}
 \begin{itemize}
-	\item describe simple adaptation (\refalg{alg:adaptation_mechanism_simple})
+	\item describe simple adaptation (\refalg{adaptation_mechanism_simple})
 	\item prove it correct under the assumption that for nodes that are in range (no partition) and using the same protocol then we guarantee that the connectivity is good. Use examples from previously-described algorithms to back this up (e.g. in the overlay-based one a node is not a relay only if it knows for sure its neighbors are covered, by default, and in particular when the system starts, it is a relay).
 	\item show that while correct, it leads to bcast storms at the frontiers (use a figure)
 \end{itemize}
 
 \er{better adaptation (using the timers)}
 \begin{itemize}
-	\item describe use of timers (\refalg{alg:adaptation_mechanism}) by relating them to the use of timers in the controlled flooding approach (description of broadcast above)
+	\item describe use of timers (\refalg{adaptation_mechanism}) by relating them to the use of timers in the controlled flooding approach (description of broadcast above)
 	\item prove that interoperability remains correct (using a proof by contradiction)
 \end{itemize}
