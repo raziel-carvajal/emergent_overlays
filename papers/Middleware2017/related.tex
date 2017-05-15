@@ -3,13 +3,15 @@
 \section{Related work}
 \labsection{relatedwork}
 
-\input{table_related_work}
+\input{related_table}
 
 %This paper uses the broadcasting algorithm classification for MANETs created by Ruiz et al.~\cite{Ruiz2015}, in which they classified several algorithms, depending on different features, such as, probabilistic, counter-based or distance-based, among others.
 %Additionally, Carvajal et al.[] present that different broadcast algorithms for MANETs are more suitable for given situations than other depending on, for instance, the node density in an area or mobile networks.
 %At the end, they show the pros and cons of each broadcast algorithm for each situation.
 %Therefore, using these two papers, we create an adaptive-based broadcast algorithm for heterogeneous MANET's that allow different protocols to communicate among them without any modification.
 
+\y{need an opening statement/paragraph about the general state of the art in manet broadcasting}
+\y{A summary of related work is found in \reftab{rw}.}
 
 Regarding adaptive-based broadcast algorithms, Hypergossiping~\cite{hypergossiping} is a broadcast strategy protocol designed for MANETs where the authors combine two different protocols: Probabilistic Flooding~\cite{Ni1999} (known as gossiping in the paper) and HyperFlooding~\cite{Cheng2005}. 
 Hypergossiping was designed for partitioned networks where partitions of mobile nodes are constantly changing.
@@ -24,7 +26,7 @@ Given that nodes are using the same protocol to communicate among them, there is
 On the other hand, our solution can work with different protocols without modifying them.
 In addition, there is no need for sending periodic HELLO and piggybacked messages either, reducing message collision and, consequently, energy consumption.
 
-Viswanath and Obraczka~\cite{Viswanath02anadaptive} present 2 variants of an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different flooding modes: \emph{plain}, \emph{hyper}, and \emph{scoped} flooding. 
+Viswanath and Obraczka~\cite{Viswanath02anadaptive} present two variants of an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different flooding modes: \emph{plain}, \emph{hyper}, and \emph{scoped} flooding. 
 Hyper flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead. 
 In contrast, scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead. 
 The nodes periodically exchange HELLO messages to keep track of their one-hop neighbours, adding to each HELLO message node speed and direction information. 
@@ -39,24 +41,22 @@ If the number of collisions is lower than \texttt{low\_threshold}, the node swit
 Otherwise, plain flooding is selected.
 This adaptive broadcast algorithm is based on the mobility or the collisions amount.
 However, our proposal can adapt different kinds of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
- 
 
-Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANET's called Smart-Flooding. 
-This mechanism utilises Shadowing Pattern~\cite{Dhoutaut2006}, a propagation model which is a realistic and probabilistic scheme based on outside monitored communications, together with an evolutionary algorithm created by the authors .
-According with this Shadowing Pattern, each node modifies its own local parameters using the evolutionary algorithm and the network density.
-This network density is calculated by sending HELLO messages periodically.
+Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANETs called Smart-Flooding. 
+This mechanism utilises the Shadowing Pattern~\cite{Dhoutaut2006}, a propagation model that is a realistic and probabilistic scheme based on outside monitored communications, together with an evolutionary algorithm created by the authors. 
+According to this Shadowing Pattern, each node modifies its own local parameters using the evolutionary algorithm and the network density calculated by periodically sending HELLO messages.
 
+Cartigny and Simplot~\cite{ProbFlood} propose probabilistic algorithms for MANETs combining a simple probabilistic algorithm, a distance protocol, and a neighbour elimination scheme~\cite{Peng2000,Stojmenovic20028} to reduce the number of broadcast messages sent through the network. 
+Each node sends periodic HELLO messages in order to be aware of its environment. 
+These algorithms are adaptable to the network topology, however, they do not achieve full coverage for broadcast messages.
 
-Cartigny and Simplot~\cite{border_node_retransmission_telsys03} propose probabilistic algorithms for MANETs combining a simple probabilistic algorithm, a distance protocol and a neighbour elimination scheme~\cite{Peng2000,Stojmenovic20028} to reduce the number of broadcast messages sent through the network.
-Each node sends periodic HELLO messages in order to be aware of its environment.
-These algorithms are adaptable to the network topology, however, they do not achieve a full coverage for broadcast messages.
+Xu and Gerla~\cite{Kaixin2002} describe a heterogeneous routing protocol based on a clustering scheme that allows different MANET broadcasting protocols to work together. 
+The authors predefine specific nodes to be backbone nodes. These can communicate among themselves using long distance communications as compared to non-backbone nodes. 
+Each backbone node creates a cluster with a specific protocol used by the nodes contained in its area. 
+Therefore, when a broadcast message is sent, the backbone nodes send the broadcast message among them, and after that, among nodes in their respective cluster areas.
 
+\y{synthesise and identify gaps in the above RW}
 
-Kaixin et al.~\cite{Kaixin2002} describe a heterogeneous routing protocol based on clustering scheme that allows different broadcasting protocols to work together in MANETs.
-The authors previously define specified nodes, known as backbone nodes, which can communicate among them using a longer distance communications than the not backbone nodes.
-Each backbone node creates a cluster with a specific protocol used by this cluster and the nodes contained in its area.
-Therefore, when a broadcast message is sent, the backbone nodes sends the broadcast message among them, and after that, among nodes in their cluster areas.
-
-Compared to our research, our approach achieves full broadcast coverage permitting the network being used by different broadcast algorithms and also defines a switching mechanism that allows nodes of different broadcast algorithms to communicate among them.
-Additionally, the work presented in this paper does not required to add HELLO or piggybacked messages scheme to protocols. A summarizing of this section can be found on Table~\ref{tbl:rw}.
+Compared to our research, our approach achieves full broadcast coverage permitting the network being used by different broadcast algorithms and also defines a switching mechanism that allows nodes of different broadcasting algorithms to communicate among themselves. 
+Additionally, the work presented in this paper does not required to add HELLO or piggybacked messaging schemes to protocols. 
 
