@@ -24,21 +24,21 @@ Given that nodes are using the same protocol to communicate among them, there is
 On the other hand, our solution can work with different protocols without modifying them.
 In addition, there is no need for sending periodic HELLO and piggybacked messages either, reducing message collision and, consequently, energy consumption.
 
-Viswanath and Obraczka~\cite{Viswanath02anadaptive} present an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different algorithm modes: \emph{scoped}, \emph{plain}, and \emph{hyper flooding}. 
-Hyper flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead.
-On the other hand, Scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead. 
-The nodes exchange periodically HELLO messages to keep track of their one-hop neighbours, adding to each HELLO message the speed and direction node information.
-Each node has two thresholds (low\_threshold and high\_threshold) and it can modify these thresholds depending on the information received by the HELLO messages and their past history.
-If the current velocity of the node is higher than high\_threshold, the node switches to hyper flooding.
-In case, the node velocity is lower than high\_threshold but higher than low\_threshold, the node switches to plain flooding.
-Otherwise, the node switches to scoped flooding.
-Additionally, the authors present a second switch mechanism based on network load uses MAC-layer collisions as an indicator of network traffic.
-In this switching method each node computes the total number of collisions occurred in a specified time window.
-Therefore, each node can adapt both thresholds (low\_threshold and high\_threshold).
-If the number of collisions is lower than low\_threshold, the node switches to hyper flooding mode. If the number of collisions is greater than high\_threshold, scoped flooding is selected.
+Viswanath and Obraczka~\cite{Viswanath02anadaptive} present 2 variants of an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different flooding modes: \emph{plain}, \emph{hyper}, and \emph{scoped} flooding. 
+Hyper flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead. 
+In contrast, scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead. 
+The nodes periodically exchange HELLO messages to keep track of their one-hop neighbours, adding to each HELLO message node speed and direction information. 
+Each node has two thresholds (\texttt{low\_threshold} and \texttt{high\_threshold}) and it can modify these thresholds depending on the information received by the HELLO messages and their past history. 
+If the current velocity of the node is higher than \texttt{high\_threshold}, the node switches to hyper flooding. 
+Conversely, if node velocity is lower than \texttt{high\_threshold} but higher than \texttt{low\_threshold}, the node switches to plain flooding. 
+Otherwise, the node switches to scoped flooding. 
+Additionally, the authors present a second switching mechanism based on network load, which uses MAC-layer collisions as an indicator of network traffic.
+In this switching method, each node computes the total number of collisions occurred in a specified time window.
+%Therefore, each node can adapt both thresholds (\texttt{low\_threshold} and \texttt{high\_threshold}).
+If the number of collisions is lower than \texttt{low\_threshold}, the node switches to hyper flooding mode. If the number of collisions is greater than \texttt{high\_threshold}, scoped flooding is selected.
 Otherwise, plain flooding is selected.
-The authors present an adaptive broadcast algorithm based on the mobility or the collisions amount.
-However, our proposal can adapt different kind of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
+This adaptive broadcast algorithm is based on the mobility or the collisions amount.
+However, our proposal can adapt different kinds of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
  
 
 Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANET's called Smart-Flooding. 

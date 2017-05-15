@@ -99,6 +99,9 @@ papers/Middleware2017/main.log
 papers/Middleware2017/main.pdf
 papers/Middleware2017/main.out
 papers/Middleware2017/main.synctex.gz
+# Mac friendly
+papers/Middleware2017/*.fls
+papers/Middleware2017/*.fdb_latexmk
 
 #
 src/scripts/algo
