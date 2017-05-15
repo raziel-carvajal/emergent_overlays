@@ -1,9 +1,10 @@
-\documentclass[sigconf]{acmart}
+%\documentclass[sigconf]{acmart}
+\documentclass[sigplan, anonymous]{acmart}
+
 \usepackage{etex}
-
-
 \usepackage{main}
 \usepackage{acm_information}
+\usepackage{booktabs} % For formal tables
 
 \begin{document}
 
@@ -84,7 +85,7 @@ Our evaluation results show that our adaptive approach leads to better performan
 \input{evaluation}
 \input{conclusion}
 
-\bibliographystyle{abbrv}%
+\bibliographystyle{ACM-Reference-Format}% abbrv
 \bibliography{references}
 
 \appendix
