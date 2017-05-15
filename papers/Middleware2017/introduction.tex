@@ -3,3 +3,21 @@
 \section{Introduction}
 \labsection{introduction}
 
+\er{%
+proposed introduction outline
+\begin{itemize}
+	\item MANETs are important due to the advances in the IoT and the fact that not all systems will benefit from a fixed infrastructure (too costly, too seldom useful, etc.)
+	\item broadcast fundamental operation in MANETs, including for routing purposes, aggregation etc. (references) - multiple protocols have been proposed for broadcast in manets
+	\item broadcast in MANETs happen by the retransmission of the broadcast message by nodes in the system until it reaches all nodes. The objectives is to reach a full coverage while spending as little energy as possible (bot average and for each node)
+	\item protocols can be classified in two main categories, according to the survey~\cite{Ruiz2015}: protocols using a pre-established overlays and protocols who do not use an established topology. This is similar to the typical unstructured vs structured overlays separation in p2p systems. Give a few details about the way unstructured approaches are based on controlled flooding (and therefore only use information available at the time of the propagation to decide on forwarding decisions) while approaches based on overlays can use information collected a priori and structure established also a priori.
+	\item previous studies~\cite{DensityMobDrivenEval} (find other studies linked in our paper that also make comparisons, so that we are not only linked with this one for double-blind rules) have shown that the performance and costs of each broadcast approach was intimately linked to environmental aspects of the MANET. In particular, density and mobility are key factors. Give the intuition: the denser the network, the better it is to use an overlay and avoid collisions, and speed up transmission (in less dense networks this is not as helpful and may lead to partitions if not up-to-date); and the more mobility there is, the less useful a overlay is since the built overlay will most likely be deprecated and we risk having either partitions or bad coverage.
+	\item choosing the appropriate protocol prior to the deployment of a MANET is difficult for a homogeneous network where the density and mobility patterns are not known a priori
+	\item several MANETs are heterogeneous (find citations, maybe from~\cite{mobility_density_model}) and the density and mobility in different parts of the system will differ (find some convincing real life use cases to back this up, like the festival scenario)
+	\item this makes the problem even more complex as the best algorithm for a part of the network may not be the best for another part
+	\item we are interested in this work in making broadcast more efficient and less costly for heterogeneous MANETs
+	\item our approach relies on a combination of interoperability and adaptation: (1) we allow different parts of the network to use different broadcast algorithms and ensure that coverage guarantees are maintained; (2) we propose dynamic adaptation mechanisms that allow nodes to dynamically select appropriate protocols based on the observation of the nodes deployment context. Our adaptation mechanisms range from simple approaches for a single node to coordinated approaches involving multiple nodes.
+	\item we evaluate our approach using (include here highlights from the evaluation)
+	\item our contributions are (recap contributions)
+	\item paper outline
+\end{itemize}
+}
