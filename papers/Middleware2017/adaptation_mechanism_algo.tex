@@ -26,36 +26,36 @@
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-
-	\BlockOfVar{
-		\Delivered \tcp*[1]{messages already delivered to application}
-	}
-
-	\Fn{\AlgoHandle{\Ms: \Msg}}{
-		\If{ $\Ms.\Id \notin \Delivered$ }{
-			$\AlgoSend(\Ms)$ \;
-			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
-		}
-	}
-
-	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
-		$\Ms' \gets \FloodNewMsg$ \;
-		$\Ms'.\MsgContent \gets$ pl \;
-		\textbf{return} $\Ms'$ \;
-	}
-
-	\Fn{\AlgoEmit{\Ms: \Msg }}{
-		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
-		\er{can insert wait here}
-		$\AlgoSend(\Ms)$ \;
-	}
-\caption{\labalg{alg:flooding}Simple flooding protocol}
-\end{algorithm}
-
+%
+%\begin{algorithm}
+%	\footnotesize
+%	\DontPrintSemicolon
+%
+%	\BlockOfVar{
+%		\Delivered \tcp*[1]{messages already delivered to application}
+%	}
+%
+%	\Fn{\AlgoHandle{\Ms: \Msg}}{
+%		\If{ $\Ms.\Id \notin \Delivered$ }{
+%			$\AlgoSend(\Ms)$ \;
+%			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+%		}
+%	}
+%
+%	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
+%		$\Ms' \gets \FloodNewMsg$ \;
+%		$\Ms'.\MsgContent \gets$ pl \;
+%		\textbf{return} $\Ms'$ \;
+%	}
+%
+%	\Fn{\AlgoEmit{\Ms: \Msg }}{
+%		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
+%		\er{can insert wait here}
+%		$\AlgoSend(\Ms)$ \;
+%	}
+%\caption{\labalg{alg:flooding}Simple flooding protocol}
+%\end{algorithm}
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 \begin{algorithm}
@@ -125,6 +125,7 @@
 	\Fn{\AlgoEmit{\Ms: \Msg }}{
 		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
 		\er{can insert wait here}
+		\raziel{I think that we can take rid off emit(), it looks redundant now that the presentation of flooding algorithms is within one algorithm. Otherwise, I do have to repeat the SWITCH shown in handle()}
 		$\AlgoSend(\Ms)$ \;
 	}
 	\caption{\labalg{alg:typesOfFlooding}Group of basic flooding protocols}
