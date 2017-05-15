@@ -12,19 +12,19 @@
 
 
 Regarding adaptive-based broadcast algorithms, Hypergossiping~\cite{hypergossiping} is a broadcast strategy protocol designed for MANETs where the authors combine two different protocols: Probabilistic Flooding~\cite{Ni1999} (known as gossiping in the paper) and HyperFlooding~\cite{Cheng2005}. 
-Hypergossiping was designed for partitioned networks where nodes are mobile and partitions are constantly changing.
+Hypergossiping was designed for partitioned networks where partitions of mobile nodes are constantly changing.
 Inside each partition, nodes use the Probabilistic Flooding protocol to send and receive messages adapting their local probability based on the local density of the node.
-This density is obtained by sending HELLO messages periodically.
+This density is obtained by periodically sending HELLO messages.
 In addition, if a new node is detected in the partition, this node may receive packets using this protocol from partition nodes.
 %The Probabilistic Flooding protocol is used for in-partition forwarding and rebroadcasts some of the packets in case the node detects a joint with another partition.
-Thus, nodes can detect partitions by simply comparison of the recently-received set packets.
+Thus, nodes can detect partitions by simply comparing recently received sets of packets.
 In case these sets differ, the node will re-broadcast the packet using HyperFlooding.
 Therefore, Hypergossiping is an adaptive algorithm for one protocol that is using two protocols and HELLO messages to adapt each partition depending on the density of the nodes inside this partition.
-Given that nodes are using the same protocol to communicate among them, there is not a protocol switch mechanism among the partitions and Hypergossiping cannot work with partition using different protocols.
+Given that nodes are using the same protocol to communicate among them, there is not a protocol switch mechanism among the partitions and Hypergossiping cannot work with partitions using different protocols.
 On the other hand, our solution can work with different protocols without modifying them.
-In addition, there is no need of sending periodic HELLO and piggybacked messages either, reducing the amount of message collision and, consequently, the energy consumed.
+In addition, there is no need for sending periodic HELLO and piggybacked messages either, reducing message collision and, consequently, energy consumption.
 
-Networks et al.~\cite{Viswanath02anadaptive} present an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different algorithm modes: scoped, plain, and hyper flooding. 
+Viswanath and Obraczka~\cite{Viswanath02anadaptive} present an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different algorithm modes: \emph{scoped}, \emph{plain}, and \emph{hyper flooding}. 
 Hyper flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead.
 On the other hand, Scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead. 
 The nodes exchange periodically HELLO messages to keep track of their one-hop neighbours, adding to each HELLO message the speed and direction node information.
@@ -41,12 +41,10 @@ The authors present an adaptive broadcast algorithm based on the mobility or the
 However, our proposal can adapt different kind of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
  
 
-
 Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANET's called Smart-Flooding. 
 This mechanism utilises Shadowing Pattern~\cite{Dhoutaut2006}, a propagation model which is a realistic and probabilistic scheme based on outside monitored communications, together with an evolutionary algorithm created by the authors .
 According with this Shadowing Pattern, each node modifies its own local parameters using the evolutionary algorithm and the network density.
 This network density is calculated by sending HELLO messages periodically.
-
 
 
 Cartigny and Simplot~\cite{border_node_retransmission_telsys03} propose probabilistic algorithms for MANETs combining a simple probabilistic algorithm, a distance protocol and a neighbour elimination scheme~\cite{Peng2000,Stojmenovic20028} to reduce the number of broadcast messages sent through the network.
