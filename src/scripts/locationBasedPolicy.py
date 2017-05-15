@@ -58,7 +58,7 @@ if __name__ == '__main__':
   ax  = fig.gca()
   ax.set_xlim((-1, 1))
   ax.set_ylim((-1, 1))
-  points, alphas, i = getPointsInCircle(3), [], 0
+  points, alphas, i = getPointsInCircle(20), [], 0
   while i < len(points):
     p = points[i]
     ax.plot((p[0]), (p[1]), 'o', color='black')

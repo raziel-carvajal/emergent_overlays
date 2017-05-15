@@ -19,6 +19,8 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 %
 \SetKwData{MapT}{t}
+\SetKwData{MapC}{c}
+\SetKwData{R}{r}
 \SetKwData{VoidType}{void}
 \SetKwData{MapFlo}{f}
 \SetKwData{Id}{id}
@@ -26,11 +28,14 @@
 \SetKwData{FloodTimer}{flooding\_}
 \SetKwData{RemTime}{time}
 \SetKwData{Delivered}{delivered}
+\SetKwData{Receptions}{receptions}
 
-\SetKwData{FloodMode}{mode}
-\SetKwData{FloodRecpLi}{max\_receptions}
+\SetKwData{FloodMode}{flooding\_mode}
+\SetKwData{FloodRecpLi}{limit\_of\_receptions}
 \SetKwData{FloodSimp}{SIMPLE}
-\SetKwData{FloodCoun}{COUNTER\_BASE}
+\SetKwData{FloodCount}{COUNTER-BASED}
+\SetKwData{FloodFixed}{FIXED\_TIMER-BASED}
+\SetKwData{FloodRandom}{RANDOM\_TIMER-BASED}
 \SetKwData{FloodNewMsg}{newFloodingMsg}
 
 \SetKwData{Algo}{p}
@@ -52,6 +57,7 @@
 
 \SetKwData{Timer}{timer}
 \SetKwData{TimerFunc}{newTimer}
+\SetKwData{RandomFunc}{newRandom}
 
 % Function and Blocks
 \SetKwFunction{FuncHandler}{receive}
@@ -62,7 +68,11 @@
 \SetKwBlock{BlockOfConstants}{constants}{}{}
 \SetKwBlock{BlockOfFuncs}{running protocol API}{}{}
 \SetKwBlock{BlockOfAlgoAPI}{communication primitives}{}{}
+\SetKwBlock{BlockOfPolicySpecific}{policy-specific functions and parameters}{}{}
 \SetKwBlock{BlockOfMapAttributes}{attributes of map}{}{}
+\SetKwBlock{BlockOfFloodCounter}{use in counter-based version}{}{}
+\SetKwBlock{BlockOfFloodTimeBased}{use in timer-based versions}{}{}
+\SetKwBlock{BlockOfTimerExpires}{wait until t expires}{}{}
 
 % Figures (tikz et al.)
 \usepackage{wrapfig}
