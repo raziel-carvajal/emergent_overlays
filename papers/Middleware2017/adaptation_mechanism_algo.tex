@@ -5,14 +5,24 @@
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
-	\BlockOfVar{
-		\SentMsgs \tcp*[1]{set of dispatched messages}
-	}
+	
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{wireless send to all nodes in range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when message received}
+
+\caption{\labalg{alg:network_api}Network layer API}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
 	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
 	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
 	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
 
-\caption{\label{alg:protocol_api}Broadcast algorithm API.}
+\caption{\labalg{alg:protocol_api}Broadcast protocol API}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,23 +30,15 @@
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
-	
-	$\AlgoSend  ($\Ms: \Msg) : \VoidType		\tcp*[1]{comm primitive to send a message}
-	$\FuncHandler($\Ms: \Msg) : \VoidType 	\tcp*[1]{comm primitive to receive a message}
 
-\caption{\label{alg:network_api}Network layer API.}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
+	\BlockOfVar{
+		\Delivered \tcp*[1]{set of dispatched messages}
+	}
 
 	\Fn{\AlgoHandle{\Ms: \Msg}}{
-		\If{ $\Ms.\Id \notin \SentMsgs$ }{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
 			$\AlgoSend(\Ms)$ \;
-			$\SentMsgs \gets \SentMsgs \cup \{\Ms.\Id\}$
+			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
 		}
 	}
 
@@ -48,9 +50,9 @@
 
 	\Fn{\AlgoEmit{\Ms: \Msg }}{
 		$\AlgoSend(\Ms)$ \;
-		$\SentMsgs \gets \SentMsgs \cup \{\MsgId\}$
+		$\Delivered \gets \Delivered \cup \{\MsgId\}$
 	}
-\caption{\label{alg:flooding}Simple flooding protocol.}
+\caption{\labalg{alg:flooding}Simple flooding protocol}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,7 +84,7 @@
 			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit}
 		}
 	}
-\caption{\label{alg:adaptation_mechanism_simple}Simple adaptation mechanism.}
+\caption{\labalg{alg:adaptation_mechanism_simple}Simple adaptation mechanism}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,5 +127,5 @@
 		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
 		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
 	}
-\caption{\label{alg:adaptation_mechanism}Efficient adaptation mechanism avoiding broadcast storms.}
+\caption{\labalg{alg:adaptation_mechanism}Efficient adaptation mechanism}
 \end{algorithm}
