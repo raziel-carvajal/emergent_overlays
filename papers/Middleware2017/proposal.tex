@@ -52,6 +52,41 @@ We then reach a contradiction, because our first assumption was that the retrans
 
 In Section~\ref{} we analyze to which extent the policies of retransmission from broadcast protocols have an impact in network coverage.
 
+\begin{figure}
+\centering
+\includegraphics[scale=0.1]{figures/dense_sparse_region}
+\caption{}
+\label{fig:dense_sparse_region}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.1]{figures/count_not_enough}
+\caption{}
+\label{fig:count_not_enough}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.1]{figures/location_of_regions}
+\caption{}
+\label{fig:location_of_regions}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.1]{figures/scenario1}
+\caption{}
+\label{fig:scenario1}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.1]{figures/dense_disk_scenario1}
+\caption{}
+\label{fig:dense_disk_scenario1}
+\end{figure}
+
 \subsection{Location-based adaptation policy}
 %
 This adaptation policy labels those nodes located at the border of dense regions, which we call \emph{border nodes}.
@@ -60,7 +95,7 @@ When nodes move towards a preferred location, border nodes surround this locatio
 %
 Let be $n_{b}$ a border node and $C_{b}$ its area of transmission, we can describe $C_{b}$ as a circle of radius $T_{x}$ centers at the position of $n_{b}$.
 %
-As shown in figure~\ref{fig:dense_sparse_reg}, region $D$ within $C_{b}$ contains more nodes or is more dense than its complement $D^{c}$.
+As shown in figure~\ref{fig:dense_sparse_region}, region $D$ within $C_{b}$ contains more nodes or is more dense than its complement $D^{c}$.
 %
 Our adaptation policy takes advantage of this systematic behavior of border nodes and uses the GPS coordinates, shared by any location-based broadcast algorithm, to tell nodes within a preferred location area when to start using an overlay-based approach.
 %
@@ -71,18 +106,19 @@ We confirm a better utilization of nodes resources using an overlay-based soluti
 \subsubsection{Characterization of border nodes' transmission area}
 A node in the network will be labeled as border node if one half of its area of communication $C_{b}$ contains at least $d$ nodes, where the threshold $d$ is a fixed parameter and it is part of our adaptation layer (see figure~\ref{}). \raziel{give an argument about the 50, 50 approach}
 %
-As depicted in figure~\ref{}, counting the number of neighbors within the communication area of nodes is not enough, we have to find the region $H_{D}$ with at least $d$ nodes such that its sparse complement $H_{D}^{C}$ contains less than $d-1$ nodes.
+As depicted in figure~\ref{fig:count_not_enough}, counting the number of neighbors within the communication area of nodes is not enough, we have to find the region $H_{D}$ with at least $d$ nodes such that its sparse complement $H_{D}^{C}$ contains less than $d-1$ nodes.
 %
-The orientation of such $H_{D}$ is a concern too, as figure~\ref{} depicts, the most dense region in $C_{B1}$ points towards west while $C_{B2}$ points to north.
+The orientation of such $H_{D}$ is a concern too, as figure~\ref{fig:location_of_regions} depicts, the most dense region in $C_{B1}$ points towards west while $C_{B2}$ points to north.
 \raziel{here you need a comment about what branch in math study this kind of problems. Continue digging into: minimal enclosing circle, circle packing, spatial analysis, etc...}
 
 Let us consider how to find $H_{D}$ in a scenario where one node has two neighbors.
 %
-As figure~\ref{} shows, we observe that $\alpha_{0}$ is the biggest angle with a size in radians equal to $\alpha_{0} = 2\pi - \measuredangle n_{2}n_{A}n_{1}$. Given $\alpha_{0} > \pi$ there exist an infinite number of half disks with an sparse density within $\alpha_{0}$.
+As figure~\ref{fig:scenario1} shows, we observe that $\alpha_{0}$ is the biggest angle with a size in radians equal to $\alpha_{0} = 2\pi - \measuredangle n_{2}n_{A}n_{1}$. Given $\alpha_{0} > \pi$ there exist an infinite number of half disks with an sparse density within $\alpha_{0}$.
 %
 For our proposes, it is enough to define just one sparse region $H_{D}^{C}$ of $\pi$ radians.
 %
-In order to find $H_{D}^{C}$ we split $\alpha_{0}$ in two equal parts by drawing a line $l_{1}$ that 
+In order to find $H_{D}^{C}$ we split $\alpha_{0}$ in two equal parts by drawing a line $l_{1}$ at the middle of $\alpha_{0}$ crossing the position of node $n_{A}$, as figure~\ref{fig:dense_disk_scenario1} depicts.
+
 
 \raziel{
 \textbf{Cost of control messages}
