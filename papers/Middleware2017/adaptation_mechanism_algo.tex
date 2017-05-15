@@ -32,25 +32,26 @@
 	\DontPrintSemicolon
 
 	\BlockOfVar{
-		\Delivered \tcp*[1]{set of dispatched messages}
+		\Delivered \tcp*[1]{messages already delivered to application}
 	}
 
 	\Fn{\AlgoHandle{\Ms: \Msg}}{
 		\If{ $\Ms.\Id \notin \Delivered$ }{
 			$\AlgoSend(\Ms)$ \;
-			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
+			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
 		}
 	}
 
 	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
 		$\Ms' \gets \FloodNewMsg$ \;
 		$\Ms'.\MsgContent \gets$ pl \;
-		\textbf{return} $\Ms'$
+		\textbf{return} $\Ms'$ \;
 	}
 
 	\Fn{\AlgoEmit{\Ms: \Msg }}{
+		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
+		\er{can insert wait here}
 		$\AlgoSend(\Ms)$ \;
-		$\Delivered \gets \Delivered \cup \{\MsgId\}$
 	}
 \caption{\labalg{alg:flooding}Simple flooding protocol}
 \end{algorithm}
@@ -61,27 +62,17 @@
 	\footnotesize
 	\DontPrintSemicolon
 	
-	\BlockOfConstants{
-		\AdaptTimer \tcp*[1]{default waiting time} \label{alg:adaptation_mechanism:timeout}
-	}
-
 	\BlockOfVar{
 		\Algo		\tcp*[1]{local instance of broadcast protocol}
 		\AlgoPid  	\tcp*[1]{protocol identifier}
-		$\MapT[]$ 	\tcp*[1]{map from message ids to timers}
-		
-		\BlockOfMapAttributes{
-			$\MapT[ \MsgId ].\RemTime$	\tcp*[1]{remaining time}
-			$\MapT[ \MsgId ].\MsgContent$ 	\tcp*[1]{content of message}
-		}
 	}
 
 	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
 		\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism_simple:eval_ids}
-			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism_simple:handle}
+			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism_simple:handle} \;
 		}{
 			$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
-			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit}
+			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit} \;
 		}
 	}
 \caption{\labalg{alg:adaptation_mechanism_simple}Simple adaptation mechanism}
