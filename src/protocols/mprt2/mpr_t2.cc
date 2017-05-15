@@ -82,11 +82,16 @@ Mpr_t2::process_hello(const broadcasting::Hello* msg)
 	string j = msg->getSender();
 	if (j == myself) return;
 	auto m = dynamic_cast<const MprHello*>(msg);
+  if (!m) {
+    cerr << myself << " : hello from " << j  << ", ptr=" << m << ", raw_ptr=" << msg->getProtocolId() << endl;
+    return;
+  }
 	//for being able to measure collisions
 	neighbors[j] = Neighbor(); // Ok, I don't like this line
 	/* first, it is obvious that the sender is a member of hops level 0 */
 	hop1[j] = NodeNeighbor(simTime());
 	hops_position[j] = Coord(m->getX(), m->getY());
+  // std::cerr << "\t" << myself << " adding " << j << " as neighbor" << '\n';
 
 	for (int i = 0 ; i < (int) m->getNeighborsArraySize() ; i++) {
 		string name(m->getNeighbors(i));
@@ -94,6 +99,7 @@ Mpr_t2::process_hello(const broadcasting::Hello* msg)
 
 		hop1[j].hop1.insert(name);
 		hops_position[name] = Coord(m->getXs(i), m->getYs(i));
+    // std::cerr << "\t" << myself << " adding " << name << " as neighbor hop 1" << '\n';
 	}
 
 }
@@ -101,7 +107,7 @@ Mpr_t2::process_hello(const broadcasting::Hello* msg)
 
 inet::broadcasting::Hello*
 Mpr_t2::build_hello_message() {
-	auto m = new MprHello("MprHello");
+  auto m = new MprHello("MprHello");
 	m->setNeighborsArraySize(hop1.size());
 	m->setXsArraySize(hop1.size());
 	m->setYsArraySize(hop1.size());

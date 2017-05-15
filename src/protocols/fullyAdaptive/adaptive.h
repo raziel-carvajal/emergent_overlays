@@ -32,7 +32,10 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     virtual void on_hello_received(const broadcasting::Hello* msg);
     virtual void time_to_broadcast_payload(void* user_data) override;
 
+    void change_current_protocol(const std::string& protocol);
+
   private:
+    int fake_change;
     std::string current_protocol_name;
 
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;

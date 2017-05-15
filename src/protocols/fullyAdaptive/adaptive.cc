@@ -41,18 +41,28 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
             break;
           case SAY_HELLO:
             {
-              gateway->send_package(build_hello_message());
               if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+                gateway->send_package(build_hello_message());
                 // cout << current_protocol_name << endl;
-                gateway->delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+                gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
+                knownProtocols[current_protocol_name]->on_saying_hello();
               }
               cancelAndDelete(msg);
-              knownProtocols[current_protocol_name]->on_saying_hello();
             }
 
           break;
           default:
-            if (!knownProtocols[current_protocol_name]->handle(msg)) {
+            if (msg->getKind() == fake_change) {
+              for (const auto& p : knownProtocols) {
+                if (p.first != current_protocol_name) {
+                  change_current_protocol(p.first);
+                  break;
+                }
+              }
+              cancelAndDelete(msg);
+              gateway->delayed_event(fake_change, "change_protocol", 1.3);
+            }
+            else if (!knownProtocols[current_protocol_name]->handle(msg)) {
               BroadcastingAppBase::handleMessageWhenUp(msg);
             }
             else {
@@ -87,9 +97,24 @@ FullyAdaptive::on_hello_received(const broadcasting::Hello* msg)
 
 
 void
+FullyAdaptive::change_current_protocol(const std::string& protocol)
+{
+  current_protocol_name = protocol;
+  gateway->setProtocolId(current_protocol_name);
+
+  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+    int n = std::stoi (myself.substr(5, myself.size()));
+    auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
+    gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta);
+  }
+}
+
+
+void
 FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
+  fake_change = gateway->register_new_control_message();
 
   auto protocols = { "Flooding2", "Mpr_t2" };
   for (const auto& p: protocols) {
@@ -100,13 +125,13 @@ FullyAdaptive::processStart()
       throw std::runtime_error("Couldn't create instance of class inet::" + current_protocol_name);
     }
     current_protocol->set_protocol_name(current_protocol_name);
+    // initialize protocol
+    current_protocol->initialize(myself, gateway);
     knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
   }
 
-  // initialize protocol
-  current_protocol_name = (gateway->get_current_position().y > 100)?"Flooding2":"Mpr_t2";
-  gateway->setProtocolId(current_protocol_name);
-  knownProtocols[current_protocol_name]->initialize(myself, gateway);
+  change_current_protocol((gateway->get_current_position().y > 100)?"Flooding2":"Mpr_t2");
+  gateway->delayed_event(fake_change, "change_protocol", 1.3);
 }
 
 

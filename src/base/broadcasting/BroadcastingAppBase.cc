@@ -385,9 +385,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 if (this->nr_hello_msg)
                 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
                 // this->nr_hello_msg--;
-                cancelAndDelete(msg);
-                break;
-                }
+              }
+              cancelAndDelete(msg);
+              break;
             case WAKEUP:
                 //configure_neighbors();
                 this->time_to_broadcast_payload(nullptr);
@@ -426,16 +426,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 cancelAndDelete(msg);
             	  endSimulation();
             	break;
-            case PRINT_POS_NEIGS:{
-                // if (nr_broadcast_msg > 0) {
-                //     cout << getLogHeader() + "TIC " + to_string((int)nr_broadcast_msg) + " POSITION " +
-                //             to_string(position.x) + " " + to_string(position.y) << endl;
-                //     auto p  = par("intervalBroadcastTime").doubleValue() / 5;
-                //     delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors",  par("intervalBroadcastTime").doubleValue() - p);
-                // }
-
-            }
-            break;
             case TRANSFORMATION_TIMEOUT: {
               void* data = msg->getContextPointer();
               std::string key = string( (char*)data );
@@ -623,8 +613,9 @@ BroadcastingAppBase::processStart()
       }
     }
 
-    if (nr_hello_msg)
-        delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
+    if (nr_hello_msg) {
+      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
+    }
 }
 
 
