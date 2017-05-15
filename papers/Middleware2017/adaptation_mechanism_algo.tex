@@ -26,34 +26,109 @@
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
+%\begin{algorithm}
+%	\footnotesize
+%	\DontPrintSemicolon
+%
+%	\BlockOfVar{
+%		\Delivered \tcp*[1]{messages already delivered to application}
+%	}
+%
+%	\Fn{\AlgoHandle{\Ms: \Msg}}{
+%		\If{ $\Ms.\Id \notin \Delivered$ }{
+%			$\AlgoSend(\Ms)$ \;
+%			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+%		}
+%	}
+%
+%	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
+%		$\Ms' \gets \FloodNewMsg$ \;
+%		$\Ms'.\MsgContent \gets$ pl \;
+%		\textbf{return} $\Ms'$ \;
+%	}
+%
+%	\Fn{\AlgoEmit{\Ms: \Msg }}{
+%		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
+%		\er{can insert wait here}
+%		$\AlgoSend(\Ms)$ \;
+%	}
+%\caption{\labalg{alg:flooding}Simple flooding protocol}
+%\end{algorithm}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
-
+	
 	\BlockOfVar{
+		\FloodMode \tcp*[1]{type of dissemination to perform}
 		\Delivered \tcp*[1]{messages already delivered to application}
-	}
-
-	\Fn{\AlgoHandle{\Ms: \Msg}}{
-		\If{ $\Ms.\Id \notin \Delivered$ }{
-			$\AlgoSend(\Ms)$ \;
-			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+		\BlockOfFloodCounter{
+			\MapC[] \tcp*[1]{map of counters}
+			\BlockOfMapAttributes{
+				$\MapC[\MsgId].\Receptions$ \tcp*[1]{receptions of message \MsgId}
+			}
+			\BlockOfConstants{
+				\FloodRecpLi \tcp*[1]{number of allowed receptions}
+			}
+		}
+		\BlockOfFloodTimeBased{
+			\BlockOfConstants{
+				\AdaptTimer \tcp*[1]{default waiting time}
+			}
 		}
 	}
-
+	
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			\Switch{\FloodMode}{
+				\Case{\FloodSimp}{
+					$\AlgoSend(\Ms)$ \;
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+				}
+				\Case{\FloodCount}{
+					\eIf{$\MapC[\MsgId].\Receptions < \FloodRecpLi$}{
+						$\AlgoSend(\Ms)$ \;
+						$\MapC[\MsgId].\Receptions \gets \MapC[\MsgId].\Receptions + 1$
+					}{
+						$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					}
+				}
+				\Case{\FloodFixed}{
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					$\MapT \gets \TimerFunc(\AdaptTimer)$ \tcp*[1]{create new timer}
+					\BlockOfTimerExpires{
+						$\AlgoSend(\Ms)$ \;
+					}
+				}
+				\Case{\FloodRandom}{
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					\tcp*[1]{get a random number between 0 and \AdaptTimer}
+					$\R \gets \RandomFunc([0,\AdaptTimer])$ \;
+					$\MapT \gets \TimerFunc(\R)$ \tcp*[1]{create new timer}
+					\BlockOfTimerExpires{
+						$\AlgoSend(\Ms)$ \;
+					}
+				}
+			}
+		}
+	}
+	
 	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
 		$\Ms' \gets \FloodNewMsg$ \;
 		$\Ms'.\MsgContent \gets$ pl \;
 		\textbf{return} $\Ms'$ \;
 	}
-
+	
 	\Fn{\AlgoEmit{\Ms: \Msg }}{
 		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
 		\er{can insert wait here}
+		\raziel{I think that we can take rid off emit(), it looks redundant now that the presentation of flooding algorithms is within one algorithm. Otherwise, I do have to repeat the SWITCH shown in handle()}
 		$\AlgoSend(\Ms)$ \;
 	}
-\caption{\labalg{alg:flooding}Simple flooding protocol}
+	\caption{\labalg{alg:typesOfFlooding}Group of basic flooding protocols}
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
