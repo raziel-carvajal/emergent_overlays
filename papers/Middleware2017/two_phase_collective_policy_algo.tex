@@ -1,0 +1,84 @@
+%!TEX root = main.tex
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfPolicySpecific{
+		propose condition \tcp*[1]{trigger for proposing adaptation}
+		enact condition \tcp*[1]{trigger for accepting adaptation}
+		participants threshold \tcp*[1]{nodes required to enact adaptation}
+	}
+	
+	\BlockOfConstants{
+		bit field size
+	}
+
+	\BlockOfVar{	
+		\Algo	\tcp*[1]{local instance of broadcast protocol}
+		
+		initiator boolean init false
+		
+		ongoing decisions = set of not-yet-enacted adaptation proposals
+	}
+
+	\Fn(\tcp*[f]{on propose condition trigger}){func trigger{params}}{
+		payload $pl$ = new adaptation proposition \;
+		
+		initiator = true 
+		
+		$\Ms \gets \Algo.\AlgoInit(pl)$ \;
+		
+		m.class = collective enactment proposal
+		
+		keep the identifier of m in some data structure 
+		
+		register callback for messages of type collective enactment answer (we will use these to get back our responses)
+		
+		$\Algo.\AlgoEmit(\Ms)$\;
+	}
+
+	\Fn(\tcp*[f]{upon reception of collective enactment proposal}){func consider{proposal m}}{
+		% note: we do not receive duplicates thanks to the behavior of the broadcast algorithm who calls deliver() only once per distinct message
+	
+		\eIf{enact condition (m) true}{
+			% we push the proposal further and we register that we were part of the acceptors
+			keep the identifier of m in the data structure
+			p.handle(m) % continues the propagation
+		}{
+			% we do not propagate it further but start sending a response, that nodes who did not see the proposal will simply ignore
+			payload $pl$ = new bit field with all bits 0 except a random 1 \;
+			$\Ms \gets \Algo.\AlgoInit(pl)$ \;
+		
+			m.class = collective enactment response
+			
+			register callback for messages of type collective enactment commit (we will use these to know if we switch)
+		}
+	}
+	
+	\Fn(\tcp*[f]{upon reception of collective enactment proposal}){func consider{proposal m}}{
+	
+	}
+	
+
+	% \Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
+	% 	\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism:eval_ids}
+	% 		\If{ $\MapT[\MsgId]  \neq \bot$ }{
+	% 			$\MapT[\MsgId] \gets \bot$ 	\tcp*[1]{cancel timer}
+	% 		}
+	% 		\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism:handle}
+	% 	}{
+	% 		\If{ $\MapT[\MsgId] = \bot$ }{
+	% 			$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+	% 			$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \label{alg:adaptation_mechanism:set_timer} \;
+	% 			$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+	% 		}
+	% 	}
+	% }
+	%
+	% \Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
+	% 	$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+	% 	$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
+	% }
+\caption{\labalg{alg:policies:two_phase_collective_policy}Collective enactment of elasticity rule}
+\end{algorithm}
