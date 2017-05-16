@@ -115,7 +115,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     double adaptationMax;
     double timeoutCustomOfficer;
-    bool withAdaptation;
     std::string protocolId;
     int nr_max_custom_officers;
     std::set<std::string> lastForeignHelloSenders;
@@ -148,6 +147,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     bool already_configured = false;
 
   protected:
+    
+    bool withAdaptation;
 
     // is the source of a broadcast
     bool is_source;

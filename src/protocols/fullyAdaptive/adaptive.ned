@@ -25,5 +25,6 @@ import broadcasting.BroadcastingBase;
 simple FullyAdaptive extends BroadcastingBase like IUDPApp
 {
     parameters:
-        @class(inet::FullyAdaptive);
+      string initialProtocol;
+      @class(inet::FullyAdaptive);
 }

@@ -15,6 +15,7 @@
 #include "broadcasting/BroadcastingAppBase_m.h"
 
 #include "broadcasting/IBroadcastProtocol.h"
+#include "IMonitoringMechanism.h"
 
 
 namespace inet {
@@ -26,18 +27,18 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
   private:
     virtual inet::broadcasting::Hello* build_hello_message();
-    /* payload of the message to broadcast */
-    std::map< std::string, std::string >  payloads;
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
     virtual void on_hello_received(const broadcasting::Hello* msg);
     virtual void time_to_broadcast_payload(void* user_data) override;
 
     void change_current_protocol(const std::string& protocol);
 
-  private:
-    int fake_change;
-    std::string current_protocol_name;
+    void adaptation();
 
+  private:
+    int DO_ADAPTATION;
+    std::unique_ptr<IMonitoringMechanism> monitor;
+    std::string current_protocol_name;
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;
 };
 

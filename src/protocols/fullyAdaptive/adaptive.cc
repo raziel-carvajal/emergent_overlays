@@ -33,49 +33,60 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
-        // detect if the message is handled by the protocols
-        switch (msg->getKind()) {
-          case START:
-            BroadcastingAppBase::handleMessageWhenUp(msg);
-            break;
-          case SAY_HELLO:
-            {
-              if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-                gateway->send_package(build_hello_message());
-                // cout << current_protocol_name << endl;
-                gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
-                knownProtocols[current_protocol_name]->on_saying_hello();
-              }
-              cancelAndDelete(msg);
-            }
-
-          break;
-          default:
-            if (msg->getKind() == fake_change) {
-              for (const auto& p : knownProtocols) {
-                if (p.first != current_protocol_name) {
-                  change_current_protocol(p.first);
-                  break;
-                }
-              }
-              cancelAndDelete(msg);
-              gateway->delayed_event(fake_change, "change_protocol", 1.3);
-            }
-            else if (!knownProtocols[current_protocol_name]->handle(msg)) {
-              BroadcastingAppBase::handleMessageWhenUp(msg);
-            }
-            else {
-              cancelAndDelete(msg);
-            }
-          break;
-        }
-    }
-    else {
+  if (withAdaptation && monitor) monitor->handle_messages(msg);
+  if (msg->isSelfMessage()) {
+    // detect if the message is handled by the protocols
+    switch (msg->getKind()) {
+      case START:
         BroadcastingAppBase::handleMessageWhenUp(msg);
+        break;
+      case SAY_HELLO:
+        {
+          if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+            gateway->send_package(build_hello_message());
+            gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
+            knownProtocols[current_protocol_name]->on_saying_hello();
+          }
+          cancelAndDelete(msg);
+        }
+      break;
+      default:
+        if (withAdaptation && msg->getKind() == DO_ADAPTATION) {
+          adaptation();
+          cancelAndDelete(msg);
+        }
+        else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+          BroadcastingAppBase::handleMessageWhenUp(msg);
+        }
+        else {
+          cancelAndDelete(msg);
+        }
+      break;
     }
+  }
+  else {
+    BroadcastingAppBase::handleMessageWhenUp(msg);
+  }
 
 }
+
+
+void
+FullyAdaptive::adaptation()
+{
+  auto density = monitor->density_estimation();
+  // cerr << "\t\tCHANGING ? " << density << "\n";
+  if (density > 15 && current_protocol_name == "Flooding2") {
+    change_current_protocol("Mpr_t2");
+    // cerr << "\t\tCHANGING TO MPR\n";
+  }
+  if (density < 15 && current_protocol_name == "Mpr_t2") {
+    change_current_protocol("Flooding2");
+    // cerr << "\t\tCHANGING TO FLOODING\n";
+  }
+  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
+}
+
 
 void
 FullyAdaptive::on_payload_received(const Broadcast* m) {
@@ -85,7 +96,7 @@ FullyAdaptive::on_payload_received(const Broadcast* m) {
 void
 FullyAdaptive::time_to_broadcast_payload(void* user_data)
 {
-    knownProtocols[current_protocol_name]->time_to_broadcast_payload(user_data);
+  knownProtocols[current_protocol_name]->time_to_broadcast_payload(user_data);
 }
 
 
@@ -114,11 +125,20 @@ void
 FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
-  fake_change = gateway->register_new_control_message();
+
+  if (withAdaptation) {
+    DO_ADAPTATION = gateway->register_new_control_message();
+    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
+
+    std::string monitoring_class("inet::SnifferBasedMonitoring");
+    monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
+    monitor->initialise(gateway);
+  }
+
+
 
   auto protocols = { "Flooding2", "Mpr_t2" };
   for (const auto& p: protocols) {
-    // select initial protocol
     current_protocol_name = p;
     auto current_protocol = dynamic_cast<IBroadcastProtocol*>(createOne(std::string("inet::" + current_protocol_name).c_str()));
     if (!current_protocol) {
@@ -130,8 +150,8 @@ FullyAdaptive::processStart()
     knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
   }
 
-  change_current_protocol((gateway->get_current_position().y > 100)?"Flooding2":"Mpr_t2");
-  gateway->delayed_event(fake_change, "change_protocol", 1.3);
+  auto initialProtocol = par("initialProtocol").stdstringValue();
+  change_current_protocol(initialProtocol);
 }
 
 

@@ -170,7 +170,7 @@ void BroadcastingAppBase::printBroadcastingLog(std::string key) {
     string info = "";
     for (auto& n: neighbors)
         info += n.first + "_";
-    cout << getLogHeader() << "BROADCASTING " << key << " TO_NEIGHBORS " << info << endl;
+    // cout << getLogHeader() << "BROADCASTING " << key << " TO_NEIGHBORS " << info << endl;
 }
 
 
