@@ -1,5 +1,7 @@
 %!TEX root = main.tex
 
+\newcommand*\rot{\rotatebox{90}}
+
 %\newcommand{\YES}{{\scriptsize $\surd$ }\xspace}
 \newcommand{\YES}{{\scriptsize \ding{51}}\xspace}
 \newcommand{\NO}{{\scriptsize \ding{53}}\xspace}
@@ -23,7 +25,10 @@
 
 \toprule
 
-Mechanism & One-hop neighbour & Two-hop neighbour & No need for periodic control messages (HELLO) & No need to piggyback control messages & Use of thresholds & Deterministic decision \\
+& \multicolumn{6}{c}{Mechanism} \\
+\cline{2-7}\\
+
+Algorithm & \rot{One-hop neighbour} & \rot{Two-hop neighbour} & \rot{\shortstack[l]{No need for periodic\\control messages}} & \rot{\shortstack[l]{No need to piggyback\\control messages}} & \rot{Use of thresholds} & \rot{Deterministic decision} \\
 
 \midrule
 
@@ -41,5 +46,5 @@ Mechanism & One-hop neighbour & Two-hop neighbour & No need for periodic control
 \end{tabular}
 \caption{Survey of evaluation criteria used in different adaptive broadcast algorithms.}% In the third column, \textit{Per} stands for \textit{Periodic} and \textit{Determ} for \textit{Deterministic}}
 \label{tab:rw}
-  \vspace{-0.4cm}
+%  \vspace{-0.4cm}
 \end{table*}
