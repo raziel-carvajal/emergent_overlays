@@ -26,6 +26,17 @@ Given that nodes are using the same protocol to communicate among them, there is
 On the other hand, our solution can work with different protocols without modifying them.
 In addition, there is no need for sending periodic HELLO and piggybacked messages either, reducing message collision and, consequently, energy consumption.
 
+Zhang et al.~\cite{Zhang2005} propose an approach called Dynamic Probabilistic Route (DPR) discovery, based on a combination of probabilistic and counter-based schemes.
+Each node contains a probabilistic P variable depending on its local density.
+Not periodically control messages are used to determine the neighbours, however, every node in the network piggybacks the set of its local neighbours nodes to the broadcast message.
+This information is used for the receiver nodes to determine their own local density. 
+In order to estimate its neighbour list, each node waits a threshold time since the first broadcast message is received. If another broadcast message is received in that period of time, the sender node will be added to the neighbour list.
+Depending on the density of the node, it will be set as sparse or dense networks. In case of the node is in a sparse network, it will always retransmit the message.
+However, if the node is in a dense network, the probability P to retransmit a broadcast message will be based on the density of their local neighbours as well as a cumulative amount of neighbour mobile nodes.
+Additionally, in case of a node receives a message containing the same list of neighbours as its local list, then the node will not broadcast the message.
+As a result, the necessity of the nodes to know in advance their number of neighbours to calculate the probability P, adds a waiting time to estimate their local neighbours list, what produces an extra overhead.
+
+
 Viswanath and Obraczka~\cite{Viswanath02anadaptive} present two variants of an adaptive broadcast algorithm for MANETs that allows each node to switch among 3 different flooding modes: \emph{plain}, \emph{hyper}, and \emph{scoped} flooding. 
 Hyper flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead. 
 In contrast, scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead. 
