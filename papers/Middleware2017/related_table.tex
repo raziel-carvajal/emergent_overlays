@@ -19,21 +19,21 @@
 \newcolumntype{E}{ >{\centering\arraybackslash} p{0.12\linewidth} }
 %\newcolumntype{F}{ >{\centering\arraybackslash} p{0.12\linewidth} }
 
-\begin{tabular}{ACCCCCCC}
+\begin{tabular}{ACCCCCC}
 
 \toprule
 
-Mechanism & One-hop neighbour & Two-hop neighbour & No need for periodic control messages (HELLO) & No need to piggyback control messages & Use of timers & Use of thresholds & Deterministic decision \\
+Mechanism & One-hop neighbour & Two-hop neighbour & No need for periodic control messages (HELLO) & No need to piggyback control messages & Use of thresholds & Deterministic decision \\
 
 \midrule
 
-{\scriptsize Hypergossiping~\cite{hypergossiping} } & \YES & \NO & \NO & \NO & \YES & \YES & \YES  \\ \hline
-{\scriptsize DPR~\cite{Zhang2005} } & \YES & \YES & \YES & \YES & \YES & \YES & \NO  \\ \hline
-{\scriptsize Viswanath and Obraczka~\cite{Viswanath02anadaptive} } & \YES & \NO & \NO & \YES & \YES & \YES & \YES  \\ \hline
-{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \YES & \NO & \NO & \YES & \YES & \NO & \NO  \\ \hline
-{\scriptsize Cartigny and Simplot~\cite{ProbFlood} } & \YES & \NO & \NO & \YES & \YES & \YES & \NO  \\ \hline
-{\scriptsize Xu and Gerla~\cite{Kaixin2002} } & \YES & \YES & \NO & \NO & \YES & \YES & \YES  \\ \hline
-{\scriptsize Our approach } & \NO & \NO & \YES & \YES & \YES & \YES & \YES  \\ 
+{\scriptsize Hypergossiping~\cite{hypergossiping} } & \YES & \NO & \NO & \NO & \YES & \YES  \\ \hline
+{\scriptsize DPR~\cite{Zhang2005} } & \YES & \YES & \YES & \YES & \YES & \NO  \\ \hline
+{\scriptsize Viswanath and Obraczka~\cite{Viswanath02anadaptive} } & \YES & \NO & \NO & \YES & \YES & \YES  \\ \hline
+{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \YES & \NO & \NO & \YES & \NO & \NO  \\ \hline
+{\scriptsize Cartigny and Simplot~\cite{ProbFlood} } & \YES & \NO & \NO & \YES & \YES & \NO  \\ \hline
+{\scriptsize Xu and Gerla~\cite{Kaixin2002} } & \YES & \YES & \NO & \NO & \YES & \YES  \\ \hline
+{\scriptsize Our approach } & \NO & \NO & \YES & \YES & \YES & \YES  \\ 
 
 %Optimized broadcast protocol for sensor networks \\
 
