@@ -26,38 +26,6 @@
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
-%
-%	\BlockOfVar{
-%		\Delivered \tcp*[1]{messages already delivered to application}
-%	}
-%
-%	\Fn{\AlgoHandle{\Ms: \Msg}}{
-%		\If{ $\Ms.\Id \notin \Delivered$ }{
-%			$\AlgoSend(\Ms)$ \;
-%			$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
-%		}
-%	}
-%
-%	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
-%		$\Ms' \gets \FloodNewMsg$ \;
-%		$\Ms'.\MsgContent \gets$ pl \;
-%		\textbf{return} $\Ms'$ \;
-%	}
-%
-%	\Fn{\AlgoEmit{\Ms: \Msg }}{
-%		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
-%		\er{can insert wait here}
-%		$\AlgoSend(\Ms)$ \;
-%	}
-%\caption{\labalg{flooding}Simple flooding protocol}
-%\end{algorithm}
-%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{algorithm}
 	\footnotesize
@@ -125,9 +93,7 @@
 	
 	\Fn{\AlgoEmit{\Ms: \Msg }}{
 		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
-		\er{can insert wait here}
-		\raziel{I think that we can take rid off emit(), it looks redundant now that the presentation of flooding algorithms is within one algorithm. Otherwise, I do have to repeat the SWITCH shown in handle()}
-		$\AlgoSend(\Ms)$ \;
+		$\AlgoSend(\Ms)$
 	}
 	\caption{\labalg{typesOfFlooding}Group of basic flooding protocols}
 \end{algorithm}
@@ -186,13 +152,109 @@
 				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
 				$\MapT[\MsgId].\RemTime \gets \AdaptTimer$ \label{alg:adaptation_mechanism:set_timer} \;
 				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+				\BlockOfMapTimerExpires{
+					$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+					$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
+				}
 			}
 		}
 	}
 
-	\Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
-		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
-		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
-	}
+%	\Fn(\tcp*[f]{triggers when $\MapT[\MsgId].\RemTime = 0$}){\FuncExp{$\MapT[\MsgId]$: \Timer}}{
+%		$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+%		$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism:emit}
+%	}
 \caption{\labalg{adaptation_mechanism}Efficient adaptation mechanism}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfVar{
+		\NodeId \;
+		\Relay \;
+		\Delivered \;
+		\Neigs \;
+		\ObsNeigs \;
+		\ObsRelays \;
+	}
+	
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			\Switch{\MsgType}{
+				\Case{\MsgCtrl}{
+					$\ObsNeigs \gets \ObsNeigs \cup \{\MsgEmitter\}$ \;
+					\If{$\MsgEmitRel = \T$}{
+						$\ObsRelays \gets \ObsRelays \cup \{\MsgEmitter\}$
+					}
+				}
+				\Case{\MsgBro}{
+					\If{$\Relay = \T$}{
+						$\AlgoSend(\Ms)$ \;
+						$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
+					}
+				}
+			}
+		}
+	}
+	
+	\Fn(\tcp*[f]{periodic deamon to send control messages}){\Demon{}}{
+		$\CtrlMsg \gets \CtrlMsgFun$ \;
+		$\CtrlMsg.\Emitter \gets \NodeId$ \;
+		$\CtrlMsg.\IsRelay\gets \Relay$ \;
+		$\AlgoSend(\CtrlMsg)$
+	}
+	
+	\Fn(\tcp*[f]{periodic update of relay status}){\Update{}}{
+		\eIf{$\Neigs \neq \ObsNeigs$}{
+			$\Neigs \gets \ObsNeigs$ \;
+			$\Relay \gets \Rule(\Neigs)$ \;
+			$\ObsNeigs \gets \emptyset$ \;
+			$\ObsRelays \gets \emptyset$ \;	
+		}{
+			$\Relay \gets \Min(\ObsRelays)$ \;
+		}
+	}
+\caption{\labalg{overlay-based}Functioning of overlay-based algorithms}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfVar{
+		\Delivered \;
+		$\MapT[]$ 	\tcp*[1]{map from message ids to timers}
+		
+		\BlockOfMapAttributes{
+			$\MapT[ \MsgId ].\RemTime$	\tcp*[1]{remaining time}
+			$\MapT[ \MsgId ].\MsgContent$ 	\tcp*[1]{content of message}
+		}
+	}
+	
+	\Fn(\tcp*[f]{on message reception}){\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			$\Fwd \gets \LocRule(\MsgPos)$ \;
+			\eIf{$\Fwd = \T$}{
+				\If{ $\MapT[\MsgId] \neq \bot$ }{
+					$\MapT[\MsgId] \gets \bot$ \tcp*[1]{cancel timer}
+				}
+				$\AlgoSend(\Ms)$
+				$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+			}{
+				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+				$\MapT[\MsgId].\RemTime \gets \Timeout(\MsgPos)$ \;
+				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+				\BlockOfMapTimerExpires{
+					$\AlgoSend(\Ms)$
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+				}
+			}
+		}
+	}
+
+\caption{\labalg{location-based}Functioning of location-based algorithms}
 \end{algorithm}
