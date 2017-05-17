@@ -390,7 +390,7 @@ def build_handcrafted_topology(args, densities, nr_points_of_interests=1):
         while True:
             b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                              map_x=int(w0), map_y=int(h0),
-                                             sim_time=600, positions=positions,
+                                             sim_time=1600, positions=positions,
                                             #  mobility_map=mobility_map,
                                              outputFile=filename,
                                             #  testValidPosition=IsValidPosition,
