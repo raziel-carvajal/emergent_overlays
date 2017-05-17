@@ -30,6 +30,8 @@
 \SetKwData{Delivered}{delivered}
 \SetKwData{Receptions}{receptions}
 
+\SetKwData{Bool}{willSwitch}
+
 \SetKwData{FloodMode}{flooding\_mode}
 \SetKwData{FloodRecpLi}{limit\_of\_receptions}
 \SetKwData{FloodSimp}{SIMPLE}
@@ -47,6 +49,7 @@
 \SetKwData{AlgoBroFunc}{broadcast}
 \SetKwData{AlgoInitFunc}{init}
 \SetKwData{AlgoEmitFunc}{emit}
+\SetKwData{AlgopSwitch}{pSwitch}
 
 \SetKwData{Ms}{m}
 \SetKwData{Msg}{message}
@@ -54,6 +57,8 @@
 \SetKwData{MsgPid}{m.pid}
 \SetKwData{MsgContent}{payload}
 \SetKwData{MsgPayload}{pl}
+\SetKwData{MsgSwitch}{m.willSwitch}
+\SetKwData{MsgProtSwitch}{m.pSwitch}
 
 \SetKwData{Timer}{timer}
 \SetKwData{TimerFunc}{newTimer}
@@ -61,6 +66,7 @@
 
 % Function and Blocks
 \SetKwFunction{FuncHandler}{receive}
+\SetKwFunction{FuncSwitch}{switch}
 \SetKwFunction{FuncExp}{expires}
 \SetKwFunction{FuncExpFlo}{expiresInFlooding}
 \SetKwProg{Fn}{function}{}{}
@@ -106,7 +112,8 @@
   columns=fullflexible,
   frame=tb,
   captionpos=b,
-  mathescape=true,
+  mathescape=\\
+  ,
   tabsize=2,
   escapeinside={(*@}{@*)}}
 
