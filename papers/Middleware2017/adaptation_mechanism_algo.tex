@@ -56,12 +56,13 @@
 %\caption{\labalg{flooding}Simple flooding protocol}
 %\end{algorithm}
 %
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
-	
+	\raziel{implementation detail: in text mention that the set "delivered" must be clean periodicalle to avoid collecting an $\infty$ number of delivered messages.} \;
 	\BlockOfVar{
 		\FloodMode \tcp*[1]{type of dissemination to perform}
 		\Delivered \tcp*[1]{messages already delivered to application}
