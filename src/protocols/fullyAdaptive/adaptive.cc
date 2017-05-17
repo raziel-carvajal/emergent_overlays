@@ -196,7 +196,7 @@ FullyAdaptive::processStart()
     }
   }
 
-  auto protocols = { "Flooding2", "Mpr_t2" };
+  auto protocols = { "Flooding2", "Mpr_t2", "Abba2" };
   for (const auto& p: protocols) {
     current_protocol_name = p;
     auto current_protocol = dynamic_cast<IBroadcastProtocol*>(createOne(std::string("inet::" + current_protocol_name).c_str()));
