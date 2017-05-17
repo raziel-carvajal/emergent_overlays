@@ -17,7 +17,7 @@
     <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Mpr_t2">
-    <Parameter name="helloTime" value="0.7" type="seconds"></Parameter>
+    <Parameter name="helloTime" value="1.5" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="ProbFlooding">

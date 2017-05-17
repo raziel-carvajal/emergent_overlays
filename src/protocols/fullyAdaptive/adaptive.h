@@ -17,6 +17,7 @@
 #include "broadcasting/IBroadcastProtocol.h"
 #include "IMonitoringMechanism.h"
 
+#include "AdaptationPolicies_m.h"
 
 namespace inet {
 
@@ -35,8 +36,18 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
 
     void adaptation();
 
+    enum class AdaptationPolicy {
+      LOCAL, SWSP
+    };
+
   private:
-    int DO_ADAPTATION;
+    int DO_ADAPTATION; // self-message ID
+    AdaptationPolicy policy;
+
+    bool willingToChange = false;
+    std::string willingToChangeToProtocol;
+    WillingToChange* packet_to_piggybag = nullptr;
+
     std::unique_ptr<IMonitoringMechanism> monitor;
     std::string current_protocol_name;
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;

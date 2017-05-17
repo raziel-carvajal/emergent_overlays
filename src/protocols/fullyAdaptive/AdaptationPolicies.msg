@@ -1,4 +1,3 @@
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -11,21 +10,10 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
 
-package fullyAdaptive;
+namespace inet;
 
-import inet.applications.contract.IUDPApp;
-import broadcasting.BroadcastingBase;
-
-//
-//
-// Some nodes distribute messages in the network using unicast UDP.
-//
-simple FullyAdaptive extends BroadcastingBase like IUDPApp
-{
-    parameters:
-      string initialProtocol;
-      string adaptation_policy = default("local"); // or "swsp" or "etienne"
-      @class(inet::FullyAdaptive);
+packet WillingToChange {
+  string sender;
+	string targetProtocol;
 }

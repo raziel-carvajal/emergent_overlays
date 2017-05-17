@@ -374,16 +374,16 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 cancelAndDelete(msg);
                 break;
             case SAY_HELLO:{
-                auto pkt = build_hello_message();
-                updatePosition();
-                pkt->setX(position.x);
-                pkt->setY(position.y);
-                pkt->setSender(myself.c_str());
-                pkt->setProtocolId (protocolId.c_str());
-
-                send_package(pkt);
-                if (this->nr_hello_msg)
-                	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+                // auto pkt = build_hello_message();
+                // updatePosition();
+                // pkt->setX(position.x);
+                // pkt->setY(position.y);
+                // pkt->setSender(myself.c_str());
+                // pkt->setProtocolId (protocolId.c_str());
+                //
+                // send_package(pkt);
+                // if (this->nr_hello_msg)
+                // 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
                 // this->nr_hello_msg--;
               }
               cancelAndDelete(msg);

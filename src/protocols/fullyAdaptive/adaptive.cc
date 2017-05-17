@@ -43,7 +43,14 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       case SAY_HELLO:
         {
           if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-            gateway->send_package(build_hello_message());
+            auto p = build_hello_message();
+            if (packet_to_piggybag) {
+              p->encapsulate(packet_to_piggybag);
+              packet_to_piggybag = nullptr;
+            }
+            gateway->send_package(p);
+            if (myself == "hostR0")
+              std::cerr << simTime() << " " << myself  << " : SENDING HELLO" << '\n';
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
             knownProtocols[current_protocol_name]->on_saying_hello();
           }
@@ -64,7 +71,34 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       break;
     }
   }
-  else {
+  else if (msg->getKind() == UDP_I_DATA)
+  {
+    auto pkt = PK(msg);
+    if (pkt->hasEncapsulatedPacket()) {
+      pkt = pkt->getEncapsulatedPacket();
+    }
+    auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
+    if (willing) {
+      if (willingToChange &&
+          willing->getTargetProtocol() == willingToChangeToProtocol &&
+          willingToChangeToProtocol != current_protocol_name) {
+
+        change_current_protocol(willingToChangeToProtocol);
+        std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol << '\n';
+
+        if (!packet_to_piggybag) {
+          packet_to_piggybag = new inet::WillingToChange("willing to change");
+          packet_to_piggybag->setSender(myself.c_str());
+          packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
+          if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+            gateway->send_package(packet_to_piggybag);
+            packet_to_piggybag = nullptr;
+          }
+        }
+        willingToChangeToProtocol = "";
+        willing = false;
+      }
+    }
     BroadcastingAppBase::handleMessageWhenUp(msg);
   }
 
@@ -75,14 +109,35 @@ void
 FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
-  // cerr << "\t\tCHANGING ? " << density << "\n";
-  if (density > 15 && current_protocol_name == "Flooding2") {
-    change_current_protocol("Mpr_t2");
-    // cerr << "\t\tCHANGING TO MPR\n";
+  if (policy == AdaptationPolicy::LOCAL) {
+    if (density > 15 && current_protocol_name == "Flooding2") {
+      change_current_protocol("Mpr_t2");
+    }
+    else if (density < 15 && current_protocol_name == "Mpr_t2") {
+      change_current_protocol("Flooding2");
+    }
   }
-  if (density < 15 && current_protocol_name == "Mpr_t2") {
-    change_current_protocol("Flooding2");
-    // cerr << "\t\tCHANGING TO FLOODING\n";
+  else if (policy == AdaptationPolicy::SWSP) {
+    bool change = false;
+    if (density > 15 && current_protocol_name == "Flooding2") {
+      willingToChange = true;
+      willingToChangeToProtocol = "Mpr_t2";
+      change = true;
+    }
+    else if (density < 15 && current_protocol_name == "Mpr_t2") {
+      willingToChange = true;
+      willingToChangeToProtocol = "Flooding2";
+      change = true;
+    }
+    if (change && !packet_to_piggybag) {
+      packet_to_piggybag = new inet::WillingToChange("willing to change");
+      packet_to_piggybag->setSender(myself.c_str());
+      packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
+      if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+        gateway->send_package(packet_to_piggybag);
+        packet_to_piggybag = nullptr;
+      }
+    }
   }
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
 }
@@ -116,7 +171,8 @@ FullyAdaptive::change_current_protocol(const std::string& protocol)
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
     int n = std::stoi (myself.substr(5, myself.size()));
     auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
-    gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta);
+    auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta;
+    gateway->delayed_event(SAY_HELLO, "helloTime", t);
   }
 }
 
@@ -133,9 +189,12 @@ FullyAdaptive::processStart()
     std::string monitoring_class("inet::SnifferBasedMonitoring");
     monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
     monitor->initialise(gateway);
+
+    policy = AdaptationPolicy::LOCAL;
+    if (par("adaptation_policy").stdstringValue() == "swsp") {
+      policy = AdaptationPolicy::SWSP;
+    }
   }
-
-
 
   auto protocols = { "Flooding2", "Mpr_t2" };
   for (const auto& p: protocols) {

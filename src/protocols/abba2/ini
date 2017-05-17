@@ -1,3 +1,5 @@
 description = "Broadcasting messages using ABBA"
-*.host*.udpApp[0].typename = "Abba2"
-*.host*.udpApp[0].timeOut = 0.02
+*.host*.udpApp[0].typename = "FullyAdaptive"
+*.host*.udpApp[0].protocolsConfig = xmldoc("../../experiments/configs/config.xml")
+*.host*.udpApp[0].withAdaptation = false
+*.host*.udpApp[0].initialProtocol = "Abba2"

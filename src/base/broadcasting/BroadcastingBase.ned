@@ -16,8 +16,6 @@
 package broadcasting;
 
 //
-
-//
 // Some nodes distribute messages in the network using unicast UDP.
 //
 
@@ -40,7 +38,6 @@ simple BroadcastingBase
         double wakeUpTime @unit(s) = default(3s);
         double intervalBroadcastTime @unit(s) = default(0.5s);
 
-
         // maybe there is some information to show
         double display_time @unit(s) = default(5s); // at this point we must show the built MWST
 
@@ -49,12 +46,11 @@ simple BroadcastingBase
         xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
         // Adaptation parameters
-        double adaptationMax @unit(s) = default(0.5s);
+        double adaptationMax @unit(s) = default(0.15s);
         bool withAdaptation = default(false);
         string protocolId = default("");
         int nr_max_custom_officers = default(1);
-        double timeoutCustomOfficer @unit(s) = default(0.5s);
-
+        double timeoutCustomOfficer @unit(s) = default(0.2s);
 
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);
