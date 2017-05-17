@@ -454,7 +454,8 @@ Computing Machinery]
     {\if@filesw
        \immediate\write\@auxout{\string\bibstyle{#1}}%
      \fi}}
-\RequirePackage{graphicx, xcolor}
+\RequirePackage{graphicx}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
 \definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
 \definecolor[named]{ACMOrange}{cmyk}{0,0.42,1,0.01}
