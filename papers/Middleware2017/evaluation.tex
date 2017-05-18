@@ -3,12 +3,39 @@
 \section{Evaluation}
 \labsection{evaluation}
 
+\er{%
+	Suggested outline for the section:
+	\begin{itemize}
+		\item objectives of the evaluation
+		\item simulation environment:
+		\begin{itemize}
+			\item simulator
+			\item energy model
+			\item MAC layer
+			\item other models if applicable
+		\end{itemize}
+		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
+		\item description of the evaluation metrics
+		\item evaluation should compare
+		\begin{itemize}
+			\item performance with a single protocol (distinguishing nodes in the different regions)
+			\item performance with the different adaptation strategies (also distinguishing nodes)
+		\end{itemize}
+		\item discussion
+	\end{itemize}}
+
 \subsection{Objectives}
 
 \subsection{Simulation Environment}
 \labsection{simulation-env}
 
 Our experiments are inspired by the scenario of a crowd of humans carrying portable communication devices (e.g., phones) in an area with no infrastructure connectivity.
+%
+In this area, there are several points of interest where people tend to stay.
+%
+As a result, the density of devices in the points of interest is high, and the mobility is low.
+%
+Meanwhile, fewer nodes constantly move in the area between point of interests. 
 %
 The dissemination of information from one individual to all the others is critical, and uses ad-hoc connections between devices.
 %
@@ -25,62 +52,10 @@ This tool provides a full implementation of the IEEE 802.11g standard.
 %
 In addition, it contains models for the mobility of nodes and for energy consumption.
 
-\smallskip
-\noindent
-\textbf{Communication Scenario.}
-%\subsection*{Communication Scenario}
-Simulated participants use their devices to broadcast messages without external coordination and may attempt to do so at nearly the same time.
-%
-We set our experiments to perform 200 broadcast messages.
-The frequency between broadcasts is $0.1$s.
-%
-The source of each message is randomly selected.
-%
-The content of each message is randomly generated, unique and with a length of 32~Bytes. 
-%
-%These two values allow us to evaluate the protocols under heavy and light network load.
-%
 
 \smallskip
 \noindent
-\textbf{Nodes Density.}
-%\subsection*{Nodes Density}
-We are interested in generating scenarios with different nodes densities.
-%
-%In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
-%
-We consider three parameters: the transmission range (Tx), the map size and the number of nodes.
-%
-As shown in~\cite{Penrose2003}, the dependency between these parameters allows us to build networks with a given density, by using random geometric graphs.
-%
-In our experiments, all nodes have a Tx of 20~m.\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
-	Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
-The number of nodes $N$ is fixed to 500. % , which is the mean value reported by previous studies on the size of manifestations in Western Europe~\cite{kriesi1995new}. %% ER useless.
-%
-To create a network with a given density, we set Tx and $N$ and compute the map size.
-%
-Then, we generate a laying on the map by using random geometric graphs.
-%
-We instantiate networks of 500 nodes each and set the densities to  {5,10, \dots, 40} nodes, a range of values that is frequently found in the literature.
-%
-This leads to a map size ranging from $125 \times 125$m to $354 \times 354$m.
-
-\smallskip
-\noindent
-\textbf{Mobility.}
-%\subsection*{Mobility}
-We use the \emph{truncated-levy walk} (LW) mobility model, as it characterizes well the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
-%
-This model generates traces composed of frequent short walks and occasional rides to distant locations.
-%
-We define two scenarios: One without mobility (\emph{static}) and another with mobility (\emph{dynamic}) at a walking speed of $1.4$ $m/s$ -- based on an estimation of the preferred walking speed~\cite{Browning390}.
-%
-We generate the dynamic scenario starting from the static one and applying the mobility based on the model.
-We check that the network remains connected for the duration of the experiment, or discard the data and regenerate using a new random seed.
-
-\smallskip
-\noindent
-\textbf{Energy Settings.}
+\textbf{Energy Model.}
 This metric depends on the wireless communication chip used.
 %
 We model power consumption using the specifications of a commercial chip found in modern mobile devices.
@@ -107,20 +82,81 @@ We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the
 \end{table}
 
 %
-These values are used for the \emph{StateBasedEnergyConsumer} consumption model integrated with INET.
-
 To simulate this chip, we use the \emph{StateBasedEnergyConsumer} model provided by INET.
 %
-This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
+This model measures how many Joules were consumed based on the time the chip spends on each consumtpion mode (as described in Table~\ref{tbl:wifi-chip}).
+
+
+\smallskip
+\noindent
+\textbf{Communication Scenario.}
+%\subsection*{Communication Scenario}
+Simulated participants use their devices to broadcast messages without external coordination and may attempt to do so at nearly the same time.
+%
+We set our experiments to perform 200 broadcast messages.
+The frequency between broadcasts is $0.1$s.
+%
+The source of each message is randomly selected.
+%
+The content of each message is randomly generated, unique and with a length of 32~Bytes. 
+%
 
 \smallskip
 \noindent
 \textbf{Simulation time.}
-As mentioned in Section~\ref{sec:background}, some algorithms first need to build a topology.
+As mentioned in~\refsection{mechanism}, some algorithms need to build a topology.
 %
-To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5s, allowing CDS-based algorithms to perform this initial construction.
+To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 2s, allowing CDS-based algorithms to perform this initial construction.
 %
-The total simulation time is then $10 + {\delta t} \times M$, where ${\delta t}$ is the interval between broadcast messages and $M$ is the number of scheduled messages.
+The total simulation time is then $4 + {\delta t} \times M$, where ${\delta t}$ is the interval between broadcast messages and $M$ is the number of scheduled messages.
+
+
+\smallskip
+\noindent
+\textbf{Mobility Model.}
+%\subsection*{Mobility}
+We use a mobility model with points of interest (PoI) proposed by Piorkowski et al.~\cite{mobility_density_model}.
+%
+In this model, all nodes move in short steps that are defined using two Gaussian distributions.
+%
+To do so, nodes are classified in two groups: nodes in the ``vecinity'' of a PoI use a distribution $\mathcal{N}(0, \sigma_1^{2})$, and nodes in between PoIs use $\mathcal{N}(0, \sigma_2^{2})$ where $\sigma_1 <  \sigma_2$.
+%
+As a consequence, nodes in the ``vecinity'' of a PoI move slower than nodes in between PoIs.
+%
+The use of these distributions also cause that often nodes stay most of the time in a PoI; as result, the density in PoI is high while it is low elsewhere.
+
+To generate the traces, the mobility model checks, during each step, the current position of a node to see whether it is in the ``vicinity'' of a PoI.
+%
+Depending on that, it selects the distribution to use to move the node.
+%
+Finally, the initial position of each node is selected using a uniform distribution. 
+%
+The exact configuration we use for each parameter is shown in Table~\ref{tbl:mobility}. 
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Parameter} & \textbf{Value} \\
+		\midrule
+		Nodes  & 500 \\
+		Number of PoI & 4 \\
+		Radio that defines vecinity of PoI  & 25 m \\
+		$\sigma_{1}^{2}$ & 0.1 \\
+		$\sigma_{2}^{2}$ & 0.8 \\
+	\end{tabular}
+	
+	\caption{Parameters to feed the mobility model.}
+	\label{tbl:mobility}
+\end{table}
+
+
+%
+Although we check that the initial network is connected,  we cannot guarantee the connectivity for all the duration of the experiment.
+%
+We think this does not affect the experiments because all protocols are evaluated under the same conditions.
+
 
 \smallskip
 \noindent
@@ -128,29 +164,34 @@ The total simulation time is then $10 + {\delta t} \times M$, where ${\delta t}$
 %\subsection*{Algorithm-specific parameters}
 The behavior of each protocol depends on its parameters, for which we favor values previously reported in the literature.
 %
-For instance, we use 0.5s as the \emph{hello time} for \emph{MPR},  \emph{ProbFlood} and \emph{CDS-based}.
+For instance, we use 1.5s as the \emph{hello time} for \emph{MPR}.
 %
-In the case of \emph{ABBA}, we use 0.3s as the maximum waiting time.
+Finally, In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiting time.
 %
-Finally, for \emph{ProbFlood} we use $k=15$ and $\sigma=1$.
 
-\er{%
-Suggested outline for the section:
-\begin{itemize}
-	\item objectives of the evaluation
-	\item simulation environment:
-	\begin{itemize}
-		\item simulator
-		\item energy model
-		\item MAC layer
-		\item other models if applicable
-	\end{itemize}
-	\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
-	\item description of the evaluation metrics
-	\item evaluation should compare
-	\begin{itemize}
-		\item performance with a single protocol (distinguishing nodes in the different regions)
-		\item performance with the different adaptation strategies (also distinguishing nodes)
-	\end{itemize}
-	\item discussion
-\end{itemize}}
+\subsection{Comparison with base protocols}
+
+\begin{figure*}[ht]
+	\begin{center}
+		\includegraphics[page=3, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Coverage per algorithm \label{fig:coverage}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\begin{center}
+		\includegraphics[page=1, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Power consumption per algorithm \label{fig:energy-consumption}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\begin{center}
+		\includegraphics[page=5, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Delay time per algorithm \label{fig:delay-time}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure*}
+
