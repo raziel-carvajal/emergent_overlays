@@ -56,7 +56,7 @@ Afterwards, we discuss the results of our experiments and draw conclusions to an
 \subsection{Simulation Environment}
 \labsection{simulation-env}
 
-Our experiments are inspired by the scenario of a crowd of humans carrying portable communication devices (e.g., phones) in an area with no infrastructure connectivity.
+Our experiments are inspired by the scenario of a crowd of users carrying portable communication devices (e.g., smartphones) in an area with no infrastructure connectivity.
 %
 In this area, there are several points of interest where people tend to stay.
 %
@@ -69,6 +69,8 @@ The dissemination of information from one individual to all the others is critic
 Our evaluation of broadcast algorithms for MANETs is mainly driven by two factors: \emph{network density} and \emph{nodes mobility}.
 %
 We describe in the following the parameters used in our study.
+
+\y{maybe a note about we assume normal wireless range with no irregular attenuation or environmental interference}
 
 \smallskip
 \noindent
@@ -85,9 +87,7 @@ In addition, it contains models for the mobility of nodes and for energy consump
 \textbf{Energy Model.}
 This metric depends on the wireless communication chip used.
 %
-We model power consumption using the specifications of a commercial chip found in modern mobile devices.
-%
-We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
+We model power consumption using the specifications of Broadcom BCM4329~\cite{BCM4329}, a commercial chip commonly found in modern mobile devices and which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
 
 \begin{table}[ht]
 	\footnotesize
@@ -168,19 +168,19 @@ The exact configuration we use for each parameter is shown in~\reftab{mobility}.
 		\textbf{Parameter} & \textbf{Value} \\
 		\midrule
 		Nodes  & 500 \\
-		Number of PoI & 4 \\
+		Number of PoIs & 4 \\
 		Radio that defines vecinity of PoI  & 25 m \\
 		$\sigma_{1}^{2}$ & 0.1 \\
 		$\sigma_{2}^{2}$ & 0.8 \\
 	\end{tabular}
 	
-	\caption{Parameters to feed the mobility model.}
+	\caption{Parameters of the mobility model.}
 	\labtab{mobility}
 \end{table}
 
 
 %
-Although we check that the initial network is connected,  we cannot guarantee the connectivity for all the duration of the experiment.
+Although we check that the initial network is connected, we cannot guarantee connectivity for the whole duration of the experiment. \y{connectivity between whom and whom?} 
 %
 We think this does not affect the experiments because all protocols are evaluated under the same conditions.
 
@@ -251,7 +251,10 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 
 \subsection{Comparison with base protocols}
 
-\inti{The plots are imposible to read. I must improve them, will do that tonight}
+\inti{The plots are impossible to read. I must improve them, will do that tonight}
+\y{in \reffigure{coverage}: if the sessions are not time-based sequence, then there is no need to show it in a series. you could just summarise by box plot, violin plot, CDF, etc. pick your favourite. or am i mis-understanding it?}
+\y{use dashed lines (\texttt{linetype} in R aes())}
+\y{also, remove the facet from all graphs, showing `Density 0'}
 
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
 %
@@ -281,21 +284,22 @@ Indeed, although in a few broadcast session the \textit{local} policy behaves be
 The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
 %
 Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
-we are not measuring the cost of using a GPS as required by this protocol.
+we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that the consumption due to the GPS\cite{Carroll:2010:APC:1855840.1855861}. For instance, in this scenario it will amount to 2.83 Joules per node.
+Previous work has shown that the consumption due to GPS use is non-trivial\cite{Carroll:2010:APC:1855840.1855861}. For instance, in this scenario it will amount to 2.83 Joules per node.\y{is this an average figure? if yes, say so}
 %
 Next in the line are our adaptive approaches.
 %
 They both have a similar performance that is only slightly higher for \textit{SWSP} because, in our implementation, it requires some additional messages from nodes using \textit{flooding} to nodes with \textit{MPR}.
 %
-Very close to the adaptive approaches is \textit{MPR}.
+Very close behind our adaptive approaches is \textit{MPR}.
+\y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
 However, as we already discussed it coverage is less than in other mechanisms.
 %
-Finally, \textit{flooding} consumes more energy than other approaches because nodes always retransmit messages.
+Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmiting messages.
 %
-As conclusion, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with a better coverage. 
+In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with better coverage. 
 
 
 \begin{figure*}[ht]
