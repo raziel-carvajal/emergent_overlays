@@ -242,15 +242,17 @@
 				\If{ $\MapT[\MsgId] \neq \bot$ }{
 					$\MapT[\MsgId] \gets \bot$ \tcp*[1]{cancel timer}
 				}
-				$\AlgoSend(\Ms)$
-				$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+				$\MsgPos \gets \GetPo()$ \;
+				$\AlgoSend(\Ms)$ \;
+				$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
 			}{
 				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
 				$\MapT[\MsgId].\RemTime \gets \Timeout(\MsgPos)$ \;
 				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
 				\BlockOfMapTimerExpires{
-					$\AlgoSend(\Ms)$
-					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					$\MsgPos \gets \GetPo()$ \;
+					$\AlgoSend(\Ms)$ \;
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
 				}
 			}
 		}
