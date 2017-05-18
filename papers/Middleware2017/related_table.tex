@@ -1,6 +1,15 @@
 %!TEX root = main.tex
 
-\newcommand*\rot{\rotatebox{90}}
+%\er{comments on the table:
+%\begin{itemize}
+	%	\item I would suggest using consistently the check and cross marks for positive/negative things. Here, in the first col. you want to emphasize that all other works require the knowledge of 1-hop neighbors. But the ticks may appear as something 'positive'.
+	%I would replace "Mechanism" on top by "Requirements", and use categories names that emphasize that these are not good things.
+	%\item I do not know what you mean by deterministic decisions; I do not think we are deterministic either (unless I am misled on the use of this term).
+	%\item The table can easily fit on one col. I can help with this (later)
+%\end{itemize}
+%}
+
+\newcommand*\rot{\rotatebox{45}}
 
 %\newcommand{\YES}{{\scriptsize $\surd$ }\xspace}
 \newcommand{\YES}{{\scriptsize \ding{51}}\xspace}
@@ -15,30 +24,30 @@
 \footnotesize
 \centering
 
-\newcolumntype{A}{ >{\raggedright} m{0.20\linewidth} }
-\newcolumntype{C}{ >{\centering\arraybackslash} p{0.11\linewidth} }
+\newcolumntype{A}{ >{\raggedright} m{0.15\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} p{0.05\linewidth} }
 %\newcolumntype{D}{ >{\centering\arraybackslash} p{0.11\linewidth} }
 \newcolumntype{E}{ >{\centering\arraybackslash} p{0.12\linewidth} }
 %\newcolumntype{F}{ >{\centering\arraybackslash} p{0.12\linewidth} }
 
-\begin{tabular}{ACCCCCC}
+\begin{tabular}{ACCCCCCCCC}
 
 \toprule
 
-& \multicolumn{6}{c}{Mechanism} \\
-\cline{2-7}\\
+& \multicolumn{7}{c}{Requirements} \\
+\cline{2-10}\\
 
-Algorithm & \rot{One-hop neighbour} & \rot{Two-hop neighbour} & \rot{\shortstack[l]{No need for periodic\\control messages}} & \rot{\shortstack[l]{No need to piggyback\\control messages}} & \rot{Use of thresholds} & \rot{Deterministic decision} \\
+Algorithm & \rot{\shortstack[l]{No need for\\One-hop neighbor}} & \rot{\shortstack[l]{No need for\\Two-hop neighbor}} & \rot{\shortstack[l]{No need for periodic\\control messages}} & \rot{\shortstack[l]{Piggyback\\control messages}} & \rot{Use of thresholds} & \rot{Stochastic decision} & \rot{Source-independent}  & \rot{\shortstack[l]{Allowing Switch\\Protocol}} &\rot{\shortstack[l]{Full coverage\\(>95\%)}}\\
 
 \midrule
 
-{\scriptsize Hypergossiping~\cite{hypergossiping} } & \YES & \NO & \NO & \NO & \YES & \YES  \\ \hline
-{\scriptsize DPR~\cite{Zhang2005} } & \YES & \YES & \YES & \YES & \YES & \NO  \\ \hline
-{\scriptsize Viswanath and Obraczka~\cite{Viswanath02anadaptive} } & \YES & \NO & \NO & \YES & \YES & \YES  \\ \hline
-{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \YES & \NO & \NO & \YES & \NO & \NO  \\ \hline
-{\scriptsize Cartigny and Simplot~\cite{ProbFlood} } & \YES & \NO & \NO & \YES & \YES & \NO  \\ \hline
-{\scriptsize Xu and Gerla~\cite{Kaixin2002} } & \YES & \YES & \NO & \NO & \YES & \YES  \\ \hline
-{\scriptsize Our approach } & \NO & \NO & \YES & \YES & \YES & \YES  \\ 
+{\scriptsize Hypergossiping~\cite{hypergossiping} } & \NO & \YES & \NO & \YES & \YES & \YES & \YES & \NO & \NO\\ \hline
+{\scriptsize DPR~\cite{Zhang2005} } & \NO & \NO & \YES & \NO & \NO & \NO & \YES & \NO & \NO \\ \hline
+{\scriptsize Viswanath and Obraczka~\cite{Viswanath02anadaptive} } & \NO & \YES & \NO & \NO & \YES & \YES & \NO & \NO & \NO \\ \hline
+{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \NO & \YES & \NO & \NO & \NO & \NO & \NO & \NO & \YES \\ \hline
+{\scriptsize Cartigny and Simplot~\cite{ProbFlood} } & \NO & \YES & \NO & \NO & \YES & \NO & \NO & \NO & \NO \\ \hline
+{\scriptsize Xu and Gerla~\cite{Kaixin2002} } & \NO & \NO & \NO & \YES & \YES & \YES & \YES & \NO & \YES \\ \hline
+{\scriptsize Our approach } & \YES & \YES & \YES & \YES & \YES & \YES & \YES & \YES & \YES\\ 
 
 %Optimized broadcast protocol for sensor networks \\
 
