@@ -58,8 +58,8 @@ Zhang et al.~\cite{Zhang2005} propose an approach called Dynamic Probabilistic R
 %\er{controlled flooding?}
 Each node has a probability $P$ to retransmit an incoming message depending on its local density. 
 %Each node contains \er{computes?} a probabilistic P variable \er{why a probabilistic variables? why not say "each node has a probability p to retransmit an incoming message."} depending on its local density.
-Instead of using periodic control messages to determine neighbors, every node piggybacks the set of its local neighbors to the broadcast message. 
-This information is used by the receiving nodes to determine their own local density, which will be used to determine whether the network is sparse or dense. 
+The protocol does not require periodic control messages in order to collect neighborhood information, but piggybacks this information on broadcast messages instead.
+The information piggybacked is used by the receiving nodes to determine their own local density, which will be used to determine whether the network is sparse or dense. 
 If the network is deemed to be sparse, the node will always retransmit the message. 
 However, if the node is in a dense network, the probability $P$ to retransmit a broadcast message will be based on the density of the local neighbors as well as a cumulative amount of neighbor mobile nodes. 
 \er{do they use threshold for this and how do they set them?}

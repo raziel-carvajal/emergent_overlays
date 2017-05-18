@@ -3,6 +3,17 @@
 \section{Adaptation policies}
 \labsection{policies}
 
+In this section, we present the adaptation policies used in \refsection{evaluation}.
+As alternative of using periodic control messages, the adaptation policies proposed utilize a mechanism where each node saves the MAC address of the sender to its own local neighbor list each time a message is received, and it also attaches a timer to the new MAC added.
+When the node receives a message using a MAC that is already in its neighbor list, the timer associated to that MAC is restarted.
+If a MAC timer expires, the MAC will be deleted from the neighbor list.
+
+As a result, when an adaptation policy request to a node its local density, the node will use its neighbor list to know how many nodes are in its neighborhood.
+As it has been demonstrated in~\cite{DensityMobDrivenEval}, the node density is a significant factor to decide which protocol is the most suitable.
+In this paper, we defined a threshold to conclude which protocol will be more adequate.
+In case of the node has more than 15 neighbor nodes, then the most suitable protocol to use will be flooding. Otherwise, it will be MPR.
+This local estimation density has been used for testing purposes, nevertheless, in future work, it might be redefined if necessary.
+
 \input{two_phase_collective_policy_algo}
 
 
