@@ -35,22 +35,22 @@ We need to guarantee that Algorithm~\ref{alg:adaptation_mechanism} does not drop
 %
 This potential loss of messages could take place only in line~\ref{alg:adaptation_mechanism:handle} or ~\ref{alg:adaptation_mechanism:emit} of Algorithm~\ref{alg:adaptation_mechanism}.
 %
-We avoid the case where there is a call of function $\AlgoHandle(\Ms)$ (line~\ref{alg:adaptation_mechanism:handle}, Algorithm~\ref{alg:adaptation_mechanism}), because our adaptation mechanism do not interfere with the way any protocol operates.
+We avoid the case where there is a call of function $\AlgoHandle(\Ms)$ (line~\ref{alg:adaptation_mechanism:handle}, Algorithm~\ref{alg:adaptation_mechanism}), because our adaptation mechanism does not interfere with the way any protocol operates.
 %
 Thus, we offer a proof of lemma~\ref{lemma:adapt_mech} considering the case where the message translation take place (line~\ref{alg:adaptation_mechanism:emit}, Algorithm~\ref{alg:adaptation_mechanism}), as follows:
 
 \textbf{Proof.}
-Let be $M_{p_{i}}$ a message that was successfully received by node $N$ for the first time, but its translation into message $M_{p_{j}}$ was not forwarded.
+Let $M_{p_{i}}$ be a message that was successfully received by node $N$ for the first time, but its translation into message $M_{p_{j}}$ was not forwarded.
 %
 Given that we want to validate the message translation procedure, not unexpectedly, protocol $p_{j}$ is in execution on node $N$. 
 %
-We follow that the condition in line~\ref{alg:adaptation_mechanism:eval_ids} of Algorithm~\ref{alg:adaptation_mechanism} is not met because $p_{i} \neq p_{j}$ and a timer $T$ with duration \AdaptTimer starts (line~\ref{alg:adaptation_mechanism:set_timer}).
+We note that the condition in line~\ref{alg:adaptation_mechanism:eval_ids} of Algorithm~\ref{alg:adaptation_mechanism} is not met because $p_{i} \neq p_{j}$, and a timer $T$ with duration \AdaptTimer starts (line~\ref{alg:adaptation_mechanism:set_timer}).
 %
-Eventually, $T$ will expire to obtain $M_{p_{j}}$ from message $M_{p_{i}}$, a call of function $\AlgoEmit()$ have place and $M_{p_{j}}$ is forwarded (line~\ref{alg:adaptation_mechanism:emit}).
+Eventually, $T$ will expire to obtain $M_{p_{j}}$ from message $M_{p_{i}}$, a call of function $\AlgoEmit()$ has taken place and $M_{p_{j}}$ is forwarded (line~\ref{alg:adaptation_mechanism:emit}).
 %
-We then reach a contradiction, because our first assumption was that the retransmission of $M_{p_{j}}$ didn't take place. We then conclude that such a message $M_{p_{j}}$ does not exist$\qed$.
+We then reach a contradiction, because our first assumption was that the retransmission of $M_{p_{j}}$ did not take place. We then conclude that such a message $M_{p_{j}}$ does not exist. $\blacksquare$
 
-In Section~\ref{} we analyze to which extent the policies of retransmission from broadcast protocols have an impact in network coverage.
+In Section~\ref{} we analyze the extent to which the policies of retransmission from broadcast protocols have an impact on network coverage.
 
 \begin{figure}
 \centering
