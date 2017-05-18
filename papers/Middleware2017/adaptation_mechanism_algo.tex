@@ -6,8 +6,8 @@
 	\footnotesize
 	\DontPrintSemicolon
 	
-	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{wireless send to all nodes in range}
-	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when message received}
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
 
 \caption{\labalg{network_api}Network layer API}
 \end{algorithm}
@@ -19,8 +19,8 @@
 	\DontPrintSemicolon
 
 	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
-	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate new broadcast}
-	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
+	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate a new broadcast}
+	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle an incoming broadcast}
 
 \caption{\labalg{protocol_api}Broadcast protocol API}
 \end{algorithm}
@@ -30,10 +30,10 @@
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
-	\raziel{implementation detail: in text mention that the set "delivered" must be clean periodicalle to avoid collecting an $\infty$ number of delivered messages.} \;
+	\raziel{implementation detail: in text mention that the set "delivered" must be cleaned periodically to avoid collecting an $\infty$ number of delivered messages.} \;
 	\BlockOfVar{
 		\FloodMode \tcp*[1]{type of dissemination to perform}
-		\Delivered \tcp*[1]{messages already delivered to application}
+		\Delivered \tcp*[1]{log of messages delivered to application}
 		\BlockOfFloodCounter{
 			\MapC[] \tcp*[1]{map of counters}
 			\BlockOfMapAttributes{
