@@ -161,17 +161,27 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 
   caption <- "Maximum delay time"
 
-  p <- ggplot( data, aes(dat, ecdf, colour = alg) ) +
-      facet_grid(. ~ density) +
+
+  # p <- ggplot( data, aes(dat, ecdf, colour = alg) ) +
+  p <- ggplot( data ) +
+      geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
       theme(legend.position="top", text=element_text(size=18)) +
-      xlab("Time (ms)") +
-      (if (print.titles)
- 		   labs(title=caption, colour="Algorithms")
+      xlab("Time (ms)") + ylab("ECDF") +
+      (if (!print.titles)
+ 		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
       else
-        labs(colour="Algorithms")
+        labs(colour="Algorithms", linetype="Algorithms")
       ) +
-      get.plot.theme.style() +
-      geom_step()
+      get.plot.theme.style() #+
+
+  N = length(unique(data$density))
+  if (N > 1) {
+    p <- p + facet_grid(. ~ density)
+  }
+
+  if (!print.titles) {
+      p <- p + scale_colour_grey(start = 0.3, end = .85)
+  }
 
   print(p)
 }
@@ -207,12 +217,12 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
     p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg))
   }
 
-  p <- p + facet_grid(. ~ density) +
+  p <- p +
 		 ylab(ylabel) +
     #  xlab("Algorithm") +
     #  theme(legend.position="none") +
      theme(legend.position="top", text=element_text(size=18)) +
-     (if (print.titles)
+     (if (!print.titles)
       #  labs(title=caption, x=NULL)
        labs(title=caption, fill="Algorithms", shape="Algorithms")
      else
@@ -223,9 +233,15 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
      theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
-    if (!print.titles) {
-        p <- p + scale_fill_grey(start = 0.3, end = .85)
-    }
+
+  N = length(unique(data$density))
+  if (N > 1) {
+    p <- p + facet_grid(. ~ density)
+  }
+
+  if (!print.titles) {
+      p <- p + scale_fill_grey(start = 0.3, end = .85)
+  }
 	print(p)
 }
 
@@ -251,22 +267,33 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			)
 		})
 
-		do.call("rbind", dd)
+    dd <- unname(dd)
+	  data <- do.call("rbind", dd)
+
+    data <- arrange(data, density, alg, dat)
+	  data.ecdf <- ddply(data, .(alg), transform, ecdf=ecdf(dat)(dat) )
+    data.ecdf
 	})
 
 	data <- do.call("rbind", data.list)
 
+  N = length(unique(data$density))
+
 	p <- ggplot(data) +
-		 geom_line(aes(x=idx, y=dat, colour=alg)) +
-		 facet_grid(. ~ density) +
+		 geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
+    #  geom_point(aes(x=idx, y=dat, shape=alg, colour=alg), size = 2) +
 		 theme(legend.position="top", text=element_text(size=18)) +
-		 ylab(ylabel) + xlab("Broadcast Session") +
-     (if (print.titles)
-		   labs(title=caption, colour="Algorithms")
+		 ylab("ECDF") + xlab(ylabel) +
+     (if (!print.titles)
+		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
      else
-       labs(colour="Algorithms")
+       labs(colour="Algorithms", linetype="Algorithms")
      ) +
      get.plot.theme.style()
+
+     if (N > 1) {
+       p <- p + facet_grid(. ~ density)
+     }
 
      if (!print.titles) {
          p <- p + scale_colour_grey(start = 0.3, end = .85)
@@ -325,7 +352,7 @@ plot.saved.rebroadcasts <- function(df, algos) {
   caption <- "% of Saved Rebroadcast"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=saved.rebroadcasts, colour=alg), size=1.2) +
-         geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg), size = 4) +        # Large points
+     geom_point(aes(x=density, y=saved.rebroadcasts, shape=alg, colour=alg), size = 4) +        # Large points
 		 theme(legend.position="top", text=element_text(size=17)) +
 		 ylab(ylabel) + xlab("Density") +
          (if (print.titles)
