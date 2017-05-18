@@ -251,7 +251,24 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 
 \subsection{Comparison with base protocols}
 
+\inti{The plots are imposible to read. I must improve them, will do that tonight}
+
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
+%
+In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR} and \textit{simple flooding}.
+%
+The first thing to notice is that this network is often disconnected, for that reason the coverage is less than 100\% for many broadcast sessions.
+%
+The second interesting point is that our adaptive solutions outperform both \textit{ABBA} and \textit{MPR}.
+%
+In fact, the adaptive approach often follows the same trend as \textit{flooding}.
+%
+However, this pattern does not occur during two ranges of broadcast sessions: before session 50, and short after session 100.
+%
+In both cases, this happens because some nodes have switched from \textit{flooding} to \textit{MPR}, but \textit{MPR} is still warming up and the node is not acting a relay when it should be doing so.
+%
+Finally, the adaptation policy has little effect in terms of coverage.
+Indeed, although in a few broadcast session the \textit{local} policy behaves better than \textit{SWSP}, the difference is negligible. 
 
 \begin{figure*}[ht]
 	\begin{center}
