@@ -255,7 +255,7 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
 %
-In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR} and \textit{simple flooding}.
+In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution.
 %
 The first thing to notice is that this network is often disconnected, for that reason the coverage is less than 100\% for many broadcast sessions.
 %
@@ -278,6 +278,26 @@ Indeed, although in a few broadcast session the \textit{local} policy behaves be
 	% \vspace*{-0.2cm}
 \end{figure*}
 
+The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
+%
+Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
+we are not measuring the cost of using a GPS as required by this protocol.
+%
+Previous work has shown that the consumption due to the GPS\cite{Carroll:2010:APC:1855840.1855861}. For instance, in this scenario it will amount to 2.83 Joules per node.
+%
+Next in the line are our adaptive approaches.
+%
+They both have a similar performance that is only slightly higher for \textit{SWSP} because, in our implementation, it requires some additional messages from nodes using \textit{flooding} to nodes with \textit{MPR}.
+%
+Very close to the adaptive approaches is \textit{MPR}.
+%
+However, as we already discussed it coverage is less than in other mechanisms.
+%
+Finally, \textit{flooding} consumes more energy than other approaches because nodes always retransmit messages.
+%
+As conclusion, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with a better coverage. 
+
+
 \begin{figure*}[ht]
 	\begin{center}
 		\includegraphics[page=1, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
@@ -295,3 +315,5 @@ Indeed, although in a few broadcast session the \textit{local} policy behaves be
 \end{figure*}
 
 \subsection{Discussion}
+
+\inti{Answer research questions based on the results}
