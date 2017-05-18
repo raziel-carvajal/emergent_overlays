@@ -198,7 +198,7 @@ class RandomWaypoint(object):
 
 
 class HeterogeneousRandomWalk(object):
-    def __init__(self, mapW, mapH, NR_Nodes, NR_Circles, Disk_Radius=30, Variance1_Circle=1, Variance2=2, ConnectivityRange=20):
+    def __init__(self, mapW, mapH, NR_Nodes, NR_Circles, Disk_Radius=25, Variance1_Circle=1, Variance2=2, ConnectivityRange=20):
         self.mapW = mapW
         self.mapH = mapH
         self.N = NR_Nodes

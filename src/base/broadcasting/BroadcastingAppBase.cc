@@ -183,7 +183,7 @@ BroadcastingAppBase::BroadcastingAppBase() {
   double
   BroadcastingAppBase::computeAdaptTimeout ()
   {
-    return uniform(0.1, adaptationMax);
+    return uniform(0.05, adaptationMax);
   }
 
   bool

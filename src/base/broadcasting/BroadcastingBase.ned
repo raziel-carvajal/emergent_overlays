@@ -46,7 +46,7 @@ simple BroadcastingBase
         xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
         // Adaptation parameters
-        double adaptationMax @unit(s) = default(0.15s);
+        double adaptationMax @unit(s) = default(0.1s);
         bool withAdaptation = default(false);
         string protocolId = default("");
         int nr_max_custom_officers = default(1);
