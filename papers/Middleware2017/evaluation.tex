@@ -193,7 +193,18 @@ The behavior of each protocol depends on its parameters, for which we favor valu
 %
 For instance, we use 1.5s as the \emph{hello time} for \emph{MPR}.
 %
-Finally, In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiting time.
+In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiting time.
+%
+
+For adaptive approaches, we only allow switching between two protocols.
+%
+At the beginning of the simulation, each nodes is executing \textit{simple flooding}.
+%
+Afterwards, a node is free to change its protocol based on some policy.
+%
+However, it can only change back and forth between \textit{simple flooding} and \textit{MPR}.
+%
+We are selecting these two algorithms based on previous studies that show their benefit in the scenarios we are considering~\cite{DensityMobDrivenEval}.  
 %
 
 \subsection{Evaluation metrics}
