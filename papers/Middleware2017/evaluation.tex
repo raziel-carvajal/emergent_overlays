@@ -169,11 +169,53 @@ For instance, we use 1.5s as the \emph{hello time} for \emph{MPR}.
 Finally, In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiting time.
 %
 
+\subsection{Evaluation metrics}
+
+To properly compare our approach against previous solutions, we present the results of our experiments in terms of a set of well-established metrics:
+
+
+\noindent $\triangleright$
+\textbf{Coverage} --
+the percentage of nodes that successfully receive a broadcast message at least once.
+%
+Since we are executing many broadcast session, we are interested in the evolution of this metric over time.
+
+%
+\noindent $\triangleright$
+\textbf{Saved Rebroadcasts (SRE)} --
+the number of forwarding we avoid by using a given algorithm instead of \emph{simple flooding}.
+%
+To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
+%
+Since in our experiments we are disseminating many messages, we compute the mean \emph{SRE} and use it as metric for our comparison study.
+%
+This metric is useful to assess the performance of algorithms in terms of both network and energy usage.
+
+%\noindent $\triangleright$
+%\textbf{Duplicate messages} --
+%the number of times one broadcast message is received again after its first reception.
+%
+
+
+\noindent $\triangleright$
+\textbf{Broadcast time} --
+the time to disseminate a message with a Coverage of 100\%.
+%
+We are interested in knowing how long does it take to deliver a message because this helps to understand what kind of use cases can be solved using a given algorithm.
+%
+For instance, some applications can tolerate high-latencies while others need instead response.
+
+
+% 
+\noindent $\triangleright$
+\textbf{Energy consumption} --
+the energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
+
 \subsection{Comparison with base protocols}
 
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=3, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\includegraphics[page=3, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Coverage per algorithm \label{fig:coverage}}
 	\end{center}
 	% \vspace*{-0.2cm}
@@ -181,7 +223,7 @@ Finally, In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiti
 
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=1, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\includegraphics[page=1, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Power consumption per algorithm \label{fig:energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
@@ -189,9 +231,10 @@ Finally, In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiti
 
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=5, scale=0.60, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\includegraphics[page=5, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Delay time per algorithm \label{fig:delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
 
+\subsection{Discussion}
