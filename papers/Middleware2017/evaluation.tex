@@ -3,6 +3,137 @@
 \section{Evaluation}
 \labsection{evaluation}
 
+\subsection{Objectives}
+
+\subsection{Simulation Environment}
+\labsection{simulation-env}
+
+Our experiments are inspired by the scenario of a crowd of humans carrying portable communication devices (e.g., phones) in an area with no infrastructure connectivity.
+%
+The dissemination of information from one individual to all the others is critical, and uses ad-hoc connections between devices.
+%
+Our evaluation of broadcast algorithms for MANETs is mainly driven by two factors: \emph{network density} and \emph{nodes mobility}.
+%
+We describe in the following the parameters used in our study.
+
+\smallskip
+\noindent
+\textbf{Simulator.}
+We rely on OMNET++4.6/INET3.3, a simulation framework for the evaluation of networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
+%
+This tool provides a full implementation of the IEEE 802.11g standard.
+%
+In addition, it contains models for the mobility of nodes and for energy consumption.
+
+\smallskip
+\noindent
+\textbf{Communication Scenario.}
+%\subsection*{Communication Scenario}
+Simulated participants use their devices to broadcast messages without external coordination and may attempt to do so at nearly the same time.
+%
+We set our experiments to perform 200 broadcast messages.
+The frequency between broadcasts is $0.1$s.
+%
+The source of each message is randomly selected.
+%
+The content of each message is randomly generated, unique and with a length of 32~Bytes. 
+%
+%These two values allow us to evaluate the protocols under heavy and light network load.
+%
+
+\smallskip
+\noindent
+\textbf{Nodes Density.}
+%\subsection*{Nodes Density}
+We are interested in generating scenarios with different nodes densities.
+%
+%In particular, the density in the vicinity of each node must equal a given value plus/minus a threshold.
+%
+We consider three parameters: the transmission range (Tx), the map size and the number of nodes.
+%
+As shown in~\cite{Penrose2003}, the dependency between these parameters allows us to build networks with a given density, by using random geometric graphs.
+%
+In our experiments, all nodes have a Tx of 20~m.\footnote{Theoretically, IEEE 802.11 allows communication in a range between 20 and 140 meters, depending on the line of sight.
+	Previous empirical tests show that it can be between 20 and 30 m in indoor or crowded places~\cite{Garbinato2010}.}
+The number of nodes $N$ is fixed to 500. % , which is the mean value reported by previous studies on the size of manifestations in Western Europe~\cite{kriesi1995new}. %% ER useless.
+%
+To create a network with a given density, we set Tx and $N$ and compute the map size.
+%
+Then, we generate a laying on the map by using random geometric graphs.
+%
+We instantiate networks of 500 nodes each and set the densities to  {5,10, \dots, 40} nodes, a range of values that is frequently found in the literature.
+%
+This leads to a map size ranging from $125 \times 125$m to $354 \times 354$m.
+
+\smallskip
+\noindent
+\textbf{Mobility.}
+%\subsection*{Mobility}
+We use the \emph{truncated-levy walk} (LW) mobility model, as it characterizes well the mobility traces of humans carrying wireless devices~\cite{Rhee:2011}.
+%
+This model generates traces composed of frequent short walks and occasional rides to distant locations.
+%
+We define two scenarios: One without mobility (\emph{static}) and another with mobility (\emph{dynamic}) at a walking speed of $1.4$ $m/s$ -- based on an estimation of the preferred walking speed~\cite{Browning390}.
+%
+We generate the dynamic scenario starting from the static one and applying the mobility based on the model.
+We check that the network remains connected for the duration of the experiment, or discard the data and regenerate using a new random seed.
+
+\smallskip
+\noindent
+\textbf{Energy Settings.}
+This metric depends on the wireless communication chip used.
+%
+We model power consumption using the specifications of a commercial chip found in modern mobile devices.
+%
+We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Mode} & \textbf{Consumption} \\
+		
+		\midrule
+		%Off	  & nW & 57.6 \\
+		Sleep  & 648 nW \\
+		Receiver Listen & 244.8 mW \\
+		Receiver Active (RX) & 295.2 mW \\
+		Transmitter Active (TX) & 1206 mW \\
+	\end{tabular}
+	
+	\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
+	\label{tbl:wifi-chip}
+\end{table}
+
+%
+These values are used for the \emph{StateBasedEnergyConsumer} consumption model integrated with INET.
+
+To simulate this chip, we use the \emph{StateBasedEnergyConsumer} model provided by INET.
+%
+This model measures how many Joules were consumed based on the time the chip spends on each mode (as described in Table~\ref{tbl:wifi-chip}).
+
+\smallskip
+\noindent
+\textbf{Simulation time.}
+As mentioned in Section~\ref{sec:background}, some algorithms first need to build a topology.
+%
+To guarantee that the first broadcast message is properly handled by all protocols, we set an initial warm-up period of 5s, allowing CDS-based algorithms to perform this initial construction.
+%
+The total simulation time is then $10 + {\delta t} \times M$, where ${\delta t}$ is the interval between broadcast messages and $M$ is the number of scheduled messages.
+
+\smallskip
+\noindent
+\textbf{Algorithm-specific parameters.}
+%\subsection*{Algorithm-specific parameters}
+The behavior of each protocol depends on its parameters, for which we favor values previously reported in the literature.
+%
+For instance, we use 0.5s as the \emph{hello time} for \emph{MPR},  \emph{ProbFlood} and \emph{CDS-based}.
+%
+In the case of \emph{ABBA}, we use 0.3s as the maximum waiting time.
+%
+Finally, for \emph{ProbFlood} we use $k=15$ and $\sigma=1$.
+
 \er{%
 Suggested outline for the section:
 \begin{itemize}
