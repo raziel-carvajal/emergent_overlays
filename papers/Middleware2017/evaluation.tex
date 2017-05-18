@@ -22,9 +22,30 @@
 			\item performance with the different adaptation strategies (also distinguishing nodes)
 		\end{itemize}
 		\item discussion
-	\end{itemize}}
+	\end{itemize}
+}
 
-\subsection{Objectives}
+
+In~\refsection{mechanism}, we discuss a mechanism to support the communication of nodes using different dissemination algorithms.
+%
+Since this mechanism modifies the behavior of each node, we can expect some performance impact in comparison to previous approach.
+%
+Likewise, our approach requires the use of adaptation policies.
+%
+In~\refsection{policies} we have described different policies, but so far we have not considered their efficiency.
+%
+The objective of this section is to evaluate our approach under realistic conditions.
+%
+In particular, we are interested in finding answers to the following research questions:
+
+
+% TODO: find a proper way of doing this.
+\begin{enumerate}
+	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption and other metrics?
+	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
+	\item[\textit{RQ3}] How different adaptation policies affect the performance of our approach?
+	\item[\textit{RQ4}] What policy better captures the dynamic topology of the network?
+\end{enumerate}
 
 \subsection{Simulation Environment}
 \labsection{simulation-env}
@@ -78,13 +99,13 @@ We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the
 	\end{tabular}
 	
 	\caption{Power consumption per mode of the Broadcom BCM4329 Wi-Fi chip.}
-	\label{tbl:wifi-chip}
+	\labtab{wifi-chip}
 \end{table}
 
 %
 To simulate this chip, we use the \emph{StateBasedEnergyConsumer} model provided by INET.
 %
-This model measures how many Joules were consumed based on the time the chip spends on each consumtpion mode (as described in Table~\ref{tbl:wifi-chip}).
+This model measures how many Joules were consumed based on the time the chip spends on each consumption mode (as described in~\reftab{wifi-chip}).
 
 
 \smallskip
@@ -131,7 +152,7 @@ Depending on that, it selects the distribution to use to move the node.
 %
 Finally, the initial position of each node is selected using a uniform distribution. 
 %
-The exact configuration we use for each parameter is shown in Table~\ref{tbl:mobility}. 
+The exact configuration we use for each parameter is shown in~\reftab{mobility}. 
 
 \begin{table}[ht]
 	\footnotesize
@@ -148,7 +169,7 @@ The exact configuration we use for each parameter is shown in Table~\ref{tbl:mob
 	\end{tabular}
 	
 	\caption{Parameters to feed the mobility model.}
-	\label{tbl:mobility}
+	\labtab{mobility}
 \end{table}
 
 
@@ -216,7 +237,7 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 \begin{figure*}[ht]
 	\begin{center}
 		\includegraphics[page=3, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Coverage per algorithm \label{fig:coverage}}
+		\caption{Coverage per algorithm \labfigure{coverage}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
@@ -224,7 +245,7 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 \begin{figure*}[ht]
 	\begin{center}
 		\includegraphics[page=1, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Power consumption per algorithm \label{fig:energy-consumption}}
+		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
@@ -232,7 +253,7 @@ the energy consumed by nodes for the broadcast of all messages and, when applica
 \begin{figure*}[ht]
 	\begin{center}
 		\includegraphics[page=5, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Delay time per algorithm \label{fig:delay-time}}
+		\caption{Delay time per algorithm \labfigure{delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
