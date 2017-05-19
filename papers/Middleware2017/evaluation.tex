@@ -3,27 +3,27 @@
 \section{Evaluation}
 \labsection{evaluation}
 
-\er{%
-	Suggested outline for the section:
-	\begin{itemize}
-		\item objectives of the evaluation
-		\item simulation environment:
-		\begin{itemize}
-			\item simulator
-			\item energy model
-			\item MAC layer
-			\item other models if applicable
-		\end{itemize}
-		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
-		\item description of the evaluation metrics
-		\item evaluation should compare
-		\begin{itemize}
-			\item performance with a single protocol (distinguishing nodes in the different regions)
-			\item performance with the different adaptation strategies (also distinguishing nodes)
-		\end{itemize}
-		\item discussion
-	\end{itemize}
-}
+%\er{%
+%	Suggested outline for the section:
+%	\begin{itemize}
+%		\item objectives of the evaluation
+%		\item simulation environment:
+%		\begin{itemize}
+%			\item simulator
+%			\item energy model
+%			\item MAC layer
+%			\item other models if applicable
+%		\end{itemize}
+%		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
+%		\item description of the evaluation metrics
+%		\item evaluation should compare
+%		\begin{itemize}
+%			\item performance with a single protocol (distinguishing nodes in the different regions)
+%			\item performance with the different adaptation strategies (also distinguishing nodes)
+%		\end{itemize}
+%		\item discussion
+%	\end{itemize}
+%}
 
 
 In~\refsection{mechanism}, we have presented a mechanism to support the interoperability between nodes that use different dissemination algorithms.
@@ -39,7 +39,7 @@ In particular, we are interested in finding answers to the following research qu
 
 % TODO: find a proper way of doing this.
 \begin{enumerate}
-	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption and other metrics? \laurent{What are the other metrics?}
+	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast delay time and coverage?
 	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
 	\item[\textit{RQ3}] How different adaptation policies affect the performance of our approach?
 	\item[\textit{RQ4}] What policy better captures the dynamic topology of the network?
@@ -68,7 +68,6 @@ Our evaluation of broadcast algorithms for MANETs is mainly driven by two factor
 %
 We describe in the following the parameters used in our experiments.
 
-\y{maybe a note about we assume normal wireless range with no irregular attenuation or environmental interference}
 
 \paragraph{Simulator.}
 We rely on OMNET++4.6/INET3.3, a simulation framework for the evaluation of networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
@@ -118,6 +117,9 @@ During a broadcast session, a randomly selected node acts as a source and broadc
 %
 Each of the 200 messages is 32~bytes long and contains a unique identifier.
 %
+Moreover, we assume normal wireless communications range and no environmental interference.
+%
+The only reason to lost packets in the medium is due to collisions, which are handle by CSMA/CA protocol.
 
 \paragraph{Simulation time.}
 As mentioned in~\refsection{mechanism}, some algorithms need to build a topology.
@@ -167,7 +169,7 @@ During each step of the simulation, nodes move according to the group in which t
 
 
 %
-Although we check that the initial network is connected, we cannot guarantee connectivity for the whole duration of the experiment. \y{connectivity between whom and whom?} 
+Although we check that the initial network is connected, we cannot guarantee that all nodes are reachable for the whole duration of the experiment.
 %
 We argue that it does not affect the experiments because all protocols are evaluated under the same conditions.
 
@@ -217,7 +219,7 @@ This metric is useful to assess the performance of algorithms in terms of both n
 %
 
 
-\paragraph{Broadcast time.} 
+\paragraph{Broadcast delay time.} 
 The time to disseminate a message with a coverage of 100\%.
 %
 The broadcast time helps to understand which algorithm to use with an application.
@@ -230,11 +232,8 @@ For instance, some applications tolerate high-latencies while others need fast r
 The energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
 
 \subsection{Comparison with base protocols}
+\labsection{comparison-base-protocols}
 
-\inti{The plots are impossible to read. I must improve them, will do that tonight}
-\y{in \reffigure{coverage}: if the sessions are not time-based sequence, then there is no need to show it in a series. you could just summarise by box plot, violin plot, CDF, etc. pick your favourite. or am i mis-understanding it?}
-\y{use dashed lines (\texttt{linetype} in R aes())}
-\y{also, remove the facet from all graphs, showing `Density 0'}
 
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
 %
@@ -255,7 +254,7 @@ Indeed, although in a few broadcast session the \textit{local} policy behaves be
 
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=3, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\includegraphics[page=3, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Coverage per algorithm \labfigure{coverage}}
 	\end{center}
 	% \vspace*{-0.2cm}
@@ -266,7 +265,7 @@ The power consumption for the same experiments is depicted in~\reffigure{energy-
 Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
 we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that the consumption due to GPS use is non-trivial\cite{Carroll:2010:APC:1855840.1855861}. For instance, in this scenario it will amount to 2.83 Joules per node.\y{is this an average figure? if yes, say so}
+Previous work has shown that the consumption due to GPS use is non-trivial\cite{Carroll:2010:APC:1855840.1855861}. For instance, using the figures in the aforementioned study, in this scenario it could roughly amount to an average of 2.83 Joules per node.
 %
 Next in the line are our adaptive approaches.
 %
@@ -284,20 +283,78 @@ In summary, our adaptive mechanism and adaptive policies are able to behave simi
 
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=1, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
 
+
+As mentioned, another important metric in broadcast protocols is the \textit{broadcast delay time}.
+%
+In \reffigure{delay-time}, we show the \textit{ECDF} of this metric for different algorithms.
+%
+As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{delay time} as expected from their design.
+%
+In particular, all messages are disseminated in less than 100 ms.
+%
+\textit{ABBA}, on the other hand, requires more time to deliver the messages.
+%
+Although over 75\% of the messages are delivered in under 400 ms, there is a long tail showing that some of them can take as long as 800 ms.
+%
+The behavior of the adaptive approaches is similar to that of \textit{ABBA}.
+%
+This is indeed a poor performance; it is the consequence of the optimization discussed in \refalg{adaptation_mechanism} where nodes wait before retransmiting a message coming from a foreign protocol.
+%
+Notice that over 75\% of the messages are broadcast in less than half a second, like in using \textit{ABBA}.
+%
+Also worth noticing is that there are no differences between the two adaptation policies.
+
+
 \begin{figure*}[ht]
 	\begin{center}
-		\includegraphics[page=5, scale=0.50, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Delay time per algorithm \labfigure{delay-time}}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Broadcast Delay Time per algorithm \labfigure{delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure*}
 
 \subsection{Discussion}
+
+% TODO: Experiments: check cost of each glueing step
+% TODO: Experiments: test cost of using the wrong policiy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+
+Using the results shown in~\refsection{comparison-base-protocols}, we can answer research questions \textit{RQ2} and \textit{RQ3}.
+
+%
+Concretely, using our adaptive approaches instead of previous solutions can be beneficial in some scenarios with PoIs.
+%
+This answer the research question \textit{RQ2}.
+%
+In particular, \textit{flooding}, the only protocol with a slightly better coverage than our solutions, consumes more energy.
+%
+On the other hand, protocols such as \textit{MPR} that has low power consumption, fail in delivering a good coverage.
+%
+Likewise, \textit{ABBA} behaves quite poorly in terms of coverage; also in terms of energy usage if the GPS is considered.
+%
+
+Unfortunately, we have not found a conclusive answer to research question \textit{RQ3}.
+%
+That is, we cannot observe significant differences in the two adaptation policies we compare.
+%
+For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
+%
+Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast delay time}.
+%
+In conclusion, to the extent of our experiments, we are unable to identify differences.
+%
+More extensive experiments are required, probably including other policies like the one discussed in~\refalg{alg:policies:two_phase_collective_policy}.
+
+
+%
+It is worth noticing that the validity of these results is limited to the scenarios described in~\refsection{simulation-env}.
+%
+That is, scenarios where there are several PoIs in an area, people tend to stay in the PoIs, and them a few of them move between PoIs.
+  
 
 \inti{Answer research questions based on the results}
