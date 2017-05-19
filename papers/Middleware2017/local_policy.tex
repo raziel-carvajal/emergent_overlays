@@ -1,0 +1,8 @@
+\subsection{Local Policy}
+\labsection{policies:Local}
+
+Local Policy is an adaptation policy where the decision to switch the protocol is made locally and individually, by each node with no collective decision.
+Each node checks periodically its local density using its neighbor list and, in case there is a more suitable protocol according to its local density, then the node will switch its protocol; independently of the protocols used by its neighbors.
+This adaptation policy is presented in \refalg{LocaPolicy}.
+
+\input{local_policy_algo}
