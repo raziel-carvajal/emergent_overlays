@@ -23,8 +23,8 @@ other papers to consider:
 %At the end, they show the pros and cons of each broadcast algorithm for each situation.
 %Therefore, using these two papers, we create an adaptive-based broadcast algorithm for heterogeneous MANET's that allow different protocols to communicate among them without any modification.
 
-\y{need an opening statement/paragraph about the general state of the art in manet broadcasting}
-\er{this state of the art could also be in the introduction?}\y{both! with slight variations}
+%\y{need an opening statement/paragraph about the general state of the art in manet broadcasting}
+%\er{this state of the art could also be in the introduction?}\y{both! with slight variations}
 
 %\er{I would add a short overview of the different approaches to adaptation:
 %\begin{itemize}
@@ -61,10 +61,10 @@ Each node has a probability $P$ to retransmit an incoming message depending on i
 The protocol does not require periodic control messages in order to collect neighborhood information, but piggybacks this information on broadcast messages instead.
 The information piggybacked is used by the receiving nodes to determine their own local density, which will be used to determine whether the network is sparse or dense. 
 If the network is deemed to be sparse, the node will always retransmit the message. 
-However, if the node is in a dense network, the probability $P$ to retransmit a broadcast message will be based on the density of the local neighbors as well as a cumulative amount of neighbor mobile nodes. 
-\er{do they use threshold for this and how do they set them?}
-\vicent{No threshold is utilized. Instead, a mathematical formula is used to determine the probabilistic variable.}
-In addition, if a node receives a message containing the same list of neighbors as its local list, then the node will not broadcast the message. 
+However, if the node is in a dense network, $P$ will be calculated based on the density of the local neighbors as well as a cumulative amount of neighbor mobile nodes. 
+%\er{do they use threshold for this and how do they set them?}
+%\vicent{No threshold is utilized. Instead, a mathematical formula is used to determine the probabilistic variable.}
+If a node receives a message containing the same list of neighbors as its local list, then the node will not broadcast the message. 
 As a result, the necessity know in advance the number of neighbors in order to calculate $P$ adds some waiting time in estimating the local neighbor list.
 
 
@@ -78,7 +78,7 @@ The nodes send periodic control messages to keep track of their one-hop neighbor
 %The nodes periodically exchange HELLO messages \er{same as before} to keep track of their one-hop neighbours, adding to each HELLO message node speed and direction information. 
 Each node uses two different thresholds to switch among these flooding mechanisms depending on the control messages previously received. 
 Thresholds are modified based on the number of collisions. 
-Their algorithm achieve a coverage between 86\% and 90\%. 
+Their algorithm achieves a coverage between 86\% and 90\%, without a guarantee of full coverage. 
 %Each node has two thresholds (\texttt{low\_threshold} and \texttt{high\_threshold}) and it can modify these thresholds depending on the information received by the HELLO messages and their past history. 
 %If the current velocity of the node is higher than \texttt{high\_threshold}, the node switches to hyper flooding. 
 %Conversely, if node velocity is lower than \texttt{high\_threshold} but higher than \texttt{low\_threshold}, the node switches to plain flooding. 
@@ -90,10 +90,10 @@ Their algorithm achieve a coverage between 86\% and 90\%.
 %Otherwise, plain flooding is selected.
 %This adaptive broadcast algorithm is based on the mobility or the collisions amount.
 However, our proposal can adapt different kinds of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
-\er{%again a bit long, maybe we do not have to go into all details. 
-Do they have a guarantee that there will be full coverage even if the nodes use different protocols? Do they formalize this in one way or the other?}
-\vicent{They do not guarantee full coverage. They achieve a coverage about 90\% in the best case and 86\% in the worst case.
-They formalized "Packet delivery ratio", that means, the percentage of nodes that receive the broadcast message.}
+%\er{%again a bit long, maybe we do not have to go into all details. 
+%Do they have a guarantee that there will be full coverage even if the nodes use different protocols? Do they formalize this in one way or the other?}
+%\vicent{They do not guarantee full coverage. They achieve a coverage about 90\% in the best case and 86\% in the worst case.
+%They formalized "Packet delivery ratio", that means, the percentage of nodes that receive the broadcast message.}
 
 Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANETs called Smart-Flooding. 
 This mechanism utilizes the Shadowing Pattern~\cite{Dhoutaut2006}, a propagation model that is a realistic and probabilistic scheme based on outside monitored communications, together with an evolutionary algorithm created by the authors. 
@@ -115,8 +115,8 @@ The nodes, excluding backbone ones, can move among different backbone areas swit
 Therefore, when a broadcast message is sent, the backbone nodes send the broadcast message among them, and then among nodes in their respective cluster areas.
 \er{if I understand well this work, it does unicast to each cluster head using infrastructure communication, and then broadcast in each cluster. correct? If so, this is not really adaptive.}
 \vicent{In this paper, the cluster heads are moving as well. I think is adaptive because the nodes, that are not cluster heads, can change among the clusters and switch their protocol.}
-\y{synthesise and identify gaps in the above RW}
 
+\y{synthesise and identify gaps in the above RW}
 Compared to our research, our approach achieves full broadcast coverage permitting the network being used by different broadcast algorithms and also defines a switching mechanism that allows nodes of different broadcasting algorithms to communicate among themselves. 
 %Additionally, the work presented in this paper does not required to add HELLO or piggybacked messaging schemes to protocols. \er{again I would not be so categoric here. It does not require it but most advanced policies will need this eventually.}
 
