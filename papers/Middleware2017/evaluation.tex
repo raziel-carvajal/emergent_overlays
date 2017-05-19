@@ -42,7 +42,7 @@ In particular, we are interested in finding answers to the following research qu
 	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast latency, and coverage?
 	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
 	\item[\textit{RQ3}] How do different adaptation policies affect the performance of our adaptive approach?
-	\item[\textit{RQ4}] What policy better captures the dynamicity of a network topology?
+	\item[\textit{RQ4}] What adaptation policy better captures the dynamicity of a network topology?
 \end{enumerate}
 
 To answer these questions, we perform controlled experiments using a network simulator.
@@ -301,7 +301,7 @@ Although in a few broadcast sessions the \textit{local} policy behaves better th
 \begin{figure}[th]
 	\begin{center}
 		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
+		\caption{Power consumption per algorithm \y{per node??} \labfigure{energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure}
@@ -369,40 +369,40 @@ Also worth noticing is that there are no differences between the two adaptation 
 % TODO: Experiments: check cost of each glueing step
 % TODO: Experiments: test cost of using the wrong policy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
 
-The experiments in~\refsection{cost-adaption} answer the research question \textit{RQ1}. \inti{Say something smart here}
+We now reflect back on the research questions posed at the beginning of this section in light of the experiment results. 
 
+The experiments in~\refsection{cost-adaption} answer the research question \textit{RQ1}. 
+\inti{Say something smart here}
 
-Using the results shown in~\refsection{comparison-base-protocols}, we can answer research questions \textit{RQ2} and \textit{RQ3}.
-
+Using the results shown in~\refsection{comparison-base-protocols}, we can answer \textit{RQ2} and \textit{RQ3}. 
+Concretely, using our adaptive approaches instead of previous solutions can be beneficial in deployment scenarios with PoIs where overall coverage is significantly improved (\y{two fold?}). 
 %
-Concretely, using our adaptive approaches instead of previous solutions can be beneficial in some scenarios with PoIs.
+%This answer the research question \textit{RQ2}.
 %
-This answer the research question \textit{RQ2}.
+\textit{Flooding} is the only protocol offering better coverage, albeit only slightly, than our solution. However, it consumes more energy. 
 %
-In particular, \textit{flooding}, the only protocol with a slightly better coverage than our solutions, consumes more energy.
+On the other hand, the \textit{ABBA} and \textit{MPR} protocols offer lower power consumption but at the cost of notably diminished coverage.
 %
-On the other hand, protocols such as \textit{MPR} that has low power consumption, fail in delivering a good coverage.
-%
-Likewise, \textit{ABBA} behaves quite poorly in terms of coverage; also in terms of energy usage if the GPS is considered.
+%Likewise, \textit{ABBA} behaves quite poorly in terms of coverage; also in terms of energy usage if the GPS is considered.
 %
 
 Unfortunately, we have not found a conclusive answer to research question \textit{RQ3}.
 %
-That is, we cannot observe significant differences in the two adaptation policies we compare.
+That is, we cannot observe significant differences in the two adaptation policies we compare within the extent of our experiments.
 %
 For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
 %
 Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast latency}.
 %
-In conclusion, to the extent of our experiments, we are unable to identify differences.
+%In conclusion, to the extent of our experiments, we are unable to identify differences.
 %
-More extensive experiments are required, probably including other policies like the one discussed in~\refalg{alg:policies:two_phase_collective_policy}.
+More extensive experiments are required, probably including other policies. % like the one discussed in~\refalg{alg:policies:two_phase_collective_policy}.
 
 
 %
 It is worth noticing that the validity of these results is limited to the scenarios described in~\refsection{simulation-env}.
 %
-That is, scenarios where there are several PoIs in an area, people tend to stay in the PoIs, and them a few of them move between PoIs.
+That is, scenarios where there are several PoIs in an area, people tend to stay in the PoIs, and only a few move between PoIs. \y{i would actually explore this further, if possible. this will also allow us to have closure on RQ3}
   
 
-\inti{Answer research questions based on the results}
+%\inti{Answer research questions based on the results}
