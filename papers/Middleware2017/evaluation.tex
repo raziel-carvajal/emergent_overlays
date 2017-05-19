@@ -231,6 +231,41 @@ For instance, some applications tolerate high-latencies while others need fast r
 \paragraph{Energy consumption.}
 The energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
 
+\subsection{Cost of adaptation mechanisms}
+\labsection{cost-adaption}
+
+In this Section, we measure the cost of the mechanisms proposed in~\refsection{mechanism} to guarantee message dissemination across different base protocols.
+%
+In particular, we evaluate the cost in terms of power consumption and broadcast delay time for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
+
+To perform this experiments we use a simple network topology where there are 500 nodes and one PoI.
+%
+Half the nodes are located in the squared PoI (center of the map).
+%
+In this PoI, the average node density is 40 while it is 5 elsewhere.
+%
+Hence, we deploy \textit{MPR} in the PoI and \textit{simple flooding} outside.
+%
+In the experiments, no node is moving and the source of every message is a node executing \textit{simple flooding}.
+
+Figure \ref{missing} shows the power consumption for the three algorithms.
+%
+As expected,~\refalg{adaptation_mechanism_simple} is worst in this scenario because no optimization is applied.
+%
+On the other hand, ~\refalg{adaptation_mechanism} improves this metric.
+%
+As previously discussed, we need to use~\refalg{missing} to guarantee coverage; these experiments show that doing so comes at the cost of increasing energy consumption.
+
+In~\ref{also-missing}, the \textit{broadcast delay time} is depicted.
+%
+Observe that~\refalg{adaptation_mechanism_simple} generates no overhead; messages are delivered under 100 ms.
+%
+Likewise,~\refalg{missing} does not impact the delay time; hence, in principle we guarantee coverage without impacting the delay time.
+%
+Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the delay time.
+
+\inti{You may be wondering where are the plots. I am generating them right now}
+
 \subsection{Comparison with base protocols}
 \labsection{comparison-base-protocols}
 
@@ -322,6 +357,9 @@ Also worth noticing is that there are no differences between the two adaptation 
 
 % TODO: Experiments: check cost of each glueing step
 % TODO: Experiments: test cost of using the wrong policiy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+
+The experiments in~\refsection{cost-adaption} answer the research question \textit{RQ1}. \inti{Say something smart here}
+
 
 Using the results shown in~\refsection{comparison-base-protocols}, we can answer research questions \textit{RQ2} and \textit{RQ3}.
 
