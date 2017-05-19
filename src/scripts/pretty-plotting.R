@@ -174,7 +174,7 @@ plot.broadcasting.time2 <- function(df, densities, pal){
         labs(colour="", linetype="")
       ) +
       get.plot.theme.style() +
-      scale_fill_brewer(palette="Set1")
+      scale_fill_brewer(palette="Set1") + scale_color_brewer(palette="Set1")
 
   N = length(unique(data$density))
   if (N > 1) {
