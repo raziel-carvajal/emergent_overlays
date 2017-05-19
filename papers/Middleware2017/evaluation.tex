@@ -301,7 +301,7 @@ Although in a few broadcast sessions the \textit{local} policy behaves better th
 \begin{figure}[th]
 	\begin{center}
 		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Power consumption per algorithm \y{per node??} \labfigure{energy-consumption}}
+		\caption{Distribution of Power consumption per algorithm \labfigure{energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure}
@@ -314,6 +314,8 @@ Although \textit{ABBA} seems to outperform other approaches, it is worth noticin
 Previous work has shown that such power cost is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83J per node. 
 %
 As for \textit{MPR}, nodes using this protocol show a median power consumption of 0.072J.
+%
+The difference of \textit{MPR} with respect to our approaches is particularly pronounced because \textit{MPR} is  right-skewed (skewness of 0.21) while our approaches are left-skewed (at least -0.57).  
 %
 However, as we already discussed it coverage is less than in other mechanisms.
 %
