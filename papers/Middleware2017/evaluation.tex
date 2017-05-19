@@ -312,22 +312,23 @@ The power consumption for the same experiments is depicted in~\reffigure{energy-
 Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
 we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that such power consumption is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83 Joules per node. 
+Previous work has shown that such power consumption is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83J per node. 
 %
-Next in the line are our adaptive approaches.
+Next in line is \textit{MPR}.
 %
-They both exhibit similar power consumption: median 0.101J for \textit{local} and 0.098J for \textit{SWSP}.
+In suing this protocol, nodes show a median power consumption of 0.07J.
+%
+However, as we already discussed it coverage is less than in other mechanisms.
+%
+Our adaptive approaches exhibit similar power consumption: median 0.10J for \textit{local} and 0.098J for \textit{SWSP}.
 %
 The latter should be slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}, but in our experiments we could not observe this effect.
 %
 This can be attributed to a better selection of what nodes switch their protocol.
 %
-Very close to our adaptive approaches is \textit{MPR}.
 \y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
-However, as we already discussed it coverage is less than in other mechanisms.
-%
-Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmitting messages.
+Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmitting messages (with a median of 0.12J, 20\% more than our approaches).
 %
 In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with better coverage. 
 
