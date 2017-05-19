@@ -168,19 +168,20 @@ plot.broadcasting.time2 <- function(df, densities, pal){
       theme(legend.position="top", text=element_text(size=18)) +
       xlab("Time (ms)") + ylab("Cumulative Probability") +
       scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
-      (if (!print.titles)
- 		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
+      (if (print.titles)
+ 		   labs(title=caption, colour="", linetype="")
       else
-        labs(colour="Algorithms", linetype="Algorithms")
+        labs(colour="", linetype="")
       ) +
-      get.plot.theme.style() #+
+      get.plot.theme.style() +
+      scale_fill_brewer(palette="Set1")
 
   N = length(unique(data$density))
   if (N > 1) {
     p <- p + facet_grid(. ~ density)
   }
 
-  if (!print.titles) {
+  if (print.titles) {
       p <- p + scale_colour_grey(start = 0.3, end = .85)
   }
 
@@ -223,24 +224,25 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
     #  xlab("Algorithm") +
     #  theme(legend.position="none") +
      theme(legend.position="top", text=element_text(size=18)) +
-     (if (!print.titles)
+     (if (print.titles)
       #  labs(title=caption, x=NULL)
-       labs(title=caption, fill="Algorithms", shape="Algorithms")
+       labs(title=caption, fill="", shape="")
      else
-       labs(shape="Algorithms", fill="Algorithms")
+       labs(shape="", fill="")
      ) +
     #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
      get.plot.theme.style() +
      theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.ticks.x=element_blank()) + scale_colour_brewer(palette="Set1") +
+      scale_fill_brewer(palette="Set1")
 
   N = length(unique(data$density))
   if (N > 1) {
     p <- p + facet_grid(. ~ density)
   }
 
-  if (!print.titles) {
+  if (print.titles) {
       p <- p + scale_fill_grey(start = 0.3, end = .85)
   }
 	print(p)
@@ -286,18 +288,18 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 		 theme(legend.position="top", text=element_text(size=18)) +
 		 ylab("Cumulative Probability") + xlab(ylabel) +
 	   scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
-     (if (!print.titles)
-		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
+     (if (print.titles)
+		   labs(title=caption, colour="", linetype="")
      else
-       labs(colour="Algorithms", linetype="Algorithms")
+       labs(colour="", linetype="")
      ) +
-     get.plot.theme.style()
+     get.plot.theme.style() + scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 
      if (N > 1) {
        p <- p + facet_grid(. ~ density)
      }
 
-     if (!print.titles) {
+     if (print.titles) {
          p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
@@ -423,10 +425,10 @@ load.dataset.with.metadata <- function(path, filename, metadata, excluded.densit
   if (is.null(metadata)) {
     metadata <- extract.metadata(data, excluded.densities)
     nr.elements <- length(metadata$densities)
-    if (nr.elements < 3) {
-      nr.elements <- 3;
+    if (nr.elements < 2) {
+      nr.elements <- 2;
     }
-    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=3.5*nr.elements, height=4)
+    pdf(paste(path, "Pretty-Results.pdf", sep = ""), width=4*nr.elements, height=4)
   }
   l <- list(data, metadata)
   names(l) <- c("data", "metadata")
