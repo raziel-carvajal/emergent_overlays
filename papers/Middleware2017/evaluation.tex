@@ -3,27 +3,27 @@
 \section{Evaluation}
 \labsection{evaluation}
 
-\er{%
-	Suggested outline for the section:
-	\begin{itemize}
-		\item objectives of the evaluation
-		\item simulation environment:
-		\begin{itemize}
-			\item simulator
-			\item energy model
-			\item MAC layer
-			\item other models if applicable
-		\end{itemize}
-		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
-		\item description of the evaluation metrics
-		\item evaluation should compare
-		\begin{itemize}
-			\item performance with a single protocol (distinguishing nodes in the different regions)
-			\item performance with the different adaptation strategies (also distinguishing nodes)
-		\end{itemize}
-		\item discussion
-	\end{itemize}
-}
+%\er{%
+%	Suggested outline for the section:
+%	\begin{itemize}
+%		\item objectives of the evaluation
+%		\item simulation environment:
+%		\begin{itemize}
+%			\item simulator
+%			\item energy model
+%			\item MAC layer
+%			\item other models if applicable
+%		\end{itemize}
+%		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
+%		\item description of the evaluation metrics
+%		\item evaluation should compare
+%		\begin{itemize}
+%			\item performance with a single protocol (distinguishing nodes in the different regions)
+%			\item performance with the different adaptation strategies (also distinguishing nodes)
+%		\end{itemize}
+%		\item discussion
+%	\end{itemize}
+%}
 
 
 In~\refsection{mechanism}, we have presented a mechanism to support the interoperability between nodes that use different dissemination algorithms.
@@ -232,6 +232,7 @@ For instance, some applications tolerate high-latencies while others need fast r
 The energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
 
 \subsection{Comparison with base protocols}
+\labsection{comparison-base-protocols}
 
 
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
@@ -319,5 +320,41 @@ Also worth noticing is that there are no differences between the two adaptation 
 \end{figure*}
 
 \subsection{Discussion}
+
+% TODO: Experiments: check cost of each glueing step
+% TODO: Experiments: test cost of using the wrong policiy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+
+Using the results shown in~\refsection{comparison-base-protocols}, we can answer research questions \textit{RQ2} and \textit{RQ3}.
+
+%
+Concretely, using our adaptive approaches instead of previous solutions can be beneficial in some scenarios with PoIs.
+%
+This answer the research question \textit{RQ2}.
+%
+In particular, \textit{flooding}, the only protocol with a slightly better coverage than our solutions, consumes more energy.
+%
+On the other hand, protocols such as \textit{MPR} that has low power consumption, fail in delivering a good coverage.
+%
+Likewise, \textit{ABBA} behaves quite poorly in terms of coverage; also in terms of energy usage if the GPS is considered.
+%
+
+Unfortunately, we have not found a conclusive answer to research question \textit{RQ3}.
+%
+That is, we cannot observe significant differences in the two adaptation policies we compare.
+%
+For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
+%
+Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast delay time}.
+%
+In conclusion, to the extent of our experiments, we are unable to identify differences.
+%
+More extensive experiments are required, probably including other policies like the one discussed in~\refalg{alg:policies:two_phase_collective_policy}.
+
+
+%
+It is worth noticing that the validity of these results is limited to the scenarios described in~\refsection{simulation-env}.
+%
+That is, scenarios where there are several PoIs in an area, people tend to stay in the PoIs, and them a few of them move between PoIs.
+  
 
 \inti{Answer research questions based on the results}
