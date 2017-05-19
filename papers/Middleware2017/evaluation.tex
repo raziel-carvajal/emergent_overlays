@@ -282,11 +282,15 @@ In particular, it depicts the results for previous approaches such as \textit{AB
 %
 The first thing to notice is that the studied network is often disconnected as coverage is less than 100\% for many broadcast sessions. \y{some stats: medians, maybe}
 %
-The second interesting point is that both our adaptive solutions significantly outperform both \textit{ABBA} and \textit{MPR} in terms of achieved coverage. \y{give stats, e.g. 
-Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of xx\% and xx\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol. In contrast, ABBA only manages xx\% mean coverage and MPR xx\%. Moreover, the minimum coverage achieved by our adaptive solution is xx\%, whilst this is considerably lower for the other protocols: xx\% for ABBA and xx\% for MPR.
-}
+The second interesting point is that both our adaptive solutions significantly outperform both \textit{ABBA} and \textit{MPR} in terms of achieved coverage. 
+% 
+Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of 83.2\% and 83.4\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol.
 %
-There are, however, instances where the pattern does not hold and our adaptive solution lags behind \textit{flooding}. This happens when some nodes switch from \textit{flooding} to \textit{MPR} but \textit{MPR} is still warming up, so the node takes some time before acting a relay when it should be doing so. \y{check wording of previous sentence, i edited it} 
+In contrast, \textit{ABBA} only manages 29.4\% mean coverage and \textit{MPR} 45.2\%.
+%
+Moreover, the minimum coverage achieved by our adaptive solution is 35.4\%, whilst this is considerably lower for the other protocols: 7.9\% for \textit{ABBA} and 6.7\% for \textit{MPR}.
+%
+There are, however, instances where the pattern does not hold and our adaptive solution lags behind \textit{flooding}. This happens when some nodes switch from \textit{flooding} to \textit{MPR} but \textit{MPR} is still warming up, so the node takes some time before acting a relay when it should be doing so. 
 %
 
 In terms of the differences between the particular adaptation policy adopted, we find  little effect on coverage. 
@@ -312,9 +316,13 @@ Previous work has shown that such power consumption is non-trivial. Using the fi
 %
 Next in the line are our adaptive approaches.
 %
-They both exhibit similar power consumption: \y{xx.xxJ for \textit{local} and xx.xxJ for \textit{SWSP}}. The latter is slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}.
+They both exhibit similar power consumption: median 0.101J for \textit{local} and 0.098J for \textit{SWSP}.
 %
-Very close behind our adaptive approaches is \textit{MPR}.
+The latter should be slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}, but in our experiments we could not observe this effect.
+%
+This can be attributed to a better selection of what nodes switch their protocol.
+%
+Very close to our adaptive approaches is \textit{MPR}.
 \y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
 However, as we already discussed it coverage is less than in other mechanisms.
