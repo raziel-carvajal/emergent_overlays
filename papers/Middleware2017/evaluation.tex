@@ -270,6 +270,14 @@ Finally, the optimization presented in~\refalg{adaptation_mechanism} does negati
 \labsection{comparison-base-protocols}
 
 
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=3, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Coverage per algorithm \labfigure{coverage}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
 \reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in a MANET.
 %
 In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution with its two policy variants.
@@ -286,42 +294,46 @@ There are, however, instances where the pattern does not hold and our adaptive s
 In terms of the differences between the particular adaptation policy adopted, we find  little effect on coverage. 
 Although in a few broadcast sessions the \textit{local} policy behaves better than \textit{SWSP}, the difference is negligible. 
 
-\begin{figure*}[ht]
+
+
+\begin{figure}[th]
 	\begin{center}
-		\includegraphics[page=3, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Coverage per algorithm \labfigure{coverage}}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
 	\end{center}
 	% \vspace*{-0.2cm}
-\end{figure*}
+\end{figure}
+
 
 The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
 %
 Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
 we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that the consumption due to GPS use is non-trivial\cite{Carroll:2010:APC:1855840.1855861}. For instance, using the figures in the aforementioned study, in this scenario it could roughly amount to an average of 2.83 Joules per node.
+Previous work has shown that such power consumption is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83 Joules per node. 
 %
 Next in the line are our adaptive approaches.
 %
-They both have a similar performance that is only slightly higher for \textit{SWSP} because, in our implementation, it requires some additional messages from nodes using \textit{flooding} to nodes with \textit{MPR}.
+They both exhibit similar power consumption: \y{xx.xxJ for \textit{local} and xx.xxJ for \textit{SWSP}}. The latter is slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}.
 %
 Very close behind our adaptive approaches is \textit{MPR}.
 \y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
 However, as we already discussed it coverage is less than in other mechanisms.
 %
-Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmiting messages.
+Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmitting messages.
 %
 In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with better coverage. 
 
 
-\begin{figure*}[ht]
+
+\begin{figure}[th]
 	\begin{center}
-		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Broadcast Delay Time per algorithm \labfigure{delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
-\end{figure*}
+\end{figure}
 
 
 As mentioned, another important metric in broadcast protocols is the \textit{broadcast delay time}.
@@ -345,13 +357,6 @@ Notice that over 75\% of the messages are broadcast in less than half a second, 
 Also worth noticing is that there are no differences between the two adaptation policies.
 
 
-\begin{figure*}[ht]
-	\begin{center}
-		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Broadcast Delay Time per algorithm \labfigure{delay-time}}
-	\end{center}
-	% \vspace*{-0.2cm}
-\end{figure*}
 
 \subsection{Discussion}
 
