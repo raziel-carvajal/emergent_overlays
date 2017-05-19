@@ -280,11 +280,11 @@ Finally, the optimization presented in~\refalg{adaptation_mechanism} does negati
 %
 In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution with its two policy variants.
 %
-The first thing to notice is that the studied network is often disconnected as coverage is less than 100\% for many broadcast sessions. \y{some stats: medians, maybe}
+The first thing to notice is that the studied network is often disconnected as coverage is less than 100\% for many broadcast sessions; \y{median coverage is xx\% across all sessions}.
 %
 The second interesting point is that both our adaptive solutions significantly outperform both \textit{ABBA} and \textit{MPR} in terms of achieved coverage. 
 % 
-Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of 83.2\% and 83.4\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol.
+Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of 83.2\% and 83.4\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol (91.2\%).
 %
 In contrast, \textit{ABBA} only manages 29.4\% mean coverage and \textit{MPR} 45.2\%.
 %
@@ -309,29 +309,25 @@ Although in a few broadcast sessions the \textit{local} policy behaves better th
 
 The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
 %
-Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
-we are not measuring the cost of using a GPS as required by the original protocol.
+Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is remarkably lower than that of others because it has the worst coverage, and also due to the fact that we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that such power consumption is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83J per node. 
+Previous work has shown that such power cost is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83J per node. 
 %
-Next in line is \textit{MPR}.
-%
-In suing this protocol, nodes show a median power consumption of 0.07J.
+As for \textit{MPR}, nodes using this protocol show a median power consumption of 0.072J.
 %
 However, as we already discussed it coverage is less than in other mechanisms.
 %
-Our adaptive approaches exhibit similar power consumption: median 0.10J for \textit{local} and 0.098J for \textit{SWSP}.
+Our adaptive approaches exhibit similar power consumption: median 0.101J for \textit{local} and 0.099J for \textit{SWSP}.
 %
 The latter should be slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}, but in our experiments we could not observe this effect.
 %
 This can be attributed to a better selection of what nodes switch their protocol.
 %
-\y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
+%\y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
-Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmitting messages (with a median of 0.12J, 20\% more than our approaches).
+Finally, \textit{flooding} consumes more energy than other approaches  (with a median of 0.118J, $\approx$18\% more than our approaches) because nodes are continuously retransmitting messages.
 %
-In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with better coverage. 
-
+In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with significantly better coverage. 
 
 
 \begin{figure}[th]
@@ -343,9 +339,9 @@ In summary, our adaptive mechanism and adaptive policies are able to behave simi
 \end{figure}
 
 
-As mentioned, another important metric in broadcast protocols is the \textit{broadcast latency}.
+Finally, we discuss \textit{broadcast latency}, another important metric in broadcast protocols.
 %
-In \reffigure{delay-time}, we show the \textit{ECDF} of this metric for different algorithms.
+In \reffigure{delay-time}, we show the \textit{CDF} of this metric for different algorithms.
 %
 As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{latency} as expected from their design.
 %
