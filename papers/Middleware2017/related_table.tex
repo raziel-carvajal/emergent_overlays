@@ -53,7 +53,9 @@ Algorithm & \rot{\shortstack[l]{No need for\\One-hop neighbor}} & \rot{\shortsta
 
 \bottomrule
 \end{tabular}
-\caption{Survey of evaluation criteria used in different adaptive broadcast algorithms.}% In the third column, \textit{Per} stands for \textit{Periodic} and \textit{Determ} for \textit{Deterministic}}
+\caption{Survey of evaluation criteria used in different adaptive broadcast algorithms.
+\protect\er{The table mixes several aspects that should probably be separated. I would recommend to have: (1) the characteristics of the protocol, e.g. does it use controlled flooding, an overlay, or both, does it combines two protocols, or adjusts the parameters for a protocol, or does both, is it autonomous or does it rely on some form of infrastructure, etc. (2) the mechanism used for the adaptation (mechanism = does it switch protocols, does it ensure interoperation, etc. and the policy = does it use threshold-based rules etc.). Then, (3) the type of information considered for the adaptation (most often, the density -- there are no others?). And finally, (4) what is required to collect this information (these are the col. we already have here). I am not sure to see the interest of the "Piggyback control messages" column: can't all approaches that use periodic messages also embed information in broadcast messages instead? Finally it is indicated that we use a stochastic decision: I am not sure about this?}
+}% In the third column, \textit{Per} stands for \textit{Periodic} and \textit{Determ} for \textit{Deterministic}}
 \label{tab:rw}
 %  \vspace{-0.4cm}
 \end{table*}
