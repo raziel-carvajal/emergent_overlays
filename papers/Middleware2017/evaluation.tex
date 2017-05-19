@@ -39,17 +39,15 @@ In particular, we are interested in finding answers to the following research qu
 
 % TODO: find a proper way of doing this.
 \begin{enumerate}
-	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast delay time and coverage?
+	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast latency, and coverage?
 	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
-	\item[\textit{RQ3}] How different adaptation policies affect the performance of our approach?
-	\item[\textit{RQ4}] What policy better captures the dynamic topology of the network?
+	\item[\textit{RQ3}] How do different adaptation policies affect the performance of our adaptive approach?
+	\item[\textit{RQ4}] What policy better captures the dynamicity of a network topology?
 \end{enumerate}
 
 To answer these questions, we perform controlled experiments using a network simulator.
 %
-In the rest of this section, we first present our simulation environment.
-%
-We then discuss the results of our experiments and draw conclusions to answer the research questions.
+In the rest of this section, we first present our simulation environment, present and discuss the results of our experiments, and finally draw conclusions to answer the above research questions.
 
 \subsection{Simulation Environment}
 \labsection{simulation-env}
@@ -219,7 +217,7 @@ This metric is useful to assess the performance of algorithms in terms of both n
 %
 
 
-\paragraph{Broadcast delay time.} 
+\paragraph{Broadcast latency.} 
 The time to disseminate a message with a coverage of 100\%.
 %
 The broadcast time helps to understand which algorithm to use with an application.
@@ -231,70 +229,116 @@ For instance, some applications tolerate high-latencies while others need fast r
 \paragraph{Energy consumption.}
 The energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
 
+\subsection{Cost of adaptation mechanisms}
+\labsection{cost-adaption}
+
+In this Section, we measure the cost of the mechanisms proposed in~\refsection{mechanism} to guarantee message dissemination across different base protocols.
+%
+In particular, we evaluate the cost in terms of power consumption and broadcast latency for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
+
+To perform this experiments we use a simple network topology where there are 500 nodes and one PoI.
+%
+Half the nodes are located in the squared PoI (center of the map).
+%
+In this PoI, the average node density is 40 while it is 5 elsewhere.
+%
+Hence, we deploy \textit{MPR} in the PoI and \textit{simple flooding} outside.
+%
+In the experiments, no node is moving and the source of every message is a node executing \textit{simple flooding}.
+
+Figure \ref{missing} shows the power consumption for the three algorithms.
+%
+As expected,~\refalg{adaptation_mechanism_simple} is worst in this scenario because no optimization is applied.
+%
+On the other hand, ~\refalg{adaptation_mechanism} improves this metric.
+%
+As previously discussed, we need to use~\refalg{missing} to guarantee coverage; these experiments show that doing so comes at the cost of increasing energy consumption.
+
+In~\ref{also-missing}, the \textit{broadcast latency} is depicted.
+%
+Observe that~\refalg{adaptation_mechanism_simple} generates no overhead; messages are delivered under 100 ms.
+%
+Likewise,~\refalg{missing} does not impact the latency; hence, in principle we guarantee coverage without impacting the latency.
+%
+Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the latency.
+
+\inti{You may be wondering where are the plots. I am generating them right now}
+
 \subsection{Comparison with base protocols}
 \labsection{comparison-base-protocols}
 
 
-\reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in MANET.
-%
-In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution.
-%
-The first thing to notice is that this network is often disconnected, for that reason the coverage is less than 100\% for many broadcast sessions.
-%
-The second interesting point is that our adaptive solutions outperform both \textit{ABBA} and \textit{MPR}.
-%
-In fact, the adaptive approach often follows the same trend as \textit{flooding}.
-%
-However, this pattern does not occur during two ranges of broadcast sessions: before session 50, and short after session 100.
-%
-In both cases, this happens because some nodes have switched from \textit{flooding} to \textit{MPR}, but \textit{MPR} is still warming up and the node is not acting a relay when it should be doing so.
-%
-Finally, the adaptation policy has little effect in terms of coverage.
-Indeed, although in a few broadcast session the \textit{local} policy behaves better than \textit{SWSP}, the difference is negligible. 
-
-\begin{figure*}[ht]
+\begin{figure}[th]
 	\begin{center}
 		\includegraphics[page=3, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
 		\caption{Coverage per algorithm \labfigure{coverage}}
 	\end{center}
 	% \vspace*{-0.2cm}
-\end{figure*}
+\end{figure}
+
+\reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in a MANET.
+%
+In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution with its two policy variants.
+%
+The first thing to notice is that the studied network is often disconnected as coverage is less than 100\% for many broadcast sessions. \y{some stats: medians, maybe}
+%
+The second interesting point is that both our adaptive solutions significantly outperform both \textit{ABBA} and \textit{MPR} in terms of achieved coverage. \y{give stats, e.g. 
+Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of xx\% and xx\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol. In contrast, ABBA only manages xx\% mean coverage and MPR xx\%. Moreover, the minimum coverage achieved by our adaptive solution is xx\%, whilst this is considerably lower for the other protocols: xx\% for ABBA and xx\% for MPR.
+}
+%
+There are, however, instances where the pattern does not hold and our adaptive solution lags behind \textit{flooding}. This happens when some nodes switch from \textit{flooding} to \textit{MPR} but \textit{MPR} is still warming up, so the node takes some time before acting a relay when it should be doing so. \y{check wording of previous sentence, i edited it} 
+%
+
+In terms of the differences between the particular adaptation policy adopted, we find  little effect on coverage. 
+Although in a few broadcast sessions the \textit{local} policy behaves better than \textit{SWSP}, the difference is negligible. 
+
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
 
 The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
 %
 Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is less because it has the worst coverage, and
 we are not measuring the cost of using a GPS as required by the original protocol.
 %
-Previous work has shown that the consumption due to GPS use is non-trivial\cite{Carroll:2010:APC:1855840.1855861}. For instance, using the figures in the aforementioned study, in this scenario it could roughly amount to an average of 2.83 Joules per node.
+Previous work has shown that such power consumption is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83 Joules per node. 
 %
 Next in the line are our adaptive approaches.
 %
-They both have a similar performance that is only slightly higher for \textit{SWSP} because, in our implementation, it requires some additional messages from nodes using \textit{flooding} to nodes with \textit{MPR}.
+They both exhibit similar power consumption: \y{xx.xxJ for \textit{local} and xx.xxJ for \textit{SWSP}}. The latter is slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}.
 %
 Very close behind our adaptive approaches is \textit{MPR}.
 \y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
 %
 However, as we already discussed it coverage is less than in other mechanisms.
 %
-Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmiting messages.
+Finally, \textit{flooding} consumes more energy than other approaches because nodes are continuously retransmitting messages.
 %
 In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with better coverage. 
 
 
-\begin{figure*}[ht]
+
+\begin{figure}[th]
 	\begin{center}
-		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Power consumption per algorithm \labfigure{energy-consumption}}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Broadcast Latency per algorithm \labfigure{delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
-\end{figure*}
+\end{figure}
 
 
-As mentioned, another important metric in broadcast protocols is the \textit{broadcast delay time}.
+As mentioned, another important metric in broadcast protocols is the \textit{broadcast latency}.
 %
 In \reffigure{delay-time}, we show the \textit{ECDF} of this metric for different algorithms.
 %
-As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{delay time} as expected from their design.
+As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{latency} as expected from their design.
 %
 In particular, all messages are disseminated in less than 100 ms.
 %
@@ -311,18 +355,14 @@ Notice that over 75\% of the messages are broadcast in less than half a second, 
 Also worth noticing is that there are no differences between the two adaptation policies.
 
 
-\begin{figure*}[ht]
-	\begin{center}
-		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Broadcast Delay Time per algorithm \labfigure{delay-time}}
-	\end{center}
-	% \vspace*{-0.2cm}
-\end{figure*}
 
 \subsection{Discussion}
 
 % TODO: Experiments: check cost of each glueing step
-% TODO: Experiments: test cost of using the wrong policiy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+% TODO: Experiments: test cost of using the wrong policy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+
+The experiments in~\refsection{cost-adaption} answer the research question \textit{RQ1}. \inti{Say something smart here}
+
 
 Using the results shown in~\refsection{comparison-base-protocols}, we can answer research questions \textit{RQ2} and \textit{RQ3}.
 
@@ -344,7 +384,7 @@ That is, we cannot observe significant differences in the two adaptation policie
 %
 For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
 %
-Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast delay time}.
+Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast latency}.
 %
 In conclusion, to the extent of our experiments, we are unable to identify differences.
 %
