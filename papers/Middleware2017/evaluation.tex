@@ -39,17 +39,15 @@ In particular, we are interested in finding answers to the following research qu
 
 % TODO: find a proper way of doing this.
 \begin{enumerate}
-	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast delay time and coverage?
+	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast latency, and coverage?
 	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
-	\item[\textit{RQ3}] How different adaptation policies affect the performance of our approach?
-	\item[\textit{RQ4}] What policy better captures the dynamic topology of the network?
+	\item[\textit{RQ3}] How do different adaptation policies affect the performance of our adaptive approach?
+	\item[\textit{RQ4}] What policy better captures the dynamicity of a network topology?
 \end{enumerate}
 
 To answer these questions, we perform controlled experiments using a network simulator.
 %
-In the rest of this section, we first present our simulation environment.
-%
-We then discuss the results of our experiments and draw conclusions to answer the research questions.
+In the rest of this section, we first present our simulation environment, present and discuss the results of our experiments, and finally draw conclusions to answer the above research questions.
 
 \subsection{Simulation Environment}
 \labsection{simulation-env}
@@ -219,7 +217,7 @@ This metric is useful to assess the performance of algorithms in terms of both n
 %
 
 
-\paragraph{Broadcast delay time.} 
+\paragraph{Broadcast latency.} 
 The time to disseminate a message with a coverage of 100\%.
 %
 The broadcast time helps to understand which algorithm to use with an application.
@@ -236,7 +234,7 @@ The energy consumed by nodes for the broadcast of all messages and, when applica
 
 In this Section, we measure the cost of the mechanisms proposed in~\refsection{mechanism} to guarantee message dissemination across different base protocols.
 %
-In particular, we evaluate the cost in terms of power consumption and broadcast delay time for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
+In particular, we evaluate the cost in terms of power consumption and broadcast latency for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
 
 To perform this experiments we use a simple network topology where there are 500 nodes and one PoI.
 %
@@ -256,13 +254,13 @@ On the other hand, ~\refalg{adaptation_mechanism} improves this metric.
 %
 As previously discussed, we need to use~\refalg{missing} to guarantee coverage; these experiments show that doing so comes at the cost of increasing energy consumption.
 
-In~\ref{also-missing}, the \textit{broadcast delay time} is depicted.
+In~\ref{also-missing}, the \textit{broadcast latency} is depicted.
 %
 Observe that~\refalg{adaptation_mechanism_simple} generates no overhead; messages are delivered under 100 ms.
 %
-Likewise,~\refalg{missing} does not impact the delay time; hence, in principle we guarantee coverage without impacting the delay time.
+Likewise,~\refalg{missing} does not impact the latency; hence, in principle we guarantee coverage without impacting the latency.
 %
-Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the delay time.
+Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the latency.
 
 \inti{You may be wondering where are the plots. I am generating them right now}
 
@@ -330,17 +328,17 @@ In summary, our adaptive mechanism and adaptive policies are able to behave simi
 \begin{figure}[th]
 	\begin{center}
 		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
-		\caption{Broadcast Delay Time per algorithm \labfigure{delay-time}}
+		\caption{Broadcast Latency per algorithm \labfigure{delay-time}}
 	\end{center}
 	% \vspace*{-0.2cm}
 \end{figure}
 
 
-As mentioned, another important metric in broadcast protocols is the \textit{broadcast delay time}.
+As mentioned, another important metric in broadcast protocols is the \textit{broadcast latency}.
 %
 In \reffigure{delay-time}, we show the \textit{ECDF} of this metric for different algorithms.
 %
-As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{delay time} as expected from their design.
+As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{latency} as expected from their design.
 %
 In particular, all messages are disseminated in less than 100 ms.
 %
@@ -386,7 +384,6 @@ That is, we cannot observe significant differences in the two adaptation policie
 %
 For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
 %
-Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast delay time}.
 %
 In conclusion, to the extent of our experiments, we are unable to identify differences.
 %
