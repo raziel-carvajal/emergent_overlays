@@ -7,15 +7,76 @@
 
 \subsection{System model}
 \labsection{overview:system_model}
-
-\er{present the system model and the simplifications made. If there are notations, introduce them here with a table.}
-
-\subsection{Components}
-\labsection{overview:components}
+We generalize the architecture of MANETs applications in three main layers.
+%
+First, the network implements a wireless protocol of communication such as IEEE 802.11, where nodes share a common channel with carrier sense multiple access (CSMA) and collision detection capabilities.
+%
+This network layer provides an API with two communication primitives: (i) $\AlgoSend()$ disseminates a message in the transmission area $A_{emitter}$ of the emitter and (ii) $\FuncHandler()$ allows the reception of messages for every node located within $A_{emitter}$.
+%
+For the sake of simplicity, in the literature $A_{emitter}$ is depicted as a circle of radius $T_{x}$, which is the length of nodes' transmission range, centered at the position of the emitter.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.35]{figures/architecture}
 	\caption{Architecture of the system}
+	\label{fig:system_architecture}
 \end{figure}
 
+Second, the Broadcast layer implements a dissemination protocol where a source node sends a message to the entire network by letting nodes act as relays and forward incoming messages.
+%
+We present in form of API the main operations required by any broadcast protocol:
+
+\begin{itemize}
+	\item $\AlgoInit()$. Nodes use this method to create a new message with the payload to disseminate, depending on the protocol this payload varies, for instance, a location-based technique piggybacks the emitter's geographic position to this payload
+	\item $\AlgoEmit()$. Source nodes use this method to initiate a broadcast session
+	\item $\AlgoHandle()$. This method is triggered on every message reception and implements one broadcast protocol. The efficiency in the dissemination of messages depends on this implementation
+\end{itemize}
+
+The third main layer is the MANET application per se and it is placed on the top of the Network and Broadcast layers.
+%
+When the application requires to disseminate the information $I$, a new broadcast message is created by calling $\AlgoInit()$ with $I$ as argument.
+%
+The dissemination of $I$ starts with a call to $\AlgoEmit()$, its propagation to others nodes in the network is performed by $\AlgoSend()$ and any message in the interest of the application will be delivered via $\AlgoHandle()$.
+
+The architecture of a MANET application is depicted on Figure~\ref{fig:system_architecture} along with two more layers: Interoperation and Adaptation.
+%
+These two layers extend an application with our adaptive approach in a network of nodes with heterogeneous configurations, by monitoring the dynamics of the network and choosing the best broadcast protocol, accordingly.
+
+
+\subsection{Framework of adaptation}
+\labsection{overview:adaptation_framework}
+We are interested in designing an \emph{adaptive} approach to broadcast in MANETs.
+%
+Adaptation refers to the ability of the system to change its behavior based on the observation of its deployment environment and performance.
+%
+In our target context, adaptation refers to the ability to dynamically select and configure the protocol used for broadcast.
+%
+It is important to note that this adaptation and protocol selection should be possible not only for the entire system but also, just for a part of it.
+%
+Thus, we must guarantee interoperability among heterogeneous regions of nodes.
+%
+More concretely, every relay node between the source of a broadcast message and each destination node must perform a forward operation, such that there is any lost of messages when the emitter and receiver are not necessarily running the same protocol; our layer of interoperability deals with this regard.
+
+\subsubsection{Interoperation layer}
+\labsection{overview:interoperation_layer}
+We propose an interoperation mechanism between the Network and Broadcast layers, as shown in Figure~\ref{fig:system_architecture}.
+%
+The basic idea is to broadcast a received message as a source node when the protocol of the emitter and the one form the receiver differs.
+%
+We assume that the protocol identifier is piggybacked on each broadcast message, note that this action does not modify the content of the message nor the metadata use by the protocols to their functioning.
+%
+This simple adaptation mechanism is depicted in \refalg{adaptation_mechanism_simple}.
+%
+The function $\FuncHandler()$ (line~\ref{alg:adaptation_mechanism_simple:receive}) acts as a wrapper for the communication primitive with the same name at the Network Layer.
+%
+When the protocol identifiers of the emitter and receiver nodes differ, a new message will be forward keeping the original payload (line~\ref{alg:adaptation_mechanism_simple:init}) but using the receiver's protocol instead (line~\ref{alg:adaptation_mechanism_simple:emit}). This algorithm have a drawback though, a message with the same payload is forwarded twice when the protocol identifiers of two emitters differ.
+%
+A more efficient adaptation mechanism is shown in \refalg{adaptation_mechanism} where we use timers to delay....
+\raziel{TODO:
+\begin{itemize}
+	\item finish with the description of \refalg{adaptation_mechanism}
+	\item argue that these simple and yet efficient mechanism guarantees coverage for any protocol and mention the proof in section 4
+	\item create Broadcast super class to reduce the space used by all implementation of broadcast
+	\item give an overall overview of the Adaptation layer saying that its detail explanation requires another section
+\end{itemize}
+}

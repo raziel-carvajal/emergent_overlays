@@ -109,11 +109,11 @@
 		\AlgoPid  	\tcp*[1]{protocol identifier}
 	}
 
-	\Fn(\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
+	\Fn(\label{alg:adaptation_mechanism_simple:receive}\tcp*[f]{on message reception}){\FuncHandler{\Ms: \Msg}}{
 		\eIf{ \AlgoPid $=$ \MsgPid }{ \label{alg:adaptation_mechanism_simple:eval_ids}
 			\Algo.$\AlgoHandle(\Ms)$ \label{alg:adaptation_mechanism_simple:handle} \;
 		}{
-			$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \;
+			$\Ms' \gets \Algo.\AlgoInit(\MapT[\MsgId].\MsgContent)$ \label{alg:adaptation_mechanism_simple:init} \;
 			$\Algo.\AlgoEmit(\Ms')$ \label{alg:adaptation_mechanism_simple:emit} \;
 		}
 	}
