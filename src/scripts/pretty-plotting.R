@@ -1,6 +1,7 @@
 library(ggplot2)
 library(plyr)
 library(argparse)
+library(e1071)
 
 
 #
@@ -203,6 +204,8 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
 
       print(cn)
       print(summary(data))
+      print(var(data))
+      print(skewness(data))
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
