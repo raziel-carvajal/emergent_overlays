@@ -1,32 +1,5 @@
 %!TEX root = main.tex
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-	
-	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
-	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
-
-\caption{\labalg{network_api}Network layer API}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-
-	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
-	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate a new broadcast}
-	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle an incoming broadcast}
-
-\caption{\labalg{protocol_api}Broadcast protocol API}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{algorithm}
 	\footnotesize
 	\DontPrintSemicolon
