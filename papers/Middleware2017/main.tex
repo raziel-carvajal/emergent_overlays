@@ -3,7 +3,7 @@
 
 \usepackage{etex}
 \usepackage{main}
-%\usepackage{acm_information}
+\usepackage{acm_information}
 \usepackage{booktabs} % For formal tables
 
 \begin{document}
@@ -25,16 +25,17 @@
 
 \begin{abstract}
 Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs).
-A large variety of broadcast protocols have been proposed to deal with network dynamics and avoid broadcast storm problems.
+A large variety of broadcast protocols have been proposed to deal with network dynamics, maximize coverage and minimize the impact of collisions.
  %, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
-These protocols follow either an unstructured approach based on reactive controlled flooding or a more structured approach involving the creation of a dissemination overlay.
-Each protocol is better adapted to particular configurations of nodes, depending in particular on their density over space or their mobility.
+These protocols follow either an unstructured approach based on the control of a flooding process or a more structured approach involving the creation of a dissemination overlay.
 The selection of the appropriate broadcast protocol for a MANET is a difficult task.
+Each protocol is better adapted to particular configurations of nodes, depending in particular on their density over space or their mobility.
 For heterogeneous node configurations, a single protocol is only adequate for some regions of the network offering poor performance elsewhere.
 This paper presents a novel adaptive approach to broadcast in heterogeneous MANETs.
 %We develop a novel mechanism allowing MANETs nodes to pick between multiple available broadcast protocols.
-The mechanism developed allows MANET nodes to pick dynamically the most appropriate broadcast protocols for different regions of the network.
-Our approach is independent of the nature of these protocols and ensure their interoperability with no impact on broadcast coverage.
+This approach allows MANET nodes to pick dynamically the most appropriate broadcast protocols for different regions of the network.
+Our approach ensure the interoperability between heterogeneous protocols with no impact on broadcast coverage.
+\er{following sentences are probably giving too much detail and can be summarized}
 It allows nodes in dense and relatively static zones to dynamically emerge overlays where they are beneficial, while the rest of the system uses more flexible unstructured approaches.
 Our policies, based on local and collective observation of the MANET state, allow nodes to collectively decide when to switch and aim at minimizing energy costs, while maximizing performance and coverage.
 %
