@@ -166,7 +166,8 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   p <- ggplot( data ) +
       geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
       theme(legend.position="top", text=element_text(size=18)) +
-      xlab("Time (ms)") + ylab("ECDF") +
+      xlab("Time (ms)") + ylab("Cumulative Probability") +
+      scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
       (if (!print.titles)
  		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
       else
@@ -283,7 +284,8 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 		 geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
     #  geom_point(aes(x=idx, y=dat, shape=alg, colour=alg), size = 2) +
 		 theme(legend.position="top", text=element_text(size=18)) +
-		 ylab("ECDF") + xlab(ylabel) +
+		 ylab("Cumulative Probability") + xlab(ylabel) +
+	   scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
      (if (!print.titles)
 		   labs(title=caption, colour="Algorithms", linetype="Algorithms")
      else
