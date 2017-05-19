@@ -200,6 +200,9 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
       cn <- replace(cn, cn == "CDS", "CDS-based")
       cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
+
+      print(cn)
+      print(summary(data))
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
@@ -263,6 +266,8 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
       x <- 1:length(y)
       p <- data.frame( x = x, y = y )
       p <- lowess(x, y, f=1/10)
+      print(cn)
+      print(summary(p$y))
 			data.frame( dat = p$y,
 						alg = rep(cn, length(y)),
             idx = p$x,
@@ -270,8 +275,10 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			)
 		})
 
+
     dd <- unname(dd)
 	  data <- do.call("rbind", dd)
+
 
     data <- arrange(data, density, alg, dat)
 	  data.ecdf <- ddply(data, .(alg), transform, ecdf=ecdf(dat)(dat) )
