@@ -183,7 +183,7 @@ BroadcastingAppBase::BroadcastingAppBase() {
   double
   BroadcastingAppBase::computeAdaptTimeout ()
   {
-    return uniform(0.05, adaptationMax);
+    return uniform(adaptationMin, adaptationMax);
   }
 
   bool
@@ -202,14 +202,16 @@ BroadcastingAppBase::BroadcastingAppBase() {
     	  if ( !msgReceived(m) ) {
 
     	    if (protocolId != m->getProtocolId()) {
-        		double timeout = computeAdaptTimeout();
-        		adaptForeigsMsgs[m->getId()] = m->getPayload();
-        		cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
-        		cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
-        		cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
-        		timeoutMsgs[m->getId()] = delayed_event(
-        		    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
-        		    m->getId(), timeout);
+            if (optimize_gluing) {
+              double timeout = computeAdaptTimeout();
+              adaptForeigsMsgs[m->getId()] = m->getPayload();
+              cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+              cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+              cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
+              timeoutMsgs[m->getId()] = delayed_event(
+                ControlMessageTypes::TRANSFORMATION_TIMEOUT,
+                m->getId(), timeout);
+            } else fwdMsg = true;
         	} else {
         		fwdMsg = true;
         		// cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
@@ -234,7 +236,7 @@ BroadcastingAppBase::BroadcastingAppBase() {
   bool
   BroadcastingAppBase::borderDetector (cMessage* msg)
   {
-    bool done = withAdaptation && processMessage<Hello>(PK(msg), [&] (const Hello* m) {
+    bool done = withAdaptation && use_topology_fix && processMessage<Hello>(PK(msg), [&] (const Hello* m) {
       if (m->getProtocolId() != protocolId) {
         // FIXME: doesn't work for mobility
         if (!contains(m->getProtocolId(), m->getSender())) {
@@ -296,9 +298,12 @@ BroadcastingAppBase::initialize(int stage)
 
             //initialization of adaptation parameters
             adaptationMax = par("adaptationMax").doubleValue();
+            adaptationMin = par("adaptationMin").doubleValue();
             nr_max_custom_officers = par("nr_max_custom_officers").longValue();
             timeoutCustomOfficer = par("timeoutCustomOfficer").doubleValue();
             withAdaptation = par("withAdaptation").boolValue();
+            use_topology_fix = par("use_topology_fix").boolValue();
+            optimize_gluing = par("optimize_gluing").boolValue();
         }
         break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
@@ -373,19 +378,8 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
                 }
                 cancelAndDelete(msg);
                 break;
-            case SAY_HELLO:{
-                // auto pkt = build_hello_message();
-                // updatePosition();
-                // pkt->setX(position.x);
-                // pkt->setY(position.y);
-                // pkt->setSender(myself.c_str());
-                // pkt->setProtocolId (protocolId.c_str());
-                //
-                // send_package(pkt);
-                // if (this->nr_hello_msg)
-                // 	delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
-                // this->nr_hello_msg--;
-              }
+            case SAY_HELLO:
+                throw std::logic_error("Unimplemented: Nobody should be calling this");
               cancelAndDelete(msg);
               break;
             case WAKEUP:
@@ -427,15 +421,19 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
             	  endSimulation();
             	break;
             case TRANSFORMATION_TIMEOUT: {
-              void* data = msg->getContextPointer();
-              std::string key = string( (char*)data );
-              cerr << getLogHeader()  << "Doing event for key: " << key << endl;
-      	      this->time_to_broadcast_payload(data);
-      	      timeoutMsgs.erase(key);
-      	      cancelAndDelete(msg);
+              if (optimize_gluing) {
+                void* data = msg->getContextPointer();
+                std::string key = string( (char*)data );
+                cerr << getLogHeader()  << "Doing event for key: " << key << endl;
+                this->time_to_broadcast_payload(data);
+                timeoutMsgs.erase(key);
+              }
+              else throw std::logic_error("Shouldn't call this if we are not using optimization");
+              cancelAndDelete(msg);
             }
             break;
             case OFFICER_ELECTION_TIMEOUT: {
+              if (!use_topology_fix) throw std::logic_error("Shouldn't call this if we are not fixing the issue with topology-based algorithms");
               // cout << getLogHeader() << "officer election timeout: " <<  endl;
               char* foreign_prot = (char*)msg->getContextPointer();
               // if (customOfficers.find(foreign_prot) == customOfficers.end())

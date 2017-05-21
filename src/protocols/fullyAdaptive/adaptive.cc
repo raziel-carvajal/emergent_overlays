@@ -58,46 +58,52 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         }
       break;
       default:
-        if (withAdaptation && msg->getKind() == DO_ADAPTATION) {
-          adaptation();
-          cancelAndDelete(msg);
-        }
-        else if (!knownProtocols[current_protocol_name]->handle(msg)) {
-          BroadcastingAppBase::handleMessageWhenUp(msg);
-        }
-        else {
-          cancelAndDelete(msg);
+      	{
+      		auto initialProtocol = par("initialProtocol").stdstringValue();
+	        if (withAdaptation  && initialProtocol != "middleware" && msg->getKind() == DO_ADAPTATION) {
+	          adaptation();
+	          cancelAndDelete(msg);
+	        }
+	        else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+	          BroadcastingAppBase::handleMessageWhenUp(msg);
+	        }
+	        else {
+	          cancelAndDelete(msg);
+	        }
         }
       break;
     }
   }
   else if (msg->getKind() == UDP_I_DATA)
   {
-    auto pkt = PK(msg);
-    if (pkt->hasEncapsulatedPacket()) {
-      pkt = pkt->getEncapsulatedPacket();
-    }
-    auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
-    if (willing) {
-      if (willingToChange &&
-          willing->getTargetProtocol() == willingToChangeToProtocol &&
-          willingToChangeToProtocol != current_protocol_name) {
-
-        change_current_protocol(willingToChangeToProtocol);
-        std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol << '\n';
-
-        if (!packet_to_piggybag) {
-          packet_to_piggybag = new inet::WillingToChange("willing to change");
-          packet_to_piggybag->setSender(myself.c_str());
-          packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
-          if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-            gateway->send_package(packet_to_piggybag);
-            packet_to_piggybag = nullptr;
-          }
-        }
-        willingToChangeToProtocol = "";
-        willing = false;
-      }
+  	auto initialProtocol = par("initialProtocol").stdstringValue();
+  	if (initialProtocol != "middleware") {
+	    auto pkt = PK(msg);
+	    if (pkt->hasEncapsulatedPacket()) {
+	      pkt = pkt->getEncapsulatedPacket();
+	    }
+	    auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
+	    if (willing) {
+	      if (willingToChange &&
+	          willing->getTargetProtocol() == willingToChangeToProtocol &&
+	          willingToChangeToProtocol != current_protocol_name) {
+	
+	        change_current_protocol(willingToChangeToProtocol);
+	        std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol << '\n';
+	
+	        if (!packet_to_piggybag) {
+	          packet_to_piggybag = new inet::WillingToChange("willing to change");
+	          packet_to_piggybag->setSender(myself.c_str());
+	          packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
+	          if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+	            gateway->send_package(packet_to_piggybag);
+	            packet_to_piggybag = nullptr;
+	          }
+	        }
+	        willingToChangeToProtocol = "";
+	        willing = false;
+	      }
+	    }
     }
     BroadcastingAppBase::handleMessageWhenUp(msg);
   }
@@ -182,7 +188,8 @@ FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
 
-  if (withAdaptation) {
+  auto initialProtocol = par("initialProtocol").stdstringValue();
+  if (withAdaptation && initialProtocol != "middleware") {
     DO_ADAPTATION = gateway->register_new_control_message();
     gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
 
@@ -209,7 +216,16 @@ FullyAdaptive::processStart()
     knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
   }
 
-  auto initialProtocol = par("initialProtocol").stdstringValue();
+  if (initialProtocol == "middleware") {
+  	auto pos = gateway->get_current_position();
+    if (pos.x >= 81 && pos.x <= 169 && pos.y >= 81 && pos.y <= 169) {
+      initialProtocol = "Mpr_t2";
+    }
+    else {
+      initialProtocol = "Flooding2";
+    }
+  }
+
   change_current_protocol(initialProtocol);
 }
 
