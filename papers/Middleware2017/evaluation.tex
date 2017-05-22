@@ -246,7 +246,7 @@ Hence, we deploy \textit{MPR} in the PoI and \textit{simple flooding} outside.
 %
 In the experiments, no node is moving and the source of every message is a node executing \textit{simple flooding}.
 
-Figure \ref{missing} shows the power consumption for the three algorithms.
+Figure \reffigure{energy-consumption-glue} shows the power consumption for the three algorithms.
 %
 As expected,~\refalg{adaptation_mechanism_simple} is worst in this scenario because no optimization is applied.
 %
@@ -254,13 +254,44 @@ On the other hand, ~\refalg{adaptation_mechanism} improves this metric.
 %
 As previously discussed, we need to use~\refalg{missing} to guarantee coverage; these experiments show that doing so comes at the cost of increasing energy consumption.
 
-In~\ref{also-missing}, the \textit{broadcast latency} is depicted.
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Distribution of Power consumption per glue mechanism variant \labfigure{energy-consumption-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+In~\reffigure{delay-time-glue}, the \textit{broadcast latency} is depicted.
 %
 Observe that~\refalg{adaptation_mechanism_simple} generates no overhead; messages are delivered under 100 ms.
 %
 Likewise,~\refalg{missing} does not impact the latency; hence, in principle we guarantee coverage without impacting the latency.
 %
 Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the latency.
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Broadcast Latency per glue mechanism \labfigure{delay-time-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+
+In~\reffigure{sbr-glue}, the \textit{saved rebroadcast message} for the glue algorithm is shown.
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=2, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Saved rebroadcast messages per glue mechanism \labfigure{sbr-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
 
 \inti{You may be wondering where are the plots. I am generating them right now}
 
