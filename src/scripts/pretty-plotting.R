@@ -374,10 +374,10 @@ plot.saved.rebroadcasts <- function(df, algos) {
          else
            labs(colour="Algorithms", shape="Algorithms")
          ) +
-		 get.plot.theme.style()
+		 get.plot.theme.style()+ scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 
 
-     if (!print.titles) {
+     if (print.titles) {
          p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
@@ -402,9 +402,9 @@ plot.simple.coverage <- function(df, algos) {
          else
            labs(colour="Algorithms", shape="Algorithms")
          ) +
-		 get.plot.theme.style()
+		 get.plot.theme.style()+ scale_colour_brewer(palette="Set1") + scale_fill_brewer(palette="Set1")
 
-     if (!print.titles) {
+     if (print.titles) {
          p <- p + scale_colour_grey(start = 0.3, end = .85)
      }
 
