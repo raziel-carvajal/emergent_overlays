@@ -246,15 +246,21 @@ def get_callback_multiple_source_code(nr_nodes, nr_max_msgs, idx_source):
     return tmp
 
 
-def get_still_connected_callback(tx, idx_source):
+def get_still_connected_callback(tx, idx_source, expectedDensityFilename):
+
     def l(p):
-        # G = build_graph(p, tx)
-        # b = nx.is_connected(G)
-        # if not b:
-        #     x = [len(c) for c in nx.connected_components(G) if idx_source in c]
-        #     logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
-        return True
-        # return b
+        G = build_graph(p, tx)
+        b = nx.is_connected(G)
+        if not b:
+            x = [len(c) for c in nx.connected_components(G) if idx_source in c]
+            logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
+        # return True
+        if b:
+            degrees = nx.degree(G)
+            with open(expectedDensityFilename, 'a') as expectedDensityFile:
+                for k, v in degrees.iteritems():
+                    expectedDensityFile.write('hostR%d,%d\n' % (k, v))
+        return b
     return l
 
 
@@ -302,12 +308,13 @@ def build_uniform_topologies(args, densities):
         if mobility:
             print "Generating mobility"
             filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, d, trRan, int(w), int(h), 0)
+            filenameGroundTruth = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.groundTruth".format(nr_nodes, d, trRan, int(w), int(h), 0)
             while True:
                 b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                                  map_x=int(w), map_y=int(h),
                                                  sim_time=200, positions=topology,
                                                  outputFile=filename,
-                                                 test=get_still_connected_callback(trRan, idx_source))
+                                                 test=get_still_connected_callback(trRan, idx_source, filenameGroundTruth))
                 if b:
                     break
     pass
@@ -375,7 +382,7 @@ def build_handcrafted_topology(args, densities, nr_points_of_interests=1):
     connected = guarentee_connectivity(positions, trRan)
 
     idx_source = create_nedfile(positions, int(w0), int(h0), 0, args)
-    create_density_file(generated_densities, int(w0), int(h0), 0, trRan, 0)
+    create_density_file(generated_densities, int(w0), int(h0), 0, trRan, args.last_idx)
 
     def IsValidPosition(tu):
         idx, point = tu
@@ -386,15 +393,16 @@ def build_handcrafted_topology(args, densities, nr_points_of_interests=1):
     if mobility:
         nr_nodes = len(positions)
         print "Generating mobility"
-        filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, 0, trRan, int(w0), int(h0), 0)
+        filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, 0, trRan, int(w0), int(h0), args.last_idx)
+        filenameGroundTruth = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.groundTruth".format(nr_nodes, 0, trRan, int(w0), int(h0), args.last_idx)
         while True:
             b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
                                              map_x=int(w0), map_y=int(h0),
-                                             sim_time=1600, positions=positions,
+                                             sim_time=500, positions=positions,
                                             #  mobility_map=mobility_map,
                                              outputFile=filename,
                                             #  testValidPosition=IsValidPosition,
-                                             test=get_still_connected_callback(trRan, idx_source))
+                                             test=get_still_connected_callback(trRan, idx_source, filenameGroundTruth))
             if b:
                 break
 
