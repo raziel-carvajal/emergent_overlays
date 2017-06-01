@@ -101,7 +101,8 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 	          }
 	        }
 	        willingToChangeToProtocol = "";
-	        willing = false;
+	        willingToChange = false;
+	        willing = nullptr;
 	      }
 	    }
     }
@@ -116,21 +117,21 @@ FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
   if (policy == AdaptationPolicy::LOCAL) {
-    if (density > 15 && current_protocol_name == "Flooding2") {
+    if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
       change_current_protocol("Mpr_t2");
     }
-    else if (density < 15 && current_protocol_name == "Mpr_t2") {
+    else if (density < density_threshold_lower && current_protocol_name == "Mpr_t2") {
       change_current_protocol("Flooding2");
     }
   }
   else if (policy == AdaptationPolicy::SWSP) {
     bool change = false;
-    if (density > 15 && current_protocol_name == "Flooding2") {
+    if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
       willingToChange = true;
       willingToChangeToProtocol = "Mpr_t2";
       change = true;
     }
-    else if (density < 15 && current_protocol_name == "Mpr_t2") {
+    else if (density < density_threshold_lower && current_protocol_name == "Mpr_t2") {
       willingToChange = true;
       willingToChangeToProtocol = "Flooding2";
       change = true;
@@ -196,6 +197,9 @@ FullyAdaptive::processStart()
     std::string monitoring_class("inet::SnifferBasedMonitoring");
     monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
     monitor->initialise(gateway);
+
+    density_threshold_lower = par("density_threshold_lower").longValue();
+    density_threshold_upper = par("density_threshold_upper").longValue();
 
     policy = AdaptationPolicy::LOCAL;
     if (par("adaptation_policy").stdstringValue() == "swsp") {

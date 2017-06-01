@@ -25,6 +25,8 @@ import broadcasting.BroadcastingBase;
 simple FullyAdaptive extends BroadcastingBase like IUDPApp
 {
     parameters:
+      int density_threshold_lower = default(15);
+      int density_threshold_upper = default(15);
       string initialProtocol;
       string adaptation_policy = default("local"); // or "swsp" or "etienne"
       @class(inet::FullyAdaptive);

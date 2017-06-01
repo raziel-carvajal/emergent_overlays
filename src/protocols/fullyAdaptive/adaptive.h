@@ -51,6 +51,8 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     std::unique_ptr<IMonitoringMechanism> monitor;
     std::string current_protocol_name;
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;
+    int density_threshold_lower;
+    int density_threshold_upper;
 };
 
 } //namespace
