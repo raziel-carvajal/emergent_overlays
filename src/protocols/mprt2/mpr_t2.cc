@@ -163,7 +163,7 @@ Mpr_t2::process_payload(const Broadcast* m)
 			// gateway->broadcast(key, build_message_to_broadcast());
 
       int n = std::stoi (myself.substr(5, myself.size()));
-      auto delta = ((n % 6) * 0.01 + 0.01);
+      auto delta = ((n % 60) * 0.001 + 0.01);
       gateway->delayed_broadcast(key, delta);
 		}
 	}
