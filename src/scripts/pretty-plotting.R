@@ -340,6 +340,13 @@ plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Power Consumption (J)",
                         "Power consumption for different algorithms", FALSE)
+
+  plot.data.using.lines(df, densities,
+                        "Power Consumption (J)",
+                        "Power consumption for different algorithms",
+                        function(d, nr.nodes) {
+                          d
+                        })
 }
 
 plot.time.power.consumption <- function(df, densities) {

@@ -476,7 +476,7 @@ if __name__ == '__main__':
     if non_uniform:
         build_non_uniform_topologies(args, densities, nr_topologies=4)
     elif handcrafted:
-	    build_handcrafted_topology(args, [min_density, max_density], 4)
+        build_handcrafted_topology(args, [min_density, max_density], 1)
     else:
         build_uniform_topologies(args, densities)
 
