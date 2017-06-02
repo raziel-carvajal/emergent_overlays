@@ -42,11 +42,11 @@ public:
     else if (m->getKind() == UDP_I_DATA) {
       auto pkt = PK(m);
       auto hello = dynamic_cast<const inet::broadcasting::Hello*>(pkt);
-      if (hello) {
+      if (hello && hello->getSender() != gateway->get_name()) {
         knownNeighbors[hello->getSender()] = 0;
       }
       auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
-      if (br) {
+      if (br && br->getSender() != gateway->get_name()) {
         knownNeighbors[br->getSender()] = 0;
       }
       return false;

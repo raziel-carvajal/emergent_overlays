@@ -24,12 +24,12 @@ namespace inet {
 class INET_API FullyAdaptive : public inet::BroadcastingAppBase
 {
   protected:
-    virtual void processStart();
+    virtual void processStart() override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
   private:
-    virtual inet::broadcasting::Hello* build_hello_message();
+    virtual inet::broadcasting::Hello* build_hello_message() override;
     virtual void on_payload_received(const broadcasting::Broadcast* m) override;
-    virtual void on_hello_received(const broadcasting::Hello* msg);
+    virtual void on_hello_received(const broadcasting::Hello* msg) override;
     virtual void time_to_broadcast_payload(void* user_data) override;
 
     void change_current_protocol(const std::string& protocol);

@@ -155,6 +155,12 @@ BroadcastingAppBase::OmnetBroadcastGateway::bridge()
   return app->amIbridge;
 }
 
+  void
+  BroadcastingAppBase::OmnetBroadcastGateway::emitDensityApproximation (
+      int value)
+  {
+    app->emit(app->signal_density_approximation, value);
+  }
 
 int
 BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
@@ -295,6 +301,7 @@ BroadcastingAppBase::initialize(int stage)
             signal_received_id = this->registerSignal("msg_received");
             signal_sent_id = this->registerSignal("msg_sent");
             signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
+            signal_density_approximation = this->registerSignal("density_approximation");
 
             //initialization of adaptation parameters
             adaptationMax = par("adaptationMax").doubleValue();
@@ -806,7 +813,7 @@ void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
     printBroadcastingLog(key);
-    msg->setPayload(std::string(128, 'p').c_str());
+    msg->setPayload(key.c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {

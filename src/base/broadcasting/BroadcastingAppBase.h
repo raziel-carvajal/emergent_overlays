@@ -80,10 +80,16 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void emitBroadcastMsgReceived(const std::string& value) override;
 
+      void emitDensityApproximation(int value) override;
+
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;
 
-      bool bridge();
+      bool bridge() override;
+
+      std::string get_name() override {
+	return app->myself;
+      }
 
       void setProtocolId(const std::string& protocol) override {
         app->protocolId = protocol;
@@ -144,6 +150,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     simsignal_t signal_sent_id;
     simsignal_t signal_power_level;
     simsignal_t signal_broadcast_msg_received;
+    simsignal_t signal_density_approximation;
 
     bool already_configured = false;
 

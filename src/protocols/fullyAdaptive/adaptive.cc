@@ -77,6 +77,10 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
   else if (msg->getKind() == UDP_I_DATA)
   {
   	auto initialProtocol = par("initialProtocol").stdstringValue();
+  	auto density = monitor->density_estimation();
+	if (initialProtocol != "middleware" && msg->getKind() == UDP_I_DATA) {
+	    gateway->emitDensityApproximation(density);
+	}
   	if (initialProtocol != "middleware") {
 	    auto pkt = PK(msg);
 	    if (pkt->hasEncapsulatedPacket()) {
@@ -116,6 +120,7 @@ void
 FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
+//  gateway->emitDensityApproximation(density);
   if (policy == AdaptationPolicy::LOCAL) {
     if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
       change_current_protocol("Mpr_t2");
@@ -146,7 +151,7 @@ FullyAdaptive::adaptation()
       }
     }
   }
-  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
+  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 }
 
 
@@ -192,7 +197,7 @@ FullyAdaptive::processStart()
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
     DO_ADAPTATION = gateway->register_new_control_message();
-    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 3.0);
+    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 
     std::string monitoring_class("inet::SnifferBasedMonitoring");
     monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
