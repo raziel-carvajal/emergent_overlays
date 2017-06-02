@@ -806,7 +806,7 @@ void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
     printBroadcastingLog(key);
-    msg->setPayload(key.c_str());
+    msg->setPayload(std::string(128, 'p').c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {
