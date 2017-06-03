@@ -21,6 +21,10 @@ get_arguments <- function() {
                       help='Relays file name')
   parser$add_argument('-cv', '--coverage-file', dest='cv', type="character",
                       help='Coverage file name')
+  parser$add_argument('-ms', '--mac-sent-file', dest='ms', type="character",
+                      help='MAC frames sent file name')
+  parser$add_argument('-mr', '--mac-received-file', dest='mr', type="character",
+                      help='MAC frames received file name')
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -336,6 +340,26 @@ plot.coverage.per.session <- function(data, densities) {
 }
 
 
+plot.mac.frames.sent <- function(data, densities) {
+  plot.data.using.lines(data, densities,
+    "MAC frames sent", "MAC frames sent",
+    function(d, nr.nodes) {
+      d
+    }
+  )
+}
+
+
+plot.mac.frames.received <- function(data, densities) {
+  plot.data.using.lines(data, densities,
+    "MAC frames received", "MAC frames received",
+    function(d, nr.nodes) {
+      d
+    }
+  )
+}
+
+
 plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Power Consumption (J)",
@@ -360,6 +384,10 @@ plot.duplicated.messages <- function(df, densities) {
                         "Duplicate messages",
                         "Distribution of duplicate messages along the experiment")
 }
+
+
+
+
 
 plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "SRB (%)"
@@ -491,6 +519,25 @@ if (!is.null(args$rf)) {
   metadata <- r$metadata
   print("Plotting saved rebroadcasts")
   plot.saved_rebroadcast.per.session(r$data, metadata$densities)
+}
+
+if (!is.null(args$ms)) {
+  print("Importing mac frames sent dataset")
+  r <- load.dataset.with.metadata(args$path, args$ms, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting mac frames sent")
+  # print(r$data)
+  plot.mac.frames.sent(r$data, metadata$densities)
+}
+
+
+if (!is.null(args$mr)) {
+  print("Importing mac frames received dataset")
+  r <- load.dataset.with.metadata(args$path, args$mr, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting mac frames received")
+  # print(r$data)
+  plot.mac.frames.received(r$data, metadata$densities)
 }
 
 if (!is.null(args$cv)) {

@@ -50,6 +50,10 @@ load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
 }
 
+load.datafile.scalar <- function(fname, query, extensions=c("sca", "vec")) {
+  loadDataset(paste(fname, sep= ".", extensions), add(type="scalar", select=query) )
+}
+
 
 powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
   # create a separate list for each power level
@@ -227,6 +231,28 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
   write.table(
             t.powerLevelInfo,
             file = build.filename(outputPath, "batteryConsumptionDistributionTime", expeId),
+            row.names = F, append = F
+  )
+}
+
+
+save.mac.frames.sent <- function(data, outputPath, expeId){
+  values <- data.frame( whatever = data$scalars$value )
+  colnames(values) <- c(expeId)
+  write.table(
+            values,
+            file = build.filename(outputPath, "macFramesSent", expeId),
+            row.names = F, append = F
+  )
+}
+
+
+save.mac.frames.received <- function(data, outputPath, expeId){
+  values <- data.frame( whatever = data$scalars$value )
+  colnames(values) <- c(expeId)
+  write.table(
+            values,
+            file = build.filename(outputPath, "macFramesReceived", expeId),
             row.names = F, append = F
   )
 }
@@ -564,6 +590,10 @@ main <- function(args) {
   print(paste("Loading power consumption data file:", args$file))
   powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
 
+  print(paste("Loading MAC frame data file:", args$file))
+  mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
+  mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
+
   pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
   print("DONE!")
 
@@ -581,6 +611,8 @@ main <- function(args) {
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
+  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration)
+  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior

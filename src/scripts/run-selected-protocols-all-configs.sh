@@ -94,13 +94,17 @@ cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryCon
 cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
 cat ../../results/relays-n_* >> ../../results/relays
 cat ../../results/coverage-n_* >> ../../results/coverage
+cat ../../results/macFramesSent-n_* >> ../../results/macFramesSent
+cat ../../results/macFramesReceived-n_* >> ../../results/macFramesReceived
 
 rm -f ../../results/broadcastSession-n_* \
       ../../results/duplicatedMsgsDistribution-n_* \
       ../../results/batteryConsumptionDistribution-n_* \
       ../../results/batteryConsumptionDistributionTime-n_* \
       ../../results/relays-n_* \
-      ../../results/coverage-n_*
+      ../../results/coverage-n_* \
+      ../../results/macFramesSent-n_* \
+      ../../results/macFramesReceived-n_*
 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
@@ -112,6 +116,8 @@ Rscript pretty-plotting.R \
       -bs broadcastSession \
       -rf relays \
       -cv coverage \
+      -ms macFramesSent \
+      -mr macFramesReceived \
       -sf summary.csv \
       --final \
       ../../results/
@@ -130,5 +136,7 @@ Rscript pretty-plotting.R \
       -bs broadcastSession \
       -rf relays \
       -cv coverage \
+      -ms macFramesSent \
+      -mr macFramesReceived \
       -sf summary.csv \
       ../../results/
