@@ -1,0 +1,440 @@
+%!TEX root = main.tex
+
+\section{Evaluation}
+\labsection{evaluation}
+
+%\er{%
+%	Suggested outline for the section:
+%	\begin{itemize}
+%		\item objectives of the evaluation
+%		\item simulation environment:
+%		\begin{itemize}
+%			\item simulator
+%			\item energy model
+%			\item MAC layer
+%			\item other models if applicable
+%		\end{itemize}
+%		\item mobility and density model (one or two-paragraph description)~\cite{mobility_density_model}
+%		\item description of the evaluation metrics
+%		\item evaluation should compare
+%		\begin{itemize}
+%			\item performance with a single protocol (distinguishing nodes in the different regions)
+%			\item performance with the different adaptation strategies (also distinguishing nodes)
+%		\end{itemize}
+%		\item discussion
+%	\end{itemize}
+%}
+
+
+In~\refsection{mechanism}, we have presented a mechanism to support the interoperability between nodes that use different dissemination algorithms.
+%
+Since this mechanism modifies the behavior of each node, we can expect some performance impact in comparison to previous approaches.
+%
+Likewise, our approach requires the use of adaptation policies as described in \refsection{policies} we have described different policies.
+%
+In this section, we evaluate our approach under realistic conditions.
+%
+In particular, we are interested in finding answers to the following research questions:
+
+
+% TODO: find a proper way of doing this.
+\begin{enumerate}
+	\item[\textit{RQ1}] What is the cost of our adaptation mechanism in terms of energy consumption, broadcast latency, and coverage?
+	\item[\textit{RQ2}] Is it truly beneficial to use an adaptive approach instead of previous dissemination algorithms?
+	\item[\textit{RQ3}] How do different adaptation policies affect the performance of our adaptive approach?
+	\item[\textit{RQ4}] What adaptation policy better captures the dynamicity of a network topology?
+\end{enumerate}
+
+To answer these questions, we perform controlled experiments using a network simulator.
+%
+In the rest of this section, we first present our simulation environment, present and discuss the results of our experiments, and finally draw conclusions to answer the above research questions.
+
+\subsection{Simulation Environment}
+\labsection{simulation-env}
+
+Our experiments are inspired by the scenario of a crowd of users carrying portable communication devices (e.g., smartphones) in an area with no infrastructure connectivity.
+%
+In this area, there are several points of interest where people tend to stay.
+%
+As a result, the density of devices in the points of interest is high, and the mobility is low.
+%
+Meanwhile, fewer nodes constantly move in the area between point of interests. 
+%
+The dissemination of information from one individual to all the others is critical, and uses ad-hoc connections between devices.
+%
+Our evaluation of broadcast algorithms for MANETs is mainly driven by two factors: \emph{network density} and \emph{nodes mobility}.
+%
+We describe in the following the parameters used in our experiments.
+
+
+\paragraph{Simulator.}
+We rely on OMNET++4.6/INET3.3, a simulation framework for the evaluation of networking algorithms~\cite{Varga:2008:OOS:1416222.1416290}.
+%
+This tool provides a full implementation of the IEEE 802.11g standard.
+%
+In addition, it contains models for the mobility of nodes and for energy consumption.
+
+
+\paragraph{Energy Model.}
+%
+The power consumed by a node mainly depends on the wireless communication chip it uses.
+%
+We selected the Broadcom BCM4329~\cite{BCM4329}, a commercial chip commonly found in modern mobile devices and which supports Wi-Fi 802.11g on the 2.4 GHz frequency band. As described in \reftab{wifi-chip}, the energy consumed by the chip varies from only 648 nW in sleep mode to up to 1.206 W when the transmitter is active.
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Mode} & \textbf{Consumption} \\
+		
+		\midrule
+		%Off	  & nW & 57.6 \\
+		Sleep  & 648 nW \\ 
+		Receiver Listen & 244.8 mW \\
+		Receiver Active (RX) & 295.2 mW \\
+		Transmitter Active (TX) & 1.206 W \\
+	\end{tabular}
+	
+	\caption{Broadcom BCM4329 power consumption modes}
+	\labtab{wifi-chip}
+\end{table}
+
+%
+To simulate this chip, we use the \emph{StateBasedEnergyConsumer} model provided by INET.\laurent{ref in footnote?}
+%
+This model measures how many Joules are consumed based on the time spent by the chip  on each consumption mode.
+
+
+\paragraph{Communication Scenario.}
+Simulated participants use their devices to broadcast messages without external coordination and may attempt to do so at nearly the same time.
+%
+We set our experiments to perform 200 broadcast sessions with a frequency between broadcasts of $0.1$s.
+%
+During a broadcast session, a randomly selected node acts as a source and broadcasts a randomly generated message.
+%
+Each of the 200 messages is 32~bytes long and contains a unique identifier.
+%
+Moreover, we assume normal wireless communications range and no environmental interference.
+%
+The only reason to lost packets in the medium is due to collisions, which are handle by CSMA/CA protocol.
+
+\paragraph{Simulation time.}
+As mentioned in~\refsection{mechanism}, some algorithms need to build a topology.
+%
+To guarantee that the first broadcast message is properly handled by all protocols, we empirically set an initial warm-up period of 2s, allowing CDS-based algorithms to perform this initial construction.
+%
+Similarly, we  wait 2s after the last broadcast session.
+%
+The overall simulation time is therefore of 24 seconds.
+
+
+\paragraph{Mobility Model.}
+We use a mobility model with points of interest (PoI) proposed by Piorkowski et al.~\cite{mobility_density_model}.
+%
+In this model, all nodes move in short steps that are defined using two Gaussian distributions.
+%
+To do so, nodes are classified in two groups: nodes in the vecinity of a PoI use a distribution $\mathcal{N}(0, \sigma_1^{2})$, and nodes in between PoIs use $\mathcal{N}(0, \sigma_2^{2})$ where $\sigma_1 <  \sigma_2$.
+%
+As a consequence, nodes in the vecinity of a PoI move slower than nodes in between PoIs.
+%
+They also stay most of the time in a PoI making the density in PoI  higher than elsewhere.
+
+To generate the traces, nodes are initially uniformly distributed on a map of 250 x 250 m.
+%
+During each step of the simulation, nodes move according to the group in which they belong to.   
+%
+\reftab{mobility} summarizes the configuration parameters we used. 
+
+\begin{table}[ht]
+	\footnotesize
+	\centering
+	
+	\begin{tabular}{lr}
+		\textbf{Parameter} & \textbf{Value} \\
+		\midrule
+		Number of nodes  & 500 \\
+		Number of PoIs & 4 \\
+		Size of the map & 250m x 250m \\
+		Radius that defines vecinity of PoI  & 25m \\
+		$\sigma_{1}^{2}$ & 0.1 \\
+		$\sigma_{2}^{2}$ & 0.8 \\
+	\end{tabular}
+	
+	\caption{Parameters of the mobility model.}
+	\labtab{mobility}
+\end{table}
+
+
+%
+Although we check that the initial network is connected, we cannot guarantee that all nodes are reachable for the whole duration of the experiment.
+%
+We argue that it does not affect the experiments because all protocols are evaluated under the same conditions.
+
+
+\paragraph{Algorithm-specific parameters.}
+The behavior of each protocol depends on its parameters, for which we favor values previously reported in the literature.
+%
+For instance, we use 1.5s as the \emph{hello time} for \emph{MPR}.
+%
+In the case of \emph{ABBA}, we use 60 milleseconds as the maximum waiting time.
+%
+
+For adaptive approaches, we only allow switching between two protocols.
+%
+At the beginning of the simulation, each node is executing \textit{simple flooding}.
+%
+Afterwards, a node is free to change its protocol based on some policy.
+%
+However, it can only change back and forth between \textit{simple flooding} and \textit{MPR}.
+%
+We are selecting these two algorithms based on previous studies that show their benefit in the scenarios we are considering~\cite{DensityMobDrivenEval}.  
+%
+
+\subsection{Evaluation metrics}
+
+To properly compare our approach against previous solutions, we present the results of our experiments in terms of a set of well-established metrics:
+
+
+\paragraph{Coverage.} 
+The percentage of nodes that successfully receive a broadcast message at least once.
+%
+Since we are performing several broadcast sessions, we are interested in the evolution of this metric over time.
+
+%
+\paragraph{Saved Rebroadcasts (SRE).} 
+The number of forwarding avoided by using a given algorithm  compared to \emph{simple flooding}.
+%
+To compute the SRE of one algorithm $A$ in a network of $N$ nodes, we measure the number $R_m$ of retransmissions made by $A$ to disseminate a message $m$. The $ \textit{SRE}_m$ for message $m$ is then $N - R_m$.
+%
+Since in our experiments we are disseminating many messages, we compute the mean \emph{SRE} and use it as metric for our comparison study.
+%
+This metric is useful to assess the performance of algorithms in terms of both network and energy usage.
+
+%\noindent $\triangleright$
+%\textbf{Duplicate messages} --
+%the number of times one broadcast message is received again after its first reception.
+%
+
+
+\paragraph{Broadcast latency.} 
+The time to disseminate a message with a coverage of 100\%.
+%
+The broadcast time helps to understand which algorithm to use with an application.
+%
+For instance, some applications tolerate high-latencies while others need fast responses.
+
+
+% 
+\paragraph{Energy consumption.}
+The energy consumed by nodes for the broadcast of all messages and, when applicable, for the construction and maintenance of the overlay.
+
+\subsection{Cost of adaptation mechanisms}
+\labsection{cost-adaption}
+
+In this Section, we measure the cost of the mechanisms proposed in~\refsection{mechanism} to guarantee message dissemination across different base protocols.
+%
+In particular, we evaluate the cost in terms of power consumption and broadcast latency for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
+
+To perform this experiments we use a simple network topology where there are 500 nodes and one PoI.
+%
+Half the nodes are located in the squared PoI (center of the map).
+%
+In this PoI, the average node density is 40 while it is 5 elsewhere.
+%
+Hence, we deploy \textit{MPR} in the PoI and \textit{simple flooding} outside.
+%
+In the experiments, no node is moving and the source of every message is a node executing \textit{simple flooding}.
+
+Figure \reffigure{energy-consumption-glue} shows the power consumption for the three algorithms.
+%
+As expected,~\refalg{adaptation_mechanism_simple} is worst in this scenario because no optimization is applied.
+%
+On the other hand, ~\refalg{adaptation_mechanism} improves this metric.
+%
+As previously discussed, we need to use~\refalg{missing} to guarantee coverage; these experiments show that doing so comes at the cost of increasing energy consumption.
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Distribution of Power consumption per glue mechanism variant \labfigure{energy-consumption-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+In~\reffigure{delay-time-glue}, the \textit{broadcast latency} is depicted.
+%
+Observe that~\refalg{adaptation_mechanism_simple} generates no overhead; messages are delivered under 100 ms.
+%
+Likewise,~\refalg{missing} does not impact the latency; hence, in principle we guarantee coverage without impacting the latency.
+%
+Finally, the optimization presented in~\refalg{adaptation_mechanism} does negatively affect the latency.
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Broadcast Latency per glue mechanism \labfigure{delay-time-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+
+In~\reffigure{sbr-glue}, the \textit{saved rebroadcast message} for the glue algorithm is shown.
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=2, scale=0.45, trim = 20mm 0mm 0 0]{figures/results-glue-mechanism.pdf}
+		\caption{Saved rebroadcast messages per glue mechanism \labfigure{sbr-glue}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+\inti{You may be wondering where are the plots. I am generating them right now}
+
+\subsection{Comparison with base protocols}
+\labsection{comparison-base-protocols}
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=3, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Coverage per algorithm \labfigure{coverage}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+\reffigure{coverage} shows the coverage obtained when different algorithms are used to disseminate messages in a MANET.
+%
+In particular, it depicts the results for previous approaches such as \textit{ABBA}, \textit{MPR}, \textit{simple flooding} and our adaptive solution with its two policy variants.
+%
+The first thing to notice is that the studied network is often disconnected as coverage is less than 100\% for many broadcast sessions; \y{median coverage is xx\% across all sessions}.
+%
+The second interesting point is that both our adaptive solutions significantly outperform both \textit{ABBA} and \textit{MPR} in terms of achieved coverage. 
+% 
+Specifically, our \textit{local} and \textit{SWSP} policies achieve mean coverage of 83.2\% and 83.4\%, respectively, which closely follows the trend of the maximalist \textit{flooding} protocol (91.2\%).
+%
+In contrast, \textit{ABBA} only manages 29.4\% mean coverage and \textit{MPR} 45.2\%.
+%
+Moreover, the minimum coverage achieved by our adaptive solution is 35.4\%, whilst this is considerably lower for the other protocols: 7.9\% for \textit{ABBA} and 6.7\% for \textit{MPR}.
+%
+There are, however, instances where the pattern does not hold and our adaptive solution lags behind \textit{flooding}. This happens when some nodes switch from \textit{flooding} to \textit{MPR} but \textit{MPR} is still warming up, so the node takes some time before acting a relay when it should be doing so. 
+%
+
+In terms of the differences between the particular adaptation policy adopted, we find  little effect on coverage. 
+Although in a few broadcast sessions the \textit{local} policy behaves better than \textit{SWSP}, the difference is negligible. 
+
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=1, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Distribution of Power consumption per algorithm \labfigure{energy-consumption}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+The power consumption for the same experiments is depicted in~\reffigure{energy-consumption}.
+%
+Although \textit{ABBA} seems to outperform other approaches, it is worth noticing that its consumption is remarkably lower than that of others because it has the worst coverage, and also due to the fact that we are not measuring the cost of using a GPS as required by the original protocol.
+%
+Previous work has shown that such power cost is non-trivial. Using the figures reported in a previous study~\cite{Carroll:2010:APC:1855840.1855861}, GPS would consume about an average of 2.83J per node. 
+%
+As for \textit{MPR}, nodes using this protocol show a median power consumption of 0.072J.
+%
+The difference of \textit{MPR} with respect to our approaches is particularly pronounced because \textit{MPR} is  right-skewed (skewness of 0.21) while our approaches are left-skewed (at least -0.57).  
+%
+However, as we already discussed it coverage is less than in other mechanisms.
+%
+Our adaptive approaches exhibit similar power consumption: median 0.101J for \textit{local} and 0.099J for \textit{SWSP}.
+%
+The latter should be slightly higher due to the few additional messages sent from nodes using \textit{flooding} to those running \textit{MPR}, but in our experiments we could not observe this effect. \y{why? needs explaining or remove comment} 
+%
+This can be attributed to a better selection of what nodes switch their protocol. \y{how can we be sure about this?}
+%
+%\y{i think you need to mention some summarising stats here to illustrate how close these are. and use these to talk about the variance, not just the means/medians. is it right or left skewed, etc.}
+%
+Finally, \textit{flooding} consumes more energy than other approaches  (with a median of 0.118J, $\approx$18\% more than our approaches) because nodes are continuously retransmitting messages.
+%
+In summary, our adaptive mechanism and adaptive policies are able to behave similarly or better than other approaches in terms of power consumption but with significantly better coverage. 
+
+
+\begin{figure}[th]
+	\begin{center}
+		\includegraphics[page=5, scale=0.45, trim = 20mm 0mm 0 0]{figures/final-results.pdf}
+		\caption{Broadcast Latency per algorithm \labfigure{delay-time}}
+	\end{center}
+	% \vspace*{-0.2cm}
+\end{figure}
+
+
+Finally, we discuss \textit{broadcast latency}, another important metric in broadcast protocols.
+%
+In \reffigure{delay-time}, we show the \textit{CDF} of this metric for different algorithms.
+%
+As can be seen, \textit{MPR} and \textit{flooding} have a very short \textit{latency} as expected from their design.
+%
+In particular, all messages are disseminated in less than 100 ms.
+%
+\textit{ABBA}, on the other hand, requires more time to deliver the messages.
+%
+Although over 75\% of the messages are delivered in under 400 ms, there is a long tail showing that some of them can take as long as 800 ms.
+%
+The behavior of the adaptive approaches is similar to that of \textit{ABBA}.
+%
+This is indeed a poor performance; it is the consequence of the optimization discussed in \refalg{adaptation_mechanism} where nodes wait before retransmiting a message coming from a foreign protocol.
+%
+Notice that over 75\% of the messages are broadcast in less than half a second, like in using \textit{ABBA}.
+%
+Also worth noticing is that there are no differences between the two adaptation policies.
+
+
+
+\subsection{Discussion}
+
+% TODO: Experiments: check cost of each glueing step
+% TODO: Experiments: test cost of using the wrong policy, using MPR instead of flooding, and flooding instead of MPR (inverted policy)
+
+We now reflect back on the research questions posed at the beginning of this section in light of the experiment results. 
+
+The experiments in~\refsection{cost-adaption} answer the research question \textit{RQ1}. 
+\inti{Say something smart here}
+
+Using the results shown in~\refsection{comparison-base-protocols}, we can answer \textit{RQ2} and \textit{RQ3}. 
+Concretely, using our adaptive approaches instead of previous solutions can be beneficial in deployment scenarios with PoIs where overall coverage is significantly improved (\y{two fold?}). 
+%
+%This answer the research question \textit{RQ2}.
+%
+\textit{Flooding} is the only protocol offering better coverage, albeit only slightly, than our solution. However, it consumes more energy. 
+%
+On the other hand, the \textit{ABBA} and \textit{MPR} protocols offer lower power consumption but at the cost of notably diminished coverage.
+%
+%Likewise, \textit{ABBA} behaves quite poorly in terms of coverage; also in terms of energy usage if the GPS is considered.
+%
+
+Unfortunately, we have not found a conclusive answer to research question \textit{RQ3}.
+%
+That is, we cannot observe significant differences in the two adaptation policies we compare within the extent of our experiments.
+%
+For instance, \textit{SWSP} has a slight advantage in terms of energy consumption, but the difference is negligible.
+%
+Meanwhile, the \textit{Local} adaptation policy is marginally better in terms of \textit{broadcast latency}.
+%
+%In conclusion, to the extent of our experiments, we are unable to identify differences.
+%
+More extensive experiments are required, probably including other policies. % like the one discussed in~\refalg{alg:policies:two_phase_collective_policy}.
+
+In summary, previous protocols such as \textit{ABBA} and \textit{MPR} are not able to cope with networks where node density varies within the network. This, perhaps, is unsurprising as they have been designed for homogeneous networks. As such, the coverage they offer is severely affected by natural topological factors that induce variance in density, which in turn affects mobility, such as the presence of PoIs. 
+Strictly speaking, \textit{flooding} is able to handle such variance due to its uncompromising maximalist approach. This, obviously, comes at the expense of power consumption.
+
+%
+It is worth noticing that the validity of these results is limited to the scenarios described in~\refsection{simulation-env}.
+%
+That is, scenarios where there are several PoIs in an area, people tend to stay in the PoIs, and only a few move between PoIs. \y{i would actually explore this further, if possible. this will also allow us to have closure on RQ3}
+  
+
+%\inti{Answer research questions based on the results}

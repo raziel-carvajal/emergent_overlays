@@ -1,0 +1,63 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: main.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+Repeated entry---line 530 of file references.bib
+ : @inproceedings{Ni1999
+ :                      ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "akhouya:2011:AAI:2030797.2030830"
+-- IEEEtran.bst version 1.13 (2008/09/30) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Warning--empty journal in ieee1997wireless
+
+Done.
+You've used 31 entries,
+            4039 wiz_defined-function locations,
+            1046 strings with 14041 characters,
+and the built_in function-call counts, 24740 in all, are:
+= -- 2018
+> -- 533
+< -- 208
++ -- 287
+- -- 85
+* -- 1244
+:= -- 3716
+add.period$ -- 68
+call.type$ -- 31
+change.case$ -- 29
+chr.to.int$ -- 492
+cite$ -- 32
+duplicate$ -- 1756
+empty$ -- 2069
+format.name$ -- 115
+if$ -- 5724
+int.to.chr$ -- 0
+int.to.str$ -- 31
+missing$ -- 307
+newline$ -- 136
+num.names$ -- 31
+pop$ -- 699
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1928
+stack$ -- 0
+substring$ -- 1174
+swap$ -- 1447
+text.length$ -- 44
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 31
+warning$ -- 1
+while$ -- 110
+width$ -- 33
+write$ -- 353
+(There was 1 error message)

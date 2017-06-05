@@ -1,0 +1,174 @@
+%!TEX root = main.tex
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfPolicySpecific{
+		% this is a boolean condition that may become true locally; we do not specify here when it is evaluated; this can be periodic, or upon the collection of some specific data about the environment.
+		propose condition \tcp*[1]{trigger for proposing adaptation}
+		% when receiving a proposal for adaptation, a node may decide if it wants to join the group or not. This is decided by this accept condition
+		accept condition \tcp*[1]{trigger for accepting adaptation}
+		% a policy may specify a minimum (probabilistic) amount of nodes it wants to have that collectively decide on adapting.
+		participants threshold \tcp*[1]{nodes required to enact adaptation}
+	}
+	
+	\BlockOfConstants{
+		% the calculation of the number of nodes that are willing to enact is based on the agregation of a bit field. It can be initiated based on the participants threshold, s.t. the probability of collision remains small for population smaller than this threshold: ideally, a population equal to this threshold should lead to an expected half of the bits set in the aggregated field.
+		B = bit field size\;
+		% random bit representing the node
+		F = field of B bits, all false except one random bit set to true \;
+	}
+
+	\BlockOfVar{
+		\Algo	\tcp*[1]{local instance of broadcast protocol}
+		
+		% a map for the ongoing adaptation decisions: When there is an ongoing adaptation decision at a node, it rejects incoming proposals. This maps also helps to know when a collected bitfield is for a proposed adaptation
+		proposed adaptation: map (proposition id, proposition) init $\varnothing$\;
+				
+		% this set contains the list of decisions that have been accepted locally, but for which the change is not enacted yet
+		ongoing decisions: map (proposition id, proposition) init $\varnothing$\;
+	}
+
+	\Fn(\tcp*[f]{on propose condition trigger}){func trigger{params}}{
+		% generate a proposal for adaptation (policy specific)
+		$adp$ = new adaptation proposition \;
+		% keep track that this node is the proposer
+		proposed adaptation.add ($adp.id$,$adp$)\;
+		% use the broadcast protocol to create a message to propagate the proposal
+		$\Ms \gets \Algo.\AlgoInit(adp)$ \;
+		% include metadata to message
+		$\Ms.id$ = random identifier \;
+		$\Ms.class$ = proposal \;
+		% send the proposal around
+		$\Algo.\AlgoEmit(\Ms)$\;
+	}
+
+	\Fn(\tcp*[f]{upon reception of collective enactment message}){func receive{message m}}{
+		% several possible cases here:
+		%	1. this is a proposal and we can see if we are interested:
+		%		- yes: register proposal, and continue propagation
+		%		- no: send a "refuse" message around (it will reach the initiator)
+		%	2. this is a refuse message
+		%		- we initiate an aggregation, that will only be considered by nodes that have registered this proposal
+		%	3. this is a aggregation:
+		%		- we cancel the further propagation of this particular message
+		%		- upon the first reception of an aggregation for some id, we create a collector with a timer
+		%		- we collect bitfields for this given time and after it we transmit the aggregated bitfield to the source (as a new aggregation message)
+		%	3b (as separate function), when the collector timer expires
+		%		- if we are not the initiator: we send the aggregated bitfield
+		%		- if we are the initiator:
+		%			-> we check the amount of nodes and if it exceeds the threshold, we call the function to send the enactment (otherwise we do nothing)
+		\Switch(\tcp*[f]{check message type}){$\Ms.class$}{
+			
+			\Case(\tcp*[f]{adaptation proposal}){proposal}{
+				\eIf{accept condition(proposal)}{
+					% register proposal
+					ongoing decisions . add ($\Ms.id$,$\Ms.pl$)\;
+					% continue propagation
+					return (true) \; %%% TODO must add this return value allowing to stop propagation
+				}{
+					% just send a refuse to all and stop propagation
+					ref = new refuse message \;
+					$\Ms' \gets \Algo.\AlgoInit(ref)$ \;
+					$\Ms'$.id = $\Ms.id$ \; % indicate for which proposal this is
+					$\Ms'$.class = refuse \;
+					return($\Ms'$)\; %% this will send the refuse instead of propagating the adaptation proposal
+				}
+			}
+			
+			\Case(\tcp*[f]{refuse notification}){refuse}{
+				% if the node does not know about the proposal, it simply ignores the refuse message. Otherwise, it initiates an aggregation
+				\eIf{ongoing decisions[$\Ms.id$]}{
+					% must start an aggregation
+					agg = new aggregation message \;
+					agg.F = F \;
+					$\Ms' \gets \Algo.\AlgoInit(agg)$ \;
+					$\Ms'$.id = $\Ms.id$ \; % indicate for which proposal this is
+					$\Ms'$.class = aggregate \;
+					return($\Ms'$)\; %% this will send the aggregation instead of the refuse
+				}{
+					% ignore this message
+					return(false)\;
+				}
+			}
+			
+			\Case(\tcp*[f]{ongoing aggregation}){aggregation}{
+				% if we know about the aggregation, and we have not already sent further its result
+				\If{ongoing decisions[$\Ms.id$]}{
+					\If{! ongoing decisions[$\Ms.id$].F}{
+						ongoing decisions[$\Ms.id$].F = F \;
+						% create a timer (this will happen only once per node in the aggregation tree)
+						ongoing decisions[$\Ms.id$].timer = new timer(agg waiting time)\;
+					}
+					% add the received bits
+					ongoing decisions[$\Ms.id$].F =
+						ongoing decisions[$\Ms.id$].F $\cup$ $\Ms.pl.F$\;
+				}
+				% stop propagation in all cases
+				return (false)\;
+			}
+			
+			\Case(\tcp*[f]{enactment}){enact}{
+				\If{ongoing decisions[$\Ms.id$]}{
+					apply protocol change\;
+					return (true)\; %% continue routing
+				}
+				return(false)\; %% ignore message and stop routing
+			}
+		}
+	}
+	
+	\Fn(\tcp*[f]{aggregation timer expires}){\FuncExp{ongoing decisions[$id]$: \Timer}}{
+		% the timer for collecting aggregation results expires: need to propagate it further unless we are the source and need to propagate the decision
+		\eIf{proposed adaptation[$id$]}{
+			% we are the source!
+
+			% expected number of bits set to 1
+			expected = $t \cdot\left(1-\left(1-\frac{1}{B}\right)^t\right)$\;
+
+			\eIf{number of bits set to 1 in ongoing decisions[$id$].F $\geq$ expected}{
+				% we can enact the change
+				enact = new enactment message \;
+				$\Ms' \gets \Algo.\AlgoInit(enact)$ \;
+				$\Ms'$.class = enact \;
+				\Algo.send($\Ms'$)\;
+			}{
+				% not enough nodes, do nothing
+				return(false)\;
+			}
+		}{
+			agg = new aggregation message \;
+			agg.F = ongoing decisions[$id$].F \;
+			$\Ms' \gets \Algo.\AlgoInit(agg)$ \;
+			$\Ms'$.id = $id$ \; % indicate for which proposal this is
+			$\Ms'$.class = aggregate \;
+			\Algo.send($\Ms'$)\; %% continue the propagation, only the 'parent' in the tree will learn about it
+		}
+	}
+	
+	
+
+	% \Fn(\tcp*[f]{upon reception of collective enactment proposal}){func consider{proposal m}}{
+	% 	% note: we do not receive duplicates thanks to the behavior of the broadcast algorithm who calls deliver() only once per distinct message
+	%
+	% 	\eIf{enact condition (m) true}{
+	% 		% we push the proposal further and we register that we were part of the acceptors
+	% 		keep the identifier of m in the data structure
+	% 		p.handle(m) % continues the propagation
+	% 	}{
+	% 		% we do not propagate it further but start sending a response, that nodes who did not see the proposal will simply ignore
+	% 		payload $pl$ = new bit field with all bits 0 except a random 1 \;
+	% 		$\Ms \gets \Algo.\AlgoInit(pl)$ \;
+	%
+	% 		m.class = collective enactment response
+	%
+	% 		register callback for messages of type collective enactment commit (we will use these to know if we switch)
+	% 	}
+	% }
+	
+	% \Fn(\tcp*[f]{upon reception of collective enactment proposal}){func consider{proposal m}}{
+	%
+	% }
+\caption{\labalg{alg:policies:two_phase_collective_policy}Collective enactment of an elasticity rule (disposal of data structures omitted for clarity).}
+\end{algorithm}

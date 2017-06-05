@@ -1,0 +1,135 @@
+%!TEX root = main.tex
+
+\section{Related work}
+\labsection{relatedwork}
+
+\input{related_table}
+
+\er{
+other papers to consider:
+\begin{itemize}
+	\item \cite{akhouya:2011:AAI:2030797.2030830} seems to use adaptation of parameters for VANET broadcast
+	\item papers on hybrid unstructured and structured networks (at the end of the section)
+	\begin{itemize}
+		\item Book chapter~\cite{Leitao2010} provides a survey
+		\item \cite{struct_unstruct_measurement_atc06} is a measurement study of unstruct. vs struct. systems -- can be used as a generic pointer to the debate in the p2p community 10 years ago on the merits of the two approaches.
+		\item Hybrid approaches in p2p networks are generally emerging a structure for efficiency amongst the stable peers, while leaving unstable or newly-joined peers use a more unstructured approach. Examples include HyPO~\cite{hypo_icact09} for video streaming where stable peers form a backbone tree and unstable ones are loosely connected in a mesh, or Flower-CDN~\cite{flower_cdn_edbt09} that uses a similar approach to build a CDN.
+	\end{itemize}
+\end{itemize}
+}
+
+\er{general comments on the RW:
+\begin{itemize}
+	\item it grows too long. I would suggest grouping papers by class, and not to discuss all the details of the implementation but rather emphasize the similarities. A paragraph per work is probably too much.
+\end{itemize}
+}
+
+%This paper uses the broadcasting algorithm classification for MANETs created by Ruiz et al.~\cite{Ruiz2015}, in which they classified several algorithms, depending on different features, such as, probabilistic, counter-based or distance-based, among others.
+%Additionally, Carvajal et al.[] present that different broadcast algorithms for MANETs are more suitable for given situations than other depending on, for instance, the node density in an area or mobile networks.
+%At the end, they show the pros and cons of each broadcast algorithm for each situation.
+%Therefore, using these two papers, we create an adaptive-based broadcast algorithm for heterogeneous MANET's that allow different protocols to communicate among them without any modification.
+
+%\y{need an opening statement/paragraph about the general state of the art in manet broadcasting}
+%\er{this state of the art could also be in the introduction?}\y{both! with slight variations}
+
+%\er{I would add a short overview of the different approaches to adaptation:
+%\begin{itemize}
+%	\item protocols combining two approaches to broadcast (e.g. gossip/DTN for the hypergossiping paper);
+%	\item protocols adapting their parameters based on observations of the environment;
+%	\item protocols employing hierarchical schemes or topology-aware schemes.
+%\end{itemize}
+%Furthermore I would introduce the characterization used in the table before detailing the systems.
+%}
+
+A wide range of routing protocols have been proposed for MANETs over the years, including \y{meta-examples}.
+Our focus is not particularly on a specific protocol, but rather on adaptation solutions that enable MANET nodes to switch between protocols to adapt to changes in their context. 
+Some works have been done to facilitate such adaptation. 
+For instance, there are protocols combining two approaches to broadcast (e.g. gossip and DTN).
+Another family of protocols adjust their parameters based on environmental observations, whilst other solutions employ hierarchical schemes or topology-aware schemes for reshaping their broadcasting approach.
+\er{it seems from the description of works below that some system actually do both (combine different protocols and adjust parameters).}
+A summary of this related work is found in \reftab{rw} where we identify the different mechanisms used by related work to identify the need for and actuate adaptation in MANETs. 
+We now discuss these works.
+
+\er{use titles like the following one to group works by classes.}
+
+\smallskip
+\noindent
+\textbf{Adaptive-based broadcast algorithms.}
+%
+Hypergossiping~\cite{hypergossiping} is a broadcast strategy protocol designed for MANETs where the authors combine two different protocols: Probabilistic Flooding~\cite{Ni1999} (known as gossiping in the paper) and Hyper-Flooding~\cite{Cheng2005}. 
+Hyper-flooding is a mechanism that forces each node to keep a track of its current neighbors. In case the same message is received again and new neighbors have been added between messages, then the node re-broadcasts the message.
+%\er{the concept of hyperflooding (actually a DTN-aware flooding) should be detailed, it is not standard.}
+Hypergossiping was designed for partitioned networks where partitions of mobile nodes are constantly changing.
+Inside each partition, nodes use the Probabilistic Flooding protocol to send and receive messages adapting their local probability of forwarding incoming messages based on the local density of \er{around?} the node.
+If two partition joins, the nodes which detect the join will re-broadcast the messages using Hyper-Flooding.
+Hypergossiping cannot work with partitions using different protocols and not \er{no?} switch mechanism is developed.
+%Given that nodes are using the same protocol to communicate among them, there is not a protocol switch mechanism among the partitions and Hypergossiping cannot work with partitions using different protocols.
+% On the other hand, our solution can work with different protocols without modifying them.
+%In addition, there is no need for sending periodic HELLO and piggybacked messages either, reducing message collision and, consequently, energy consumption.
+%\er{we may want to re-consider this last sentence in light of the implemented adaptation policies} 
+%\er{in general this paragraph is too long and could be shortened by giving less technical details.}
+
+Zhang et al.~\cite{Zhang2005} propose an approach called Dynamic Probabilistic Route (DPR) discovery, based on a combination of probabilistic flooding and counter-based schemes. \er{warning: this must be defined before (in intro probably)}
+%\er{controlled flooding?}
+Each node has a probability $P$ to retransmit an incoming message depending on its local density. 
+%Each node contains \er{computes?} a probabilistic P variable \er{why a probabilistic variables? why not say "each node has a probability p to retransmit an incoming message."} depending on its local density.
+The protocol does not require periodic control messages in order to collect neighborhood information, but piggybacks this information on broadcast messages instead.
+The information piggybacked is used by the receiving nodes to determine their own local density, which will be used to determine whether the network is sparse or dense. 
+If the network is deemed to be sparse, the node will always retransmit the message. 
+However, if the node is in a dense network, $P$ will be calculated based on the density of the local neighbors as well as a cumulative amount of neighbor mobile nodes. 
+%\er{do they use threshold for this and how do they set them?}
+%\vicent{No threshold is utilized. Instead, a mathematical formula is used to determine the probabilistic variable.}
+If a node receives a message containing the same list of neighbors as its local list, then the node will not broadcast the message. 
+As a result, the necessity know in advance the number of neighbors in order to calculate $P$ adds some waiting time in estimating the local neighbor list. \er{revise last sentence}
+
+
+Viswanath and Obraczka~\cite{Viswanath02anadaptive} present an algorithms
+%\er{previous text could be simpler, at this point we know that we are discussing adaptive broadcast algorithms already}
+that allow each node to switch among three different flooding modes: \emph{plain}, \emph{hyper}, and \emph{scoped} flooding. 
+Hyper-flooding is used to obtained the high reliability necessary for mobile scenarios with high mobility. It also has the highest overhead.
+%\er{I would put this first since it defines hyperflooding, used by the Hypergossiping~\cite{hypergossiping} paper.}
+In contrast, scoped flooding is used when nodes have a lower velocity, aiming to reduce redundant broadcast messages and obtaining a lower overhead.
+The nodes send periodic control messages to keep track of their one-hop neighbors.
+%The nodes periodically exchange HELLO messages \er{same as before} to keep track of their one-hop neighbours, adding to each HELLO message node speed and direction information. 
+Each node uses two different thresholds to switch among these flooding mechanisms depending on the control messages previously received. 
+Thresholds are modified based on the number of collisions. 
+Their algorithm achieves a coverage between 86\% and 90\%, without a guarantee of full coverage. 
+%Each node has two thresholds (\texttt{low\_threshold} and \texttt{high\_threshold}) and it can modify these thresholds depending on the information received by the HELLO messages and their past history. 
+%If the current velocity of the node is higher than \texttt{high\_threshold}, the node switches to hyper flooding. 
+%Conversely, if node velocity is lower than \texttt{high\_threshold} but higher than \texttt{low\_threshold}, the node switches to plain flooding. 
+%Otherwise, the node switches to scoped flooding. 
+%Additionally, the authors present a second switching mechanism based on network load, which uses MAC-layer collisions as an indicator of network traffic.
+%In this switching method, each node computes the total number of collisions occurred in a specified time window.
+%Therefore, each node can adapt both thresholds (\texttt{low\_threshold} and \texttt{high\_threshold}).
+%If the number of collisions is lower than \texttt{low\_threshold}, the node switches to hyper flooding mode. If the number of collisions is greater than \texttt{high\_threshold}, scoped flooding is selected.
+%Otherwise, plain flooding is selected.
+%This adaptive broadcast algorithm is based on the mobility or the collisions amount.
+However, our proposal can adapt different kinds of broadcast algorithms, using the most suitable algorithm, such as counter-based or area-based among others, being more flexible for the requirements of diverse kind of situations.
+%\er{%again a bit long, maybe we do not have to go into all details. 
+%Do they have a guarantee that there will be full coverage even if the nodes use different protocols? Do they formalize this in one way or the other?}
+%\vicent{They do not guarantee full coverage. They achieve a coverage about 90\% in the best case and 86\% in the worst case.
+%They formalized "Packet delivery ratio", that means, the percentage of nodes that receive the broadcast message.}
+
+Abdou et al.~\cite{Abdou2012} propose an adaptive broadcasting protocol for MANETs called Smart-Flooding. 
+This mechanism utilizes the Shadowing Pattern~\cite{Dhoutaut2006}, a propagation model that is a realistic and probabilistic scheme based on outside monitored communications, together with an evolutionary algorithm. 
+According to this Shadowing Pattern, each node modifies its own local parameters using the evolutionary algorithm and the network density calculated by sending periodically control messages.
+
+Cartigny and Simplot~\cite{ProbFlood} propose probabilistic algorithms for MANETs combining a simple probabilistic algorithm, a distance-based scheme~\cite{Ni1999},
+%\er{what is a distance protocol?}
+and a neighbor elimination scheme~\cite{Peng2000,Stojmenovic20028} to reduce the number of broadcast messages sent through the network.
+In the distance-based scheme a node broadcasts a message only if the distance between itself and the receiver is larger than a specific threshold.
+In this work, periodically control messages are sent by the nodes in order to know the number of neighbors around themselves. 
+%Each node sends periodic HELLO messages in order to be aware of its environment.
+The authors show that these algorithms do not achieve full coverage because the messages are broadcast to nodes that are in the border of the radio area and the probability of obtaining an optimal distance increases. 
+%\er{is this a flaw of the algorithms, or something expected for the considered evaluation setting? Do we have evidence that a message is not transmitted to a node that was in range of a node that received the broadcast?}
+
+Xu and Gerla~\cite{Kaixin2002} describe a heterogeneous routing protocol based on a clustering scheme that allows different MANET broadcasting protocols to work together.
+The authors predefine specific nodes to be backbone nodes that can inter-communicate using long distance communications (non-backbone nodes do not). 
+Each backbone node creates a cluster with a specific protocol used by the nodes contained in its area. 
+The nodes, excluding backbone ones, can move among different backbone areas switching to the corresponding protocol. 
+Therefore, when a broadcast message is sent, the backbone nodes send the broadcast message among them, and then among nodes in their respective cluster areas.
+Compared to our research, our approach achieves full broadcast coverage permitting the network being used by different broadcast algorithms and also defines a switching mechanism that allows nodes of different broadcasting algorithms to communicate among themselves.
+\er{I would compare with our approach by saying that we are more autonomous (nodes take the switching decisions autonomously) and that we do not require the support of an infrastructure.}
+%Additionally, the work presented in this paper does not required to add periodic control messages. \er{again I would not be so categoric here. It does not require it but most advanced policies will need this eventually.}
+
+\y{synthesise and identify gaps in the above RW}

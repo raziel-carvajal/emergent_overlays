@@ -1,0 +1,172 @@
+%!TEX root = main.tex
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	\raziel{implementation detail: in text mention that the set "delivered" must be cleaned periodically to avoid collecting an $\infty$ number of delivered messages.} \;
+	\BlockOfVar{
+		\FloodMode \tcp*[1]{type of dissemination to perform}
+		\Delivered \tcp*[1]{log of messages delivered to application}
+		\BlockOfFloodCounter{
+			\MapC[] \tcp*[1]{map of counters}
+			\BlockOfMapAttributes{
+				$\MapC[\MsgId].\Receptions$ \tcp*[1]{receptions of message \MsgId}
+			}
+			\BlockOfConstants{
+				\FloodRecpLi \tcp*[1]{number of allowed receptions}
+			}
+		}
+		\BlockOfFloodTimeBased{
+			\BlockOfConstants{
+				\AdaptTimer \tcp*[1]{default waiting time}
+			}
+		}
+	}
+	
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			\Switch{\FloodMode}{
+				\Case{\FloodSimp}{
+					$\AlgoSend(\Ms)$ \;
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+				}
+				\Case{\FloodCount}{
+					\eIf{$\MapC[\MsgId].\Receptions < \FloodRecpLi$}{
+						$\AlgoSend(\Ms)$ \;
+						$\MapC[\MsgId].\Receptions \gets \MapC[\MsgId].\Receptions + 1$
+					}{
+						$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					}
+				}
+				\Case{\FloodFixed}{
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					$\MapT \gets \TimerFunc(\AdaptTimer)$ \tcp*[1]{create new timer}
+					\BlockOfTimerExpires{
+						$\AlgoSend(\Ms)$ \;
+					}
+				}
+				\Case{\FloodRandom}{
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$ \;
+					\tcp*[1]{get a random number between 0 and \AdaptTimer}
+					$\R \gets \RandomFunc([0,\AdaptTimer])$ \;
+					$\MapT \gets \TimerFunc(\R)$ \tcp*[1]{create new timer}
+					\BlockOfTimerExpires{
+						$\AlgoSend(\Ms)$ \;
+					}
+				}
+			}
+		}
+	}
+	
+	\Fn{\AlgoInit{\MsgPayload: \MsgContent}}{
+		$\Ms' \gets \FloodNewMsg$ \;
+		$\Ms'.\MsgContent \gets$ pl \;
+		\textbf{return} $\Ms'$ \;
+	}
+	
+	\Fn{\AlgoEmit{\Ms: \Msg }}{
+		$\Delivered \gets \Delivered \cup \{\MsgId\}$ \;
+		$\AlgoSend(\Ms)$
+	}
+	\caption{\labalg{typesOfFlooding}Flooding-based protocols 
+	\protect\er{Several todos in this algorithm: (1) there are no deliver() calls to the application; (2) it is not possible to reach line 21 after the first reception due to line 15. (2) fixed timer based and random timer base are very close, they should be merged. (3) in the counter based case the message will never be delivered to the application as we will never reach line 25. It is not necessary to declare new variables such as t to hold a random value. In these algorithms, the retransmission is never canceled even if the same message is received several times. I thought this was the principle of the timer based algorithms. It is also not necessary to write "on timer expires" but to use a simple wait() command -- this is pseudocode.}
+	}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfVar{
+		\NodeId \;
+		\Relay \;
+		\Delivered \;
+		\Neigs \;
+		\ObsNeigs \;
+		\ObsRelays \;
+	}
+	
+	\Fn{\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			\Switch{\MsgType}{
+				\Case{\MsgCtrl}{
+					$\ObsNeigs \gets \ObsNeigs \cup \{\MsgEmitter\}$ \;
+					\If{$\MsgEmitRel = \T$}{
+						$\ObsRelays \gets \ObsRelays \cup \{\MsgEmitter\}$
+					}
+				}
+				\Case{\MsgBro}{
+					\If{$\Relay = \T$}{
+						$\AlgoSend(\Ms)$ \;
+						$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
+					}
+				}
+			}
+		}
+	}
+	
+	\Fn(\tcp*[f]{periodic daemon to send control messages}){\Demon{}}{
+		$\CtrlMsg \gets \CtrlMsgFun$ \;
+		$\CtrlMsg.\Emitter \gets \NodeId$ \;
+		$\CtrlMsg.\IsRelay\gets \Relay$ \;
+		$\AlgoSend(\CtrlMsg)$
+	}
+	
+	\Fn(\tcp*[f]{periodic update of relay status}){\Update{}}{
+		\eIf{$\Neigs \neq \ObsNeigs$}{
+			$\Neigs \gets \ObsNeigs$ \;
+			$\Relay \gets \Rule(\Neigs)$ \;
+			$\ObsNeigs \gets \emptyset$ \;
+			$\ObsRelays \gets \emptyset$ \;	
+		}{
+			$\Relay \gets \Min(\ObsRelays)$ \;
+		}
+	}
+\caption{\labalg{overlay-based}Overlay-based broadcasting
+\protect\er{(1) no types and comments for variables? (2) delivery calls missing (3) line 18 should be outside the if on line 16 (4) lines 20--23 would fit in a single call (4) it is a daemon, not a demon (5) update is buggy: where is observed neig. created /maintained? (6) where is function applyOverlayRules()? This is the interesting one.}
+}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfVar{
+		\Delivered \;
+		$\MapT[]$ 	\tcp*[1]{map from message ids to timers}
+		
+		\BlockOfMapAttributes{
+			$\MapT[ \MsgId ].\RemTime$	\tcp*[1]{remaining time}
+			$\MapT[ \MsgId ].\MsgContent$ 	\tcp*[1]{content of message}
+		}
+	}
+	
+	\Fn(\tcp*[f]{on message reception}){\AlgoHandle{\Ms: \Msg}}{
+		\If{ $\Ms.\Id \notin \Delivered$ }{
+			$\Fwd \gets \LocRule(\MsgPos)$ \;
+			\eIf{$\Fwd = \T$}{
+				\If{ $\MapT[\MsgId] \neq \bot$ }{
+					$\MapT[\MsgId] \gets \bot$ \tcp*[1]{cancel timer}
+				}
+				$\MsgPos \gets \GetPo()$ \;
+				$\AlgoSend(\Ms)$ \;
+				$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
+			}{
+				$\MapT[\MsgId] \gets \TimerFunc$ \tcp*[1]{create new timer}
+				$\MapT[\MsgId].\RemTime \gets \Timeout(\MsgPos)$ \;
+				$\MapT[\MsgId].\MsgContent \gets \Ms.\MsgContent$ \tcp*[1]{keep message payload}
+				\BlockOfMapTimerExpires{
+					$\MsgPos \gets \GetPo()$ \;
+					$\AlgoSend(\Ms)$ \;
+					$\Delivered \gets \Delivered \cup \{\Ms.\Id\}$
+				}
+			}
+		}
+	}
+
+\caption{\labalg{location-based}Location-based broadcasting
+\protect\er{(1) why do you consider only the first message? (line 8) (2) same as for the flooding algorithm, we never cancel a timed retransmission? But then what is the point of using locations if we eventually always flood???}
+}
+\end{algorithm}

@@ -1,0 +1,49 @@
+%!TEX root = main.tex
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	\BlockOfVar{
+		\Bool		\tcp*[1]{boolean of willingness to switch}
+		\AlgoPSwitch	\tcp*[1]{broadcast protocol that node wants to switch}
+	}
+	
+
+		\Fn(\tcp*[f]{Modification of message reception}){\FuncHandler{\Ms: \Msg}}{
+			\If{ \MsgSwitch $=$ TRUE }{
+				\eIf{ \MsgProtSwitch $=$ \AlgoPSwitch }
+				{
+					\FuncSwitch (\AlgoPSwitch)\;
+					\Bool = FALSE
+				}{
+					\If{ \MsgPid $=$ \AlgoPSwitch  }{
+						\FuncSwitch (\AlgoPSwitch)\;
+						\Bool = FALSE
+					}
+				}
+			}	
+			Continuing received mechanism\;
+		}
+		
+		\Fn(\tcp*[f]{on propose check adaptation trigger}){trigger(MACTimer)}{
+			\eIf{Density >= 15}
+			{
+				\If{\AlgoPid $\neq$ flooding}
+				{
+					\Bool = TRUE\;
+					\AlgoPSwitch = flooding
+				}
+				
+			}{
+				\If{\AlgoPid $\neq$ MPR}
+				{
+					\Bool = TRUE\;
+					\AlgoPSwitch = MPR
+				}
+			}
+		}
+
+
+\caption{\labalg{SWSP}Share Will Switch Policy}
+\end{algorithm}

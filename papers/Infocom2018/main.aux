@@ -1,0 +1,173 @@
+\relax 
+\bibstyle{IEEEtran}
+\citation{Bellavista2013}
+\citation{Williams2002}
+\citation{basagni2004mobile}
+\citation{Ruiz2015}
+\citation{Aschenbruck2009}
+\citation{DensityMobDrivenEval}
+\citation{Camp2002}
+\citation{bai2004mobility}
+\citation{Ramdhany2008}
+\citation{hypergossiping}
+\citation{Zhang2005}
+\citation{Viswanath02anadaptive}
+\citation{Abdou2012}
+\citation{ProbFlood}
+\citation{Kaixin2002}
+\citation{akhouya:2011:AAI:2030797.2030830}
+\citation{Leitao2010}
+\citation{struct_unstruct_measurement_atc06}
+\citation{hypo_icact09}
+\citation{flower_cdn_edbt09}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}}
+\newlabel{sect:introduction}{{I}{1}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related work}{1}}
+\newlabel{sect:relatedwork}{{II}{1}}
+\citation{hypergossiping}
+\citation{Ni1999}
+\citation{Cheng2005}
+\citation{Zhang2005}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Survey of evaluation criteria used in different adaptive broadcast algorithms. \er {The table mixes several aspects that should probably be separated. I would recommend to have: (1) the characteristics of the protocol, e.g. does it use controlled flooding, an overlay, or both, does it combines two protocols, or adjusts the parameters for a protocol, or does both, is it autonomous or does it rely on some form of infrastructure, etc. (2) the mechanism used for the adaptation (mechanism = does it switch protocols, does it ensure interoperation, etc. and the policy = does it use threshold-based rules etc.). Then, (3) the type of information considered for the adaptation (most often, the density -- there are no others?). And finally, (4) what is required to collect this information (these are the col. we already have here). I am not sure to see the interest of the "Piggyback control messages" column: can't all approaches that use periodic messages also embed information in broadcast messages instead? Finally it is indicated that we use a stochastic decision: I am not sure about this?} }}{2}}
+\newlabel{tab:rw}{{I}{2}}
+\citation{Viswanath02anadaptive}
+\citation{Abdou2012}
+\citation{Dhoutaut2006}
+\citation{ProbFlood}
+\citation{Ni1999}
+\citation{Peng2000}
+\citation{Stojmenovic20028}
+\citation{Kaixin2002}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Overview}{3}}
+\newlabel{sect:overview}{{III}{3}}
+\newlabel{alg:network_api}{{1}{3}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Network layer API}}{3}}
+\newlabel{alg:protocol_api}{{2}{3}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces Broadcast protocol API}}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-A}}System model}{3}}
+\newlabel{sect:overview:system_model}{{\unhbox \voidb@x \hbox {III-A}}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Architecture of the system}}{4}}
+\newlabel{fig:system_architecture}{{1}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {III-B}}Framework of adaptation}{4}}
+\newlabel{sect:overview:adaptation_framework}{{\unhbox \voidb@x \hbox {III-B}}{4}}
+\newlabel{sect:overview:interoperation_layer}{{\unhbox \voidb@x \hbox {III-B}1}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {III-B}1}Interoperation layer}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Broadcast interoperability}{4}}
+\newlabel{sect:mechanism}{{IV}{4}}
+\newlabel{alg:typesOfFlooding}{{3}{5}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces Flooding-based protocols \er {Several todos in this algorithm: (1) there are no deliver() calls to the application; (2) it is not possible to reach line 21 after the first reception due to line 15. (2) fixed timer based and random timer base are very close, they should be merged. (3) in the counter based case the message will never be delivered to the application as we will never reach line 25. It is not necessary to declare new variables such as t to hold a random value. In these algorithms, the retransmission is never canceled even if the same message is received several times. I thought this was the principle of the timer based algorithms. It is also not necessary to write "on timer expires" but to use a simple wait() command -- this is pseudocode.} }}{5}}
+\newlabel{alg:overlay-based}{{4}{5}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {4}{\ignorespaces Overlay-based broadcasting \er {(1) no types and comments for variables? (2) delivery calls missing (3) line 18 should be outside the if on line 16 (4) lines 20--23 would fit in a single call (4) it is a daemon, not a demon (5) update is buggy: where is observed neig. created /maintained? (6) where is function applyOverlayRules()? This is the interesting one.} }}{5}}
+\citation{DensityMobDrivenEval}
+\newlabel{alg:location-based}{{5}{6}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {5}{\ignorespaces Location-based broadcasting \er {(1) why do you consider only the first message? (line 8) (2) same as for the flooding algorithm, we never cancel a timed retransmission? But then what is the point of using locations if we eventually always flood???} }}{6}}
+\newlabel{alg:adaptation_mechanism_simple}{{6}{6}}
+\newlabel{alg:adaptation_mechanism_simple:receive}{{4}{6}}
+\newlabel{alg:adaptation_mechanism_simple:eval_ids}{{5}{6}}
+\newlabel{alg:adaptation_mechanism_simple:handle}{{6}{6}}
+\newlabel{alg:adaptation_mechanism_simple:init}{{8}{6}}
+\newlabel{alg:adaptation_mechanism_simple:emit}{{9}{6}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {6}{\ignorespaces Simple adaptation mechanism}}{6}}
+\newlabel{alg:adaptation_mechanism}{{7}{6}}
+\newlabel{alg:adaptation_mechanism:timeout}{{2}{6}}
+\newlabel{alg:adaptation_mechanism:eval_ids}{{11}{6}}
+\newlabel{alg:adaptation_mechanism:handle}{{14}{6}}
+\newlabel{alg:adaptation_mechanism:set_timer}{{18}{6}}
+\newlabel{alg:adaptation_mechanism:emit}{{22}{6}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {7}{\ignorespaces Efficient adaptation mechanism}}{6}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Adaptation policies}{6}}
+\newlabel{sect:policies}{{V}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-A}}Local Policy}{7}}
+\newlabel{sect:policies:Local}{{\unhbox \voidb@x \hbox {V-A}}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-B}}Share Will Switch Policy}{7}}
+\newlabel{sect:policies:SWSP}{{\unhbox \voidb@x \hbox {V-B}}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Evaluation}{7}}
+\newlabel{sect:evaluation}{{VI}{7}}
+\newlabel{alg:alg:policies:two_phase_collective_policy}{{8}{7}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {8}{\ignorespaces Collective enactment of an elasticity rule (disposal of data structures omitted for clarity).}}{7}}
+\citation{Varga:2008:OOS:1416222.1416290}
+\citation{BCM4329}
+\citation{mobility_density_model}
+\newlabel{alg:LocaPolicy}{{9}{8}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {9}{\ignorespaces Local Policy}}{8}}
+\newlabel{alg:SWSP}{{10}{8}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {10}{\ignorespaces Share Will Switch Policy}}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-A}}Simulation Environment}{8}}
+\newlabel{sect:simulation-env}{{\unhbox \voidb@x \hbox {VI-A}}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0a}Simulator.}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0b}Energy Model.}{8}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Broadcom BCM4329 power consumption modes}}{8}}
+\newlabel{tab:wifi-chip}{{II}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0c}Communication Scenario.}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0d}Simulation time.}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0e}Mobility Model.}{8}}
+\citation{DensityMobDrivenEval}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Parameters of the mobility model.}}{9}}
+\newlabel{tab:mobility}{{III}{9}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-A}0f}Algorithm-specific parameters.}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-B}}Evaluation metrics}{9}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-B}0g}Coverage.}{9}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-B}0h}Saved Rebroadcasts (SRE).}{9}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-B}0i}Broadcast latency.}{9}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\unhbox \voidb@x \hbox {VI-B}0j}Energy consumption.}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-C}}Cost of adaptation mechanisms}{9}}
+\newlabel{sect:cost-adaption}{{\unhbox \voidb@x \hbox {VI-C}}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Distribution of Power consumption per glue mechanism variant }}{9}}
+\newlabel{fig:energy-consumption-glue}{{2}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-D}}Comparison with base protocols}{9}}
+\newlabel{sect:comparison-base-protocols}{{\unhbox \voidb@x \hbox {VI-D}}{9}}
+\citation{Carroll:2010:APC:1855840.1855861}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Broadcast Latency per glue mechanism }}{10}}
+\newlabel{fig:delay-time-glue}{{3}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Saved rebroadcast messages per glue mechanism }}{10}}
+\newlabel{fig:sbr-glue}{{4}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Coverage per algorithm }}{10}}
+\newlabel{fig:coverage}{{5}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Distribution of Power consumption per algorithm }}{10}}
+\newlabel{fig:energy-consumption}{{6}{10}}
+\bibdata{references}
+\bibcite{Bellavista2013}{1}
+\bibcite{Williams2002}{2}
+\bibcite{basagni2004mobile}{3}
+\bibcite{Ruiz2015}{4}
+\bibcite{Aschenbruck2009}{5}
+\bibcite{DensityMobDrivenEval}{6}
+\bibcite{Camp2002}{7}
+\bibcite{bai2004mobility}{8}
+\bibcite{Ramdhany2008}{9}
+\bibcite{hypergossiping}{10}
+\bibcite{Zhang2005}{11}
+\bibcite{Viswanath02anadaptive}{12}
+\bibcite{Abdou2012}{13}
+\bibcite{ProbFlood}{14}
+\bibcite{Kaixin2002}{15}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Broadcast Latency per algorithm }}{11}}
+\newlabel{fig:delay-time}{{7}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VI-E}}Discussion}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{11}}
+\newlabel{sect:conclusion}{{VII}{11}}
+\@writefile{toc}{\contentsline {section}{References}{11}}
+\bibcite{Leitao2010}{16}
+\bibcite{struct_unstruct_measurement_atc06}{17}
+\bibcite{hypo_icact09}{18}
+\bibcite{flower_cdn_edbt09}{19}
+\bibcite{Ni1999}{20}
+\bibcite{Cheng2005}{21}
+\bibcite{Dhoutaut2006}{22}
+\bibcite{Peng2000}{23}
+\bibcite{Stojmenovic20028}{24}
+\bibcite{Varga:2008:OOS:1416222.1416290}{25}
+\bibcite{BCM4329}{26}
+\bibcite{mobility_density_model}{27}
+\bibcite{Carroll:2010:APC:1855840.1855861}{28}
+\bibcite{SurveyRuiz}{29}
+\bibcite{survey_routing}{30}
+\bibcite{ieee1997wireless}{31}
+\citation{SurveyRuiz}
+\citation{survey_routing}
+\citation{SurveyRuiz}
+\citation{SurveyRuiz}
+\citation{SurveyRuiz}
+\citation{DensityMobDrivenEval}
+\@writefile{toc}{\contentsline {section}{Appendix}{12}}
+\citation{ieee1997wireless}

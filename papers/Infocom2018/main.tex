@@ -1,0 +1,57 @@
+\documentclass[10pt, conference, letterpaper]{IEEEtran}
+
+\usepackage{main}
+
+\begin{document}
+
+\title{Emergent Overlays: Autonomous Adaptation for Efficient Broadcasting in Heterogeneous Mobile Ad-Hoc Networks}
+%\renewcommand{\shorttitle}{Emergent overlays: Adaptation for broadcasting in MANETs}
+
+
+\author{\IEEEauthorblockN{}
+\IEEEauthorblockA{}
+}
+
+\maketitle
+
+\begin{abstract}
+Broadcast is a fundamental operation in Mobile Ad-Hoc Networks (MANETs).
+A large variety of broadcast protocols have been proposed to deal with network dynamics, maximize coverage and minimize the impact of collisions.
+ %, that is, the presence of collisions and contentions in MANETs as a consequence of the dissemination of messages.
+These protocols follow either an unstructured approach based on the control of a flooding process or a more structured approach involving the creation of a dissemination overlay.
+The selection of the appropriate broadcast protocol for a MANET is a difficult task.
+Each protocol is better adapted to particular configurations of nodes, depending in particular on their density over space or their mobility.
+For heterogeneous node configurations, a single protocol is only adequate for some regions of the network offering poor performance elsewhere.
+This paper presents a novel adaptive approach to broadcast in heterogeneous MANETs.
+%We develop a novel mechanism allowing MANETs nodes to pick between multiple available broadcast protocols.
+This approach allows MANET nodes to pick dynamically the most appropriate broadcast protocols for different regions of the network.
+Our approach ensure the interoperability between heterogeneous protocols with no impact on broadcast coverage.
+\er{following sentences are probably giving too much detail and can be summarized}
+It allows nodes in dense and relatively static zones to dynamically emerge overlays where they are beneficial, while the rest of the system uses more flexible unstructured approaches.
+Our policies, based on local and collective observation of the MANET state, allow nodes to collectively decide when to switch and aim at minimizing energy costs, while maximizing performance and coverage.
+%
+% We perform simulations and evaluate our approach using a mobility model that mimics how humans move to zones of interest, where overlays of nodes emerge as a result of applying our adaptive solution.
+%
+Our evaluation results show that our adaptive approach leads to better performance and lower network consumption.
+% by dynamically selecting the most appropriate protocols for different regions of the network.
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+\input{introduction}
+\input{related}
+\input{overview}
+\input{mechanism}
+\input{policies}
+%\input{proposal} %% will be removed
+\input{evaluation}
+\input{conclusion}
+
+\bibliography{references}
+
+\appendix
+\input{problem_statement}
+
+\end{document}
+
+

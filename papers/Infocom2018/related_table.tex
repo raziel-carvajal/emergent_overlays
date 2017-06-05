@@ -1,0 +1,61 @@
+%!TEX root = main.tex
+
+%\er{comments on the table:
+%\begin{itemize}
+	%	\item I would suggest using consistently the check and cross marks for positive/negative things. Here, in the first col. you want to emphasize that all other works require the knowledge of 1-hop neighbors. But the ticks may appear as something 'positive'.
+	%I would replace "Mechanism" on top by "Requirements", and use categories names that emphasize that these are not good things.
+	%\item I do not know what you mean by deterministic decisions; I do not think we are deterministic either (unless I am misled on the use of this term).
+	%\item The table can easily fit on one col. I can help with this (later)
+%\end{itemize}
+%}
+
+\newcommand*\rot{\rotatebox{40}}
+
+%\newcommand{\YES}{{\scriptsize $\surd$ }\xspace}
+\newcommand{\YES}{{\scriptsize \ding{51}}\xspace}
+\newcommand{\NO}{{\scriptsize \ding{53}}\xspace}
+\newcommand{\DONTKNOW}{ --\xspace}
+\newcommand{\USER}{\textit{User}\xspace}
+\newcommand{\KERNEL}{ \textit{Kernel}\xspace}
+
+\begin{table*}[t!]
+\setlength\tabcolsep{1pt}
+\renewcommand\arraystretch{0.99}
+\footnotesize
+\centering
+
+\newcolumntype{A}{ >{\raggedright} m{0.15\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} p{0.05\linewidth} }
+%\newcolumntype{D}{ >{\centering\arraybackslash} p{0.11\linewidth} }
+\newcolumntype{E}{ >{\centering\arraybackslash} p{0.12\linewidth} }
+%\newcolumntype{F}{ >{\centering\arraybackslash} p{0.12\linewidth} }
+
+\begin{tabular}{ACCCCCCCCC}
+
+\toprule
+
+& \multicolumn{7}{c}{Requirements} \\
+\cline{2-10}\\
+
+Algorithm & \rot{\shortstack[l]{No need for\\One-hop neighbor}} & \rot{\shortstack[l]{No need for\\Two-hop neighbor}} & \rot{\shortstack[l]{No need for periodic\\control messages}} & \rot{\shortstack[l]{Piggyback\\control messages}} & \rot{Use of thresholds} & \rot{Stochastic decision} & \rot{Source-independent}  & \rot{\shortstack[l]{Allows Switch Protocol}} &\rot{\shortstack[l]{Full coverage\\( $>95\%$ )}}\\
+
+\midrule
+
+{\scriptsize Hypergossiping~\cite{hypergossiping} } & \NO & \YES & \NO & \YES & \YES & \YES & \YES & \NO & \NO\\ \hline
+{\scriptsize DPR~\cite{Zhang2005} } & \NO & \NO & \YES & \NO & \NO & \NO & \YES & \NO & \NO \\ \hline
+{\scriptsize Viswanath and Obraczka~\cite{Viswanath02anadaptive} } & \NO & \YES & \NO & \NO & \YES & \YES & \NO & \NO & \NO \\ \hline
+{\scriptsize Smart-Flooding~\cite{Abdou2012} } & \NO & \YES & \NO & \NO & \NO & \NO & \NO & \NO & \YES \\ \hline
+{\scriptsize Cartigny and Simplot~\cite{ProbFlood} } & \NO & \YES & \NO & \NO & \YES & \NO & \NO & \NO & \NO \\ \hline
+{\scriptsize Xu and Gerla~\cite{Kaixin2002} } & \NO & \NO & \NO & \YES & \YES & \YES & \YES & \NO & \YES \\ \hline
+{\scriptsize Our approach } & \YES & \YES & \YES & \YES & \YES & \YES & \YES & \YES & \YES\\ 
+
+%Optimized broadcast protocol for sensor networks \\
+
+\bottomrule
+\end{tabular}
+\caption{Survey of evaluation criteria used in different adaptive broadcast algorithms.
+\protect\er{The table mixes several aspects that should probably be separated. I would recommend to have: (1) the characteristics of the protocol, e.g. does it use controlled flooding, an overlay, or both, does it combines two protocols, or adjusts the parameters for a protocol, or does both, is it autonomous or does it rely on some form of infrastructure, etc. (2) the mechanism used for the adaptation (mechanism = does it switch protocols, does it ensure interoperation, etc. and the policy = does it use threshold-based rules etc.). Then, (3) the type of information considered for the adaptation (most often, the density -- there are no others?). And finally, (4) what is required to collect this information (these are the col. we already have here). I am not sure to see the interest of the "Piggyback control messages" column: can't all approaches that use periodic messages also embed information in broadcast messages instead? Finally it is indicated that we use a stochastic decision: I am not sure about this?}
+}% In the third column, \textit{Per} stands for \textit{Periodic} and \textit{Determ} for \textit{Deterministic}}
+\label{tab:rw}
+%  \vspace{-0.4cm}
+\end{table*}
