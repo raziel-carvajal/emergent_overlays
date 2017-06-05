@@ -1,0 +1,63 @@
+Context
+  - Cutting-edge technologies (IoT, new cellphones, etc) seen as a revival of MANETs
+  - Definition of: MANET, area of communication for nodes (circle of radio Tx), use transceiver in nodes, nodes densities
+  - Basic way in which nodes communicate within a MANET, with their surroundings or by using nodes as relays
+  - Metrics of importance for nodes: network coverage, efficiency in message dissemination and energy consumption
+  - Common deployment scenarios over human patterns of mobility and different densities of nodes
+
+Motivation
+  - The fundamental role of broadcast in basic services of communication
+  - The broadcast storm problem
+  - Recent taxonomy of broadcast algorithms according to Ruiz
+      - focus on solutions that do not change transmission range
+
+Problem
+  - variety of broadcast algorithms + different deployment scenarios + any common metrics to measure the performance of algorithms = lack in the understanding of which is the best algorithm that better copes with the dynamics in a given deployment scenario
+
+Contribution
+  - Comparative study of broadcast algorithms for MANETs to select the algorithm that performs better is a given deployment scenario
+
+Related work
+  - basic ways of control a simple flooding solution (counter-based, location-based, area-based)
+  - protocols representative of their class
+      - no underlying topology
+          - simple flooding
+          - probabilistic solution (Probflood)
+          - location-based solution (ABBA)
+      - underlying topology (MPR, CDS)
+  - show table of solutions where we observe the lack of a comprehensive study
+
+Deployment scenario
+  - Our own implementation of broadcast algorithms as framework
+  - Representation of how humans move via the truncated-levy-walk model
+  - Random positioning of nodes over different densities
+  - Simulation of a commercial chip found in modern mobile devices, important for power consumption
+  - Simulation of wireless standard IEEE802.11 with (CSMA/CS)
+  - Explain the following metrics: network coverage, saved-rebroadcast, energy consumption, broadcast session time and number of relays
+  - Experimental settings:
+      - For algorithms: frequency of control messages, range of timers, parameters in probabilistic approach
+      - Size for area of communication, transmission range of nodes, Omnet++/INET, simulation time, energy consumed by each mode of the chip, we do follow CSMA/CS as it is
+
+Evaluation in a static scenario and with mobility
+  - Show one plot per each of the following metrics: network coverage, saved-rebroadcast, energy consumption, broadcast session time and number of relays
+
+Discussion and future work
+  - Summarize in form of a table which protocol fits better for a deployment scenario with and without mobility
+  - Perspectives of interoperability and adaptation
+    - nodes with heterogeneous configurations
+    - enforce of broadcast algorithms with mechanisms of interoperability
+
+Conclusion
+  - summarize
+  - retake problem statement and compare with our contribution
+  - identification of future perspectives with adaptive approaches
+
+Approximative number of slides per section (18 slides approx)
+- Context: 2
+- Motivation 2
+- Problem and Contribution: 1
+- Related work: 4
+- Deployment scenario: 3
+- Evaluation: 4
+- Discussion and future work: 1
+- Conclusion: 1
