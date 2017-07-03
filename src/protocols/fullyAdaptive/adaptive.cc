@@ -199,7 +199,7 @@ FullyAdaptive::processStart()
     DO_ADAPTATION = gateway->register_new_control_message();
     gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 
-    std::string monitoring_class("inet::SnifferBasedMonitoring");
+    std::string monitoring_class("inet::BroadcastMsgBasedMonitor");
     monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
     monitor->initialise(gateway);
 
