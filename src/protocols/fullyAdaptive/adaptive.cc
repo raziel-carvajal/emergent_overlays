@@ -38,6 +38,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
       case START:
+        cout << getLogHeader() << "handleMessageWhenUp in FullyAdaptive " << endl;
         BroadcastingAppBase::handleMessageWhenUp(msg);
         break;
       case SAY_HELLO:
@@ -120,7 +121,6 @@ void
 FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
-//  gateway->emitDensityApproximation(density);
   if (policy == AdaptationPolicy::LOCAL) {
     if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
       change_current_protocol("Mpr_t2");
