@@ -32,6 +32,9 @@ get.arguments <- function() {
   parser$add_argument('--plot', dest='plot', action="store_true",
                       help='When this flag is specified, a pdf file with the name of the configuration is generared. The file contains a bunch of charts.')
 
+  parser$add_argument('--splitted', dest='splitted', action="store_true",
+                      help='If used, the script generates data per protocol when there are mnay used in a single scenario')
+
   parser$add_argument('--show-averages', dest='showAverages', action="store_true",
                       help='Show the average of all the metrics')
 
@@ -212,14 +215,33 @@ save.duplicated.messages <- function(data, outputPath, expeId){
 }
 
 
-save.power.level <- function(power.level, outputPath, expeId){
+save.power.level <- function(power.level, outputPath, expeId, protocol.per.node=NULL){
   pl <- power.level[lapply(power.level, length) > 0]
-  powerLevelInfo <- data.frame( whatever = -1*as.numeric(unlist(c(tail(pl, 1)))) )
-  colnames(powerLevelInfo) <- c(expeId)
+  values <- -1*as.numeric(unlist(c(tail(pl, 1))))
+  if (is.null(protocol.per.node)) {
+    protocol.per.node <- data.frame(protocol=rep('*', length(values)))
+  }
+  powerLevelInfo <- data.frame( whatever = values, protocol=protocol.per.node$protocol )
+  colnames(powerLevelInfo) <- c(expeId, "protocol")
+
+  if (length(unique(protocol.per.node$protocol)) > 1) {
+    sapply(unique(protocol.per.node$protocol), function (p) {
+      s <- powerLevelInfo[powerLevelInfo$protocol == as.character(p),1, drop=F]
+      the.name <- paste(names(s)[1], as.character(p), sep="-")
+      colnames(s) <- c(the.name)
+
+      write.table(
+        s,
+        file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
+        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        )
+    })
+  }
+
   write.table(
-            powerLevelInfo,
+            powerLevelInfo[, 1, drop=F],
             file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-            row.names = F, append = F
+            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
   )
 }
 
@@ -236,24 +258,65 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
 }
 
 
-save.mac.frames.sent <- function(data, outputPath, expeId){
-  values <- data.frame( whatever = data$scalars$value )
-  colnames(values) <- c(expeId)
+save.mac.frames.sent <- function(data, outputPath, expeId, protocol.per.node = NULL){
+  values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
+  values <- values[order(values$node),]
+  if (is.null(protocol.per.node)) {
+    protocol.per.node <- data.frame(protocol=rep('*', length(values$value)))
+  }
+  values <- data.frame( whatever = values$value, protocol=protocol.per.node$protocol )
+  colnames(values) <- c(expeId, "protocol")
+
+  if (length(unique(protocol.per.node$protocol)) > 1) {
+    sapply(unique(protocol.per.node$protocol), function (p) {
+      s <- values[values$protocol == as.character(p),1, drop=F]
+      the.name <- paste(names(s)[1], as.character(p), sep="-")
+      colnames(s) <- c(the.name)
+
+      write.table(
+        s,
+        file = build.filename(outputPath, "macFramesSent", expeId),
+        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        )
+    })
+  }
+
   write.table(
-            values,
+            values[, 1, drop=F],
             file = build.filename(outputPath, "macFramesSent", expeId),
-            row.names = F, append = F
+            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
   )
+
 }
 
 
-save.mac.frames.received <- function(data, outputPath, expeId){
-  values <- data.frame( whatever = data$scalars$value )
-  colnames(values) <- c(expeId)
+save.mac.frames.received <- function(data, outputPath, expeId, protocol.per.node=NULL){
+  values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
+  values <- values[order(values$node),]
+  if (is.null(protocol.per.node)) {
+    protocol.per.node <- data.frame(protocol=rep('*', length(values$value)))
+  }
+  values <- data.frame( whatever = values$value, protocol=protocol.per.node$protocol )
+  colnames(values) <- c(expeId, "protocol")
+
+  if (length(unique(protocol.per.node$protocol)) > 1) {
+    sapply(unique(protocol.per.node$protocol), function (p) {
+      s <- values[values$protocol == as.character(p),1, drop=F]
+      the.name <- paste(names(s)[1], as.character(p), sep="-")
+      colnames(s) <- c(the.name)
+
+      write.table(
+        s,
+        file = build.filename(outputPath, "macFramesReceived", expeId),
+        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        )
+    })
+  }
+
   write.table(
-            values,
+            values[, 1, drop=F],
             file = build.filename(outputPath, "macFramesReceived", expeId),
-            row.names = F, append = F
+            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
   )
 }
 
@@ -565,6 +628,55 @@ exportDataset <- function(ds, dst){
   else write.table(ds, file = dst, col.names = F, row.names = F, append = T, sep=",")
 }
 
+compute.time.per.protocol <- function(changes.of.protocol) {
+
+  d <- changes.of.protocol$vectordata
+  df <- data.frame(node=d$resultkey, t=d$x, v=d$y)
+
+  nodes <- unique(df$node)
+
+  protocol.changes <- lapply(nodes, function(n) { df[df$node==n,] } )
+
+  max.time = max(df$t)
+
+  my.shift.left <- function (x, shift, emptyvalue=NA) c(x[(1+shift):(length(x))], rep(emptyvalue, shift))
+
+  my.shift.left <- function (x, shift, emptyvalue=NA) {
+  	if (length(x) > shift ) (c(x[(1+shift):(length(x))], rep(emptyvalue, shift)))	else (rep(emptyvalue, length(x)))
+  }
+
+  df <- lapply(protocol.changes, function (pc) {
+  	times = pc$t
+  	tmp <- my.shift.left(times, 1, max.time)
+  	data.frame(node = pc$node, t=times, v=pc$v, elapsed=(tmp - times))
+  })
+
+  times <- lapply(df, function (pc) {
+  	tmp <- unique(pc$v)
+  	node <- unique(pc$node)
+  	dd <- sapply(tmp, function(pro) sum(pc[pc$v == pro,]$elapsed))
+  	protocols <- sapply(tmp, intToUtf8)
+  	dd <- data.frame(node=rep(node, length(tmp)), protocol=protocols, elapsed.time=dd)
+    dd[dd$protocol!='E',]
+  })
+
+  tt <-do.call("rbind",lapply(times, function(pc) pc[max(pc$elapsed.time) == pc$elapsed.time,]))
+
+  print("Count of nodes executing a protocol")
+  print(lapply(unique(tt$protocol), function(t) data.frame(pro = t, count=length(tt[tt$protocol==t,]$protocol)) ))
+
+  tt
+}
+
+compute.median.density.per.node <- function(density.over.time) {
+  df <- density.over.time$vectordata
+  df <- data.frame(node=df$resultkey, t=df$x, v=df$y)
+  nodes <- unique(df$node)
+  # densities.total <- lapply(nodes, function(n) { df[df$node==n,] } )
+  densities <- lapply(nodes, function(n) { median(df[df$node==n,]$v) } )
+  densities
+}
+
 
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
 # 			- we can aggregate this in many ways
@@ -589,13 +701,22 @@ main <- function(args) {
 
   print(paste("Loading power consumption data file:", args$file))
   powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
+  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
+  print("DONE!")
 
   print(paste("Loading MAC frame data file:", args$file))
   mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
   mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
-
-  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
   print("DONE!")
+
+  protocol.per.node <- NULL
+  if (args$splitted) {
+    print(paste("Loading changes of protocol", args$file))
+    changes.of.protocol <- load.datafile(args$file, "name(protocol_change:vector)")
+    protocol.per.node <- compute.time.per.protocol(changes.of.protocol)
+    print(protocol.per.node)
+    print("DONE!")
+  }
 
   print("Computing maximal reception delay")
   bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
@@ -605,14 +726,14 @@ main <- function(args) {
 	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
 
   print("Exporting data")
-  save.power.level(pl.local, args$outputPath, args$configuration)
+  save.power.level(pl.local, args$outputPath, args$configuration, protocol.per.node)
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
-  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration)
-  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration)
+  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, protocol.per.node)
+  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, protocol.per.node)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior

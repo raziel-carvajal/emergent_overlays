@@ -91,7 +91,8 @@ for ((i=0;i<END;i++)); do
   # Rscript extract-charts.R --show-averages ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5
 	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
   #      exit 1
-	results=`Rscript extract-charts.R --show-averages ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5 | grep average_values`
+  # Rscript extract-charts.R --show-averages ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5
+	results=`Rscript extract-charts.R --show-averages --splitted ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5 | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 

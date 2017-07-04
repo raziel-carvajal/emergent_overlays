@@ -60,6 +60,8 @@ rm -f ../../results/broadcastSession* \
       ../../results/networkCoverage* \
       ../../results/relays* \
       ../../results/coverage* \
+      ../../results/macFramesReceived* \
+      ../../results/macFramesSent* \
       ../../results/*.pdf \
       ../../results/summary.csv
 
