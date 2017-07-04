@@ -42,20 +42,23 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         break;
       case SAY_HELLO:
         {
-          if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+          // temporary_check --;
+          if (temporary_check > 0 && gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
             auto p = build_hello_message();
             if (packet_to_piggybag) {
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
             gateway->send_package(p);
-            if (myself == "hostR0")
-              std::cerr << simTime() << " " << myself  << " : SENDING HELLO" << '\n';
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
             knownProtocols[current_protocol_name]->on_saying_hello();
           }
           cancelAndDelete(msg);
         }
+      break;
+      case HALT_SIMULATION_DELAY:
+        emit(signal_protocol_change, 'E');
+        BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
       default:
       	{
@@ -77,11 +80,11 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
   else if (msg->getKind() == UDP_I_DATA)
   {
   	auto initialProtocol = par("initialProtocol").stdstringValue();
-  	auto density = monitor->density_estimation();
-	if (initialProtocol != "middleware" && msg->getKind() == UDP_I_DATA) {
-	    gateway->emitDensityApproximation(density);
-	}
   	if (initialProtocol != "middleware") {
+      // if (withAdaptation) {
+      //   auto density = monitor->density_estimation();
+      //   gateway->emitDensityApproximation(density);
+      // }
 	    auto pkt = PK(msg);
 	    if (pkt->hasEncapsulatedPacket()) {
 	      pkt = pkt->getEncapsulatedPacket();
@@ -91,10 +94,10 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 	      if (willingToChange &&
 	          willing->getTargetProtocol() == willingToChangeToProtocol &&
 	          willingToChangeToProtocol != current_protocol_name) {
-	
+
 	        change_current_protocol(willingToChangeToProtocol);
 	        std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol << '\n';
-	
+
 	        if (!packet_to_piggybag) {
 	          packet_to_piggybag = new inet::WillingToChange("willing to change");
 	          packet_to_piggybag->setSender(myself.c_str());
@@ -120,25 +123,27 @@ void
 FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
-//  gateway->emitDensityApproximation(density);
+  gateway->emitDensityApproximation(density);
+  const string dense_region_protocol = "Mpr_t2";
+  const string sparse_region_protocol = "Flooding2";
   if (policy == AdaptationPolicy::LOCAL) {
-    if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
-      change_current_protocol("Mpr_t2");
+    if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
+      change_current_protocol(dense_region_protocol);
     }
-    else if (density < density_threshold_lower && current_protocol_name == "Mpr_t2") {
-      change_current_protocol("Flooding2");
+    else if (density < density_threshold_lower && current_protocol_name != sparse_region_protocol) {
+      change_current_protocol(sparse_region_protocol);
     }
   }
   else if (policy == AdaptationPolicy::SWSP) {
     bool change = false;
-    if (density > density_threshold_upper && current_protocol_name == "Flooding2") {
+    if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
       willingToChange = true;
-      willingToChangeToProtocol = "Mpr_t2";
+      willingToChangeToProtocol = dense_region_protocol;
       change = true;
     }
-    else if (density < density_threshold_lower && current_protocol_name == "Mpr_t2") {
+    else if (density < density_threshold_lower && current_protocol_name != sparse_region_protocol) {
       willingToChange = true;
-      willingToChangeToProtocol = "Flooding2";
+      willingToChangeToProtocol = sparse_region_protocol;
       change = true;
     }
     if (change && !packet_to_piggybag) {
@@ -180,6 +185,8 @@ FullyAdaptive::change_current_protocol(const std::string& protocol)
   current_protocol_name = protocol;
   gateway->setProtocolId(current_protocol_name);
 
+  emit(signal_protocol_change, current_protocol_name[0]);
+
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
     int n = std::stoi (myself.substr(5, myself.size()));
     auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
@@ -193,6 +200,8 @@ void
 FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
+
+  signal_protocol_change = this->registerSignal("protocol_change");
 
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {

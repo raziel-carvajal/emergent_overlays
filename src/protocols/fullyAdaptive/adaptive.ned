@@ -30,4 +30,6 @@ simple FullyAdaptive extends BroadcastingBase like IUDPApp
       string initialProtocol;
       string adaptation_policy = default("local"); // or "swsp" or "etienne"
       @class(inet::FullyAdaptive);
+
+      @statistic[protocol_change](title="The protocol has change"; record=vector; source=protocol_change);
 }

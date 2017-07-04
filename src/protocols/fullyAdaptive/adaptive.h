@@ -41,6 +41,10 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     };
 
   private:
+
+    int temporary_check = 3;
+
+
     int DO_ADAPTATION; // self-message ID
     AdaptationPolicy policy;
 
@@ -53,6 +57,9 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;
     int density_threshold_lower;
     int density_threshold_upper;
+
+    // events and signals
+    simsignal_t signal_protocol_change;
 };
 
 } //namespace
