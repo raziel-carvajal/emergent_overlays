@@ -160,11 +160,11 @@ Mpr_t2::process_payload(const Broadcast* m)
 		}
 
 		if (from_selector || gateway->bridge()) {
-			// gateway->broadcast(key, build_message_to_broadcast());
+			gateway->broadcast(key, build_message_to_broadcast());
 
-	      int n = std::stoi (myself.substr(5, myself.size()));
-	      auto delta = (((n % 50) + 1) * 0.001);
-	      gateway->delayed_broadcast(key, delta);
+	      // int n = std::stoi (myself.substr(5, myself.size()));
+	      // auto delta = (((n % 50) + 1) * 0.001);
+	      // gateway->delayed_broadcast(key, delta);
 		}
 	}
 }
