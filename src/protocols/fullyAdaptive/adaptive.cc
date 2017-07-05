@@ -41,8 +41,10 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         break;
       case SAY_HELLO:
         {
+          //XXX this variable is not declared in any other scope, I comment it!
           // temporary_check --;
-          if (temporary_check > 0 && gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+          //if (temporary_check > 0 && gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+          if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
             auto p = build_hello_message();
             if (packet_to_piggybag) {
               p->encapsulate(packet_to_piggybag);
@@ -214,7 +216,7 @@ FullyAdaptive::processStart()
 
   signal_protocol_change = this->registerSignal("protocol_change");
 
-  DO_ADAPTATION = gateway->register_new_control_message();
+  //DO_ADAPTATION = gateway->register_new_control_message();
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   std::string monitoring_class("inet::SnifferBasedMonitoring");
   monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
