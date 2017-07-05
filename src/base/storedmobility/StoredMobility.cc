@@ -48,7 +48,8 @@ NodeStoredMobility::get_next_location()
 		throw runtime_error("no more locations");
 	}
 	auto p = locations.back();
-	locations.pop_back();
+  	if (locations.size() > 1)
+    	locations.pop_back();
 	return p;
 }
 
@@ -92,8 +93,8 @@ StoredMobility::readNodeMobilities()
 			mobility.push_back(NodeStoredMobility(time_step));
 		}
 
-	  cerr << "Number of node is " << nr_nodes << endl;
-	  cerr << "The time step is " << time_step << " seconds" << endl;
+		cerr << "Number of node is " << nr_nodes << endl;
+		cerr << "The time step is " << time_step << " seconds" << endl;
 		do {
 
 			for (int i = 0 ; i < nr_nodes; i++ ) {
