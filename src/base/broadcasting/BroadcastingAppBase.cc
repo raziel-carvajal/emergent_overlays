@@ -377,10 +377,10 @@ BroadcastingAppBase::initialize(int stage)
 void
 BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
 {
-    // cout << getLogHeader() << "Message: " <<  msg->getKind() << endl;
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
             case START: {
+                  cout << getLogHeader() << "handleMessageWhenUp in BroadcastAppBase " << endl;
                   this->processStart();
                 }
                 cancelAndDelete(msg);

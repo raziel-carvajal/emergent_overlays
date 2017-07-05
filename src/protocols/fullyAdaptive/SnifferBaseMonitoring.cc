@@ -30,6 +30,7 @@ public:
     if (m->isSelfMessage()) {
       if (m->getKind() == update_message) {
         // update and remove if necessary
+        std::cout << simTime().str() << " updating neighbors for message [" << m->getKind() << "]" << endl;
         for(auto it = knownNeighbors.begin(), ite = knownNeighbors.end(); it != ite;) {
           it->second++;
           it = (it->second == 3)?(knownNeighbors.erase(it)): (std::next(it, 1));
@@ -43,10 +44,12 @@ public:
       auto pkt = PK(m);
       auto hello = dynamic_cast<const inet::broadcasting::Hello*>(pkt);
       if (hello && hello->getSender() != gateway->get_name()) {
+        std::cout << simTime().str() << " doing neighs <- 0 for message [" << m->getKind() << "]" << endl;
         knownNeighbors[hello->getSender()] = 0;
       }
       auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
       if (br && br->getSender() != gateway->get_name()) {
+        std::cout << simTime().str() << " doing neighs <- 0 for message [" << m->getKind() << "]" << endl;
         knownNeighbors[br->getSender()] = 0;
       }
       return false;

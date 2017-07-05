@@ -39,6 +39,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
       case START:
+        cout << getLogHeader() << "handleMessageWhenUp in FullyAdaptive " << endl;
         BroadcastingAppBase::handleMessageWhenUp(msg);
         break;
       case SAY_HELLO:
