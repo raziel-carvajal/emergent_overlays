@@ -129,8 +129,8 @@ FullyAdaptive::adaptation()
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   if (!withAdaptation) return;
 
-  const string dense_region_protocol = "Mpr_t2";
-  const string sparse_region_protocol = "Abba2";
+  const string dense_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "dense_region");
+  const string sparse_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "sparse_region");
   if (policy == AdaptationPolicy::LOCAL) {
     if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
       change_current_protocol(dense_region_protocol);

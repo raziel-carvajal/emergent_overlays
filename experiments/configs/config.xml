@@ -1,4 +1,8 @@
 <root>
+  <Protocol name="AdaptiveBase">
+    <Parameter name="sparse_region" value="Flooding2" type="string"></Parameter>
+    <Parameter name="dense_region" value="Mpr_t2" type="string"></Parameter>
+  </Protocol>
   <Protocol name="Abba2">
     <Parameter name="timeOut" value="0.02" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
