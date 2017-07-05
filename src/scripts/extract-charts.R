@@ -215,25 +215,28 @@ save.duplicated.messages <- function(data, outputPath, expeId){
 }
 
 
-save.power.level <- function(power.level, outputPath, expeId, protocol.per.node=NULL){
+save.power.level <- function(power.level, outputPath, expeId, class.of.nodes=NULL){
   pl <- power.level[lapply(power.level, length) > 0]
   values <- -1*as.numeric(unlist(c(tail(pl, 1))))
-  if (is.null(protocol.per.node)) {
-    protocol.per.node <- data.frame(protocol=rep('*', length(values)))
+  if (is.null(class.of.nodes)) {
+    class.of.nodes <- rep('*', length(values))
   }
-  powerLevelInfo <- data.frame( whatever = values, protocol=protocol.per.node$protocol )
+  powerLevelInfo <- data.frame( whatever = values, protocol=class.of.nodes )
   colnames(powerLevelInfo) <- c(expeId, "protocol")
 
-  if (length(unique(protocol.per.node$protocol)) > 1) {
-    sapply(unique(protocol.per.node$protocol), function (p) {
-      s <- powerLevelInfo[powerLevelInfo$protocol == as.character(p),1, drop=F]
+  print("COCO")
+  print(class.of.nodes)
+
+  if (length(unique(class.of.nodes)) > 1) {
+    sapply(unique(class.of.nodes), function (p) {
+      s <- powerLevelInfo[powerLevelInfo$protocol == p,1, drop=F]
       the.name <- paste(names(s)[1], as.character(p), sep="-")
       colnames(s) <- c(the.name)
 
       write.table(
         s,
         file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        row.names = F, append = (p!=unique(class.of.nodes)[1])
         )
     })
   }
@@ -241,7 +244,7 @@ save.power.level <- function(power.level, outputPath, expeId, protocol.per.node=
   write.table(
             powerLevelInfo[, 1, drop=F],
             file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
+            row.names = F, append = (length(unique(class.of.nodes)) > 1)
   )
 }
 
@@ -258,25 +261,25 @@ save.time.of.power.level <- function(data, outputPath, expeId) {
 }
 
 
-save.mac.frames.sent <- function(data, outputPath, expeId, protocol.per.node = NULL){
+save.mac.frames.sent <- function(data, outputPath, expeId, class.of.nodes = NULL){
   values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
   values <- values[order(values$node),]
-  if (is.null(protocol.per.node)) {
-    protocol.per.node <- data.frame(protocol=rep('*', length(values$value)))
+  if (is.null(class.of.nodes)) {
+    protocol.per.node <- rep('*', length(values$value))
   }
-  values <- data.frame( whatever = values$value, protocol=protocol.per.node$protocol )
+  values <- data.frame( whatever = values$value, protocol=class.of.nodes )
   colnames(values) <- c(expeId, "protocol")
 
-  if (length(unique(protocol.per.node$protocol)) > 1) {
-    sapply(unique(protocol.per.node$protocol), function (p) {
-      s <- values[values$protocol == as.character(p),1, drop=F]
+  if (length(unique(class.of.nodes)) > 1) {
+    sapply(unique(class.of.nodes), function (p) {
+      s <- values[values$protocol == p,1, drop=F]
       the.name <- paste(names(s)[1], as.character(p), sep="-")
       colnames(s) <- c(the.name)
 
       write.table(
         s,
         file = build.filename(outputPath, "macFramesSent", expeId),
-        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        row.names = F, append = (p!=unique(class.of.nodes)[1])
         )
     })
   }
@@ -284,31 +287,31 @@ save.mac.frames.sent <- function(data, outputPath, expeId, protocol.per.node = N
   write.table(
             values[, 1, drop=F],
             file = build.filename(outputPath, "macFramesSent", expeId),
-            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
+            row.names = F, append = (length(unique(class.of.nodes)) > 1)
   )
 
 }
 
 
-save.mac.frames.received <- function(data, outputPath, expeId, protocol.per.node=NULL){
+save.mac.frames.received <- function(data, outputPath, expeId, class.of.nodes=NULL){
   values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
   values <- values[order(values$node),]
-  if (is.null(protocol.per.node)) {
-    protocol.per.node <- data.frame(protocol=rep('*', length(values$value)))
+  if (is.null(class.of.nodes)) {
+    protocol.per.node <- rep('*', length(values$value))
   }
-  values <- data.frame( whatever = values$value, protocol=protocol.per.node$protocol )
+  values <- data.frame( whatever = values$value, protocol=class.of.nodes )
   colnames(values) <- c(expeId, "protocol")
 
-  if (length(unique(protocol.per.node$protocol)) > 1) {
-    sapply(unique(protocol.per.node$protocol), function (p) {
-      s <- values[values$protocol == as.character(p),1, drop=F]
+  if (length(unique(class.of.nodes)) > 1) {
+    sapply(unique(class.of.nodes), function (p) {
+      s <- values[values$protocol == p,1, drop=F]
       the.name <- paste(names(s)[1], as.character(p), sep="-")
       colnames(s) <- c(the.name)
 
       write.table(
         s,
         file = build.filename(outputPath, "macFramesReceived", expeId),
-        row.names = F, append = (p!=unique(protocol.per.node$protocol)[1])
+        row.names = F, append = (p!=unique(class.of.nodes)[1])
         )
     })
   }
@@ -316,7 +319,7 @@ save.mac.frames.received <- function(data, outputPath, expeId, protocol.per.node
   write.table(
             values[, 1, drop=F],
             file = build.filename(outputPath, "macFramesReceived", expeId),
-            row.names = F, append = (length(unique(protocol.per.node$protocol)) > 1)
+            row.names = F, append = (length(unique(class.of.nodes)) > 1)
   )
 }
 
@@ -674,7 +677,7 @@ compute.median.density.per.node <- function(density.over.time) {
   nodes <- unique(df$node)
   # densities.total <- lapply(nodes, function(n) { df[df$node==n,] } )
   densities <- lapply(nodes, function(n) { median(df[df$node==n,]$v) } )
-  densities
+  sapply(densities, function(d) if (d>15) 'dense' else 'sparse')
 }
 
 
@@ -710,11 +713,14 @@ main <- function(args) {
   print("DONE!")
 
   protocol.per.node <- NULL
+  median.density.per.node <- NULL
   if (args$splitted) {
-    print(paste("Loading changes of protocol", args$file))
+    print(paste("Loading changes of protocol over time", args$file))
     changes.of.protocol <- load.datafile(args$file, "name(protocol_change:vector)")
     protocol.per.node <- compute.time.per.protocol(changes.of.protocol)
-    print(protocol.per.node)
+    print(paste("Loading density over time", args$file))
+    density.over.time <- load.datafile(args$file, "name(density_approximation:vector)")
+    median.density.per.node <- compute.median.density.per.node(density.over.time)
     print("DONE!")
   }
 
@@ -726,14 +732,14 @@ main <- function(args) {
 	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
 
   print("Exporting data")
-  save.power.level(pl.local, args$outputPath, args$configuration, protocol.per.node)
+  save.power.level(pl.local, args$outputPath, args$configuration, median.density.per.node)
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
-  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, protocol.per.node)
-  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, protocol.per.node)
+  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
+  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior

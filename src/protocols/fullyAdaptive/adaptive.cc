@@ -33,7 +33,8 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
-  if (withAdaptation && monitor) monitor->handle_messages(msg);
+  if (monitor) monitor->handle_messages(msg);
+  // if (withAdaptation && monitor) monitor->handle_messages(msg);
   if (msg->isSelfMessage()) {
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
@@ -62,12 +63,12 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       break;
       default:
       	{
-      		auto initialProtocol = par("initialProtocol").stdstringValue();
-	        if (withAdaptation  && initialProtocol != "middleware" && msg->getKind() == DO_ADAPTATION) {
-	          adaptation();
-	          cancelAndDelete(msg);
-	        }
-	        else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+          auto initialProtocol = par("initialProtocol").stdstringValue();
+          if (/*withAdaptation  &&*/ msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
+            adaptation();
+            cancelAndDelete(msg);
+          }
+      		else if (!knownProtocols[current_protocol_name]->handle(msg)) {
 	          BroadcastingAppBase::handleMessageWhenUp(msg);
 	        }
 	        else {
@@ -124,8 +125,11 @@ FullyAdaptive::adaptation()
 {
   auto density = monitor->density_estimation();
   gateway->emitDensityApproximation(density);
+  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
+  if (!withAdaptation) return;
+
   const string dense_region_protocol = "Mpr_t2";
-  const string sparse_region_protocol = "Flooding2";
+  const string sparse_region_protocol = "Abba2";
   if (policy == AdaptationPolicy::LOCAL) {
     if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
       change_current_protocol(dense_region_protocol);
@@ -156,7 +160,6 @@ FullyAdaptive::adaptation()
       }
     }
   }
-  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 }
 
 
@@ -203,14 +206,15 @@ FullyAdaptive::processStart()
 
   signal_protocol_change = this->registerSignal("protocol_change");
 
+  DO_ADAPTATION = gateway->register_new_control_message();
+  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
+  std::string monitoring_class("inet::SnifferBasedMonitoring");
+  monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
+  monitor->initialise(gateway);
+
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
-    DO_ADAPTATION = gateway->register_new_control_message();
-    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 
-    std::string monitoring_class("inet::SnifferBasedMonitoring");
-    monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
-    monitor->initialise(gateway);
 
     density_threshold_lower = par("density_threshold_lower").longValue();
     density_threshold_upper = par("density_threshold_upper").longValue();
