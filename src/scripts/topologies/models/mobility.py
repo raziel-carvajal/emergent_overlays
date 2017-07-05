@@ -198,7 +198,7 @@ class RandomWaypoint(object):
 
 
 class HeterogeneousRandomWalk(object):
-    def __init__(self, mapW, mapH, NR_Nodes, NR_Circles, Disk_Radius=25, Variance1_Circle=1, Variance2=2, ConnectivityRange=20):
+    def __init__(self, mapW, mapH, NR_Nodes, NR_Circles, Disk_Radius=35, Variance1_Circle=1, Variance2=2, ConnectivityRange=20):
         self.mapW = mapW
         self.mapH = mapH
         self.N = NR_Nodes
@@ -215,11 +215,15 @@ class HeterogeneousRandomWalk(object):
         self.pi_l = self.beta*self.A_l*self.v_l
         self.pi_h = self.beta*self.A_h*self.v_h
 
+
         self.N_l = binomial(self.N, self.pi_l)
+        self.N_l = self.N * 3 / 5
         self.N_h = self.N - self.N_l
+        print "N_l", self.N_l
+        print "N_h", self.N_h
 
         self.disks = []
-        for i in range(4):
+        for i in range(NR_Circles):
             t = random([1, 2])*[(self.mapW/3, self.mapH/3)]
             row = i / 2
             col = i % 2

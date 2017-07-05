@@ -68,9 +68,9 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
     # rw = mb.random_direction(nr_nodes, dimensions=(map_x, map_y), positions=positions)
     # rw = mb.heterogeneous_truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
 
-    rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
+    # rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
 
-    # rw = mb.HeterogeneousRandomWalk(map_x, map_y, nr_nodes, 4, Variance1_Circle=0.1, Variance2=0.8)
+    rw = mb.HeterogeneousRandomWalk(map_x, map_y, nr_nodes, 3, Variance1_Circle=0.1, Variance2=0.8)
     step_time = 1. / float(sps)
 
     lastValidxy = [p for p in positions]
@@ -114,7 +114,10 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
             if step % (sps*60*10) == 0:
                 logger.info('Simulation Time %s minutes' % (step / (sps*60)))
 
-            if connected and step > sim_time*sps/3:
+
+            # connected = True
+            if connected:
+            # if connected:
                 for (x, y) in lastValidxy:
                     f.write('%f %f\n' % (x, y))
 

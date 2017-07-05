@@ -254,6 +254,8 @@ def get_still_connected_callback(tx, idx_source, expectedDensityFilename):
         if not b:
             x = [len(c) for c in nx.connected_components(G) if idx_source in c]
             logger.info("Node {0} is in a component with {1} out of {2} members".format(idx_source, x[0], len(p)))
+            b = (x[0]*100/len(p) > 90)
+
         # return True
         if b:
             degrees = nx.degree(G)
@@ -396,9 +398,9 @@ def build_handcrafted_topology(args, densities, nr_points_of_interests=1):
         filename = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.mobility".format(nr_nodes, 0, trRan, int(w0), int(h0), args.last_idx)
         filenameGroundTruth = "n_{0}_d_{1}_tr_{2}_a_{3}x{4}_idx_{5}.groundTruth".format(nr_nodes, 0, trRan, int(w0), int(h0), args.last_idx)
         while True:
-            b = genmobility.generateMobility(sps=10, nr_nodes=nr_nodes,
+            b = genmobility.generateMobility(sps=5, nr_nodes=nr_nodes,
                                              map_x=int(w0), map_y=int(h0),
-                                             sim_time=500, positions=positions,
+                                             sim_time=300, positions=positions,
                                             #  mobility_map=mobility_map,
                                              outputFile=filename,
                                             #  testValidPosition=IsValidPosition,
