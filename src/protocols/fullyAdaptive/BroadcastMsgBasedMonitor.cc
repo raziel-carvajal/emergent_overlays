@@ -20,28 +20,41 @@ namespace inet {
 
 
 class BroadcastMsgBasedMonitor: public IMonitoringMechanism {
+
 private:
-  std::shared_ptr<IBroadcastGateway> gateway = nullptr;
-  std::map<std::string, int> knownBroadcast;
+    int lastDensityApprox = 0;
+    std::map<std::string, int> knownNeighbors;
+    std::shared_ptr<IBroadcastGateway> gateway = nullptr;
 
 public:
-  int density_estimation() override {
-    return -1;
+
+  void compute_density_approx() override {
+      if (knownNeighbors.size() != lastDensityApprox) {
+          lastDensityApprox = knownNeighbors.size();
+      }
+      knownNeighbors.clear();
   }
+
+  int get_density_approx() override { return lastDensityApprox; }
 
   double mobility_estimation() override {
     return 0.0;
   }
 
   bool handle_messages(cMessage* m) override {
-    if (!gateway) return false;
+    auto pkt = PK(m);
+    auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
+    if (!br || !br->getSender() || br->getSender() == gateway->get_name()) return false;
+    std::string sender(br->getSender());
+    if(knownNeighbors.find(sender) == knownNeighbors.end())
+        knownNeighbors[sender] = 0;
+    else
+        knownNeighbors[sender]++;
     return true;
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
       this->gateway = gateway;
-//      update_message = this->gateway->register_new_control_message();
-//      this->gateway->delayed_event(update_message, "update in sniffer based monitor", 1.0);
   }
 };
 

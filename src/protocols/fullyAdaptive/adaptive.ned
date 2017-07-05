@@ -29,6 +29,8 @@ simple FullyAdaptive extends BroadcastingBase like IUDPApp
       int density_threshold_upper = default(15);
       string initialProtocol;
       string adaptation_policy = default("local"); // or "swsp" or "etienne"
+      //ground truth
+      double deltaApprox @unit(s) = default(1.0s);
       @class(inet::FullyAdaptive);
 
       @statistic[protocol_change](title="The protocol has change"; record=vector; source=protocol_change);

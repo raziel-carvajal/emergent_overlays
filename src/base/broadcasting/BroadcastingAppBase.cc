@@ -162,6 +162,12 @@ BroadcastingAppBase::OmnetBroadcastGateway::bridge()
     app->emit(app->signal_density_approximation, value);
   }
 
+void BroadcastingAppBase::OmnetBroadcastGateway::emitNodePosition(float x,
+        float y) {
+    app->emit(app->signal_node_position_x, x);
+    app->emit(app->signal_node_position_y, y);
+}
+
 int
 BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
 {
@@ -298,11 +304,15 @@ BroadcastingAppBase::initialize(int stage)
             remote_port = par("remotePort").longValue();
             local_port = par("localPort").longValue();
 
+            //TODO vectors related to adaptation must be part of FullyAdaptive
             signal_received_id = this->registerSignal("msg_received");
             signal_sent_id = this->registerSignal("msg_sent");
             signal_broadcast_msg_received = this->registerSignal("broadcast_msg_received");
             signal_density_approximation = this->registerSignal("density_approximation");
+            signal_node_position_x = this->registerSignal("node_position_x");
+            signal_node_position_y = this->registerSignal("node_position_y");
 
+            //TODO parameters related to adaptation must be part of FullyAdaptive too
             //initialization of adaptation parameters
             adaptationMax = par("adaptationMax").doubleValue();
             adaptationMin = par("adaptationMin").doubleValue();
@@ -333,6 +343,7 @@ BroadcastingAppBase::initialize(int stage)
             d += 3; // some extra seconds
             delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
             // ==========================================================================
+            delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
 
             d = par("wakeUpTime").doubleValue();
             delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
@@ -380,7 +391,6 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
             case START: {
-                  cout << getLogHeader() << "handleMessageWhenUp in BroadcastAppBase " << endl;
                   this->processStart();
                 }
                 cancelAndDelete(msg);
@@ -551,7 +561,7 @@ BroadcastingAppBase::updatePosition()
   cModule* host = getContainingNode(this);
   IMobility* mobility = check_and_cast<IMobility*>(host->getSubmodule("mobility"));
   position = mobility->getCurrentPosition();
-  return mobility->getCurrentPosition();
+  return position;
 }
 
 
@@ -564,7 +574,6 @@ BroadcastingAppBase::get_radious()
 void
 BroadcastingAppBase::processStart()
 {
-
     std::string::size_type sz;
     //this delta is required to cope with collisions of control messages; even if
     //we are using CSMA it is not enough to cope with this issue
@@ -583,7 +592,6 @@ BroadcastingAppBase::processStart()
     this->radious = transmitter->getMaxCommunicationRange().get();
 
     EV_TRACE << "My position is " << this->position  << "\n";
-    // cerr << " My position is " << this->position << " " << myself  << endl;
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(local_port);
@@ -771,7 +779,9 @@ BroadcastingAppBase::delayed_event(int type, const std::string& data, double del
     cMessage* mm = new cMessage("some delay");
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
-    scheduleAt(simTime() + delay, mm);
+    auto t = simTime() + delay;
+//    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
+    scheduleAt(t, mm);
     return mm;
 }
 

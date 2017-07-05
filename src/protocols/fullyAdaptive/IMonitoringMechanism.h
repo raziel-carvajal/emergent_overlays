@@ -11,7 +11,8 @@ namespace inet {
 
 class IMonitoringMechanism: public cObject {
 public:
-  virtual int density_estimation() = 0;
+  virtual int get_density_approx() = 0;
+  virtual void compute_density_approx() = 0;
   virtual double mobility_estimation() = 0;
   virtual bool handle_messages(cMessage* m) = 0;
   virtual void initialise(std::shared_ptr<IBroadcastGateway> gateway) = 0;

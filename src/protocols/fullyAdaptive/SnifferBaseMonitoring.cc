@@ -16,7 +16,11 @@ namespace inet {
 class SnifferBasedMonitoring: public IMonitoringMechanism {
 public:
 
-  int density_estimation() override {
+  void compute_density_approx() override {
+
+  }
+
+  int get_density_approx() override {
     return knownNeighbors.size();
   }
 
@@ -54,6 +58,7 @@ public:
       }
       return false;
     }
+    return true;
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {

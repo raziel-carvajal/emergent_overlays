@@ -33,13 +33,10 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
-  if (monitor) monitor->handle_messages(msg);
-  // if (withAdaptation && monitor) monitor->handle_messages(msg);
   if (msg->isSelfMessage()) {
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
       case START:
-        cout << getLogHeader() << "handleMessageWhenUp in FullyAdaptive " << endl;
         BroadcastingAppBase::handleMessageWhenUp(msg);
         break;
       case SAY_HELLO:
@@ -62,6 +59,21 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         emit(signal_protocol_change, 'E');
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
+      case PRINT_POSITION:
+      {
+          Coord p = gateway->get_current_position();
+          gateway->emitNodePosition(p.x, p.y);
+          cancelAndDelete(msg);
+          gateway->delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
+          gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation", deltaApprox);
+      }
+          break;
+      case APPROXIMATE_DENSITY:
+      {
+          monitor->compute_density_approx();
+          gateway->emitDensityApproximation(monitor->get_density_approx());
+      }
+          break;
       default:
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();
@@ -79,15 +91,11 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       break;
     }
   }
-  else if (msg->getKind() == UDP_I_DATA)
-  {
-  	auto initialProtocol = par("initialProtocol").stdstringValue();
+  else if (msg->getKind() == UDP_I_DATA) {
+    monitor->handle_messages(msg);
+    auto pkt = PK(msg);
+    auto initialProtocol = par("initialProtocol").stdstringValue();
   	if (initialProtocol != "middleware") {
-      // if (withAdaptation) {
-      //   auto density = monitor->density_estimation();
-      //   gateway->emitDensityApproximation(density);
-      // }
-	    auto pkt = PK(msg);
 	    if (pkt->hasEncapsulatedPacket()) {
 	      pkt = pkt->getEncapsulatedPacket();
 	    }
@@ -124,8 +132,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 void
 FullyAdaptive::adaptation()
 {
-  auto density = monitor->density_estimation();
-  gateway->emitDensityApproximation(density);
+  auto density = monitor->get_density_approx();
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   if (!withAdaptation) return;
 
@@ -215,10 +222,13 @@ FullyAdaptive::processStart()
 
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
+//    DO_ADAPTATION = gateway->register_new_control_message();
+    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 
 
     density_threshold_lower = par("density_threshold_lower").longValue();
     density_threshold_upper = par("density_threshold_upper").longValue();
+    deltaApprox = par("deltaApprox").doubleValue();
 
     policy = AdaptationPolicy::LOCAL;
     if (par("adaptation_policy").stdstringValue() == "swsp") {

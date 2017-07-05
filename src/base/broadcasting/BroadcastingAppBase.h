@@ -36,7 +36,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double delta;
     // how many hello messages I must send
     int nr_hello_msg;
-
     enum ControlMessageTypes {
         IDLE,
         START,
@@ -49,7 +48,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         TRANSFORMATION_TIMEOUT,
         OFFICER_ELECTION_TIMEOUT,
         LAST_POWER_REPORT,
-
+        PRINT_POSITION,
+        APPROXIMATE_DENSITY,
+        DO_ADAPTATION,
         First = IDLE,
         Last = LAST_POWER_REPORT
     };
@@ -81,6 +82,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
       void emitBroadcastMsgReceived(const std::string& value) override;
 
       void emitDensityApproximation(int value) override;
+
+      void emitNodePosition(float x, float y) override;
 
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;
@@ -137,6 +140,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::map<std::string, std::set<std::string>> customOfficers;
 
     bool amIbridge = false;
+
   private:
 
     bool contains(const std::string& protocolId, const std::string& nodeId);
@@ -151,6 +155,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     simsignal_t signal_power_level;
     simsignal_t signal_broadcast_msg_received;
     simsignal_t signal_density_approximation;
+    simsignal_t signal_node_position_x;
+    simsignal_t signal_node_position_y;
 
     bool already_configured = false;
 
