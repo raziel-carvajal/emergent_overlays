@@ -323,6 +323,17 @@ save.mac.frames.received <- function(data, outputPath, expeId, class.of.nodes=NU
   )
 }
 
+save.density.relative.errors <- function(data, outputPath, expeId){
+  values <- data.frame(value=data)
+  colnames(values) <- c(expeId)
+
+  write.table(
+            values,
+            file = build.filename(outputPath, "densityRelativeError", expeId),
+            row.names = F, append = F
+  )
+}
+
 
 ######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (BEGIN) ############################################
 # DEPRECATED
@@ -681,6 +692,70 @@ compute.median.density.per.node <- function(density.over.time) {
 }
 
 
+compute.relative.error.in.density <- function(file) {
+  df_x <- load.datafile(file, "name(node_position_x:vector)" )$vectordata
+  df_y <- load.datafile(file, "name(node_position_y:vector)" )$vectordata
+  df_density <- load.datafile(file, "name(density_approximation:vector)" )$vectordata
+
+  times <- unique(df_density$x)
+  nodes <- unique(df_density$resultkey)
+
+  y.per.time <- lapply(times, function(t) {
+  	tmp <- df_y[df_y$x == t,]
+  	d <- data.frame(node = tmp$resultkey, t=tmp$x, y=tmp$y)
+  	d[order(d$node),]
+  })
+
+  x.per.time <- lapply(times, function(t) {
+  	tmp <- df_x[df_x$x == t,]
+  	d <- data.frame(node = tmp$resultkey, t=tmp$x, x=tmp$y)
+  	d[order(d$node),]
+  })
+
+  observed.density.per.time <- lapply(times, function(t) {
+  	tmp <- df_density[df_density$x == t,]
+  	d <- data.frame(node = tmp$resultkey, t=tmp$x, density=tmp$y)
+  	d[order(d$node),]
+  })
+
+  all.data <- lapply(times, function(t) {
+  	tmp_y <- df_y[df_y$x == t,]
+  	tmp_y <- tmp_y[order(tmp_y$resultkey),]
+
+  	tmp_x <- df_x[df_x$x == t,]
+  	tmp_x <- tmp_x[order(tmp_x$resultkey),]
+
+  	tmp_d <- df_density[df_density$x == t,]
+  	tmp_d <- tmp_d[order(tmp_d$resultkey),]
+
+  	d <- data.frame(node = tmp_x$resultkey, t=tmp_y$x, x=tmp_x$y, y=tmp_y$y, d = tmp_d$y)
+  })
+
+  final.data <- lapply(all.data, function(d) {
+  	ttt <- function(radious, x, y, d) {
+  		length(d[((d$x-x)*(d$x-x) + (d$y-y)*(d$y-y)) < radious*radious,]$node)
+  	}
+  	expected.density<- sapply(nodes, function(n) {
+  		x <- d[d$node == n,]$x[1]
+  		y <- d[d$node == n,]$y[1]
+  		ttt(20, x, y, d)
+  	})
+
+  	data.frame(node=d$node, t=d$t, observed.density=d$d, expected.density=expected.density)
+  })
+
+  sapply(final.data, function(d) {
+  	o <- d$observed.density
+  	e <- d$expected.density
+  	diff <- e - o
+  	n_diff <- norm(as.matrix(diff), type="F")
+  	n_e <- norm(as.matrix(e), type="F")
+  	n_diff/n_e
+  })
+
+}
+
+
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
 # 			- we can aggregate this in many ways
 #					1. chart of broadcast session and coverage (one curve per protocol). this one is only useful to compare protocols using the same topology
@@ -712,6 +787,11 @@ main <- function(args) {
   mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
   print("DONE!")
 
+  print(paste("Computing observed and expected densities", args$file))
+  density.relative.errors <- compute.relative.error.in.density(args$file)
+  print(density.relative.errors)
+  print("DONE!")
+
   protocol.per.node <- NULL
   median.density.per.node <- NULL
   if (args$splitted) {
@@ -738,6 +818,7 @@ main <- function(args) {
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
+  save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
   save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
   save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
