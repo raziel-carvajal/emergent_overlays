@@ -58,7 +58,7 @@ public:
       }
       return false;
     }
-    return true;
+    return false; // by default, I don't process the message
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
