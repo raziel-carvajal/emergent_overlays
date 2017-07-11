@@ -33,6 +33,18 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
+  if (monitor) {
+    // TO RAZIEL: Ok, no entiendo por que no te gusta esta linea.
+    // O quizas si lo entiendo, es que el return no estaba explicito
+    // mi idea es la siguiente: el monitor devuelve verdadero si
+    // consume el mensaje. Ponerlo aqui es util porque asi el monitor puede
+    // usar self-messages para controlar su funcionamiento interno.
+    // Por ejemplo, al mover esta linea, haces que el sniffer monitor deje
+    // de funcionar.
+
+    bool result = monitor->handle_messages(msg);
+    if (result) return;
+  }
   if (msg->isSelfMessage()) {
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
@@ -61,21 +73,33 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         emit(signal_protocol_change, 'E');
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
-      case PRINT_POSITION:
-      {
-          Coord p = gateway->get_current_position();
-          gateway->emitNodePosition(p.x, p.y);
-          cancelAndDelete(msg);
-          gateway->delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
-          gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation", deltaApprox);
-      }
-          break;
-      case APPROXIMATE_DENSITY:
-      {
-          monitor->compute_density_approx();
-          gateway->emitDensityApproximation(monitor->get_density_approx());
-      }
-          break;
+      // TO RAZIEL: Esto es lo que de verdad no me gusta.
+      // No me gusta proque tiene un problema conceptual:
+      // Estas guardando la posicion del nodo en el instance de tiempo T,
+      // y la densidad aproximada en el instante de tiempo T + deltaApprox.
+      // Observa que eso es un problema con movilidad: simplemente porque es imposible decir
+      // si la diferencia entre la densidad observada (la que calculamos con el monitor)
+      // y la densidad esperada (la que calculamos usando la posicion) se debe a:
+      // un error en el monitor o a que los nodos se movieron y por tanto la densidad cambio.
+      // En otras palabras, tenemos que guardar las posiciones y la aproximacion de la densidad exactamente
+      // en el mismo instante de tiempo. Y tenemos que hacerlo en el instante de tiempo en que
+      // la densidad aproximada se usa para hacer algo (adaptacion)
+
+      // case PRINT_POSITION:
+      // {
+      //     Coord p = gateway->get_current_position();
+      //     gateway->emitNodePosition(p.x, p.y);
+      //     cancelAndDelete(msg);
+      //     gateway->delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
+      //     gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation", deltaApprox);
+      // }
+      // break;
+      // case APPROXIMATE_DENSITY:
+      // {
+      //     monitor->compute_density_approx();
+      //     gateway->emitDensityApproximation(monitor->get_density_approx());
+      // }
+      // break;
       default:
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();
@@ -94,7 +118,11 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     }
   }
   else if (msg->getKind() == UDP_I_DATA) {
-    monitor->handle_messages(msg);
+    // TO RAZIEL, como te decia, esta linea debe ir al principio para que
+    // todos los tipos de monitoreo funcionen.
+    // Por supuesto, eso complica un poco el monitoreo, pero no demasiado
+    // monitor->handle_messages(msg);
+
     auto pkt = PK(msg);
     auto initialProtocol = par("initialProtocol").stdstringValue();
   	if (initialProtocol != "middleware") {
@@ -134,7 +162,15 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 void
 FullyAdaptive::adaptation()
 {
+  // TO RAZIEL: aqui es donde creo se debe guardar todo, porque aqui es donde usamos la densidad para algo
+  // (ademas, esto facilita muchisimo el script R)
+  monitor->compute_density_approx();
   auto density = monitor->get_density_approx();
+  Coord p = gateway->get_current_position();
+
+  gateway->emitDensityApproximation(density);
+  gateway->emitNodePosition(p.x, p.y);
+
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   if (!withAdaptation) return;
 
@@ -216,7 +252,7 @@ FullyAdaptive::processStart()
 
   signal_protocol_change = this->registerSignal("protocol_change");
 
-  //DO_ADAPTATION = gateway->register_new_control_message();
+  // DO_ADAPTATION = gateway->register_new_control_message();
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   std::string monitoring_class("inet::SnifferBasedMonitoring");
   monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
@@ -225,12 +261,15 @@ FullyAdaptive::processStart()
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
 //    DO_ADAPTATION = gateway->register_new_control_message();
-    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
+    // TO RAZIEL: esta linea la habia movido, cuidado al resolver los conflictos
+    // gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
 
 
     density_threshold_lower = par("density_threshold_lower").longValue();
     density_threshold_upper = par("density_threshold_upper").longValue();
-    deltaApprox = par("deltaApprox").doubleValue();
+
+    // TO RAZIEL: no creo que sea necesario
+    // deltaApprox = par("deltaApprox").doubleValue();
 
     policy = AdaptationPolicy::LOCAL;
     if (par("adaptation_policy").stdstringValue() == "swsp") {

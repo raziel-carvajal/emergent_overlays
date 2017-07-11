@@ -25,6 +25,8 @@ get_arguments <- function() {
                       help='MAC frames sent file name')
   parser$add_argument('-mr', '--mac-received-file', dest='mr', type="character",
                       help='MAC frames received file name')
+  parser$add_argument('-dre', '--density-error-file', dest='dre', type="character",
+                      help='File with the density relative error for each experiment')
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -386,7 +388,14 @@ plot.duplicated.messages <- function(df, densities) {
 }
 
 
-
+plot.density.relative.error <- function(df, densities) {
+  plot.data.using.lines(df, densities,
+                        "Density relative error",
+                        "Density relative error (Expected vs Observed)",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
 
 
 plot.saved.rebroadcasts <- function(df, algos) {
@@ -562,6 +571,14 @@ if (!is.null(args$bs)) {
   metadata <- r$metadata
   print("Plotting broadcast time")
   plot.broadcasting.time2(r$data, metadata$densities, metadata$pal)
+}
+
+if (!is.null(args$dre)) {
+  print("Importing density relative error dataset")
+  r <- load.dataset.with.metadata(args$path, args$dre, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting density relative error")
+  plot.density.relative.error(r$data, metadata$densities)
 }
 
 # this most be the last

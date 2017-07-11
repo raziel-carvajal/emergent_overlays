@@ -42,15 +42,19 @@ public:
   }
 
   bool handle_messages(cMessage* m) override {
-    auto pkt = PK(m);
-    auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
-    if (!br || !br->getSender() || br->getSender() == gateway->get_name()) return false;
-    std::string sender(br->getSender());
-    if(knownNeighbors.find(sender) == knownNeighbors.end())
+    // TO RAZIEL: aqui chequeas si es mensaje UDP
+    if (m->getKind() == UDP_I_DATA) {
+      auto pkt = PK(m);
+      auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
+      if (!br || !br->getSender() || br->getSender() == gateway->get_name()) return false;
+      std::string sender(br->getSender());
+      if(knownNeighbors.find(sender) == knownNeighbors.end())
         knownNeighbors[sender] = 0;
-    else
+      else
         knownNeighbors[sender]++;
-    return true;
+    }
+    // TO RAZIEL: FALSO, porque estas observando el mensaje, pero no consumiendolo
+    return false;
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {

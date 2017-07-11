@@ -62,6 +62,7 @@ rm -f ../../results/broadcastSession* \
       ../../results/coverage* \
       ../../results/macFramesReceived* \
       ../../results/macFramesSent* \
+      ../../results/densityRelativeError* \
       ../../results/*.pdf \
       ../../results/summary.csv
 
@@ -98,6 +99,7 @@ cat ../../results/relays-n_* >> ../../results/relays
 cat ../../results/coverage-n_* >> ../../results/coverage
 cat ../../results/macFramesSent-n_* >> ../../results/macFramesSent
 cat ../../results/macFramesReceived-n_* >> ../../results/macFramesReceived
+cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
 
 rm -f ../../results/broadcastSession-n_* \
       ../../results/duplicatedMsgsDistribution-n_* \
@@ -106,7 +108,8 @@ rm -f ../../results/broadcastSession-n_* \
       ../../results/relays-n_* \
       ../../results/coverage-n_* \
       ../../results/macFramesSent-n_* \
-      ../../results/macFramesReceived-n_*
+      ../../results/macFramesReceived-n_* \
+      ../../results/densityRelativeError-n_*
 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
@@ -120,6 +123,7 @@ Rscript pretty-plotting.R \
       -cv coverage \
       -ms macFramesSent \
       -mr macFramesReceived \
+      -dre densityRelativeError \
       -sf summary.csv \
       --final \
       ../../results/
@@ -140,5 +144,6 @@ Rscript pretty-plotting.R \
       -cv coverage \
       -ms macFramesSent \
       -mr macFramesReceived \
+      -dre densityRelativeError \
       -sf summary.csv \
       ../../results/

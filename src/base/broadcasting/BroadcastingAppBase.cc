@@ -343,7 +343,8 @@ BroadcastingAppBase::initialize(int stage)
             d += 3; // some extra seconds
             delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
             // ==========================================================================
-            delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
+            // TO RAZIEL : no creo que sea buena idea esto, explico en otro lugar la razon
+            // delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
 
             d = par("wakeUpTime").doubleValue();
             delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
