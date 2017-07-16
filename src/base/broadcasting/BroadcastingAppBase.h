@@ -44,16 +44,15 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         DISPLAY_TIME,
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
-        PRINT_POS_NEIGS,
         TRANSFORMATION_TIMEOUT,
         OFFICER_ELECTION_TIMEOUT,
         LAST_POWER_REPORT,
-        PRINT_POSITION,
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
         First = IDLE,
         Last = LAST_POWER_REPORT
     };
+
 
   private:
 
@@ -224,8 +223,10 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     double get_random_delay() { return uniform(0.03, 0.1); }
 
     // optional
-    void printBroadcastingLog (std::string key);
+
     std::string getLogHeader();
+    void printBroadcastingLog(std::string key);
+
   private:
 
     // core broadcast gateway

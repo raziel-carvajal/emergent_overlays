@@ -41,7 +41,7 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     };
 
   private:
-    // int DO_ADAPTATION; // self-message ID
+//    int DO_ADAPTATION; // self-message ID
     AdaptationPolicy policy;
 
     bool willingToChange = false;
@@ -56,9 +56,8 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
 
     // events and signals
     simsignal_t signal_protocol_change;
-    // ground truth of density
-    // TO RAZIEL: lo mismo por supuesto
-    // double deltaApprox;
+    //ground truth of density
+    double deltaApprox;
 };
 
 } //namespace

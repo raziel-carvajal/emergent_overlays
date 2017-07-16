@@ -176,9 +176,13 @@ BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
 
 
 
-string BroadcastingAppBase::getLogHeader() { return simTime().str() + " " + myself + " :: " ;}
+std::string
+BroadcastingAppBase::getLogHeader(){
+  return simTime().str() + " " + myself + " :: ";
+}
 
-void BroadcastingAppBase::printBroadcastingLog(std::string key) {
+void
+BroadcastingAppBase::printBroadcastingLog(std::string key) {
     string info = "";
     for (auto& n: neighbors)
         info += n.first + "_";
@@ -343,11 +347,11 @@ BroadcastingAppBase::initialize(int stage)
             d += 3; // some extra seconds
             delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report", d - 0.5);
             // ==========================================================================
-            // TO RAZIEL : no creo que sea buena idea esto, explico en otro lugar la razon
-            // delayed_event(PRINT_POSITION, "useful to compute nodes' density", par("intervalBroadcastTime").doubleValue());
-
             d = par("wakeUpTime").doubleValue();
-            delayed_event(PRINT_POS_NEIGS, "PrintingPosition&Neighbors", d - 0.2);
+            // not the best solution because this super class doesn't know anything about
+            // adaptation parameters
+            delayed_event(APPROXIMATE_DENSITY, "approximation of nodes density",
+                          d + par("deltaApprox").doubleValue());
 
             if (!par("single_source").boolValue()) {
               cModule* host = getContainingNode(this);
@@ -781,7 +785,7 @@ BroadcastingAppBase::delayed_event(int type, const std::string& data, double del
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
     auto t = simTime() + delay;
-//    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
+    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
     scheduleAt(t, mm);
     return mm;
 }

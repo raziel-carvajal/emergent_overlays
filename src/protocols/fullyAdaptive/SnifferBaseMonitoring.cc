@@ -58,12 +58,13 @@ public:
       }
       return false;
     }
-    return false; // by default, I don't process the message
+    return true;
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
       this->gateway = gateway;
       update_message = this->gateway->register_new_control_message();
+      std::cout << "MSG type[" << update_message << "]" << endl;
       this->gateway->delayed_event(update_message, "update in sniffer based monitor", 1.0);
   }
 
