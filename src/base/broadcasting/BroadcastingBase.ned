@@ -57,11 +57,11 @@ simple BroadcastingBase
 
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);
-    		@statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
-    		@statistic[density_approximation](title="approximation of nodes' density"; record=vector; source=density_approximation);
-    		@statistic[node_position_x](title="Node position, value of horizontal axes"; record=vector; source=node_position_x);
-    		@statistic[node_position_y](title="Node position, value of vertical axes"; record=vector; source=node_position_y);
-
+		@statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
+		@statistic[density_approximation](title="approximation of nodes' density"; record=vector; source=density_approximation);
+		@statistic[node_position_x](title="Node position, value of horizontal axes"; record=vector; source=node_position_x);
+		@statistic[node_position_y](title="Node position, value of vertical axes"; record=vector; source=node_position_y);
+		
    gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
