@@ -38,6 +38,11 @@ get.arguments <- function() {
   parser$add_argument('--show-averages', dest='showAverages', action="store_true",
                       help='Show the average of all the metrics')
 
+  parser$add_argument('-b', '--broadcast_msgs', metavar='broadcast_msgs', type="integer",
+                      help='Number of broadcast messages')
+  parser$add_argument('-Tx', '--transmission_range', metavar='transmissionRange', type="integer",
+                      help='Tx of nodes')
+
   # parser$print_help()
   parser$parse_args()
 }
@@ -692,66 +697,86 @@ compute.median.density.per.node <- function(density.over.time) {
 }
 
 
-compute.relative.error.in.density <- function(file) {
+compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
   df_x <- load.datafile(file, "name(node_position_x:vector)" )$vectordata
   df_y <- load.datafile(file, "name(node_position_y:vector)" )$vectordata
   df_density <- load.datafile(file, "name(density_approximation:vector)" )$vectordata
 
-  times <- unique(df_density$x)
+  # the number of approximations match with the sent broadcast messages
+  times <- unique(df_density$x)[ c(1:broadcastMsgs) ]
   nodes <- unique(df_density$resultkey)
+  
+  densityPerNode <- lapply(times, function(t) {
+    tmp <- df_density[df_density$x == t, ]
+    data.frame(
+      resultkey = tmp$resultkey,
+      time = t,
+      approximation = tmp$y
+    )
+  })
+  
+  allPositions <- data.frame(
+    resultkey = df_x$resultkey,
+    time = df_x$x,
+    x = df_x$y,
+    y = df_y$y
+  )
 
-  y.per.time <- lapply(times, function(t) {
-  	tmp <- df_y[df_y$x == t,]
-  	d <- data.frame(node = tmp$resultkey, t=tmp$x, y=tmp$y)
-  	d[order(d$node),]
+  nodesPositions <- lapply(times, function(t){
+    allPositions[allPositions$time == t, ]
+  })
+  
+  groundTruth <- lapply(nodesPositions, function(l_i){
+    result <- lapply(nodes, function(n){
+      node <- l_i[l_i$resultkey == n, ]
+      neigs <- l_i[l_i$resultkey != n, ]
+      neigsNo <- length(unique(
+          subset(neigs, 
+            sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= 75.0
+          )$resultkey))
+      c(n, node$time, neigsNo)
+    })
+    df <- data.frame(matrix(unlist(result), nrow=length(result), byrow=T))
+    names(df) <- c("resultkey", "time", "groundTruth")
+    df
   })
 
-  x.per.time <- lapply(times, function(t) {
-  	tmp <- df_x[df_x$x == t,]
-  	d <- data.frame(node = tmp$resultkey, t=tmp$x, x=tmp$y)
-  	d[order(d$node),]
+  groundTruth <- sapply(groundTruth, function(l_i){
+    l_i[ l_i$resultkey == nodes, ]$groundTruth
+  })
+  
+  densityApproximation <- sapply(densityPerNode, function(l_i){
+    l_i[ l_i$resultkey == nodes, ]$approximation
   })
 
-  observed.density.per.time <- lapply(times, function(t) {
-  	tmp <- df_density[df_density$x == t,]
-  	d <- data.frame(node = tmp$resultkey, t=tmp$x, density=tmp$y)
-  	d[order(d$node),]
+  absoluteError <- abs(densityApproximation - groundTruth)
+  relativeError <- sapply(1:nrow(absoluteError), function(r){
+    sum(absoluteError[r,]) / length(absoluteError[r,])
   })
+  print(relativeError)
+  relativeError
 
-  all.data <- lapply(times, function(t) {
-  	tmp_y <- df_y[df_y$x == t,]
-  	tmp_y <- tmp_y[order(tmp_y$resultkey),]
-
-  	tmp_x <- df_x[df_x$x == t,]
-  	tmp_x <- tmp_x[order(tmp_x$resultkey),]
-
-  	tmp_d <- df_density[df_density$x == t,]
-  	tmp_d <- tmp_d[order(tmp_d$resultkey),]
-
-  	d <- data.frame(node = tmp_x$resultkey, t=tmp_y$x, x=tmp_x$y, y=tmp_y$y, d = tmp_d$y)
-  })
-
-  final.data <- lapply(all.data, function(d) {
-  	ttt <- function(radious, x, y, d) {
-  		length(d[((d$x-x)*(d$x-x) + (d$y-y)*(d$y-y)) < radious*radious,]$node)
-  	}
-  	expected.density<- sapply(nodes, function(n) {
-  		x <- d[d$node == n,]$x[1]
-  		y <- d[d$node == n,]$y[1]
-  		ttt(20, x, y, d)
-  	})
-
-  	data.frame(node=d$node, t=d$t, observed.density=d$d, expected.density=expected.density)
-  })
-
-  sapply(final.data, function(d) {
-  	o <- d$observed.density
-  	e <- d$expected.density
-  	diff <- e - o
-  	n_diff <- norm(as.matrix(diff), type="F")
-  	n_e <- norm(as.matrix(e), type="F")
-  	n_diff/n_e
-  })
+#  final.data <- lapply(all.data, function(d) {
+#  	ttt <- function(radious, x, y, d) {
+#  		length(d[((d$x-x)*(d$x-x) + (d$y-y)*(d$y-y)) < radious*radious,]$node)
+#  	}
+#  	expected.density<- sapply(nodes, function(n) {
+#  		x <- d[d$node == n,]$x[1]
+#  		y <- d[d$node == n,]$y[1]
+#  		ttt(20, x, y, d)
+#  	})
+#
+#  	data.frame(node=d$node, t=d$t, observed.density=d$d, expected.density=expected.density)
+#  })
+#
+#  sapply(final.data, function(d) {
+#  	o <- d$observed.density
+#  	e <- d$expected.density
+#  	diff <- e - o
+#  	n_diff <- norm(as.matrix(diff), type="F")
+#  	n_e <- norm(as.matrix(e), type="F")
+#  	n_diff/n_e
+#  })
 
 }
 
@@ -788,7 +813,7 @@ main <- function(args) {
   print("DONE!")
 
   print(paste("Computing observed and expected densities", args$file))
-  density.relative.errors <- compute.relative.error.in.density(args$file)
+  density.relative.errors <- compute.relative.error.in.density(args$file, args$broadcast_msgs, args$transmissionRange)
   print(density.relative.errors)
   print("DONE!")
 
