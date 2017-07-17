@@ -31,11 +31,11 @@ echo "CLEANING OLD RESULTS..."
 rm -fr ../../results/batteryConsumptionDistribution-*
 rm -fr ../../results/broadcastSession-*
 rm -fr ../../results/duplicatedMsgsDistribution-*
-
+rm -fr ../../results/densityRelativeError_*
 rm -fr ../../results/sentMsgs_*
 rm -fr ../../results/rcvdMsgs_*
 rm -fr ../../results/networkCoverage_*
-rm -fr ../../results/IndividualPlots-* 
+rm -fr ../../results/IndividualPlots-*
 rm -fr ../../results/collisions_*
 rm -fr ../../results/graphConnectivity_*
 rm -fr ../../results/batteryConsumption_*
@@ -139,14 +139,14 @@ for config in ${CONFIG_PATH}/*.ini ; do
     config_name="${filename%.*}"
     density=$(get_density_from_config_name $config_name)
     protocol=$(get_protocol_from_config_name $config_name)
-    
+
     if [ "$density" -lt "$minimum_density" ]; then
     	minimum_density=$density
     fi
     if [ "$density" -gt "$maximum_density" ]; then
     	maximum_density=$density
     fi
-    
+
     algorithms+=("-a" $protocol)
 done
 ./run-selected-protocols-all-configs.sh -d $minimum_density -D $maximum_density -p ${CONFIG_PATH} ${algorithms[@]}
