@@ -31,7 +31,6 @@ get.graph <- function(file, time, Tx) {
   
   nodes <- unique(allPositions$nodeId)
   nodesPositions <- allPositions[allPositions$time == time, ]
-  edges <- vector()
 
   tmp <- unlist(lapply(nodes, function(n){
     node <- nodesPositions[nodesPositions$nodeId == n, ]
