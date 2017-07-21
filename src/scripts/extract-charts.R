@@ -40,7 +40,7 @@ get.arguments <- function() {
 
   parser$add_argument('-b', '--broadcast_msgs', metavar='broadcast_msgs', type="integer",
                       help='Number of broadcast messages')
-  parser$add_argument('-Tx', '--transmission_range', metavar='transmissionRange', type="integer",
+  parser$add_argument('-t', '--transmission_range', metavar='transmission_range', type="integer",
                       help='Tx of nodes')
 
   # parser$print_help()
@@ -732,7 +732,7 @@ compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
       neigs <- l_i[l_i$resultkey != n, ]
       neigsNo <- length(unique(
           subset(neigs, 
-            sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= 75.0
+            sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= Tx
           )$resultkey))
       c(n, node$time, neigsNo)
     })
@@ -740,7 +740,7 @@ compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
     names(df) <- c("resultkey", "time", "groundTruth")
     df
   })
-
+  
   groundTruth <- sapply(groundTruth, function(l_i){
     l_i[ l_i$resultkey == nodes, ]$groundTruth
   })
@@ -750,10 +750,12 @@ compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
   })
 
   absoluteError <- abs(densityApproximation - groundTruth)
+  #relative error with vectors
   relativeError <- sapply(1:nrow(absoluteError), function(r){
-    sum(absoluteError[r,]) / length(absoluteError[r,])
+    max(absoluteError[r, ]) / max( groundTruth[r, ] )
   })
   print(relativeError)
+
   relativeError
 
 #  final.data <- lapply(all.data, function(d) {
@@ -813,7 +815,9 @@ main <- function(args) {
   print("DONE!")
 
   print(paste("Computing observed and expected densities", args$file))
-  density.relative.errors <- compute.relative.error.in.density(args$file, args$broadcast_msgs, args$transmissionRange)
+  density.relative.errors <- compute.relative.error.in.density(args$file, 
+    args$broadcast_msgs, 
+    args$transmission_range)
   print(density.relative.errors)
   print("DONE!")
 
