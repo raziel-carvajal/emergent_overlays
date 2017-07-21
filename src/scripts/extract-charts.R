@@ -1,5 +1,6 @@
-require('omnetpp')
+require(omnetpp)
 library(argparse)
+library(igraph)
 
 #
 # Used to define the arguments of the script
@@ -14,7 +15,7 @@ get.arguments <- function() {
                       help='Simulation time in seconds')
   parser$add_argument('configuration', metavar='configuration', type="character",
                       help='Name of the configuration')
-  parser$add_argument('step', metavar='step', type="integer",
+  parser$add_argument('step', metavar='step', type="double",
                       help='Every broadcasting metric as function of time will use this value as xtics to be plotted')
   parser$add_argument('-a','--algorithm', dest='algorithm', type="character",
                       help='Algorithm used')
@@ -36,12 +37,14 @@ get.arguments <- function() {
                       help='If used, the script generates data per protocol when there are mnay used in a single scenario')
 
   parser$add_argument('--show-averages', dest='showAverages', action="store_true",
-                      help='Show the average of all the metrics')
+    help='Show the average of all the metrics')
 
-  parser$add_argument('-b', '--broadcast_msgs', metavar='broadcast_msgs', type="integer",
-                      help='Number of broadcast messages')
-  parser$add_argument('-t', '--transmission_range', metavar='transmission_range', type="integer",
-                      help='Tx of nodes')
+  parser$add_argument('-b', '--broadcast_msgs', type="integer",
+    help='Number of broadcast messages')
+  parser$add_argument('-t', '--transmission_range', type="integer",
+    help='Tx of nodes')
+  parser$add_argument('-f_t', '--first_time_of_measuring_nodes_position', type='double', 
+    help='First point in time when nodes print out their position')
 
   # parser$print_help()
   parser$parse_args()
@@ -335,6 +338,17 @@ save.density.relative.errors <- function(data, outputPath, expeId){
   write.table(
             values,
             file = build.filename(outputPath, "densityRelativeError", expeId),
+            row.names = F, append = F
+  )
+}
+
+save.collisions.relative.error <- function(data, outputPath, expeId){
+  values <- data.frame(value=data)
+  colnames(values) <- c(expeId)
+
+  write.table(
+            values,
+            file = build.filename(outputPath, "collisionsRelativeError", expeId),
             row.names = F, append = F
   )
 }
@@ -782,6 +796,83 @@ compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
 
 }
 
+get.graph <- function(time, Tx, x_positions, y_positions) {
+ 
+  allPositions <- data.frame(
+    nodeId = x_positions$resultkey + 1,
+    time = x_positions$x,
+    x = x_positions$y,
+    y = y_positions$y
+  )
+  
+  nodes <- unique(allPositions$nodeId)
+  nodesPositions <- allPositions[allPositions$time == time, ]
+
+  tmp <- unlist(lapply(nodes, function(n){
+    node <- nodesPositions[nodesPositions$nodeId == n, ]
+    others <- nodesPositions[nodesPositions$nodeId != n, ]
+    neigs <- unique(
+      subset(others, sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= Tx)$nodeId
+    )
+    unlist(lapply(neigs, function(n){
+        c(node$nodeId, n)
+    }))
+  }))
+  
+  graph( edges=tmp, n=length(nodes))
+}
+
+collisions.relative.error <- function(results_file, first_measure, msg_freq, 
+    trans_range, sent_msgs, recv_msgs){
+
+  x_positions <- load.datafile(results_file, 
+    "name(node_position_x:vector)" )$vectordata
+  y_positions <- load.datafile(results_file,
+    "name(node_position_y:vector)" )$vectordata  
+
+  sent_msgs <- data.frame(
+    node_id = sent_msgs$resultkey + 1,
+    broadcast_id = sent_msgs$y
+  )
+  recv_msgs <- data.frame(
+    node_id = recv_msgs$resultkey + 1,
+    broadcast_id = recv_msgs$y
+  )
+  msgs_ids <- unique(sent_msgs$broadcast_id)
+  
+  ground_truth_recv_msgs <- unlist(
+    lapply(msgs_ids, function(msg){
+      # get point in time where nodes' positions were reported
+      time <- first_measure + msg_freq * (msg - 1)
+      # create the graph with the position of each node
+      g <- get.graph(time, trans_range, x_positions, y_positions)
+      
+      #all nodes that send broadcast messages [msg]
+      emitters  <- sent_msgs[sent_msgs$broadcast_id == msg, ]$node_id
+      #from ground truth count neighbors of each node
+      tmp <- sapply(emitters, function(e){
+        edges <- g[e, ]
+        #return number of neighbors of node [e]
+        length( edges[edges != 0] )
+      })
+      #the ground truth of sent broadcast is obtained as follows:
+      #  - the sum of the size of every node's neighborhood (getting from graph)
+      #  - every emitter also receive a message when it is sent by itself (self transition)
+      #  - the last case is not valid for the source node; reason of having minus one
+      sum(tmp) + length(emitters) - 1
+    })
+  )
+  
+  measured_recv_msgs <- unlist(
+      lapply(msgs_ids, function(msg){
+        #all nodes that receive broadcast message [msg]
+        receivers <- recv_msgs[recv_msgs$broadcast_id == msg, ]$node_id
+        length(receivers)
+      })
+  )
+  
+  abs(measured_recv_msgs - ground_truth_recv_msgs) / ground_truth_recv_msgs
+}
 
 # TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
 # 			- we can aggregate this in many ways
@@ -795,13 +886,22 @@ main <- function(args) {
 
   #TODO find a way to adapt this parameter in an automatic way
   pl.step <- args$step
-
   # mandatory behavior
 
   print("Reading vectors with messages sent and received")
-  msgSentDs <- load.datafile(args$file, "name(msg_sent:vector)" )
-  msgRcvDs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+  sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
+  recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+  print("DONE!")
 
+  print("Computing relative error of collisions")
+  collisions_re <- collisions.relative.error(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    sent_msgs$vectordata,
+    recv_msgs$vectordata
+  )
   print("DONE!")
 
   print(paste("Loading power consumption data file:", args$file))
@@ -818,7 +918,6 @@ main <- function(args) {
   density.relative.errors <- compute.relative.error.in.density(args$file, 
     args$broadcast_msgs, 
     args$transmission_range)
-  print(density.relative.errors)
   print("DONE!")
 
   protocol.per.node <- NULL
@@ -834,11 +933,11 @@ main <- function(args) {
   }
 
   print("Computing maximal reception delay")
-  bs <- broadcastingTime(msgSentDs, msgRcvDs, simulation.time = args$simTime)
+  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
   print("DONE!")
 
   print("Collecting information on number of duplicated messages")
-	dm <- collect.duplicated.messages(msgSentDs, msgRcvDs, simulation.time = args$simTime)
+	dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
 
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration, median.density.per.node)
@@ -848,6 +947,7 @@ main <- function(args) {
   # FIXME:
   save.duplicated.messages(dm, args$outputPath, args$configuration)
   save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
+  save.collisions.relative.error(collisions_re, args$outputPath, args$configuration)
   save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
   save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
   # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
@@ -871,7 +971,7 @@ main <- function(args) {
     radioMode <- load.datafile(args$file, "name(radioMode:vector)" )
     rcvM <- subset(radioMode$vectordata, y == 2)
     trsM <- subset(radioMode$vectordata, y == 3)
-    r <- countMsgsPerRadioMode(rcvM, msgRcvDs, args$algorithm)
+    r <- countMsgsPerRadioMode(rcvM, recv_msgs, args$algorithm)
     filename <- build.filename(args$outputPath, "RadioModeReception", args$density)
     exportDataset(r, filename)
   }
@@ -880,18 +980,18 @@ main <- function(args) {
     print("Computing distributions of each metric...")
     pcoDist <- getPowerConsumptionPerBroadcastSession(
       powerLevelDs$vectordata,
-      msgSentDs$vectordata,
-      msgRcvDs$vectordata,
+      sent_msgs$vectordata,
+      recv_msgs$vectordata,
       args$algorithm, pl.step
     )
     #pcoDist <- getPowerConsumption(pl.local, args$algorithm, seq(pl.step, args$simTime, by=pl.step))
-    relDist <- getNumberOfRelays(msgSentDs, args$algorithm)
-    dupDist <- getDuplicatedMsgs(msgSentDs, msgRcvDs, args$algorithm)
-    broDist <- getBroadcastingTime(msgSentDs, msgRcvDs, args$algorithm)
+    relDist <- getNumberOfRelays(sent_msgs, args$algorithm)
+    dupDist <- getDuplicatedMsgs(sent_msgs, recv_msgs, args$algorithm)
+    broDist <- getBroadcastingTime(sent_msgs, recv_msgs, args$algorithm)
     nodes   <- max(sapply(pl.local, function(p) length(p)))
     netCove <- getCoveragePerBroadcastSession(bs, args$algorithm, nodes)
-    sentMsg <- getRcvOrSentBroadcastMessagesPerSession(msgSentDs$vectordata, args$algorithm)
-    rcvdMsg <- getRcvOrSentBroadcastMessagesPerSession(msgRcvDs$vectordata, args$algorithm)
+    sentMsg <- getRcvOrSentBroadcastMessagesPerSession(sent_msgs$vectordata, args$algorithm)
+    rcvdMsg <- getRcvOrSentBroadcastMessagesPerSession(recv_msgs$vectordata, args$algorithm)
     print("DONE")
 
     print("Exporting distributions of metrics...")
