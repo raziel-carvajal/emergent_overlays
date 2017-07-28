@@ -163,7 +163,8 @@ BroadcastingAppBase::OmnetBroadcastGateway::bridge()
   }
 
 void BroadcastingAppBase::OmnetBroadcastGateway::emitNodePosition(float x,
-        float y) {
+        float y, float density) {
+    app->emit(app->signal_density_approximation, density);
     app->emit(app->signal_node_position_x, x);
     app->emit(app->signal_node_position_y, y);
 }
@@ -632,7 +633,8 @@ BroadcastingAppBase::processStart()
     }
 
     if (nr_hello_msg) {
-      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
+//      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
+      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
     }
 }
 
@@ -785,7 +787,7 @@ BroadcastingAppBase::delayed_event(int type, const std::string& data, double del
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
     auto t = simTime() + delay;
-    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
+//    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
     scheduleAt(t, mm);
     return mm;
 }
