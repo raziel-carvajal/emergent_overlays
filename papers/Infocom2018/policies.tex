@@ -11,7 +11,7 @@
 \centering
 
 \newcolumntype{A}{ >{\raggedright} m{0.15\linewidth} }
-\newcolumntype{C}{ >{\centering\arraybackslash} p{0.05\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} p{0.07\linewidth} }
 %\newcolumntype{D}{ >{\centering\arraybackslash} p{0.11\linewidth} }
 \newcolumntype{E}{ >{\centering\arraybackslash} p{0.12\linewidth} }
 %\newcolumntype{F}{ >{\centering\arraybackslash} p{0.12\linewidth} }
@@ -22,15 +22,17 @@ Algorithm & \rot{Two-hop neighbor} &  \rot{\shortstack[l]{Knowledge of \\nodes' 
 
 \midrule
 
-{\scriptsize Flooding } & \NO & \NO & \NO & \NO & \NO & \YES & \NO & \NO\\ \hline
+{\scriptsize Flooding } & \NO & \NO & \NO & \NO & \NO & \YES & \NO & \NO\\
+\hline
 {\scriptsize CDS-based (node-degree rules) } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO\\ \hline
 {\scriptsize CDS-based (power aware rules) } & \YES & \NO & \YES & \NO & \YES & \YES & \NO & \NO\\ \hline
-{\scriptsize ABBA fix timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\ \hline
-{\scriptsize ABBA random timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\ \hline
-{\scriptsize MPR } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\ \hline
-{\scriptsize ProbFlood } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\ \hline
-
-%Optimized broadcast protocol for sensor networks \\
+{\scriptsize ABBA fix timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\
+\hline
+{\scriptsize ABBA random timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\
+\hline
+{\scriptsize MPR } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\
+\hline
+{\scriptsize ProbFlood } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\
 
 \bottomrule
 \end{tabular}
