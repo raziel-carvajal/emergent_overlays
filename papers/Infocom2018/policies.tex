@@ -3,6 +3,45 @@
 \section{Adaptation policies}
 \labsection{policies}
 
+
+\begin{table*}[t!]
+\setlength\tabcolsep{1pt}
+\renewcommand\arraystretch{0.99}
+\footnotesize
+\centering
+
+\newcolumntype{A}{ >{\raggedright} m{0.15\linewidth} }
+\newcolumntype{C}{ >{\centering\arraybackslash} p{0.05\linewidth} }
+%\newcolumntype{D}{ >{\centering\arraybackslash} p{0.11\linewidth} }
+\newcolumntype{E}{ >{\centering\arraybackslash} p{0.12\linewidth} }
+%\newcolumntype{F}{ >{\centering\arraybackslash} p{0.12\linewidth} }
+
+\begin{tabular}{ACCCCCCCC}
+
+Algorithm & \rot{Two-hop neighbor} &  \rot{\shortstack[l]{Knowledge of \\nodes' position}} & \rot{\shortstack[l]{Piggybacking\\control messages}} & \rot{\shortstack[l]{Piggybacking\\Broadcast messages}} & \rot{\shortstack[l]{Periodic messages\\exchange}} & \rot{Density} & \rot{\shortstack[l]{Neighbor's velocity}}&\rot{Own velocity} \\
+
+\midrule
+
+{\scriptsize Flooding } & \NO & \NO & \NO & \NO & \NO & \YES & \NO & \NO\\ \hline
+{\scriptsize CDS-based (node-degree rules) } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO\\ \hline
+{\scriptsize CDS-based (power aware rules) } & \YES & \NO & \YES & \NO & \YES & \YES & \NO & \NO\\ \hline
+{\scriptsize ABBA fix timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\ \hline
+{\scriptsize ABBA random timer } & \NO & \YES & \NO & \YES & \NO & \NO & \YES & \YES \\ \hline
+{\scriptsize MPR } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\ \hline
+{\scriptsize ProbFlood } & \YES & \NO & \NO & \NO & \YES & \YES & \NO & \NO \\ \hline
+
+%Optimized broadcast protocol for sensor networks \\
+
+\bottomrule
+\end{tabular}
+\caption{Information gathered by the adapted protocols.}
+\label{tab:pi}
+%  \vspace{-0.4cm}
+\end{table*}
+
+
+
+
 \er{the policies need better framing: we must present first what is the control/feedback loop and say we will present a few variants. We must describe clearly what is the problem first. We could separate between the data available to the nodes. I insist that having a table linking the currently-running protocol and the available data would be very useful, as it drives the type of adaptation policy we can have.}
 
 \er{the proposed strategies (algorithms) integrate the threshold-based rules directly in the algorithm. It would be clearer to put them separately as predicates provided to the policies, and that can be reused across multiple decision-making strategies (e.g. the simple local one vs the complex collective one).}
