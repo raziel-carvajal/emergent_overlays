@@ -47,6 +47,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
+            std::cout << simTime().str() << " " + gateway->get_name() << " :: Sending HelloMessage" << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
             knownProtocols[current_protocol_name]->on_saying_hello();
@@ -61,9 +62,11 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       case APPROXIMATE_DENSITY:
       {
 	Coord p = gateway->get_current_position();
-	gateway->emitNodePosition(p.x, p.y);
 	monitor->compute_density_approx();
-	gateway->emitDensityApproximation(monitor->get_density_approx());
+	//gateway->emitDensityApproximation(monitor->get_density_approx());
+	//TODO find a better way to call get_density_approx()
+	gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
+
 	cancelAndDelete(msg);
 	gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation",
 	                       par("intervalBroadcastTime").doubleValue());
@@ -72,7 +75,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       default:
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();
-          if (/*withAdaptation  &&*/ msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
+          if (msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
             adaptation();
             cancelAndDelete(msg);
           }
@@ -130,7 +133,7 @@ FullyAdaptive::adaptation()
   auto density = monitor->get_density_approx();
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   if (!withAdaptation) return;
-
+  return;
   const string dense_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "dense_region");
   const string sparse_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "sparse_region");
   if (policy == AdaptationPolicy::LOCAL) {

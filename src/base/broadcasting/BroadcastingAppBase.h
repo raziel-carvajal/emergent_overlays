@@ -82,7 +82,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void emitDensityApproximation(int value) override;
 
-      void emitNodePosition(float x, float y) override;
+      void emitNodePosition(float x, float y, float density) override;
 
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;

@@ -29,7 +29,7 @@ private:
 public:
 
   void compute_density_approx() override {
-      if (knownNeighbors.size() != lastDensityApprox) {
+      if (knownNeighbors.size() != lastDensityApprox && knownNeighbors.size() != 0) {
           lastDensityApprox = knownNeighbors.size();
       }
       knownNeighbors.clear();
@@ -46,7 +46,7 @@ public:
     auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
     if (!br || !br->getSender() || br->getSender() == gateway->get_name()) return false;
     std::string sender(br->getSender());
-    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "SenderId [" << sender << "]" << endl;
+//    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "SenderId [" << sender << "]" << endl;
     if(knownNeighbors.find(sender) == knownNeighbors.end())
         knownNeighbors[sender] = 0;
     else
