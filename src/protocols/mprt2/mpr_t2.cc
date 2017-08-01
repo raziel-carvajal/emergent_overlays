@@ -144,9 +144,11 @@ Mpr_t2::build_message_to_broadcast()
 void
 Mpr_t2::process_payload(const Broadcast* m)
 {
+    string key = m->getId();
+    gateway->emitBroadcastMsgReceived( key );
 	if (m->getSender() == myself) return;
-	string key = m->getId();
-	gateway->emitBroadcastMsgReceived( key );
+
+
 
 	if (payloads.find(key) == payloads.end()) {
 		payloads[key] = m->getPayload();
