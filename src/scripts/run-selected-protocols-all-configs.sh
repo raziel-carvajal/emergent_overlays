@@ -44,51 +44,52 @@ while getopts "d:D:p:a:h" opt; do
   esac
 done
 
-[ "${#ALGORITHMS[@]}" -eq "0" ] && echo "Ok, since there is no algorithm selected, we are done, bye!!!" && exit 0
-
-# configuring path to omnet++
-. download-omnet.sh
-. local-omnet-setenv.sh ${OMNET_PATH}
-
-# prepare result directory
-if [ ! -d "../../results" ]; then
-    mkdir ../../results
-fi
-rm -f ../../results/broadcastSession* \
-      ../../results/duplicatedMsgs* \
-      ../../results/batteryConsumption* \
-      ../../results/networkCoverage* \
-      ../../results/relays* \
-      ../../results/coverage* \
-      ../../results/macFramesReceived* \
-      ../../results/macFramesSent* \
-      ../../results/densityRelativeError* \
-      ../../results/*.pdf \
-      ../../results/summary.csv
-
-echo "Simulating"
-
-for c in ${CONFIG_PATH}*.ini ; do
-	filename=$(basename "$c")
-  my_substring="_forCol"
-  if [[ ! "$filename" =~ "$my_substring" ]]; then
-  	config_name="${filename%.*}"
-    nodes=$(get_nrnodes_from_config_name $config_name)
-    density=$(get_density_from_config_name $config_name)
-    protocol=$(get_protocol_from_config_name $config_name)
-    if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
-      array_contains "$protocol" "${ALGORITHMS[@]}"
-      if [ $? -eq 0 ]; then
-        echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
-        sem -j-1 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet 0
-      fi
-    fi
-  fi
-
-done
-
-sem --wait --no-notice
-
+##[ "${#ALGORITHMS[@]}" -eq "0" ] && echo "Ok, since there is no algorithm selected, we are done, bye!!!" && exit 0
+##
+### configuring path to omnet++
+##. download-omnet.sh
+##. local-omnet-setenv.sh ${OMNET_PATH}
+##
+### prepare result directory
+##if [ ! -d "../../results" ]; then
+##    mkdir ../../results
+##fi
+##rm -f ../../results/broadcastSession* \
+##      ../../results/duplicatedMsgs* \
+##      ../../results/batteryConsumption* \
+##      ../../results/networkCoverage* \
+##      ../../results/relays* \
+##      ../../results/coverage* \
+##      ../../results/macFramesReceived* \
+##      ../../results/macFramesSent* \
+##      ../../results/densityRelativeError* \
+##      ../../results/collisionsRelativeError* \
+##      ../../results/*.pdf \
+##      ../../results/summary.csv
+##
+##echo "Simulating"
+##
+##for c in ${CONFIG_PATH}*.ini ; do
+##	filename=$(basename "$c")
+##  my_substring="_forCol"
+##  if [[ ! "$filename" =~ "$my_substring" ]]; then
+##  	config_name="${filename%.*}"
+##    nodes=$(get_nrnodes_from_config_name $config_name)
+##    density=$(get_density_from_config_name $config_name)
+##    protocol=$(get_protocol_from_config_name $config_name)
+##    if [ "${density}" -ge "${MINIMUM_DENSITY}" ] && [ "${density}" -le "${MAXIMUM_DENSITY}" ]; then
+##      array_contains "$protocol" "${ALGORITHMS[@]}"
+##      if [ $? -eq 0 ]; then
+##        echo "This is one ${config_name}  ${nodes} ${density} ${protocol}"
+##        sem -j-1 --no-notice ./run-one-configuration.sh ${c} ${OMNET_PATH}/samples/inet 0
+##      fi
+##    fi
+##  fi
+##
+##done
+##
+##sem --wait --no-notice
+##
 echo "Creating aggregated results"
 
 cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
@@ -100,6 +101,9 @@ cat ../../results/coverage-n_* >> ../../results/coverage
 cat ../../results/macFramesSent-n_* >> ../../results/macFramesSent
 cat ../../results/macFramesReceived-n_* >> ../../results/macFramesReceived
 cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
+cat ../../results/collisionsRelativeError-n_* >> ../../results/collisionsRelativeError
+cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
+
 
 rm -f ../../results/broadcastSession-n_* \
       ../../results/duplicatedMsgsDistribution-n_* \
@@ -109,21 +113,26 @@ rm -f ../../results/broadcastSession-n_* \
       ../../results/coverage-n_* \
       ../../results/macFramesSent-n_* \
       ../../results/macFramesReceived-n_* \
-      ../../results/densityRelativeError-n_*
-
+      ../../results/densityRelativeError-n_* \
+      ../../results/collisionsRelativeError-n_* \
+      ../../results/distributionOfDensity-n_* 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
 echo "Plotting aggregated results"
 
+#      -mr macFramesReceived \
+#      -ms macFramesSent \
 Rscript pretty-plotting.R \
       -pc batteryConsumptionDistribution \
       -dm duplicatedMsgsDistribution \
       -bs broadcastSession \
       -rf relays \
       -cv coverage \
-      -ms macFramesSent \
-      -mr macFramesReceived \
+      -cre collisionsRelativeError \
       -dre densityRelativeError \
+      -mr macFramesReceived \
+      -ms macFramesSent \
+      -ds distributionOfDensity \
       -sf summary.csv \
       --final \
       ../../results/
@@ -136,14 +145,18 @@ Rscript pretty-plotting.R \
 mv ../../results/Pretty-Results.pdf ../../results/summary-results.pdf
 
 
+#      -mr macFramesReceived \
+#      -ms macFramesSent \
 Rscript pretty-plotting.R \
       -pc batteryConsumptionDistribution \
       -dm duplicatedMsgsDistribution \
       -bs broadcastSession \
       -rf relays \
       -cv coverage \
-      -ms macFramesSent \
-      -mr macFramesReceived \
+      -cre collisionsRelativeError \
       -dre densityRelativeError \
+      -mr macFramesReceived \
+      -ms macFramesSent \
+      -ds distributionOfDensity \
       -sf summary.csv \
       ../../results/

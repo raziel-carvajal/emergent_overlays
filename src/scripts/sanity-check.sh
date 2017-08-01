@@ -60,7 +60,7 @@ if [ $isEmpty -ne 0 ]; then
     #python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 40 --idx 0 --mobility --distributed
     # python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 35 --nodes 500 --non-uniform
     #python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 40 --nodes 500 --handcrafted
-    python topologies/buildTopology.py --tx $Tx --min_d 5 --max_d 10 --nodes 50 --handcrafted
+    python topologies/buildTopology.py --tx ${Tx} --min_d 7 --max_d 50 --nodes 600 --mobility --handcrafted
     state=$?
     if [ $state -ne 0 ]; then
         echo >&2 "Error: the construction of topologies failed. Aborting."; exit 1;
