@@ -1,8 +1,6 @@
 description = "Broadcasting messages using FullyAdaptive"
 *.host*.udpApp[0].typename = "FullyAdaptive"
 *.host*.udpApp[0].protocolsConfig = xmldoc("../../experiments/configs/config.xml")
-# Avoiding adaptation for testing method to test approximation of density
-#*.host*.udpApp[0].withAdaptation = true
+*.host*.udpApp[0].withAdaptation = true
 *.host*.udpApp[0].initialProtocol = "Flooding2"
 *.host*.udpApp[0].adaptation_policy = "swsp"
-*.host*.udpApp[0].deltaApprox = 0.3s
