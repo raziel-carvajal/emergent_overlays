@@ -29,6 +29,8 @@ get_arguments <- function() {
                       help='File with the density relative error for each experiment')
   parser$add_argument('-cre', '--collisions-error-file', dest='cre', type="character",
                       help='File with the collisions relative error for each experiment')
+  parser$add_argument('-ds', '--density-distribution', dest='ds', type="character",
+                      help='Distribution of nodes density')
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -338,7 +340,7 @@ plot.coverage.per.session <- function(data, densities) {
   plot.data.using.lines(data, densities,
     "Coverage (%)", "Coverage per session",
     function(d, nr.nodes) {
-      d/rep(nr.nodes, length(d))*100
+      d/rep(nr.nodes, length(d)) * 100
     }
   )
 }
@@ -403,6 +405,15 @@ plot.collisions.relative.error <- function(df, densities) {
   plot.data.using.lines(df, densities,
                         "Relative error of collisions for broadcast msgs",
                         "Relative error of collisions for broadcast msgs",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
+
+plot.density.distribution <- function(df, densities) {
+  plot.data.using.lines(df, densities,
+                        "Density of nodes",
+                        "Density of nodes",
                         function(d, nr.nodes) {
                           d
                         })
@@ -599,6 +610,14 @@ if (!is.null(args$cre)) {
   metadata <- r$metadata
   print("Plotting collisions relative error")
   plot.collisions.relative.error(r$data, metadata$densities)
+}
+
+if (!is.null(args$ds)) {
+  print("Importing distribution of density dataset")
+  r <- load.dataset.with.metadata(args$path, args$ds, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting distribution of density")
+  plot.density.distribution(r$data, metadata$densities)
 }
 
 # this most be the last

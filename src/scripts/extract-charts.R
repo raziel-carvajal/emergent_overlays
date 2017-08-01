@@ -2,6 +2,8 @@ require(omnetpp)
 library(argparse)
 library(igraph)
 
+TOLERANCE <- 1e-8
+
 #
 # Used to define the arguments of the script
 #
@@ -338,6 +340,17 @@ save.density.relative.errors <- function(data, outputPath, expeId){
   write.table(
             values,
             file = build.filename(outputPath, "densityRelativeError", expeId),
+            row.names = F, append = F
+  )
+}
+
+save.density.distribution <- function(data, outputPath, expeId){
+  values <- data.frame(value=data)
+  colnames(values) <- c(expeId)
+
+  write.table(
+            values,
+            file = build.filename(outputPath, "distributionOfDensity", expeId),
             row.names = F, append = F
   )
 }
@@ -710,68 +723,87 @@ compute.median.density.per.node <- function(density.over.time) {
   sapply(densities, function(d) if (d>15) 'dense' else 'sparse')
 }
 
-
-compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
-  df_x <- load.datafile(file, "name(node_position_x:vector)" )$vectordata
-  df_y <- load.datafile(file, "name(node_position_y:vector)" )$vectordata
-  df_density <- load.datafile(file, "name(density_approximation:vector)" )$vectordata
-
-  # the number of approximations match with the sent broadcast messages
-  times <- unique(df_density$x)[ c(1:broadcastMsgs) ]
-  nodes <- unique(df_density$resultkey)
+get.density.distribution <- function(results_file, first_measure,
+  msg_freq, trans_range, sent_msgs){
   
-  densityPerNode <- lapply(times, function(t) {
-    tmp <- df_density[df_density$x == t, ]
-    data.frame(
-      resultkey = tmp$resultkey,
-      time = t,
-      approximation = tmp$y
-    )
-  })
-  
-  allPositions <- data.frame(
-    resultkey = df_x$resultkey,
-    time = df_x$x,
-    x = df_x$y,
-    y = df_y$y
+  x_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_x:vector)"
   )
-
-  nodesPositions <- lapply(times, function(t){
-    allPositions[allPositions$time == t, ]
-  })
+  y_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_y:vector)"
+  )
   
-  groundTruth <- lapply(nodesPositions, function(l_i){
-    result <- lapply(nodes, function(n){
-      node <- l_i[l_i$resultkey == n, ]
-      neigs <- l_i[l_i$resultkey != n, ]
-      neigsNo <- length(unique(
-          subset(neigs, 
-            sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= Tx
-          )$resultkey))
-      c(n, node$time, neigsNo)
+  node_ids <- unique(
+    replace.resultkey.with.node_id(
+      results_file, "name(density_approximation:vector)"
+    )$node_id
+  )
+  msgs_ids <- unique(sent_msgs$value)
+
+  density_ground_truth <- sapply(msgs_ids, function(msg){
+    # get point in time where nodes' positions were reported
+    time <- first_measure + msg_freq * (msg - 1)
+    # create the graph with the position of each node
+    g <- get.graph(time, trans_range, x_positions, y_positions)
+    sapply(node_ids, function(node_id){
+      node_neigs <- g[node_id, ]
+      length(node_neigs[node_neigs != 0])
     })
-    df <- data.frame(matrix(unlist(result), nrow=length(result), byrow=T))
-    names(df) <- c("resultkey", "time", "groundTruth")
-    df
   })
   
-  groundTruth <- sapply(groundTruth, function(l_i){
-    l_i[ l_i$resultkey == nodes, ]$groundTruth
-  })
-  
-  densityApproximation <- sapply(densityPerNode, function(l_i){
-    l_i[ l_i$resultkey == nodes, ]$approximation
+  sapply(1:nrow(density_ground_truth), function(r){
+    sum(density_ground_truth[r, 1]) / length(density_ground_truth[r, ])
   })
 
-  absoluteError <- abs(densityApproximation - groundTruth)
+}
+
+compute.relative.error.in.density <- function(results_file, first_measure,
+  msg_freq, trans_range, sent_msgs){
+  
+  x_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_x:vector)"
+  )
+  y_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_y:vector)"
+  )
+  measured_density <- replace.resultkey.with.node_id(
+    results_file, "name(density_approximation:vector)"
+  )
+  
+  node_ids <- unique(measured_density$node_id)
+  msgs_ids <- unique(sent_msgs$value)
+
+  density_approx <- sapply(msgs_ids, function(msg){
+    # get point in time where nodes' positions were reported
+    time <- first_measure + msg_freq * (msg - 1)
+
+    indx_per_time <- measured_density[abs(measured_density$time - time) < TOLERANCE, ]
+
+    sapply(node_ids, function(node_id){
+      indx_per_time[indx_per_time$node_id == node_id, ]$value
+    })
+  })
+  
+  density_ground_truth <- sapply(msgs_ids, function(msg){
+
+    # get point in time where nodes' positions were reported
+    time <- first_measure + msg_freq * (msg - 1)
+    # create the graph with the position of each node
+    g <- get.graph(time, trans_range, x_positions, y_positions)
+    sapply(node_ids, function(node_id){
+      node_neigs <- g[node_id, ]
+      length(node_neigs[node_neigs != 0])
+    })
+  })
+
+  absolute_err <- abs(density_approx - density_ground_truth)
+
   #relative error with vectors
-  relativeError <- sapply(1:nrow(absoluteError), function(r){
-    max(absoluteError[r, ]) / max( groundTruth[r, ] )
+  relative_err <- sapply(1:nrow(absolute_err), function(r){
+    max(absolute_err[r, ]) / max( density_ground_truth[r, ] )
   })
-  print(relativeError)
-
-  relativeError
-
+  print(relative_err)
+  relative_err
 #  final.data <- lapply(all.data, function(d) {
 #  	ttt <- function(radious, x, y, d) {
 #  		length(d[((d$x-x)*(d$x-x) + (d$y-y)*(d$y-y)) < radious*radious,]$node)
@@ -796,47 +828,88 @@ compute.relative.error.in.density <- function(file, broadcastMsgs, Tx) {
 
 }
 
+
+
 get.graph <- function(time, Tx, x_positions, y_positions) {
  
   allPositions <- data.frame(
-    nodeId = x_positions$resultkey + 1,
-    time = x_positions$x,
-    x = x_positions$y,
-    y = y_positions$y
+    nodeId = x_positions$node_id,
+    time = x_positions$time,
+    x = x_positions$value,
+    y = y_positions[y_positions$node_id == x_positions$node_id, ]$value
   )
   
   nodes <- unique(allPositions$nodeId)
-  nodesPositions <- allPositions[allPositions$time == time, ]
 
+  nodesPositions <- allPositions[ abs(allPositions$time - time) < TOLERANCE, ]
+  
+  
   tmp <- unlist(lapply(nodes, function(n){
     node <- nodesPositions[nodesPositions$nodeId == n, ]
     others <- nodesPositions[nodesPositions$nodeId != n, ]
-    neigs <- unique(
-      subset(others, sqrt(abs(node$x - x)*abs(node$x - x) + abs(node$y - y)*abs(node$y - y)) <= Tx)$nodeId
-    )
-    unlist(lapply(neigs, function(n){
-        c(node$nodeId, n)
-    }))
+   
+    neigs <- subset(
+      others, 
+      sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
+    )$nodeId
+    
+    sapply(neigs, function(neig){
+      c(node$nodeId, neig)
+    })
+
   }))
   
   graph( edges=tmp, n=length(nodes))
+
+}
+
+# This method replace the column [resultkey] of a dataset with a string
+# obtained from the field [module], which refers to the node identifier
+replace.resultkey.with.node_id <- function(dataset_file, query){
+  dataset <- load.datafile(dataset_file, query)
+  # getting node identifier from column [vectors$module]
+  tmp <- toString(dataset$vectors$module)
+  tmp <- strsplit(unlist(strsplit(tmp, "\\.")), "hostR")
+  node_ids <- unlist(lapply(tmp, function(itm){ if(length(itm) == 2) {itm[2]} }))
+  # map of node identifier per resultkey
+  key_id_mapping <- data.frame(
+    key = dataset$vectors$resultkey,
+    node_id = as.numeric(node_ids)
+  )
+
+  # get column [resultkey]
+  keys <- dataset$vectordata$resultkey
+  # new values for column [resultkey]
+  transf <- unlist(lapply(keys, function(k){
+    key_id_mapping[key_id_mapping$key == k, ]$node_id
+  }))
+  # update column
+  dataset$vectordata$resultkey <- transf
+  # update headers of dataset
+  data.frame(
+    node_id = dataset$vectordata$resultkey,
+    time = dataset$vectordata$x,
+    value = dataset$vectordata$y
+  )
 }
 
 collisions.relative.error <- function(results_file, first_measure, msg_freq, 
     trans_range, sent_msgs, recv_msgs){
 
-  x_positions <- load.datafile(results_file, 
-    "name(node_position_x:vector)" )$vectordata
-  y_positions <- load.datafile(results_file,
-    "name(node_position_y:vector)" )$vectordata  
-
+  x_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_x:vector)"
+  )
+  y_positions <- replace.resultkey.with.node_id(
+    results_file, "name(node_position_y:vector)"
+  )
+  
   sent_msgs <- data.frame(
-    node_id = sent_msgs$resultkey + 1,
-    broadcast_id = sent_msgs$y
+    node_id = sent_msgs$node_id,
+    broadcast_id = sent_msgs$value
   )
   recv_msgs <- data.frame(
-    node_id = recv_msgs$resultkey + 1,
-    broadcast_id = recv_msgs$y
+    node_id = recv_msgs$node_id,
+    broadcast_id = recv_msgs$value
   )
   msgs_ids <- unique(sent_msgs$broadcast_id)
   
@@ -844,14 +917,30 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
     lapply(msgs_ids, function(msg){
       # get point in time where nodes' positions were reported
       time <- first_measure + msg_freq * (msg - 1)
+
       # create the graph with the position of each node
       g <- get.graph(time, trans_range, x_positions, y_positions)
-      
+      #
+      is_connected <- is_connected(g)
+
       #all nodes that send broadcast messages [msg]
-      emitters  <- sent_msgs[sent_msgs$broadcast_id == msg, ]$node_id
-      #from ground truth count neighbors of each node
-      tmp <- sapply(emitters, function(e){
-        edges <- g[e, ]
+      senders <- unique(sent_msgs[sent_msgs$broadcast_id == msg, ]$node_id)
+
+      colors <- sapply(1:length(V(g)), function(v){
+        ifelse(v %in% senders, "orange", "red")
+      })
+      V(g)$color <- colors
+      name <- paste(
+        paste(
+          paste("GraphForMsg_", msg, sep=""), 
+            is_connected(g), sep="_"), 
+      "pdf", sep=".")
+      pdf(name)
+      plot(g)
+      dev.off()
+
+      tmp <- sapply(senders, function(s){
+        edges <- g[s, ]
         #return number of neighbors of node [e]
         length( edges[edges != 0] )
       })
@@ -859,7 +948,7 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
       #  - the sum of the size of every node's neighborhood (getting from graph)
       #  - every emitter also receive a message when it is sent by itself (self transition)
       #  - the last case is not valid for the source node; reason of having minus one
-      sum(tmp) + length(emitters) - 1
+      sum(tmp) + length(senders) - 1
     })
   )
   
@@ -867,10 +956,11 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
       lapply(msgs_ids, function(msg){
         #all nodes that receive broadcast message [msg]
         receivers <- recv_msgs[recv_msgs$broadcast_id == msg, ]$node_id
+
         length(receivers)
       })
   )
-  
+
   abs(measured_recv_msgs - ground_truth_recv_msgs) / ground_truth_recv_msgs
 }
 
@@ -891,17 +981,39 @@ main <- function(args) {
   print("Reading vectors with messages sent and received")
   sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
   recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+
   print("DONE!")
 
+  print("Get the distribution of density")
+  density_dist <- get.density.distribution(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+  )
+  print("DONE!")
+  
+  print("Computing observed and expected densities")
+  density.relative.errors <- compute.relative.error.in.density(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+  )
+  print("DONE!")
+  
   print("Computing relative error of collisions")
   collisions_re <- collisions.relative.error(
     args$file,
     args$first_time_of_measuring_nodes_position,
     args$step,
     args$transmission_range,
-    sent_msgs$vectordata,
-    recv_msgs$vectordata
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)"),
+    replace.resultkey.with.node_id(args$file, "name(broadcast_msg_received:vector)")
   )
+  print(collisions_re)
   print("DONE!")
 
   print(paste("Loading power consumption data file:", args$file))
@@ -914,11 +1026,6 @@ main <- function(args) {
   mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
   print("DONE!")
 
-  print(paste("Computing observed and expected densities", args$file))
-  density.relative.errors <- compute.relative.error.in.density(args$file, 
-    args$broadcast_msgs, 
-    args$transmission_range)
-  print("DONE!")
 
   protocol.per.node <- NULL
   median.density.per.node <- NULL
@@ -944,9 +1051,12 @@ main <- function(args) {
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-  # FIXME:
-  save.duplicated.messages(dm, args$outputPath, args$configuration)
+
   save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
+
+  save.density.distribution(density_dist, args$outputPath, args$configuration)
+ 
+  save.duplicated.messages(dm, args$outputPath, args$configuration)
   save.collisions.relative.error(collisions_re, args$outputPath, args$configuration)
   save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
   save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
