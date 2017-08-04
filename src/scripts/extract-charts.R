@@ -981,39 +981,6 @@ main <- function(args) {
   print("Reading vectors with messages sent and received")
   sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
   recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
-
-  print("DONE!")
-
-  print("Get the distribution of density")
-  density_dist <- get.density.distribution(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
-  )
-  print("DONE!")
-  
-  print("Computing observed and expected densities")
-  density.relative.errors <- compute.relative.error.in.density(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
-  )
-  print("DONE!")
-  
-  print("Computing relative error of collisions")
-  collisions_re <- collisions.relative.error(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)"),
-    replace.resultkey.with.node_id(args$file, "name(broadcast_msg_received:vector)")
-  )
-  print(collisions_re)
   print("DONE!")
 
   print(paste("Loading power consumption data file:", args$file))
@@ -1021,13 +988,47 @@ main <- function(args) {
   pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
   print("DONE!")
 
-  print(paste("Loading MAC frame data file:", args$file))
-  mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
-  mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
-  print("DONE!")
-
-
-  protocol.per.node <- NULL
+#  print("Get the distribution of density")
+#  density_dist <- get.density.distribution(
+#    args$file,
+#    args$first_time_of_measuring_nodes_position,
+#    args$step,
+#    args$transmission_range,
+#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+#  )
+#  print("DONE!")
+#  
+#  print("Computing observed and expected densities")
+#  density.relative.errors <- compute.relative.error.in.density(
+#    args$file,
+#    args$first_time_of_measuring_nodes_position,
+#    args$step,
+#    args$transmission_range,
+#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+#  )
+#  print("DONE!")
+#  
+#  print("Computing relative error of collisions")
+#  collisions_re <- collisions.relative.error(
+#    args$file,
+#    args$first_time_of_measuring_nodes_position,
+#    args$step,
+#    args$transmission_range,
+#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)"),
+#    replace.resultkey.with.node_id(args$file, "name(broadcast_msg_received:vector)")
+#  )
+#  print(collisions_re)
+#  print("DONE!")
+#
+#
+#
+#  print(paste("Loading MAC frame data file:", args$file))
+#  mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
+#  mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
+#  print("DONE!")
+#
+#
+#  protocol.per.node <- NULL
   median.density.per.node <- NULL
   if (args$splitted) {
     print(paste("Loading changes of protocol over time", args$file))
@@ -1038,29 +1039,29 @@ main <- function(args) {
     median.density.per.node <- compute.median.density.per.node(density.over.time)
     print("DONE!")
   }
-
-  print("Computing maximal reception delay")
-  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
-  print("DONE!")
-
-  print("Collecting information on number of duplicated messages")
-	dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
-
+#
+#  print("Computing maximal reception delay")
+#  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
+#  print("DONE!")
+#
+#  print("Collecting information on number of duplicated messages")
+#	dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
+#
   print("Exporting data")
   save.power.level(pl.local, args$outputPath, args$configuration, median.density.per.node)
-  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
-  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-
-  save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
-
-  save.density.distribution(density_dist, args$outputPath, args$configuration)
- 
-  save.duplicated.messages(dm, args$outputPath, args$configuration)
-  save.collisions.relative.error(collisions_re, args$outputPath, args$configuration)
-  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
-  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
-  # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
+#  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
+#  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
+#  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
+#
+#  save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
+#
+#  save.density.distribution(density_dist, args$outputPath, args$configuration)
+# 
+#  save.duplicated.messages(dm, args$outputPath, args$configuration)
+#  save.collisions.relative.error(collisions_re, args$outputPath, args$configuration)
+#  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
+#  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
+#  # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
 
   # optional behavior
 

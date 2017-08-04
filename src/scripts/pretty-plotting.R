@@ -2,7 +2,7 @@ library(ggplot2)
 library(plyr)
 library(argparse)
 library(e1071)
-
+library(grid)
 
 #
 # Used to define the arguments of the script
