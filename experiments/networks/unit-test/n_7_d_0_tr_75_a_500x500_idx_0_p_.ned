@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-//package abba2;
+package builtTopologies;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
@@ -26,7 +26,7 @@ import broadcasting.CenterHost;
 // - drop an IdealRadioMedium module and rename to "radioMedium"
 // - drop two standardhosts at the 100,100 and 400,400 position and
 //   rename them to hostA and hostB
-network Small
+network n_7_d_0_tr_75_a_500x500_idx_0_p_
 {
     @display("bgb=500,500");
     string hostType = default("WirelessHost");
