@@ -46,6 +46,7 @@ Mpr_t2::initialize(const std::string& node_name, const std::shared_ptr<IBroadcas
 void
 Mpr_t2::on_saying_hello()
 {
+//    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "Scheduling HelloMessage with type: " << refresh_hops_message << endl;
 	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
 }
 

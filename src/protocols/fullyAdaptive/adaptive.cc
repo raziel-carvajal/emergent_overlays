@@ -38,7 +38,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     switch (msg->getKind()) {
       case START:
         BroadcastingAppBase::handleMessageWhenUp(msg);
-        break;
+      break;
       case SAY_HELLO:
         {
           if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
@@ -47,7 +47,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-            std::cout << simTime().str() << " " + gateway->get_name() << " :: Sending HelloMessage" << endl;
+//            std::cout << simTime().str() << " " + gateway->get_name() << " :: Sending HelloMessage" << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
             knownProtocols[current_protocol_name]->on_saying_hello();
@@ -60,18 +60,18 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
       case APPROXIMATE_DENSITY:
-      {
-	Coord p = gateway->get_current_position();
-	monitor->compute_density_approx();
-	//gateway->emitDensityApproximation(monitor->get_density_approx());
-	//TODO find a better way to call get_density_approx()
-	gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
+          {
+            Coord p = gateway->get_current_position();
+            monitor->compute_density_approx();
+            //gateway->emitDensityApproximation(monitor->get_density_approx());
+            //TODO find a better way to call get_density_approx()
+            gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
 
-	cancelAndDelete(msg);
-	gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation",
-	                       par("intervalBroadcastTime").doubleValue());
-      }
-          break;
+            cancelAndDelete(msg);
+            gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation",
+                                   par("intervalBroadcastTime").doubleValue());
+          }
+      break;
       default:
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();

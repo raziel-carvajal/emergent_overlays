@@ -50,7 +50,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
         First = IDLE,
-        Last = LAST_POWER_REPORT
+        Last = DO_ADAPTATION
     };
 
 

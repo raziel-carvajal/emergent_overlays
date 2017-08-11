@@ -787,7 +787,7 @@ BroadcastingAppBase::delayed_event(int type, const std::string& data, double del
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
     auto t = simTime() + delay;
-//    cout << getLogHeader() << "DOINT EVENT [" << type << "] after [" << t << "]s" << endl;
+//    cout << getLogHeader() << "DOING EVENT [" << type << "] after [" << t << "]s" << endl;
     scheduleAt(t, mm);
     return mm;
 }
@@ -799,6 +799,7 @@ BroadcastingAppBase::delayed_event_with_strict_time(int type, const std::string&
     cMessage* mm = new cMessage("some delay");
     mm->setContextPointer(strdup(data.c_str()));
     mm->setKind(type);
+//    cout << getLogHeader() << "DOING EVENT [" << type << "] after [" << t << "]s" << endl;
     scheduleAt(SimTime(t), mm);
 }
 
