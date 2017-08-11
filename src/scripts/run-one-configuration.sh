@@ -73,7 +73,6 @@ fi
 
 # TODO: DO NOT FORGET TO WRITE EVERY VALUE AT THE INI FILE AS DOUBLE, EVEN IF IT IS INTEGER
 # NOTE: when you grep in this way, be sure that the INI file contains float values for wakeUpTime AND deltaApprox
-
 simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 step=`cat ${CONF_FILE} |grep "intervalBroadcastTime" | head -1 | awk -F "=" '{print $2}'| grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 transmissionRange=`cat ${CONF_FILE} | grep "maxCommunicationRange" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
@@ -94,28 +93,16 @@ echo "Interval broadcast time [${step}]"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-  withFa=""
-  # if [ "${algoN}" == "fullyAdaptive" ]; then
-  #   echo "Experiment with FullyAdaptive ${CONF_FILE} ${CONF_NAME}.mapping" >> log.txt
-  #   ./MapNodeIdProtocolId.sh ${CONF_FILE} ${CONF_NAME}".mapping"
-  #   #withFa="-mf ${CONF_NAME}.mapping"
-  # fi
+  results=`Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT}  | grep average_values`
+	echo "Repetition $i"
+	echo "$results"
 
-  # Rscript extract-charts.R --show-averages ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} 5
-	#Rscript extract-charts.R --export-data-for-raziel ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} --algorithm ${PROTOCOL} --density-as-string ${densityAsString} --plot
-  #      exit 1
-  Rscript extract-charts.R --show-averages --splitted ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT}
-	#results=`Rscript extract-charts.R --show-averages --splitted ${withFa} ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} | grep average_values`
-	#echo "Repetition $i"
-	#echo "$results"
-
-	#coverage=`echo ${results} | awk '{print $3}'`
-	#broadcast_time=`echo ${results} | awk '{print $4}'`
-	#power_consumption=`echo ${results} | awk '{print $5}'`
-	#duplicated_messages=`echo ${results} | awk '{print $6}'`
-	#retransmissions=`echo ${results} | awk '{print $7}'`
-
-	#echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
+	coverage=`echo ${results} | awk '{print $3}'`
+	broadcast_time=`echo ${results} | awk '{print $4}'`
+	power_consumption=`echo ${results} | awk '{print $5}'`
+	duplicated_messages=`echo ${results} | awk '{print $6}'`
+	retransmissions=`echo ${results} | awk '{print $7}'`
+	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
 	
 	echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
 	rm -fr debugging/logs/${CONF_NAME}

@@ -306,7 +306,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 		 geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
     #  geom_point(aes(x=idx, y=dat, shape=alg, colour=alg), size = 2) +
 		 theme(legend.position="top", text=element_text(size=18)) +
-		 ylab("Cumulative Probability") + xlab(ylabel) +
+		 ylab("ECDF") + xlab(ylabel) +
 	   scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
      (if (print.titles)
 		   labs(title=caption, colour="", linetype="")
@@ -368,11 +368,11 @@ plot.mac.frames.received <- function(data, densities) {
 
 plot.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
-                        "Power Consumption (J)",
+                        "Energy Consumption (mJ)",
                         "Power consumption for different algorithms", FALSE)
 
   plot.data.using.lines(df, densities,
-                        "Power Consumption (J)",
+                        "Energy Consumption (mJ)",
                         "Power consumption for different algorithms",
                         function(d, nr.nodes) {
                           d

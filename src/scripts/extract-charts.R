@@ -3,7 +3,7 @@ library(argparse)
 library(igraph)
 
 TOLERANCE <- 1e-8
-
+SENT_RECV_PKG_TOLERANCE <- 1.5e-03
 #
 # Used to define the arguments of the script
 #
@@ -27,14 +27,6 @@ get.arguments <- function() {
                       help='Density of the topology used as string')
   parser$add_argument('--radio-mode', dest='computeRadioMode', action="store_true",
                       help='Computing the time spent in each radio mode (a debug only option)')
-  parser$add_argument('--save-time-power-level', dest='timeOfPowerLevels', action="store_true",
-                      help='Compute and save the time last time each node updates its power consumption (a debug only option)')
-  parser$add_argument('--export-data-for-raziel', dest='exportForRaziel', action="store_true",
-                      help='This option will probably become the default as soon as we fixed the other scripts')
-
-  parser$add_argument('--plot', dest='plot', action="store_true",
-                      help='When this flag is specified, a pdf file with the name of the configuration is generared. The file contains a bunch of charts.')
-
   parser$add_argument('--splitted', dest='splitted', action="store_true",
                       help='If used, the script generates data per protocol when there are mnay used in a single scenario')
 
@@ -333,40 +325,16 @@ save.mac.frames.received <- function(data, outputPath, expeId, class.of.nodes=NU
   )
 }
 
-save.density.relative.errors <- function(data, outputPath, expeId){
+save.distribution <-function(dist_name, data, outputPath, expeId){
   values <- data.frame(value=data)
   colnames(values) <- c(expeId)
 
   write.table(
             values,
-            file = build.filename(outputPath, "densityRelativeError", expeId),
+            file = build.filename(outputPath, dist_name, expeId),
             row.names = F, append = F
   )
 }
-
-save.density.distribution <- function(data, outputPath, expeId){
-  values <- data.frame(value=data)
-  colnames(values) <- c(expeId)
-
-  write.table(
-            values,
-            file = build.filename(outputPath, "distributionOfDensity", expeId),
-            row.names = F, append = F
-  )
-}
-
-save.collisions.relative.error <- function(data, outputPath, expeId){
-  values <- data.frame(value=data)
-  colnames(values) <- c(expeId)
-
-  write.table(
-            values,
-            file = build.filename(outputPath, "collisionsRelativeError", expeId),
-            row.names = F, append = F
-  )
-}
-
-
 ######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (BEGIN) ############################################
 # DEPRECATED
 # getting power consumption per an X interval of time doesn't
@@ -646,7 +614,7 @@ plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = 
 
 average.values <- function(pl, broadcast.info, max) {
 
-	nr.nodes <- max(sapply(pl, function(p) length(p)))
+	nr.nodes <- length(pl)
 	n <- length(broadcast.info$id) # number of broadcast messages
 
 	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
@@ -654,7 +622,7 @@ average.values <- function(pl, broadcast.info, max) {
 	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
 	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
 
-	pc <- unlist(lapply(pl, sum))/nr.nodes
+	pc <- sum(pl)/nr.nodes
 
 	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
 
@@ -893,6 +861,85 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
   )
 }
 
+get.biggest.energy.consumption <- function(){
+
+}
+
+energy.consumption.of.sent_recv.messages <- function(results_file){
+
+  sent_msgs <- replace.resultkey.with.node_id(
+    results_file, "name(sentPk:vector*)"
+  )
+  
+  recv_msgs <- replace.resultkey.with.node_id(
+    results_file, "name(rcvdPk:vector*)"
+  )
+  
+  energy_consumption <- replace.resultkey.with.node_id(
+    results_file, "name(residualCapacity:vector)"
+  )
+  
+  nodes <- unique(sent_msgs$node_id)
+  
+  e_consump_per_node <- sapply(nodes, function(n){
+    
+    n_e_consump <- subset(energy_consumption, node_id == n)
+    
+    n_recv_msgs <- subset(recv_msgs, node_id == n)
+    
+    key_timestamps <- unlist(
+      sapply(n_recv_msgs$time, function(t){
+        subset(n_e_consump, time == t)$time
+      })
+    )
+
+    e_consump_recv_msgs <- sapply(key_timestamps, function(t_i){
+      consump_before_t <- abs(
+        subset(
+          subset(n_e_consump, t_i - time >= 0), 
+          abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
+        )
+      )
+      ifelse(
+        length(consump_before_t$node_id) >= 2,
+        abs(tail(consump_before_t$value, 1) - tail(consump_before_t$value, 2)[1]),
+        0
+      )
+    })
+    
+    key_timestamps <- subset(sent_msgs, node_id == n)$time
+    
+    e_consump_sent_msgs <- sapply(key_timestamps, function(t_i){
+    
+      t_i_consump_vec <- sort(
+        abs(
+          subset(
+            n_e_consump,
+            abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
+          )$value
+        )
+      , decreasing = T)
+      
+      ifelse(
+        length(t_i_consump_vec) >= 2,
+        highest.energy.consumption(t_i_consump_vec),
+        0
+      )
+      
+    })
+    # this vector is multiplied by 1K to have milli Joules
+    sum( e_consump_sent_msgs, e_consump_recv_msgs ) * 1000
+  })
+  
+  e_consump_per_node
+}
+
+highest.energy.consumption <- function(v){
+  quasi_v <- tail(v, length(v) - 1)
+  quasi_v <- c(quasi_v, tail(v,1)[1])
+  max(v - quasi_v)
+}
+
 collisions.relative.error <- function(results_file, first_measure, msg_freq, 
     trans_range, sent_msgs, recv_msgs){
 
@@ -968,67 +1015,54 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
 # 			- we can aggregate this in many ways
 #					1. chart of broadcast session and coverage (one curve per protocol). this one is only useful to compare protocols using the same topology
 #					2. I (Inti) think that we can also compute the complete coverage in the experiments (all sessions together) and plot a single value per experiment in a chart. This is the one I explained before.
-# TODO: total power consumption in one experiment
-# TODO: chart of power consumption in many experiments (depends on the previous one)
 
 main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
-
-  #TODO find a way to adapt this parameter in an automatic way
   pl.step <- args$step
-  # mandatory behavior
 
-  print("Reading vectors with messages sent and received")
-  sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
-  recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+  print("Calculating energy consumption")
+  energy_consumption <- energy.consumption.of.sent_recv.messages(args$file)
   print("DONE!")
 
-  print(paste("Loading power consumption data file:", args$file))
-  powerLevelDs <- load.datafile(args$file, "name(residualCapacity:vector)")
-  pl.local <- powerlevels3( powerLevelDs, max= args$simTime, step=pl.step)
+  print("Calculating nodes' real density")
+  density_dist <- get.density.distribution(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+  )
+  print("DONE!")
+  
+  print("Calculating approximation of nodes' density")
+  density.relative.errors <- compute.relative.error.in.density(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
+  )
+  print("DONE!")
+  
+  print("Calculating relative erro of collisions")
+  collisions_re <- collisions.relative.error(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)"),
+    replace.resultkey.with.node_id(args$file, "name(broadcast_msg_received:vector)")
+  )
+  print(collisions_re)
   print("DONE!")
 
-#  print("Get the distribution of density")
-#  density_dist <- get.density.distribution(
-#    args$file,
-#    args$first_time_of_measuring_nodes_position,
-#    args$step,
-#    args$transmission_range,
-#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
-#  )
-#  print("DONE!")
-#  
-#  print("Computing observed and expected densities")
-#  density.relative.errors <- compute.relative.error.in.density(
-#    args$file,
-#    args$first_time_of_measuring_nodes_position,
-#    args$step,
-#    args$transmission_range,
-#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
-#  )
-#  print("DONE!")
-#  
-#  print("Computing relative error of collisions")
-#  collisions_re <- collisions.relative.error(
-#    args$file,
-#    args$first_time_of_measuring_nodes_position,
-#    args$step,
-#    args$transmission_range,
-#    replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)"),
-#    replace.resultkey.with.node_id(args$file, "name(broadcast_msg_received:vector)")
-#  )
-#  print(collisions_re)
-#  print("DONE!")
-#
-#
-#
-#  print(paste("Loading MAC frame data file:", args$file))
-#  mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
-#  mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
-#  print("DONE!")
-#
-#
-#  protocol.per.node <- NULL
+  print("Calculating distribution of sent and received MAC frames")
+  mac.frames.sent <- load.datafile.scalar(args$file, "name(nbTxFrames)")
+  mac.frames.received <- load.datafile.scalar(args$file, "name(nbRxFrames)")
+  print("DONE!")
+  
+
+  protocol.per.node <- NULL
   median.density.per.node <- NULL
   if (args$splitted) {
     print(paste("Loading changes of protocol over time", args$file))
@@ -1039,38 +1073,52 @@ main <- function(args) {
     median.density.per.node <- compute.median.density.per.node(density.over.time)
     print("DONE!")
   }
-#
-#  print("Computing maximal reception delay")
-#  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
-#  print("DONE!")
-#
-#  print("Collecting information on number of duplicated messages")
-#	dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
-#
+  
+  print("Reading vectors with messages sent and received")
+  sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
+  recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
+  print("DONE!")
+  
+  print("Computing maximal reception delay")
+  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
+  print("DONE!")
+
+  print("Collecting information on number of duplicated messages")
+  dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
+
+  #######################
   print("Exporting data")
-  save.power.level(pl.local, args$outputPath, args$configuration, median.density.per.node)
-#  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-#  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
-#  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-#
-#  save.density.relative.errors(density.relative.errors, args$outputPath, args$configuration)
-#
-#  save.density.distribution(density_dist, args$outputPath, args$configuration)
-# 
-#  save.duplicated.messages(dm, args$outputPath, args$configuration)
-#  save.collisions.relative.error(collisions_re, args$outputPath, args$configuration)
-#  save.mac.frames.sent(mac.frames.sent, args$outputPath, args$configuration, median.density.per.node)
-#  save.mac.frames.received(mac.frames.received, args$outputPath, args$configuration, median.density.per.node)
-#  # export.data.of.experiment(args$configuration, bs, args$simTime, args$outputPath)
-
+  save.distribution(
+    "batteryConsumptionDistribution", energy_consumption,
+    args$outputPath, args$configuration
+  ) 
+  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
+  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
+  save.coverage(bs, args$simTime, args$outputPath, args$configuration)
+  save.distribution(
+    "densityRelativeError", density.relative.errors,
+    args$outputPath, args$configuration
+  )
+  save.distribution(
+    "distributionOfDensity", density_dist,
+    args$outputPath, args$configuration
+  )
+  save.distribution(
+    "collisionsRelativeError", collisions_re,
+    args$outputPath, args$configuration
+  )
+ 
+  save.duplicated.messages(dm, args$outputPath, args$configuration)
+  save.mac.frames.sent(
+    mac.frames.sent, args$outputPath, 
+    args$configuration, median.density.per.node
+  )
+  save.mac.frames.received(
+    mac.frames.received, args$outputPath,
+    args$configuration, median.density.per.node
+  )
+  #######################
   # optional behavior
-
-  if (args$timeOfPowerLevels) {
-    print("Ohhh ... this is a debug session. Ok, reading time of power levels")
-    time.pl <- time.of.powerlevels( powerLevelDs, max= args$simTime, step=pl.step)
-    save.time.of.power.level(time.pl, args$outputPath, args$configuration)
-  }
-
   if (args$computeRadioMode) {
     print("Ohhh ... this is a debug session. Ok, reading radio modes")
     # get the intervals of time of two radio modes where:
@@ -1087,58 +1135,9 @@ main <- function(args) {
     exportDataset(r, filename)
   }
 
-  if (args$exportForRaziel) {
-    print("Computing distributions of each metric...")
-    pcoDist <- getPowerConsumptionPerBroadcastSession(
-      powerLevelDs$vectordata,
-      sent_msgs$vectordata,
-      recv_msgs$vectordata,
-      args$algorithm, pl.step
-    )
-    #pcoDist <- getPowerConsumption(pl.local, args$algorithm, seq(pl.step, args$simTime, by=pl.step))
-    relDist <- getNumberOfRelays(sent_msgs, args$algorithm)
-    dupDist <- getDuplicatedMsgs(sent_msgs, recv_msgs, args$algorithm)
-    broDist <- getBroadcastingTime(sent_msgs, recv_msgs, args$algorithm)
-    nodes   <- max(sapply(pl.local, function(p) length(p)))
-    netCove <- getCoveragePerBroadcastSession(bs, args$algorithm, nodes)
-    sentMsg <- getRcvOrSentBroadcastMessagesPerSession(sent_msgs$vectordata, args$algorithm)
-    rcvdMsg <- getRcvOrSentBroadcastMessagesPerSession(recv_msgs$vectordata, args$algorithm)
-    print("DONE")
-
-    print("Exporting distributions of metrics...")
-    filename <- build.filename(args$outputPath, "batteryConsumption", args$density_as_string, seP="_")
-    exportDataset(pcoDist, filename)
-
-    filename <- build.filename(args$outputPath, "numberOfRelays", args$density_as_string, seP="_")
-    exportDataset(relDist, filename)
-
-    filename <- build.filename(args$outputPath, "duplicatedMsgs", args$density_as_string, seP="_")
-    exportDataset(dupDist, filename)
-
-    filename <- build.filename(args$outputPath, "broadcastSessionTime", args$density_as_string, seP="_")
-    exportDataset(broDist, filename)
-
-    filename <- build.filename(args$outputPath, "networkCoverage", args$density_as_string, seP="_")
-    exportDataset(netCove, filename)
-
-    filename <- build.filename(args$outputPath, "sentMsgs", args$density_as_string, seP="_")
-    exportDataset(sentMsg, filename)
-
-    filename <- build.filename(args$outputPath, "rcvdMsgs", args$density_as_string, seP="_")
-    exportDataset(rcvdMsg, filename)
-    print("DONE")
-  }
-
-  if (args$plot) {
-    print("Plotting :-P")
-    id <- paste(args$algorithm, args$density_as_string, sep="-")
-    pdf( build.filename(args$outputPath, "IndividualPlots", id) )
-    plot.charts.for.single.experiment(pl.local, bs, max = args$simTime, step=pl.step)
-  }
-
   if (args$showAverages) {
     print("Printing average values")
-    averages <- average.values(pl.local, bs, max=args$simTime)
+    averages <- average.values(energy_consumption, bs, max=args$simTime)
     print(noquote(paste("average_values",
     				averages$coverage,
     				averages$broadcasting.time,
@@ -1146,9 +1145,7 @@ main <- function(args) {
     				averages$duplicated_messages,
     				averages$retransmitted_messages)))
   }
-
   print("END")
-
 }
 
 main(get.arguments())
