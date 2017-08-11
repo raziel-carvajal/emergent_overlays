@@ -93,7 +93,8 @@ echo "Interval broadcast time [${step}]"
 END=$(($count))
 
 for ((i=0;i<END;i++)); do
-  results=`Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT}  | grep average_values`
+  Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime}
+#  results=`Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT}  | grep average_values`
 	echo "Repetition $i"
 	echo "$results"
 
