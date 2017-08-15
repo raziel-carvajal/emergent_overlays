@@ -21,16 +21,24 @@ get_arguments <- function() {
                       help='Relays file name')
   parser$add_argument('-cv', '--coverage-file', dest='cv', type="character",
                       help='Coverage file name')
-  parser$add_argument('-ms', '--mac-sent-file', dest='ms', type="character",
-                      help='MAC frames sent file name')
-  parser$add_argument('-mr', '--mac-received-file', dest='mr', type="character",
-                      help='MAC frames received file name')
   parser$add_argument('-dre', '--density-error-file', dest='dre', type="character",
                       help='File with the density relative error for each experiment')
   parser$add_argument('-cre', '--collisions-error-file', dest='cre', type="character",
                       help='File with the collisions relative error for each experiment')
   parser$add_argument('-ds', '--density-distribution', dest='ds', type="character",
                       help='Distribution of nodes density')
+
+  parser$add_argument('-sent_bro', '--sent-broadcast-msgs', type="character",
+                      help='Distribution of sent broadcast messages')
+  parser$add_argument('-recv_bro', '--recv-broadcast-msgs', type="character",
+                      help='Distribution of received broadcast messages')
+                      
+  parser$add_argument('-sent_ctrl', '--sent-control-msgs', dest="sent_ctrl", 
+                      type="character", help='Distribution of sent control messages')
+
+  parser$add_argument('-recv_ctrl', '--recv-control-msgs', dest="recv_ctrl",
+                      type="character", help='Distribution of received control messages')
+                      
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -288,7 +296,6 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			)
 		})
 
-
     dd <- unname(dd)
 	  data <- do.call("rbind", dd)
 
@@ -307,7 +314,8 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
     #  geom_point(aes(x=idx, y=dat, shape=alg, colour=alg), size = 2) +
 		 theme(legend.position="top", text=element_text(size=18)) +
 		 ylab("Nodes") + xlab(ylabel) +
-	   scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
+	   scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) + 
+	   scale_y_continuous(expand=c(0,0), limits=c(0, 1)) +
      (if (print.titles)
 		   labs(title=caption, colour="", linetype="")
      else
@@ -530,11 +538,8 @@ load.summary <- function(path, filename) {
 
 args <- get_arguments()
 metadata = NULL
-
-
 # should plot titles?
 print.titles <- !args$final
-
 
 if (!is.null(args$pc)) {
   print("Importing power consumption dataset")
@@ -542,6 +547,77 @@ if (!is.null(args$pc)) {
   metadata <- r$metadata
   print("Plotting power consumption")
   plot.power.consumption(r$data, metadata$densities)
+}
+
+if (!is.null(args$sent_bro)) {
+  print("Importing distribution of sent broadcast messages")
+  r <- load.dataset.with.metadata(args$path, args$sent_bro, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting distribution of sent broadcast messages")
+  plot.data.using.boxes(r$data, metadata$densities,
+                        "Sent broadcast messages",
+                        "", FALSE)
+  plot.data.using.lines(r$data, metadata$densities,
+                        "Sent broadcast messages",
+                        "",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
+if (!is.null(args$sent_ctrl)) {
+  print("Importing distribution of sent control messages")
+  r <- load.dataset.with.metadata(args$path, args$sent_ctrl, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting distribution of sent control messages")
+  plot.data.using.boxes(r$data, metadata$densities,
+                        "Sent control messages",
+                        "Empirical Cumulative Distribution Function", FALSE)
+  plot.data.using.lines(r$data, metadata$densities,
+                        "Sent control messages",
+                        "",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
+
+if (!is.null(args$recv_bro)) {
+  print("Importing distribution of received broadcast messages")
+  r <- load.dataset.with.metadata(args$path, args$recv_bro, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting distribution of received broadcast messages")
+  plot.data.using.boxes(r$data, metadata$densities,
+                        "Received broadcast messages",
+                        "Empirical Cumulative Distribution Function", FALSE)
+  plot.data.using.lines(r$data, metadata$densities,
+                        "Received broadcast messages",
+                        "",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
+
+if (!is.null(args$recv_ctrl)) {
+  print("Importing distribution of received control messages")
+  r <- load.dataset.with.metadata(args$path, args$recv_ctrl, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting distribution of received control messages")
+  plot.data.using.boxes(r$data, metadata$densities,
+                        "Received control messages",
+                        "Empirical Cumulative Distribution Function", FALSE)
+  plot.data.using.lines(r$data, metadata$densities,
+                        "Received control messages",
+                        "",
+                        function(d, nr.nodes) {
+                          d
+                        })
+}
+
+if (!is.null(args$cv)) {
+  print("Importing coverage dataset")
+  r <- load.dataset.with.metadata(args$path, args$cv, metadata, args$excluded.densities)
+  metadata <- r$metadata
+  print("Plotting coverage")
+  plot.coverage.per.session(r$data, metadata$densities)
 }
 
 if (!is.null(args$rf)) {
@@ -552,32 +628,7 @@ if (!is.null(args$rf)) {
   plot.saved_rebroadcast.per.session(r$data, metadata$densities)
 }
 
-if (!is.null(args$ms)) {
-  print("Importing mac frames sent dataset")
-  r <- load.dataset.with.metadata(args$path, args$ms, metadata, args$excluded.densities)
-  metadata <- r$metadata
-  print("Plotting mac frames sent")
-  # print(r$data)
-  plot.mac.frames.sent(r$data, metadata$densities)
-}
 
-
-if (!is.null(args$mr)) {
-  print("Importing mac frames received dataset")
-  r <- load.dataset.with.metadata(args$path, args$mr, metadata, args$excluded.densities)
-  metadata <- r$metadata
-  print("Plotting mac frames received")
-  # print(r$data)
-  plot.mac.frames.received(r$data, metadata$densities)
-}
-
-if (!is.null(args$cv)) {
-  print("Importing coverage dataset")
-  r <- load.dataset.with.metadata(args$path, args$cv, metadata, args$excluded.densities)
-  metadata <- r$metadata
-  print("Plotting coverage")
-  plot.coverage.per.session(r$data, metadata$densities)
-}
 
 if (!is.null(args$dm)) {
   print("Importing duplicated messages dataset")
@@ -603,7 +654,6 @@ if (!is.null(args$dre)) {
   plot.density.relative.error(r$data, metadata$densities)
 }
 
-
 if (!is.null(args$cre)) {
   print("Importing collisions relative error dataset")
   r <- load.dataset.with.metadata(args$path, args$cre, metadata, args$excluded.densities)
@@ -619,6 +669,8 @@ if (!is.null(args$ds)) {
   print("Plotting distribution of density")
   plot.density.distribution(r$data, metadata$densities)
 }
+
+
 
 # this most be the last
 if (!is.null(args$sf)) {

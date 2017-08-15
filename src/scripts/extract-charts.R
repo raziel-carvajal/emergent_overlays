@@ -336,103 +336,7 @@ save.distribution <-function(dist_name, data, outputPath, expeId){
             row.names = F, append = F
   )
 }
-######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (BEGIN) ############################################
-# DEPRECATED
-# getting power consumption per an X interval of time doesn't
-# provide accurate information about what nodes consume per broadcast session
-#getPowerConsumption <- function(ds, algo, timeLine) {
-#  nRow <- length( ds[[1]] )
-#  nCol <- 1 + length( ds )
-#  headers <- paste("", timeLine, sep="")
-#  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-#  names(df) <- c("Algorithm", headers)
-#  for (i in 1:nRow) {
-#    tmp <- c(algo)
-#    for (j in 1:length( ds )) {
-#      v <- ds[[j]][i]
-#      tmp <- c(tmp, v)
-#    }
-#    df[i,] <- tmp
-#  }
-#  df
-#}
 
-getNumberOfRelays <- function(msgDs, algo) {
-  # create a separate list for each msg_sent vector
-  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-  nRow <- 1
-  nCol <- 1 + length( id_msgs )
-  headers <- paste("B", id_msgs, sep="")
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", headers)
-  x <- sapply(id_msgs, function(id) { sum( sapply(list_of_sent, function(d) id %in% d$y ) ) } )
-  x <- c(algo, x)
-  df[1,] <- x
-  df
-}
-
-getDuplicatedMsgs <- function(msgDs, broDs, algo){
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-  tmp <- lapply(id_msgs, function(id){
-    lapply(list_of_received, function(v){
-      id==v$y
-    })
-  })
-
-  nRow <- length(tmp[[1]])
-  nCol <- 1 + length( id_msgs )
-  headers <- paste("B", id_msgs, sep="")
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", headers)
-  for (i in 1:nRow) {
-    x <- c(algo)
-    for (j in 1:length( id_msgs )) {
-      t <- tmp[[j]][[i]]
-      x <- c(x, sum( t == TRUE))
-    }
-    df[i,] <- x
-  }
-  df
-}
-
-getBroadcastingTime <- function(msgDs, broDs, algo) {
-  # create a separate list for each msg_sent vector
-  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-
-  sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
-
-  l.recp <- lapply(id_msgs, function (id) {
-    lapply(list_of_received, function(r) {
-      max(r[r$y == id,]$x)
-    })
-  })
-
-  nRow <- length( l.recp[[1]] )
-  nCol <- 1 + length( l.recp )
-  headers <- paste("B", id_msgs, sep="")
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", headers)
-  for (i in 1:nRow) {
-    tmp <- c(algo)
-    for (j in 1:length( l.recp )) {
-      tmp <- c(tmp, (l.recp[[j]][[i]] - sending.time[j])*1000)
-    }
-  df[i,] <- tmp
-  }
-  df
-}
 
 countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
   keys <- subset(msgsds$vectordata, !duplicated(resultkey))$resultkey
@@ -465,153 +369,6 @@ countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
   r[,"algorithm"] = algo
   r
 }
-
-getRcvOrSentBroadcastMessagesPerSession = function(ds, algo) {
-  nodes <- ds$resultkey[!duplicated(ds$resultkey)]
-  sess  <- ds$y[!duplicated(ds$y)]
-  nRow <- length(nodes)
-  nCol <- length(sess) + 1
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
-  for (i in 1:nRow) {
-    values <- c(vector(), algo)
-    for (j in 2:nCol - 1) {# why 2 ??
-      msgs <- subset(ds, y == j)
-      values <- c(values, length(msgs$y))
-    }
-    df[i, ] <- values
-  }
-  df
-}
-
-getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsgsDs, algo, step){
-  nodes <- rcvMsgsDs$resultkey[!duplicated(rcvMsgsDs$resultkey)]
-  broadcastSessions <- sentMsgsDs$y[!duplicated(sentMsgsDs$y)]
-  battConByNode <- lapply(nodes, function(n){
-    subset(powerConDs, resultkey==n)
-  })
-  nRow <- length(nodes)
-  nCol <- length(broadcastSessions) + 1
-  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
-  rowNumber <- 1
-  for (i in 1:length(nodes)) {
-    vCpy <- c(vector(), battConByNode[[i]]$y)
-    vCpy[ length(vCpy) ] <- NA
-    vCpy <- vCpy[!is.na(vCpy)]
-    vCpy <- c(0.0, vCpy)
-    battConByNode[[i]]$y <- battConByNode[[i]]$y * (-1.0) - vCpy * (-1.0)
-    nodeBatCon <- battConByNode[[i]]
-    values <- c(vector(), algo)
-    for (j in 1:length(broadcastSessions)) {
-      if (j == 1){
-        limInf <- 0
-        #NOTE: be sure that peers must start broadcasting after two steps
-        inte <- step*2
-      } else {
-        limInf <- inte
-        inte <- inte + step
-      }
-      consumpPerSession <- subset(subset(nodeBatCon, x > limInf), x <= inte)
-      totalConsump <- sum( (consumpPerSession$y) )
-      values <- c(values, totalConsump)
-    }
-    df[i, ] <- values
-  }
-  df
-}
-
-getCoveragePerBroadcastSession = function(broInfo, algo, nodes) {
-  sess <- length(broInfo$id)
-  nCol <- sess + 1
-  df <- as.data.frame(matrix(seq(nCol), nrow=1, ncol=nCol))
-  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
-  values <- c(vector(), algo)
-  for (i in 1:sess){
-    values <- c(values, broInfo$n.received[i]/nodes*100)
-  }
-  df[1, ] <- values
-  df
-}
-#getPowerConsumptionPerBroadcastSession = function(powerConDs, sentMsgsDs, rcvMsgsDs, algo){
-#  nodes <- rcvMsgsDs$resultkey[!duplicated(rcvMsgsDs$resultkey)]
-#  broadcastSessions <- sentMsgsDs$y[!duplicated(sentMsgsDs$y)]
-#  recTimes <- getRecOrTraTimeByNode_Session(sentMsgsDs, nodes, broadcastSessions)
-#  traTimes <- getRecOrTraTimeByNode_Session(rcvMsgsDs,  nodes, broadcastSessions)
-#  battConByNode <- lapply(nodes, function(n){
-#    subset(powerConDs, resultkey==n)
-#  })
-#  nRow <- length(nodes)
-#  nCol <- length(broadcastSessions) + 1
-#  df <- as.data.frame(matrix(seq(nRow*nCol), nrow=nRow, ncol=nCol))
-#  names(df) <- c("Algorithm", paste("B", 1:(nCol - 1), sep="") )
-#  rowNumber <- 1
-#  for (i in 1:length(nodes)) {
-#    values <- c(algo)
-#    eventsVector <- vector()
-#    nodeBatCon <- battConByNode[[i]]
-#    for (j in 1:length(broadcastSessions)) {
-#      m <- max(c(recTimes[[i]][[j]], traTimes[[i]][[j]]))
-#      consumpPerSession <- subset(subset(nodeBatCon, x<=m), !(eventno %in% eventsVector) )
-#      eventsVector <- c(eventsVector, consumpPerSession$eventno)
-#      totalConsump <- sum( (consumpPerSession$y) * (-1.0) )
-#      values <- c(values, totalConsump)
-#    }
-#    df[i, ] <- values
-#  }
-#  df
-#}
-######### FUNCTIONS TO COMPUTE DISTRIBUTIONS OF EACH METRIC (END) ############################################
-
-plot.charts.for.single.experiment <- function(power.level, broadcast.info, ts = seq(step, max, by=step), max, step=30) {
-
-  nr.nodes <- max(sapply(power.level, function(p) length(p)))
-  n <- length(broadcast.info$id) # number of broadcast messages
-
-  valid.time <- broadcast.info$time[broadcast.info$time <= max ]
-  if (length(valid.time) == 0) {
-  	valid.time <- broadcast.info$time
-  }
-  plot(ecdf(valid.time * 1000), xlab="Time (ms)", main="ECDF of maximal reception delay")
-  hist(valid.time, xlab="Maximal reception delay (Seconds)", main="Maximal reception delay")
-
-  plot(broadcast.info$B.i / broadcast.info$n.received, type="l", col="blue", xlab="Broadcast Session",
-    ylab="n/B.i", main="Mean of Duplicated Messages ?")
-
-  #plot(broadcast.info$B.i / broadcast.info$n.received,
-  #     type="l", col="blue", xlab="Broadcast Session", ylab="n/B.i", main="Mean of Duplicated Messages ?",
-  #     ylim=c(1, 3)
-  #)
-
-  plot(broadcast.info$n.received/nr.nodes*100, type="l", col="blue", xlab="Session Id", ylab="Coverage (%)", main="Coverage")
-
-  # nr.dead.nodes <- apply(power.level, 2, function(e) length(e[e == 0]) )
-  #nr.dead.nodes <- apply(power.level, 2, function(e) 0 )
-
-  plot(y=broadcast.info$n.received/nr.nodes*100,
-  	 x = broadcast.info$sending ,
-  	 type="l",
-  	 col="blue",
-  	 xlab="Sending Time (Seconds) of each session",
-  	 ylab="Coverage (%)",
-  	 main="Coverage per session Id"
-  	)
-
-  #print(nr.dead.nodes)
-
-  # TODO: PLOT THIS USING LINES
-
-  #plot(x = ts, y = nr.dead.nodes*100.0/nr.nodes, type="l", main="Dead Nodes")
-
-  boxplot(power.level, names = sapply(ts, function(x) { paste("", x, sep="") }) )
-
-  #boxplot(
-  #  power.level, names = sapply(ts, function(x) paste("", x, sep="") ),
-  #  main="Distribution of power consumption", xlab="Time (s)", ylab="Joules (watt-s)"
-  #)
-
-}
-
 
 average.values <- function(pl, broadcast.info, max) {
 
@@ -702,11 +459,7 @@ get.density.distribution <- function(results_file, first_measure,
     results_file, "name(node_position_y:vector)"
   )
   
-  node_ids <- unique(
-    replace.resultkey.with.node_id(
-      results_file, "name(density_approximation:vector)"
-    )$node_id
-  )
+  node_ids <- unique(x_positions$node_id)
   msgs_ids <- unique(sent_msgs$value)
 
   density_ground_truth <- sapply(msgs_ids, function(msg){
@@ -721,7 +474,7 @@ get.density.distribution <- function(results_file, first_measure,
   })
   
   sapply(1:nrow(density_ground_truth), function(r){
-    sum(density_ground_truth[r, 1]) / length(density_ground_truth[r, ])
+    sum(density_ground_truth[r, ]) / length(density_ground_truth[r, ])
   })
 
 }
@@ -773,31 +526,7 @@ compute.relative.error.in.density <- function(results_file, first_measure,
   })
   print(relative_err)
   relative_err
-#  final.data <- lapply(all.data, function(d) {
-#  	ttt <- function(radious, x, y, d) {
-#  		length(d[((d$x-x)*(d$x-x) + (d$y-y)*(d$y-y)) < radious*radious,]$node)
-#  	}
-#  	expected.density<- sapply(nodes, function(n) {
-#  		x <- d[d$node == n,]$x[1]
-#  		y <- d[d$node == n,]$y[1]
-#  		ttt(20, x, y, d)
-#  	})
-#
-#  	data.frame(node=d$node, t=d$t, observed.density=d$d, expected.density=expected.density)
-#  })
-#
-#  sapply(final.data, function(d) {
-#  	o <- d$observed.density
-#  	e <- d$expected.density
-#  	diff <- e - o
-#  	n_diff <- norm(as.matrix(diff), type="F")
-#  	n_e <- norm(as.matrix(e), type="F")
-#  	n_diff/n_e
-#  })
-
 }
-
-
 
 get.graph <- function(time, Tx, x_positions, y_positions) {
  
@@ -811,7 +540,6 @@ get.graph <- function(time, Tx, x_positions, y_positions) {
   nodes <- unique(allPositions$nodeId)
 
   nodesPositions <- allPositions[ abs(allPositions$time - time) < TOLERANCE, ]
-  
   
   tmp <- unlist(lapply(nodes, function(n){
     node <- nodesPositions[nodesPositions$nodeId == n, ]
@@ -860,10 +588,6 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
     time = dataset$vectordata$x,
     value = dataset$vectordata$y
   )
-}
-
-get.biggest.energy.consumption <- function(){
-
 }
 
 energy.consumption.of.sent_recv.messages <- function(results_file, 
@@ -1036,17 +760,12 @@ distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs,
   result
 }
 
-# TODO: coverage (percentage of nodes that receive a message per broadcast session) (this depends on many experiments, it is partially done in one of the functions)
-# 			- we can aggregate this in many ways
-#					1. chart of broadcast session and coverage (one curve per protocol). this one is only useful to compare protocols using the same topology
-#					2. I (Inti) think that we can also compute the complete coverage in the experiments (all sessions together) and plot a single value per experiment in a chart. This is the one I explained before.
-
 main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
-  
   pl.step <- args$step
   exp_duration <- 
       args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
+
   sent_broadcast_msgs <- replace.resultkey.with.node_id(
       args$file, "name(msg_sent:vector)")
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
@@ -1129,8 +848,8 @@ main <- function(args) {
   bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
   print("DONE!")
 
-  print("Collecting information on number of duplicated messages")
-  dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
+#  print("Collecting information on number of duplicated messages")
+#  dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
 
   #######################
   print("Exporting data")
@@ -1170,7 +889,7 @@ main <- function(args) {
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(bs, args$simTime, args$outputPath, args$configuration)
-  save.duplicated.messages(dm, args$outputPath, args$configuration)
+#  save.duplicated.messages(dm, args$outputPath, args$configuration)
   #######################
   # optional behavior
   if (args$computeRadioMode) {

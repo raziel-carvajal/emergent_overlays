@@ -93,70 +93,66 @@ done
 echo "Creating aggregated results"
 
 cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
-cat ../../results/duplicatedMsgsDistribution-n_* >> ../../results/duplicatedMsgsDistribution
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
 cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
 cat ../../results/relays-n_* >> ../../results/relays
 cat ../../results/coverage-n_* >> ../../results/coverage
-cat ../../results/macFramesSent-n_* >> ../../results/macFramesSent
-cat ../../results/macFramesReceived-n_* >> ../../results/macFramesReceived
+cat ../../results/sentBroadcastMsgsDistribution-n_* >> ../../results/sentBroadcastMsgsDistribution
+cat ../../results/recvBroadcastMsgsDistribution-n_* >> ../../results/recvBroadcastMsgsDistribution
+cat ../../results/sentCtrlMsgsDistribution-n_* >> ../../results/sentCtrlMsgsDistribution
+cat ../../results/recvCtrlMsgsDistribution-n_* >> ../../results/recvCtrlMsgsDistribution
 cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
 cat ../../results/collisionsRelativeError-n_* >> ../../results/collisionsRelativeError
 cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
 
 
-rm -f ../../results/broadcastSession-n_* \
-      ../../results/duplicatedMsgsDistribution-n_* \
-      ../../results/batteryConsumptionDistribution-n_* \
-      ../../results/batteryConsumptionDistributionTime-n_* \
-      ../../results/relays-n_* \
-      ../../results/coverage-n_* \
-      ../../results/macFramesSent-n_* \
-      ../../results/macFramesReceived-n_* \
-      ../../results/densityRelativeError-n_* \
-      ../../results/collisionsRelativeError-n_* \
-      ../../results/distributionOfDensity-n_* 
+##rm -f ../../results/broadcastSession-n_* \
+##      ../../results/duplicatedMsgsDistribution-n_* \
+##      ../../results/batteryConsumptionDistribution-n_* \
+##      ../../results/batteryConsumptionDistributionTime-n_* \
+##      ../../results/relays-n_* \
+##      ../../results/coverage-n_* \
+##      ../../results/macFramesSent-n_* \
+##      ../../results/macFramesReceived-n_* \
+##      ../../results/densityRelativeError-n_* \
+##      ../../results/collisionsRelativeError-n_* \
+##      ../../results/distributionOfDensity-n_* 
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
 echo "Plotting aggregated results"
 
-#      -mr macFramesReceived \
-#      -ms macFramesSent \
 Rscript pretty-plotting.R \
       -pc batteryConsumptionDistribution \
-      -dm duplicatedMsgsDistribution \
       -bs broadcastSession \
-      -rf relays \
       -cv coverage \
       -cre collisionsRelativeError \
       -dre densityRelativeError \
-      -mr macFramesReceived \
-      -ms macFramesSent \
       -ds distributionOfDensity \
-      -sf summary.csv \
-      --final \
+      -sent_bro sentBroadcastMsgsDistribution \
+      -recv_bro recvBroadcastMsgsDistribution \
+      -sent_ctrl sentCtrlMsgsDistribution \
+      -recv_ctrl recvCtrlMsgsDistribution \
+      -final \
       ../../results/
 mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
 
-Rscript pretty-plotting.R \
-      -sf summary.csv \
-      --final \
-      ../../results/
-mv ../../results/Pretty-Results.pdf ../../results/summary-results.pdf
+##Rscript pretty-plotting.R \
+##      -sf summary.csv \
+##      --final \
+##      ../../results/
+##mv ../../results/Pretty-Results.pdf ../../results/summary-results.pdf
 
 
-#      -mr macFramesReceived \
-#      -ms macFramesSent \
-Rscript pretty-plotting.R \
-      -pc batteryConsumptionDistribution \
-      -dm duplicatedMsgsDistribution \
-      -bs broadcastSession \
-      -rf relays \
-      -cv coverage \
-      -cre collisionsRelativeError \
-      -dre densityRelativeError \
-      -mr macFramesReceived \
-      -ms macFramesSent \
-      -ds distributionOfDensity \
-      -sf summary.csv \
-      ../../results/
+##Rscript pretty-plotting.R \
+##      -pc batteryConsumptionDistribution \
+##      -dm duplicatedMsgsDistribution \
+##      -bs broadcastSession \
+##      -rf relays \
+##      -cv coverage \
+##      -cre collisionsRelativeError \
+##      -dre densityRelativeError \
+##      -mr macFramesReceived \
+##      -ms macFramesSent \
+##      -ds distributionOfDensity \
+##      -sf summary.csv \
+##      ../../results/
