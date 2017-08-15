@@ -272,7 +272,7 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
 	print(p)
 }
 
-plot.data.using.lines <- function(data, densities, ylabel, caption, transformation) {
+plot.data.using.lines <- function(data, densities, ylabel, caption, transformation, is_coverage=FALSE) {
   data.list <- lapply(densities, function(density) {
 		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
 		dd <- lapply(dd, function(e) {
@@ -308,13 +308,18 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 	data <- do.call("rbind", data.list)
 
   N = length(unique(data$density))
+  if (is_coverage)
+    scale_x <- scale_x_continuous(expand=c(0,0))
+  else
+    scale_x <- scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat)))
+    
 
 	p <- ggplot(data) +
 		 geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
     #  geom_point(aes(x=idx, y=dat, shape=alg, colour=alg), size = 2) +
 		 theme(legend.position="top", text=element_text(size=18)) +
 		 ylab("Nodes") + xlab(ylabel) +
-	   scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) + 
+	   scale_x + 
 	   scale_y_continuous(expand=c(0,0), limits=c(0, 1)) +
      (if (print.titles)
 		   labs(title=caption, colour="", linetype="")
@@ -349,7 +354,8 @@ plot.coverage.per.session <- function(data, densities) {
     "Coverage (%)", "Coverage per session",
     function(d, nr.nodes) {
       d/rep(nr.nodes, length(d)) * 100
-    }
+    },
+    TRUE
   )
 }
 
