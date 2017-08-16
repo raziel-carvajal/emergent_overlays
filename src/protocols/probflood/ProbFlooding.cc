@@ -71,7 +71,7 @@ void ProbFlooding::on_payload_received(const broadcasting::Broadcast* m) {
     double probability = 0.0;
     bool doRetransmission = false;
     NeigsMap toDel;
-    std::string key = string(m->getPayload());
+    std::string key = string(m->getId());
     if (string(m->getSender()) == myself) return;
     cout << getLogHeader() << "KEY_RECEPTION " << key << " FROM_PEER " << string(m->getSender()) << endl;
     emitBroadcastMsgReceived(key);
