@@ -70,7 +70,7 @@ def generateMobility(positions, outputFile, sps=15, nr_nodes=200, map_x=100, map
 
     # rw = mb.truncated_levy_walk(nr_nodes, dimensions=(map_x, map_y), positions=positions, FL_EXP=-3.9)
 
-    rw = mb.HeterogeneousRandomWalk(map_x, map_y, nr_nodes, 3, Variance1_Circle=0.1, Variance2=0.8)
+    rw = mb.HeterogeneousRandomWalk(map_x, map_y, nr_nodes, 1, Variance1_Circle=0.1, Variance2=0.8)
     step_time = 1. / float(sps)
 
     lastValidxy = [p for p in positions]
