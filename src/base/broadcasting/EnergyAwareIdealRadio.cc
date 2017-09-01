@@ -49,10 +49,10 @@ void EnergyAwareIdealRadio::startTransmission(cPacket *macFrame)
 {
   // ASSERT(isOperational);
   // Remove comment while using Omnet IDE
-   //startTransmission(macFrame);
+  startTransmission(macFrame);
 
   // Remove comment to compile at InfoCom repository
-  inet::physicallayer::Radio::startTransmission(macFrame);
+  //inet::physicallayer::Radio::startTransmission(macFrame);
   if (energyStorage->getResidualCapacity().get() <= 0) {
     // there is no energy to send the frame
     // cancelEvent(endSwitchTimer);
@@ -65,9 +65,9 @@ void EnergyAwareIdealRadio::startTransmission(cPacket *macFrame)
 void EnergyAwareIdealRadio::startReception(inet::physicallayer::RadioFrame *radioFrame)
 {
   // Remove comment while using Omnet IDE
-   //startReception(radioFrame);
+  startReception(radioFrame);
   // Remove comment to compile at InfoCom repository
-  inet::physicallayer::Radio::startReception(radioFrame);
+  //inet::physicallayer::Radio::startReception(radioFrame);
   if (energyStorage->getResidualCapacity().get() <= 0) {
     // there is no energy to receive a message
     // cancelEvent(endSwitchTimer);
