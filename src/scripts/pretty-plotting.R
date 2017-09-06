@@ -185,7 +185,7 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   p <- ggplot( data ) +
       geom_line(aes(x=dat, y=ecdf, colour=alg, linetype=alg), size=1.1) +
       theme(legend.position="top", text=element_text(size=18)) +
-      xlab("Time (ms)") + ylab("Cumulative Probability") +
+      xlab("Broadcast session time (ms)") + ylab("Cumulative Probability") +
       scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
       (if (print.titles)
  		   labs(title=caption, colour="", linetype="")
@@ -210,43 +210,41 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE) {
   data.list <- lapply(densities, function(density) {
 
-		dd <- data[grepl(paste("d",density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
-		dd <- lapply(dd, function(e) {
+		dd <- lapply(data, function(e) {
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
-	  	cn <- as.character(s[which(s == "p") + 1])
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "CDS-based")
-      cn <- replace(cn, cn == "MPRT", "MPR")
+	  	cn <- toupper(as.character(s[which(s == "p") + 1]))
 			data <- e[,1]
 
       print(cn)
       print(summary(data))
       print(var(data))
       print(skewness(data))
+
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
 						density=rep(as.factor(paste("Density", density)), length(data))
 			)
 		})
-
 		do.call("rbind", dd)
 	})
+
 	data <- do.call("rbind", data.list)
 
-	p <- ggplot(data)
+	p <- ggplot(data=data, aes(x=alg, y=dat, fill=alg, ymin=0, ymax=0))
   if (!usebox) {
-    p <- p + geom_violin(aes(x=alg, y=dat, fill=alg)) +
+    p <- p + geom_violin() +
           stat_summary(fun.y=median, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
   }
   else {
-    p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg))
+	  meanV <- aggregate(dat ~ alg, data, mean)
+    p <- p + geom_boxplot() +
+					stat_summary(fun.y=mean, colour="blue", geom="point", shape=18, size=3, show_guide = FALSE) +
+					geom_text(data=meanV, aes(label=round(dat, digits=2), y = dat + 2))
   }
 
   p <- p +
-		 ylab(ylabel) +
-    #  xlab("Algorithm") +
-    #  theme(legend.position="none") +
+		 ylab(ylabel) + scale_y_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
      theme(legend.position="top", text=element_text(size=18)) +
      (if (print.titles)
       #  labs(title=caption, x=NULL)
@@ -379,20 +377,6 @@ plot.mac.frames.received <- function(data, densities) {
   )
 }
 
-
-plot.power.consumption <- function(df, densities) {
-  plot.data.using.boxes(df, densities,
-                        "Energy Consumption (mJ)",
-                        "Empirical Cumulative Distribution Function", FALSE)
-
-  plot.data.using.lines(df, densities,
-                        "Energy Consumption (mJ)",
-                        "Empirical Cumulative Distribution Function",
-                        function(d, nr.nodes) {
-                          d
-                        })
-}
-
 plot.time.power.consumption <- function(df, densities) {
   plot.data.using.boxes(df, densities,
                         "Last Time Power Consumption was reported (S)",
@@ -408,7 +392,7 @@ plot.duplicated.messages <- function(df, densities) {
 
 plot.density.relative.error <- function(df, densities) {
   plot.data.using.lines(df, densities,
-                        "Density relative error",
+                        "Relative error of technique to approximate density",
                         "Density relative error (Expected vs Observed)",
                         function(d, nr.nodes) {
                           d
@@ -417,7 +401,7 @@ plot.density.relative.error <- function(df, densities) {
 
 plot.collisions.relative.error <- function(df, densities) {
   plot.data.using.lines(df, densities,
-                        "Relative error of collisions for broadcast msgs",
+                        "Relative error of received broadcast messages",
                         "Relative error of collisions for broadcast msgs",
                         function(d, nr.nodes) {
                           d
@@ -426,7 +410,7 @@ plot.collisions.relative.error <- function(df, densities) {
 
 plot.density.distribution <- function(df, densities) {
   plot.data.using.lines(df, densities,
-                        "Density of nodes",
+                        "Density of nodes (ground truth)",
                         "Density of nodes",
                         function(d, nr.nodes) {
                           d
@@ -552,7 +536,16 @@ if (!is.null(args$pc)) {
   r <- load.dataset.with.metadata(args$path, args$pc, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting power consumption")
-  plot.power.consumption(r$data, metadata$densities)
+  plot.data.using.boxes(r$data, metadata$densities,
+                        "Energy Consumption (mJ)",
+                        "Empirical Cumulative Distribution Function")
+
+  plot.data.using.lines(r$data, metadata$densities,
+                        "Energy Consumption (mJ)",
+                        "Empirical Cumulative Distribution Function",
+                        function(d, nr.nodes) {
+                          d
+                        })
 }
 
 if (!is.null(args$sent_bro)) {
@@ -562,13 +555,7 @@ if (!is.null(args$sent_bro)) {
   print("Plotting distribution of sent broadcast messages")
   plot.data.using.boxes(r$data, metadata$densities,
                         "Sent broadcast messages",
-                        "", FALSE)
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Sent broadcast messages",
-                        "",
-                        function(d, nr.nodes) {
-                          d
-                        })
+                        "")
 }
 if (!is.null(args$sent_ctrl)) {
   print("Importing distribution of sent control messages")
@@ -577,13 +564,7 @@ if (!is.null(args$sent_ctrl)) {
   print("Plotting distribution of sent control messages")
   plot.data.using.boxes(r$data, metadata$densities,
                         "Sent control messages",
-                        "Empirical Cumulative Distribution Function", FALSE)
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Sent control messages",
-                        "",
-                        function(d, nr.nodes) {
-                          d
-                        })
+                        "Empirical Cumulative Distribution Function")
 }
 
 if (!is.null(args$recv_bro)) {
@@ -593,13 +574,18 @@ if (!is.null(args$recv_bro)) {
   print("Plotting distribution of received broadcast messages")
   plot.data.using.boxes(r$data, metadata$densities,
                         "Received broadcast messages",
-                        "Empirical Cumulative Distribution Function", FALSE)
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Received broadcast messages",
-                        "",
-                        function(d, nr.nodes) {
-                          d
-                        })
+                        "Empirical Cumulative Distribution Function")
+	#BUG: plotting a CDF reduces the number of measured points, example, consider the following
+	#			distribution:
+	#			1, 2, 3, 4, 1, 1, 2
+	#			using CDF will transform the distribution into:
+	#			1, 2, 3, 4
+  #plot.data.using.lines(r$data, metadata$densities,
+  #                      "Received broadcast messages",
+  #                      "",
+  #                      function(d, nr.nodes) {
+  #                        d
+  #                      })
 }
 
 if (!is.null(args$recv_ctrl)) {
@@ -609,13 +595,7 @@ if (!is.null(args$recv_ctrl)) {
   print("Plotting distribution of received control messages")
   plot.data.using.boxes(r$data, metadata$densities,
                         "Received control messages",
-                        "Empirical Cumulative Distribution Function", FALSE)
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Received control messages",
-                        "",
-                        function(d, nr.nodes) {
-                          d
-                        })
+                        "Empirical Cumulative Distribution Function")
 }
 
 if (!is.null(args$cv)) {

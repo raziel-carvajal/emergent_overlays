@@ -83,32 +83,32 @@ firstPosT=$(bc <<< "${wakeUpTime}+${deltaApprox}")
 broadcastMsgs=`cat ${CONF_FILE} | grep nr_broadcast_msg | head -1 | awk -F "=" '{print $2}'| grep -Eo '[0-9]{1,5}'`
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
-echo "Checking ${count} repetitions"
-echo "Broadcast messages number [${broadcastMsgs}]"
+echo "Simulation time [${simulation_time}]"
+echo "Frequency of broadcast messages: [${step}]"
 echo "Transmission range [${transmissionRange}]"
+echo "Time of first broadcast [${wakeUpTime}]"
+echo "Broadcast messages number [${broadcastMsgs}]"
+
 echo "First time when nodes print their position [${firstPosT}]"
 echo "Delta aproximation [${deltaApprox}]"
-echo "Interval broadcast time [${step}]"
 
-END=$(($count))
 
-for ((i=0;i<END;i++)); do
-  Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime}
-#  results=`Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-$i ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT}  | grep average_values`
-	echo "Repetition $i"
-	echo "$results"
+Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} > out
+results=`cat out`
+echo "Result: ${results}"
+rm -fr out
 
-	coverage=`echo ${results} | awk '{print $3}'`
-	broadcast_time=`echo ${results} | awk '{print $4}'`
-	power_consumption=`echo ${results} | awk '{print $5}'`
-	duplicated_messages=`echo ${results} | awk '{print $6}'`
-	retransmissions=`echo ${results} | awk '{print $7}'`
-	echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
-	
-	echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
-	rm -fr debugging/logs/${CONF_NAME}
-	mkdir debugging/logs/${CONF_NAME}
-	mv *.pdf debugging/logs/${CONF_NAME}
-	cp ${CONFIG_PATH}/${CONF_NAME}".ini" debugging/logs/${CONF_NAME}
-	echo "All PDF files were copied"
-done
+coverage=`echo ${results} | awk '{print $3}'`
+broadcast_time=`echo ${results} | awk '{print $4}'`
+power_consumption=`echo ${results} | awk '{print $5}'`
+duplicated_messages=`echo ${results} | awk '{print $6}'`
+retransmissions=`echo ${results} | awk '{print $7}'`
+
+echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
+
+echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
+rm -fr debugging/logs/${CONF_NAME}
+mkdir debugging/logs/${CONF_NAME}
+mv *.pdf debugging/logs/${CONF_NAME}
+cp ${CONFIG_PATH}/${CONF_NAME}".ini" debugging/logs/${CONF_NAME}
+echo "All PDF files were copied"
