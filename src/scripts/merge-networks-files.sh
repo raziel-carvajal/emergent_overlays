@@ -3,15 +3,18 @@
 #
 #          FILE: merge-networks-files.sh
 # 
-#         USAGE: ./merge-networks-files.sh 
+#         USAGE: ./merge-networks-files.sh SPARSE_NET DENSE_NET INC_X
 # 
-#   DESCRIPTION: 
-# 
+#   DESCRIPTION: Merge two NED files (description of a network in Omnet++) to create
+#								an adhoc network with one Point of Interest (PoI). Such a PoI is placed
+#								at the position (INC_X, INC_X) and will contain a copy of the network
+#								depicted in DENSE_NET. 
+#         NOTES: Be sure that SPARSE_NET doesn't contain any peer in the region where
+#								the PoI will be placed, otherwise peers will overlap.
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
-#         NOTES: ---
-#        AUTHOR: YOUR NAME (), 
+#        AUTHOR: Raziel Carvajal-Gómez, 
 #  ORGANIZATION: 
 #       CREATED: 09/07/2017 23:14
 #      REVISION:  ---
