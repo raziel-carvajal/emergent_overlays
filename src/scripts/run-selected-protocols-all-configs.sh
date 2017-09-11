@@ -94,7 +94,6 @@ echo "Creating aggregated results"
 
 cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
-cat ../../results/batteryConsumptionDistributionTime-n_* >> ../../results/batteryConsumptionDistributionTime
 cat ../../results/relays-n_* >> ../../results/relays
 cat ../../results/coverage-n_* >> ../../results/coverage
 cat ../../results/sentBroadcastMsgsDistribution-n_* >> ../../results/sentBroadcastMsgsDistribution
