@@ -81,6 +81,15 @@ results/broadcastSession-*
 results/duplicatedMsgsDistribution-*
 results/collisions_*
 results/graphConnectivity_*
+results/sentCtrlMsgsDistribution-*
+results/sentBroadcastMsgsDistribution-*
+results/relays-*
+results/recvCtrlMsgsDistribution-*
+results/recvBroadcastMsgsDistribution-*
+results/distributionOfDensity-*
+results/densityRelativeError-*
+results/coverage-*
+results/collisionsRelativeError-*
 
 #ICDCS paper
 papers/ICDCS2017/main.aux
