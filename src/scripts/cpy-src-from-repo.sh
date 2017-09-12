@@ -53,7 +53,7 @@ BASE_DIR="../base"
 ALGO_DIR="../protocols"
 
 if [ $# -lt 1 ]; then
-  echo -e "USAGE: ${0} ROOT_DIR_FROM_IDE \nEND of ${0}"; exit 1
+  echo -e "USAGE: ${0} SRC_DIR_FROM_IDE \nEND of ${0}"; exit 1
 fi
 if [ ! -d ${1} ]; then
   echo -e "ERROR: directory ${1} does not exist.\nEND of ${0}"; exit 1
