@@ -127,11 +127,12 @@ Rscript pretty-plotting.R \
       -cre collisionsRelativeError \
       -dre densityRelativeError \
       -ds distributionOfDensity \
+			-run_algo algorithmTypeDistribution \
       -sent_bro sentBroadcastMsgsDistribution \
       -recv_bro recvBroadcastMsgsDistribution \
       -sent_ctrl sentCtrlMsgsDistribution \
       -recv_ctrl recvCtrlMsgsDistribution \
-      -final \
+			-final \
       ../../results/
 mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
 
