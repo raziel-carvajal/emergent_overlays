@@ -215,20 +215,23 @@ BroadcastingAppBase::BroadcastingAppBase() {
   BroadcastingAppBase::applyMsgsTransformation (cMessage *msg, bool &fwdMsg)
   {
     bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
-    	  // cerr << getLogHeader() <<  " enter 000 with Msg.protocolId: " << m->getProtocolId() << endl;
+    	  cout << getLogHeader() << "Sender of broadcast [1]: " << m->getSender() << endl;
+    	  cout << getLogHeader() << "with protocolId: " << m->getProtocolId() << endl;
     	  if ( !msgReceived(m) ) {
-
+    	    fwdMsg = true;
+            cout << getLogHeader() << "msg not received: " << m->getSender() << endl;
     	    if (protocolId != m->getProtocolId()) {
-            if (optimize_gluing) {
-              double timeout = computeAdaptTimeout();
-              adaptForeigsMsgs[m->getId()] = m->getPayload();
-              cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
-              cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
-              cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
-              timeoutMsgs[m->getId()] = delayed_event(
-                ControlMessageTypes::TRANSFORMATION_TIMEOUT,
-                m->getId(), timeout);
-            } else fwdMsg = true;
+                if (optimize_gluing) {
+                  cout << getLogHeader() << "doing transformation: " << m->getSender() << endl;
+                  double timeout = computeAdaptTimeout();
+                  adaptForeigsMsgs[m->getId()] = m->getPayload();
+                  cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
+                  cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
+                  cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
+                  timeoutMsgs[m->getId()] = delayed_event(
+                    ControlMessageTypes::TRANSFORMATION_TIMEOUT,
+                    m->getId(), timeout);
+                } else fwdMsg = true;
         	} else {
         		fwdMsg = true;
         		// cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
@@ -529,6 +532,7 @@ BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 	});
 
   done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {
+    cout << getLogHeader() << "Handling message: " << m->getSender() << endl;
     this->on_payload_received(m);
   });
 

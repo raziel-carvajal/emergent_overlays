@@ -171,6 +171,7 @@ FullyAdaptive::adaptation()
 
 void
 FullyAdaptive::on_payload_received(const Broadcast* m) {
+  cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + m->getId() + " FROM_PEER " + string(m->getSender()) << endl;
   knownProtocols[current_protocol_name]->process_payload(m);
 }
 
