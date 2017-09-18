@@ -37,10 +37,8 @@ get_arguments <- function() {
                       type="character", help='Distribution of sent control messages')
   parser$add_argument('-recv_ctrl', '--recv-control-msgs', dest="recv_ctrl",
                       type="character", help='Distribution of received control messages')
-  
-  parser$add_argument('-run_algo', '--running-algorithms', dest="run_algo",
+  parser$add_argument('-runalgo', '--running-algorithms', dest="run_algo",
                       type="character", help='Distribution of running algorithm per nodes')
-                      
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
   parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
@@ -143,7 +141,7 @@ get.attrSet <- function(dfNames, attri) {
 
 get.plot.theme.style <- function() {
   theme(plot.title=element_text(size=15, vjust=3)) +
-  theme(plot.margin = unit(c(0.4,0.4,0.4,0.4), "cm")) +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   # scale_fill_brewer(palette="RdBu") + theme_minimal()
   # all this is to remove the beautiful grid (not good for the paper :-( )
   theme(
@@ -228,72 +226,10 @@ plot.running.algorithms.distri <- function(data) {
 	})))))
 
 	new_df <- data.frame(Experiment=data_t[,1], Nodes=as.numeric(data_t[,3]), Algorithm=data_t[,2])
-	p <- ggplot(data=new_df, aes(x=Experiment, y=Nodes, fill=Algorithm)) + geom_bar(stat="identity") +
-		theme(legend.position="top", text=element_text(size=18)) + get.plot.theme.style() +
-    scale_fill_brewer(palette="Set1") + scale_color_brewer(palette="Set1")
-	print(p)
-}
-##
+	p <- ggplot(data=new_df, aes(x=Experiment, y=Nodes, fill=Algorithm, colour=Algorithm)) + 
+		geom_bar(stat="identity") + theme(legend.position="top", text=element_text(size=18)) +
+		get.plot.theme.style() + scale_fill_brewer(palette="Set1") + scale_color_brewer(palette="Set1")
 
-plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE) {
-  data.list <- lapply(densities, function(density) {
-
-		dd <- lapply(data, function(e) {
-			cn <- colnames(e)[1]
-			s <- unlist( strsplit(cn,'_'))
-	  	cn <- toupper(as.character(s[which(s == "p") + 1]))
-			data <- e[,1]
-
-      print(summary(data))
-      print(var(data))
-      print(skewness(data))
-
-			data.frame( dat = data,
-						alg = rep(cn, length(data)),
-						density=rep(as.factor(paste("Density", density)), length(data))
-			)
-		})
-		do.call("rbind", dd)
-	})
-
-	data <- do.call("rbind", data.list)
-
-	p <- ggplot(data=data, aes(x=alg, y=dat, fill=alg, ymin=0, ymax=0))
-  if (!usebox) {
-    p <- p + geom_violin() +
-          stat_summary(fun.y=mean, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
-  }
-  else {
-	  meanV <- aggregate(dat ~ alg, data, mean)
-    p <- p + geom_boxplot() +
-					stat_summary(fun.y=mean, colour="blue", geom="point", shape=18, size=3, show_guide = FALSE)
-#					geom_text(data=meanV, aes(label=round(dat, digits=2), y = dat + 2))
-  }
-
-  p <- p +
-		 ylab(ylabel) + scale_y_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
-     theme(legend.position="top", text=element_text(size=18)) +
-     (if (print.titles)
-      #  labs(title=caption, x=NULL)
-       labs(title=caption, fill="", shape="")
-     else
-       labs(shape="", fill="")
-     ) +
-    #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
-     get.plot.theme.style() +
-     theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) + scale_colour_brewer(palette="Set1") +
-      scale_fill_brewer(palette="Set1")
-
-  #N = length(unique(data$density))
-  #if (N > 1) {
-  #  p <- p + facet_grid(. ~ density)
-  #}
-
-  if (print.titles) {
-      p <- p + scale_fill_grey(start = 0.3, end = .85)
-  }
 	print(p)
 }
 
@@ -342,6 +278,126 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 		ylab("Nodes") + xlab(ylabel) + get.plot.theme.style()
 	print(p)
 }
+
+###
+plot.dist.as.cdf <- function(data, xlabel) {
+
+	dd <- lapply(data, function(e) {
+		cn <- colnames(e)[1]
+		s <- unlist( strsplit(cn,'_'))
+		cn <- toupper(as.character(s[which(s == "p") + 1]))
+		dist <- e[,1]
+		data.frame( dat = dist,
+			Algorithm = rep(cn, length(dist))
+		)
+	})
+
+  dd <- unname(dd)
+  data <- do.call("rbind", dd)
+  
+	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) + 
+		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
+		labs(x=xlabel, y="Nodes") +
+		scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
+		scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style()
+
+	print(p)
+}
+###
+plot.neighbors.as.cdf <- function(data, run_algo_data, xlabel) {
+
+	run_algo_ds <- lapply(run_algo_data, function(e) {
+		cn <- colnames(e)[1]
+		s <- unlist( strsplit(cn,'_'))
+		cn <- toupper(as.character(s[which(s == "p") + 1]))
+		if (cn == "HYBRID") {
+			dist <- e[,1]
+			data.frame( dat = dist, Algorithm = rep(cn, length(dist)) )
+		}
+	})
+	run_algo_ds <- unname(run_algo_ds)
+	run_algo_ds <- do.call("rbind", run_algo_ds)
+
+	algs_in_hyb <- unique(run_algo_ds$dat)
+	to_replace <- unlist(sapply(algs_in_hyb, function(a){
+		rep(
+			paste("HYBRID", a, sep="-"),
+			length(run_algo_ds$dat[run_algo_ds$dat == a])
+		)
+	}))
+	
+	dd <- lapply(data, function(e) {
+		cn <- colnames(e)[1]
+		s <- unlist( strsplit(cn,'_'))
+		cn <- toupper(as.character(s[which(s == "p") + 1]))
+		dist <- e[,1]
+		data.frame( dat = dist,
+			Algorithm = rep(cn, length(dist))
+		)
+	})
+
+  dd <- unname(dd)
+  data <- do.call("rbind", dd)
+  indx <- which(data$Algorithm == "HYBRID")
+  tmp <- as.character(data$Algorithm)
+  data$Algorithm <- replace(tmp, indx, to_replace)
+  
+	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) + 
+		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
+		labs(x=xlabel, y="Nodes") +
+		scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
+		scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style()
+
+	print(p)
+}
+###
+
+plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE) {
+  data.list <- lapply(densities, function(density) {
+
+		dd <- lapply(data, function(e) {
+			cn <- colnames(e)[1]
+			s <- unlist( strsplit(cn,'_'))
+	  	cn <- toupper(as.character(s[which(s == "p") + 1]))
+			data <- e[,1]
+
+      print(summary(data))
+      print(var(data))
+      print(skewness(data))
+
+			data.frame( dat = data,
+						Algorithm = rep(cn, length(data)),
+						density=rep(as.factor(paste("Density", density)), length(data))
+			)
+		})
+		do.call("rbind", dd)
+	})
+
+	data <- do.call("rbind", data.list)
+
+	p <- ggplot(data=data, aes(x=Algorithm, y=dat, colour=Algorithm, fill=Algorithm, ymin=0, ymax=0))
+  if (!usebox) {
+    p <- p + geom_violin() +
+          stat_summary(fun.y=mean, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
+  }
+  else {
+	  meanV <- aggregate(dat ~ Algorithm, data, mean)
+    p <- p + geom_boxplot() +
+					stat_summary(fun.y=mean, colour="blue", geom="point", shape=18, size=3, show_guide = FALSE)
+#					geom_text(data=meanV, aes(label=round(dat, digits=2), y = dat + 2))
+  }
+
+  p <- p +
+		 ylab(ylabel) + scale_y_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
+     theme(legend.position="top", text=element_text(size=18)) +
+     get.plot.theme.style() +
+     theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+	print(p)
+}
+
+
 
 
 plot.saved_rebroadcast.per.session <- function(data, densities) {
@@ -394,35 +450,6 @@ plot.duplicated.messages <- function(df, densities) {
                         "Duplicate messages",
                         "Distribution of duplicate messages along the experiment")
 }
-
-
-plot.density.relative.error <- function(df, densities) {
-  plot.data.using.lines(df, densities,
-                        "Relative error of technique to approximate density",
-                        "Density relative error (Expected vs Observed)",
-                        function(d, nr.nodes) {
-                          d
-                        })
-}
-
-plot.collisions.relative.error <- function(df, densities) {
-  plot.data.using.lines(df, densities,
-                        "Relative error of received broadcast messages",
-                        "Relative error of collisions for broadcast msgs",
-                        function(d, nr.nodes) {
-                          d
-                        })
-}
-
-plot.density.distribution <- function(df, densities) {
-  plot.data.using.lines(df, densities,
-                        "Nodes' neighbors",
-                        "Density of nodes",
-                        function(d, nr.nodes) {
-                          d
-                        })
-}
-
 
 plot.saved.rebroadcasts <- function(df, algos) {
   ylabel <- "SRB (%)"
@@ -531,19 +558,9 @@ load.summary <- function(path, filename) {
   data
 }
 
-
 args <- get_arguments()
 metadata = NULL
-# should plot titles?
-print.titles <- !args$final
-
-if (!is.null(args$run_algo)) {
-  print("Importing distribution of running algorithms")
-  r <- load.dataset.with.metadata(args$path, args$run_algo, metadata, args$excluded.densities)
-  metadata <- r$metadata
-  print("Plotting distribution of running algorithms")
-  plot.running.algorithms.distri(r$data)
-}
+separate_dist = TRUE
 
 if (!is.null(args$pc)) {
   print("Importing power consumption dataset")
@@ -554,53 +571,35 @@ if (!is.null(args$pc)) {
                         "Energy Consumption (mJ)",
                         "Empirical Cumulative Distribution Function")
 
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Energy Consumption (mJ)",
-                        "Empirical Cumulative Distribution Function",
-                        function(d, nr.nodes) {
-                          d
-                        })
+  plot.dist.as.cdf(r$data, "Energy Consumption (mJ)")
 }
-
-
 
 if (!is.null(args$sent_bro)) {
   print("Importing distribution of sent broadcast messages")
   r <- load.dataset.with.metadata(args$path, args$sent_bro, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting distribution of sent broadcast messages")
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Sent broadcast messages",
-                        "", function(d, nr.nodes){d})
+  plot.dist.as.cdf(r$data, "No of Sent Broadcast Messages")
 }
+
 if (!is.null(args$sent_ctrl)) {
   print("Importing distribution of sent control messages")
   r <- load.dataset.with.metadata(args$path, args$sent_ctrl, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting distribution of sent control messages")
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Sent control messages",
-                        "", function(d, nr.nodes){d})
+  plot.dist.as.cdf(r$data, "Sent control messages")
 }
 
 if (!is.null(args$recv_bro)) {
   print("Importing distribution of received broadcast messages")
   r <- load.dataset.with.metadata(args$path, args$recv_bro, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting distribution of received broadcast messages")
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Received broadcast messages",
-                        "", function(d, nr.nodes){d})
+  plot.dist.as.cdf(r$data, "Received broadcast messages")
 }
 
 if (!is.null(args$recv_ctrl)) {
   print("Importing distribution of received control messages")
   r <- load.dataset.with.metadata(args$path, args$recv_ctrl, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting distribution of received control messages")
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Received control messages",
-                        "", function(d, nr.nodes){d})
+  plot.dist.as.cdf(r$data, "Received control messages")
 }
 
 if (!is.null(args$cv)) {
@@ -632,34 +631,40 @@ if (!is.null(args$bs)) {
   r <- load.dataset.with.metadata(args$path, args$bs, metadata, args$excluded.densities)
   metadata <- r$metadata
   print("Plotting broadcast time")
-  plot.data.using.lines(r$data, metadata$densities,
-                        "Broadcast session time (ms)",
-                        "", function(d, nr.nodes){d})
-#  plot.broadcasting.time2(r$data, metadata$densities, metadata$pal)
+  plot.dist.as.cdf(r$data, "Broadcast session time (ms)")
 }
 
 if (!is.null(args$dre)) {
   print("Importing density relative error dataset")
   r <- load.dataset.with.metadata(args$path, args$dre, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting density relative error")
-  plot.density.relative.error(r$data, metadata$densities)
+  plot.dist.as.cdf(r$data, "Relative error of technique to approximate density")
 }
 
 if (!is.null(args$cre)) {
   print("Importing collisions relative error dataset")
   r <- load.dataset.with.metadata(args$path, args$cre, metadata, args$excluded.densities)
-  metadata <- r$metadata
   print("Plotting collisions relative error")
-  plot.collisions.relative.error(r$data, metadata$densities)
+  plot.dist.as.cdf(r$data, "Relative error of received broadcast messages")
 }
 
 if (!is.null(args$ds)) {
-  print("Importing distribution of density dataset")
+	print("Importing distribution of density dataset")
   r <- load.dataset.with.metadata(args$path, args$ds, metadata, args$excluded.densities)
-  metadata <- r$metadata
-  print("Plotting distribution of density")
-  plot.density.distribution(r$data, metadata$densities)
+	print("Plotting distribution of density")
+	if (!is.null(args$run_algo) & !is.null(args$run_algo) & separate_dist) {
+	  rds <- load.dataset.with.metadata(args$path, args$run_algo, metadata, args$excluded.densities)
+		plot.neighbors.as.cdf(r$data, rds$data, "Nodes' neighbors")
+	} else {
+		plot.dist.as.cdf(r$data, "Nodes' neighbors")	
+	}
+}
+
+if (!is.null(args$run_algo)) {
+  print("Importing distribution of running algorithms")
+  r <- load.dataset.with.metadata(args$path, args$run_algo, metadata, args$excluded.densities)
+  print("Plotting distribution of running algorithms")
+  plot.running.algorithms.distri(r$data)
 }
 
 # this most be the last

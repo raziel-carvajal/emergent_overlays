@@ -450,7 +450,7 @@ compute.median.density.per.node <- function(density.over.time) {
 }
 
 get.density.distribution <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs){
+  msg_freq, trans_range, sent_msgs, node_ids){
   
   x_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_x:vector)"
@@ -459,7 +459,6 @@ get.density.distribution <- function(results_file, first_measure,
     results_file, "name(node_position_y:vector)"
   )
   
-  node_ids <- unique(x_positions$node_id)
   msgs_ids <- unique(sent_msgs$value)
 
   density_ground_truth <- sapply(msgs_ids, function(msg){
@@ -480,7 +479,7 @@ get.density.distribution <- function(results_file, first_measure,
 }
 
 compute.relative.error.in.density <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs){
+  msg_freq, trans_range, sent_msgs, node_ids){
   
   x_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_x:vector)"
@@ -491,8 +490,7 @@ compute.relative.error.in.density <- function(results_file, first_measure,
   measured_density <- replace.resultkey.with.node_id(
     results_file, "name(density_approximation:vector)"
   )
-  
-  node_ids <- unique(measured_density$node_id)
+
   msgs_ids <- unique(sent_msgs$value)
 
   density_approx <- sapply(msgs_ids, function(msg){
@@ -591,13 +589,12 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
 }
 
 energy.consumption.of.sent_recv.messages <- function(results_file, 
-  exp_duration, sent_packages, recv_packages){
+  exp_duration, sent_packages, recv_packages, nodes){
 
   energy_consumption <- subset(
     replace.resultkey.with.node_id(results_file, "name(residualCapacity:vector)"),
     time < exp_duration
-  )  
-  nodes <- unique(sent_packages$node_id)
+  )
   
   e_consump_per_node <- sapply(nodes, function(n){
     
@@ -645,8 +642,9 @@ energy.consumption.of.sent_recv.messages <- function(results_file,
       )
       
     })
+
     # this vector is multiplied by 1K to have milli Joules
-    sum( e_consump_sent_msgs, e_consump_recv_msgs ) * 1000
+    sum( unlist(e_consump_sent_msgs), unlist(e_consump_recv_msgs) ) * 1000
   })
   
   e_consump_per_node
@@ -745,10 +743,8 @@ count.events_compl.per.node <- function(nodes, A, B){
 }
 
 distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs, 
-  recv_bro_msgs, sent_pkgs, recv_pkgs){
-  
-  nodes <- unique(sent_pkgs$node_id)
-  result <- list()  
+  recv_bro_msgs, sent_pkgs, recv_pkgs, nodes){
+  result <- list()
   result[["sent_bro_msgs"]] <- count.events.per.node(nodes, sent_bro_msgs)
   result[["recv_bro_msgs"]] <- count.events.per.node(nodes, recv_bro_msgs)
   result[["sent_ctrl_msgs"]] <- count.events_compl.per.node(
@@ -765,7 +761,9 @@ main <- function(args) {
   pl.step <- args$step
   exp_duration <- 
       args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
-
+	all_nodes <- unique( replace.resultkey.with.node_id(
+			args$file, "name(density_approximation:vector)")$node_id
+	)
   sent_broadcast_msgs <- replace.resultkey.with.node_id(
       args$file, "name(msg_sent:vector)")
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
@@ -779,19 +777,15 @@ main <- function(args) {
 
   print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
-    sent_broadcast_msgs,
-    recv_broadcast_msgs,
-    sent_packages,
-    recv_packages
+    sent_broadcast_msgs, recv_broadcast_msgs,
+    sent_packages, recv_packages, all_nodes
   )
   print("DONE!")
   
   print("Calculating energy consumption")
   energy_consumption <- energy.consumption.of.sent_recv.messages(
-    args$file,
-    exp_duration,
-    sent_packages,
-    recv_packages
+    args$file, exp_duration,
+    sent_packages, recv_packages, all_nodes
   )
   print("DONE!")
 
@@ -801,7 +795,7 @@ main <- function(args) {
     args$first_time_of_measuring_nodes_position,
     args$step,
     args$transmission_range,
-    sent_broadcast_msgs
+    sent_broadcast_msgs, all_nodes
   )
   print("DONE!")
   
@@ -811,7 +805,7 @@ main <- function(args) {
     args$first_time_of_measuring_nodes_position,
     args$step,
     args$transmission_range,
-    sent_broadcast_msgs
+    sent_broadcast_msgs, all_nodes
   )
   print("DONE!")
   
