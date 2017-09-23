@@ -234,19 +234,19 @@ The energy consumed by nodes for the broadcast of all messages and, when applica
 
 In this Section, we measure the cost of the mechanisms proposed in~\refsection{mechanism} to guarantee message dissemination across different base protocols.
 %
-In particular, we evaluate the cost in terms of power consumption and broadcast latency for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{missing}.
+In particular, we evaluate the cost in terms of power consumption and broadcast latency for the mechanisms presented in~\refalg{adaptation_mechanism_simple},~\refalg{adaptation_mechanism} and~\refalg{??}.
 
-To perform this experiments we use a simple network topology where there are 500 nodes and one PoI.
+To perform this experiments we use a simple network topology with 500 nodes and a single PoI.
 %
-Half the nodes are located in the squared PoI (center of the map).
+Half the nodes are located in a squared PoI located at the center of the map.
 %
-In this PoI, the average node density is 40 while it is 5 elsewhere.
+In this PoI, the average node density is 40 whilst the density is 5 elsewhere.
 %
-Hence, we deploy \textit{MPR} in the PoI and \textit{simple flooding} outside.
+As we discussed in ~\refsection{overview}, \textit{MPR} behaves well in dense regions. Hence, we deploy \textit{MPR} in nodes within the PoI and \textit{pure flooding} outside.
 %
-In the experiments, no node is moving and the source of every message is a node executing \textit{simple flooding}.
+In the experiments, no node is moving and the source of every message is a node randomly chosen that is executing \textit{pure flooding}.
 
-Figure \reffigure{energy-consumption-glue} shows the power consumption for the three algorithms.
+\reffigure{energy-consumption-glue} shows the power consumption for the three mechanisms of our gluing solution.
 %
 As expected,~\refalg{adaptation_mechanism_simple} is worst in this scenario because no optimization is applied.
 %
