@@ -1,71 +1,122 @@
+#!/usr/bin/python
+import sys
+import math
+import argparse
+import itertools as iterT
 import networkx as nx
 import matplotlib.pyplot as plt
-import argparse; import sys; import math
+from pymobility.models.mobility import random_waypoint
 
-NED_HEADER = "package rand_uniform_topologies;\n\
-	import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n\
-	import inet.node.bgp.BGPRouter;\n\
-	import inet.node.inet.AdhocHost;\n\
-	import inet.node.inet.INetworkNode;\n\
-	import inet.node.mpls.LDP_LSR;\n\
-	import inet.physicallayer.contract.packetlevel.IRadioMedium;\n\
-	import broadcasting.CenterHost;\n"
-NED_MIDDLE = "string mediumType = default(" + '"IdealRadioMedium");\n' +\
-  "submodules:\nconfigurator: IPv4NetworkConfigurator {\n@display(" +\
-  '"p=0,0");\n}\nradioMedium: <mediumType> like IRadioMedium{\n' +\
-	"@display(" + '"p=0,0");}\n'
+FIRST_PLOT_NAME = "FirstPosition.pdf"
+STEPS_NO = 100
+MIN_VELOCITY = 0.1
+MAX_VELOCITY = 1.0
+WAITING_TIME = 1.0
+MOBILITY_FILE= "mobility-trace"
 
-def getArgs():
-	p = argparse.ArgumentParser(description='Creates a network with N regions of density.')
+def getArgs() :
+	p = argparse.ArgumentParser(description='Creates a network with N regions '+
+		'of density.')
 	p.add_argument('--cma-w', dest='cma_w', type=int, default=100,
 		help='width of the communication area')
 	p.add_argument('--regions', dest='regions', type=int, default=1,
 		help='number of regions within the communication area')
 	p.add_argument('--nodes-no', dest='nodes_no', type=int, default=100,
 		help='number of nodes on each region')
+	p.add_argument('--transmission-range', dest='Tx', type=int, default=15,
+		help='transmission range of each node')
 	return p.parse_args()
 
-def getDistance(a, b):
+def getDistance(a, b) :
 	return math.sqrt(math.pow(a['x'] - b['x'], 2) + math.pow(a['y'] - b['y'], 2))
 
+def getInitialPosition(nodes, denZoneNo, cmaW) :
+	denZones = { }
+	for i in range(0, denZoneNo) :
+		matxLen = 1 + 2 * i
+		sqrtsNo = 4 * (matxLen - 1)
+		if sqrtsNo == 0 :
+			denZones[i] = nodes
+		else :
+			denZones[i] =  int(math.ceil(nodes / sqrtsNo))
+	sqrtLen = float(cmaW / matxLen)
+	deltSqrt = float(sqrtLen / 2)
+	theCenter = { 'x': float(cmaW / 2), 'y': float(cmaW / 2) }
+	centers = {}; positions = {}; nodeId = 1
+	for i in range(0, matxLen) :
+		centers[i] = {}
+		for j in range(0, matxLen) :
+			centers[i][j] = { 'x': j*sqrtLen + deltSqrt, 'y': i*sqrtLen + deltSqrt }
+			d = getDistance(theCenter, centers[i][j])
+			if d < deltSqrt :
+				centers[i][j]['density'] = denZones[0]
+			else :
+				for k in range(1, denZoneNo + 1) :
+					if d < (k + 1) * sqrtLen :
+						centers[i][j]['density'] = denZones[k]
+						break
+			g = nx.Graph(); nodesRange = range(0, centers[i][j]['density'])
+			g.add_nodes_from(nodesRange)
+			pos = nx.random_layout(g, scale=sqrtLen, 
+				center=(centers[i][j]['x'], centers[i][j]['y']))
+			for k in nodesRange :
+				positions[nodeId] = {'x': pos[k][0], 'y': pos[k][1]}
+				nodeId = nodeId + 1
+	return positions
+
+def plotNodesPositions(pos, pltWidth) :
+	layout = plt.subplot(111)
+	layout.plot(pltWidth, pltWidth, linestyle='', marker='.')
+	plt.scatter( [ pos[p]['x'] for p in pos], [ pos[p]['y'] for p in pos] )
+	plt.savefig(FIRST_PLOT_NAME)
+
+def plotOverlay(graph, positions) :
+	pTmp = {}
+	for k in range(1, len(positions) + 1):
+		pTmp[k] = [positions[k]['x'], positions[k]['y']]
+	plt.subplot(111)
+	nx.draw_networkx(graph, pos=pTmp, node_size=10, with_labels=False)
+	plt.savefig(FIRST_PLOT_NAME)
+
+def getOverlay(positions, transRange) :
+	g = nx.Graph()
+	nodes = range(1, len(positions) + 1)
+	g.add_nodes_from(nodes)
+	pairs = iterT.combinations_with_replacement(nodes, 2)
+	for p in pairs :
+		if getDistance(positions[p[0]], positions[p[1]]) <= transRange :
+			g.add_edge(p[0], p[1])
+	return g
+
+def isConnected(g) :
+	try :
+		nx.average_shortest_path_length(g)
+		r = True
+	except :
+		r = False
+	return r
+
+def savePositions(positions) :
+	with open(MOBILITY_FILE, 'a') as f:
+		for k in range(1, len(positions) + 1) :
+			l = str(k) + " " + str(positions[k]['x']) + " " + str(positions[k]['y'])
+			f.write(l + "\n")
+
+#	plotInitialPos(latestP, args.cma_w)
 if __name__ == '__main__':
 	args = getArgs()
-	densPerLevel = { 0: args.nodes_no }
-	for i in range(1, args.regions + 1):
-		matrixLen = 3 + 2 * (i - 1)
-		sqrtsNo = 4 * (matrixLen - 1)
-		densPerLevel[i] =  int(math.ceil(args.nodes_no / sqrtsNo))
-	matrixLen = 3 + 2 * (args.regions - 1)
-	sqrtLen = float(args.cma_w / matrixLen)
-	deltSqrt = float(sqrtLen / 2)
-	center = { 'x': float(args.cma_w / 2), 'y': float(args.cma_w / 2) }
-	centers = {}; peerId = 1; nodesList = ""
-	for i in range(1, matrixLen + 1):
-		centers[i] = {}
-		for j in range(1, matrixLen + 1):
-			centers[i][j] = {'x': (j - 1) * sqrtLen + deltSqrt, 'y': (i - 1) * sqrtLen + deltSqrt}
-			d = getDistance(center, centers[i][j])
-			if d < deltSqrt:
-				centers[i][j]['density'] = densPerLevel[0]
-				nodesList += "//Center region with {0} nodes\n".format(densPerLevel[0])
-			else:
-				for k in range(1, args.regions + 1):
-					if d < (k + 1) * sqrtLen:
-						centers[i][j]['density'] = densPerLevel[k]
-						break
-			g = nx.Graph()
-			g.add_nodes_from(range(1, centers[i][j]['density'] + 1))
-			p = (centers[i][j]['x'], centers[i][j]['y'])
-			pos = nx.random_layout(g, scale=sqrtLen, center=p)
-			for k in range(1, len(pos) + 1):
-				pInX = pos[k][0]; pInY = pos[k][1]
-				nodesList += "hostR{0}: CenterHost ".format(peerId) + "{@display(" + '"' + \
-					"p={0},{1}".format(pInX, pInY) + '"' + ");}\n"
-				peerId += 1
-	fileName = "n_{0}_d_0_tr_X_a_{1}x{1}_idx_0_p_".format(peerId - 1, args.cma_w)
-	with open(fileName + ".ned", "a") as f:
-		f.write(NED_HEADER)
-		f.write( "network " + fileName + " {\n@display(" + \
-			'"' + "bgb={0}, {0}".format(args.cma_w) + '"' + ");\n" )
-		f.write(NED_MIDDLE)
-		f.write(nodesList + "}")
+	rw = random_waypoint(args.nodes_no, dimensions=(args.cma_w, args.cma_w),
+		velocity=(MIN_VELOCITY, MAX_VELOCITY), wt_max=WAITING_TIME)
+	tryNo = 0
+	hasPartitions = True
+	while hasPartitions :
+		latestP = getInitialPosition(args.nodes_no, args.regions, args.cma_w)
+		latestOv = getOverlay(latestP, args.Tx)
+		hasPartitions = not isConnected(latestOv)
+		tryNo = tryNo + 1
+		print("Try number to create P0 [" + str(tryNo) + "]")
+	tryNo = 0
+	print("First connected graph was created")
+	while tryNo < STEPS_NO :
+		savePositions(latestP)
+		hasPartitions = True
