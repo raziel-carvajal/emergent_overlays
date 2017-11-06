@@ -466,6 +466,7 @@ get.density.distribution <- function(results_file, first_measure,
     time <- first_measure + msg_freq * (msg - 1)
     # create the graph with the position of each node
     g <- get.graph(time, trans_range, x_positions, y_positions)
+    
     sapply(node_ids, function(node_id){
       node_neigs <- g[node_id, ]
       length(node_neigs[node_neigs != 0])
@@ -527,11 +528,12 @@ compute.relative.error.in.density <- function(results_file, first_measure,
 }
 
 get.graph <- function(time, Tx, x_positions, y_positions) {
- 
+
   allPositions <- data.frame(
     nodeId = x_positions$node_id,
     time = x_positions$time,
     x = x_positions$value,
+    #TODO this comparison must be done with over time and node identifier
     y = y_positions[y_positions$node_id == x_positions$node_id, ]$value
   )
   
@@ -760,20 +762,31 @@ main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
   pl.step <- args$step
   exp_duration <- 
-      args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
-	all_nodes <- unique( replace.resultkey.with.node_id(
-			args$file, "name(density_approximation:vector)")$node_id
+	  args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
+	all_nodes <- unique(
+		replace.resultkey.with.node_id(args$file, "name(density_approximation:vector)")$node_id
 	)
-  sent_broadcast_msgs <- replace.resultkey.with.node_id(
-      args$file, "name(msg_sent:vector)")
+
+  sent_broadcast_msgs <- replace.resultkey.with.node_id(args$file, "name(msg_sent:vector)")
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
-      args$file, "name(broadcast_msg_received:vector)")
+  	args$file, "name(broadcast_msg_received:vector)"
+  )
   sent_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
       time < exp_duration)
   recv_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(rcvdPk:vector*)"),
       time < exp_duration)
+  
+  print("Calculating nodes' real density")
+  density_dist <- get.density.distribution(
+    args$file,
+    args$first_time_of_measuring_nodes_position,
+    args$step,
+    args$transmission_range,
+    sent_broadcast_msgs, all_nodes
+  )
+  print("DONE!")
 
   print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
@@ -789,16 +802,6 @@ main <- function(args) {
   )
   print("DONE!")
 
-  print("Calculating nodes' real density")
-  density_dist <- get.density.distribution(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    sent_broadcast_msgs, all_nodes
-  )
-  print("DONE!")
-  
   print("Calculating approximation of nodes' density")
   density.relative.errors <- compute.relative.error.in.density(
     args$file,

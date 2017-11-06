@@ -121,19 +121,19 @@ cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensi
 echo "Plotting aggregated results"
 
 Rscript pretty-plotting.R \
-      -pc batteryConsumptionDistribution \
-      -bs broadcastSession \
-      -cv coverage \
-      -cre collisionsRelativeError \
-      -dre densityRelativeError \
-      -ds distributionOfDensity \
-			-run_algo algorithmTypeDistribution \
-      -sent_bro sentBroadcastMsgsDistribution \
-      -recv_bro recvBroadcastMsgsDistribution \
-      -sent_ctrl sentCtrlMsgsDistribution \
-      -recv_ctrl recvCtrlMsgsDistribution \
-			-final \
-      ../../results/
+	-runalgo algorithmTypeDistribution \
+	-sent_bro sentBroadcastMsgsDistribution \
+	-recv_bro recvBroadcastMsgsDistribution \
+	-sent_ctrl sentCtrlMsgsDistribution \
+	-recv_ctrl recvCtrlMsgsDistribution \
+	-pc batteryConsumptionDistribution \
+	-bs broadcastSession \
+	-cv coverage \
+	-cre collisionsRelativeError \
+	-dre densityRelativeError \
+	-ds distributionOfDensity \
+	 ../../results/
+
 mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
 
 ##Rscript pretty-plotting.R \

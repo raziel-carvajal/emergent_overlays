@@ -311,20 +311,12 @@ plot.neighbors.as.cdf <- function(data, run_algo_data, xlabel) {
 		s <- unlist( strsplit(cn,'_'))
 		cn <- toupper(as.character(s[which(s == "p") + 1]))
 		if (cn == "HYBRID") {
-			dist <- e[,1]
-			data.frame( dat = dist, Algorithm = rep(cn, length(dist)) )
+			dist <- paste("HYBRID", e[,1], sep="-")
+			data.frame( to_replace = dist)
 		}
 	})
 	run_algo_ds <- unname(run_algo_ds)
 	run_algo_ds <- do.call("rbind", run_algo_ds)
-
-	algs_in_hyb <- unique(run_algo_ds$dat)
-	to_replace <- unlist(sapply(algs_in_hyb, function(a){
-		rep(
-			paste("HYBRID", a, sep="-"),
-			length(run_algo_ds$dat[run_algo_ds$dat == a])
-		)
-	}))
 	
 	dd <- lapply(data, function(e) {
 		cn <- colnames(e)[1]
@@ -340,7 +332,7 @@ plot.neighbors.as.cdf <- function(data, run_algo_data, xlabel) {
   data <- do.call("rbind", dd)
   indx <- which(data$Algorithm == "HYBRID")
   tmp <- as.character(data$Algorithm)
-  data$Algorithm <- replace(tmp, indx, to_replace)
+  data$Algorithm <- replace(tmp, indx, as.character(run_algo_ds$to_replace))
   
 	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) + 
 		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
