@@ -37,7 +37,7 @@ get_arguments <- function() {
                       type="character", help='Distribution of sent control messages')
   parser$add_argument('-recv_ctrl', '--recv-control-msgs', dest="recv_ctrl",
                       type="character", help='Distribution of received control messages')
-  parser$add_argument('-runalgo', '--running-algorithms', dest="run_algo",
+  parser$add_argument('-run_algo', '--running-algorithms', dest="run_algo",
                       type="character", help='Distribution of running algorithm per nodes')
   parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
                       help='Summary file name (should be * csv)')
