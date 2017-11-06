@@ -35,7 +35,7 @@ void
 Flooding2::process_payload(const Broadcast* m) {
     string key = string(m->getId());
     gateway->emitBroadcastMsgReceived(key);
-    cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
+//    cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
     if (myself == m->getSender()) return;
     bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {

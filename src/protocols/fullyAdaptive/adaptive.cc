@@ -171,7 +171,7 @@ FullyAdaptive::adaptation()
 
 void
 FullyAdaptive::on_payload_received(const Broadcast* m) {
-  cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + m->getId() + " FROM_PEER " + string(m->getSender()) << endl;
+//  cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + m->getId() + " FROM_PEER " + string(m->getSender()) << endl;
   knownProtocols[current_protocol_name]->process_payload(m);
 }
 
@@ -235,7 +235,7 @@ FullyAdaptive::processStart()
     }
   }
 
-  auto protocols = { "Flooding2", "Mpr_t2", "Abba2" };
+  auto protocols = { "Flooding2", "Mpr_t2", "Abba2", "TimeBasedFlooding" };
   for (const auto& p: protocols) {
     current_protocol_name = p;
     auto current_protocol = dynamic_cast<IBroadcastProtocol*>(createOne(std::string("inet::" + current_protocol_name).c_str()));

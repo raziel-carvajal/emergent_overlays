@@ -27,7 +27,7 @@ class IBroadcastGateway {
 protected:
   std::map<std::string, std::map<std::string, std::string>> params;
 
-  virtual double get_double_parameter(const std::string& protocol,const std::string& param) = 0;
+
   virtual bool get_bool_parameter(const std::string& protocol,const std::string& param) = 0;
   virtual std::string get_string_parameter(const std::string& protocol, const std::string& param) = 0;
 public:
@@ -43,6 +43,8 @@ public:
   virtual void emitBroadcastMsgReceived(const std::string& value) = 0; // important. you should use it. log data (statistics in vector)
   virtual void emitDensityApproximation(int value) = 0;
   virtual void emitNodePosition(float x, float y, float density) = 0;
+
+  virtual double get_double_parameter(const std::string& protocol,const std::string& param) = 0;
 
   virtual void delayed_event(int type, const std::string& key, double delay) = 0;
   virtual cMessage* delayed_broadcast(const std::string& key, double delay) = 0; // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
