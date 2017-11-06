@@ -10,7 +10,7 @@ from pymobility.models.mobility import random_waypoint
 from pymobility.models.mobility import heterogeneous_truncated_levy_walk
 
 FIRST_PLOT_NAME = "Position_"
-CONNECTED_OVERLAYS = 100
+CONNECTED_OVERLAYS = 10
 MIN_VELOCITY = 0.1
 MAX_VELOCITY = 1.0
 WAITING_TIME = 0.1

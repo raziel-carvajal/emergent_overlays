@@ -28,7 +28,7 @@ import genmobility
 import matplotlib.pyplot as plt
 
 from omnetFiles import createNedFile, create_density_file
-import kdTree
+import kdtree as kdTree
 
 
 # network density
@@ -154,7 +154,7 @@ def guarentee_connectivity(pos, tx):
 
 def is_valid_network(pos, tx, density, allowed_error):
     g = build_graph(pos, tx)
-    degrees = map(lambda (k, v): v, nx.degree(g).iteritems())
+    degrees = map(lambda (k, v): v, nx.degree(g))
     sum_degree = sum(degrees)
     avg_degree = sum_degree/float(nx.number_of_nodes(g))
     expected = density-density*allowed_error/100.0
@@ -260,7 +260,7 @@ def get_still_connected_callback(tx, idx_source, expectedDensityFilename):
         if b:
             degrees = nx.degree(G)
             with open(expectedDensityFilename, 'a') as expectedDensityFile:
-                for k, v in degrees.iteritems():
+                for k, v in degrees:
                     expectedDensityFile.write('hostR%d,%d\n' % (k, v))
         return b
     return l
