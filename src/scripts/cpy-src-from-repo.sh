@@ -63,7 +63,7 @@ DST_DIR="`dirname ${1}`/`basename ${1}`"
 baseC="broadcasting\nstoredmobility"
 copyFiles ${baseC} "BASE"
 algos="abba2\nadaptive-local\nadaptive-swsp\ncds3\nflooding\nfullyAdaptive\nmiddleAll"
-algos="${algos}\nmiddleFix\nmiddleNone\nmiddleOpt\nmprt2\nprobflood"
+algos="${algos}\nmiddleFix\nmiddleNone\nmiddleOpt\nmprt2\nprobflood\ntime_based_flooding"
 copyFiles ${algos} "ALGO"
 
 echo "END of ${0}"
