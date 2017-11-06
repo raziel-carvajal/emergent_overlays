@@ -35,7 +35,11 @@ public:
       knownNeighbors.clear();
   }
 
-  int get_density_approx() override { return lastDensityApprox; }
+  int get_density_approx() override {
+//      std::cout << simTime().str() << " " << gateway->get_name() <<
+//          ": density approximation gets " << lastDensityApprox << endl;
+      return lastDensityApprox;
+  }
 
   double mobility_estimation() override {
     return 0.0;
@@ -43,14 +47,18 @@ public:
 
   bool handle_messages(cMessage* m) override {
     auto pkt = PK(m);
+    auto hello = dynamic_cast<const inet::broadcasting::Hello*>(pkt);
+    if (hello && hello->getSender() != gateway->get_name()) {
+//        std::cout << simTime().str() << " " << gateway->get_name() <<
+//            ": hello msg received from " << hello->getSender() << endl;
+        knownNeighbors[hello->getSender()] = 0;
+    }
     auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
-    if (!br || !br->getSender() || br->getSender() == gateway->get_name()) return false;
-    std::string sender(br->getSender());
-//    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "SenderId [" << sender << "]" << endl;
-    if(knownNeighbors.find(sender) == knownNeighbors.end())
-        knownNeighbors[sender] = 0;
-    else
-        knownNeighbors[sender]++;
+    if (br && br->getSender() != gateway->get_name()) {
+//        std::cout << simTime().str() << " " << gateway->get_name() <<
+//            ": broadcast msg received from " << br->getSender() << endl;
+        knownNeighbors[br->getSender()] = 0;
+    }
     return true;
   }
 

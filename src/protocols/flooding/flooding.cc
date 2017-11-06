@@ -40,7 +40,7 @@ Flooding2::process_payload(const Broadcast* m) {
     bool firstTime = payloads.find(key) == payloads.end();
     if (firstTime) {
         payloads[key] = key;
-        cout << simTime().str() + " " + myself + " :: " + "DOING BROADCAST OF KEY: " + key << endl;
+//        cout << simTime().str() + " " + myself + " :: " + "DOING BROADCAST OF KEY: " + key << endl;
         gateway->broadcast(key, new broadcasting::Broadcast("payload"));
     }
 }
