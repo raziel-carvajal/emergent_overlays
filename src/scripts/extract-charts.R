@@ -695,14 +695,14 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
         ifelse(v %in% senders, "orange", "red")
       })
       V(g)$color <- colors
-      name <- paste(
-        paste(
-          paste("GraphForMsg_", msg, sep=""), 
-            is_connected(g), sep="_"), 
-      "pdf", sep=".")
-      pdf(name)
-      plot(g)
-      dev.off()
+#      name <- paste(
+#        paste(
+#          paste("GraphForMsg_", msg, sep=""),
+#            is_connected(g), sep="_"),
+#      "pdf", sep=".")
+#      pdf(name)
+#      plot(g)
+#      dev.off()
 
       tmp <- sapply(senders, function(s){
         edges <- g[s, ]

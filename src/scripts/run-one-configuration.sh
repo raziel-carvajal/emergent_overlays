@@ -109,6 +109,6 @@ echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time}
 echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
 rm -fr debugging/logs/${CONF_NAME}
 mkdir debugging/logs/${CONF_NAME}
-mv *.pdf debugging/logs/${CONF_NAME}
+#mv *.pdf debugging/logs/${CONF_NAME}
 cp ${CONFIG_PATH}/${CONF_NAME}".ini" debugging/logs/${CONF_NAME}
 echo "All PDF files were copied"
