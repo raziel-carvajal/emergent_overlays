@@ -222,7 +222,7 @@ BroadcastingAppBase::BroadcastingAppBase() {
 //            cout << getLogHeader() << "msg not received: " << m->getSender() << endl;
     	    if (protocolId != m->getProtocolId()) {
                 if (optimize_gluing) {
-                  cout << getLogHeader() << "doing transformation: " << m->getSender() << endl;
+//                  cout << getLogHeader() << "doing transformation: " << m->getSender() << endl;
                   double timeout = computeAdaptTimeout();
                   adaptForeigsMsgs[m->getId()] = m->getPayload();
 //                  cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;

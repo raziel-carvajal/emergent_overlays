@@ -65,6 +65,8 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
             monitor->compute_density_approx();
             //gateway->emitDensityApproximation(monitor->get_density_approx());
             //TODO find a better way to call get_density_approx()
+//            std::cout << simTime().str() << " " << gateway->get_name() <<
+//              ": density approximation gets " << monitor->get_density_approx() << endl;
             gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
 
             cancelAndDelete(msg);
@@ -133,15 +135,19 @@ FullyAdaptive::adaptation()
   auto density = monitor->get_density_approx();
   gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
   if (!withAdaptation) return;
-  return;
+//  return;
   const string dense_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "dense_region");
   const string sparse_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "sparse_region");
   if (policy == AdaptationPolicy::LOCAL) {
-    if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
+//    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
+//          density << endl;
+    if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
+//       std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
       change_current_protocol(dense_region_protocol);
     }
-    else if (density < density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-      change_current_protocol(sparse_region_protocol);
+    else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
+//        std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
+        change_current_protocol(sparse_region_protocol);
     }
   }
   else if (policy == AdaptationPolicy::SWSP) {
@@ -192,9 +198,13 @@ FullyAdaptive::on_hello_received(const broadcasting::Hello* msg)
 void
 FullyAdaptive::change_current_protocol(const std::string& protocol)
 {
+//    std::cout << simTime().str() << " " + gateway->get_name() << " :: running algorithm " <<
+//            current_protocol_name << endl;
   current_protocol_name = protocol;
   gateway->setProtocolId(current_protocol_name);
 
+//  std::cout << simTime().str() << " " + gateway->get_name() << " :: switch to algo" <<
+//          protocol << endl;
   emit(signal_protocol_change, current_protocol_name[0]);
 
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {

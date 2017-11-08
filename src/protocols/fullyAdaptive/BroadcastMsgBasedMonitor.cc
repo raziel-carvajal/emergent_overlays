@@ -22,15 +22,25 @@ namespace inet {
 class BroadcastMsgBasedMonitor: public IMonitoringMechanism {
 
 private:
-    int lastDensityApprox = 0;
+    int latestApprox;
     std::map<std::string, int> knownNeighbors;
     std::shared_ptr<IBroadcastGateway> gateway = nullptr;
 
 public:
 
   void compute_density_approx() override {
-      if (knownNeighbors.size() != lastDensityApprox && knownNeighbors.size() != 0) {
-          lastDensityApprox = knownNeighbors.size();
+      int currentApprox = knownNeighbors.size();
+      if (getLatestApprox() == -1) {
+          latestApprox = currentApprox;
+          appendApprox(currentApprox);
+      } else {
+          if (appendApprox(currentApprox)) {
+              latestApprox = roundApprox();
+          } else {
+              latestApprox = currentApprox;
+              initialiseAproxArray();
+              appendApprox(currentApprox);
+          }
       }
       knownNeighbors.clear();
   }
@@ -38,7 +48,7 @@ public:
   int get_density_approx() override {
 //      std::cout << simTime().str() << " " << gateway->get_name() <<
 //          ": density approximation gets " << lastDensityApprox << endl;
-      return lastDensityApprox;
+      return latestApprox;
   }
 
   double mobility_estimation() override {
@@ -63,6 +73,7 @@ public:
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
+      initialiseAproxArray();
       this->gateway = gateway;
   }
 };
