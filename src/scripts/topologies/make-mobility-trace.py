@@ -15,10 +15,6 @@ MIN_VELOCITY = 0.1
 MAX_VELOCITY = 1.0
 WAITING_TIME = 0.1
 MOBILITY_FILE= "mobility-trace"
-CONEC_DATASET= "connectivity-ds"
-CONEC_AT_INI_DS= "connectivity-ini-ds"
-CONNECTED = "connected"
-NOT_CONNECTED = "partitioned"
 
 def getArgs() :
 	p = argparse.ArgumentParser(description='Creates a network with N regions '+
@@ -31,6 +27,8 @@ def getArgs() :
 		help='number of nodes on each region')
 	p.add_argument('--transmission-range', dest='Tx', type=int, default=15,
 		help='transmission range of each node')
+	p.add_argument('--connected-nets', dest='connected', type=str, default='N',
+		help='with Y every created topology is connected using Levy-walk model')
 	return p.parse_args()
 
 def getDistance(a, b) :
@@ -48,7 +46,9 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 	sqrtLen = float(cmaW / matxLen)
 	deltSqrt = float(sqrtLen / 2)
 	theCenter = { 'x': float(cmaW / 2), 'y': float(cmaW / 2) }
-	centers = {}; positions = {}; nodeId = 1
+	centers = {}
+	positions = {}
+	nodeId = 1
 	for i in range(0, matxLen) :
 		centers[i] = {}
 		for j in range(0, matxLen) :
@@ -61,13 +61,16 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 					if d < (k + 1) * sqrtLen :
 						centers[i][j]['density'] = denZones[k]
 						break
-			g = nx.Graph(); nodesRange = range(0, centers[i][j]['density'])
+			g = nx.Graph()
+			nodesRange = range(0, centers[i][j]['density'])
 			g.add_nodes_from(nodesRange)
 			pos = nx.random_layout(g, scale=sqrtLen, 
 				center=(centers[i][j]['x'], centers[i][j]['y']))
 			for k in nodesRange :
 				positions[nodeId] = {'x': pos[k][0], 'y': pos[k][1]}
 				nodeId = nodeId + 1
+	#XXX latest node is located at the center of the communication area
+	positions[nodeId] = {'x': theCenter['x'], 'y': theCenter['y']}
 	return positions
 
 def plotNodesPositions(pos, pltWidth) :
@@ -77,11 +80,13 @@ def plotNodesPositions(pos, pltWidth) :
 	plt.savefig(FIRST_PLOT_NAME)
 	plt.clf()
 	
-def plotOverlay(iD, graph, positions) :
+def plotOverlay(iD, graph, positions, xMax, yMax) :
 	pTmp = {}
 	for k, v in positions.iteritems():
 		pTmp[k] = [ v['x'], v['y'] ]
 	plt.subplot(111)
+	plt.xlim((0, xMax))
+	plt.ylim((0, yMax))
 	nx.draw_networkx(graph, pos=pTmp, node_size=10, with_labels=False)
 	plt.savefig(FIRST_PLOT_NAME + str(iD) + ".pdf")
 	plt.clf()
@@ -113,19 +118,31 @@ def addConnectEntry(fileName, entry) :
 	with open(fileName, 'a') as f :
 		f.write(entry + "\n")
 
+def getNextOverlay(mobMod, nodes_no, latestP, Tx, staticPo) :
+	p_i = [ (k[0], k[1]) for k in next(mobMod) ]
+	p_j = [ (k[0], k[1]) for k in next(mobMod) ]
+	pDif= [ (p_j[k][0] - p_i[k][0], p_j[k][1] - p_i[k][1]) \
+		for k in range(0, nodes_no) ]
+	for k, v in latestP.iteritems() :
+		latestP[k] = { 'x': v['x'] + pDif[k-1][0], 'y': v['y'] + pDif[k-1][1] }
+	latestP[len(latestP) + 1] = { 'x': staticPo['x'], 'y': staticPo['y'] }
+	return getOverlay(latestP, Tx), latestP
+
 if __name__ == '__main__':
 	args = getArgs()
+	if args.connected == "Y" :
+		keepConnected = True
+	else :
+		keepConnected = False
 	tryNo = 0
 	hasPartitions = True
 	while hasPartitions :
-		latestP = getInitialPosition(args.nodes_no, args.regions, args.cma_w)
+		latestP = getInitialPosition(args.nodes_no, args.regions,
+			args.cma_w)
 		latestOv = getOverlay(latestP, args.Tx)
 		hasPartitions = not isConnected(latestOv)
-		if hasPartitions :
-			addConnectEntry(CONEC_AT_INI_DS, NOT_CONNECTED)
-		else :		
-			addConnectEntry(CONEC_AT_INI_DS, CONNECTED)			
-			plotOverlay(tryNo, latestOv, latestP)
+		if not hasPartitions :
+			plotOverlay(tryNo, latestOv, latestP, args.cma_w, args.cma_w)
 		tryNo = tryNo + 1
 		print("Try number to create P0 [" + str(tryNo) + "]")
 	args.nodes_no = len(latestP)
@@ -135,28 +152,29 @@ if __name__ == '__main__':
 	print("First connected graph was created")
 	tryNo = 0
 	connectedOvs = 0
-#	mobMod = random_waypoint(args.nodes_no, dimensions=(args.cma_w, args.cma_w),
-#		velocity=(MIN_VELOCITY, MAX_VELOCITY), wt_max=WAITING_TIME)
-	mobMod = heterogeneous_truncated_levy_walk(args.nodes_no, 
-		dimensions=(args.cma_w, args.cma_w), WT_EXP=-1.8, WT_MAX=WAITING_TIME)
+	if keepConnected :
+		mobMod = heterogeneous_truncated_levy_walk(args.nodes_no - 1, 
+			dimensions=(args.cma_w, args.cma_w), WT_EXP=-1.8, WT_MAX=WAITING_TIME)
+	else :
+		mobMod = random_waypoint(args.nodes_no - 1, 
+			dimensions=(args.cma_w, args.cma_w),
+			velocity=(MIN_VELOCITY, MAX_VELOCITY), wt_max=WAITING_TIME)
+	#XXX latest node in list of positions is located at the center of
+	#    the communication area
+	staticNodeId = args.nodes_no
+	staticNodePo = latestP[staticNodeId]
 	while connectedOvs <= CONNECTED_OVERLAYS :
-		hasPartitions = True
-		while hasPartitions :
-			p_i = [ (k[0], k[1]) for k in next(mobMod)]
-			p_j = [ (k[0], k[1]) for k in next(mobMod)]
-			pDif= [ (p_j[k][0] - p_i[k][0], p_j[k][1] - p_i[k][1]) \
-				for k in range(0, args.nodes_no) ]
-			for k, v in latestP.iteritems() :
-				latestP[k] = { 'x': v['x'] + pDif[k-1][0], 'y': v['y'] + pDif[k-1][1] }
-			latestOv = getOverlay(latestP, args.Tx)
-			hasPartitions = not isConnected(latestOv)
-			if hasPartitions :
-				addConnectEntry(CONEC_AT_INI_DS, NOT_CONNECTED)
-			else :
-				addConnectEntry(CONEC_AT_INI_DS, CONNECTED)
-				savePositions(latestP)
-			tryNo = tryNo + 1
-			plotOverlay(tryNo, latestOv, latestP)
-			print("Try number to create Pi [" + str(tryNo) + "]")
-		connectedOvs = connectedOvs + 1
+		del latestP[staticNodeId]
+		latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
+			latestP, args.Tx, staticNodePo)
+		if keepConnected :
+			while not isConnected(latestOv) :
+				print("Try no to create a connected overlay [" + str(tryNo) + "]")
+				tryNo = tryNo + 1
+				del latestP[staticNodeId]
+				latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
+					latestP, args.Tx, staticNodePo)
+		savePositions(latestP)
+		plotOverlay(connectedOvs, latestOv, latestP, args.cma_w, args.cma_w)
 		print("Number of connected overlays [" + str(connectedOvs) + "]")
+		connectedOvs = connectedOvs + 1
