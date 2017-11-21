@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_waypoint
 from pymobility.models.mobility import heterogeneous_truncated_levy_walk
 
-FIRST_PLOT_NAME = "Position_"
-CONNECTED_OVERLAYS = 10
+OVERLAYS = 10
 MIN_VELOCITY = 0.1
 MAX_VELOCITY = 1.0
 WAITING_TIME = 0.1
+FIRST_PLOT_NAME = "Position_"
 MOBILITY_FILE= "mobility-trace"
+DIST_PER_ZONE= "distribution-per-density"
 
 def getArgs() :
 	p = argparse.ArgumentParser(description='Creates a network with N regions '+
@@ -40,9 +41,9 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 		matxLen = 1 + 2 * i
 		sqrtsNo = 4 * (matxLen - 1)
 		if sqrtsNo == 0 :
-			denZones[i] = nodes
+			denZones[i] = { 'nodes': nodes, 'zoneId': i }
 		else :
-			denZones[i] =  int(math.ceil(nodes / sqrtsNo))
+			denZones[i] = { 'nodes': int(math.ceil(nodes / sqrtsNo)), 'zoneId': i }
 	sqrtLen = float(cmaW / matxLen)
 	deltSqrt = float(sqrtLen / 2)
 	theCenter = { 'x': float(cmaW / 2), 'y': float(cmaW / 2) }
@@ -55,11 +56,13 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 			centers[i][j] = { 'x': j*sqrtLen + deltSqrt, 'y': i*sqrtLen + deltSqrt }
 			d = getDistance(theCenter, centers[i][j])
 			if d < deltSqrt :
-				centers[i][j]['density'] = denZones[0]
+				centers[i][j]['density'] = denZones[0]['nodes']
+				centers[i][j]['zoneId'] = denZones[0]['zoneId']
 			else :
 				for k in range(1, denZoneNo + 1) :
 					if d < (k + 1) * sqrtLen :
-						centers[i][j]['density'] = denZones[k]
+						centers[i][j]['density'] = denZones[k]['nodes']
+						centers[i][j]['zoneId'] = denZones[k]['zoneId']
 						break
 			g = nx.Graph()
 			nodesRange = range(0, centers[i][j]['density'])
@@ -71,7 +74,7 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 				nodeId = nodeId + 1
 	#XXX latest node is located at the center of the communication area
 	positions[nodeId] = {'x': theCenter['x'], 'y': theCenter['y']}
-	return positions
+	return positions, centers, deltSqrt
 
 def plotNodesPositions(pos, pltWidth) :
 	layout = plt.subplot(111)
@@ -128,6 +131,17 @@ def getNextOverlay(mobMod, nodes_no, latestP, Tx, staticPo) :
 	latestP[len(latestP) + 1] = { 'x': staticPo['x'], 'y': staticPo['y'] }
 	return getOverlay(latestP, Tx), latestP
 
+def savePosPerZone(positions, centers, halfSqr) :
+	for i in range(0, len(centers)) :
+		for j in range(0, len(centers[i])) :
+			c = { 'x': centers[i][j]['x'], 'y': centers[i][j]['y'] }
+			with open(DIST_PER_ZONE, 'a') as f:
+				for k, v in positions.iteritems() :
+					inAbs = c['x'] - halfSqr <= v['x'] and v['x'] <= c['x'] + halfSqr
+					inOrd = c['y'] - halfSqr <= v['y'] and v['y'] <= c['y'] + halfSqr
+					if inAbs and inOrd :
+						f.write( "%f %f %d\n" % (v['x'], v['y'], centers[i][j]['zoneId']) )
+
 if __name__ == '__main__':
 	args = getArgs()
 	if args.connected == "Y" :
@@ -137,12 +151,13 @@ if __name__ == '__main__':
 	tryNo = 0
 	hasPartitions = True
 	while hasPartitions :
-		latestP = getInitialPosition(args.nodes_no, args.regions,
+		latestP, centers, halfSqr = getInitialPosition(args.nodes_no, args.regions,
 			args.cma_w)
 		latestOv = getOverlay(latestP, args.Tx)
 		hasPartitions = not isConnected(latestOv)
 		if not hasPartitions :
-			plotOverlay(tryNo, latestOv, latestP, args.cma_w, args.cma_w)
+			plotOverlay(0, latestOv, latestP, args.cma_w, args.cma_w)
+			savePosPerZone(latestP, centers, halfSqr)
 		tryNo = tryNo + 1
 		print("Try number to create P0 [" + str(tryNo) + "]")
 	args.nodes_no = len(latestP)
@@ -150,7 +165,7 @@ if __name__ == '__main__':
 		f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
 	savePositions(latestP)
 	print("First connected graph was created")
-	tryNo = 0
+	tryNo = 1
 	connectedOvs = 0
 	if keepConnected :
 		mobMod = heterogeneous_truncated_levy_walk(args.nodes_no - 1, 
@@ -163,7 +178,7 @@ if __name__ == '__main__':
 	#    the communication area
 	staticNodeId = args.nodes_no
 	staticNodePo = latestP[staticNodeId]
-	while connectedOvs <= CONNECTED_OVERLAYS :
+	while connectedOvs <= OVERLAYS :
 		del latestP[staticNodeId]
 		latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
 			latestP, args.Tx, staticNodePo)
@@ -175,6 +190,7 @@ if __name__ == '__main__':
 				latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
 					latestP, args.Tx, staticNodePo)
 		savePositions(latestP)
+		savePosPerZone(latestP, centers, halfSqr)
 		plotOverlay(connectedOvs, latestOv, latestP, args.cma_w, args.cma_w)
 		print("Number of connected overlays [" + str(connectedOvs) + "]")
 		connectedOvs = connectedOvs + 1
