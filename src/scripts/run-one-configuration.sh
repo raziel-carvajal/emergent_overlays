@@ -93,7 +93,7 @@ echo "First time when nodes print their position [${firstPosT}]"
 echo "Delta aproximation [${deltaApprox}]"
 
 
-Rscript extract-charts.R --show-averages --splitted ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} > out
+Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} > out
 results=`cat out`
 echo "Result: ${results}"
 rm -fr out

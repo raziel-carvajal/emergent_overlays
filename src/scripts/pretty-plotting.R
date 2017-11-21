@@ -405,7 +405,8 @@ plot.coverage.per.session <- function(data, densities) {
   plot.data.using.lines(data, densities,
     "Coverage (%)", "Coverage per session",
     function(d, nr.nodes) {
-      d/rep(nr.nodes, length(d)) * 100
+    	d
+#      d/rep(nr.nodes, length(d)) * 100
     },
     TRUE
   )
@@ -630,7 +631,7 @@ if (!is.null(args$dre)) {
   print("Importing density relative error dataset")
   r <- load.dataset.with.metadata(args$path, args$dre, metadata, args$excluded.densities)
   print("Plotting density relative error")
-  plot.dist.as.cdf(r$data, "Relative error of technique to approximate density")
+  plot.dist.as.cdf(r$data, "Approximation technique")
 }
 
 if (!is.null(args$cre)) {
