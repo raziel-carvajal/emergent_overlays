@@ -142,11 +142,11 @@ FullyAdaptive::adaptation()
 //    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
 //          density << endl;
     if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
-//       std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
+       std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
       change_current_protocol(dense_region_protocol);
     }
     else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-//        std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
+        std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
         change_current_protocol(sparse_region_protocol);
     }
   }
@@ -198,7 +198,7 @@ FullyAdaptive::on_hello_received(const broadcasting::Hello* msg)
 void
 FullyAdaptive::change_current_protocol(const std::string& protocol)
 {
-//    std::cout << simTime().str() << " " + gateway->get_name() << " :: running algorithm " <<
+//  std::cout << simTime().str() << " " + gateway->get_name() << " :: running algorithm " <<
 //            current_protocol_name << endl;
   current_protocol_name = protocol;
   gateway->setProtocolId(current_protocol_name);

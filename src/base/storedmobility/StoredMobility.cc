@@ -135,6 +135,8 @@ StoredMovingMobility::initialize(int stage)
 
     //cModule* host = getContainingNode(this);
     string hostName = this->getParentModule()->getFullName();
+//    std::cout << simTime().str() << " " << hostName <<
+//          ": INIT of MOBILITY " << endl;
     auto id = hostName.substr( string("hostR").length(), string::npos);
     int idx = stoi(id);
     lastSpeed = Coord::ZERO;
@@ -142,7 +144,7 @@ StoredMovingMobility::initialize(int stage)
     if (isMoving) {
       auto m = StoredMobility::getInstance(filename);
       m->readNodeMobilities();
-      mobility = m->getMobility(idx);
+      mobility = m->getMobility(idx - 1);
     }
     stationary = !isMoving;
     if (stationary) {
