@@ -46,8 +46,8 @@ simple BroadcastingBase
         xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
         // Adaptation parameters
-        double adaptationMax @unit(s) = default(0.15s);
-        double adaptationMin @unit(s) = default(0.05s);
+        double adaptationMax @unit(s) = default(0.04s);
+        double adaptationMin @unit(s) = default(0.01s);
         bool withAdaptation = default(false);
         bool use_topology_fix = default(true);
         bool optimize_gluing = default(true);

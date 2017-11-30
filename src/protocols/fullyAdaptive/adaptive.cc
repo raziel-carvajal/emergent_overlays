@@ -133,43 +133,75 @@ void
 FullyAdaptive::adaptation()
 {
   auto density = monitor->get_density_approx();
-  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
+  gateway->delayed_event(DO_ADAPTATION, "adaptation self message", adapTimer);
   if (!withAdaptation) return;
-//  return;
   const string dense_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "dense_region");
   const string sparse_region_protocol = gateway->get_parameter<string>("AdaptiveBase", "sparse_region");
-  if (policy == AdaptationPolicy::LOCAL) {
-//    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
-//          density << endl;
-    if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
-       std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
-      change_current_protocol(dense_region_protocol);
+  switch (policy) {
+    case AdaptationPolicy::LOCAL:
+    {
+    //    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
+    //          density << endl;
+        if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
+           std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
+          change_current_protocol(dense_region_protocol);
+        }
+        else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
+            std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
+            change_current_protocol(sparse_region_protocol);
+        }
+
+        break;
     }
-    else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-        std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
-        change_current_protocol(sparse_region_protocol);
+    case AdaptationPolicy::SWSP:
+    {
+        bool change = false;
+        if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
+          willingToChange = true;
+          willingToChangeToProtocol = dense_region_protocol;
+          change = true;
+        }
+        else if (density < density_threshold_lower && current_protocol_name != sparse_region_protocol) {
+          willingToChange = true;
+          willingToChangeToProtocol = sparse_region_protocol;
+          change = true;
+        }
+        if (change && !packet_to_piggybag) {
+          packet_to_piggybag = new inet::WillingToChange("willing to change");
+          packet_to_piggybag->setSender(myself.c_str());
+          packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
+          if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+            gateway->send_package(packet_to_piggybag);
+            packet_to_piggybag = nullptr;
+          }
+        }
+        break;
     }
-  }
-  else if (policy == AdaptationPolicy::SWSP) {
-    bool change = false;
-    if (density > density_threshold_upper && current_protocol_name != dense_region_protocol) {
-      willingToChange = true;
-      willingToChangeToProtocol = dense_region_protocol;
-      change = true;
-    }
-    else if (density < density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-      willingToChange = true;
-      willingToChangeToProtocol = sparse_region_protocol;
-      change = true;
-    }
-    if (change && !packet_to_piggybag) {
-      packet_to_piggybag = new inet::WillingToChange("willing to change");
-      packet_to_piggybag->setSender(myself.c_str());
-      packet_to_piggybag->setTargetProtocol(willingToChangeToProtocol.c_str());
-      if (!gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-        gateway->send_package(packet_to_piggybag);
-        packet_to_piggybag = nullptr;
-      }
+    case AdaptationPolicy::DENSITY_AREA:
+    {
+        // This policy considers that within the area of communication there are 2 regions, dense and sparse
+        // respectively. Those nodes positioned at the dense region execute dense_region_protocol and the
+        // rest of nodes execute sparse_region_protocol
+        Coord p = gateway->get_current_position();
+        EV_DEBUG << simTime().str() << " " + gateway->get_name() << " running [" <<
+                  current_protocol_name << "] position [" << p.x << ", " << p.y << "]" << endl;
+        bool inDensAreaAbs = centerDensAx - (denseAreaWid/2) <= p.x && centerDensAx + (denseAreaWid/2) >= p.x;
+        bool inDensAreaOrd = centerDensAy - (denseAreaWid/2) <= p.y && centerDensAy + (denseAreaWid/2) >= p.y;
+        if (inDensAreaAbs && inDensAreaOrd) {
+            EV_INFO << simTime().str() << " " + gateway->get_name() << " I am at dense zone!" << endl;
+            if (current_protocol_name != dense_region_protocol){
+                EV << simTime().str() << " " + gateway->get_name() << " switching to [" <<
+                  dense_region_protocol << "]" << endl;
+                change_current_protocol(dense_region_protocol);
+            }
+        } else {
+            if (current_protocol_name != sparse_region_protocol){
+                EV << simTime().str() << " " + gateway->get_name() << " switching to [" <<
+                  sparse_region_protocol << "]" << endl;
+                change_current_protocol(sparse_region_protocol);
+            }
+        }
+        break;
     }
   }
 }
@@ -223,25 +255,34 @@ FullyAdaptive::processStart()
 
   signal_protocol_change = this->registerSignal("protocol_change");
 
-  //DO_ADAPTATION = gateway->register_new_control_message();
-//  std::string monitoring_class("inet::SnifferBasedMonitoring");
   std::string monitoring_class("inet::BroadcastMsgBasedMonitor");
   monitor = std::unique_ptr<IMonitoringMechanism>(dynamic_cast<IMonitoringMechanism*>(createOne(monitoring_class.c_str())));
   monitor->initialise(gateway);
 
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
-//    DO_ADAPTATION = gateway->register_new_control_message();
-    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", 0.1);
+
+    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", adapTimer);
 
 
     density_threshold_lower = par("density_threshold_lower").longValue();
     density_threshold_upper = par("density_threshold_upper").longValue();
     deltaApprox = par("deltaApprox").doubleValue();
+    centerDensAx = par("centerDensAx").doubleValue();
+    centerDensAy = par("centerDensAy").doubleValue();
+    denseAreaWid = par("denseAreaWid").doubleValue();
+    adapTimer = par("adapTimer").doubleValue();
 
-    policy = AdaptationPolicy::LOCAL;
-    if (par("adaptation_policy").stdstringValue() == "swsp") {
-      policy = AdaptationPolicy::SWSP;
+    switch ( (int) par("adaptation_policy").longValue() ) {
+        case AdaptationPolicy::LOCAL:
+            policy = AdaptationPolicy::LOCAL;
+            break;
+        case AdaptationPolicy::SWSP:
+            policy = AdaptationPolicy::SWSP;
+            break;
+        case AdaptationPolicy::DENSITY_AREA:
+            policy = AdaptationPolicy::DENSITY_AREA;
+            break;
     }
   }
 

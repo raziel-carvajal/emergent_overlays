@@ -28,7 +28,15 @@ simple FullyAdaptive extends BroadcastingBase like IUDPApp
       int density_threshold_lower = default(15);
       int density_threshold_upper = default(15);
       string initialProtocol;
-      string adaptation_policy = default("local"); // or "swsp" or "etienne"
+      //integer value to define adaptation policy where:
+      //	0: LOCAL
+      //	1: SWSP
+      //	2: DENSITY_AREA
+      int adaptation_policy = default(0);
+      double centerDensAx = default(50.0);
+      double centerDensAy = default(50.0);
+      double denseAreaWid = default(100.0);
+      double adapTimer @unit(s) = default(0.5s);
       //ground truth
       double deltaApprox @unit(s) = default(1.0s);
       @class(inet::FullyAdaptive);

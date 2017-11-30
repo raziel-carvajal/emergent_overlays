@@ -36,8 +36,8 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
 
     void adaptation();
 
-    enum class AdaptationPolicy {
-      LOCAL, SWSP
+    enum AdaptationPolicy {
+      LOCAL, SWSP, DENSITY_AREA
     };
 
   private:
@@ -53,6 +53,10 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     std::map<std::string, std::unique_ptr<IBroadcastProtocol>> knownProtocols;
     int density_threshold_lower;
     int density_threshold_upper;
+    double centerDensAx;
+    double centerDensAy;
+    double denseAreaWid;
+    double adapTimer;
 
     // events and signals
     simsignal_t signal_protocol_change;
