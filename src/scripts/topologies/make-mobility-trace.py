@@ -6,13 +6,14 @@ import networkx as nx
 from time import sleep
 import itertools as iterT
 import matplotlib.pyplot as plt
-from pymobility.models.mobility import random_waypoint
-from pymobility.models.mobility import heterogeneous_truncated_levy_walk
+from pymobility.models.mobility import random_direction
+from pymobility.models.mobility import truncated_levy_walk
 
-OVERLAYS = 10
-MIN_VELOCITY = 0.1
-MAX_VELOCITY = 1.0
-WAITING_TIME = 0.1
+MIN_LOW_VELOCITY = 0.0
+MAX_LOW_VELOCITY = 1.0
+MIN_HIG_VELOCITY = 1.5
+MAX_HIG_VELOCITY = 2.0
+WAITING_TIME = 1.0
 FIRST_PLOT_NAME = "Position_"
 MOBILITY_FILE= "mobility-trace"
 DIST_PER_ZONE= "distribution-per-density"
@@ -26,10 +27,10 @@ def getArgs() :
 		help='number of regions within the communication area')
 	p.add_argument('--nodes-no', dest='nodes_no', type=int, default=100,
 		help='number of nodes on each region')
-	p.add_argument('--transmission-range', dest='Tx', type=int, default=15,
+	p.add_argument('--transmission-range', dest='Tx', type=int, default=25,
 		help='transmission range of each node')
-	p.add_argument('--connected-nets', dest='connected', type=str, default='N',
-		help='with Y every created topology is connected using Levy-walk model')
+	p.add_argument('--overlays-no', dest='overlays', type=int, default=50,
+		help='number of overlays to create')
 	return p.parse_args()
 
 def getDistance(a, b) :
@@ -67,7 +68,7 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 			g = nx.Graph()
 			nodesRange = range(0, centers[i][j]['density'])
 			g.add_nodes_from(nodesRange)
-			pos = nx.random_layout(g, scale=sqrtLen, 
+			pos = nx.random_layout(g, scale=sqrtLen,
 				center=(centers[i][j]['x'], centers[i][j]['y']))
 			for k in nodesRange :
 				positions[nodeId] = {'x': pos[k][0], 'y': pos[k][1]}
@@ -82,7 +83,7 @@ def plotNodesPositions(pos, pltWidth) :
 	plt.scatter( [ pos[p]['x'] for p in pos], [ pos[p]['y'] for p in pos] )
 	plt.savefig(FIRST_PLOT_NAME)
 	plt.clf()
-	
+
 def plotOverlay(iD, graph, positions, xMax, yMax) :
 	pTmp = {}
 	for k, v in positions.iteritems():
@@ -121,15 +122,55 @@ def addConnectEntry(fileName, entry) :
 	with open(fileName, 'a') as f :
 		f.write(entry + "\n")
 
-def getNextOverlay(mobMod, nodes_no, latestP, Tx, staticPo) :
-	p_i = [ (k[0], k[1]) for k in next(mobMod) ]
-	p_j = [ (k[0], k[1]) for k in next(mobMod) ]
-	pDif= [ (p_j[k][0] - p_i[k][0], p_j[k][1] - p_i[k][1]) \
+def getNextOverlay(mobModLowS, mobModHigS, nodes_no, latestP,
+	Tx, staticPo, xlim, ylim, halfSqr) :
+	# every node is moving once using the mobility model with low speed
+	p_iLowS = [ (k[0], k[1]) for k in next(mobModLowS) ]
+	p_jLowS = [ (k[0], k[1]) for k in next(mobModLowS) ]
+	pDifLowS= [ (p_jLowS[k][0] - p_iLowS[k][0], p_jLowS[k][1] - p_iLowS[k][1]) \
+		for k in range(0, nodes_no) ]
+	# every node is moving once using the mobility model with high speed
+	p_iHigS = [ (k[0], k[1]) for k in next(mobModHigS) ]
+	p_jHigS = [ (k[0], k[1]) for k in next(mobModHigS) ]
+	pDifHigS= [ (p_jHigS[k][0] - p_iHigS[k][0], p_jHigS[k][1] - p_iHigS[k][1]) \
 		for k in range(0, nodes_no) ]
 	for k, v in latestP.iteritems() :
-		latestP[k] = { 'x': v['x'] + pDif[k-1][0], 'y': v['y'] + pDif[k-1][1] }
+		pAtLowS = { 'x': v['x'] + pDifLowS[k-1][0], 'y': v['y'] + pDifLowS[k-1][1] }
+		pAtHigS = { 'x': v['x'] + pDifHigS[k-1][0], 'y': v['y'] + pDifHigS[k-1][1] }
+		# if one node is positioned at the dense area, the high-speed mobility
+		# model is used
+		atDensZlow = inSquare(pAtLowS, staticPo, halfSqr)
+		atDensZhig = inSquare(pAtHigS, staticPo, halfSqr)
+		if atDensZlow and atDensZhig :
+			point = pAtLowS
+		elif (not atDensZlow) and atDensZhig :
+			point = pAtLowS
+		elif atDensZlow and (not atDensZhig) :
+			point = pAtHigS
+		else :
+			point = pAtHigS
+		# force nodes to respect the "appear to other side" policy (a way to fix
+		#	the bug in the mobility model)
+		if point['x'] < 0 :
+			point['x'] = xlim + point['x']
+		else :
+			if point['x'] > xlim :
+				point['x'] = point['x'] - xlim
+		if point['y'] < 0 :
+			point['y'] = ylim + point['y']
+		else :
+			if point['y'] > ylim :
+				point['y'] = point['y'] - ylim
+		latestP[k] = point
 	latestP[len(latestP) + 1] = { 'x': staticPo['x'], 'y': staticPo['y'] }
 	return getOverlay(latestP, Tx), latestP
+
+def inSquare(point, center, halfSqr) :
+	inAbs = center['x'] - halfSqr <= point['x'] and \
+		center['x'] + halfSqr >= point['x']
+	inOrd = center['y'] - halfSqr <= point['y'] and \
+		center['y'] + halfSqr >= point['y']
+	return inAbs and inOrd
 
 def savePosPerZone(positions, centers, halfSqr) :
 	for i in range(0, len(centers)) :
@@ -137,17 +178,12 @@ def savePosPerZone(positions, centers, halfSqr) :
 			c = { 'x': centers[i][j]['x'], 'y': centers[i][j]['y'] }
 			with open(DIST_PER_ZONE, 'a') as f:
 				for k, v in positions.iteritems() :
-					inAbs = c['x'] - halfSqr <= v['x'] and v['x'] <= c['x'] + halfSqr
-					inOrd = c['y'] - halfSqr <= v['y'] and v['y'] <= c['y'] + halfSqr
-					if inAbs and inOrd :
-						f.write( "%f %f %d\n" % (v['x'], v['y'], centers[i][j]['zoneId']) )
+					if inSquare(v, c, halfSqr) :
+						zoneId = centers[i][j]['zoneId']
+						f.write( "%d %f %f %d\n" % (k, v['x'], v['y'], zoneId) )
 
 if __name__ == '__main__':
 	args = getArgs()
-	if args.connected == "Y" :
-		keepConnected = True
-	else :
-		keepConnected = False
 	tryNo = 0
 	hasPartitions = True
 	while hasPartitions :
@@ -167,28 +203,28 @@ if __name__ == '__main__':
 	print("First connected graph was created")
 	tryNo = 1
 	connectedOvs = 0
-	if keepConnected :
-		mobMod = heterogeneous_truncated_levy_walk(args.nodes_no - 1, 
-			dimensions=(args.cma_w, args.cma_w), WT_EXP=-1.8, WT_MAX=WAITING_TIME)
-	else :
-		mobMod = random_waypoint(args.nodes_no - 1, 
-			dimensions=(args.cma_w, args.cma_w),
-			velocity=(MIN_VELOCITY, MAX_VELOCITY), wt_max=WAITING_TIME)
-	#XXX latest node in list of positions is located at the center of
-	#    the communication area
+	mobModLowS = random_direction(
+		args.nodes_no - 1,
+		(args.cma_w, args.cma_w),
+		wt_max=WAITING_TIME,
+		velocity=(MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
+	)
+	mobModHigS = random_direction(
+		args.nodes_no - 1,
+		(args.cma_w, args.cma_w),
+		wt_max=WAITING_TIME,
+		velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
+	)
+	# latest node in list of positions is located at the center of
+	# the communication area, for the moment, this node acts at the source
+	# of every broadcast session
 	staticNodeId = args.nodes_no
 	staticNodePo = latestP[staticNodeId]
-	while connectedOvs <= OVERLAYS :
+	while connectedOvs <= args.overlays :
 		del latestP[staticNodeId]
-		latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
-			latestP, args.Tx, staticNodePo)
-		if keepConnected :
-			while not isConnected(latestOv) :
-				print("Try no to create a connected overlay [" + str(tryNo) + "]")
-				tryNo = tryNo + 1
-				del latestP[staticNodeId]
-				latestOv, latestP = getNextOverlay(mobMod, args.nodes_no - 1, 
-					latestP, args.Tx, staticNodePo)
+		latestOv, latestP = getNextOverlay(mobModLowS, mobModHigS,
+			args.nodes_no - 1, latestP, args.Tx, staticNodePo,
+			args.cma_w, args.cma_w, halfSqr)
 		savePositions(latestP)
 		savePosPerZone(latestP, centers, halfSqr)
 		plotOverlay(connectedOvs, latestOv, latestP, args.cma_w, args.cma_w)
