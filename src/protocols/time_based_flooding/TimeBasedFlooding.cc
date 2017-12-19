@@ -22,20 +22,25 @@ void inet::TimeBasedFlooding::process_payload(
     bool wasntDispatched = dispatchedMsgs.find(key) == dispatchedMsgs.end();
     if (wasntDispatched) {
         bool wasntReceived = timers.find(key) == timers.end();
-        if (wasntReceived) {
-            double maxTimer = gateway->get_parameter<double>(protocol_name, "maxTimer");
-            double t = uniform(0, maxTimer);
-//            cout << simTime().str() << " " << myself << " :: " << "first reception of " << key;
-//            cout << " its broadcast will be delayed " << t << " seconds" << endl;
-            timers[key] = gateway->delayed_broadcast(key, t);
-        } else {
-//            cout << simTime().str() << " " << myself << " :: " << "forward of  " << key << " was cancelled" << endl;
-            if (timers.find(key) != timers.end()) {
-                gateway->cancel_message(timers[key]);
-                timers.erase(key);
-                dispatchedMsgs[key] = key;
-            }
-        }
+        double maxTimer = gateway->get_parameter<double>(protocol_name, "maxTimer");
+        double t = uniform(0, maxTimer);
+        timers[key] = gateway->delayed_broadcast(key, t);
+//        cout << simTime().str() << " " << myself << " :: " << "first reception of " << key;
+//        cout << " its broadcast will be delayed " << t << " seconds" << endl;
+//        if (wasntReceived) {
+//            double maxTimer = gateway->get_parameter<double>(protocol_name, "maxTimer");
+//            double t = uniform(0, maxTimer);
+////            cout << simTime().str() << " " << myself << " :: " << "first reception of " << key;
+////            cout << " its broadcast will be delayed " << t << " seconds" << endl;
+//            timers[key] = gateway->delayed_broadcast(key, t);
+//        } else {
+////            cout << simTime().str() << " " << myself << " :: " << "forward of  " << key << " was cancelled" << endl;
+//            if (timers.find(key) != timers.end()) {
+//                gateway->cancel_message(timers[key]);
+//                timers.erase(key);
+//                dispatchedMsgs[key] = key;
+//            }
+//        }
 
     }
 }
