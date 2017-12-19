@@ -100,10 +100,11 @@ cat ../../results/sentBroadcastMsgsDistribution-n_* >> ../../results/sentBroadca
 cat ../../results/recvBroadcastMsgsDistribution-n_* >> ../../results/recvBroadcastMsgsDistribution
 cat ../../results/sentCtrlMsgsDistribution-n_* >> ../../results/sentCtrlMsgsDistribution
 cat ../../results/recvCtrlMsgsDistribution-n_* >> ../../results/recvCtrlMsgsDistribution
-cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
 cat ../../results/collisionsRelativeError-n_* >> ../../results/collisionsRelativeError
 cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
-
+cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
+rm ../../results/groundTruthDensityDist-
+cat ../../results/groundTruthDensityDist-n_* >> ../../results/densityRelativeError
 
 ##rm -f ../../results/broadcastSession-n_* \
 ##      ../../results/duplicatedMsgsDistribution-n_* \
@@ -120,8 +121,8 @@ cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensi
 
 echo "Plotting aggregated results"
 
+#	-run_algo algorithmTypeDistribution \
 Rscript pretty-plotting.R \
-	-run_algo algorithmTypeDistribution \
 	-pc batteryConsumptionDistribution \
 	-bs broadcastSession \
 	-cv coverage \
