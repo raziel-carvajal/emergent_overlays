@@ -22,9 +22,11 @@ cma=150
 regions=2
 nodes=200
 tx=20
-overlays=126
+overlays=60
+generator="./make-mobility-trace-same-den.py"
+#generator="./make-mobility-trace.py"
 rm -f *.pdf mobility-trace mobility-trace *.ned
-./make-mobility-trace.py --cma-w ${cma} --regions ${regions} \
+${generator} --cma-w ${cma} --regions ${regions} \
   --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays}
 s=""
 for f in `ls -t *.pdf`; do
