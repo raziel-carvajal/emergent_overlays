@@ -1,0 +1,12 @@
+doc/
+dockerfiles/
+experiments/
+papers/
+results/
+src/
+tools/
+.git*
+docker-compose.yml
+LICENSE
+*.md
+revision.txt
