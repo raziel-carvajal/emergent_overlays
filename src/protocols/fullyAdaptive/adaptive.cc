@@ -296,7 +296,8 @@ FullyAdaptive::processStart()
     current_protocol->set_protocol_name(current_protocol_name);
     // initialize protocol
     current_protocol->initialize(myself, gateway);
-    knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
+    //knownProtocols.emplace(current_protocol_name, std::unique_ptr<IBroadcastProtocol>(current_protocol));
+    knownProtocols[current_protocol_name] = std::unique_ptr<IBroadcastProtocol>(current_protocol);
   }
 
   if (initialProtocol == "middleware") {
