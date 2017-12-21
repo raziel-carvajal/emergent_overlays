@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # configuring path to omnet++
-. download-omnet.sh
+#. download-omnet.sh
 . local-omnet-setenv.sh ${OMNET_PATH}
 
 if [ $# -lt 2 ]; then
