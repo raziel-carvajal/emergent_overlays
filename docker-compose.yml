@@ -3,8 +3,8 @@ services:
   flooding:
     image: emergent-overlays-worker
     volumes:
-      - '"$(pwd)"/experiments:/usr/emrg-ovrl/experiments'
-      - '"$(pwd)"/src:/usr/emrg-ovrl/src'
+      - './experiments:/usr/emrg-ovrl/experiments'
+      - './src:/usr/emrg-ovrl/src'
       - 'results:/usr/emrg-ovrl/results'
     environment:
       - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_flooding.ini
@@ -13,8 +13,8 @@ services:
   mpr:
     image: emergent-overlays-worker
     volumes:
-      - '"$(pwd)"/experiments:/usr/emrg-ovrl/experiments'
-      - '"$(pwd)"/src:/usr/emrg-ovrl/src'
+      - './experiments:/usr/emrg-ovrl/experiments'
+      - './src:/usr/emrg-ovrl/src'
       - 'results:/usr/emrg-ovrl/results'
     environment:
       - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_mpr.ini
@@ -23,8 +23,8 @@ services:
   hybrid:
     image: emergent-overlays-worker
     volumes:
-      - '"$(pwd)"/experiments:/usr/emrg-ovrl/experiments'
-      - '"$(pwd)"/src:/usr/emrg-ovrl/src'
+      - './experiments:/usr/emrg-ovrl/experiments'
+      - './src:/usr/emrg-ovrl/src'
       - 'results:/usr/emrg-ovrl/results'
     environment:
       - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_hybrid.ini
@@ -33,7 +33,7 @@ services:
   plotter:
     image: emergent-overlays-plotter
     volumes:
-      - '"$(pwd)"/src:/usr/emrg-ovrl/src'
+      - './src:/usr/emrg-ovrl/src'
       - 'results:/usr/emrg-ovrl/results'
     depends_on:
       flooding:

@@ -25,4 +25,4 @@ RUN cd r-packages && \
     https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_1.0.1.tar.gz && \
   R CMD BATCH r-plotter-pkgs.R
 
-CMD [ "cd src/scripts && ./run-selected-protocols-all-configs.sh -a abba" ]
+CMD cd ./src/scripts && ./run-selected-protocols-all-configs.sh -a abba

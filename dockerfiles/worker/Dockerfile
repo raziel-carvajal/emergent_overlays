@@ -82,4 +82,7 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
 # - just one broadcast session is performed
 # - one node initiate the broadcast session
 ENV EXPE_CONF_FILE /usr/emrg-ovrl/experiments/configs/unit-tests/n_7_d_0_tr_75_a_500x500_idx_0_p_flooding.ini
-CMD [ "cd src/scripts && ./compile_protocols.sh ../protocols ../../built && ./run-one-configuration.sh ${EXPE_CONF_FILE} ../../tools/omnetpp-4.6/samples/inet 0" ]
+CMD cd /usr/emrg-ovrl/src/scripts && \
+  ./compile_protocols.sh ../protocols ../../built && \
+  ./run-one-configuration.sh ${EXPE_CONF_FILE} \
+    ../../tools/omnetpp-4.6/samples/inet 0
