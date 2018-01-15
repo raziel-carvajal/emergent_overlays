@@ -1,7 +1,7 @@
 <root>
 
   <Protocol name="AdaptiveBase">
-    <Parameter name="sparse_region" value="Abba2" type="string"></Parameter>
+    <Parameter name="sparse_region" value="TimeBasedFlooding" type="string"></Parameter>
     <Parameter name="dense_region" value="Mpr_t2" type="string"></Parameter>
   </Protocol>
   <Protocol name="Abba2">
@@ -22,11 +22,11 @@
     <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Mpr_t2">
-    <Parameter name="helloTime" value="1.45" type="seconds"></Parameter>
+    <Parameter name="helloTime" value="10.0" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="TimeBasedFlooding">
-    <Parameter name="maxTimer" value="0.1" type="seconds"></Parameter>
+    <Parameter name="maxTimer" value="0.09" type="seconds"></Parameter>
   </Protocol>
   <Protocol name="ProbFlooding">
     <Parameter name="helloTime" value="1" type="seconds"></Parameter>
