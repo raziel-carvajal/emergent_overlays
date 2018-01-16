@@ -5,6 +5,11 @@ import argparse
 import networkx as nx
 from time import sleep
 import itertools as iterT
+# print "IMPORT"
+# import matplotlib
+# print "BEFORE"
+# matplotlib.use('Agg')
+# print "AFTER"
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_direction
 from pymobility.models.mobility import truncated_levy_walk
