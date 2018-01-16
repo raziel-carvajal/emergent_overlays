@@ -38,6 +38,8 @@ def getDistance(a, b) :
 
 def getInitialPosition(nodes, denZoneNo, cmaW) :
 	denZones = { }
+	# the communication area is representend by a NxN matrix where its entries
+	# have a unique identifier (zoneId) and nodes are positioned on each entry
 	for i in range(0, denZoneNo) :
 		matxLen = 1 + 2 * i
 		sqrtsNo = 4 * (matxLen - 1)
@@ -54,7 +56,8 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 	for i in range(0, matxLen) :
 		centers[i] = {}
 		for j in range(0, matxLen) :
-			centers[i][j] = { 'x': j*sqrtLen + deltSqrt, 'y': i*sqrtLen + deltSqrt }
+			# find out the center of each entry in the matrix
+			centers[i][j] = {'x': j*sqrtLen + deltSqrt, 'y': i*sqrtLen + deltSqrt}
 			d = getDistance(theCenter, centers[i][j])
 			if d < deltSqrt :
 				centers[i][j]['density'] = denZones[0]['nodes']
@@ -68,6 +71,7 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 			g = nx.Graph()
 			nodesRange = range(0, centers[i][j]['density'])
 			g.add_nodes_from(nodesRange)
+			# position nodes within an entry in a random way
 			pos = nx.random_layout(g, scale=sqrtLen,
 				center=(centers[i][j]['x'], centers[i][j]['y']))
 			for k in nodesRange :
@@ -90,19 +94,16 @@ def placedNodesWithUniformDen(latestPos, centers, halfSqrt, staticPo, overlays, 
                         nodesAtSqrt[n] = latestPos[n]
                         nodeIds.append(n)
                 if v_j['zoneId'] == 0 :
-                	mobMod = random_direction(
-                		len(nodesAtSqrt),
-                		(halfSqrt * 2, halfSqrt * 2),
-                		wt_max=WAITING_TIME,
-                		velocity=(MIN_LOW_VELOCITY, MAX_LOW_VELOCITY),
-                        border_policy='reflect')
+            	    velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
                 else :
-                	mobMod = random_direction(
-                		len(nodesAtSqrt),
-                		(halfSqrt * 2, halfSqrt * 2),
-                		wt_max=WAITING_TIME,
-                		velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY),
-                        border_policy='reflect')
+		    velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
+		mobMod = random_direction(
+	            len(nodesAtSqrt),
+	            (halfSqrt * 2, halfSqrt * 2),
+	            wt_max=WAITING_TIME,
+	            velocity=velocity,
+	            border_policy='reflect'
+		)
                 nodesAtSqrt = makeStep(mobMod, nodesAtSqrt, center, halfSqrt)
                 savePositions(nodesAtSqrt)
                 nodeIdx = 0
