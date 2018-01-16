@@ -50,13 +50,11 @@ src/base/*/*_m.cc
 src/base/*/*_m.h
 src/protocols/Makefile
 built/
-experiments/configs/builtConfigs/*.ini
-experiments/configs/builtConfigs/*.density
-experiments/networks/builtTopologies/*.ned
+experiments/configs/built_configs/*.ini
+experiments/configs/built_configs/results
+experiments/networks/built_topologies/*.ned
+experiments/networks/built_topologies/*.mobility
 
-# Non useful experimental results
-experiments/configs/builtConfigs/results/
-experiments/configs/results/
 
 # Paper
 text/main.aux
