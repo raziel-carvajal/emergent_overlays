@@ -54,6 +54,8 @@ experiments/configs/built_configs/*.ini
 experiments/configs/built_configs/results
 experiments/networks/built_topologies/*.ned
 experiments/networks/built_topologies/*.mobility
+experiments/networks/built_topologies/*.pdf
+experiments/networks/built_topologies/*.positions
 
 
 # Paper

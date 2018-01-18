@@ -25,7 +25,7 @@ tx=20
 overlays=60
 generator="./make-mobility-trace-same-den.py"
 #generator="./make-mobility-trace.py"
-rm -f *.pdf mobility-trace mobility-trace *.ned
+rm -f *.pdf *.ned *.mobility *.positions
 ${generator} --cma-w ${cma} --regions ${regions} \
   --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays}
 s=""
@@ -37,4 +37,6 @@ rm -f Position_*.pdf
 ./make-ned-file.py --cma-w ${cma} --transmission-range ${tx}
 mobF=`file *.ned | awk -F ".ned" '{ print $1}'`
 mv mobility-trace "${mobF}.mobility"
+mv distribution-per-density "${mobF}.positions"
 mv all.pdf "${mobF}.pdf"
+mv *.pdf *.ned *.mobility *.positions ../../../experiments/networks/built_topologies

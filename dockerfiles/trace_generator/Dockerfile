@@ -25,4 +25,4 @@ RUN git clone git://github.com/panisson/pymobility.git && \
 RUN echo "backend : Agg" > /etc/matplotlibrc && \
   rm -r /root/.cache
 
-CMD cd topologies && ./make-topology.sh
+CMD cd src/scripts/topologies && ./make-topology.sh
