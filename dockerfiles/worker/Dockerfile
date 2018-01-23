@@ -77,9 +77,9 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
   make makefiles && \
   make
 
-ADD ../../src/base /usr/emrg-ovrl/src/base
-ADD ../../src/scripts /usr/emrg-ovrl/src/scripts
-ADD ../../src/protocols /usr/emrg-ovrl/src/protocols
+ADD src/base /usr/emrg-ovrl/src/base
+ADD src/scripts /usr/emrg-ovrl/src/scripts
+ADD src/protocols /usr/emrg-ovrl/src/protocols
 
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \

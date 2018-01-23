@@ -12,7 +12,8 @@ RUN apt-get update && \
   python-pip \
   python-matplotlib \
   git \
-  poppler-utils
+  poppler-utils \
+  bc
 
 COPY python_pkgs /usr/emrg-ovrl/python_pkgs
 
