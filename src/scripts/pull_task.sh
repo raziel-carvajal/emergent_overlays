@@ -17,8 +17,6 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -o nounset                              # Treat unset variables as an error
-
 shareDir="../../experiments/configs/built_configs"
 taskList="cfgs_for_workers"
 while :
@@ -34,5 +32,7 @@ do
 	echo "waiting until lock is released"
 	sleep 1
 done
-./run-one-configuration.sh ${MY_TASK} ../../tools/omnetpp-4.6/samples/inet 0
+MY_TASK=`head -1 my_task`
+./run-one-configuration.sh "../../experiments/configs/built_configs/${MY_TASK}" \
+  ../../tools/omnetpp-4.6/samples/inet 0
 echo "END OF ${0}"

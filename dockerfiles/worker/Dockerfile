@@ -83,4 +83,4 @@ ADD src/protocols /usr/emrg-ovrl/src/protocols
 
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \
-  ./pull_task
+  ./pull_task.sh

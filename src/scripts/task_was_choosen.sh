@@ -26,6 +26,7 @@ if ( set -o noclobber ; touch ${lockFile} ) 2>/dev/null ; then
 	echo "Lock taken!"
 	trap "{ rm -f ${lockFile}; exit 0; }" EXIT
 	MY_TASK=`head -1 ${tasks}`
+	echo "${MY_TASK}" >my_task
   echo "Worker [${HOSTNAME}]: I've chosen task [${MY_TASK}]"
 	let others=(`cat ${tasks} | wc -l`)-1
 	todo=`tail -${others} ${tasks}`
