@@ -1,42 +1,22 @@
 version: "2.1"
 services:
   trace_generator:
+    env_file: .env
     build: ./dockerfiles/trace_generator
     volumes:
       - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies/'
+      - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+  worker:
+    build: ./dockerfiles/worker
+    volumes:
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
-  # flooding:
-  #   image: emergent-overlays-worker
-  #   volumes:
-  #    - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
-  #    - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
-  #     - './experiments:/usr/emrg-ovrl/experiments'
-  #     - './src:/usr/emrg-ovrl/src'
-  #     - 'results:/usr/emrg-ovrl/results'
-  #   environment:
-  #     - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_flooding.ini
-  # mpr:
-  #   image: emergent-overlays-worker
-  #   volumes:
-  #     - './experiments:/usr/emrg-ovrl/experiments'
-  #     - './src:/usr/emrg-ovrl/src'
-  #     - 'results:/usr/emrg-ovrl/results'
-  #   environment:
-  #     - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_mpr.ini
-  #   healthcheck:
-  #       test: exit 0
-  # hybrid:
-  #   image: emergent-overlays-worker
-  #   volumes:
-  #     - './experiments:/usr/emrg-ovrl/experiments'
-  #     - './src:/usr/emrg-ovrl/src'
-  #     - 'results:/usr/emrg-ovrl/results'
-  #   environment:
-  #     - EXPE_CONF_FILE=/usr/emrg-ovrl/experiments/configs/unit-tests/n_11_d_0_tr_75_a_500x500_idx_0_p_hybrid.ini
-  #   healthcheck:
-  #       test: exit 0
+      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
+      - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+      - './results:/usr/emrg-ovrl/results'
+    depends_on:
+      - trace_generator
   # plotter:
   #   image: emergent-overlays-plotter
   #   volumes:

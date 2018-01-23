@@ -77,12 +77,10 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
   make makefiles && \
   make
 
-# Experiment by default. The value in this variable is a configuration file of an experiment with the following characteristics:
-# - 7 nodes run simple flooding
-# - just one broadcast session is performed
-# - one node initiate the broadcast session
-ENV EXPE_CONF_FILE /usr/emrg-ovrl/experiments/configs/unit-tests/n_7_d_0_tr_75_a_500x500_idx_0_p_flooding.ini
+ADD ../../src/base /usr/emrg-ovrl/src/base
+ADD ../../src/scripts /usr/emrg-ovrl/src/scripts
+ADD ../../src/protocols /usr/emrg-ovrl/src/protocols
+
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \
-  ./run-one-configuration.sh ${EXPE_CONF_FILE} \
-    ../../tools/omnetpp-4.6/samples/inet 0
+  ./pull_task

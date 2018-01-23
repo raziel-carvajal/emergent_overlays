@@ -28,7 +28,8 @@ generator="./make-mobility-trace-same-den.py"
 # remove all configurations and topologies
 rm -f *.pdf *.ned *.mobility *.positions output \
   ../../../experiments/networks/built_topologies/n_* \
-  ../../../experiments/configs/built_configs/n_*
+  ../../../experiments/configs/built_configs/n_* \
+  ../../../experiments/configs/built_configs/cfgs_for_workers
 ${generator} --cma-w ${cma} --regions ${regions} \
   --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays} \
   &> output
@@ -74,6 +75,7 @@ newSimTime=`bc<<<"${ctrlMsgFreq} * 2 + ${SIMULATION_TIME} * 60 + ${ctrlMsgFreq}"
 WITH_MOBILITY=true
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 cfgFile='../../../experiments/configs/in_common/common.ini'
+cfgsForWorkers=""
 for algo in ${algorithms} ; do
   cat "${cfgFile}" > iniFile
   sed -i -e "s/CONFIGURATION_NAME/${mobF}${algo}/" iniFile
@@ -106,10 +108,15 @@ for algo in ${algorithms} ; do
     # NOTE for the moment there is a source node positioned within the dense area
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+    cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini"
   else
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo -e "*.host*.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+    cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"
   fi
   mv iniFile "${mobF}${algo}.ini"
   mv "${mobF}${algo}.ini" ../../../experiments/configs/built_configs
 done
+builtCfgDir="../../../experiments/configs/built_configs"
+echo -e "FOR WORKERS:\n ${cfgsForWorkers}"
+echo -e "${cfgsForWorkers}" > "${builtCfgDir}/cfgs_for_workers"
