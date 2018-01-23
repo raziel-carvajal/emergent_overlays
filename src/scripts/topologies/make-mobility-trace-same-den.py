@@ -1,15 +1,11 @@
 #!/usr/bin/python
-import sys
+import os
+# import sys
 import math
 import argparse
 import networkx as nx
-from time import sleep
+# from time import sleep
 import itertools as iterT
-# print "IMPORT"
-# import matplotlib
-# print "BEFORE"
-# matplotlib.use('Agg')
-# print "AFTER"
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_direction
 from pymobility.models.mobility import truncated_levy_walk
@@ -18,10 +14,10 @@ MIN_LOW_VELOCITY = 0.0
 MAX_LOW_VELOCITY = 1.0
 MIN_HIG_VELOCITY = 1.5
 MAX_HIG_VELOCITY = 2.0
-WAITING_TIME = 1.0
-FIRST_PLOT_NAME = "Position_"
-MOBILITY_FILE= "mobility-trace"
-DIST_PER_ZONE= "distribution-per-density"
+WAITING_TIME = int(os.environ['NODES_MOV_FREQ'])
+FIRST_PLOT_NAME = 'Position_'
+MOBILITY_FILE= 'mobility-trace'
+DIST_PER_ZONE= 'distribution-per-density'
 
 def getArgs() :
 	p = argparse.ArgumentParser(description='Creates a network with N regions '+
@@ -65,6 +61,7 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 			centers[i][j] = {'x': j*sqrtLen + deltSqrt, 'y': i*sqrtLen + deltSqrt}
 			d = getDistance(theCenter, centers[i][j])
 			if d < deltSqrt :
+				print('FIRST_NODE_AT_DENSE_AREA=' + str(nodeId) + '\n')
 				centers[i][j]['density'] = denZones[0]['nodes']
 				centers[i][j]['zoneId'] = denZones[0]['zoneId']
 			else :
@@ -82,6 +79,8 @@ def getInitialPosition(nodes, denZoneNo, cmaW) :
 			for k in nodesRange :
 				positions[nodeId] = {'x': pos[k][0], 'y': pos[k][1]}
 				nodeId = nodeId + 1
+	print('LAST_NODE_AT_SPARSE_AREA=' + str(nodeId - 1) + '\n')
+	print('SOURCE_NODE_ID=' + str(nodeId) + '\n')
 	#XXX latest node is located at the center of the communication area
 	positions[nodeId] = {'x': theCenter['x'], 'y': theCenter['y']}
 	return positions, centers, deltSqrt

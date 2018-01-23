@@ -2,7 +2,7 @@
 import math
 import argparse
 
-NED_HEAD = "package rand_uniform_topologies;\n\
+NED_HEAD = "package built_topologies;\n\
   import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n\
   import inet.node.inet.INetworkNode;\n\
   import inet.physicallayer.contract.packetlevel.IRadioMedium;\n\

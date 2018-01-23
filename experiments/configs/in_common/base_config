@@ -1,7 +1,7 @@
 <root>
   <Protocol name="AdaptiveBase">
-    <Parameter name="sparse_region" value="Mpr_t2" type="string"></Parameter>
-    <Parameter name="dense_region" value="Flooding2" type="string"></Parameter>
+    <Parameter name="sparse_region" value="ALGO_AT_DENSE_AREA" type="string"></Parameter>
+    <Parameter name="dense_region" value="ALGO_AT_SPARSE_AREA" type="string"></Parameter>
   </Protocol>
   <Protocol name="Abba2">
     <Parameter name="timeOut" value="0.02" type="seconds"></Parameter>
@@ -11,7 +11,7 @@
     <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Cds_3">
-    <Parameter name="helloTime" value="3.0" type="seconds"></Parameter>
+    <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
     <Parameter name="doRule2" value="true" type="boolean"></Parameter>
     <Parameter name="doOptiP" value="false" type="boolean"></Parameter>
@@ -21,14 +21,14 @@
     <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Mpr_t2">
-    <Parameter name="helloTime" value="3.0" type="seconds"></Parameter>
+    <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="TimeBasedFlooding">
     <Parameter name="maxTimer" value="0.09" type="seconds"></Parameter>
   </Protocol>
   <Protocol name="ProbFlooding">
-    <Parameter name="helloTime" value="3.0" type="seconds"></Parameter>
+    <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
     <Parameter name="scheme" value="DENSITY_BORDER_AWARE" type="string"></Parameter>
     <Parameter name="k" value="4" type="integer"></Parameter>

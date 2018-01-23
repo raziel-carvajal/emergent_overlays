@@ -5,8 +5,8 @@ services:
     volumes:
       - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies/'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
-      - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+      - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
   # flooding:
   #   image: emergent-overlays-worker
   #   volumes:
