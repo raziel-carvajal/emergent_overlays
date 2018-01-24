@@ -42,7 +42,7 @@ done
 MY_TASK=`head -1 my_task`
 ./run-one-configuration.sh "../../experiments/configs/built_configs/${MY_TASK}" \
   ../../tools/omnetpp-4.6/samples/inet 0
-[ ${$} != 0 ] && \
+[ ${?} != 0 ] && \
 	echo -e "Error during execution of [${MY_TASK}]\nEND OF ${0}" && \
 	exit 1
 

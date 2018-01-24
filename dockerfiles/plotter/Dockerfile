@@ -15,7 +15,8 @@ RUN apt-get -y install \
   git \
   wget \
   python \
-  r-base
+  r-base \
+  r-cran-digest
 
 COPY r-packages /usr/emrg-ovrl/r-packages
 RUN cd r-packages && \
