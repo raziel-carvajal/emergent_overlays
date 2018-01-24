@@ -1,18 +1,18 @@
-#!/bin/bash - 
+#!/bin/bash -
 #===============================================================================
 #
 #          FILE: wait_for_workers.sh
-# 
-#         USAGE: ./wait_for_workers.sh 
-# 
-#   DESCRIPTION: 
-# 
+#
+#         USAGE: ./wait_for_workers.sh
+#
+#   DESCRIPTION:
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
 #         NOTES: ---
 #        AUTHOR: Raziel Carvajal-Gomez (), raziel.carvajal@uclouvain.be
-#  ORGANIZATION: 
+#  ORGANIZATION:
 #       CREATED: 01/24/2018 12:03
 #      REVISION:  ---
 #===============================================================================
@@ -24,11 +24,11 @@ tasksNoF="${shareDir}/completed_tasks_no"
 while :
 do
   [ -f ${tasksNoF} ] && break
-	echo "Any worker has finished yet"
+	echo "Any worker has finished yet, waiting"
 	# workers have the highest completition time
-	sleep 60
+	sleep 1
 done
-
+echo "at least one worker finised"
 while :
 do
   totalTasks=`ls -l ${shareDir}/*.ini | wc -l`

@@ -26,10 +26,9 @@ overlays=$(bc <<< "(${SIMULATION_TIME} * 60) / ${NODES_MOV_FREQ}")
 generator="./make-mobility-trace-same-den.py"
 #generator="./make-mobility-trace.py"
 # remove all configurations and topologies
-rm -f *.pdf *.ned *.mobility *.positions output \
-  ../../../experiments/networks/built_topologies/n_* \
-  ../../../experiments/configs/built_configs/n_* \
-  ../../../experiments/configs/built_configs/cfgs_for_workers
+rm -rf *.pdf *.ned *.mobility *.positions output \
+  ../../../experiments/networks/built_topologies/* \
+  ../../../experiments/configs/built_configs/*
 ${generator} --cma-w ${cma} --regions ${regions} \
   --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays} \
   &> output
