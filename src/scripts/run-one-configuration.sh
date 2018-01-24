@@ -54,7 +54,8 @@ PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2
 algoN=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
 logFile="n_${NODES}_d_${DENSITY}_p_${algoN}"
 
-${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
+#${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
+${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
 
 if [ $r -ne 0 ]; then
