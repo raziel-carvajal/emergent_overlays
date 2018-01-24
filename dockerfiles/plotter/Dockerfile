@@ -27,4 +27,4 @@ RUN cd r-packages && \
 
 ADD src/scripts /usr/emrg-ovrl/src/scripts
 
-CMD cd ./src/scripts && ./wait_for_workers.sh ./run-selected-protocols-all-configs.sh -a abba
+CMD cd ./src/scripts && ./wait_for_workers.sh && ./run-selected-protocols-all-configs.sh -a abba
