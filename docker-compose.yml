@@ -26,7 +26,7 @@ services:
     cpuset: '6'
     build:
       context: .
-      dockerfile: dockerfile/plotter/Dockerfile
+      dockerfile: dockerfiles/plotter/Dockerfile
     volumes:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
