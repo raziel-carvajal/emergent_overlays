@@ -5,11 +5,9 @@ LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simu
 RUN mkdir /usr/emrg-ovrl && \
   mkdir /usr/emrg-ovrl/tools && \
   mkdir /usr/emrg-ovrl/built
-
 WORKDIR /usr/emrg-ovrl
 
 RUN apt-get update
-
 RUN apt-get -y install \
 # OMNeT++ dependencies
   bc \
@@ -38,13 +36,6 @@ RUN apt-get -y install \
   wget \
   python \
   r-base
-
-# List of R packages to create a data-set of experimental results per dissemination protocol
-COPY r-packages /usr/emrg-ovrl/r-packages
-# Installation of R packages
-RUN cd r-packages && \
-  wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
-  R CMD BATCH r-worker-pkgs.R
 
 # Fetch OMNeT++ source file
 RUN wget \
@@ -76,6 +67,13 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
   cd omnetpp-4.6/samples/inet && \
   make makefiles && \
   make
+
+# List of R packages to create a data-set of experimental results per dissemination protocol
+COPY r-packages /usr/emrg-ovrl/r-packages
+# Installation of R packages
+RUN cd r-packages && \
+  wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
+  R CMD BATCH r-worker-pkgs.R
 
 ADD src/base /usr/emrg-ovrl/src/base
 ADD src/scripts /usr/emrg-ovrl/src/scripts

@@ -15,13 +15,13 @@ RUN apt-get update && \
   poppler-utils \
   bc
 
-COPY python_pkgs /usr/emrg-ovrl/python_pkgs
-
-RUN pip install -r python_pkgs
-
 RUN git clone git://github.com/panisson/pymobility.git && \
   cd pymobility && \
   python setup.py install
+
+COPY python_pkgs /usr/emrg-ovrl/python_pkgs
+
+RUN pip install -r python_pkgs
 
 RUN echo "backend : Agg" > /etc/matplotlibrc && \
   rm -r /root/.cache

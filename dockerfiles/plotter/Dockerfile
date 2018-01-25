@@ -11,4 +11,7 @@ RUN cd r-packages && R CMD BATCH r-plotter-pkgs.R
 
 ADD src/scripts /usr/emrg-ovrl/src/scripts
 
+RUN apt-get update && \
+  apt-get install -y python
+
 CMD cd ./src/scripts && ./wait_for_workers.sh && ./run-selected-protocols-all-configs.sh -a abba
