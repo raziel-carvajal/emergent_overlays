@@ -68,7 +68,7 @@ cenPosXandY=`bc <<< "${cma} / 2"`
 denseAreaWi=`bc <<< "${cma} / (${regions} + 1)"`
 broaMsgFreq=`bc <<< "( (${SIMULATION_TIME} * 60) / ${BROADCAST_MSGS_NO} ) * 1.0"`
 # TODO this warm up phase must be independent of the control messages frequency
-warmUpPhase=`bc <<< "${ctrlMsgFreq} * 2.0"`
+warmUpPhase="3.0"
 newSimTime=`bc<<<"${ctrlMsgFreq} * 2 + ${SIMULATION_TIME} * 60 + ${ctrlMsgFreq}"`
 # TODO
 WITH_MOBILITY=true

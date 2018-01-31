@@ -147,6 +147,8 @@ Mpr_t2::process_payload(const Broadcast* m)
 {
     string key = m->getId();
     gateway->emitBroadcastMsgReceived( key );
+//    cout << simTime().str() << " " + gateway->get_name()
+//            << " msg rcv from " << m->getSender() << endl;
 	if (m->getSender() == myself) return;
 
 

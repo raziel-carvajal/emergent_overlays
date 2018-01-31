@@ -35,7 +35,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     //set (according to its node identifier) to send control messages
     double delta;
     // how many hello messages I must send
-    int nr_hello_msg;
+    bool with_hello_msgs;
     enum ControlMessageTypes {
         IDLE,
         START,

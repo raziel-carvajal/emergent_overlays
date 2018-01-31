@@ -47,7 +47,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-//            std::cout << simTime().str() << " " + gateway->get_name() << " :: Sending HelloMessage" << endl;
+//            std::cout << simTime().str() << " " + gateway->get_name() << " SEND HELLO MSG" << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
             knownProtocols[current_protocol_name]->on_saying_hello();
@@ -311,6 +311,13 @@ FullyAdaptive::processStart()
   }
 
   change_current_protocol(initialProtocol);
+
+  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+      /*NOTE when a protocol requires to send control messages, we need to give a grace period
+       * to start the first broadcast session.*/
+      gateway->delayed_event(SAY_HELLO, "helloTime", 1.0);
+      gateway->delayed_event(SAY_HELLO, "helloTime", 2.0);
+  }
 }
 
 

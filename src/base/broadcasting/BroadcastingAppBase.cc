@@ -303,7 +303,7 @@ BroadcastingAppBase::initialize(int stage)
 
             // protocolId = par("protocolId").stdstringValue();
 
-            nr_hello_msg = par("nr_hello_messages").boolValue();
+            with_hello_msgs = par("nr_hello_messages").boolValue();
 
             is_source = par("is_source").boolValue();
 
@@ -344,7 +344,6 @@ BroadcastingAppBase::initialize(int stage)
         }
         break;
         case INITSTAGE_LAST:{
-
             double d = par("wakeUpTime").doubleValue();
             // DON'T REMOVE THIS THREE LINES. IT IS IMPORTANT TO GUARANTEE A PROPER MEASUREMENT
             d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
@@ -596,7 +595,8 @@ BroadcastingAppBase::processStart()
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
 
     cModule* host = getContainingNode(this);
-    auto transmitter = check_and_cast<physicallayer::IdealTransmitter*>(host->getModuleByPath(".wlan[0].radio.transmitter"));
+    auto transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
+            host->getModuleByPath(".wlan[0].radio.transmitter") );
 
     updatePosition();
     this->radious = transmitter->getMaxCommunicationRange().get();
@@ -636,9 +636,8 @@ BroadcastingAppBase::processStart()
       }
     }
 
-    if (nr_hello_msg) {
-//      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue() + delta);
-      delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
+    if (with_hello_msgs) {
+        delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
     }
 }
 
@@ -835,7 +834,8 @@ void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
     printBroadcastingLog(key);
-    msg->setPayload(std::string(128, 'p').c_str());
+    msg->addByteLength(140);
+//    msg->setPayload(std::string(128, 'p').c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {
