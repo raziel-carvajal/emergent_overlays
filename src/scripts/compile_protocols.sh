@@ -33,9 +33,10 @@ MAKE=make
 # variables
 INCLUDE="${OMNET_PATH}/samples/inet/src"
 PROTOCOLS=$1
+CORES=3
 
 # create base library that only includes project broadcasting
-cd "../base" && ${OMNET_MAKEMAKE} -f --deep -a -I${INCLUDE} -O ${OUT_PATH} -o protocol_base && make
+cd "../base" && ${OMNET_MAKEMAKE} -f --deep -a -I${INCLUDE} -O ${OUT_PATH} -o protocol_base && make MODE=release -j ${CORES}
 if [ $? -ne "0" ]; then
   exit 1
 fi
@@ -47,7 +48,7 @@ if [ $? -ne "0" ]; then
 fi
 
 # build library with all protocols
-cd "${PROTOCOLS}" && make
+cd "${PROTOCOLS}" && make MODE=release -j ${CORES}
 if [ $? -ne "0" ]; then
   exit 1
 fi
