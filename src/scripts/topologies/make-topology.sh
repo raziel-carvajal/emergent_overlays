@@ -87,11 +87,11 @@ for algo in ${algorithms} ; do
   sed -i -e "s/DENSE_REGION_WIDTH/${denseAreaWi}/" iniFile
   sed -i -e "s/BROADCAST_MSGS_NO/${BROADCAST_MSGS_NO}/" iniFile
   sed -i -e "s/BROADCAST_MSG_INTERVAL/${broaMsgFreq}s/" iniFile
-  sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
   sed -i -e "s/WITH_MOBILITY/${WITH_MOBILITY}/" iniFile
   sed -i -e "s/WARMUP_PHASE/${warmUpPhase}s/" iniFile
   if [ "${algo}" == "hybrid" ] ; then
+    sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
 	  for (( I=1; I<${firsAtDenseA}; I+=1 )); do
       echo "*.hostR${I}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
@@ -109,6 +109,9 @@ for algo in ${algorithms} ; do
     echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini"
   else
+    if [ "${WITH_ADAPTATION}" == "true" ] ; then
+      sed -i -e "s/WITH_ADAPTATION/false/" iniFile
+    fi
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo -e "*.host*.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"

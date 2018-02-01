@@ -21,7 +21,8 @@ CONF_NAME=${filename%.*}
 CONFIG_PATH=$(dirname "$1")
 
 # executable omnet
-OMNET=opp_run
+#OMNET="mpirun --np 1 --cpu-set 0,1,2 opp_run"
+OMNET="opp_run"
 
 # path to inet
 INET_PATH=$2
@@ -55,7 +56,7 @@ algoN=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
 logFile="n_${NODES}_d_${DENSITY}_p_${algoN}"
 
 # ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
-${OMNET} --cmdenv-extra-stack=4000KiB -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
+${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
 
 if [ $r -ne 0 ]; then

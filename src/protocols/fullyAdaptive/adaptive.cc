@@ -14,8 +14,6 @@
 //
 
 #include "adaptive.h"
-
-
 #include "inet/mobility/contract/IMobility.h"
 
 #include <algorithm>
@@ -143,11 +141,11 @@ FullyAdaptive::adaptation()
     //    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
     //          density << endl;
         if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
-           std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
+           // std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
           change_current_protocol(dense_region_protocol);
         }
         else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-            std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
+            // std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
             change_current_protocol(sparse_region_protocol);
         }
 
