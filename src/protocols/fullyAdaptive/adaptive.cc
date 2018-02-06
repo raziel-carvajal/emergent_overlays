@@ -37,6 +37,18 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       case START:
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
+      case BOOTSTRAP_MSG:
+      {
+//         std::cout << simTime().str() << " " + gateway->get_name() << " BOOTSTRAP MSG, " << current_protocol_name << endl;
+        auto p = build_hello_message();
+        if (packet_to_piggybag) {
+            p->encapsulate(packet_to_piggybag);
+            packet_to_piggybag = nullptr;
+        }
+        gateway->send_package(p);
+        cancelAndDelete(msg);
+      }
+      break;
       case SAY_HELLO:
         {
           if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
@@ -45,10 +57,10 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-//            std::cout << simTime().str() << " " + gateway->get_name() << " SEND HELLO MSG" << endl;
+//            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
-            knownProtocols[current_protocol_name]->on_saying_hello();
+//            knownProtocols[current_protocol_name]->on_saying_hello();
           }
           cancelAndDelete(msg);
         }
@@ -66,7 +78,9 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 //            std::cout << simTime().str() << " " << gateway->get_name() <<
 //              ": density approximation gets " << monitor->get_density_approx() << endl;
             gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
-
+//            std::cout << simTime().str() << " " + gateway->get_name()
+//                << " next approx event in " << par("intervalBroadcastTime").doubleValue()
+//                << endl;
             cancelAndDelete(msg);
             gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation",
                                    par("intervalBroadcastTime").doubleValue());
@@ -76,15 +90,17 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();
           if (msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
-            adaptation();
-            cancelAndDelete(msg);
+              // std::cout << simTime().str() << " " + gateway->get_name()
+              //     << " DO_ADAPTATION" << endl;
+              adaptation();
+              cancelAndDelete(msg);
           }
-      		else if (!knownProtocols[current_protocol_name]->handle(msg)) {
-	          BroadcastingAppBase::handleMessageWhenUp(msg);
-	        }
-	        else {
-	          cancelAndDelete(msg);
-	        }
+            else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+            BroadcastingAppBase::handleMessageWhenUp(msg);
+            }
+            else {
+            cancelAndDelete(msg);
+            }
         }
       break;
     }
@@ -141,11 +157,11 @@ FullyAdaptive::adaptation()
     //    std::cout << simTime().str() << " " + gateway->get_name() << " observed density " <<
     //          density << endl;
         if (density > density_threshold_lower && current_protocol_name != dense_region_protocol) {
-           // std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
+           std::cout << simTime().str() << " " + gateway->get_name() << " node is in dense area " << endl;
           change_current_protocol(dense_region_protocol);
         }
         else if (density <= density_threshold_lower && current_protocol_name != sparse_region_protocol) {
-            // std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
+            std::cout << simTime().str() << " " + gateway->get_name() << " node is in sparse " << endl;
             change_current_protocol(sparse_region_protocol);
         }
 
@@ -237,7 +253,8 @@ FullyAdaptive::change_current_protocol(const std::string& protocol)
 //          protocol << endl;
   emit(signal_protocol_change, current_protocol_name[0]);
 
-  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+  if (withAdaptation && gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+//    std::cout << simTime().str() << " " + gateway->get_name() << "CHANGE_CURRENT_PROTO" << endl;
     int n = std::stoi (myself.substr(5, myself.size()));
     auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
     auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta;
@@ -259,10 +276,6 @@ FullyAdaptive::processStart()
 
   auto initialProtocol = par("initialProtocol").stdstringValue();
   if (withAdaptation && initialProtocol != "middleware") {
-
-    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", adapTimer);
-
-
     density_threshold_lower = par("density_threshold_lower").longValue();
     density_threshold_upper = par("density_threshold_upper").longValue();
     deltaApprox = par("deltaApprox").doubleValue();
@@ -270,6 +283,8 @@ FullyAdaptive::processStart()
     centerDensAy = par("centerDensAy").doubleValue();
     denseAreaWid = par("denseAreaWid").doubleValue();
     adapTimer = par("adapTimer").doubleValue();
+
+    gateway->delayed_event(DO_ADAPTATION, "adaptation self message", adapTimer);
 
     switch ( (int) par("adaptation_policy").longValue() ) {
         case AdaptationPolicy::LOCAL:
@@ -313,8 +328,15 @@ FullyAdaptive::processStart()
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
       /*NOTE when a protocol requires to send control messages, we need to give a grace period
        * to start the first broadcast session.*/
-      gateway->delayed_event(SAY_HELLO, "helloTime", 1.0);
-      gateway->delayed_event(SAY_HELLO, "helloTime", 2.0);
+      auto t = par("wakeUpTime").doubleValue() +
+          gateway->get_parameter<double>(current_protocol_name, "helloTime");
+      gateway->delayed_event(SAY_HELLO, "helloTime", t);
+//      std::cout << simTime().str() << " " + gateway->get_name() << " FIRST_HELO_AT " << t << endl;
+      int i = 1;
+      while(i <= (int) par("bootstrap_ctrl_msgs_no").longValue()){
+          gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i);
+          i = i + 1;
+      }
   }
 }
 

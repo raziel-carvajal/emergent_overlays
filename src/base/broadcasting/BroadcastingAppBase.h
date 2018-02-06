@@ -49,8 +49,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         LAST_POWER_REPORT,
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
+        BOOTSTRAP_MSG,
         First = IDLE,
-        Last = DO_ADAPTATION
+        Last = BOOTSTRAP_MSG
     };
 
 

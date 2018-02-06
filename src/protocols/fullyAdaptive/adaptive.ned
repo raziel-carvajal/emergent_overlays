@@ -39,6 +39,7 @@ simple FullyAdaptive extends BroadcastingBase like IUDPApp
       double adapTimer @unit(s) = default(0.5s);
       //ground truth
       double deltaApprox @unit(s) = default(1.0s);
+      int bootstrap_ctrl_msgs_no = default(2);
       @class(inet::FullyAdaptive);
 
       @statistic[protocol_change](title="The protocol has change"; record=vector; source=protocol_change);

@@ -57,6 +57,7 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     double centerDensAy;
     double denseAreaWid;
     double adapTimer;
+    int bootstrap_ctrl_msgs_no;
 
     // events and signals
     simsignal_t signal_protocol_change;

@@ -329,6 +329,7 @@ BroadcastingAppBase::initialize(int stage)
             withAdaptation = par("withAdaptation").boolValue();
             use_topology_fix = par("use_topology_fix").boolValue();
             optimize_gluing = par("optimize_gluing").boolValue();
+//            cout << getLogHeader()  << "adaptation" << withAdaptation << endl;
         }
         break;
         case INITSTAGE_PHYSICAL_ENVIRONMENT_2:
@@ -371,7 +372,6 @@ BroadcastingAppBase::initialize(int stage)
 
             if (is_source) {
               msgs.clear();
-              // delayed_event(WAKEUP, "intervalBroadcastTime", d);
               cout << getLogHeader() << "Broadcasting sessions will star at " << (d) << endl;
               for (int i = 0 ; i < nr_broadcast_msg; i++)
                 msgs.insert(i);
@@ -634,10 +634,6 @@ BroadcastingAppBase::processStart()
             // knownProtocols.emplace(string(protocolName), std::shared_ptr<IBroadcastProtocol>(protocol));
         }
       }
-    }
-
-    if (with_hello_msgs) {
-        delayed_event(SAY_HELLO, "helloTime", par("helloTime").doubleValue());
     }
 }
 

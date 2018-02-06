@@ -1,7 +1,7 @@
 <root>
   <Protocol name="AdaptiveBase">
-    <Parameter name="sparse_region" value="ALGO_AT_DENSE_AREA" type="string"></Parameter>
-    <Parameter name="dense_region" value="ALGO_AT_SPARSE_AREA" type="string"></Parameter>
+    <Parameter name="dense_region" value="ALGO_AT_DENSE_AREA" type="string"></Parameter>
+    <Parameter name="sparse_region" value="ALGO_AT_SPARSE_AREA" type="string"></Parameter>
   </Protocol>
   <Protocol name="Abba2">
     <Parameter name="timeOut" value="0.02" type="seconds"></Parameter>

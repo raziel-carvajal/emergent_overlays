@@ -70,11 +70,11 @@ broaMsgFreq=`bc <<< "( (${SIMULATION_TIME} * 60) / ${BROADCAST_MSGS_NO} ) * 1.0"
 # TODO this warm up phase must be independent of the control messages frequency
 warmUpPhase="3.0"
 newSimTime=`bc<<<"${ctrlMsgFreq} * 2 + ${SIMULATION_TIME} * 60 + ${ctrlMsgFreq}"`
-# TODO
-WITH_MOBILITY=true
+
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 cfgFile='../../../experiments/configs/in_common/common.ini'
 cfgsForWorkers=""
+
 for algo in ${algorithms} ; do
   cat "${cfgFile}" > iniFile
   sed -i -e "s/CONFIGURATION_NAME/${mobF}${algo}/" iniFile
@@ -91,7 +91,7 @@ for algo in ${algorithms} ; do
   sed -i -e "s/WITH_MOBILITY/${WITH_MOBILITY}/" iniFile
   sed -i -e "s/WARMUP_PHASE/${warmUpPhase}s/" iniFile
   if [ "${algo}" == "hybrid" ] ; then
-    sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
+    sed -i -e "s/WITH_ADAPTATION/true/" iniFile
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
 	  for (( I=1; I<${firsAtDenseA}; I+=1 )); do
       echo "*.hostR${I}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
@@ -109,9 +109,7 @@ for algo in ${algorithms} ; do
     echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini"
   else
-    if [ "${WITH_ADAPTATION}" == "true" ] ; then
-      sed -i -e "s/WITH_ADAPTATION/false/" iniFile
-    fi
+    sed -i -e "s/WITH_ADAPTATION/false/" iniFile
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo -e "*.host*.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"
