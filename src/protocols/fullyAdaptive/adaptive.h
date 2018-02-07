@@ -58,6 +58,7 @@ class INET_API FullyAdaptive : public inet::BroadcastingAppBase
     double denseAreaWid;
     double adapTimer;
     int bootstrap_ctrl_msgs_no;
+    bool keep_sending_hello_msgs = false;
 
     // events and signals
     simsignal_t signal_protocol_change;

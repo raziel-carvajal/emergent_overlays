@@ -51,13 +51,13 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       break;
       case SAY_HELLO:
         {
-          if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+          if (keep_sending_hello_msgs) {
             auto p = build_hello_message();
             if (packet_to_piggybag) {
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-//            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
+            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
 //            knownProtocols[current_protocol_name]->on_saying_hello();
@@ -253,12 +253,14 @@ FullyAdaptive::change_current_protocol(const std::string& protocol)
 //          protocol << endl;
   emit(signal_protocol_change, current_protocol_name[0]);
 
-  if (withAdaptation && gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-//    std::cout << simTime().str() << " " + gateway->get_name() << "CHANGE_CURRENT_PROTO" << endl;
-    int n = std::stoi (myself.substr(5, myself.size()));
-    auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
-    auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta;
-    gateway->delayed_event(SAY_HELLO, "helloTime", t);
+  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+      keep_sending_hello_msgs = true;
+      int n = std::stoi (myself.substr(5, myself.size()));
+      auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
+      auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta;
+      gateway->delayed_event(SAY_HELLO, "helloTime", t);
+  } else {
+      keep_sending_hello_msgs = false;
   }
 }
 
@@ -323,21 +325,28 @@ FullyAdaptive::processStart()
     }
   }
 
-  change_current_protocol(initialProtocol);
+  current_protocol_name = initialProtocol;
+  gateway->setProtocolId(current_protocol_name);
+  emit(signal_protocol_change, current_protocol_name[0]);
 
-  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
-      /*NOTE when a protocol requires to send control messages, we need to give a grace period
-       * to start the first broadcast session.*/
-      auto t = par("wakeUpTime").doubleValue() +
-          gateway->get_parameter<double>(current_protocol_name, "helloTime");
-      gateway->delayed_event(SAY_HELLO, "helloTime", t);
+  /*NOTE when a protocol requires to send control messages, we need to give a grace period
+   * to start the first broadcast session.*/
 //      std::cout << simTime().str() << " " + gateway->get_name() << " FIRST_HELO_AT " << t << endl;
+  if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
+      keep_sending_hello_msgs = true;
+      int n = std::stoi (myself.substr(5, myself.size()));
+      auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
       int i = 1;
       while(i <= (int) par("bootstrap_ctrl_msgs_no").longValue()){
-          gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i);
+          gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i + delta);
           i = i + 1;
       }
+      auto t = par("wakeUpTime").doubleValue() +
+          gateway->get_parameter<double>(current_protocol_name, "helloTime");
+      gateway->delayed_event(SAY_HELLO, "helloTime", t + delta);
+
   }
+
 }
 
 
