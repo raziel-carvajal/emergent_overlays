@@ -829,9 +829,10 @@ BroadcastingAppBase::send_package(cPacket* m)
 void
 BroadcastingAppBase::broadcast(std::string key, broadcasting::Broadcast* msg)
 {
+    // cout << getLogHeader() << "BROADCASTING " << key << endl;
     printBroadcastingLog(key);
     msg->addByteLength(128);
-//    msg->setPayload(std::string(128, 'p').c_str());
+    // msg->setPayload(std::string(128, 'p').c_str());
     msg->setId(key.c_str());
     msg->setSender(myself.c_str());
     if (withAdaptation) {

@@ -64,9 +64,10 @@ ctrlMsgFreq=`bc <<< "(${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
 sed -i -e "s/CTRL_MSG_FREQ/${ctrlMsgFreq}/" config.xml
 mv config.xml "../../../experiments/configs/in_common"
 
-cenPosXandY=`bc <<< "${cma} / 2"`
-denseAreaWi=`bc <<< "${cma} / (${regions} + 1)"`
-broaMsgFreq=`bc <<< "( (${SIMULATION_TIME} * 60) / ${BROADCAST_MSGS_NO} ) * 1.0"`
+cenPosXandY=`bc <<< "scale=2; ${cma} / 2"`
+denseAreaWi=`bc <<< "scale=2; ${cma} / (${regions} + 1)"`
+broaMsgFreq=`bc <<< "scale=2; (${SIMULATION_TIME} * 60 ) / ${BROADCAST_MSGS_NO}"`
+echo "broadcast msg freq ${broaMsgFreq}"
 # TODO this warm up phase must be independent of the control messages frequency
 warmUpPhase="3.0"
 newSimTime=`bc<<<"${ctrlMsgFreq} * 2 + ${SIMULATION_TIME} * 60 + ${ctrlMsgFreq}"`

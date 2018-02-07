@@ -185,6 +185,7 @@ Mpr_t2::time_to_broadcast_payload(void* user_data)
   }else {
     key = string( (char*)user_data );
   }
+  //cout << simTime().str() + " " + gateway->get_name() + " DOING BROADCAST" << endl;
   payloads[key] = key;
   gateway->broadcast(key, build_message_to_broadcast());
 }

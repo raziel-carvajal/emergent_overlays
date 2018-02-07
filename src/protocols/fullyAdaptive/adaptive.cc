@@ -57,7 +57,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
+//            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
 //            knownProtocols[current_protocol_name]->on_saying_hello();
@@ -230,6 +230,7 @@ FullyAdaptive::on_payload_received(const Broadcast* m) {
 void
 FullyAdaptive::time_to_broadcast_payload(void* user_data)
 {
+  // cout << simTime().str() + " " + myself + " DOING BROADCAST" << endl;
   knownProtocols[current_protocol_name]->time_to_broadcast_payload(user_data);
 }
 
