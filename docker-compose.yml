@@ -2,8 +2,6 @@ version: "2.1"
 services:
   trace_generator:
     env_file: .env
-    mem_limit: '1g'
-    cpuset: '0'
     build: dockerfiles/trace_generator
     volumes:
       - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies'
@@ -11,8 +9,6 @@ services:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
   worker:
-    mem_limit: '9g'
-    cpuset: '0,1,2,3,4,5,6'
     build:
       context: .
       dockerfile: dockerfiles/worker/Dockerfile
@@ -22,8 +18,6 @@ services:
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
       - './results:/usr/emrg-ovrl/results'
   plotter:
-    mem_limit: '1g'
-    cpuset: '6'
     build:
       context: .
       dockerfile: dockerfiles/plotter/Dockerfile
