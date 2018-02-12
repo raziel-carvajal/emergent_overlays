@@ -37,9 +37,9 @@ get.arguments <- function() {
     help='Number of broadcast messages')
   parser$add_argument('-t', '--transmission_range', type="integer",
     help='Tx of nodes')
-  parser$add_argument('-f_t', '--first_time_of_measuring_nodes_position', type='double', 
+  parser$add_argument('-f_t', '--first_time_of_measuring_nodes_position', type='double',
     help='First point in time when nodes print out their position')
-  parser$add_argument('-f_b', '--time_of_first_broadcast_message', type='double', 
+  parser$add_argument('-f_b', '--time_of_first_broadcast_message', type='double',
     help='Time when the first broadcast message was emitted')
   # parser$print_help()
   parser$parse_args()
@@ -185,7 +185,7 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
 
 save.coverage <- function(broadcast.info, max, outputPath, expeId,
 	expectedCoverage){
-	
+
   cov <- (broadcast.info$n.received / expectedCoverage) * 100
   broSes <- data.frame( whatever = cov )
   colnames(broSes) <- c(expeId)
@@ -453,14 +453,14 @@ compute.median.density.per.node <- function(density.over.time) {
 
 get.density.distribution <- function(results_file, first_measure,
   msg_freq, trans_range, sent_msgs, node_ids){
-  
+
   x_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_x:vector)"
   )
   y_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_y:vector)"
   )
-  
+
   msgs_ids <- unique(sent_msgs$value)
 #  print(msgs_ids)
 
@@ -481,11 +481,11 @@ get.density.distribution <- function(results_file, first_measure,
       length(node_neigs[node_neigs != 0])
     })
   })
-  
-  unlist(density_ground_truth)  
+
+  unlist(density_ground_truth)
 #  print(density_ground_truth)
 #  stop()
-#  
+#
 #  sapply(1:nrow(density_ground_truth), function(r){
 #    sum(density_ground_truth[r, ]) / length(density_ground_truth[r, ])
 #  })
@@ -494,7 +494,7 @@ get.density.distribution <- function(results_file, first_measure,
 
 compute.relative.error.in.density <- function(results_file, first_measure,
   msg_freq, trans_range, sent_msgs, node_ids){
-  
+
   x_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_x:vector)"
   )
@@ -517,9 +517,9 @@ compute.relative.error.in.density <- function(results_file, first_measure,
       indx_per_time[indx_per_time$node_id == node_id, ]$value
     })
   })
-  
+
   unlist(density_approx)
-#  
+#
 #  density_ground_truth <- sapply(msgs_ids, function(msg){
 
 #    # get point in time where nodes' positions were reported
@@ -550,20 +550,20 @@ get.graph <- function(time, Tx, x_positions, y_positions) {
     x = x_positions$value,
     y = y_positions[y_positions$node_id == x_positions$node_id, ]$value
   )
-  
+
   nodes <- unique(allPositions$nodeId)
 
   nodesPositions <- allPositions[ abs(allPositions$time - time) < TOLERANCE, ]
-  
+
   tmp <- unlist(lapply(nodes, function(n){
     node <- nodesPositions[nodesPositions$nodeId == n, ]
     others <- nodesPositions[nodesPositions$nodeId != n, ]
-   
+
     neigs <- subset(
-      others, 
+      others,
       sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
     )$nodeId
-    
+
     sapply(neigs, function(neig){
       c(node$nodeId, neig)
     })
@@ -575,8 +575,8 @@ get.graph <- function(time, Tx, x_positions, y_positions) {
 
   # gets the biggest connected cluster
   # XXX we assume that the source node belongs to this cluster
-  # TODO find a way to ensure that the source node is always within the 
-  #			the biggest cluster 
+  # TODO find a way to ensure that the source node is always within the
+  #			the biggest cluster
   biggestCluster <- getVerticesFromBiggestCluster(g)
 
   d0 <- data.frame(indx=1:length(tmp), v=tmp)
@@ -638,67 +638,82 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
   )
 }
 
-energy.consumption.of.sent_recv.messages <- function(results_file, 
+energy.consumption.of.sent_recv.messages <- function(results_file,
   exp_duration, sent_packages, recv_packages, nodes){
 
   energy_consumption <- subset(
     replace.resultkey.with.node_id(results_file, "name(residualCapacity:vector)"),
     time < exp_duration
   )
-  
+
   e_consump_per_node <- sapply(nodes, function(n){
-    
-    n_e_consump <- subset(energy_consumption, node_id == n)
-    
-    n_recv_msgs <- subset(recv_packages, node_id == n)
-    
-    key_timestamps <- unlist(
-      sapply(n_recv_msgs$time, function(t){
-        subset(n_e_consump, time == t)$time
-      })
-    )
-
-    e_consump_recv_msgs <- sapply(key_timestamps, function(t_i){
-      consump_before_t <- abs(
-        subset(
-          subset(n_e_consump, t_i - time >= 0), 
-          abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
-        )
-      )
-      ifelse(
-        length(consump_before_t$node_id) >= 2,
-        abs(tail(consump_before_t$value, 1) - tail(consump_before_t$value, 2)[1]),
-        0
-      )
-    })
-    
-    key_timestamps <- subset(sent_packages, node_id == n)$time
-    
-    e_consump_sent_msgs <- sapply(key_timestamps, function(t_i){
-    
-      t_i_consump_vec <- sort(
-        abs(
-          subset(
-            n_e_consump,
-            abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
-          )$value
-        )
-      , decreasing = T)
-      
-      ifelse(
-        length(t_i_consump_vec) >= 2,
-        highest.energy.consumption(t_i_consump_vec),
-        0
-      )
-      
-    })
-
-    # this vector is multiplied by 1K to have milli Joules
-    sum( unlist(e_consump_sent_msgs), unlist(e_consump_recv_msgs) ) * 1000
+    n_e_consump <- sort.int( subset(energy_consumption, node_id == n)$value )
+    n_e_consump[length(n_e_consump)] - n_e_consump[1]
   })
-  
+
   e_consump_per_node
 }
+# energy.consumption.of.sent_recv.messages <- function(results_file,
+#   exp_duration, sent_packages, recv_packages, nodes){
+#
+#   energy_consumption <- subset(
+#     replace.resultkey.with.node_id(results_file, "name(residualCapacity:vector)"),
+#     time < exp_duration
+#   )
+#
+#   e_consump_per_node <- sapply(nodes, function(n){
+#
+#     n_e_consump <- subset(energy_consumption, node_id == n)
+#
+#     n_recv_msgs <- subset(recv_packages, node_id == n)
+#
+#     key_timestamps <- unlist(
+#       sapply(n_recv_msgs$time, function(t){
+#         subset(n_e_consump, time == t)$time
+#       })
+#     )
+#
+#     e_consump_recv_msgs <- sapply(key_timestamps, function(t_i){
+#       consump_before_t <- abs(
+#         subset(
+#           subset(n_e_consump, t_i - time >= 0),
+#           abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
+#         )
+#       )
+#       ifelse(
+#         length(consump_before_t$node_id) >= 2,
+#         abs(tail(consump_before_t$value, 1) - tail(consump_before_t$value, 2)[1]),
+#         0
+#       )
+#     })
+#
+#     key_timestamps <- subset(sent_packages, node_id == n)$time
+#
+#     e_consump_sent_msgs <- sapply(key_timestamps, function(t_i){
+#
+#       t_i_consump_vec <- sort(
+#         abs(
+#           subset(
+#             n_e_consump,
+#             abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
+#           )$value
+#         )
+#       , decreasing = T)
+#
+#       ifelse(
+#         length(t_i_consump_vec) >= 2,
+#         highest.energy.consumption(t_i_consump_vec),
+#         0
+#       )
+#
+#     })
+#
+#     # this vector is multiplied by 1K to have milli Joules
+#     sum( unlist(e_consump_sent_msgs), unlist(e_consump_recv_msgs) ) * 1000
+#   })
+#
+#   e_consump_per_node
+# }
 
 highest.energy.consumption <- function(v){
   quasi_v <- tail(v, length(v) - 1)
@@ -706,7 +721,7 @@ highest.energy.consumption <- function(v){
   max(v - quasi_v)
 }
 
-collisions.relative.error <- function(results_file, first_measure, msg_freq, 
+collisions.relative.error <- function(results_file, first_measure, msg_freq,
     trans_range, sent_msgs, recv_msgs){
 
   x_positions <- replace.resultkey.with.node_id(
@@ -715,7 +730,7 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
   y_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_y:vector)"
   )
-  
+
   sent_msgs <- data.frame(
     node_id = sent_msgs$node_id,
     broadcast_id = sent_msgs$value
@@ -725,7 +740,7 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
     broadcast_id = recv_msgs$value
   )
   msgs_ids <- unique(sent_msgs$broadcast_id)
-  
+
   ground_truth_recv_msgs <- unlist(
     lapply(msgs_ids, function(msg){
       # get point in time where nodes' positions were reported
@@ -764,7 +779,7 @@ collisions.relative.error <- function(results_file, first_measure, msg_freq,
       sum(tmp) + length(senders) - 1
     })
   )
-  
+
   measured_recv_msgs <- unlist(
       lapply(msgs_ids, function(msg){
         #all nodes that receive broadcast message [msg]
@@ -786,13 +801,13 @@ count.events.per.node <- function(nodes, ds){
 count.events_compl.per.node <- function(nodes, A, B){
   sapply(nodes, function(n_i){
     abs(
-      length(subset(A, node_id == n_i)$node_id) - 
+      length(subset(A, node_id == n_i)$node_id) -
       length(subset(B, node_id == n_i)$node_id)
     )
   })
 }
 
-distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs, 
+distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs,
   recv_bro_msgs, sent_pkgs, recv_pkgs, nodes){
   result <- list()
   result[["sent_bro_msgs"]] <- count.events.per.node(nodes, sent_bro_msgs)
@@ -808,14 +823,14 @@ distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs,
 
 saveGroundTruthOfDensity <- function(results_file, first_measure,
   msg_freq, trans_range, sent_msgs, node_ids){
-  
+
   x_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_x:vector)"
   )
   y_positions <- replace.resultkey.with.node_id(
     results_file, "name(node_position_y:vector)"
   )
-  
+
   msgs_ids <- unique(sent_msgs$value)
 
   density_ground_truth <- lapply(msgs_ids, function(msg){
@@ -861,17 +876,17 @@ getExpectedCoverage <- function(results_file, first_measure,
 main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
   pl.step <- args$step
-  exp_duration <- 
+  exp_duration <-
 	  args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
 	all_nodes <- unique(
 		replace.resultkey.with.node_id(args$file, "name(density_approximation:vector)")$node_id
 	)
-	
+
   sent_broadcast_msgs <- replace.resultkey.with.node_id(
   	args$file, "name(msg_sent:vector)")
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
   	args$file, "name(broadcast_msg_received:vector)")
-  
+
   sent_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
       time < exp_duration)
@@ -886,10 +901,10 @@ main <- function(args) {
 	  args$transmission_range,
 	  sent_broadcast_msgs, all_nodes
 	)
-      
+
 	datasetExists <- list.files(args$outputPath)
 	datasetExists <- datasetExists[datasetExists == "groundTruthDensityDist-"]
-	if( length(datasetExists) == 0 ) { 
+	if( length(datasetExists) == 0 ) {
 		print("Save ground truth of density")
 		groundTruthD <- saveGroundTruthOfDensity(
 		  args$file,
@@ -906,7 +921,7 @@ main <- function(args) {
 		strV <- strV[ 1:length(strV)-1 ]
 		undV <- rep("_", length(strV))
 		resu <- sapply(1:length(strV), function(i){
-			paste(strV[i], undV[i], sep="") 
+			paste(strV[i], undV[i], sep="")
 		})
 		resu <- c(resu, "Ground-Truth")
 		newName <- paste(resu, collapse="")
@@ -933,7 +948,7 @@ main <- function(args) {
     sent_packages, recv_packages, all_nodes
   )
   print("DONE!")
-  
+
   print("Calculating energy consumption")
   energy_consumption <- energy.consumption.of.sent_recv.messages(
     args$file, exp_duration,
@@ -950,7 +965,7 @@ main <- function(args) {
     sent_broadcast_msgs, all_nodes
   )
   print("DONE!")
-  
+
   print("Calculating relative error of collisions")
   collisions_re <- collisions.relative.error(
     args$file,
@@ -974,12 +989,12 @@ main <- function(args) {
     median.density.per.node <- compute.median.density.per.node(density.over.time)
     print("DONE!")
   }
-  
+
   print("Reading vectors with messages sent and received")
   sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
   recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
   print("DONE!")
-  
+
   print("Computing maximal reception delay")
   bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
   print("DONE!")
@@ -1008,7 +1023,7 @@ main <- function(args) {
   save.distribution(
     "batteryConsumptionDistribution", energy_consumption,
     args$outputPath, args$configuration
-  ) 
+  )
   save.distribution(
     "densityRelativeError", density.relative.errors,
     args$outputPath, args$configuration
@@ -1021,7 +1036,7 @@ main <- function(args) {
     "collisionsRelativeError", collisions_re,
     args$outputPath, args$configuration
   )
-  
+
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
   save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
   save.coverage(
