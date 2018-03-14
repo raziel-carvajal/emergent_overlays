@@ -451,89 +451,40 @@ compute.median.density.per.node <- function(density.over.time) {
   sapply(densities, function(d) if (d>15) 'dense' else 'sparse')
 }
 
-get.density.distribution <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs, node_ids){
+get.density.distribution <- function(overlays){
 
-  x_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_x:vector)"
-  )
-  y_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_y:vector)"
-  )
-
-  msgs_ids <- unique(sent_msgs$value)
-#  print(msgs_ids)
-
-  density_ground_truth <- lapply(msgs_ids, function(msg){
-    # get point in time where nodes' positions were reported
-    time <- first_measure + msg_freq * (msg - 1)
-    # create the graph with the position of each node
-    g <- get.graph(time, trans_range, x_positions, y_positions)
-    vertices <- getVerticesFromBiggestCluster(g)
-   	#XXX plot to check graph
-#		name <- paste("graph_", msg, ".pdf", sep="")
-#		pdf(name)
-#		plot(g)
-#		dev.off()
-
+  density_ground_truth <- lapply(overlays, function(overlay){
+    vertices <- getVerticesFromBiggestCluster(overlay)
     lapply(vertices, function(v){
-      node_neigs <- g[v, ]
+      node_neigs <- overlay[v, ]
       length(node_neigs[node_neigs != 0])
     })
   })
 
   unlist(density_ground_truth)
-#  print(density_ground_truth)
-#  stop()
-#
-#  sapply(1:nrow(density_ground_truth), function(r){
-#    sum(density_ground_truth[r, ]) / length(density_ground_truth[r, ])
-#  })
-
 }
 
-compute.relative.error.in.density <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs, node_ids){
+get.measured.density <- function(results_file, first_measure,
+  msg_freq, msgs_ids, node_ids){
 
-  x_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_x:vector)"
-  )
-  y_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_y:vector)"
-  )
   measured_density <- replace.resultkey.with.node_id(
     results_file, "name(density_approximation:vector)"
   )
-
-  msgs_ids <- unique(sent_msgs$value)
-
+  # NOTE in case you want to compute the relative error doit here with /!\
   density_approx <- lapply(msgs_ids, function(msg){
-    # get point in time where nodes' positions were reported
-    time <- first_measure + msg_freq * (msg - 1)
-
-    indx_per_time <- measured_density[abs(measured_density$time - time) < TOLERANCE, ]
-
-    lapply(node_ids, function(node_id){
-      indx_per_time[indx_per_time$node_id == node_id, ]$value
-    })
+    timestamp <- first_measure + msg_freq * (msg - 1)
+    desityAtTi<-subset( measured_density, abs(time - timestamp) < TOLERANCE )
+    lapply(
+      node_ids,
+      function(nodeId){
+        subset(desityAtTi, node_id == nodeId)$value
+      }
+    )
   })
 
   unlist(density_approx)
-#
-#  density_ground_truth <- sapply(msgs_ids, function(msg){
-
-#    # get point in time where nodes' positions were reported
-#    time <- first_measure + msg_freq * (msg - 1)
-#    # create the graph with the position of each node
-#    g <- get.graph(time, trans_range, x_positions, y_positions)
-#    sapply(node_ids, function(node_id){
-#      node_neigs <- g[node_id, ]
-#      length(node_neigs[node_neigs != 0])
-#    })
-#  })
-
+  # NOTE /!\ compute relative error for vectors
 #  absolute_err <- abs(density_approx - density_ground_truth)
-
 #  #relative error with vectors
 #  relative_err <- sapply(1:nrow(absolute_err), function(r){
 #    max(absolute_err[r, ]) / max( density_ground_truth[r, ] )
@@ -542,63 +493,81 @@ compute.relative.error.in.density <- function(results_file, first_measure,
 #  relative_err
 }
 
-get.graph <- function(time, Tx, x_positions, y_positions) {
+get.graph <- function(nodes, positions, Tx, locationTimestamp,
+  msgTimestamp, msgReceivers, msgEmitters, savePlot=F) {
 
-  allPositions <- data.frame(
-    nodeId = x_positions$node_id,
-    time = x_positions$time,
-    x = x_positions$value,
-    y = y_positions[y_positions$node_id == x_positions$node_id, ]$value
+  nodesPositions <-
+    positions[ abs(positions$time - locationTimestamp) < TOLERANCE, ]
+
+  edges <- unlist(
+    lapply(
+      nodes,
+      function(n){
+        node <- nodesPositions[nodesPositions$nodeId == n, ]
+
+        nodeNeigs <- subset(
+          subset(
+            nodesPositions,
+            sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
+          ),
+          node$nodeId != nodeId
+        )$nodeId
+
+        sapply(nodeNeigs, function(neig){
+          c(node$nodeId, neig)
+        })
+      }
+    )
   )
 
-  nodes <- unique(allPositions$nodeId)
-
-  nodesPositions <- allPositions[ abs(allPositions$time - time) < TOLERANCE, ]
-
-  tmp <- unlist(lapply(nodes, function(n){
-    node <- nodesPositions[nodesPositions$nodeId == n, ]
-    others <- nodesPositions[nodesPositions$nodeId != n, ]
-
-    neigs <- subset(
-      others,
-      sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
-    )$nodeId
-
-    sapply(neigs, function(neig){
-      c(node$nodeId, neig)
-    })
-
-  }))
-
-  # network overlay from last time nodes print their positions
-  g <- graph( edges=tmp )
-
-  # gets the biggest connected cluster
-  # XXX we assume that the source node belongs to this cluster
-  # TODO find a way to ensure that the source node is always within the
-  #			the biggest cluster
-  biggestCluster <- getVerticesFromBiggestCluster(g)
-
-  d0 <- data.frame(indx=1:length(tmp), v=tmp)
-  matr <- data.frame(
-  	A=subset(d0, indx %% 2 == 1)$v,
-  	B=subset(d0, indx %% 2 == 0)$v
-  )
-	edgesAtCluster <- unlist(sapply(biggestCluster, function(i){
-		dsts <- subset(matr, A == i)$B
-		sapply(dsts, function(j){
-			c(i, j)
-		})
-	}))
-	graph(edges=edgesAtCluster, directed=F)
-#	vertices <- V(subGraph)
-#	print(vertices)
-#	toRemove <- vertices[! vertices %in% biggestCluster]
-#	print(toRemove)
-#	g1 <- delete_vertices(subGraph, toRemove)
-#	print(V(g1))
-#	g1
+  # create graph based on edges
+  g <- graph( edges=edges )
+  if(savePlot){
+    V(g)$size <- 8
+    V(g)$frame.color <- 'white'
+    E(g)$arrow.mode <- 0
+    # use node coordinates as layout
+    layout <- cbind(nodesPositions$x, nodesPositions$y)
+    # labeled nodes when they aren't rechable, act as pure receivers or as relays
+    labelCode <- rep(1, length(nodes))
+    labelCode[msgReceivers] <- 2
+    labelCode[msgEmitters]  <- 3
+    colors <- c('gray50', 'gold', 'tomato')
+    V(g)$color <- colors[labelCode]
+    # save one graph per broadcast session
+    name <- paste("graph_", locationTimestamp, ".pdf", sep="")
+    pdf(name)
+    plot.igraph(g, layout=layout)
+    legend(
+      x=0.7, y=1.4, c("Unreachable","Pure-receiver", "Relay"), pch=21,
+      col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+    )
+    dev.off()
+  }
+  # return graph
+  g
 }
+# TODO figure out if this chunk of code is still required
+#      in the new implementation of get.graph
+# get.graph <- function(...) {
+#   # gets the biggest connected cluster
+#   # XXX we assume that the source node belongs to this cluster
+#   #			the biggest cluster
+#   biggestCluster <- getVerticesFromBiggestCluster(g)
+#
+#   d0 <- data.frame(indx=1:length(tmp), v=tmp)
+#   matr <- data.frame(
+#   	A=subset(d0, indx %% 2 == 1)$v,
+#   	B=subset(d0, indx %% 2 == 0)$v
+#   )
+# 	edgesAtCluster <- unlist(sapply(biggestCluster, function(i){
+# 		dsts <- subset(matr, A == i)$B
+# 		sapply(dsts, function(j){
+# 			c(i, j)
+# 		})
+# 	}))
+# 	graph(edges=edgesAtCluster, directed=F)
+# }
 
 getVerticesFromBiggestCluster <- function(g){
   c <- clusters(g)
@@ -706,75 +675,67 @@ highest.energy.consumption <- function(v){
   max(v - quasi_v)
 }
 
-collisions.relative.error <- function(results_file, first_measure, msg_freq,
-    trans_range, sent_msgs, recv_msgs){
-
-  x_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_x:vector)"
+collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays,
+  nodes){
+  # XXX find a way to measure ground truth of received messages
+  groundTruth <- lapply(
+    msgs_ids,
+    function(msg){
+      overlay <- overlays[[msg]]
+      senders <- unique( subset(sent_msgs, value == msg)$node_id )
+      receptions <- lapply(
+        senders,
+        function(s){
+          counter <- rep(0, length(nodes))
+          edges <- overlay[s, ]
+          neigs <- sapply(
+            1:length(edges),
+            function(indx){
+              ifelse(edges[indx] == 1, indx, NA)
+            }
+          )
+          neigs <- neigs[ !is.na(neigs) ]
+          counter[neigs] <- 1
+          counter
+        }
+      )
+      receptions <- matrix(
+        unlist(receptions), nrow=length(receptions), ncol=length(nodes)
+      )
+      print(receptions)
+      t<-colSums(receptions)
+      print(t)
+      stop()
+    }
   )
-  y_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_y:vector)"
+  groundTruth <- matrix(
+    unlist(groundTruth), nrow=length(groundTruth), ncol=length(nodes)
   )
-
-  sent_msgs <- data.frame(
-    node_id = sent_msgs$node_id,
-    broadcast_id = sent_msgs$value
+  print(groundTruth)
+  measuredRcvMsgs <- lapply(
+    nodes,
+    function(node){
+      recvMsgIds <- subset(recv_msgs, node_id == node)$value
+      sapply(
+        msgs_ids,
+        function(msg){
+          length(recvMsgIds[recvMsgIds == msg])
+        }
+      )
+    }
   )
-  recv_msgs <- data.frame(
-    node_id = recv_msgs$node_id,
-    broadcast_id = recv_msgs$value
+  tmp <- matrix(
+    unlist(measuredRcvMsgs), nrow=length(nodes), ncol=length(measuredRcvMsgs)
   )
-  msgs_ids <- unique(sent_msgs$broadcast_id)
-
-  ground_truth_recv_msgs <- unlist(
-    lapply(msgs_ids, function(msg){
-      # get point in time where nodes' positions were reported
-      time <- first_measure + msg_freq * (msg - 1)
-
-      # create the graph with the position of each node
-      g <- get.graph(time, trans_range, x_positions, y_positions)
-      #
-      is_connected <- is_connected(g)
-
-      #all nodes that send broadcast messages [msg]
-      senders <- unique(sent_msgs[sent_msgs$broadcast_id == msg, ]$node_id)
-
-#      colors <- sapply(1:length(V(g)), function(v){
-#        ifelse(v %in% senders, "orange", "red")
-#      })
-#      V(g)$color <- colors
-#      name <- paste(
-#        paste(
-#          paste("GraphForMsg_", msg, sep=""),
-#            is_connected(g), sep="_"),
-#      "pdf", sep=".")
-#      pdf(name)
-#      plot(g)
-#      dev.off()
-
-      tmp <- sapply(senders, function(s){
-        edges <- g[s, ]
-        #return number of neighbors of node [e]
-        length( edges[edges != 0] )
-      })
-      #the ground truth of sent broadcast is obtained as follows:
-      #  - the sum of the size of every node's neighborhood (getting from graph)
-      #  - every emitter also receive a message when it is sent by itself (self transition)
-      #  - the last case is not valid for the source node; reason of having minus one
-      sum(tmp) + length(senders) - 1
-    })
+  tmp <- lapply(
+    msgs_ids,
+    function(msg){
+      tmp[ ,msg]
+    }
   )
-
-  measured_recv_msgs <- unlist(
-      lapply(msgs_ids, function(msg){
-        #all nodes that receive broadcast message [msg]
-        receivers <- recv_msgs[recv_msgs$broadcast_id == msg, ]$node_id
-
-        length(receivers)
-      })
-  )
-
-  abs(measured_recv_msgs - ground_truth_recv_msgs) / ground_truth_recv_msgs
+  measuredRcvMsgs <- matrix(unlist(tmp), nrow=length(tmp), ncol=length(nodes))
+  print(measuredRcvMsgs)
+  groundTruth - measuredRcvMsgs
 }
 
 count.events.per.node <- function(nodes, ds){
@@ -806,65 +767,35 @@ distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs,
   result
 }
 
-saveGroundTruthOfDensity <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs, node_ids){
-
-  x_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_x:vector)"
-  )
-  y_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_y:vector)"
-  )
-
-  msgs_ids <- unique(sent_msgs$value)
-
-  density_ground_truth <- lapply(msgs_ids, function(msg){
-    # get point in time where nodes' positions were reported
-    time <- first_measure + msg_freq * (msg - 1)
-    # create the graph with the position of each node
-    g <- get.graph(time, trans_range, x_positions, y_positions)
-    vertices <- getVerticesFromBiggestCluster(g)
-
-# 	name <- paste("graph_", msg, ".pdf", sep="")
-#		pdf(name)
-#		plot(g)
-#		dev.off()
-
-    lapply(vertices, function(v){
-      node_neigs <- g[v, ]
-      length(node_neigs[node_neigs != 0])
-    })
+getExpectedCoverage <- function(overlays){
+  sapply(overlays, function(overlay) {
+    length( getVerticesFromBiggestCluster(overlay) )
   })
-
-	unlist(density_ground_truth)
-}
-
-getExpectedCoverage <- function(results_file, first_measure,
-  msg_freq, trans_range, sent_msgs, node_ids){
-  x_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_x:vector)"
-  )
-  y_positions <- replace.resultkey.with.node_id(
-    results_file, "name(node_position_y:vector)"
-  )
-  msgs_ids <- unique(sent_msgs$value)
-  sapply(msgs_ids, function(msg) {
-    # get point in time where nodes' positions were reported
-    time <- first_measure + msg_freq * (msg - 1)
-    # create the graph with the position of each node
-    g <- get.graph(time, trans_range, x_positions, y_positions)
-    length( getVerticesFromBiggestCluster(g) )
-  })
-
 }
 
 main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
-  pl.step <- args$step
   exp_duration <-
-	  args$time_of_first_broadcast_message + args$broadcast_msgs * pl.step
-	all_nodes <- unique(
-		replace.resultkey.with.node_id(args$file, "name(density_approximation:vector)")$node_id
+	  args$time_of_first_broadcast_message + args$broadcast_msgs * args$step
+
+  xPositions <- replace.resultkey.with.node_id(
+    args$file, "name(node_position_x:vector)"
+  )
+  yPositions <- replace.resultkey.with.node_id(
+    args$file, "name(node_position_y:vector)"
+  )
+  # merge nodes positions in one dataframe
+  positions <- data.frame(
+    nodeId = xPositions$node_id,
+    time = xPositions$time,
+    x = xPositions$value,
+    y = yPositions[yPositions$node_id == xPositions$node_id, ]$value
+  )
+
+  all_nodes <- unique(
+		replace.resultkey.with.node_id(
+      args$file, "name(density_approximation:vector)"
+    )$node_id
 	)
 
   sent_broadcast_msgs <- replace.resultkey.with.node_id(
@@ -872,60 +803,64 @@ main <- function(args) {
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
   	args$file, "name(broadcast_msg_received:vector)")
 
+  msgs_ids <- unique(sent_broadcast_msgs$value)
+  # store in a list a graph per broadcast session
+  overlays <- lapply(msgs_ids, function(msg) {
+    # point in time where node
+    locationTimestamp <-
+      args$first_time_of_measuring_nodes_position + args$step * (msg - 1)
+    msgTimestamp <-
+      args$time_of_first_broadcast_message + args$step * (msg - 1)
+    msgEmitters <- unique( subset(sent_broadcast_msgs, value == msg)$node_id )
+    msgReceivers <-unique( subset(recv_broadcast_msgs, value == msg)$node_id )
+    # create the graph with the position of each node
+    get.graph(
+      all_nodes,
+      positions,
+      args$transmission_range,
+      locationTimestamp,
+      msgTimestamp,
+      msgReceivers,
+      # within this loop, we plot the one overlay per broadcast session
+      msgEmitters, savePlot=TRUE
+    )
+  })
+
   sent_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
       time < exp_duration)
   recv_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(rcvdPk:vector*)"),
       time < exp_duration)
-
-	expectedCoverage <- getExpectedCoverage(
-	  args$file,
-	  args$first_time_of_measuring_nodes_position,
-	  args$step,
-	  args$transmission_range,
-	  sent_broadcast_msgs, all_nodes
-	)
+  # expected number of nodes that must receive a broadcast message
+  # over all sessions of dissemination
+	expectedCoverage <- getExpectedCoverage(overlays)
 
 	datasetExists <- list.files(args$outputPath)
-	datasetExists <- datasetExists[datasetExists == "groundTruthDensityDist-"]
-	if( length(datasetExists) == 0 ) {
+	if(! "groundTruthDensityDist-" %in% datasetExists) {
 		print("Save ground truth of density")
-		groundTruthD <- saveGroundTruthOfDensity(
-		  args$file,
-		  args$first_time_of_measuring_nodes_position,
-		  args$step,
-		  args$transmission_range,
-		  sent_broadcast_msgs, all_nodes
-		)
+		groundTruthD <- get.density.distribution(overlays)
 		save.distribution(
-		  "groundTruthDensityDist", groundTruthD,
-		  args$outputPath, ""
+      "groundTruthDensityDist", groundTruthD, args$outputPath, ""
   	)
+    ##### BEGIN: naming dataset #####
 		strV <- unlist(strsplit(args$configuration, "_"))
 		strV <- strV[ 1:length(strV)-1 ]
 		undV <- rep("_", length(strV))
-		resu <- sapply(1:length(strV), function(i){
-			paste(strV[i], undV[i], sep="")
-		})
+		resu <- sapply(
+      1:length(strV),
+      function(i){
+			     paste(strV[i], undV[i], sep="")
+		  }
+    )
 		resu <- c(resu, "Ground-Truth")
 		newName <- paste(resu, collapse="")
 		save.distribution(
-		  "groundTruthDensityDist", groundTruthD,
-		  args$outputPath, newName
+		  "groundTruthDensityDist", groundTruthD, args$outputPath, newName
   	)
+    ##### END: naming dataset #####
   	print("DONE!")
   }
-
-  print("Calculating nodes' real density")
-  density_dist <- get.density.distribution(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    sent_broadcast_msgs, all_nodes
-  )
-  print("DONE!")
 
   print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
@@ -942,25 +877,24 @@ main <- function(args) {
   print("DONE!")
 
   print("Calculating approximation of nodes' density")
-  density.relative.errors <- compute.relative.error.in.density(
+  density.relative.errors <- get.measured.density(
     args$file,
     args$first_time_of_measuring_nodes_position,
     args$step,
-    args$transmission_range,
-    sent_broadcast_msgs, all_nodes
+    msgs_ids,
+    all_nodes
   )
   print("DONE!")
 
   print("Calculating relative error of collisions")
-  collisions_re <- collisions.relative.error(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    args$transmission_range,
-    sent_broadcast_msgs,
-    recv_broadcast_msgs
-  )
-  print(collisions_re)
+  # collisions_re <- collisions.relative.error(
+  #   sent_broadcast_msgs,
+  #   recv_broadcast_msgs,
+  #   msgs_ids,
+  #   overlays,
+  #   all_nodes
+  # )
+  # stop()
   print("DONE!")
 
   protocol.per.node <- NULL
@@ -1011,10 +945,6 @@ main <- function(args) {
   )
   save.distribution(
     "densityRelativeError", density.relative.errors,
-    args$outputPath, args$configuration
-  )
-  save.distribution(
-    "distributionOfDensity", density_dist,
     args$outputPath, args$configuration
   )
   save.distribution(
