@@ -4,9 +4,7 @@ library(igraph)
 
 TOLERANCE <- 1e-8
 SENT_RECV_PKG_TOLERANCE <- 1.5e-03
-#
-# Used to define the arguments of the script
-#
+
 get.arguments <- function() {
   parser <- ArgumentParser(description='Process omnetpp result files to extract the measurements of our experiment')
   parser$add_argument('file', metavar='file', type="character",
@@ -45,43 +43,13 @@ get.arguments <- function() {
   parser$parse_args()
 }
 
-
 build.filename <- function(path, filename, id, seP="-") {
   filename <- paste(path, filename, sep="/")
   paste(filename, id, sep=seP)
 }
 
-
 load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
   ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
-}
-
-load.datafile.scalar <- function(fname, query, extensions=c("sca", "vec")) {
-  loadDataset(paste(fname, sep= ".", extensions), add(type="scalar", select=query) )
-}
-
-
-powerlevels3 <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
-  # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$y, 1) ) ), unlist)
-}
-
-getRecOrTraTimeByNode_Session <- function(rcvOrTrsMsgsDs, nodes, broadcastSessions){
-  lapply(nodes, function(n){
-    lapply(broadcastSessions, function(b){
-      subset(subset(rcvOrTrsMsgsDs, resultkey==n), y==b)$x
-    })
-  })
-}
-
-
-time.of.powerlevels <- function(ds, ts = seq(step, max, by=step), max, step=30) {
-  # create a separate list for each power level
-  others <- lapply(ds$vectors$resultkey, function(p) subset(ds$vectordata, resultkey==p) )
-  # vector of power levels for each instant of time
-  lapply(lapply(ts, function(t)  lapply(others, function(s) tail(s[s$x <= t,]$x, 1) ) ), unlist)
 }
 
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
@@ -93,13 +61,9 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-  # print("feo")
-  # print(id_msgs)
 
   # create a separate list for each broadcast_msg_received vector
   list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-  # print("feo2")
-  # print(list_of_received)
 
   sending.time <- sapply(id_msgs, function(id) min( unlist(lapply(list_of_sent, function(d)  subset(d, y == id, select=c(x))[[1]] )) ) )
 
@@ -119,9 +83,6 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   l.recp <- do.call("rbind", l.recp)
 
-  # print(l.recp)
-  # print(sending.time)
-
   broadcasting.time <- data.frame(
   		id = id_msgs, # session id
   		sending = sending.time,
@@ -133,42 +94,7 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 }
 
-
-collect.duplicated.messages <- function(msgDs, broDs, simulation.time) {
-  # create a separate list for each msg_sent vector
-  list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
-
-  # recover list of msg id
-  id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
-
-  # create a separate list for each broadcast_msg_received vector
-  list_of_received <- lapply(broDs$vectors$resultkey, function(p) subset(broDs$vectordata, resultkey == p))
-
-  l.recp <- lapply(id_msgs, function (id) {
-						tmp.list <- lapply(list_of_received, function(d)  d[d$y == id,]$x )
-						data.frame(dm = sapply(tmp.list, function(d) length(d)) )
-			}
-  )
-
-  do.call("rbind", l.recp)
-}
-
-
-export.data.of.experiment <- function(expeId, broadcast.info, max, outputPath){
-
-  n <- length(broadcast.info$id) # number of broadcast messages
-  broDupMsgs <- broadcast.info$B.i / broadcast.info$n.received
-  broDupMsgsInfo <- data.frame( whatever = c(broDupMsgs) )
-  colnames(broDupMsgsInfo) <- c(expeId)
-  write.table(
-            broDupMsgsInfo,
-            file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
-            row.names = F, append = F
-  )
-
-}
-
-
+######## [BEGIN] TODO refactor save.* functions. All this functions can be factorized
 save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   valid.time <- broadcast.info$time[broadcast.info$time <= max ]
   valid.time <- valid.time[!is.na(valid.time)]
@@ -196,7 +122,6 @@ save.coverage <- function(broadcast.info, max, outputPath, expeId,
   )
 }
 
-
 save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
   broSes <- data.frame( whatever = broadcast.info$n.sent)
   colnames(broSes) <- c(expeId)
@@ -204,127 +129,6 @@ save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
             broSes,
             file = build.filename(outputPath, "relays", expeId),
             row.names = F, append = F
-  )
-}
-
-
-save.duplicated.messages <- function(data, outputPath, expeId){
-  dm <- data$dm[data$dm > 0] # only data from nodes that received the messages
-  df <- data.frame( whatever = dm)
-  colnames(df) <- c(expeId)
-  write.table(
-            df,
-            file = build.filename(outputPath, "duplicatedMsgsDistribution", expeId),
-            row.names = F, append = F
-  )
-}
-
-
-save.power.level <- function(power.level, outputPath, expeId, class.of.nodes=NULL){
-  pl <- power.level[lapply(power.level, length) > 0]
-  values <- -1*as.numeric(unlist(c(tail(pl, 1))))
-  if (is.null(class.of.nodes)) {
-    class.of.nodes <- rep('*', length(values))
-  }
-  powerLevelInfo <- data.frame( whatever = values, protocol=class.of.nodes )
-  colnames(powerLevelInfo) <- c(expeId, "protocol")
-
-  print("COCO")
-  print(class.of.nodes)
-
-  if (length(unique(class.of.nodes)) > 1) {
-    sapply(unique(class.of.nodes), function (p) {
-      s <- powerLevelInfo[powerLevelInfo$protocol == p,1, drop=F]
-      the.name <- paste(names(s)[1], as.character(p), sep="-")
-      colnames(s) <- c(the.name)
-
-      write.table(
-        s,
-        file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-        row.names = F, append = (p!=unique(class.of.nodes)[1])
-        )
-    })
-  }
-
-  write.table(
-            powerLevelInfo[, 1, drop=F],
-            file = build.filename(outputPath, "batteryConsumptionDistribution", expeId),
-            row.names = F, append = (length(unique(class.of.nodes)) > 1)
-  )
-}
-
-
-save.time.of.power.level <- function(data, outputPath, expeId) {
-  t.pl <- time.of.data[lapply(data, length) > 0]
-  t.powerLevelInfo <- data.frame( whatever = c(tail(t.pl, 1)) )
-  colnames(t.powerLevelInfo) <- c(expeId)
-  write.table(
-            t.powerLevelInfo,
-            file = build.filename(outputPath, "batteryConsumptionDistributionTime", expeId),
-            row.names = F, append = F
-  )
-}
-
-
-save.mac.frames.sent <- function(data, outputPath, expeId, class.of.nodes = NULL){
-  values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
-  values <- values[order(values$node),]
-  if (is.null(class.of.nodes)) {
-    protocol.per.node <- rep('*', length(values$value))
-  }
-  values <- data.frame( whatever = values$value, protocol=class.of.nodes )
-  colnames(values) <- c(expeId, "protocol")
-
-  if (length(unique(class.of.nodes)) > 1) {
-    sapply(unique(class.of.nodes), function (p) {
-      s <- values[values$protocol == p,1, drop=F]
-      the.name <- paste(names(s)[1], as.character(p), sep="-")
-      colnames(s) <- c(the.name)
-
-      write.table(
-        s,
-        file = build.filename(outputPath, "macFramesSent", expeId),
-        row.names = F, append = (p!=unique(class.of.nodes)[1])
-        )
-    })
-  }
-
-  write.table(
-            values[, 1, drop=F],
-            file = build.filename(outputPath, "macFramesSent", expeId),
-            row.names = F, append = (length(unique(class.of.nodes)) > 1)
-  )
-
-}
-
-
-save.mac.frames.received <- function(data, outputPath, expeId, class.of.nodes=NULL){
-  values <- data.frame(node=data$scalars$resultkey, value=data$scalars$value)
-  values <- values[order(values$node),]
-  if (is.null(class.of.nodes)) {
-    protocol.per.node <- rep('*', length(values$value))
-  }
-  values <- data.frame( whatever = values$value, protocol=class.of.nodes )
-  colnames(values) <- c(expeId, "protocol")
-
-  if (length(unique(class.of.nodes)) > 1) {
-    sapply(unique(class.of.nodes), function (p) {
-      s <- values[values$protocol == p,1, drop=F]
-      the.name <- paste(names(s)[1], as.character(p), sep="-")
-      colnames(s) <- c(the.name)
-
-      write.table(
-        s,
-        file = build.filename(outputPath, "macFramesReceived", expeId),
-        row.names = F, append = (p!=unique(class.of.nodes)[1])
-        )
-    })
-  }
-
-  write.table(
-            values[, 1, drop=F],
-            file = build.filename(outputPath, "macFramesReceived", expeId),
-            row.names = F, append = (length(unique(class.of.nodes)) > 1)
   )
 }
 
@@ -338,39 +142,7 @@ save.distribution <-function(dist_name, data, outputPath, expeId){
             row.names = F, append = F
   )
 }
-
-
-countmsgsperradiomode <- function(radiomodeds, msgsds, algo){
-  keys <- subset(msgsds$vectordata, !duplicated(resultkey))$resultkey
-  headers <- vector()
-  for (i in 1:length(keys)) {
-    a <- subset(radiomodeds, resultkey == keys[i])
-    tmp <- subset(msgsds$vectordata, resultkey == keys[i])
-    for (j in 1:length(tmp$resultkey)) {
-      v <- tmp[j, ]
-      t <- nrow( subset(a, x <= v$x) )
-      if (na %in% headers[t]) {
-        headers <- c(headers, t)
-      }
-    }
-  }
-  headers <- c(headers, "algorithm")
-  nrow <- length(keys)
-  ncol <- length(headers)
-  r <- as.data.frame(matrix(0, nrow=nrow, ncol=ncol))
-  names(r) <- headers
-  for (i in 1:length(keys)) {
-    a <- subset(radiomodeds, resultkey == keys[i])
-    tmp <- subset(msgsds$vectordata, resultkey == keys[i])
-    for (j in 1:length(tmp$resultkey)) {
-      v <- tmp[j, ]
-      t <- nrow( subset(a, x <= v$x) )
-      r[i, t] <- r[i, t] + 1
-    }
-  }
-  r[,"algorithm"] = algo
-  r
-}
+######## [END] TODO refactor save.* functions. All this functions can be factorized
 
 average.values <- function(pl, broadcast.info, max) {
 
@@ -395,60 +167,6 @@ average.values <- function(pl, broadcast.info, max) {
 		duplicated_messages = mean(dm),
 		retransmitted_messages = mean(rt)
 	)
-}
-
-exportDataset <- function(ds, dst){
-  if (!file.exists(dst)) write.table(ds, file = dst, col.names = T, row.names = F, append = F, sep=",")
-  else write.table(ds, file = dst, col.names = F, row.names = F, append = T, sep=",")
-}
-
-compute.time.per.protocol <- function(changes.of.protocol) {
-
-  d <- changes.of.protocol$vectordata
-  df <- data.frame(node=d$resultkey, t=d$x, v=d$y)
-
-  nodes <- unique(df$node)
-
-  protocol.changes <- lapply(nodes, function(n) { df[df$node==n,] } )
-
-  max.time = max(df$t)
-
-  my.shift.left <- function (x, shift, emptyvalue=NA) c(x[(1+shift):(length(x))], rep(emptyvalue, shift))
-
-  my.shift.left <- function (x, shift, emptyvalue=NA) {
-  	if (length(x) > shift ) (c(x[(1+shift):(length(x))], rep(emptyvalue, shift)))	else (rep(emptyvalue, length(x)))
-  }
-
-  df <- lapply(protocol.changes, function (pc) {
-  	times = pc$t
-  	tmp <- my.shift.left(times, 1, max.time)
-  	data.frame(node = pc$node, t=times, v=pc$v, elapsed=(tmp - times))
-  })
-
-  times <- lapply(df, function (pc) {
-  	tmp <- unique(pc$v)
-  	node <- unique(pc$node)
-  	dd <- sapply(tmp, function(pro) sum(pc[pc$v == pro,]$elapsed))
-  	protocols <- sapply(tmp, intToUtf8)
-  	dd <- data.frame(node=rep(node, length(tmp)), protocol=protocols, elapsed.time=dd)
-    dd[dd$protocol!='E',]
-  })
-
-  tt <-do.call("rbind",lapply(times, function(pc) pc[max(pc$elapsed.time) == pc$elapsed.time,]))
-
-  print("Count of nodes executing a protocol")
-  print(lapply(unique(tt$protocol), function(t) data.frame(pro = t, count=length(tt[tt$protocol==t,]$protocol)) ))
-
-  tt
-}
-
-compute.median.density.per.node <- function(density.over.time) {
-  df <- density.over.time$vectordata
-  df <- data.frame(node=df$resultkey, t=df$x, v=df$y)
-  nodes <- unique(df$node)
-  # densities.total <- lapply(nodes, function(n) { df[df$node==n,] } )
-  densities <- lapply(nodes, function(n) { median(df[df$node==n,]$v) } )
-  sapply(densities, function(d) if (d>15) 'dense' else 'sparse')
 }
 
 get.density.distribution <- function(overlays){
@@ -539,8 +257,16 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
     pdf(name)
     plot.igraph(g, layout=layout)
     legend(
-      x=0.7, y=1.4, c("Unreachable","Pure-receiver", "Relay"), pch=21,
-      col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+      x=0.7, y=1.4,
+      c(
+        paste('Unreachable [', length(labelCode[labelCode == 1]), ']'),
+        paste(
+          'Pure-receiver [',
+          length(nodes) - length(labelCode[labelCode == 1]) - length(labelCode[labelCode == 3]),
+          ']'
+        ),
+        paste('Relay [', length(labelCode[labelCode == 3]), ']')
+      ),pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
     )
     dev.off()
   }
@@ -548,7 +274,7 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
   g
 }
 # TODO figure out if this chunk of code is still required
-#      in the new implementation of get.graph
+#      in the new implementation of get.graph (function above)
 # get.graph <- function(...) {
 #   # gets the biggest connected cluster
 #   # XXX we assume that the source node belongs to this cluster
@@ -677,65 +403,58 @@ highest.energy.consumption <- function(v){
 
 collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays,
   nodes){
-  # XXX find a way to measure ground truth of received messages
-  groundTruth <- lapply(
-    msgs_ids,
+  groundTruth <- lapply(msgs_ids,
     function(msg){
       overlay <- overlays[[msg]]
-      senders <- unique( subset(sent_msgs, value == msg)$node_id )
-      receptions <- lapply(
-        senders,
+      senders <- sort.int(unique( subset(sent_msgs, value == msg)$node_id ))
+      receptions <- lapply(senders,
         function(s){
           counter <- rep(0, length(nodes))
           edges <- overlay[s, ]
-          neigs <- sapply(
-            1:length(edges),
+          neigs <- sapply(1:length(edges),
             function(indx){
               ifelse(edges[indx] == 1, indx, NA)
             }
           )
           neigs <- neigs[ !is.na(neigs) ]
           counter[neigs] <- 1
+          # NOTE when a sender S forwards a message, S is labed as a receiver too
+          counter[s] <- 1
           counter
         }
       )
       receptions <- matrix(
-        unlist(receptions), nrow=length(receptions), ncol=length(nodes)
+        unlist(receptions), nrow=length(senders), ncol=length(nodes), byrow=T
       )
-      print(receptions)
       t<-colSums(receptions)
-      print(t)
-      stop()
     }
   )
-  groundTruth <- matrix(
-    unlist(groundTruth), nrow=length(groundTruth), ncol=length(nodes)
+  groundTruth <- rowSums(
+    matrix(
+      unlist(groundTruth), nrow=length(nodes), ncol=length(msgs_ids)
+    )
   )
-  print(groundTruth)
-  measuredRcvMsgs <- lapply(
-    nodes,
+  measuredRcvMsgs <- lapply(nodes,
     function(node){
       recvMsgIds <- subset(recv_msgs, node_id == node)$value
-      sapply(
-        msgs_ids,
+      sapply(msgs_ids,
         function(msg){
           length(recvMsgIds[recvMsgIds == msg])
         }
       )
     }
   )
-  tmp <- matrix(
-    unlist(measuredRcvMsgs), nrow=length(nodes), ncol=length(measuredRcvMsgs)
+  measuredRcvMsgs <- rowSums(
+    matrix(
+      unlist(measuredRcvMsgs), nrow=length(nodes), ncol=length(msgs_ids), byrow=T
+    )
   )
-  tmp <- lapply(
-    msgs_ids,
-    function(msg){
-      tmp[ ,msg]
+  relative_err <- sapply(nodes,
+    function(n){
+      abs(1 - measuredRcvMsgs[n] / groundTruth[n])
     }
   )
-  measuredRcvMsgs <- matrix(unlist(tmp), nrow=length(tmp), ncol=length(nodes))
-  print(measuredRcvMsgs)
-  groundTruth - measuredRcvMsgs
+  relative_err[!is.na(relative_err)]
 }
 
 count.events.per.node <- function(nodes, ds){
@@ -803,7 +522,7 @@ main <- function(args) {
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
   	args$file, "name(broadcast_msg_received:vector)")
 
-  msgs_ids <- unique(sent_broadcast_msgs$value)
+  msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
   # store in a list a graph per broadcast session
   overlays <- lapply(msgs_ids, function(msg) {
     # point in time where node
@@ -887,41 +606,21 @@ main <- function(args) {
   print("DONE!")
 
   print("Calculating relative error of collisions")
-  # collisions_re <- collisions.relative.error(
-  #   sent_broadcast_msgs,
-  #   recv_broadcast_msgs,
-  #   msgs_ids,
-  #   overlays,
-  #   all_nodes
-  # )
-  # stop()
+  collisions_re <- collisions.relative.error(
+    sent_broadcast_msgs,
+    recv_broadcast_msgs,
+    msgs_ids,
+    overlays,
+    all_nodes
+  )
   print("DONE!")
 
-  protocol.per.node <- NULL
-  median.density.per.node <- NULL
-  if (args$splitted) {
-    print(paste("Loading changes of protocol over time", args$file))
-    changes.of.protocol <- load.datafile(args$file, "name(protocol_change:vector)")
-    protocol.per.node <- compute.time.per.protocol(changes.of.protocol)
-    print(paste("Loading density over time", args$file))
-    density.over.time <- load.datafile(args$file, "name(density_approximation:vector)")
-    median.density.per.node <- compute.median.density.per.node(density.over.time)
-    print("DONE!")
-  }
-
-  print("Reading vectors with messages sent and received")
+  print('Get distribution of broadcast session time')
   sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
   recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
-  print("DONE!")
-
-  print("Computing maximal reception delay")
   bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
   print("DONE!")
 
-#  print("Collecting information on number of duplicated messages")
-#  dm <- collect.duplicated.messages(sent_msgs, recv_msgs, simulation.time = args$simTime)
-
-  #######################
   print("Exporting data")
   save.distribution(
     "sentBroadcastMsgsDistribution", sent_recv_msgs$sent_bro_msgs,
@@ -957,25 +656,6 @@ main <- function(args) {
   save.coverage(
   	bs, args$simTime, args$outputPath, args$configuration, expectedCoverage
   )
-#  save.duplicated.messages(dm, args$outputPath, args$configuration)
-  #######################
-  # optional behavior
-  if (args$computeRadioMode) {
-    print("Ohhh ... this is a debug session. Ok, reading radio modes")
-    # get the intervals of time of two radio modes where:
-    # - 2 means reception mode
-    # - 3 means transmission mode
-    # this script was tested with a dataset of ABBA and Floding just for reception mode
-    #TODO: for protocols that send control messages (like CDS) this script gets an error
-    #TODO: figure out why an error occurs when the transmission mode is analyzed
-    radioMode <- load.datafile(args$file, "name(radioMode:vector)" )
-    rcvM <- subset(radioMode$vectordata, y == 2)
-    trsM <- subset(radioMode$vectordata, y == 3)
-    r <- countMsgsPerRadioMode(rcvM, recv_msgs, args$algorithm)
-    filename <- build.filename(args$outputPath, "RadioModeReception", args$density)
-    exportDataset(r, filename)
-  }
-
   if (args$showAverages) {
     print("Printing average values")
     averages <- average.values(energy_consumption, bs, max=args$simTime)
