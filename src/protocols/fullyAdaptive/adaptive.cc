@@ -60,7 +60,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 //            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
-//            knownProtocols[current_protocol_name]->on_saying_hello();
+            knownProtocols[current_protocol_name]->on_saying_hello();
           }
           cancelAndDelete(msg);
         }

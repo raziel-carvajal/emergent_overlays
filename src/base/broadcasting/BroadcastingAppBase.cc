@@ -172,7 +172,7 @@ void BroadcastingAppBase::OmnetBroadcastGateway::emitNodePosition(float x,
 int
 BroadcastingAppBase::OmnetBroadcastGateway::register_new_control_message()
 {
-  return ++last_message_assigned;
+  return ControlMessageTypes::Last + 1;
 }
 
 

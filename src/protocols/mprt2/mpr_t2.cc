@@ -47,14 +47,16 @@ void
 Mpr_t2::on_saying_hello()
 {
 //    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "Scheduling HelloMessage with type: " << refresh_hops_message << endl;
-	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
+//	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
 }
 
 
 bool
 Mpr_t2::handle(const cMessage *msg)
 {
+//    std::cout << simTime().str() << " HANDLE()" << endl;
 	if (msg->getKind() == refresh_hops_message) {
+//        std::cout << simTime().str() << " ERASE OLD HOPS" << endl;
 		erase_old_hops();
 		return true;
 	}
@@ -170,7 +172,10 @@ Mpr_t2::process_payload(const Broadcast* m)
 	      // int n = std::stoi (myself.substr(5, myself.size()));
 	      // auto delta = (((n % 50) + 1) * 0.001);
 	      // gateway->delayed_broadcast(key, delta);
-		}
+		} else {
+//            cout << simTime().str() << " " + gateway->get_name()<<
+//                " FOREING MSG RECEIVED [" << key << "] selector["<< from_selector << "]" << endl;
+        }
 	}
 }
 
