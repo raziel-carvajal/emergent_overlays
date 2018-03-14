@@ -75,9 +75,9 @@ RUN cd r-packages && \
   wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
   R CMD BATCH r-worker-pkgs.R
 
-ADD src/base /usr/emrg-ovrl/src/base
-ADD src/scripts /usr/emrg-ovrl/src/scripts
-ADD src/protocols /usr/emrg-ovrl/src/protocols
+COPY src/base /usr/emrg-ovrl/src/base
+COPY src/scripts /usr/emrg-ovrl/src/scripts
+COPY src/protocols /usr/emrg-ovrl/src/protocols
 
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \

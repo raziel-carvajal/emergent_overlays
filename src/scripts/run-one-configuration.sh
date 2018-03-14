@@ -114,4 +114,9 @@ rm -fr debugging/logs/${CONF_NAME}
 mkdir debugging/logs/${CONF_NAME}
 mv *.pdf debugging/logs/${CONF_NAME}
 cp ${CONFIG_PATH}/${CONF_NAME}".ini" debugging/logs/${CONF_NAME}
+echo "Compression of logs..."
+tar czf debugging/logs/${CONF_NAME}.tgz debugging/logs/${CONF_NAME}
+echo "DONE"
+echo "Moving logs to results folder"
+mv debugging/logs/${CONF_NAME}.tgz ../../results
 echo "All PDF files were copied"

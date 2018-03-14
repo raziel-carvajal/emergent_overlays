@@ -9,7 +9,7 @@ COPY r-packages /usr/emrg-ovrl/r-packages
 
 RUN cd r-packages && R CMD BATCH r-plotter-pkgs.R
 
-ADD src/scripts /usr/emrg-ovrl/src/scripts
+COPY src/scripts /usr/emrg-ovrl/src/scripts
 
 RUN apt-get update && \
   apt-get install -y python
