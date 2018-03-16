@@ -100,6 +100,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void cancel_message(cMessage* m) override;
       int register_new_control_message() override;
+      double getDelayToAvoidCollisions() override {
+          return app->delta;
+      }
     };
 
     friend class OmnetBroadcastGateway;

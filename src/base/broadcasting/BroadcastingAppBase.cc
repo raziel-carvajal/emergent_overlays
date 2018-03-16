@@ -525,9 +525,18 @@ BroadcastingAppBase::build_hello_message() {
 bool
 BroadcastingAppBase::on_network_message_received(cPacket* pkt)
 {
-
+  /**
+   * NOTE entry point of application messages (control and broadcast)
+   */
   bool done = processMessage<Hello>(pkt, [&] (const Hello* m) {
-		this-> on_hello_received(m);
+    /**
+     * the instance of <this> is a FullyAdaptive object
+     * and not an object of type BroadcastingAppBase such
+     * that the protocol in question will execute
+     * FullyAdaptive.on_hello_received() instead of
+     * BroadcastingAppBase.on_hello_received()
+     */
+	  this-> on_hello_received(m);
 	});
 
   done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m) {

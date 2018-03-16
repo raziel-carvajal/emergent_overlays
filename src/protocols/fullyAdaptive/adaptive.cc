@@ -330,22 +330,20 @@ FullyAdaptive::processStart()
   gateway->setProtocolId(current_protocol_name);
   emit(signal_protocol_change, current_protocol_name[0]);
 
-  /*NOTE when a protocol requires to send control messages, we need to give a grace period
-   * to start the first broadcast session.*/
-//      std::cout << simTime().str() << " " + gateway->get_name() << " FIRST_HELO_AT " << t << endl;
+  /** NOTE when a protocol requires to send control messages,
+   * we need to give a grace period to start the first
+   * broadcast session.
+   * */
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
       keep_sending_hello_msgs = true;
-      int n = std::stoi (myself.substr(5, myself.size()));
-      auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
       int i = 1;
       while(i <= (int) par("bootstrap_ctrl_msgs_no").longValue()){
-          gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i + delta);
+          gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i * 1.0 + delta);
           i = i + 1;
       }
       auto t = par("wakeUpTime").doubleValue() +
           gateway->get_parameter<double>(current_protocol_name, "helloTime");
       gateway->delayed_event(SAY_HELLO, "helloTime", t + delta);
-
   }
 
 }

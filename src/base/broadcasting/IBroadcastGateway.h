@@ -53,6 +53,7 @@ public:
 
   virtual bool bridge() = 0;
   virtual void setProtocolId(const std::string& protocol) = 0;
+  virtual double getDelayToAvoidCollisions() = 0;
 
   template<typename T> T get_parameter(const std::string& protocol, const std::string& param) {
     return get_parameter(protocol, param, identity<T>());
@@ -74,6 +75,8 @@ public:
   void add_param_value_pair(const std::string& protocol, std::string name, std::string value) {
     params[protocol][name] = value;
   }
+
+
 };
 
 }

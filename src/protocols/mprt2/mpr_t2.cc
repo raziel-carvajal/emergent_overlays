@@ -57,7 +57,7 @@ Mpr_t2::handle(const cMessage *msg)
 //    std::cout << simTime().str() << " HANDLE()" << endl;
 	if (msg->getKind() == refresh_hops_message) {
 //        std::cout << simTime().str() << " ERASE OLD HOPS" << endl;
-		erase_old_hops();
+//		erase_old_hops();
 		return true;
 	}
 	return false;
@@ -85,13 +85,13 @@ Mpr_t2::process_hello(const broadcasting::Hello* msg)
 	string j = msg->getSender();
 	if (j == myself) return;
 	auto m = dynamic_cast<const MprHello*>(msg);
-  if (!m) {
-    cerr << myself << " : hello from " << j  << ", ptr=" << m << ", raw_ptr=" << msg->getProtocolId() << endl;
-    return;
-  }
+	if (!m) {
+	    cerr << myself << " : hello from " << j  << ", ptr=" << m << ", raw_ptr=" << msg->getProtocolId() << endl;
+        return;
+	}
 	//for being able to measure collisions
-	neighbors[j] = Neighbor(); // Ok, I don't like this line
-	/* first, it is obvious that the sender is a member of hops level 0 */
+	neighbors[j] = Neighbor();
+
 	hop1[j] = NodeNeighbor(simTime());
 	hops_position[j] = Coord(m->getX(), m->getY());
   // std::cerr << "\t" << myself << " adding " << j << " as neighbor" << '\n';
@@ -153,8 +153,6 @@ Mpr_t2::process_payload(const Broadcast* m)
 //            << " msg rcv from " << m->getSender() << endl;
 	if (m->getSender() == myself) return;
 
-
-
 	if (payloads.find(key) == payloads.end()) {
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
@@ -165,13 +163,8 @@ Mpr_t2::process_payload(const Broadcast* m)
 				from_selector = (j == myself);
 			}
 		}
-
 		if (from_selector || gateway->bridge()) {
 			gateway->broadcast(key, build_message_to_broadcast());
-
-	      // int n = std::stoi (myself.substr(5, myself.size()));
-	      // auto delta = (((n % 50) + 1) * 0.001);
-	      // gateway->delayed_broadcast(key, delta);
 		} else {
 //            cout << simTime().str() << " " + gateway->get_name()<<
 //                " FOREING MSG RECEIVED [" << key << "] selector["<< from_selector << "]" << endl;
@@ -200,13 +193,37 @@ set<string>
 Mpr_t2::compute_mpr()
 {
 	set<string> mpr;
+	if(first_exec){
+	    first_exec = false;
+	    latest = hop1;
+	} else {
+	    bool changeOfNeigs = false;
+	    if(hop1.size() != 0) {
+	        if(latest.size() != hop1.size()){
+	            changeOfNeigs = true;
+	        } else {
+                for (const auto& p: hop1) {
+                    string key = p.first;
+                    if(latest.find(key) == latest.end()){
+                        changeOfNeigs = true;
+                        break;
+                    }
+                }
+
+	        }
+	    }
+	    if(changeOfNeigs){
+	        latest.clear();
+	        latest = hop1;
+	    }
+	}
 	hops[0].clear();
 	hops[1].clear();
 	// first fill the array hops
-	for (const auto& p: hop1) {
+	for (const auto& p: latest) {
 		hops[0].insert(p.first);
 	}
-	for (const auto& p: hop1) {
+	for (const auto& p: latest) {
 		string j = p.first;
 		for (const auto& name: p.second.hop1) {
 			if (name == myself) continue;
@@ -291,7 +308,7 @@ Mpr_t2::compute_mpr()
 		still_uncovered = any_of(hops[1].begin(), hops[1].end(), is_not_covered_by_mpr);
 		iterations ++;
 	}
-
+	hop1.clear();
 	return mpr;
 }
 
