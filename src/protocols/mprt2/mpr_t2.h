@@ -47,9 +47,10 @@ private:
     map< string, string >  payloads;
 
     map<string, NodeNeighbor> latest;
+
     bool first_exec = true;
 
-
+    set<string> currentMpr;
 
     void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;
 

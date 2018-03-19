@@ -596,10 +596,10 @@ BroadcastingAppBase::processStart()
     //this delta is required to cope with collisions of control messages; even if
     //we are using CSMA it is not enough to cope with this issue
     int n = std::stoi (myself.substr(5, myself.size()), &sz);
-    if (n % 50 == 0)
-        delta = 0.003;
+    if (n % 100 == 0)
+        delta = 0.001;
     else
-        delta = (n % 50) * 0.002;
+        delta = (n % 100) * 0.001;
 //    cerr << getLogHeader() + "Delta: " + to_string(delta) + "\n";
     L3AddressResolver().tryResolve(myself.c_str(), myAddress);
 

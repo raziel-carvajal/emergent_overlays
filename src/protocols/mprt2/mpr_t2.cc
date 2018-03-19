@@ -48,6 +48,7 @@ Mpr_t2::on_saying_hello()
 {
 //    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "Scheduling HelloMessage with type: " << refresh_hops_message << endl;
 //	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
+    currentMpr = compute_mpr();
 }
 
 
@@ -133,11 +134,10 @@ Mpr_t2::build_hello_message() {
 MprBroadcast*
 Mpr_t2::build_message_to_broadcast()
 {
-	auto mpr = compute_mpr();
 	auto m = new MprBroadcast("payload");
-	m->setInMprArraySize(mpr.size());
+	m->setInMprArraySize(currentMpr.size());
 	int idx = 0;
-	for (const auto& h: mpr) {
+	for (const auto& h: currentMpr) {
 		m->setInMpr(idx++, strdup(h.c_str()));
 	}
 	return m;

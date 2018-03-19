@@ -50,8 +50,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
         BOOTSTRAP_MSG,
+        BUILD_STRUCT,
         First = IDLE,
-        Last = BOOTSTRAP_MSG
+        Last = BUILD_STRUCT
     };
 
 

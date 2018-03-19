@@ -37,6 +37,13 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       case START:
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
+      case BUILD_STRUCT: {
+          knownProtocols[current_protocol_name]->on_saying_hello();
+          auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime");
+          gateway->delayed_event(BUILD_STRUCT, "", t);
+          cancelAndDelete(msg);
+      }
+      break;
       case BOOTSTRAP_MSG:
       {
 //         std::cout << simTime().str() << " " + gateway->get_name() << " BOOTSTRAP MSG, " << current_protocol_name << endl;
@@ -47,6 +54,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         }
         gateway->send_package(p);
         cancelAndDelete(msg);
+//        gateway->delayed_event(BUILD_STRUCT, "", 0.050);
       }
       break;
       case SAY_HELLO:
@@ -59,8 +67,16 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
             }
 //            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
-            gateway->delayed_event(SAY_HELLO, "helloTime", gateway->get_parameter<double>(current_protocol_name, "helloTime"));
-            knownProtocols[current_protocol_name]->on_saying_hello();
+            /* NOTE: once the timeout of sending control messages is set,
+             *  two messages must be sent to build one-hop and two-hop
+             *  neighbor
+             */
+//            gateway->delayed_event(BOOTSTRAP_MSG, "", 0.050);
+            gateway->delayed_event(
+                SAY_HELLO, "helloTime",
+                gateway->get_parameter<double>(current_protocol_name, "helloTime")
+            );
+
           }
           cancelAndDelete(msg);
         }
@@ -256,8 +272,6 @@ FullyAdaptive::change_current_protocol(const std::string& protocol)
 
   if (gateway->get_parameter<bool>(current_protocol_name, "nr_hello_messages")) {
       keep_sending_hello_msgs = true;
-      int n = std::stoi (myself.substr(5, myself.size()));
-      auto delta = (n % 50 == 0)? 0.003 : ((n % 50) * 0.002);
       auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime") + delta;
       gateway->delayed_event(SAY_HELLO, "helloTime", t);
   } else {
@@ -341,6 +355,9 @@ FullyAdaptive::processStart()
           gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i * 1.0 + delta);
           i = i + 1;
       }
+      gateway->delayed_event(BUILD_STRUCT, "",
+          0.3 + par("bootstrap_ctrl_msgs_no").longValue() * 1.0
+      );
       auto t = par("wakeUpTime").doubleValue() +
           gateway->get_parameter<double>(current_protocol_name, "helloTime");
       gateway->delayed_event(SAY_HELLO, "helloTime", t + delta);
