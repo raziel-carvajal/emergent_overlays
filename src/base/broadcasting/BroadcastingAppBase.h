@@ -45,7 +45,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         BROADCAST_DELAY,
         HALT_SIMULATION_DELAY,
         TRANSFORMATION_TIMEOUT,
-        OFFICER_ELECTION_TIMEOUT,
+        BORDER_DETECTOR_TIMER,
         LAST_POWER_REPORT,
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
@@ -128,7 +128,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     double adaptationMax;
     double adaptationMin;
-    double timeoutCustomOfficer;
+    double border_detector_max_timeout;
     std::string protocolId;
     int nr_max_custom_officers;
     std::set<std::string> lastForeignHelloSenders;
@@ -137,18 +137,15 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::map<std::string, std::string> adaptForeigsMsgs;
     std::map<std::string, std::string> adaptMyProtoMsgs;
     std::map<std::string, cMessage*> timeoutMsgs;
-    std::map<std::string, cMessage*> timeoutBorderDet;
+    std::map<std::string, cMessage*> border_detector_timers;
 
-    // custom officer for foreign protocol
-    // map from protocol to target
-    std::map<std::string, std::set<std::string>> customOfficers;
+    std::map<std::string, std::set<std::string>> nodes_at_border;
 
     bool amIbridge = false;
 
   private:
 
-    bool contains(const std::string& protocolId, const std::string& nodeId);
-    void save_border_node(const std::string& protocolId, const std::string& nodeId);
+    bool in_border_nodes(const std::string& protocolId);
 
     // control messages
     cMessage* ctrlDisplayTime = nullptr;
@@ -167,9 +164,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
   protected:
 
     bool withAdaptation;
-
-    bool use_topology_fix;
-    bool optimize_gluing;
 
     // is the source of a broadcast
     bool is_source;

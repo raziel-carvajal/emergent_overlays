@@ -49,11 +49,9 @@ simple BroadcastingBase
         double adaptationMax @unit(s) = default(0.04s);
         double adaptationMin @unit(s) = default(0.01s);
         bool withAdaptation = default(false);
-        bool use_topology_fix = default(true);
-        bool optimize_gluing = default(true);
         string protocolId = default("");
         int nr_max_custom_officers = default(1);
-        double timeoutCustomOfficer @unit(s) = default(0.2s);
+        double border_detector_max_timeout @unit(s) = default(0.2s);
 
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);

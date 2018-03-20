@@ -31,6 +31,8 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
+//         std::cout << simTime().str() << " " + gateway->get_name() <<
+//          " BOOTSTRAP MSG, " << current_protocol_name << endl;
   if (msg->isSelfMessage()) {
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
@@ -46,7 +48,6 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       break;
       case BOOTSTRAP_MSG:
       {
-//         std::cout << simTime().str() << " " + gateway->get_name() << " BOOTSTRAP MSG, " << current_protocol_name << endl;
         auto p = build_hello_message();
         if (packet_to_piggybag) {
             p->encapsulate(packet_to_piggybag);
@@ -54,7 +55,6 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         }
         gateway->send_package(p);
         cancelAndDelete(msg);
-//        gateway->delayed_event(BUILD_STRUCT, "", 0.050);
       }
       break;
       case SAY_HELLO:
@@ -65,13 +65,12 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
               p->encapsulate(packet_to_piggybag);
               packet_to_piggybag = nullptr;
             }
-//            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             /* NOTE: once the timeout of sending control messages is set,
              *  two consecutive messages must be sent to keep track of
-             *  one-hop and two-hop neighbors
+             *  one-hop and two-hop neighbors. Such behaviour depends
+             *  on the implementation of the CDS-based algorithm
              */
-//            gateway->delayed_event(BOOTSTRAP_MSG, "", 0.050);
             gateway->delayed_event(
                 SAY_HELLO, "helloTime",
                 gateway->get_parameter<double>(current_protocol_name, "helloTime")
@@ -90,12 +89,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
             monitor->compute_density_approx();
             //gateway->emitDensityApproximation(monitor->get_density_approx());
             //TODO find a better way to call get_density_approx()
-//            std::cout << simTime().str() << " " << gateway->get_name() <<
-//              ": density approximation gets " << monitor->get_density_approx() << endl;
             gateway->emitNodePosition(p.x, p.y, monitor->get_density_approx());
-//            std::cout << simTime().str() << " " + gateway->get_name()
-//                << " next approx event in " << par("intervalBroadcastTime").doubleValue()
-//                << endl;
             cancelAndDelete(msg);
             gateway->delayed_event(APPROXIMATE_DENSITY, "density approximation",
                                    par("intervalBroadcastTime").doubleValue());
@@ -105,8 +99,6 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
       	{
           auto initialProtocol = par("initialProtocol").stdstringValue();
           if (msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
-              // std::cout << simTime().str() << " " + gateway->get_name()
-              //     << " DO_ADAPTATION" << endl;
               adaptation();
               cancelAndDelete(msg);
           }
