@@ -5,7 +5,7 @@ LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simu
 RUN mkdir /usr/emrg-ovrl && \
   mkdir /usr/emrg-ovrl/tools && \
   mkdir /usr/emrg-ovrl/built && \
-  mkdir /usr/emrg-ovrl/src
+  mkdir -p /usr/emrg-ovrl/src/scripts
 
 WORKDIR /usr/emrg-ovrl
 
@@ -78,8 +78,9 @@ RUN cd r-packages && \
   R CMD BATCH r-worker-pkgs.R
 
 ADD src/base ./src/
-ADD src/scripts ./src/
 ADD src/protocols ./src/
+ADD src/scripts/*.sh ./src/scripts/
+ADD src/scripts/*.R ./src/scripts/
 
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \
