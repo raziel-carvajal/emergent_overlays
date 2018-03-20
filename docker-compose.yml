@@ -12,7 +12,6 @@ services:
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
   worker:
     build:
-      context: .
       dockerfile: ./dockerfiles/worker/Dockerfile
     image: worker:latest
     volumes:
@@ -22,7 +21,6 @@ services:
       - './results:/usr/emrg-ovrl/results'
   plotter:
     build:
-      context: .
       dockerfile: ./dockerfiles/plotter/Dockerfile
     image: plotter:latest
     volumes:

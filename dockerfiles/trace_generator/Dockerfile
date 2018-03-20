@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
-LABEL Description="Python image to create mobility traces"
+LABEL Description="Creates mobility traces using a Python implementation of the Lavy walk model"
 
 RUN mkdir -p /usr/emrg-ovrl
 WORKDIR /usr/emrg-ovrl
@@ -19,7 +19,7 @@ RUN git clone git://github.com/panisson/pymobility.git && \
   cd pymobility && \
   python setup.py install
 
-COPY python_pkgs /usr/emrg-ovrl/python_pkgs
+ADD python_pkgs ./
 
 RUN pip install -r python_pkgs
 
