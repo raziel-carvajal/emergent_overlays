@@ -38,10 +38,10 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
         BroadcastingAppBase::handleMessageWhenUp(msg);
       break;
       case BUILD_STRUCT: {
-          knownProtocols[current_protocol_name]->on_saying_hello();
-          auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime");
-          gateway->delayed_event(BUILD_STRUCT, "", t);
-          cancelAndDelete(msg);
+        knownProtocols[current_protocol_name]->on_saying_hello();
+        auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime");
+        gateway->delayed_event(BUILD_STRUCT, "", t);
+        cancelAndDelete(msg);
       }
       break;
       case BOOTSTRAP_MSG:
@@ -68,15 +68,14 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 //            std::cout << simTime().str() << " " + gateway->get_name() << " HELLO_MSG, " << current_protocol_name << endl;
             gateway->send_package(p);
             /* NOTE: once the timeout of sending control messages is set,
-             *  two messages must be sent to build one-hop and two-hop
-             *  neighbor
+             *  two consecutive messages must be sent to keep track of
+             *  one-hop and two-hop neighbors
              */
 //            gateway->delayed_event(BOOTSTRAP_MSG, "", 0.050);
             gateway->delayed_event(
                 SAY_HELLO, "helloTime",
                 gateway->get_parameter<double>(current_protocol_name, "helloTime")
             );
-
           }
           cancelAndDelete(msg);
         }
@@ -122,6 +121,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     }
   }
   else if (msg->getKind() == UDP_I_DATA) {
+    // keep track of known neighbors
     monitor->handle_messages(msg);
     auto pkt = PK(msg);
     auto initialProtocol = par("initialProtocol").stdstringValue();
@@ -129,6 +129,11 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 	    if (pkt->hasEncapsulatedPacket()) {
 	      pkt = pkt->getEncapsulatedPacket();
 	    }
+	    /*
+	     * XXX this is a sort of collaborative decision to switch
+	     *   of dissemination protocol, but it is not clear how to
+	     *   tag those members who will execute the change
+	     */
 	    auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
 	    if (willing) {
 	      if (willingToChange &&
@@ -330,15 +335,16 @@ FullyAdaptive::processStart()
     knownProtocols[current_protocol_name] = std::unique_ptr<IBroadcastProtocol>(current_protocol);
   }
 
-  if (initialProtocol == "middleware") {
-  	auto pos = gateway->get_current_position();
-    if (pos.x >= 81 && pos.x <= 169 && pos.y >= 81 && pos.y <= 169) {
-      initialProtocol = "Mpr_t2";
-    }
-    else {
-      initialProtocol = "Flooding2";
-    }
-  }
+//  XXX what the hell is this?
+//  if (initialProtocol == "middleware") {
+//  	auto pos = gateway->get_current_position();
+//    if (pos.x >= 81 && pos.x <= 169 && pos.y >= 81 && pos.y <= 169) {
+//      initialProtocol = "Mpr_t2";
+//    }
+//    else {
+//      initialProtocol = "Flooding2";
+//    }
+//  }
 
   current_protocol_name = initialProtocol;
   gateway->setProtocolId(current_protocol_name);

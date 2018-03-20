@@ -73,6 +73,8 @@ public:
   }
 
   void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
+      std::cout << simTime().str() << " " << gateway->get_name() <<
+        " new BroadcastMsgBasedMonitor()" << endl;
       initialiseAproxArray();
       this->gateway = gateway;
   }

@@ -242,6 +242,7 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
   g <- graph( edges=edges )
   if(savePlot){
     V(g)$size <- 8
+    V(g)$label <- ''
     V(g)$frame.color <- 'white'
     E(g)$arrow.mode <- 0
     # use node coordinates as layout

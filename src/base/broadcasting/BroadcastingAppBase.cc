@@ -216,31 +216,23 @@ BroadcastingAppBase::BroadcastingAppBase() {
   {
     bool done = withAdaptation && processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
 //    	  cout << getLogHeader() << "Sender of broadcast [1]: " << m->getSender() << endl;
-//    	  cout << getLogHeader() << "with protocolId: " << m->getProtocolId() << endl;
     	  if ( !msgReceived(m) ) {
     	    fwdMsg = true;
-//            cout << getLogHeader() << "msg not received: " << m->getSender() << endl;
     	    if (protocolId != m->getProtocolId()) {
                 if (optimize_gluing) {
-//                  cout << getLogHeader() << "doing transformation: " << m->getSender() << endl;
                   double timeout = computeAdaptTimeout();
                   adaptForeigsMsgs[m->getId()] = m->getPayload();
-//                  cerr << getLogHeader() <<  "Setting event for: " << m->getId() << endl;
-//                  cerr << getLogHeader() << "Current protocol: " << protocolId << endl;
-//                  cerr << getLogHeader() << "Foreign protocol: " << m->getProtocolId() << endl;
                   timeoutMsgs[m->getId()] = delayed_event(
                     ControlMessageTypes::TRANSFORMATION_TIMEOUT,
                     m->getId(), timeout);
                 } else fwdMsg = true;
         	} else {
         		fwdMsg = true;
-        		// cerr << getLogHeader() <<  " enter 1111 with Msg.protocolId: " << m->getProtocolId() << endl;
         		adaptMyProtoMsgs[m->getId()] = m->getPayload();
     	    }
     	  } else {
     	    if (protocolId == m->getProtocolId()) {
         		if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() ){
-        		    // cerr << getLogHeader() <<  " enter 4444 with Msg.protocolId: " << m->getProtocolId() << endl;
         		    auto tmp = timeoutMsgs[m->getId()];
         		    cancelAndDelete(tmp);
         		    timeoutMsgs.erase(m->getId());
@@ -408,7 +400,11 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
               cancelAndDelete(msg);
               break;
             case WAKEUP:
-                //configure_neighbors();
+                /**
+                 * the instance of <this> is a FullyAdaptive, this
+                 * call will execute FullyAdaptive.time_to_broadcast_payload()
+                 * instead of BroadcastingAppBase.time_to_broadcast_payload()
+                 */
                 this->time_to_broadcast_payload(nullptr);
                 next_to_send++;
                 if (next_to_send != msgs.end()) {
@@ -499,9 +495,9 @@ BroadcastingAppBase::handleMessageWhenUp(cMessage *msg)
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-      // cout << getLogHeader() << "officer election with UDP_I_DATA " <<  endl;
-    	bool fwdMsg = false;
-      bool done = false;
+//       cout << getLogHeader() << "officer election with UDP_I_DATA " <<  endl;
+        bool fwdMsg = false;
+        bool done = false;
     	done = applyMsgsTransformation (msg, fwdMsg);
     	borderDetector(msg);
     	if (!done || fwdMsg) {
@@ -616,7 +612,6 @@ BroadcastingAppBase::processStart()
     socket.bind(local_port);
     socket.setBroadcast(true);
 
-
     {
       cXMLElement *configs = par("protocolsConfig").xmlValue();
       if (configs) {
@@ -632,15 +627,6 @@ BroadcastingAppBase::processStart()
 //              cout << "Protocol: " << protocolName << ", parameter: " << param_name << ", value: " << param_value << endl;
               gateway->add_param_value_pair(protocolName, param_name, param_value);
             }
-            // string tmp(protocolName);
-            // tmp = "inet::" + tmp;
-            // cObject* obj = cObjectFactory::createOne(tmp.c_str());
-            // IBroadcastProtocol* protocol = dynamic_cast<IBroadcastProtocol*>(obj);
-            // if (!protocol) {
-            //   cerr << "Couldn't find class " << tmp << endl;
-            //   endSimulation();
-            // }
-            // knownProtocols.emplace(string(protocolName), std::shared_ptr<IBroadcastProtocol>(protocol));
         }
       }
     }
