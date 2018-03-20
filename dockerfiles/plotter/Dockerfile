@@ -2,14 +2,14 @@ FROM r-base:latest
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 LABEL Description="r-base image to plot datasets of emergent_overlays"
 
-RUN mkdir -p /usr/emrg-ovrl
+RUN mkdir -p /usr/emrg-ovrl && mkdir -p /usr/emrg-ovrl/src
 WORKDIR /usr/emrg-ovrl
 
-COPY r-packages /usr/emrg-ovrl/r-packages
+ADD r-packages ./
 
 RUN cd r-packages && R CMD BATCH r-plotter-pkgs.R
 
-COPY src/scripts /usr/emrg-ovrl/src/scripts
+ADD src/scripts ./src/
 
 RUN apt-get update && \
   apt-get install -y python
