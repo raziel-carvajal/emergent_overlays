@@ -4,7 +4,6 @@ services:
     env_file: .env
     build:
       context: ./dockerfiles/trace_generator
-    image: trace_generator:latest
     volumes:
       - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies'
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
@@ -12,8 +11,8 @@ services:
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
   worker:
     build:
+      context: .
       dockerfile: ./dockerfiles/worker/Dockerfile
-    image: worker:latest
     volumes:
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
@@ -21,8 +20,8 @@ services:
       - './results:/usr/emrg-ovrl/results'
   plotter:
     build:
+      context: .
       dockerfile: ./dockerfiles/plotter/Dockerfile
-    image: plotter:latest
     volumes:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
