@@ -163,7 +163,7 @@ Mpr_t2::process_payload(const Broadcast* m)
 				from_selector = (j == myself);
 			}
 		}
-		if (from_selector || gateway->bridge()) {
+		if (gateway->amIborderNode() || from_selector) {
 			gateway->broadcast(key, build_message_to_broadcast());
 		} else {
 //            cout << simTime().str() << " " + gateway->get_name()<<

@@ -31,8 +31,10 @@ Define_Module(FullyAdaptive);
 void
 FullyAdaptive::handleMessageWhenUp(cMessage *msg)
 {
-//         std::cout << simTime().str() << " " + gateway->get_name() <<
-//          " BOOTSTRAP MSG, " << current_protocol_name << endl;
+// std::cout << simTime().str() << " " + gateway->get_name() <<
+// " BOOTSTRAP MSG, " << current_protocol_name << endl;
+// if (!use_topology_fix) throw std::logic_error("Shouldn't call this
+//	if we are not fixing the issue with topology-based algorithms");
   if (msg->isSelfMessage()) {
     // detect if the message is handled by the protocols
     switch (msg->getKind()) {
@@ -79,10 +81,6 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
           cancelAndDelete(msg);
         }
       break;
-      case HALT_SIMULATION_DELAY:
-        emit(signal_protocol_change, 'E');
-        BroadcastingAppBase::handleMessageWhenUp(msg);
-      break;
       case APPROXIMATE_DENSITY:
           {
             Coord p = gateway->get_current_position();
@@ -117,6 +115,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
     monitor->handle_messages(msg);
     auto pkt = PK(msg);
     auto initialProtocol = par("initialProtocol").stdstringValue();
+    // XXX what the hell is this?
   	if (initialProtocol != "middleware") {
 	    if (pkt->hasEncapsulatedPacket()) {
 	      pkt = pkt->getEncapsulatedPacket();

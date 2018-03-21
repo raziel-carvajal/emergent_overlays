@@ -31,6 +31,7 @@
 using namespace std;
 using inet::broadcasting::Broadcast;
 using inet::broadcasting::Hello;
+using inet::broadcasting::Border;
 
 namespace inet {
 
@@ -125,8 +126,8 @@ void BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m) {
 	app->cancelAndDelete(m);
 }
 
-bool BroadcastingAppBase::OmnetBroadcastGateway::bridge() {
-	return app->amIbridge;
+bool BroadcastingAppBase::OmnetBroadcastGateway::amIborderNode() {
+	return app->am_i_border_node;
 }
 
 void BroadcastingAppBase::OmnetBroadcastGateway::emitDensityApproximation(
@@ -164,77 +165,37 @@ double BroadcastingAppBase::computeAdaptTimeout() {
 	return uniform(adaptationMin, adaptationMax);
 }
 
-bool BroadcastingAppBase::msgReceived(const broadcasting::Broadcast* m) {
-	bool inMyMsgs = adaptMyProtoMsgs.find(m->getId()) != adaptMyProtoMsgs.end();
-	bool inForMsgs = adaptForeigsMsgs.find(m->getId()) != adaptForeigsMsgs.end();
-	return inMyMsgs || inForMsgs;
-}
-
-// XXX given that border nodes are labed thanks to control protocols, this method is useless!
-bool BroadcastingAppBase::applyMsgsTransformation(cMessage *msg, bool &fwdMsg) {
-	bool done =
-			withAdaptation
-					&& processMessage<Broadcast>(PK(msg), [&] (const Broadcast* m) {
-//    	  cout << getLogHeader() << "Sender of broadcast [1]: " << m->getSender() << endl;
-							if ( !msgReceived(m) ){
-								fwdMsg = true;
-								if (protocolId != m->getProtocolId())
-								{
-									double timeout = computeAdaptTimeout();
-									adaptForeigsMsgs[m->getId()] = m->getPayload();
-									timeoutMsgs[m->getId()] = delayed_event(TRANSFORMATION_TIMEOUT, m->getId(), timeout);
-								}
-								else
-								{
-									fwdMsg = true;
-									adaptMyProtoMsgs[m->getId()] = m->getPayload();
-								}
-							}
-							else
-							{
-								if (protocolId == m->getProtocolId())
-								{
-									if (timeoutMsgs.find(m->getId()) != timeoutMsgs.end() )
-									{
-										auto tmp = timeoutMsgs[m->getId()];
-										cancelAndDelete(tmp);
-										timeoutMsgs.erase(m->getId());
-									}
-									fwdMsg = true;
-								}
-							}
-						});
-	return done;
-}
-
 bool BroadcastingAppBase::borderDetector(cMessage* msg) {
 	bool known_ctrl_msg = false;
-	bool msg_trans_ok = withAdaptation &&
-			processMessage<Hello>(PK(msg), [&] (const Hello* m) {
-				if (m->getProtocolId() != protocolId) {
-					if ( in_border_nodes(m->getProtocolId()) ){
-						nodes_at_border[m->getProtocolId()].insert(m->getSender());
-					} else {
-						border_detector_timers[m->getProtocolId()] =
-							delayed_event(
-								BORDER_DETECTOR_TIMER,
-								strdup(m->getProtocolId()),
-								uniform(0.1, border_detector_max_timeout)
-							);
-					}
-				} else {
-					known_ctrl_msg = true;
-				}
-			});
+	bool msg_trans_ok =
+			processMessage<Hello>(PK(msg),
+					[&] (const Hello* m) {
+						if (m->getProtocolId() != protocolId) {
+							if ( !in_border_nodes(m->getProtocolId()) ) {
+								double timer_dur = uniform(0.1, border_detector_max_timeout);
+								cout << getLogHeader() << "scheduling border-detector event, duration [" <<
+								timer_dur << "]" << endl;
+								border_detector_timers[m->getProtocolId()] = delayed_event(
+										BORDER_DETECTOR_TIMER,
+										strdup(m->getProtocolId()),
+										timer_dur
+								);
+							}
+							cout << getLogHeader() << "node [" << m->getSender() <<
+							"] is now a candidate for being border node" << endl;
+							nodes_at_border[m->getProtocolId()].insert(m->getSender());
+						} else {
+							known_ctrl_msg = true;
+						}
+					});
 	return msg_trans_ok && !known_ctrl_msg;
 }
 
 //Define_Module(BroadcastingAppBase);
 
 bool BroadcastingAppBase::in_border_nodes(const std::string& protocolId) {
-	if (nodes_at_border.size() == 0 || nodes_at_border.find(protocolId) == nodes_at_border.end())
-		return false;
-	return true;
+	return nodes_at_border.find(protocolId) != nodes_at_border.end()
+			&& nodes_at_border[protocolId].size() > 0;
 }
 
 void BroadcastingAppBase::initialize(int stage) {
@@ -270,7 +231,8 @@ void BroadcastingAppBase::initialize(int stage) {
 		adaptationMax = par("adaptationMax").doubleValue();
 		adaptationMin = par("adaptationMin").doubleValue();
 		nr_max_custom_officers = par("nr_max_custom_officers").longValue();
-		border_detector_max_timeout = par("border_detector_max_timeout").doubleValue();
+		border_detector_max_timeout =
+				par("border_detector_max_timeout").doubleValue();
 		withAdaptation = par("withAdaptation").boolValue();
 //            cout << getLogHeader()  << "adaptation" << withAdaptation << endl;
 	}
@@ -291,18 +253,11 @@ void BroadcastingAppBase::initialize(int stage) {
 		break;
 	case INITSTAGE_LAST: {
 		double d = par("wakeUpTime").doubleValue();
-		// DON'T REMOVE THIS THREE LINES. IT IS IMPORTANT TO GUARANTEE A PROPER MEASUREMENT
-		d += nr_broadcast_msg * par("intervalBroadcastTime").doubleValue();
-		d += 3; // some extra seconds
-		delayed_event_with_strict_time(LAST_POWER_REPORT, "last power report",
-				d - 0.5);
-		// ==========================================================================
-		d = par("wakeUpTime").doubleValue();
 		// not the best solution because this super class doesn't know anything about
 		// adaptation parameters
 		delayed_event(APPROXIMATE_DENSITY, "approximation of nodes density",
 				d + par("deltaApprox").doubleValue());
-
+		// XXX what INOG is this for?
 		if (!par("single_source").boolValue()) {
 			cModule* host = getContainingNode(this);
 			const char* s = host->par("id_messages_to_send");
@@ -368,7 +323,6 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 						d + idx * par("intervalBroadcastTime").doubleValue());
 			}
 			cancelAndDelete(msg);
-
 			break;
 		case BROADCAST_DELAY: {
 			void* data = msg->getContextPointer();
@@ -380,63 +334,58 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			cancelAndDelete(msg);
 			break;
 		}
-		case LAST_POWER_REPORT: {
-			Hello* pkt = build_hello_message();
-			send_package(pkt);
-
-			auto d = par("wakeUpTime").doubleValue()
-					+ nr_broadcast_msg * par("intervalBroadcastTime").doubleValue() + 5; //some extra seconds
-			delayed_event_with_strict_time(HALT_SIMULATION_DELAY, "halt simulation",
-					d);
-			cancelAndDelete(msg);
-		}
-			break;
-		case HALT_SIMULATION_DELAY:
-			cancelAndDelete(msg);
-			endSimulation();
-			break;
-		case TRANSFORMATION_TIMEOUT: {
-			void* data = msg->getContextPointer();
-			std::string key = string((char*) data);
-			cerr << getLogHeader() << "Doing event for key: " << key << endl;
-			this->time_to_broadcast_payload(data);
-			timeoutMsgs.erase(key);
-			cancelAndDelete(msg);
-		}
-			break;
 		case BORDER_DETECTOR_TIMER: {
-//              if (!use_topology_fix) throw std::logic_error("Shouldn't call this if we are not fixing the issue with topology-based algorithms");
+			/* Policy to select a border node. Suggestions:
+			 * - piggyback stored energy of nodes to chose that node
+			 *   with the highest value as border node
+			 * Currently, choosing a border node follows a first-received-first-chosen rule
+			 * OPEN QUESTIONS
+			 *   - how to up date this set of potential border nodes?
+			 *   - mobility has an impact on this decision
+			 */
+			cout << getLogHeader() << "border-detector event expires " << endl;
 			char* foreign_prot = (char*) msg->getContextPointer();
-			// if (nodes_at_border.find(foreign_prot) == nodes_at_border.end())
-			// cout << getLogHeader() << "NOT IN MAP" << endl;
-			broadcasting::TargetSet targets;
-			// cout << getLogHeader() << "foreing prot: " << foreign_prot <<  endl;
-			for (const auto& e : nodes_at_border[foreign_prot]) {
-				targets.insert(e);
-				if (targets.size() == nr_max_custom_officers)
-					break;
+			cout << getLogHeader() << "choosing a border node for foreign protocol: "
+					<< foreign_prot << endl;
+			if (nodes_at_border.find(foreign_prot) == nodes_at_border.end()) {
+				cerr << getLogHeader()
+						<< "set of potential border nodes was deleted !!!" << endl;
+			} else {
+				Border* border_msg = new Border();
+				border_msg->setSender(myself.c_str());
+				border_msg->setSrcProtocol(protocolId.c_str());
+				border_msg->setForeignProtocol(foreign_prot);
+				border_msg->setHopTL(2);
+//				cout << getLogHeader() << "new Border() : done" << endl;
+				auto set_it = nodes_at_border[foreign_prot].begin();
+				advance(set_it, 0);
+//				cout << getLogHeader() << "adcanve() : done" << endl;
+				string chosen_node = *set_it;
+				cout << getLogHeader() << "border node is [" << chosen_node.c_str()
+						<< "]" << endl;
+				border_msg->setChosenNode(chosen_node.c_str());
+				known_foreign_algos.insert(foreign_prot);
+				send_package(border_msg);
+//				cout << getLogHeader() << "Border message was sent" << endl;
 			}
-			// cout << getLogHeader() << "AFTER LOOP " <<  endl;
-//			if (nodes_at_border[foreign_prot].size() != lastForeignHelloSenders.size()
-//					|| !std::equal(nodes_at_border[foreign_prot].begin(),
-//							customOfficers[foreign_prot].end(),
-//							lastForeignHelloSenders.begin())) {
-//				//  cout << getLogHeader() << "IN CONDITION " <<  endl;
-//				auto tmp = new broadcasting::Border();
-//				tmp->setSourceProtocol(protocolId.c_str());
-//				tmp->setForeignProtocol(foreign_prot);
-//				tmp->setTargets(targets);
-//				send_package(tmp);
-//				border_detector_timers.erase(foreign_prot);
-//				lastForeignHelloSenders = nodes_at_border[foreign_prot];
-//				nodes_at_border[foreign_prot].clear();
-//
-//				//  cout << getLogHeader() << "BEFORE " <<  endl;
-//				free(foreign_prot);
-//				cancelAndDelete(msg);
-//				//  cout << getLogHeader() << "AFTER" <<  endl;
-//			}
-			//  cout << getLogHeader() << "END OF OFFICIER ELECTION TIMEMOU" <<  endl;
+			cancelAndDelete(msg);
+		}
+			break;
+		case FWD_DELAYED_MSG: {
+			cout << getLogHeader() << "FWD_DELAYED_MSG, msg in queue: "
+					<< scheduled_border_msgs.size() << endl;
+			if (scheduled_border_msgs.size() != 0) {
+				auto iter = scheduled_border_msgs.begin();
+				advance(iter, 0);
+				Border* scheduled_msg = *iter;
+				if (scheduled_msg != nullptr) {
+					send_package(scheduled_msg);
+					cout << getLogHeader() << "now messages in queue: "
+							<< scheduled_border_msgs.size() << endl;
+					scheduled_border_msgs.erase(iter);
+				}
+			}
+			cancelAndDelete(msg);
 		}
 			break;
 		default:
@@ -444,22 +393,22 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 		}
 	} else if (msg->getKind() == UDP_I_DATA) {
 		// try to detect nodes at the border between two protocols
-		if (!borderDetector(msg)){
-			/* two situations when a border node wasn't detected:
+		if (!borderDetector(msg)) {
+			/* when a border node wasn't detected, two reasons are possible:
 			 *  (i) <msg> is a broadcast message
 			 *    1.- from same protocol
 			 *    2.- from a foreign one
 			 * (ii) <msg> is a ctrl message from same protocol
-			 *    In this case, <msg> must treat as any ctrl message
+			 *    In this case, <msg> is treated as any ctrl message
 			 */
 			on_network_message_received(PK(msg));
 		}
-		/* when a border node was detected, msg is a ctrl message
+		/* when a border node was detected, <msg> is a ctrl message
 		 * from a foreign protocol that souldn't be computed
 		 * by this local node (even if the foreign protocol
 		 * exchanges control messages too)
+		 * TODO is there a way to exploit a foreing ctrl message?
 		 */
-//		done = applyMsgsTransformation(msg, fwdMsg);
 		delete msg;
 	}
 
@@ -475,12 +424,59 @@ BroadcastingAppBase::build_hello_message() {
 	return pkt;
 }
 
-bool BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
-	/**
-	 * NOTE entry point of application messages (control and broadcast)
-	 */
-	bool done = processMessage<Hello>(pkt, [&] (const Hello* m)
-	{
+/**
+ * NOTE entry point of application messages (control and broadcast)
+ */
+void BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
+	if (dynamic_cast<Border *>(pkt) != nullptr) {
+		Border* border_msg = dynamic_cast<Border *>(pkt);
+		if (border_msg->getSender() == myself)
+			return;
+		cout << getLogHeader() << "Border msg received from sender ["
+				<< border_msg->getSender() << "]" << endl;
+		if (border_msg->getSrcProtocol() != protocolId) {
+			if (border_msg->getChosenNode() == myself)
+				am_i_border_node = true;
+			else
+				am_i_border_node = false;
+			cout << getLogHeader() << "am I a border node? ANSW [" << am_i_border_node
+					<< "]" << endl;
+		} else {
+			// avoid forwarding indefinitely
+			bool not_known = known_foreign_algos.find(border_msg->getForeignProtocol())
+					== known_foreign_algos.end();
+			if (not_known) {
+				// INFO cancel ongoing timers that chose a different border node
+				cMessage* ongoing_border_detector = border_detector_timers[border_msg->getForeignProtocol()];
+				if (ongoing_border_detector != nullptr) {
+					cout << getLogHeader() << "cancel border-detector event !" << endl;
+					cancelAndDelete(ongoing_border_detector);
+					/* INFO remove candidates of being border nodes.
+					 *     This measure is a little bit drastic because
+					 *     the set could be reuse later. On the other hand,
+					 *     this a way to deal with mobility.
+					 */
+					nodes_at_border[border_msg->getForeignProtocol()].clear();
+				}
+
+				known_foreign_algos.insert(border_msg->getForeignProtocol());
+
+				Border* msg_cpy = new Border();
+				msg_cpy->setSender(border_msg->getSender());
+				msg_cpy->setSrcProtocol(border_msg->getSrcProtocol());
+				msg_cpy->setForeignProtocol(border_msg->getForeignProtocol());
+				msg_cpy->setHopTL(border_msg->getHopTL() - 1);
+				cout << getLogHeader() << "border messages hope-to-live ["
+						<< msg_cpy->getHopTL() << "]" << endl;
+
+				if (msg_cpy->getHopTL() > 0) {
+					scheduled_border_msgs.insert(msg_cpy);
+					cout << getLogHeader() << "keep forwarding border message" << endl;
+					delayed_event(FWD_DELAYED_MSG, "FWD_DELAYED_MSG", delta);
+				}
+			}
+		}
+	} else if (dynamic_cast<Hello *>(pkt) != nullptr) {
 		/**
 		 * the instance of <this> is a FullyAdaptive object
 		 * and not an object of type BroadcastingAppBase such
@@ -488,40 +484,13 @@ bool BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
 		 * FullyAdaptive.on_hello_received() instead of
 		 * BroadcastingAppBase.on_hello_received()
 		 */
-		this-> on_hello_received(m);
-	});
+		this->on_hello_received(dynamic_cast<Hello *>(pkt));
+	} else if (dynamic_cast<Broadcast *>(pkt) != nullptr) {
+		this->on_payload_received(dynamic_cast<Broadcast *>(pkt));
+	} else {
+		cerr << getLogHeader() << "unknown message received" << endl;
+	}
 
-	done = done || processMessage<Broadcast>(pkt, [&] (const Broadcast* m)
-	{
-//    cout << getLogHeader() << "Handling message: " << m->getSender() << endl;
-			this->on_payload_received(m);
-		});
-
-	done = done
-			|| processMessage<broadcasting::Border>(pkt,
-					[&] (const broadcasting::Border* m)
-					{
-						if (m->getSourceProtocol() != protocolId)
-						{
-							if (m->getTargets().find(myself) != m->getTargets().end())
-							{
-								amIbridge = true;
-							}
-						}
-						else
-						{
-							// if I have a time out for the same foreign protocol
-							string key(m->getForeignProtocol());
-							if (border_detector_timers.find(key) != border_detector_timers.end())
-							{
-								auto mm = border_detector_timers[key];
-								cancelAndDelete(mm);
-								border_detector_timers.erase(key);
-							}
-						}
-					});
-
-	return done;
 }
 
 bool BroadcastingAppBase::handleNodeStart(IDoneCallback *doneCallback) {

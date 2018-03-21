@@ -51,7 +51,7 @@ public:
   virtual void cancel_message(cMessage* m) = 0;
   virtual int register_new_control_message() = 0;
 
-  virtual bool bridge() = 0;
+  virtual bool amIborderNode() = 0;
   virtual void setProtocolId(const std::string& protocol) = 0;
   virtual double getDelayToAvoidCollisions() = 0;
 

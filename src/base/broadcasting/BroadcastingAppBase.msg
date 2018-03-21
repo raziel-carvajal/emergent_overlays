@@ -38,7 +38,11 @@ packet Broadcast {
 }
 
 packet Border {
-  string sourceProtocol;	//protocol of the sender
-  string foreignProtocol;	// foreign protocol I care about 
-  TargetSet targets;
+  string sender;
+  // QUESTION: is it important to keep track of the decider?
+  // string decider;      // node that chose the border node
+  string srcProtocol;  // protocol of the sender
+  string chosenNode;   // border node
+  string foreignProtocol;
+  int hopTL;
 }

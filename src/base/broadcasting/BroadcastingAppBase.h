@@ -43,14 +43,12 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         WAKEUP,
         DISPLAY_TIME,
         BROADCAST_DELAY,
-        HALT_SIMULATION_DELAY,
-        TRANSFORMATION_TIMEOUT,
         BORDER_DETECTOR_TIMER,
-        LAST_POWER_REPORT,
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
         BOOTSTRAP_MSG,
         BUILD_STRUCT,
+        FWD_DELAYED_MSG,
         First = IDLE,
         Last = BUILD_STRUCT
     };
@@ -89,7 +87,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
       void delayed_event(int type, const std::string& key, double delay) override;
       cMessage* delayed_broadcast(const std::string& key, double delay) override;
 
-      bool bridge() override;
+      bool amIborderNode() override;
 
       std::string get_name() override {
 	      return app->myself;
@@ -134,14 +132,15 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::set<std::string> lastForeignHelloSenders;
 
     //Payloads
-    std::map<std::string, std::string> adaptForeigsMsgs;
     std::map<std::string, std::string> adaptMyProtoMsgs;
-    std::map<std::string, cMessage*> timeoutMsgs;
     std::map<std::string, cMessage*> border_detector_timers;
-
+    // key: protocol identifier
+    // value: set of potential border nodes
     std::map<std::string, std::set<std::string>> nodes_at_border;
+    std::set<std::string> known_foreign_algos;
+    std::set<broadcasting::Border*> scheduled_border_msgs;
 
-    bool amIbridge = false;
+    bool am_i_border_node = false;
 
   private:
 
@@ -211,7 +210,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     virtual void on_hello_received(const broadcasting::Hello* msg);
     virtual void on_payload_received(const broadcasting::Broadcast* m); // you must ALWAYS redefine (overwrite) this one
-    virtual bool on_network_message_received(cPacket* pkt); // This nasty one must be defined if your protocol is using other type of messages (percolator)
+    virtual void on_network_message_received(cPacket* pkt); // This nasty one must be defined if your protocol is using other type of messages (percolator)
 
     virtual void time_to_broadcast_payload(void* user_data); // it is called sometime after you call delayed_broadcast
 
@@ -251,9 +250,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
     double computeAdaptTimeout();
 
-    bool msgReceived(const broadcasting::Broadcast* m);
-
-    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
+//    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
     bool borderDetector(cMessage *msg);
 
 };
