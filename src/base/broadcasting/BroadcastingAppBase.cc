@@ -123,7 +123,8 @@ std::string BroadcastingAppBase::OmnetBroadcastGateway::get_string_parameter(
 }
 
 void BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m) {
-	app->cancelAndDelete(m);
+	if (m != nullptr)
+		app->cancelAndDelete(m);
 }
 
 bool BroadcastingAppBase::OmnetBroadcastGateway::amIborderNode() {
@@ -163,27 +164,25 @@ BroadcastingAppBase::BroadcastingAppBase() {
 
 bool BroadcastingAppBase::borderDetector(cMessage* msg) {
 	bool known_ctrl_msg = false;
-	bool msg_trans_ok =
-			processMessage<Hello>(PK(msg),
-					[&] (const Hello* m) {
-						if (m->getProtocolId() != protocolId) {
-							if ( !in_border_nodes(m->getProtocolId()) ) {
-								double timer_dur = uniform(0.001, delta);
+	bool msg_trans_ok = processMessage<Hello>(PK(msg), [&] (const Hello* m) {
+		if (m->getProtocolId() != protocolId) {
+			if ( !in_border_nodes(m->getProtocolId()) ) {
+				double timer_dur = uniform(0.001, delta);
 //								cout << getLogHeader() << "scheduling border-detector event, duration [" <<
 //								timer_dur << "]" << endl;
-								border_detector_timers[m->getProtocolId()] = delayed_event(
-										BORDER_DETECTOR_TIMER,
-										strdup(m->getProtocolId()),
-										timer_dur
-								);
-							}
+			border_detector_timers[m->getProtocolId()] = delayed_event(
+					BORDER_DETECTOR_TIMER,
+					strdup(m->getProtocolId()),
+					timer_dur
+			);
+		}
 //							cout << getLogHeader() << "node [" << m->getSender() <<
 //							"] is now a candidate for being border node" << endl;
-							nodes_at_border[m->getProtocolId()].insert(m->getSender());
-						} else {
-							known_ctrl_msg = true;
-						}
-					});
+		nodes_at_border[m->getProtocolId()].insert(m->getSender());
+	} else {
+		known_ctrl_msg = true;
+	}
+});
 	return msg_trans_ok && !known_ctrl_msg;
 }
 
@@ -317,9 +316,11 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			cancelAndDelete(msg);
 			break;
 		case BROADCAST_DELAY: {
-			void* data = msg->getContextPointer();
-			this->time_to_broadcast_payload(data);
-			cancelAndDelete(msg);
+			if (msg != nullptr) {
+				void* data = msg->getContextPointer();
+				this->time_to_broadcast_payload(data);
+				cancelAndDelete(msg);
+			}
 		}
 			break;
 		case DISPLAY_TIME: {
@@ -436,23 +437,23 @@ void BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
 
 		if (!known_protocol && border_msg->getSrcProtocol() == protocolId) {
 //			if (!known_protocol) {
-				// labeled algorithm as known
-				known_foreign_algos.insert(border_msg->getForeignProtocol());
+			// labeled algorithm as known
+			known_foreign_algos.insert(border_msg->getForeignProtocol());
 
-				// INFO cancel ongoing timers, which aim to chose a different border node,
-				//      of protocol border_msg->getForeignProtocol()
-				cMessage* ongoing_border_detector =
-						border_detector_timers[border_msg->getForeignProtocol()];
-				if (ongoing_border_detector != nullptr) {
+			// INFO cancel ongoing timers, which aim to chose a different border node,
+			//      of protocol border_msg->getForeignProtocol()
+			cMessage* ongoing_border_detector =
+					border_detector_timers[border_msg->getForeignProtocol()];
+			if (ongoing_border_detector != nullptr) {
 //					cout << getLogHeader() << "cancel border-detector event !" << endl;
-					cancelAndDelete(ongoing_border_detector);
-					/* INFO remove candidates of being border nodes.
-					 *     This measure is a little bit drastic because
-					 *     the set could be reuse later. On the other hand,
-					 *     this a way to deal with mobility.
-					 */
-					nodes_at_border[border_msg->getForeignProtocol()].clear();
-				}
+				cancelAndDelete(ongoing_border_detector);
+				/* INFO remove candidates of being border nodes.
+				 *     This measure is a little bit drastic because
+				 *     the set could be reuse later. On the other hand,
+				 *     this a way to deal with mobility.
+				 */
+				nodes_at_border[border_msg->getForeignProtocol()].clear();
+			}
 //			}
 
 			Border* msg_cpy = new Border();
@@ -697,7 +698,7 @@ void BroadcastingAppBase::send_package(cPacket* m) {
 
 void BroadcastingAppBase::broadcast(std::string key,
 		broadcasting::Broadcast* msg) {
-	// cout << getLogHeader() << "BROADCASTING " << key << endl;
+	cout << getLogHeader() << "BROADCASTING " << key << endl;
 	printBroadcastingLog(key);
 	msg->addByteLength(128);
 	// msg->setPayload(std::string(128, 'p').c_str());

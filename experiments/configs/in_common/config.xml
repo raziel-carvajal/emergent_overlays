@@ -25,7 +25,8 @@
     <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="TimeBasedFlooding">
-    <Parameter name="maxTimer" value="0.09" type="seconds"></Parameter>
+		<Parameter name="max_waiting_time" value="0.01" type="seconds"></Parameter>
+    <Parameter name="max_msg_rcv" value="3.0" type="seconds"></Parameter>
   </Protocol>
   <Protocol name="ProbFlooding">
     <Parameter name="helloTime" value="30" type="seconds"></Parameter>

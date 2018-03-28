@@ -22,7 +22,10 @@ import broadcasting.BroadcastingBase;
 //
 // Some nodes distribute messages in the network using unicast UDP.
 //
-simple TimeBasedFlooding extends BroadcastingBase like IUDPApp{
+simple TimeBasedFlooding extends BroadcastingBase like IUDPApp
+{
     parameters:
+//        INFO: all configurations must be written at [config.xml]
+//        double max_waiting_time @unit(s) = default(0.01s);
         @class(inet::TimeBasedFlooding);
 }
