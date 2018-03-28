@@ -177,8 +177,8 @@ bool BroadcastingAppBase::borderDetector(cMessage* msg) {
 										timer_dur
 								);
 							}
-							cout << getLogHeader() << "node [" << m->getSender() <<
-							"] is now a candidate for being border node" << endl;
+//							cout << getLogHeader() << "node [" << m->getSender() <<
+//							"] is now a candidate for being border node" << endl;
 							nodes_at_border[m->getProtocolId()].insert(m->getSender());
 						} else {
 							known_ctrl_msg = true;
