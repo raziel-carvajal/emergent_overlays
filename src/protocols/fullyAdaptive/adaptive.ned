@@ -18,29 +18,34 @@ package fullyAdaptive;
 import inet.applications.contract.IUDPApp;
 import broadcasting.BroadcastingBase;
 
-//
-//
-// Some nodes distribute messages in the network using unicast UDP.
-//
 simple FullyAdaptive extends BroadcastingBase like IUDPApp
 {
     parameters:
-      int density_threshold_lower = default(15);
-      int density_threshold_upper = default(15);
-      string initialProtocol;
-      //integer value to define adaptation policy where:
-      //	0: LOCAL
-      //	1: SWSP
-      //	2: DENSITY_AREA
-      int adaptation_policy = default(0);
-      double centerDensAx = default(50.0);
-      double centerDensAy = default(50.0);
-      double denseAreaWid = default(100.0);
-      double adapTimer @unit(s) = default(0.5s);
-      //ground truth
-      double deltaApprox @unit(s) = default(1.0s);
-      int bootstrap_ctrl_msgs_no = default(2);
-      @class(inet::FullyAdaptive);
+        string protocolId = default("");
+        bool withAdaptation = default(false);
 
-      @statistic[protocol_change](title="The protocol has change"; record=vector; source=protocol_change);
+        // message translation mechanism
+        int hop_to_live = default(2);
+        int bootstrap_ctrl_msgs_no = default(2);
+
+        // adaptation mechanism
+        int density_threshold_lower = default(15);
+        int density_threshold_upper = default(15);
+        string initialProtocol;
+        
+        //integer value to define adaptation policy where:
+        //	0: LOCAL
+        //	1: SWSP
+        //	2: DENSITY_AREA
+        int adaptation_policy = default(0);
+        double centerDensAx = default(50.0);
+        double centerDensAy = default(50.0);
+        double denseAreaWid = default(100.0);
+        double adapTimer @unit(s) = default(0.5s);
+        
+        //ground truth
+        double deltaApprox @unit(s) = default(1.0s);
+        
+        @class(inet::FullyAdaptive);
+        @statistic[protocol_change](title="The protocol has change"; record=vector; source=protocol_change);
 }

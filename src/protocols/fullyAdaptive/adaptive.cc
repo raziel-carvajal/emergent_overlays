@@ -280,7 +280,6 @@ void
 FullyAdaptive::processStart()
 {
   BroadcastingAppBase::processStart();
-
   signal_protocol_change = this->registerSignal("protocol_change");
 
   std::string monitoring_class("inet::BroadcastMsgBasedMonitor");

@@ -123,12 +123,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     int local_port = 10000;
     UDPSocket socket;
 
-
-    double adaptationMax;
-    double adaptationMin;
-    double border_detector_max_timeout;
     std::string protocolId;
-    int nr_max_custom_officers;
     std::set<std::string> lastForeignHelloSenders;
 
     //Payloads
@@ -163,6 +158,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
   protected:
 
     bool withAdaptation;
+    int hop_to_live;
 
     // is the source of a broadcast
     bool is_source;
@@ -247,8 +243,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     void send_package(cPacket* m, std::string dst); // send a package to a particular devices given its host name
     int get_next_id_for_msg();
     int get_last_id_for_msg();
-
-    double computeAdaptTimeout();
 
 //    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
     bool borderDetector(cMessage *msg);

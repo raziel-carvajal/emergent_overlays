@@ -45,14 +45,6 @@ simple BroadcastingBase
 
         xml protocolsConfig; // xml containing the full configuration for every broadcast protocol
 
-        // Adaptation parameters
-        double adaptationMax @unit(s) = default(0.04s);
-        double adaptationMin @unit(s) = default(0.01s);
-        bool withAdaptation = default(false);
-        string protocolId = default("");
-        int nr_max_custom_officers = default(1);
-        double border_detector_max_timeout @unit(s) = default(0.2s);
-
         @statistic[msg_received](title="A node receive a message";record=vector; source=msg_received);
         @statistic[msg_sent](title="The node sends the message";record=vector;source=msg_sent);
 		@statistic[broadcast_msg_received](title="a message was received again"; record=vector; source=broadcast_msg_received);
