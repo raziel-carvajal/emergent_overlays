@@ -53,7 +53,7 @@ public:
 
   virtual bool amIborderNode() = 0;
   virtual void setProtocolId(const std::string& protocol) = 0;
-  virtual double getDelayToAvoidCollisions() = 0;
+  virtual double get_delta() = 0;
 
   template<typename T> T get_parameter(const std::string& protocol, const std::string& param) {
     return get_parameter(protocol, param, identity<T>());

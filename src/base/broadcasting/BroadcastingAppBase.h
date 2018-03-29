@@ -99,7 +99,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
       void cancel_message(cMessage* m) override;
       int register_new_control_message() override;
-      double getDelayToAvoidCollisions() override {
+      double get_delta() override {
           return app->delta;
       }
     };
@@ -215,11 +215,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     // core broadcast protocol
     virtual inet::broadcasting::Hello* build_hello_message();
     double get_random_delay() { return uniform(0.03, 0.1); }
-
-    // optional
-
     std::string getLogHeader();
-    void printBroadcastingLog(std::string key);
 
   private:
 

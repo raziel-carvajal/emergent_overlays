@@ -151,13 +151,6 @@ std::string BroadcastingAppBase::getLogHeader() {
 	return simTime().str() + " " + myself + " :: ";
 }
 
-void BroadcastingAppBase::printBroadcastingLog(std::string key) {
-	string info = "";
-	for (auto& n : neighbors)
-		info += n.first + "_";
-	// cout << getLogHeader() << "BROADCASTING " << key << " TO_NEIGHBORS " << info << endl;
-}
-
 BroadcastingAppBase::BroadcastingAppBase() {
 	gateway = std::make_shared<OmnetBroadcastGateway>(this);
 }
@@ -698,15 +691,12 @@ void BroadcastingAppBase::send_package(cPacket* m) {
 
 void BroadcastingAppBase::broadcast(std::string key,
 		broadcasting::Broadcast* msg) {
-	cout << getLogHeader() << "BROADCASTING " << key << endl;
-	printBroadcastingLog(key);
+//	cout << getLogHeader() << "BROADCASTING " << key << endl;
 	msg->addByteLength(128);
 	// msg->setPayload(std::string(128, 'p').c_str());
 	msg->setId(key.c_str());
 	msg->setSender(myself.c_str());
-	if (withAdaptation) {
-		msg->setProtocolId(protocolId.c_str());
-	}
+	msg->setProtocolId(protocolId.c_str());
 	send_package(msg);
 	emitSent(key);
 }
