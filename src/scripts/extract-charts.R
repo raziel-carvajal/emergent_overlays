@@ -402,6 +402,46 @@ highest.energy.consumption <- function(v){
   max(v - quasi_v)
 }
 
+get.node.roles <- function(overlays, msgs_ids) {
+  node_roles <- sapply(msgs_ids,
+    function(msg){
+      overlay <- overlays[[msg]]
+      roles_by_color <- V(overlay)$color
+      relays <- sapply(1:length(roles_by_color),
+        function(i){ ifelse(roles_by_color[i] == 'tomato', i, NA) }
+      )
+      relays <- relays[ !is.na(relays) ]
+      receivers <- sapply(1:length(roles_by_color),
+        function(i){ ifelse(roles_by_color[i] == 'gold', i, NA) }
+      )
+      receivers <- receivers[ !is.na(receivers) ]
+      non_reachable <- sapply(1:length(roles_by_color),
+        function(i){ ifelse(roles_by_color[i] == 'gray50', i, NA) }
+      )
+      non_reachable <- non_reachable[ !is.na(non_reachable) ]
+      data.frame(
+        relays=length(relays),
+        receivers=length(receivers),
+        non_reachable=length(non_reachable)
+      )
+    }
+  )
+
+  relays_perc <- sum( unlist( node_roles['relays', ] ) )
+  receiv_perc <- sum( unlist( node_roles['receivers', ] ) )
+  n_reac_perc <- sum( unlist( node_roles['non_reachable', ] ) )
+
+  nodes_no <- node_roles[, 1]$relays + node_roles[, 1]$receivers +
+    node_roles[, 1]$non_reachable
+  ds_length <- nodes_no * length(node_roles['relays', ])
+
+  data.frame(
+    relays=       ceiling((relays_perc * 100) / ds_length),
+    receivers=    ceiling((receiv_perc * 100) / ds_length),
+    non_reachable=ceiling((n_reac_perc * 100) / ds_length)
+  )
+}
+
 collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays,
   nodes){
   groundTruth <- lapply(msgs_ids,
@@ -524,7 +564,7 @@ main <- function(args) {
   	args$file, "name(broadcast_msg_received:vector)")
 
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
-  # store in a list a graph per broadcast session
+  # store in a list one graph per broadcast session
   overlays <- lapply(msgs_ids, function(msg) {
     # point in time where node
     locationTimestamp <-
@@ -541,10 +581,17 @@ main <- function(args) {
       locationTimestamp,
       msgTimestamp,
       msgReceivers,
-      # within this loop, we plot the one overlay per broadcast session
       msgEmitters, savePlot=TRUE
     )
   })
+
+  # INFO: save proportion of nodes that act as relays, pure receivers or
+  #       those nodes that do not receive broadcast messages
+  write.table(
+    get.node.roles(overlays, msgs_ids),
+    file = build.filename(args$outputPath, "noderoles", args$configuration),
+    row.names=F, append=F
+  )
 
   sent_packages <- subset(
       replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
