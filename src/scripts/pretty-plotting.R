@@ -3,6 +3,7 @@ library(plyr)
 library(argparse)
 library(e1071)
 library(grid)
+library(reshape2)
 
 #
 # Used to define the arguments of the script
@@ -32,8 +33,10 @@ get_arguments <- function() {
                       help='Distribution of sent broadcast messages')
   parser$add_argument('-recv_bro', '--recv-broadcast-msgs', type="character",
                       help='Distribution of received broadcast messages')
-                      
-  parser$add_argument('-sent_ctrl', '--sent-control-msgs', dest="sent_ctrl", 
+  parser$add_argument('-nodes_roles', '--nodes-roles', type="character",
+                      help='Distribution of nodes behaviour (relay or receiver)')
+
+  parser$add_argument('-sent_ctrl', '--sent-control-msgs', dest="sent_ctrl",
                       type="character", help='Distribution of sent control messages')
   parser$add_argument('-recv_ctrl', '--recv-control-msgs', dest="recv_ctrl",
                       type="character", help='Distribution of received control messages')
@@ -208,6 +211,29 @@ plot.broadcasting.time2 <- function(df, densities, pal){
 }
 
 ##
+plot.nodes.roles.distribution <- function(data) {
+
+	ds <- unname(lapply(data,
+    function(e) {
+  		ds_name <- unlist(strsplit(colnames(e), '_'))
+      algo_name <- toupper(ds_name[ length(ds_name) ])
+      data.frame(
+        dist=unlist(e, use.names=F),
+        algo=rep(algo_name, 3),
+        type=c('Relay', 'Receiver', 'Unreachable'),
+        stringsAsFactors=FALSE
+      )
+	  }
+  ))
+  ds <- do.call('rbind', ds)
+  p <- ggplot(ds, aes(algo))
+  p <- p + geom_bar(aes(weight=dist, fill=type)) + xlab('Algorithm') +
+    theme(legend.position="top", text=element_text(size=18)) +
+    ylab('Nodes (%)') + guides(fill=guide_legend(title='Type: '))
+
+	print(p)
+}
+
 plot.running.algorithms.distri <- function(data) {
 
 	data_t <- unname(unlist(sapply(data, function(e) {
@@ -226,7 +252,7 @@ plot.running.algorithms.distri <- function(data) {
 	})))))
 
 	new_df <- data.frame(Experiment=data_t[,1], Nodes=as.numeric(data_t[,3]), Algorithm=data_t[,2])
-	p <- ggplot(data=new_df, aes(x=Experiment, y=Nodes, fill=Algorithm, colour=Algorithm)) + 
+	p <- ggplot(data=new_df, aes(x=Experiment, y=Nodes, fill=Algorithm, colour=Algorithm)) +
 		geom_bar(stat="identity") + theme(legend.position="top", text=element_text(size=18)) +
 		get.plot.theme.style() + scale_fill_brewer(palette="Set1") + scale_color_brewer(palette="Set1")
 
@@ -259,7 +285,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 
     dd <- unname(dd)
 	  data <- do.call("rbind", dd)
-	  
+
     data <- arrange(data, density, Algorithm, dat)
 	  data.ecdf <- ddply(data, .(Algorithm), transform, ecdf=ecdf(dat)(dat) )
     data.ecdf
@@ -272,7 +298,7 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
   else
     scale_x <- scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat)))
 
-	p <- ggplot(data, aes(x=dat, y=ecdf, colour=Algorithm, linetype=Algorithm)) + 
+	p <- ggplot(data, aes(x=dat, y=ecdf, colour=Algorithm, linetype=Algorithm)) +
 		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
 		scale_x + scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style() +
 		ylab("Nodes") + xlab(ylabel) + get.plot.theme.style()
@@ -294,8 +320,8 @@ plot.dist.as.cdf <- function(data, xlabel) {
 
   dd <- unname(dd)
   data <- do.call("rbind", dd)
-  
-	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) + 
+
+	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) +
 		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
 		labs(x=xlabel, y="Nodes") +
 		scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
@@ -317,7 +343,7 @@ plot.neighbors.as.cdf <- function(data, run_algo_data, xlabel) {
 	})
 	run_algo_ds <- unname(run_algo_ds)
 	run_algo_ds <- do.call("rbind", run_algo_ds)
-	
+
 	dd <- lapply(data, function(e) {
 		cn <- colnames(e)[1]
 		s <- unlist( strsplit(cn,'_'))
@@ -333,8 +359,8 @@ plot.neighbors.as.cdf <- function(data, run_algo_data, xlabel) {
   indx <- which(data$Algorithm == "HYBRID")
   tmp <- as.character(data$Algorithm)
   data$Algorithm <- replace(tmp, indx, as.character(run_algo_ds$to_replace))
-  
-	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) + 
+
+	p <- ggplot(data, aes(x=dat, colour=Algorithm, linetype=Algorithm)) +
 		stat_ecdf(geom="step", lwd=1.5) + theme(legend.position="top", text=element_text(size=18)) +
 		labs(x=xlabel, y="Nodes") +
 		scale_x_continuous(expand=c(0,0), limits=c(0, max(data$dat))) +
@@ -567,12 +593,21 @@ if (!is.null(args$pc)) {
   plot.dist.as.cdf(r$data, "Energy Consumption (mJ)")
 }
 
+if (!is.null(args$nodes_roles)) {
+  print("Importing distribution of nodes roles")
+  r <- load.dataset.with.metadata(args$path, args$nodes_roles, metadata, args$excluded.densities)
+  print("Plotting distribution of sent broadcast messages")
+  plot.nodes.roles.distribution(r$data)
+}
+
 if (!is.null(args$sent_bro)) {
   print("Importing distribution of sent broadcast messages")
   r <- load.dataset.with.metadata(args$path, args$sent_bro, metadata, args$excluded.densities)
   print("Plotting distribution of sent broadcast messages")
   plot.dist.as.cdf(r$data, "No of Sent Broadcast Messages")
 }
+
+
 
 if (!is.null(args$sent_ctrl)) {
   print("Importing distribution of sent control messages")
@@ -649,7 +684,7 @@ if (!is.null(args$ds)) {
 	  rds <- load.dataset.with.metadata(args$path, args$run_algo, metadata, args$excluded.densities)
 		plot.neighbors.as.cdf(r$data, rds$data, "Nodes' neighbors")
 	} else {
-		plot.dist.as.cdf(r$data, "Nodes' neighbors")	
+		plot.dist.as.cdf(r$data, "Nodes' neighbors")
 	}
 }
 

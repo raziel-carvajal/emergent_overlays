@@ -101,10 +101,11 @@ cat ../../results/recvBroadcastMsgsDistribution-n_* >> ../../results/recvBroadca
 cat ../../results/sentCtrlMsgsDistribution-n_* >> ../../results/sentCtrlMsgsDistribution
 cat ../../results/recvCtrlMsgsDistribution-n_* >> ../../results/recvCtrlMsgsDistribution
 cat ../../results/collisionsRelativeError-n_* >> ../../results/collisionsRelativeError
-cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
+# cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
 cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
-rm ../../results/groundTruthDensityDist-
-cat ../../results/groundTruthDensityDist-n_* >> ../../results/densityRelativeError
+cat ../../results/noderoles-n_* >> ../../results/noderoles
+# rm ../../results/groundTruthDensityDist-
+# cat ../../results/groundTruthDensityDist-n_* >> ../../results/densityRelativeError
 
 ##rm -f ../../results/broadcastSession-n_* \
 ##      ../../results/duplicatedMsgsDistribution-n_* \
@@ -116,24 +117,23 @@ cat ../../results/groundTruthDensityDist-n_* >> ../../results/densityRelativeErr
 ##      ../../results/macFramesReceived-n_* \
 ##      ../../results/densityRelativeError-n_* \
 ##      ../../results/collisionsRelativeError-n_* \
-##      ../../results/distributionOfDensity-n_* 
+##      ../../results/distributionOfDensity-n_*
 # Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
 echo "Plotting aggregated results"
 
 #	-run_algo algorithmTypeDistribution \
+# -final \
+#-ds distributionOfDensity \
 Rscript pretty-plotting.R \
-	-pc batteryConsumptionDistribution \
 	-bs broadcastSession \
 	-cv coverage \
 	-cre collisionsRelativeError \
 	-dre densityRelativeError \
-	-ds distributionOfDensity \
 	-sent_bro sentBroadcastMsgsDistribution \
 	-recv_bro recvBroadcastMsgsDistribution \
 	-sent_ctrl sentCtrlMsgsDistribution \
 	-recv_ctrl recvCtrlMsgsDistribution \
-	-final \
-	../../results/
+  -nodes_roles noderoles \
+  -pc batteryConsumptionDistribution ../../results/
 mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
-

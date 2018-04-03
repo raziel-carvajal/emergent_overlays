@@ -699,6 +699,7 @@ void BroadcastingAppBase::broadcast(std::string key,
 	msg->setProtocolId(protocolId.c_str());
 	send_package(msg);
 	emitSent(key);
+//	cout << getLogHeader() << "BROADCASTING DONE" << key << endl;
 }
 
 } //namespace

@@ -435,10 +435,10 @@ get.node.roles <- function(overlays, msgs_ids) {
     node_roles[, 1]$non_reachable
   ds_length <- nodes_no * length(node_roles['relays', ])
 
-  data.frame(
-    relays=       ceiling((relays_perc * 100) / ds_length),
-    receivers=    ceiling((receiv_perc * 100) / ds_length),
-    non_reachable=ceiling((n_reac_perc * 100) / ds_length)
+  c(
+    floor((relays_perc * 100) / ds_length),
+    floor((receiv_perc * 100) / ds_length),
+    floor((n_reac_perc * 100) / ds_length)
   )
 }
 
@@ -587,10 +587,9 @@ main <- function(args) {
 
   # INFO: save proportion of nodes that act as relays, pure receivers or
   #       those nodes that do not receive broadcast messages
-  write.table(
-    get.node.roles(overlays, msgs_ids),
-    file = build.filename(args$outputPath, "noderoles", args$configuration),
-    row.names=F, append=F
+  save.distribution(
+    'noderoles', get.node.roles(overlays, msgs_ids),
+    args$outputPath, args$configuration
   )
 
   sent_packages <- subset(
