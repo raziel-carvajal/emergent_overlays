@@ -259,6 +259,8 @@ plot.running.algorithms.distri <- function(data) {
 	print(p)
 }
 
+# BUG: if a protocol has a number within its name then the whole distribution of this protocol
+#      just dissapears. This function must be refacted cause it is error prone.
 plot.data.using.lines <- function(data, densities, ylabel, caption, transformation, is_coverage=FALSE) {
   data.list <- lapply(densities, function(density) {
 		dd <- data[grepl(paste("d", density, "tr",sep="_"), sapply(data, function(e) colnames(e) ))]
