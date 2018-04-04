@@ -71,16 +71,16 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
   make -j 4
 
 # List of R packages to create a data-set of experimental results per dissemination protocol
-ADD r-packages ./
+ADD r-packages r-packages
 # Installation of R packages
 RUN cd r-packages && \
   wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
   R CMD BATCH r-worker-pkgs.R
 
-ADD src/base ./src/
-ADD src/protocols ./src/
-ADD src/scripts/*.sh ./src/scripts/
-ADD src/scripts/*.R ./src/scripts/
+COPY src/base ./src/base
+COPY src/protocols ./src/protocols
+ADD src/scripts/*.sh src/scripts/
+ADD src/scripts/*.R src/scripts/
 
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \

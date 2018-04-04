@@ -19,7 +19,7 @@ RUN git clone git://github.com/panisson/pymobility.git && \
   cd pymobility && \
   python setup.py install
 
-ADD python_pkgs ./
+ADD python_pkgs python_pkgs
 
 RUN pip install -r python_pkgs
 
