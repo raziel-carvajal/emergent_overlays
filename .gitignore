@@ -115,3 +115,4 @@ src/scripts/algo
 tools/inet-3.3.0-src.tgz
 tools/omnetpp_0.7-1.tar.gz
 experiments/configs/in_common/config.xml
+experiments/configs/built_configs/cfgs_for_workers

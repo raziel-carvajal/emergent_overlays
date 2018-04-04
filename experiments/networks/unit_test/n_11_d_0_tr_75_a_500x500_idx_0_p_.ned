@@ -3,17 +3,18 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package unit_test;
+
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
@@ -56,18 +57,18 @@ network n_11_d_0_tr_75_a_500x500_idx_0_p_
             @display("p=83,166;r=75");
         }
         hostR7: CenterHost {
-            @display("p=96,260;r=75");
+            @display("p=96,281;r=75");
         }
         hostR8: CenterHost {
-            @display("p=63,313;r=75");
+            @display("p=319,116;r=75");
         }
         hostR9: CenterHost {
-            @display("p=63,111;r=75");
+            @display("p=310,328;r=75");
         }
         hostR10: CenterHost {
-            @display("p=310,319;r=75");
+            @display("p=339,149;r=75");
         }
         hostR11: CenterHost {
-            @display("p=310,117;r=75");
+            @display("p=332,306;r=75");
         }
 }
