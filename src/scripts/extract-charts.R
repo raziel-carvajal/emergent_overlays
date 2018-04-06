@@ -478,10 +478,8 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
 
       # INFO we have now total number of nodes per FW code
       dsAsMatrix <- sapply( fw_codes,
-        function(code){ subset(ds, fw_code == code)$count }
+        function(code){ sum(subset(ds, fw_code == code)$count) }
       )
-      dsAsMatrix <- sapply(fw_codes, function(code){ sum( dsAsMatrix[, code] ) })
-
       # INFO we get the percentage over all broadcast messages and nodes
       dsLen <- sum(ds$count)
       data.frame(
@@ -592,7 +590,7 @@ main <- function(args) {
   expeConfig <- unlist(strsplit(args$configuration, '_'))
   algorithmN <- toupper(expeConfig[ length(expeConfig) ])
   # INFO metadate of dense zone
-  # NOTE ATM we consider that there is only one dense zone
+  # NOTE ATM we consider that there is only one dense zone and one sparse zone
   denseZone <- data.frame(
     atX=args$d_x, atY=args$d_y, halfLenAtX=args$d_h_x, halfLenAtY=args$d_h_y
   )
@@ -628,7 +626,8 @@ main <- function(args) {
   	args$file, "name(forward_type:vector)")
 
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
-  # store in a list one graph per broadcast session
+  # creates a list of virtual overlays per broadcast session, where each
+  # overlay refers to the graph form by the message dissemination
   overlays <- lapply(msgs_ids, function(msg) {
     # point in time where node
     locationTimestamp <-
@@ -660,11 +659,13 @@ main <- function(args) {
   )
 
   sent_packages <- subset(
-      replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
-      time < exp_duration)
+    replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
+    time < exp_duration
+  )
   recv_packages <- subset(
-      replace.resultkey.with.node_id(args$file, "name(rcvdPk:vector*)"),
-      time < exp_duration)
+    replace.resultkey.with.node_id(args$file, "name(rcvdPk:vector*)"),
+    time < exp_duration
+  )
   # expected number of nodes that must receive a broadcast message
   # over all sessions of dissemination
 	expectedCoverage <- getExpectedCoverage(overlays)

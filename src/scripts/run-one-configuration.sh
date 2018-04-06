@@ -51,7 +51,7 @@ NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
 
 #densityAsString=`grep "${DENSITY}" densities| head -1| awk '{print $2}'`
-PROTOCOL=`cat ${CONF_NAME} | awk -F "_" '{ print $12 }'`
+PROTOCOL=`echo ${CONF_NAME} | awk -F "_" '{ print $12 }'`
 logFile="n_${NODES}_d_${DENSITY}_p_${PROTOCOL}"
 
 # ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
@@ -106,18 +106,15 @@ Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 .
   ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} \
   -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} \
   -d_x ${DENSE_ZONE_X} -d_y ${DENSE_ZONE_Y} -d_h_x ${DENSE_ZONE_X_HALF_LEN} \
-  -d_h_y ${DENSE_ZONE_Y_HALF_LEN} > out
-results=`cat out`
-echo "Result: ${results}"
-rm -fr out
+  -d_h_y ${DENSE_ZONE_Y_HALF_LEN}
 
-coverage=`echo ${results} | awk '{print $3}'`
-broadcast_time=`echo ${results} | awk '{print $4}'`
-power_consumption=`echo ${results} | awk '{print $5}'`
-duplicated_messages=`echo ${results} | awk '{print $6}'`
-retransmissions=`echo ${results} | awk '{print $7}'`
-
-echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
+# coverage=`echo ${results} | awk '{print $3}'`
+# broadcast_time=`echo ${results} | awk '{print $4}'`
+# power_consumption=`echo ${results} | awk '{print $5}'`
+# duplicated_messages=`echo ${results} | awk '{print $6}'`
+# retransmissions=`echo ${results} | awk '{print $7}'`
+#
+# echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
 
 echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
 rm -fr debugging/logs/${CONF_NAME}
