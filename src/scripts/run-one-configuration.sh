@@ -40,7 +40,6 @@ PROTOCOLS_LIBRARY=../../built/gcc-debug/protocols
 #LOCAL_NED_PATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
 LOCAL_NED_PATH=${INET_PATH}/src:../../experiments/networks:../protocols/:../base
 
-
 echo "Executing : ${CONF_FILE}"
 echo "Ned path: ${LOCAL_NED_PATH}"
 echo "Inet Library: ${INET_LIBRARY_PATH}"
@@ -50,12 +49,13 @@ echo "Executing command: ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRA
 
 NODES=`echo "$CONF_NAME" | awk -F "_" '{print $2 }'`
 DENSITY=`echo "$CONF_NAME" | awk -F "_" '{print $4 }'`
+
 #densityAsString=`grep "${DENSITY}" densities| head -1| awk '{print $2}'`
-PROTOCOL=`cat ${CONF_FILE} | grep udpApp | grep typename | awk -F "=" '{print $2}'`
-algoN=`echo "$CONF_NAME" | awk -F "_" '{print $12 }'`
-logFile="n_${NODES}_d_${DENSITY}_p_${algoN}"
+PROTOCOL=`cat ${CONF_NAME} | awk -F "_" '{ print $12 }'`
+logFile="n_${NODES}_d_${DENSITY}_p_${PROTOCOL}"
 
 # ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE} &>debugging/logs/${logFile}
+
 ${OMNET} -u Cmdenv -n ${LOCAL_NED_PATH} -l ${INET_LIBRARY_PATH} -l ${PROTOCOLS_LIBRARY} -c ${CONF_NAME} -f ${CONF_FILE}
 r=$?
 
@@ -63,7 +63,6 @@ if [ $r -ne 0 ]; then
   echo -e "\nERROR: for more details check this file: debugging/logs/${logFile}"
 	exit 1
 fi
-
 
 if [ ${EXPE_FOR_COLLISIONS} -eq "1" ]; then
   echo "COMPUTATION FOR COLLISIONS STARTS..."
@@ -82,21 +81,32 @@ transmissionRange=`cat ${CONF_FILE} | grep "maxCommunicationRange" | tail -n 1 |
 wakeUpTime=`cat ${CONF_FILE} | grep "wakeUpTime" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 deltaApprox=`cat ${CONF_FILE} | grep "deltaApprox" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 firstPosT=$(bc <<< "${wakeUpTime}+${deltaApprox}")
-
 broadcastMsgs=`cat ${CONF_FILE} | grep nr_broadcast_msg | head -1 | awk -F "=" '{print $2}'| grep -Eo '[0-9]{1,5}'`
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
+
+commAreaLen=`echo "${CONF_NAME}" | awk -F "_" '{print $8}'`
+DENSE_ZONE_X=`echo "${commAreaLen}" | awk -F "x" '{print $1}'`
+DENSE_ZONE_X_HALF_LEN=`bc <<< "scale=2; ${DENSE_ZONE_X} / 4"`
+DENSE_ZONE_Y=`echo "${commAreaLen}" | awk -F "x" '{print $2}'`
+DENSE_ZONE_Y_HALF_LEN=`bc <<< "scale=2; ${DENSE_ZONE_Y} / 4"`
+DENSE_ZONE_X=`bc <<< "scale=2; ${DENSE_ZONE_X} / 2"`
+DENSE_ZONE_Y=`bc <<< "scale=2; ${DENSE_ZONE_Y} / 2"`
 
 echo "Simulation time [${simulation_time}]"
 echo "Frequency of broadcast messages: [${step}]"
 echo "Transmission range [${transmissionRange}]"
 echo "Time of first broadcast [${wakeUpTime}]"
 echo "Broadcast messages number [${broadcastMsgs}]"
-
 echo "First time when nodes print their position [${firstPosT}]"
 echo "Delta aproximation [${deltaApprox}]"
+echo "Dense zone cetered at [${DENSE_ZONE_X}, ${DENSE_ZONE_Y}]"
+echo "Dense zone [width/2, height/2] [${DENSE_ZONE_X_HALF_LEN}, ${DENSE_ZONE_Y_HALF_LEN}]"
 
-
-Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} > out
+Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ \
+  ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} \
+  -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} \
+  -d_x ${DENSE_ZONE_X} -d_y ${DENSE_ZONE_Y} -d_h_x ${DENSE_ZONE_X_HALF_LEN} \
+  -d_h_y ${DENSE_ZONE_Y_HALF_LEN} > out
 results=`cat out`
 echo "Result: ${results}"
 rm -fr out

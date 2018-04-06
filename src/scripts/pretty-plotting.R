@@ -143,15 +143,13 @@ get.attrSet <- function(dfNames, attri) {
 
 
 get.plot.theme.style <- function() {
-  theme(plot.title=element_text(size=15, vjust=3)) +
-  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
-  # scale_fill_brewer(palette="RdBu") + theme_minimal()
-  # all this is to remove the beautiful grid (not good for the paper :-( )
+  theme(plot.title=element_text(hjust = 0.5)) +
+  theme(text=element_text(size=14)) +
   theme(
-    panel.background = element_rect(fill = 'white', colour = 'black')
-    ,panel.grid.major = element_blank()
-    ,panel.grid.minor = element_blank()
-    ,panel.border = element_blank()
+    panel.background = element_rect(fill = 'white', colour = 'black'),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border     = element_blank()
   )
 }
 
@@ -210,28 +208,23 @@ plot.broadcasting.time2 <- function(df, densities, pal){
   print(p)
 }
 
-##
-plot.nodes.roles.distribution <- function(data) {
-
-	ds <- unname(lapply(data,
-    function(e) {
-  		ds_name <- unlist(strsplit(colnames(e), '_'))
-      algo_name <- toupper(ds_name[ length(ds_name) ])
-      data.frame(
-        dist=unlist(e, use.names=F),
-        algo=rep(algo_name, 3),
-        type=c('Relay', 'Receiver', 'Unreachable'),
-        stringsAsFactors=FALSE
-      )
-	  }
-  ))
-  ds <- do.call('rbind', ds)
-  p <- ggplot(ds, aes(algo))
-  p <- p + geom_bar(aes(weight=dist, fill=type)) + xlab('Algorithm') +
-    theme(legend.position="top", text=element_text(size=18)) +
-    ylab('Nodes (%)') + guides(fill=guide_legend(title='Type: '))
-
-	print(p)
+# TODO plot DENSE and SPARSE distribution in one plot
+# + scale_alpha_manual(values = c(0.3, 1))
+# guides(fill=guide_legend(title='Type:'), alpha=guide_legend(title='Zone:'))
+plot.nodes.roles.distribution <- function(ds) {
+  names(ds) <- c('count', 'fw_type', 'zone', 'algorithm')
+  denseDs <- subset(ds, zone == 'DENSE')
+  sparsDs <- subset(ds, zone == 'SPARSE')
+  sparsP <- ggplot(sparsDs)
+  denseP <- ggplot(denseDs)
+  p1 <- sparsP + geom_col(aes(x=algorithm, y=count, fill=fw_type)) +
+    ggtitle('Forwarding nodes in sparse zone') + get.plot.theme.style() +
+    xlab('Algorithm') + ylab('Nodes (%)') + guides(fill=guide_legend(title='Type'))
+  p2 <- denseP + geom_col(aes(x=algorithm, y=count, fill=fw_type)) +
+    ggtitle('Forwarding nodes in dense zone') + get.plot.theme.style() +
+    xlab('Algorithm') + ylab('Nodes (%)') + guides(fill=guide_legend(title='Type'))
+  print(p1)
+  print(p2)
 }
 
 plot.running.algorithms.distri <- function(data) {
@@ -597,9 +590,8 @@ if (!is.null(args$pc)) {
 
 if (!is.null(args$nodes_roles)) {
   print("Importing distribution of nodes roles")
-  r <- load.dataset.with.metadata(args$path, args$nodes_roles, metadata, args$excluded.densities)
-  print("Plotting distribution of sent broadcast messages")
-  plot.nodes.roles.distribution(r$data)
+  ds <- read.table( paste(args$path, args$nodes_roles, sep=''), header=F)
+  plot.nodes.roles.distribution(ds)
 }
 
 if (!is.null(args$sent_bro)) {

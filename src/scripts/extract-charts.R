@@ -3,6 +3,7 @@ library(argparse)
 library(igraph)
 
 TOLERANCE <- 1e-8
+BROADCAST_SESSION_TOLERANCE <- 1000e-03 # 1000 ms = 0.1 s
 SENT_RECV_PKG_TOLERANCE <- 1.5e-03
 
 get.arguments <- function() {
@@ -39,7 +40,16 @@ get.arguments <- function() {
     help='First point in time when nodes print out their position')
   parser$add_argument('-f_b', '--time_of_first_broadcast_message', type='double',
     help='Time when the first broadcast message was emitted')
-  # parser$print_help()
+
+  parser$add_argument('-d_x', type='double',
+    help='Abscissa of dense zone center')
+  parser$add_argument('-d_y', type='double',
+    help='Ordinate of dense zone center')
+  parser$add_argument('-d_h_x', type='double',
+    help='Half of the widht dense zone')
+  parser$add_argument('-d_h_y', type='double',
+    help='Half of the height dense zone')
+
   parser$parse_args()
 }
 
@@ -212,7 +222,7 @@ get.measured.density <- function(results_file, first_measure,
 }
 
 get.graph <- function(nodes, positions, Tx, locationTimestamp,
-  msgTimestamp, msgReceivers, msgEmitters, savePlot=F) {
+  msgTimestamp, msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
 
   nodesPositions <-
     positions[ abs(positions$time - locationTimestamp) < TOLERANCE, ]
@@ -238,63 +248,74 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
     )
   )
 
+  xlim <- data.frame(
+    infe=denseZone$atX - denseZone$halfLenAtX,
+    supe=denseZone$atX + denseZone$halfLenAtX
+  )
+  ylim <- data.frame(
+    infe=denseZone$atY - denseZone$halfLenAtY,
+    supe=denseZone$atY + denseZone$halfLenAtY
+  )
+
+  nodesLocation <- sapply(nodes,
+    function(n){
+      nPos <- nodesPositions[nodesPositions$nodeId == n, ]
+      ifelse(
+        nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
+        nPos$y >= ylim$infe && nPos$y <= ylim$supe,
+        'DENSE',
+        'SPARSE'
+      )
+    }
+  )
   # create graph based on edges
+  forward_type <- subset( forward_type_ds,
+    abs(time - msgTimestamp) <= BROADCAST_SESSION_TOLERANCE
+  )
   g <- graph( edges=edges )
+  # label whether nodes are located at the dense zone
+  V(g)$location <- nodesLocation
+  # this code is followed IN DATASET to label nodes that forward messages:
+  #   0 => SIMPLE
+  #   1 => CDS RELAY
+  #   2 => BORDER
+  #   3 => RECEIVER
+  #   4 => UNREACHABLE
+  labelCode <- rep(5, length(nodes))
+  labelCode[msgReceivers] <- 4
+  labelCode[ subset(forward_type, value == 0)$node_id ] <- 1
+  labelCode[ subset(forward_type, value == 1)$node_id ] <- 2
+  labelCode[ subset(forward_type, value == 2)$node_id ] <- 3
+  V(g)$colorCode <- labelCode
   if(savePlot){
-    V(g)$size <- 8
-    V(g)$label <- ''
-    V(g)$frame.color <- 'white'
     E(g)$arrow.mode <- 0
+    E(g)$color <- 'lightgrey'
+    V(g)$size <- 4
+    V(g)$label <- ''
+    V(g)$frame.color <- 'black'
+    colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
+    V(g)$color <- colors[labelCode]
     # use node coordinates as layout
     layout <- cbind(nodesPositions$x, nodesPositions$y)
-    # labeled nodes when they aren't rechable, act as pure receivers or as relays
-    labelCode <- rep(1, length(nodes))
-    labelCode[msgReceivers] <- 2
-    labelCode[msgEmitters]  <- 3
-    colors <- c('gray50', 'gold', 'tomato')
-    V(g)$color <- colors[labelCode]
     # save one graph per broadcast session
     name <- paste("graph_", locationTimestamp, ".pdf", sep="")
     pdf(name)
     plot.igraph(g, layout=layout)
     legend(
-      x=0.7, y=1.4,
+      x=0.7, y=1.4, title='Type of forward',
       c(
-        paste('Unreachable [', length(labelCode[labelCode == 1]), ']'),
-        paste(
-          'Pure-receiver [',
-          length(nodes) - length(labelCode[labelCode == 1]) - length(labelCode[labelCode == 3]),
-          ']'
-        ),
-        paste('Relay [', length(labelCode[labelCode == 3]), ']')
-      ),pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+        paste('Simple [', length(labelCode[labelCode == 1]), ']'),
+        paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
+        paste('Border [', length(labelCode[labelCode == 3]), ']'),
+        paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
+        paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
+      ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
     )
     dev.off()
   }
   # return graph
   g
 }
-# TODO figure out if this chunk of code is still required
-#      in the new implementation of get.graph (function above)
-# get.graph <- function(...) {
-#   # gets the biggest connected cluster
-#   # XXX we assume that the source node belongs to this cluster
-#   #			the biggest cluster
-#   biggestCluster <- getVerticesFromBiggestCluster(g)
-#
-#   d0 <- data.frame(indx=1:length(tmp), v=tmp)
-#   matr <- data.frame(
-#   	A=subset(d0, indx %% 2 == 1)$v,
-#   	B=subset(d0, indx %% 2 == 0)$v
-#   )
-# 	edgesAtCluster <- unlist(sapply(biggestCluster, function(i){
-# 		dsts <- subset(matr, A == i)$B
-# 		sapply(dsts, function(j){
-# 			c(i, j)
-# 		})
-# 	}))
-# 	graph(edges=edgesAtCluster, directed=F)
-# }
 
 getVerticesFromBiggestCluster <- function(g){
   c <- clusters(g)
@@ -402,44 +423,77 @@ highest.energy.consumption <- function(v){
   max(v - quasi_v)
 }
 
-get.node.roles <- function(overlays, msgs_ids) {
-  node_roles <- sapply(msgs_ids,
+# this code is followed IN DATASET to label nodes that forward messages:
+#   0 => SIMPLE
+#   1 => CDS RELAY
+#   2 => BORDER
+#   3 => RECEIVER
+#   4 => UNREACHABLE
+get.node.roles <- function(overlays, msgs_ids, algorithmN) {
+  fw_code_str<- c('Simple', 'CDS relay', 'Border', 'Receiver', 'Unreachable')
+  node_roles <- lapply( msgs_ids,
     function(msg){
       overlay <- overlays[[msg]]
-      roles_by_color <- V(overlay)$color
-      relays <- sapply(1:length(roles_by_color),
-        function(i){ ifelse(roles_by_color[i] == 'tomato', i, NA) }
+      nodes_location <- V(overlay)$location
+      zones <- unique(nodes_location)
+      nodes_per_location <- sapply( zones,
+        function(z){
+          nodes_at_z <- sapply( 1:length(nodes_location),
+            function(i){
+              ifelse(nodes_location[i] == z, i, NA)
+            }
+          )
+          nodes_at_z[ !is.na(nodes_at_z) ]
+        }
       )
-      relays <- relays[ !is.na(relays) ]
-      receivers <- sapply(1:length(roles_by_color),
-        function(i){ ifelse(roles_by_color[i] == 'gold', i, NA) }
-      )
-      receivers <- receivers[ !is.na(receivers) ]
-      non_reachable <- sapply(1:length(roles_by_color),
-        function(i){ ifelse(roles_by_color[i] == 'gray50', i, NA) }
-      )
-      non_reachable <- non_reachable[ !is.na(non_reachable) ]
-      data.frame(
-        relays=length(relays),
-        receivers=length(receivers),
-        non_reachable=length(non_reachable)
+      nodes_fw_type <- V(overlay)$colorCode
+      fw_codes <- unique(nodes_fw_type)
+      lapply( nodes_per_location,
+        function(nodes){
+          fw_types <- nodes_fw_type[nodes]
+          fw_codes_no <- lapply( fw_codes,
+            function(code){
+              data.frame(
+                count=length(fw_types[fw_types == code]),
+                fw_code=fw_code_str[code],
+                stringsAsFactors=F
+              )
+            }
+          )
+          do.call('rbind', fw_codes_no)
+        }
       )
     }
   )
-
-  relays_perc <- sum( unlist( node_roles['relays', ] ) )
-  receiv_perc <- sum( unlist( node_roles['receivers', ] ) )
-  n_reac_perc <- sum( unlist( node_roles['non_reachable', ] ) )
-
-  nodes_no <- node_roles[, 1]$relays + node_roles[, 1]$receivers +
-    node_roles[, 1]$non_reachable
-  ds_length <- nodes_no * length(node_roles['relays', ])
-
-  c(
-    floor((relays_perc * 100) / ds_length),
-    floor((receiv_perc * 100) / ds_length),
-    floor((n_reac_perc * 100) / ds_length)
+  # XXX find a way to to this with a lapply
+  dsPerZone <- list(
+    do.call( 'rbind', lapply(node_roles, function(df){ df$SPARSE }) ),
+    do.call( 'rbind', lapply(node_roles, function(df){ df$DENSE }) )
   )
+  zones <- c('SPARSE', 'DENSE')
+  merged_ds <- lapply(1:2,
+    function(i){
+      ds <- dsPerZone[[i]]
+      fw_codes <- unique(ds$fw_code)
+
+      # INFO we have now total number of nodes per FW code
+      dsAsMatrix <- sapply( fw_codes,
+        function(code){ subset(ds, fw_code == code)$count }
+      )
+      dsAsMatrix <- sapply(fw_codes, function(code){ sum( dsAsMatrix[, code] ) })
+
+      # INFO we get the percentage over all broadcast messages and nodes
+      dsLen <- sum(ds$count)
+      data.frame(
+        count=as.vector(floor((dsAsMatrix * 100) / dsLen)),
+        fw_code=names(dsAsMatrix),
+        zone=rep(zones[[i]], length(dsAsMatrix)),
+        algorithm=rep(algorithmN, length(dsAsMatrix)),
+        stringsAsFactors=F
+      )
+    }
+  )
+  do.call('rbind', merged_ds)
 }
 
 collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays,
@@ -535,6 +589,13 @@ getExpectedCoverage <- function(overlays){
 
 main <- function(args) {
   print(paste("Simulation time", args$simTime, "seconds"))
+  expeConfig <- unlist(strsplit(args$configuration, '_'))
+  algorithmN <- toupper(expeConfig[ length(expeConfig) ])
+  # INFO metadate of dense zone
+  # NOTE ATM we consider that there is only one dense zone
+  denseZone <- data.frame(
+    atX=args$d_x, atY=args$d_y, halfLenAtX=args$d_h_x, halfLenAtY=args$d_h_y
+  )
   exp_duration <-
 	  args$time_of_first_broadcast_message + args$broadcast_msgs * args$step
 
@@ -563,6 +624,9 @@ main <- function(args) {
   recv_broadcast_msgs <- replace.resultkey.with.node_id(
   	args$file, "name(broadcast_msg_received:vector)")
 
+  forward_type_ds <- replace.resultkey.with.node_id(
+  	args$file, "name(forward_type:vector)")
+
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
   # store in a list one graph per broadcast session
   overlays <- lapply(msgs_ids, function(msg) {
@@ -574,6 +638,7 @@ main <- function(args) {
     msgEmitters <- unique( subset(sent_broadcast_msgs, value == msg)$node_id )
     msgReceivers <-unique( subset(recv_broadcast_msgs, value == msg)$node_id )
     # create the graph with the position of each node
+    # TODO denseZone$atY - denseZone$halfLen
     get.graph(
       all_nodes,
       positions,
@@ -581,15 +646,17 @@ main <- function(args) {
       locationTimestamp,
       msgTimestamp,
       msgReceivers,
-      msgEmitters, savePlot=TRUE
+      msgEmitters,
+      denseZone,
+      forward_type_ds,
+      savePlot=TRUE
     )
   })
-
-  # INFO: save proportion of nodes that act as relays, pure receivers or
-  #       those nodes that do not receive broadcast messages
-  save.distribution(
-    'noderoles', get.node.roles(overlays, msgs_ids),
-    args$outputPath, args$configuration
+  # INFO save distribution of nodes per FW type
+  write.table(
+    get.node.roles(overlays, msgs_ids, algorithmN),
+    file = build.filename(args$outputPath, 'noderoles', args$configuration),
+    row.names=F, col.names=F
   )
 
   sent_packages <- subset(
