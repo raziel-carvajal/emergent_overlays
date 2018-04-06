@@ -51,6 +51,7 @@ simple BroadcastingBase
 		@statistic[density_approximation](title="approximation of nodes' density"; record=vector; source=density_approximation);
 		@statistic[node_position_x](title="Node position, value of horizontal axes"; record=vector; source=node_position_x);
 		@statistic[node_position_y](title="Node position, value of vertical axes"; record=vector; source=node_position_y);
+		@statistic[forward_type](title="Type of message forwarding"; record=vector; source=forward_type);
 		
    gates:
         input udpIn @labels(UDPControlInfo/up);

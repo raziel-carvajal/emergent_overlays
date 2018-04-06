@@ -70,7 +70,7 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
             gateway->send_package(p);
             /* NOTE: once the timeout of sending control messages is set,
              *  two consecutive messages must be sent to keep track of
-             *  one-hop and two-hop neighbors. Such behaviour depends
+             *  one-hop and two-hop neighbors. Such behavior depends
              *  on the implementation of the CDS-based algorithm
              */
             gateway->delayed_event(
@@ -81,6 +81,9 @@ FullyAdaptive::handleMessageWhenUp(cMessage *msg)
           cancelAndDelete(msg);
         }
       break;
+      /* INFO this event serves to keep track of nodes' surroundings.
+       *
+       */
       case APPROXIMATE_DENSITY:
           {
             Coord p = gateway->get_current_position();

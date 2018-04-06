@@ -52,7 +52,9 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         First = IDLE,
         Last = BUILD_STRUCT
     };
-
+    enum ForwardType{
+    	SIMPLE, CDS_RELAY, BORDER
+    };
 
   private:
 
@@ -79,6 +81,8 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
       std::string createUniqueBroadcastingSessionId() override;
 
       void emitBroadcastMsgReceived(const std::string& value) override;
+      void emitForwardTypeSignal(int s) override;
+
 
       void emitDensityApproximation(int value) override;
 
@@ -152,6 +156,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     simsignal_t signal_density_approximation;
     simsignal_t signal_node_position_x;
     simsignal_t signal_node_position_y;
+    simsignal_t signal_forward_type;
 
     bool already_configured = false;
 
@@ -227,6 +232,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::string createUniqueBroadcastingSessionId();
     L3Address getAddr(const std::string& id);
     void emitBroadcastMsgReceived(const std::string& value); // important. you should use it. log data (statistics in vector)
+    void emitForwardTypeSignal(int s);
     cMessage* delayed_event(int type, const std::string& key, double delay);
     cMessage* delayed_broadcast(const std::string& key, double delay); // call this one in the implementation of on_payload_received. it is like a Timer that will be called after 'delay' seconds
 

@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 #include "inet/common/geometry/common/Coord.h"
-
+#include "broadcasting/BroadcastingAppBase.h"
 #include "broadcasting/IBroadcastProtocol.h"
 #include "broadcasting/BroadcastingAppBase_m.h"
 

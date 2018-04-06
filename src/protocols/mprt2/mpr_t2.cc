@@ -151,6 +151,10 @@ void Mpr_t2::process_payload(const Broadcast* m) {
 			}
 		}
 		if (gateway->amIborderNode() || from_selector) {
+			if(gateway->amIborderNode())
+				gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::BORDER);
+			else
+				gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::CDS_RELAY);
 			gateway->broadcast(key, build_message_to_broadcast());
 		} else {
 //            cout << simTime().str() << " " + gateway->get_name()<<
@@ -166,6 +170,7 @@ void Mpr_t2::time_to_broadcast_payload(void* user_data) {
 	else
 		key = string((char*) user_data);
 	payloads[key] = key;
+	gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::CDS_RELAY);
 	gateway->broadcast(key, build_message_to_broadcast());
 }
 

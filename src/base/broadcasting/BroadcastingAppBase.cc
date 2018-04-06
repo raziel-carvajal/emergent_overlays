@@ -73,6 +73,10 @@ void BroadcastingAppBase::OmnetBroadcastGateway::emitBroadcastMsgReceived(
 	app->emitBroadcastMsgReceived(value);
 } // important. you should use it. log data (statistics in vector)
 
+void BroadcastingAppBase::OmnetBroadcastGateway::emitForwardTypeSignal(int s) {
+	app->emitForwardTypeSignal(s);
+}
+
 void BroadcastingAppBase::OmnetBroadcastGateway::delayed_event(int type,
 		const std::string& key, double delay) {
 	app->delayed_event(type, key, delay);
@@ -213,6 +217,7 @@ void BroadcastingAppBase::initialize(int stage) {
 				"density_approximation");
 		signal_node_position_x = this->registerSignal("node_position_x");
 		signal_node_position_y = this->registerSignal("node_position_y");
+		signal_forward_type = this->registerSignal("forward_type");
 
 		//TODO parameters related to adaptation must be part of FullyAdaptive too
 		//initialization of adaptation parameters
@@ -618,6 +623,10 @@ void BroadcastingAppBase::emitReceived() {
 
 void BroadcastingAppBase::emitPowerLevel(double value) {
 	emit(signal_power_level, value);
+}
+
+void BroadcastingAppBase::emitForwardTypeSignal(int s) {
+	emit(signal_forward_type, s);
 }
 
 void BroadcastingAppBase::emitBroadcastMsgReceived(const string& value) {

@@ -15,7 +15,6 @@
 
 #include "flooding.h"
 
-
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -31,34 +30,33 @@ namespace inet {
 
 Register_Class(Flooding2);
 
-void
-Flooding2::process_payload(const Broadcast* m) {
-    string key = string(m->getId());
-    gateway->emitBroadcastMsgReceived(key);
+void Flooding2::process_payload(const Broadcast* m) {
+
+	string key = string(m->getId());
+	gateway->emitBroadcastMsgReceived(key);
 //    cout << simTime().str() + " " + myself + " :: " + "KEY_RECEPTION " + key + " FROM_PEER " + string(m->getSender()) << endl;
-    if (myself == m->getSender()) return;
-    bool firstTime = payloads.find(key) == payloads.end();
-    if (firstTime) {
-        payloads[key] = key;
+	if (myself == m->getSender())
+		return;
+	bool firstTime = payloads.find(key) == payloads.end();
+	if (firstTime) {
+		payloads[key] = key;
 //        cout << simTime().str() + " " + myself + " :: " + "DOING BROADCAST OF KEY: " + key << endl;
-        gateway->broadcast(key, new broadcasting::Broadcast("payload"));
-    }
+		gateway->broadcast(key, new broadcasting::Broadcast("payload"));
+		gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::SIMPLE);
+	}
 }
 
-void
-Flooding2::time_to_broadcast_payload(void* user_data)
-{
-    string key;
-    if (!user_data) {
-        key = gateway->createUniqueBroadcastingSessionId();
-
-		//to cope with mobility
-        neighbors.empty();
-    }else {
-		key = string( (char*)user_data );
-    }
-    payloads[key] = key;
-    gateway->broadcast(key, new broadcasting::Broadcast("payload"));
+void Flooding2::time_to_broadcast_payload(void* user_data) {
+	string key;
+	if (!user_data) {
+		key = gateway->createUniqueBroadcastingSessionId();
+		neighbors.empty();
+	} else {
+		key = string((char*) user_data);
+	}
+	payloads[key] = key;
+	gateway->broadcast(key, new broadcasting::Broadcast("payload"));
+	gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::SIMPLE);
 }
 
 } //namespace

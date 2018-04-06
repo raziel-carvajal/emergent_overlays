@@ -51,6 +51,7 @@ void inet::TimeBasedFlooding::time_to_broadcast_payload(void* user_data) {
 	} else
 		key = string((char*) user_data);
 	gateway->broadcast(key, new broadcasting::Broadcast("payload"));
+	gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::SIMPLE);
 	sentMsgs.insert(key);
 }
 

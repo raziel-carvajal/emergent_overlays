@@ -43,6 +43,7 @@ public:
   virtual void emitBroadcastMsgReceived(const std::string& value) = 0; // important. you should use it. log data (statistics in vector)
   virtual void emitDensityApproximation(int value) = 0;
   virtual void emitNodePosition(float x, float y, float density) = 0;
+  virtual void emitForwardTypeSignal(int s) = 0;
 
   virtual double get_double_parameter(const std::string& protocol,const std::string& param) = 0;
 
