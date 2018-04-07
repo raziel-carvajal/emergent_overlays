@@ -108,14 +108,6 @@ Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 .
   -d_x ${DENSE_ZONE_X} -d_y ${DENSE_ZONE_Y} -d_h_x ${DENSE_ZONE_X_HALF_LEN} \
   -d_h_y ${DENSE_ZONE_Y_HALF_LEN}
 
-# coverage=`echo ${results} | awk '{print $3}'`
-# broadcast_time=`echo ${results} | awk '{print $4}'`
-# power_consumption=`echo ${results} | awk '{print $5}'`
-# duplicated_messages=`echo ${results} | awk '{print $6}'`
-# retransmissions=`echo ${results} | awk '{print $7}'`
-#
-# echo "${CONF_NAME},${PROTOCOL},${NODES},${DENSITY},${coverage},${broadcast_time},${power_consumption},${duplicated_messages},${retransmissions}" >> ../../results/summary.csv
-
 echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
 rm -fr debugging/logs/${CONF_NAME}
 mkdir -p debugging/logs/${CONF_NAME}

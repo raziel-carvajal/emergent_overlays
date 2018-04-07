@@ -94,38 +94,20 @@ echo "Creating aggregated results"
 
 cat ../../results/broadcastSession-n_* >> ../../results/broadcastSession
 cat ../../results/batteryConsumptionDistribution-n_* >> ../../results/batteryConsumptionDistribution
-cat ../../results/relays-n_* >> ../../results/relays
 cat ../../results/coverage-n_* >> ../../results/coverage
 cat ../../results/sentBroadcastMsgsDistribution-n_* >> ../../results/sentBroadcastMsgsDistribution
 cat ../../results/recvBroadcastMsgsDistribution-n_* >> ../../results/recvBroadcastMsgsDistribution
 cat ../../results/sentCtrlMsgsDistribution-n_* >> ../../results/sentCtrlMsgsDistribution
 cat ../../results/recvCtrlMsgsDistribution-n_* >> ../../results/recvCtrlMsgsDistribution
 cat ../../results/collisionsRelativeError-n_* >> ../../results/collisionsRelativeError
-# cat ../../results/distributionOfDensity-n_* >> ../../results/distributionOfDensity
 cat ../../results/densityRelativeError-n_* >> ../../results/densityRelativeError
 cat ../../results/noderoles-n_* >> ../../results/noderoles
-# rm ../../results/groundTruthDensityDist-
-# cat ../../results/groundTruthDensityDist-n_* >> ../../results/densityRelativeError
-
-##rm -f ../../results/broadcastSession-n_* \
-##      ../../results/duplicatedMsgsDistribution-n_* \
-##      ../../results/batteryConsumptionDistribution-n_* \
-##      ../../results/batteryConsumptionDistributionTime-n_* \
-##      ../../results/relays-n_* \
-##      ../../results/coverage-n_* \
-##      ../../results/macFramesSent-n_* \
-##      ../../results/macFramesReceived-n_* \
-##      ../../results/densityRelativeError-n_* \
-##      ../../results/collisionsRelativeError-n_* \
-##      ../../results/distributionOfDensity-n_*
-# Rscript import-data.R ../../results/ batteryConsumptionDistribution duplicatedMsgsDistribution broadcastSession
 
 echo "Plotting aggregated results"
-
 #	-run_algo algorithmTypeDistribution \
 # -final \
-#-ds distributionOfDensity \
 Rscript pretty-plotting.R \
+  -ds groundTruthDensityDist- \
 	-bs broadcastSession \
 	-cv coverage \
 	-cre collisionsRelativeError \
@@ -136,4 +118,4 @@ Rscript pretty-plotting.R \
 	-recv_ctrl recvCtrlMsgsDistribution \
   -nodes_roles noderoles \
   -pc batteryConsumptionDistribution ../../results/
-mv ../../results/Pretty-Results.pdf ../../results/final-results.pdf
+mv Rplots.pdf ../../results

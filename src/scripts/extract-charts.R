@@ -104,7 +104,6 @@ broadcastingTime <- function(msgDs, broDs, simulation.time) {
   )
 }
 
-######## [BEGIN] TODO refactor save.* functions. All this functions can be factorized
 save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   valid.time <- broadcast.info$time[broadcast.info$time <= max ]
   valid.time <- valid.time[!is.na(valid.time)]
@@ -118,41 +117,6 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
             row.names = F, append = F
   )
 }
-
-save.coverage <- function(broadcast.info, max, outputPath, expeId,
-	expectedCoverage){
-
-  cov <- (broadcast.info$n.received / expectedCoverage) * 100
-  broSes <- data.frame( whatever = cov )
-  colnames(broSes) <- c(expeId)
-  write.table(
-            broSes,
-            file = build.filename(outputPath, "coverage", expeId),
-            row.names = F, append = F
-  )
-}
-
-save.number.of.relays <- function(broadcast.info, max, outputPath, expeId){
-  broSes <- data.frame( whatever = broadcast.info$n.sent)
-  colnames(broSes) <- c(expeId)
-  write.table(
-            broSes,
-            file = build.filename(outputPath, "relays", expeId),
-            row.names = F, append = F
-  )
-}
-
-save.distribution <-function(dist_name, data, outputPath, expeId){
-  values <- data.frame(value=data)
-  colnames(values) <- c(expeId)
-
-  write.table(
-            values,
-            file = build.filename(outputPath, dist_name, expeId),
-            row.names = F, append = F
-  )
-}
-######## [END] TODO refactor save.* functions. All this functions can be factorized
 
 average.values <- function(pl, broadcast.info, max) {
 
@@ -180,16 +144,22 @@ average.values <- function(pl, broadcast.info, max) {
 }
 
 get.density.distribution <- function(overlays){
-
-  density_ground_truth <- lapply(overlays, function(overlay){
-    vertices <- getVerticesFromBiggestCluster(overlay)
-    lapply(vertices, function(v){
-      node_neigs <- overlay[v, ]
-      length(node_neigs[node_neigs != 0])
-    })
-  })
-
-  unlist(density_ground_truth)
+  ground_truth <- lapply( overlays,
+    function(overlay){
+      nodes <- getVerticesFromBiggestCluster(overlay)
+      neigs <- sapply( nodes,
+        function(n){
+          neigs <- overlay[n, ]
+          length(neigs[neigs != 0])
+        }
+      )
+      at_zone <- V(overlay)$location
+      data.frame( neigsNo=neigs, zoneLocation=at_zone[nodes],
+        algorithm=rep('GroundTruth', length(neigs)), stringsAsFactors=F
+      )
+    }
+  )
+  do.call('rbind', ground_truth)
 }
 
 get.measured.density <- function(results_file, first_measure,
@@ -211,14 +181,6 @@ get.measured.density <- function(results_file, first_measure,
   })
 
   unlist(density_approx)
-  # NOTE /!\ compute relative error for vectors
-#  absolute_err <- abs(density_approx - density_ground_truth)
-#  #relative error with vectors
-#  relative_err <- sapply(1:nrow(absolute_err), function(r){
-#    max(absolute_err[r, ]) / max( density_ground_truth[r, ] )
-#  })
-#  print(relative_err)
-#  relative_err
 }
 
 get.graph <- function(nodes, positions, Tx, locationTimestamp,
@@ -565,17 +527,48 @@ count.events_compl.per.node <- function(nodes, A, B){
   })
 }
 
-distribution.sent_recv.broadcast_control.messages <- function(sent_bro_msgs,
-  recv_bro_msgs, sent_pkgs, recv_pkgs, nodes){
-  result <- list()
-  result[["sent_bro_msgs"]] <- count.events.per.node(nodes, sent_bro_msgs)
-  result[["recv_bro_msgs"]] <- count.events.per.node(nodes, recv_bro_msgs)
-  result[["sent_ctrl_msgs"]] <- count.events_compl.per.node(
-    nodes, sent_pkgs, sent_bro_msgs
+distribution.sent_recv.broadcast_control.messages <- function(
+  sent_bro_msgs, recv_bro_msgs, sent_pkgs, recv_pkgs, nodes,
+  overlays, msgs_ids, algorithmN){
+# INFO get distribution of sent broadcast messages, adding the type of zone
+#      (dense or sparse) where the sender was positioned
+  sentMsgDist <- lapply( msgs_ids,
+    function(msg){
+      overlay <- overlays[[msg]]
+      senders <- unique( subset(sent_bro_msgs, value == msg)$node_id )
+      data.frame(
+        msgsNo=count.events.per.node(senders, sent_bro_msgs),
+        zone=V(overlay)$location[ senders ],
+        algorithm=rep(algorithmN, length(senders)), stringsAsFactors=F
+      )
+    }
   )
-  result[["recv_ctrl_msgs"]] <- count.events_compl.per.node(
-    nodes, recv_pkgs, recv_bro_msgs
+  sentMsgDist <- do.call('rbind', sentMsgDist)
+# INFO get distribution of received broadcast messages, adding the type of zone
+#      (dense or sparse) where the receiver was positioned
+  recvMsgDist <- lapply( msgs_ids,
+    function(msg){
+      overlay <- overlays[[msg]]
+      receivers <- unique( subset(recv_bro_msgs, value == msg)$node_id )
+      data.frame(
+        msgsNo=count.events.per.node(receivers, recv_bro_msgs),
+        zone=V(overlay)$location[ receivers ],
+        algorithm=rep(algorithmN, length(receivers)), stringsAsFactors=F
+      )
+    }
   )
+  recvMsgDist <- do.call('rbind', recvMsgDist)
+
+  sentCtrlMsgDist <- count.events_compl.per.node(nodes, sent_pkgs, sent_bro_msgs)
+  sentCtrlMsgDist <- data.frame(
+    msgsNo=sentCtrlMsgDist, algorithm=rep(algorithmN, length(sentCtrlMsgDist)), stringsAsFactors=F
+  )
+  recvCtrlMsgDist <- count.events_compl.per.node(nodes, recv_pkgs, recv_bro_msgs)
+  recvCtrlMsgDist <- data.frame(
+    masgsNo=recvCtrlMsgDist, algorithm=rep(algorithmN, length(recvCtrlMsgDist)), stringsAsFactors=F
+  )
+  result <- list( sentMsgDist, recvMsgDist, sentCtrlMsgDist, recvCtrlMsgDist )
+  names(result) <- c('sentBroMsgDist', 'recvBroMsgDist', 'sentCtrlMsgDist', 'recvCtrlMsgDist')
   result
 }
 
@@ -583,6 +576,13 @@ getExpectedCoverage <- function(overlays){
   sapply(overlays, function(overlay) {
     length( getVerticesFromBiggestCluster(overlay) )
   })
+}
+
+saveDataFrame <- function(df, dstPath, fileName, expeConfig){
+  write.table(
+    df, file = build.filename(dstPath, fileName, expeConfig),
+    row.names=F, col.names=F
+  )
 }
 
 main <- function(args) {
@@ -639,23 +639,15 @@ main <- function(args) {
     # create the graph with the position of each node
     # TODO denseZone$atY - denseZone$halfLen
     get.graph(
-      all_nodes,
-      positions,
-      args$transmission_range,
-      locationTimestamp,
-      msgTimestamp,
-      msgReceivers,
-      msgEmitters,
-      denseZone,
-      forward_type_ds,
+      all_nodes, positions, args$transmission_range, locationTimestamp,
+      msgTimestamp, msgReceivers, msgEmitters, denseZone, forward_type_ds,
       savePlot=TRUE
     )
   })
   # INFO save distribution of nodes per FW type
-  write.table(
+  saveDataFrame(
     get.node.roles(overlays, msgs_ids, algorithmN),
-    file = build.filename(args$outputPath, 'noderoles', args$configuration),
-    row.names=F, col.names=F
+    args$outputPath, 'noderoles', args$configuration
   )
 
   sent_packages <- subset(
@@ -672,61 +664,62 @@ main <- function(args) {
 
 	datasetExists <- list.files(args$outputPath)
 	if(! "groundTruthDensityDist-" %in% datasetExists) {
-		print("Save ground truth of density")
-		groundTruthD <- get.density.distribution(overlays)
-		save.distribution(
-      "groundTruthDensityDist", groundTruthD, args$outputPath, ""
+		print('Compute ground truth of nodes neighbors')
+		saveDataFrame(
+      get.density.distribution(overlays),
+      args$outputPath, 'groundTruthDensityDist', ''
   	)
-    ##### BEGIN: naming dataset #####
-		strV <- unlist(strsplit(args$configuration, "_"))
-		strV <- strV[ 1:length(strV)-1 ]
-		undV <- rep("_", length(strV))
-		resu <- sapply(
-      1:length(strV),
-      function(i){
-			     paste(strV[i], undV[i], sep="")
-		  }
-    )
-		resu <- c(resu, "Ground-Truth")
-		newName <- paste(resu, collapse="")
-		save.distribution(
-		  "groundTruthDensityDist", groundTruthD, args$outputPath, newName
-  	)
-    ##### END: naming dataset #####
-  	print("DONE!")
+  	print('DONE')
   }
-
   print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
     sent_broadcast_msgs, recv_broadcast_msgs,
-    sent_packages, recv_packages, all_nodes
+    sent_packages, recv_packages, all_nodes,
+    overlays, msgs_ids, algorithmN
+  )
+  # save distributions of sent/received messages (ctrl and broadcast)
+  saveDataFrame(
+    sent_recv_msgs$sentBroMsgDist, args$outputPath,
+    'sentBroadcastMsgsDistribution', args$configuration
+  )
+  saveDataFrame(
+    sent_recv_msgs$recvBroMsgDist, args$outputPath,
+    'recvBroadcastMsgsDistribution', args$configuration
+  )
+  saveDataFrame(
+    sent_recv_msgs$sentCtrlMsgDist, args$outputPath,
+    'sentCtrlMsgsDistribution', args$configuration
+  )
+  saveDataFrame(
+    sent_recv_msgs$recvCtrlMsgDist, args$outputPath,
+    'recvCtrlMsgsDistribution', args$configuration
   )
   print("DONE!")
-
   print("Calculating energy consumption")
   energy_consumption <- energy.consumption.of.sent_recv.messages(
     args$file, exp_duration,
     sent_packages, recv_packages, all_nodes
   )
+  saveDataFrame(
+    data.frame(
+      data=energy_consumption,
+      algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
+    ),
+    args$outputPath, 'batteryConsumptionDistribution', args$configuration
+  )
   print("DONE!")
 
   print("Calculating approximation of nodes' density")
   density.relative.errors <- get.measured.density(
-    args$file,
-    args$first_time_of_measuring_nodes_position,
-    args$step,
-    msgs_ids,
-    all_nodes
+    args$file, args$first_time_of_measuring_nodes_position,
+    args$step, msgs_ids, all_nodes
   )
   print("DONE!")
 
   print("Calculating relative error of collisions")
   collisions_re <- collisions.relative.error(
-    sent_broadcast_msgs,
-    recv_broadcast_msgs,
-    msgs_ids,
-    overlays,
-    all_nodes
+    sent_broadcast_msgs, recv_broadcast_msgs,
+    msgs_ids, overlays, all_nodes
   )
   print("DONE!")
 
@@ -734,54 +727,44 @@ main <- function(args) {
   sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
   recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
   bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
-  print("DONE!")
+  print("DONE")
 
-  print("Exporting data")
-  save.distribution(
-    "sentBroadcastMsgsDistribution", sent_recv_msgs$sent_bro_msgs,
-    args$outputPath, args$configuration
+  print("Exporting rest of broadcast metrics")
+  saveDataFrame(
+    data.frame(
+      data=density.relative.errors,
+      algo=rep(algorithmN, length(density.relative.errors)), stringsAsFactors=F
+    ),
+    args$outputPath, 'densityRelativeError', args$configuration
   )
-  save.distribution(
-    "recvBroadcastMsgsDistribution", sent_recv_msgs$recv_bro_msgs,
-    args$outputPath, args$configuration
+  saveDataFrame(
+    data.frame(
+      data=collisions_re,
+      algo=rep(algorithmN, length(collisions_re)), stringsAsFactors=F
+    ),
+    args$outputPath, 'collisionsRelativeError', args$configuration
   )
-  save.distribution(
-    "sentCtrlMsgsDistribution", sent_recv_msgs$sent_ctrl_msgs,
-    args$outputPath, args$configuration
-  )
-  save.distribution(
-    "recvCtrlMsgsDistribution", sent_recv_msgs$recv_ctrl_msgs,
-    args$outputPath, args$configuration
-  )
-  save.distribution(
-    "batteryConsumptionDistribution", energy_consumption,
-    args$outputPath, args$configuration
-  )
-  save.distribution(
-    "densityRelativeError", density.relative.errors,
-    args$outputPath, args$configuration
-  )
-  save.distribution(
-    "collisionsRelativeError", collisions_re,
-    args$outputPath, args$configuration
-  )
-
   save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-  save.number.of.relays(bs, args$simTime, args$outputPath, args$configuration)
-  save.coverage(
-  	bs, args$simTime, args$outputPath, args$configuration, expectedCoverage
+  # save network coverage
+  coverage <- (bs$n.received / expectedCoverage) * 100
+  saveDataFrame(
+    data.frame(
+      data=coverage,
+      algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
+    ),
+    args$outputPath, 'coverage', args$configuration
   )
+  print('DONE')
   if (args$showAverages) {
     print("Printing average values")
     averages <- average.values(energy_consumption, bs, max=args$simTime)
-    print(noquote(paste("average_values",
-    				averages$coverage,
-    				averages$broadcasting.time,
-    				averages$power_consumption,
-    				averages$duplicated_messages,
-    				averages$retransmitted_messages)))
+    print(
+      noquote( paste("average_values",
+      averages$coverage, averages$broadcasting.time, averages$power_consumption,
+			averages$duplicated_messages, averages$retransmitted_messages
+    )))
+    print("DONE")
   }
-  print("END")
 }
 
 main(get.arguments())
