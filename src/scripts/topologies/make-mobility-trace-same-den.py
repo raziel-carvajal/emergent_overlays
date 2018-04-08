@@ -98,16 +98,18 @@ def placedNodesWithUniformDen(latestPos, centers, halfSqrt, staticPo, overlays, 
                         nodesAtSqrt[n] = latestPos[n]
                         nodeIds.append(n)
                 if v_j['zoneId'] == 0 :
+                    # nodes at dense zone move slowly
             	    velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
                 else :
-		    velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
-		mobMod = random_direction(
-	            len(nodesAtSqrt),
-	            (halfSqrt * 2, halfSqrt * 2),
-	            wt_max=WAITING_TIME,
-	            velocity=velocity,
-	            border_policy='reflect'
-		)
+                    # nodes at sparse zone move rapidly
+                    velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
+                mobMod = random_direction( \
+    	            len(nodesAtSqrt), \
+    	            (halfSqrt * 2, halfSqrt * 2), \
+    	            wt_max=WAITING_TIME, \
+    	            velocity=velocity, \
+    	            border_policy='reflect' )
+                # print(center)
                 nodesAtSqrt = makeStep(mobMod, nodesAtSqrt, center, halfSqrt)
                 savePositions(nodesAtSqrt)
                 nodeIdx = 0
@@ -130,12 +132,27 @@ def placedNodesWithUniformDen(latestPos, centers, halfSqrt, staticPo, overlays, 
 
 
 def makeStep(mobMod, pos, center, halfSqrt) :
+    sqrtLeftInfCorner = {
+        'x': center['x'] - halfSqrt, 'y': center['y'] - halfSqrt }
     i = 0
     p_i = [ (k[0], k[1]) for k in next(mobMod) ]
     p_j = [ (k[0], k[1]) for k in next(mobMod) ]
-    pDif= [ (p_j[k][0] - p_i[k][0], p_j[k][1] - p_i[k][1]) for k in range(0, len(pos)) ]
+    pDif = [( abs( p_i[k][0] - p_j[k][0] ), abs( p_i[k][1] - p_j[k][1] ) ) \
+        for k in range(0, len(pos)) ]
     for k, v in pos.iteritems() :
         point = { 'x': v['x'] + pDif[i][0], 'y': v['y'] + pDif[i][1] }
+        # implementation of reflect policy of points within square of size:
+        # [ sqrtLeftInfCorner[x] , sqrtLeftInfCorner[y] ] &&
+        # [ sqrtLeftInfCorner[x] + 2 * halfSqrt,
+        #   sqrtLeftInfCorner[y] + 2 * halfSqrt ]
+        if point['x'] < sqrtLeftInfCorner['x'] :
+            point['x'] = point['x'] + 2 * halfSqrt
+        if point['x'] > sqrtLeftInfCorner['x'] + 2 * halfSqrt :
+            point['x'] = point['x'] - 2 * halfSqrt
+        if point['y'] < sqrtLeftInfCorner['y'] :
+            point['y'] = point['y'] + 2 * halfSqrt
+        if point['y'] > sqrtLeftInfCorner['y'] + 2 * halfSqrt :
+            point['y'] = point['y'] - 2 * halfSqrt
         i = i + 1
         pos[k] = point
     return pos
@@ -221,8 +238,12 @@ if __name__ == '__main__':
     	f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
     savePositions(latestP)
     print("First connected graph was created")
+
+    # source node remains fixed within the communication area, that's why
+    # the source node is removed to create mobility traces from the rest of nodes
     staticNodeId = args.nodes_no
     staticNodePo = latestP[staticNodeId]
     del latestP[staticNodeId]
+
     placedNodesWithUniformDen(latestP, centers, halfSqr, staticNodePo,
         args.overlays, args.Tx, args.cma_w)

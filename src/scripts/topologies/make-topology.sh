@@ -30,7 +30,7 @@ rm -rf *.pdf *.ned *.mobility *.positions output \
   ../../../experiments/networks/built_topologies/* \
   ../../../experiments/configs/built_configs/*
 ${generator} --cma-w ${cma} --regions ${regions} \
-  --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays}
+  --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays} >output
 s=""
 for f in `ls -t *.pdf`; do
   s="${f} ${s}"

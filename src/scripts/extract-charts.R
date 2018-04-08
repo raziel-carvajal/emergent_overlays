@@ -396,6 +396,8 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   node_roles <- lapply( msgs_ids,
     function(msg){
       overlay <- overlays[[msg]]
+      # connected_nodes <- getVerticesFromBiggestCluster(overlay)
+      # nodes_location <- V(overlay)$location[connected_nodes]
       nodes_location <- V(overlay)$location
       zones <- unique(nodes_location)
       nodes_per_location <- sapply( zones,
