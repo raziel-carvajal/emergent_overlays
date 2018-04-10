@@ -106,13 +106,18 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
       double get_delta() override {
           return app->delta;
       }
+      int set_and_get_ctrl_msg_no() {
+      	app->latest_ctrl_session++;
+      	return app->latest_ctrl_session;
+      }
     };
 
     friend class OmnetBroadcastGateway;
   private:
     // number of broadcast message to send
     int nr_broadcast_msg;
-
+    int latest_ctrl_session = 0;
+    int latest_rcv_ctrl_session;
 
     // when to send broadcast messages
     std::set<int> msgs;
@@ -135,16 +140,13 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     std::map<std::string, cMessage*> border_detector_timers;
     // key: protocol identifier
     // value: set of potential border nodes
-    std::map<std::string, std::set<std::string>> nodes_at_border;
-    std::set<std::string> known_foreign_algos;
+    std::map<int, std::map<std::string, std::set<std::string>>> known_border_nodes;
+    std::map<int, std::set<std::string>> known_foreign_algos;
     std::set<broadcasting::Border*> scheduled_border_msgs;
 
-    bool am_i_border_node = false;
+    std::map<int, bool> am_i_border_node;
 
   private:
-
-    bool in_border_nodes(const std::string& protocolId);
-
     // control messages
     cMessage* ctrlDisplayTime = nullptr;
 
@@ -248,6 +250,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
 
 //    bool applyMsgsTransformation(cMessage *msg, bool &fwdMsg);
     bool borderDetector(cMessage *msg);
+//    virtual int get_latest_ctrl_msg();
 
 };
 

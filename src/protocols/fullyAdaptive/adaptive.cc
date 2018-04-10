@@ -328,17 +328,6 @@ FullyAdaptive::processStart()
     knownProtocols[current_protocol_name] = std::unique_ptr<IBroadcastProtocol>(current_protocol);
   }
 
-//  XXX what the hell is this?
-//  if (initialProtocol == "middleware") {
-//  	auto pos = gateway->get_current_position();
-//    if (pos.x >= 81 && pos.x <= 169 && pos.y >= 81 && pos.y <= 169) {
-//      initialProtocol = "Mpr_t2";
-//    }
-//    else {
-//      initialProtocol = "Flooding2";
-//    }
-//  }
-
   current_protocol_name = initialProtocol;
   gateway->setProtocolId(current_protocol_name);
   emit(signal_protocol_change, current_protocol_name[0]);
@@ -369,6 +358,7 @@ inet::broadcasting::Hello*
 FullyAdaptive::build_hello_message()
 {
   auto m = knownProtocols[current_protocol_name]->build_hello_message();
+  m->setSession(gateway->set_and_get_ctrl_msg_no());
   m->setX(gateway->get_current_position().x);
   m->setY(gateway->get_current_position().y);
   m->setProtocolId (current_protocol_name.c_str());

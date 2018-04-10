@@ -25,9 +25,10 @@ class noncobject TargetSet;
 
 packet Hello {
   string sender;
-	double x;
-	double y;
-	string protocolId;	//protocol ID
+  double x;
+  double y;
+  string protocolId;	//protocol ID
+  int session;
 }
 
 packet Broadcast {

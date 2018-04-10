@@ -132,7 +132,7 @@ void BroadcastingAppBase::OmnetBroadcastGateway::cancel_message(cMessage* m) {
 }
 
 bool BroadcastingAppBase::OmnetBroadcastGateway::amIborderNode() {
-	return app->am_i_border_node;
+	return app->am_i_border_node[app->latest_ctrl_session];
 }
 
 void BroadcastingAppBase::OmnetBroadcastGateway::emitDensityApproximation(
@@ -161,33 +161,35 @@ BroadcastingAppBase::BroadcastingAppBase() {
 
 bool BroadcastingAppBase::borderDetector(cMessage* msg) {
 	bool known_ctrl_msg = false;
-	bool msg_trans_ok = processMessage<Hello>(PK(msg), [&] (const Hello* m) {
-		if (m->getProtocolId() != protocolId) {
-			if ( !in_border_nodes(m->getProtocolId()) ) {
-				double timer_dur = uniform(0.001, delta);
+	bool msg_trans_ok =
+			processMessage<Hello>(PK(msg),
+					[&] (const Hello* m) {
+						if (m->getProtocolId() != protocolId) {
+							bool known_foreign_algo =
+							(known_border_nodes.find(m->getSession()) != known_border_nodes.end() ) &&
+							(
+									known_border_nodes[m->getSession()].find(m->getProtocolId()) !=
+									known_border_nodes[m->getSession()].end()
+							);
+							if(!known_foreign_algo) {
+								latest_rcv_ctrl_session = m->getSession();
+								double timer_dur = uniform(0.001, delta);
 //								cout << getLogHeader() << "scheduling border-detector event, duration [" <<
 //								timer_dur << "]" << endl;
-			border_detector_timers[m->getProtocolId()] = delayed_event(
-					BORDER_DETECTOR_TIMER,
-					strdup(m->getProtocolId()),
-					timer_dur
-			);
-		}
+								border_detector_timers[m->getProtocolId()] = delayed_event(
+										BORDER_DETECTOR_TIMER,
+										strdup(m->getProtocolId()),
+										timer_dur
+								);
+							}
 //							cout << getLogHeader() << "node [" << m->getSender() <<
 //							"] is now a candidate for being border node" << endl;
-		nodes_at_border[m->getProtocolId()].insert(m->getSender());
-	} else {
-		known_ctrl_msg = true;
-	}
-});
+							known_border_nodes[latest_rcv_ctrl_session][m->getProtocolId()].insert(m->getSender());
+						} else {
+							known_ctrl_msg = true;
+						}
+					});
 	return msg_trans_ok && !known_ctrl_msg;
-}
-
-//Define_Module(BroadcastingAppBase);
-
-bool BroadcastingAppBase::in_border_nodes(const std::string& protocolId) {
-	return nodes_at_border.find(protocolId) != nodes_at_border.end()
-			&& nodes_at_border[protocolId].size() > 0;
 }
 
 void BroadcastingAppBase::initialize(int stage) {
@@ -336,22 +338,25 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			 */
 //			cout << getLogHeader() << "border-detector event expires " << endl;
 			char* foreign_prot = (char*) msg->getContextPointer();
-			if (nodes_at_border.find(foreign_prot) == nodes_at_border.end()) {
+			bool no_border_nodes = known_border_nodes[latest_rcv_ctrl_session].find(
+					foreign_prot) == known_border_nodes[latest_rcv_ctrl_session].end();
+			if (no_border_nodes) {
 				cerr << getLogHeader()
-						<< "set of potential border nodes was deleted !!!" << endl;
+						<< "ERROR: set of potential border nodes is empty!!!" << endl;
 			} else {
 				Border* border_msg = new Border();
 				border_msg->setSender(myself.c_str());
 				border_msg->setSrcProtocol(protocolId.c_str());
 				border_msg->setForeignProtocol(foreign_prot);
 				border_msg->setHopTL(hop_to_live);
-				auto set_it = nodes_at_border[foreign_prot].begin();
+				auto set_it =
+						known_border_nodes[latest_rcv_ctrl_session][foreign_prot].begin();
 				advance(set_it, 0);
 				string chosen_node = *set_it;
 //				cout << getLogHeader() << "chosen border node [" << chosen_node.c_str()
 //						<< "] from foreign protocol [" << foreign_prot << "]" << endl;
 				border_msg->setChosenNode(chosen_node.c_str());
-				known_foreign_algos.insert(foreign_prot);
+				known_foreign_algos[latest_rcv_ctrl_session].insert(foreign_prot);
 				send_package(border_msg);
 			}
 			cancelAndDelete(msg);
@@ -419,40 +424,55 @@ void BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
 		Border* border_msg = dynamic_cast<Border *>(pkt);
 		if (border_msg->getSender() == myself)
 			return;
-		// avoid forwarding indefinitely
-		bool known_protocol = known_foreign_algos.find(
-				border_msg->getForeignProtocol()) != known_foreign_algos.end();
+		bool known_protocol;
 //		cout << getLogHeader() << "Border msg received from sender ["
 //				<< border_msg->getSender() << "]" << endl;
-		if (!known_protocol && border_msg->getForeignProtocol() == protocolId) {
-			if (border_msg->getChosenNode() == myself)
-				am_i_border_node = true;
-			else
-				am_i_border_node = false;
-//			cout << getLogHeader() << "Am I a border node? ANSW [" << am_i_border_node
+//	INFO Border node received from a foreign protocol
+		if (border_msg->getForeignProtocol() == protocolId) {
+			// avoid forwarding indefinitely
+			known_protocol = known_foreign_algos.find(latest_ctrl_session)
+					!= known_foreign_algos.end()
+					&& known_foreign_algos[latest_ctrl_session].find(
+							border_msg->getForeignProtocol())
+							!= known_foreign_algos[latest_ctrl_session].end();
+			if (!known_protocol) {
+				known_foreign_algos[latest_ctrl_session].insert(
+						border_msg->getForeignProtocol());
+				if (border_msg->getChosenNode() == myself)
+					am_i_border_node[latest_ctrl_session] = true;
+				else
+					am_i_border_node[latest_ctrl_session] = false;
+
+			}
+//						cout << getLogHeader() << "Am I a border node? ANSW [" << am_i_border_node[latest_ctrl_session]
 //					<< "]" << endl;
 		}
 
-		if (!known_protocol && border_msg->getSrcProtocol() == protocolId) {
-//			if (!known_protocol) {
-			// labeled algorithm as known
-			known_foreign_algos.insert(border_msg->getForeignProtocol());
-
-			// INFO cancel ongoing timers, which aim to chose a different border node,
-			//      of protocol border_msg->getForeignProtocol()
-			cMessage* ongoing_border_detector =
-					border_detector_timers[border_msg->getForeignProtocol()];
-			if (ongoing_border_detector != nullptr) {
+		if (border_msg->getSrcProtocol() == protocolId) {
+			known_protocol = known_foreign_algos.find(latest_rcv_ctrl_session)
+					!= known_foreign_algos.end()
+					&& known_foreign_algos[latest_rcv_ctrl_session].find(
+							border_msg->getForeignProtocol())
+							!= known_foreign_algos[latest_rcv_ctrl_session].end();
+			if (!known_protocol) {
+				known_foreign_algos[latest_rcv_ctrl_session].insert(
+						border_msg->getForeignProtocol());
+//			INFO cancel ongoing timers, which aim to chose a different border node,
+//			      of protocol border_msg->getForeignProtocol()
+				cMessage* ongoing_border_detector =
+						border_detector_timers[border_msg->getForeignProtocol()];
+				if (ongoing_border_detector != nullptr) {
 //					cout << getLogHeader() << "cancel border-detector event !" << endl;
-				cancelAndDelete(ongoing_border_detector);
-				/* INFO remove candidates of being border nodes.
-				 *     This measure is a little bit drastic because
-				 *     the set could be reuse later. On the other hand,
-				 *     this a way to deal with mobility.
-				 */
-				nodes_at_border[border_msg->getForeignProtocol()].clear();
+					cancelAndDelete(ongoing_border_detector);
+					/* INFO remove candidates of being border nodes.
+					 *     This measure is a little bit drastic because
+					 *     the set could be reuse later. On the other hand,
+					 *     this a way to deal with mobility.
+					 */
+					known_border_nodes[latest_rcv_ctrl_session][border_msg->getForeignProtocol()].clear();
+				}
+
 			}
-//			}
 
 			Border* msg_cpy = new Border();
 			msg_cpy->setSender(border_msg->getSender());
