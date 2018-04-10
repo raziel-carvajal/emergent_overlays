@@ -143,44 +143,50 @@ average.values <- function(pl, broadcast.info, max) {
 	)
 }
 
-get.density.distribution <- function(overlays){
-  ground_truth <- lapply( overlays,
-    function(overlay){
-      nodes <- getVerticesFromBiggestCluster(overlay)
-      neigs <- sapply( nodes,
-        function(n){
-          neigs <- overlay[n, ]
-          length(neigs[neigs != 0])
-        }
-      )
-      at_zone <- V(overlay)$location
-      data.frame( neigsNo=neigs, zoneLocation=at_zone[nodes],
-        algorithm=rep('GroundTruth', length(neigs)), stringsAsFactors=F
-      )
-    }
-  )
-  do.call('rbind', ground_truth)
-}
-
-get.measured.density <- function(results_file, first_measure,
-  msg_freq, msgs_ids, node_ids){
-
+get.density.relative.error <- function(results_file, first_measure,
+  msg_freq, msgs_ids, overlays, algorithmN){
   measured_density <- replace.resultkey.with.node_id(
     results_file, "name(density_approximation:vector)"
   )
-  # NOTE in case you want to compute the relative error doit here with /!\
-  density_approx <- lapply(msgs_ids, function(msg){
-    timestamp <- first_measure + msg_freq * (msg - 1)
-    desityAtTi<-subset( measured_density, abs(time - timestamp) < TOLERANCE )
-    lapply(
-      node_ids,
-      function(nodeId){
-        subset(desityAtTi, node_id == nodeId)$value
-      }
-    )
-  })
-
-  unlist(density_approx)
+  denRelErrPerZone <- lapply( c('SPARSE', 'DENSE'),
+    function(zone){
+      densityRelativeError <- sapply( msgs_ids,
+        function(msg){
+          overlay <- overlays[[msg]]
+          nodes <- getVerticesFromBiggestCluster(overlay)
+          nodesInZone <- sapply( nodes,
+            function(n){ ifelse(V(overlay)$location[n] == zone, n, NA) }
+          )
+          nodesInZone <- nodesInZone[!is.na(nodesInZone)]
+          timestamp <- first_measure + msg_freq * (msg - 1)
+          densAtTi  <- subset( measured_density, abs(time - timestamp) < TOLERANCE )
+          # get measured number of neighbors over nodes
+          densityPerZone <- sapply( nodesInZone,
+            function(n){
+              subset(densAtTi, node_id == n)$value
+            }
+          )
+          # get real number of neighbors over nodes
+          groundTruth <- sapply( nodesInZone,
+            function(n){
+              neigs <- overlay[n, ]
+              length(neigs[neigs != 0])
+            }
+          )
+          # get the relative error
+          1 - ( densityPerZone / groundTruth )
+        }
+      )
+      densityRelativeError <- as.vector(densityRelativeError)
+      data.frame(
+        density_relative_err=densityRelativeError,
+        zone=rep(zone, length(densityRelativeError)),
+        algorithm=rep(algorithmN, length(densityRelativeError)),
+        stringsAsFactors=F
+      )
+    }
+  )
+  do.call('rbind', denRelErrPerZone)
 }
 
 get.graph <- function(nodes, positions, Tx, locationTimestamp,
@@ -280,7 +286,7 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
 }
 
 getVerticesFromBiggestCluster <- function(g){
-  c <- clusters(g)
+  c <- components(g)
   d1 <- data.frame(indx=c(1:length(c$csize)), csize=c$csize)
   d2 <- data.frame(indx=c(1:length(c$membership)), membership=c$membership)
   clusterId <- subset(d1, csize == max(c$csize))$indx
@@ -396,10 +402,13 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   node_roles <- lapply( msgs_ids,
     function(msg){
       overlay <- overlays[[msg]]
-      # connected_nodes <- getVerticesFromBiggestCluster(overlay)
-      # nodes_location <- V(overlay)$location[connected_nodes]
-      nodes_location <- V(overlay)$location
-      zones <- unique(nodes_location)
+      connected_nodes <- getVerticesFromBiggestCluster(overlay)
+      nodes_location <- sapply(1:length(V(overlay)$location),
+        function(e){
+          ifelse(e %in% connected_nodes, V(overlay)$location[e], NA)
+        }
+      )
+      zones <- c('SPARSE', 'DENSE')
       nodes_per_location <- sapply( zones,
         function(z){
           nodes_at_z <- sapply( 1:length(nodes_location),
@@ -447,7 +456,7 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
       # INFO we get the percentage over all broadcast messages and nodes
       dsLen <- sum(ds$count)
       data.frame(
-        count=as.vector(floor((dsAsMatrix * 100) / dsLen)),
+        count=as.vector( (dsAsMatrix * 100) / dsLen ),
         fw_code=names(dsAsMatrix),
         zone=rep(zones[[i]], length(dsAsMatrix)),
         algorithm=rep(algorithmN, length(dsAsMatrix)),
@@ -458,60 +467,50 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   do.call('rbind', merged_ds)
 }
 
-collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays,
-  nodes){
-  groundTruth <- lapply(msgs_ids,
-    function(msg){
-      overlay <- overlays[[msg]]
-      senders <- sort.int(unique( subset(sent_msgs, value == msg)$node_id ))
-      receptions <- lapply(senders,
-        function(s){
-          counter <- rep(0, length(nodes))
-          edges <- overlay[s, ]
-          neigs <- sapply(1:length(edges),
-            function(indx){
-              ifelse(edges[indx] == 1, indx, NA)
+collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays){
+  relativeErr <- lapply( c('SPARSE', 'DENSE'),
+    function(zone){
+      relativeError <- sapply( msgs_ids,
+        function(msg){
+          overlay <- overlays[[msg]]
+          senders <- sort.int(unique( subset(sent_msgs, value == msg)$node_id ))
+          sendersAtZone <- sapply( senders,
+            function(s){ ifelse(V(overlay)$location[s] == zone, s, NA) }
+          )
+          sendersAtZone <- sendersAtZone[ !is.na(sendersAtZone) ]
+          # ground truth of receptions
+          groundTruth <- sapply( sendersAtZone,
+            function(s){
+              neigs <- overlay[s, ]
+              receivers <- sapply( 1:length(neigs),
+                function(i){ ifelse(neigs[i] == 1, i, NA) }
+              )
+              receivers <- receivers[ !is.na(receivers) ]
+              # NOTE when a sender S forwards a message, S is labed as a receiver too
+              receivers[ length(receivers) + 1 ] <- s
+              receivers
             }
           )
-          neigs <- neigs[ !is.na(neigs) ]
-          counter[neigs] <- 1
-          # NOTE when a sender S forwards a message, S is labed as a receiver too
-          counter[s] <- 1
-          counter
+          groundTruth <- unlist(groundTruth)
+          receiversAtZone <- unique(groundTruth)
+          measuredRcvrs <- sapply( receiversAtZone,
+            function(r){
+              length( subset( subset( recv_msgs, value == msg ), node_id == r ) )
+            }
+          )
+          groundTruth <- length(groundTruth)
+          measuredRcvrs <- sum(measuredRcvrs)
+          abs(1 - measuredRcvrs / groundTruth)
         }
       )
-      receptions <- matrix(
-        unlist(receptions), nrow=length(senders), ncol=length(nodes), byrow=T
-      )
-      t<-colSums(receptions)
-    }
-  )
-  groundTruth <- rowSums(
-    matrix(
-      unlist(groundTruth), nrow=length(nodes), ncol=length(msgs_ids)
-    )
-  )
-  measuredRcvMsgs <- lapply(nodes,
-    function(node){
-      recvMsgIds <- subset(recv_msgs, node_id == node)$value
-      sapply(msgs_ids,
-        function(msg){
-          length(recvMsgIds[recvMsgIds == msg])
-        }
+      data.frame(
+        relative_err=relativeError,
+        zone=rep(zone, length(relativeError)),
+        stringsAsFactors=F
       )
     }
   )
-  measuredRcvMsgs <- rowSums(
-    matrix(
-      unlist(measuredRcvMsgs), nrow=length(nodes), ncol=length(msgs_ids), byrow=T
-    )
-  )
-  relative_err <- sapply(nodes,
-    function(n){
-      abs(1 - measuredRcvMsgs[n] / groundTruth[n])
-    }
-  )
-  relative_err[!is.na(relative_err)]
+ relativeErr <- do.call('rbind', relativeErr)
 }
 
 count.events.per.node <- function(nodes, ds){
@@ -662,17 +661,8 @@ main <- function(args) {
   )
   # expected number of nodes that must receive a broadcast message
   # over all sessions of dissemination
-	expectedCoverage <- getExpectedCoverage(overlays)
+  expectedCoverage <- getExpectedCoverage(overlays)
 
-	datasetExists <- list.files(args$outputPath)
-	if(! "groundTruthDensityDist-" %in% datasetExists) {
-		print('Compute ground truth of nodes neighbors')
-		saveDataFrame(
-      get.density.distribution(overlays),
-      args$outputPath, 'groundTruthDensityDist', ''
-  	)
-  	print('DONE')
-  }
   print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
     sent_broadcast_msgs, recv_broadcast_msgs,
@@ -711,17 +701,17 @@ main <- function(args) {
   )
   print("DONE!")
 
-  print("Calculating approximation of nodes' density")
-  density.relative.errors <- get.measured.density(
+  print("Calculating relative error of nodes neighborhood size")
+  densityRelativeError <- get.density.relative.error(
     args$file, args$first_time_of_measuring_nodes_position,
-    args$step, msgs_ids, all_nodes
+    args$step, msgs_ids, overlays, algorithmN
   )
   print("DONE!")
 
   print("Calculating relative error of collisions")
   collisions_re <- collisions.relative.error(
     sent_broadcast_msgs, recv_broadcast_msgs,
-    msgs_ids, overlays, all_nodes
+    msgs_ids, overlays
   )
   print("DONE!")
 
@@ -733,10 +723,7 @@ main <- function(args) {
 
   print("Exporting rest of broadcast metrics")
   saveDataFrame(
-    data.frame(
-      data=density.relative.errors,
-      algo=rep(algorithmN, length(density.relative.errors)), stringsAsFactors=F
-    ),
+    densityRelativeError,
     args$outputPath, 'densityRelativeError', args$configuration
   )
   saveDataFrame(

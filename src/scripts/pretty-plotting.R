@@ -116,10 +116,10 @@ if (!is.null(args$pc)) {
   print('Plotting power consumption')
   ds <- read.table( paste(args$path, args$pc, sep=''), header=F)
   names(ds) <- c('data', 'algorithm')
-  plot.data.using.boxes(ds, '', 'Algorithm', 'Energy Consumption (mJ)')
+  plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules (mJ)')
   plot.dist.as.cdf(
-    ds, 'Nodes energy consumption',
-    'Milli Joules (mJ)', 'CDF'
+    ds, 'Energy consumption',
+    'Milli Joules (mJ)', 'CDF over nodes'
   )
   print('DONE')
 }
@@ -138,12 +138,12 @@ if (!is.null(args$sent_bro)) {
   msgAtDenseZ  <- subset(ds, zone == 'DENSE')
   msgAtSparseZ <- subset(ds, zone == 'SPARSE')
   plot.dist.as.cdf(
-    msgAtDenseZ, 'Sent Broadcast Messages at Dense Zone',
-    'Messages No', 'CDF'
+    msgAtDenseZ, 'Sent Broadcast Messages within Dense Zone',
+    'Number of Messages', 'CDF over broadcast sessions'
   )
   plot.dist.as.cdf(
-    msgAtSparseZ, 'Sent Broadcast Messages at Sparse Zone',
-    'Messages No', 'CDF'
+    msgAtSparseZ, 'Sent Broadcast Messages within Sparse Zone',
+    'Number of Messages', 'CDF over broadcast sessions'
   )
   print('DONE')
 }
@@ -155,12 +155,12 @@ if (!is.null(args$recv_bro)) {
   msgAtDenseZ  <- subset(ds, zone == 'DENSE')
   msgAtSparseZ <- subset(ds, zone == 'SPARSE')
   plot.dist.as.cdf(
-    msgAtDenseZ, 'Received Broadcast Messages at Dense Zone',
-    'Messages No', 'CDF'
+    msgAtDenseZ, 'Received Broadcast Messages within Dense Zone',
+    'Number of Messages', 'CDF over broadcast sessions'
   )
   plot.dist.as.cdf(
-    msgAtSparseZ, 'Received Broadcast Messages at Sparse Zone',
-    'Messages No', 'CDF'
+    msgAtSparseZ, 'Received Broadcast Messages within Sparse Zone',
+    'Number of Messages', 'CDF over broadcast sessions'
   )
   print('DONE')
 }
@@ -171,7 +171,7 @@ if (!is.null(args$sent_ctrl)) {
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
     ds, 'Sent Ctrl Messages (dense & sparse area)',
-    'Messages No', 'CDF'
+    'Number of Messages', 'CDF over Ctrl sessions'
   )
   print('DONE')
 }
@@ -182,7 +182,7 @@ if (!is.null(args$recv_ctrl)) {
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
     ds, 'Received Ctrl Messages (dense & sparse area)',
-    'Messages No', 'CDF'
+    'Number of Messages', 'CDF over Ctrl sessions'
   )
   print('DONE')
 }
@@ -193,27 +193,25 @@ if (!is.null(args$cv)) {
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
     ds, 'Network Coverage of Broadcast Sessions',
-    '% of covered nodes', 'CDF over broadcast sessions'
+    '% of Covered Nodes', 'CDF over broadcast sessions'
   )
   print('DONE')
 }
 
 
 if (!is.null(args$dre)) {
-  print('Plotting density approximation')
+  print('Plotting density relative error')
   ds <- read.table( paste(args$path, args$dre, sep=''), header=F)
-  names(ds) <- c('data', 'algorithm')
-  if (!is.null(args$ds)){
-    groundTruth <- read.table( paste(args$path, args$ds, sep=''), header=F)
-    names(groundTruth) <- c('data', 'zone', 'algorithm')
-    groundTruth <- data.frame(
-      data=groundTruth$data, algorithm=groundTruth$algorithm, stringsAsFactors=F
-    )
-    ds <- rbind(ds, groundTruth)
-  }
+  names(ds) <- c('data', 'zone', 'algorithm')
+  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
+  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
   plot.dist.as.cdf(
-    ds, 'Measured Number of Neighbors',
-    'No of neighbors', 'CDF over nodes'
+    msgAtDenseZ, 'Relative Error of Nodes Neighbors No in Dense Zone',
+    'Relative Error', 'CDF over nodes'
+  )
+  plot.dist.as.cdf(
+    msgAtSparseZ, 'Relative Error of Nodes Neighbors No in Sparse Zone',
+    'Relative Error', 'CDF over nodes'
   )
   print('DONE')
 }
@@ -221,9 +219,15 @@ if (!is.null(args$dre)) {
 if (!is.null(args$cre)) {
   print('Plotting relative error of collisions')
   ds <- read.table( paste(args$path, args$cre, sep=''), header=F)
-  names(ds) <- c('data', 'algorithm')
+  names(ds) <- c('data', 'zone', 'algorithm')
+  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
+  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
   plot.dist.as.cdf(
-    ds, 'Collisions of Recieved Broadcast Messages',
+    msgAtDenseZ, 'Collisions of Recieved Broadcast Messages in Dense Zone',
+    'Relative Error', 'CDF over broadcast sessions'
+  )
+  plot.dist.as.cdf(
+    msgAtSparseZ, 'Collisions of Recieved Broadcast Messages in Sparse Zone',
     'Relative Error', 'CDF over broadcast sessions'
   )
   print('DONE')
