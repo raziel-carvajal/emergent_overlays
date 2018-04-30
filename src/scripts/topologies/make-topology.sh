@@ -90,28 +90,27 @@ for algo in ${algorithms} ; do
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
   sed -i -e "s/WITH_MOBILITY/${WITH_MOBILITY}/" iniFile
   sed -i -e "s/WARMUP_PHASE/${warmUpPhase}s/" iniFile
+  sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
   if [ "${algo}" == "hybrid" ] ; then
-    sed -i -e "s/WITH_ADAPTATION/true/" iniFile
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
 	  for (( I=1; I<${firsAtDenseA}; I+=1 )); do
-      echo "*.hostR${I}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+      echo "*.hostR${I}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
 	  done
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     for (( I=${firsAtDenseA}; I<${firsAtDenseA}+${nodes}; I+=1 )); do
-      echo "*.hostR${I}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+      echo "*.hostR${I}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
 	  done
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     for (( I=${firsAtDenseA}+${nodes}; I<=${lastAtSparsA}; I+=1 )); do
-      echo "*.hostR${I}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+      echo "*.hostR${I}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
 	  done
     # NOTE for the moment there is a source node positioned within the dense area
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
-    echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+    echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini"
   else
-    sed -i -e "s/WITH_ADAPTATION/false/" iniFile
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
-    echo -e "*.host*.udpApp[0].initialProtocol = \"${algoClassName}\"" >> iniFile
+    echo -e "*.host*.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
     cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"
   fi
   mv iniFile "${mobF}${algo}.ini"
