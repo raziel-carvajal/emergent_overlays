@@ -1,4 +1,4 @@
-FROM ubuntu:14.04.5
+FROM debian:9
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simulate message dissemination in MANETs via the framework EmergentOverlays."
 
@@ -59,16 +59,18 @@ RUN mv omnetpp-4.6-src.tgz tools/ && \
   tar xof omnetpp-4.6-src.tgz && \
   cd omnetpp-4.6 && \
   NO_TCL=1 ./configure && \
-  make -j 4
+  make MODE=release -j 4
 
 # Compilation of INET
 RUN mv inet-3.0.0-src.tgz tools/ && \
   cd tools && \
   tar xof inet-3.0.0-src.tgz && \
-  mv inet omnetpp-4.6/samples/ && \
-  cd omnetpp-4.6/samples/inet && \
+  mv inet omnetpp-4.6/samples/
+# Apply patch
+COPY sctphdr.h tools/omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/sctphdr.h
+RUN cd tools/omnetpp-4.6/samples/inet && \
   make makefiles && \
-  make -j 4
+  make MODE=release -j 4
 
 # List of R packages to create a data-set of experimental results per dissemination protocol
 ADD r-packages r-packages
