@@ -67,7 +67,7 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
   tar xof inet-3.0.0-src.tgz && \
   mv inet omnetpp-4.6/samples/
 # Apply patch
-COPY sctphdr.h tools/omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/sctphdr.h
+COPY dockerfiles/worker/sctphdr.h tools/omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/sctphdr.h
 RUN cd tools/omnetpp-4.6/samples/inet && \
   make makefiles && \
   make MODE=release -j 4
