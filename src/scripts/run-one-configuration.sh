@@ -31,10 +31,10 @@ INET_PATH=$2
 EXPE_FOR_COLLISIONS=$3
 
 # path to inet library. Observe the string INET at the end
-INET_LIBRARY_PATH=${INET_PATH}/out/gcc-debug/src/INET
+INET_LIBRARY_PATH=${INET_PATH}/out/gcc-release/src/INET
 
 # path to library with protocols
-PROTOCOLS_LIBRARY=../../built/gcc-debug/protocols
+PROTOCOLS_LIBRARY=../../built/gcc-release/protocols
 
 # specify my ned path. set of path where I can find ned files
 #LOCAL_NED_PATH=${INET_PATH}/examples:${INET_PATH}/src:../../experiments/networks:../protocols/:../base
