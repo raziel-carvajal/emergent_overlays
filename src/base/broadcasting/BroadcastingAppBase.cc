@@ -243,30 +243,30 @@ void BroadcastingAppBase::initialize(int stage) {
 	}
 		break;
 	case INITSTAGE_LAST: {
-		double d = par("wakeUpTime").doubleValue();
+		double deltaApprox = par("deltaApprox").doubleValue();
+		double broadcastMsgTo = par("wakeUpTime").doubleValue();
+		double broadcastMsgFreq = par("intervalBroadcastTime").doubleValue();
 		// not the best solution because this super class doesn't know anything about
 		// adaptation parameters
-		delayed_event(APPROXIMATE_DENSITY, "approximation of nodes density",
-				d + par("deltaApprox").doubleValue());
 
+		double broadcastMsgTj;
 		if (is_source) {
-			msgs.clear();
-			cout << getLogHeader() << "Broadcasting sessions will star at " << (d)
+			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo
 					<< endl;
-			for (int i = 0; i < nr_broadcast_msg; i++)
-				msgs.insert(i);
 		}
-
-		if (msgs.size() > 0) {
-			is_source = true;
-			next_to_send = msgs.begin();
-			int idx = *next_to_send;
-			cout << getLogHeader() << "Scheduling broadcast at time: "
-					<< d + idx * par("intervalBroadcastTime").doubleValue() << endl;
-			delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime",
-					d + idx * par("intervalBroadcastTime").doubleValue());
+		cout << getLogHeader() << " BEGIN scheduling broadcast/denApprox sessions "
+				<< endl;
+		for (int i = 0; i < nr_broadcast_msg; i++) {
+			broadcastMsgTj = broadcastMsgTo + i * broadcastMsgFreq;
+			if (is_source) {
+				delayed_event_with_strict_time(BROADCAST, "doBroadcast",
+						broadcastMsgTj);
+			}
+			delayed_event(APPROXIMATE_DENSITY, "densityApprox",
+					broadcastMsgTj + deltaApprox);
 		}
-
+		cout << getLogHeader() << "END scheduling broadcast/denApprox sessions "
+				<< endl;
 	}
 		break;
 	default:
@@ -286,20 +286,13 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			throw std::logic_error("Unimplemented: Nobody should be calling this");
 			cancelAndDelete(msg);
 			break;
-		case WAKEUP:
+		case BROADCAST:
 			/**
 			 * the instance of <this> is a FullyAdaptive, this
 			 * call will execute FullyAdaptive.time_to_broadcast_payload()
 			 * instead of BroadcastingAppBase.time_to_broadcast_payload()
 			 */
 			this->time_to_broadcast_payload(nullptr);
-			next_to_send++;
-			if (next_to_send != msgs.end()) {
-				int idx = *next_to_send;
-				double d = par("wakeUpTime").doubleValue();
-				delayed_event_with_strict_time(WAKEUP, "intervalBroadcastTime",
-						d + idx * par("intervalBroadcastTime").doubleValue());
-			}
 			cancelAndDelete(msg);
 			break;
 		case BROADCAST_DELAY: {

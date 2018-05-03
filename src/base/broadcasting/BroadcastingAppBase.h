@@ -40,7 +40,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         IDLE,
         START,
         SAY_HELLO,
-        WAKEUP,
+        BROADCAST,
         DISPLAY_TIME,
         BROADCAST_DELAY,
         BORDER_DETECTOR_TIMER,
@@ -118,10 +118,6 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
     int nr_broadcast_msg;
     int latest_ctrl_session = 0;
     int latest_rcv_ctrl_session;
-
-    // when to send broadcast messages
-    std::set<int> msgs;
-    std::set<int>::iterator next_to_send;
 
     // my position
     Coord position;
