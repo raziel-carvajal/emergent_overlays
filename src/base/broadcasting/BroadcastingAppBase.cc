@@ -380,7 +380,7 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 		 * exchanges control messages too)
 		 * TODO is there a way to exploit a foreing ctrl message?
 		 */
-		delete msg;
+		cancelAndDelete(msg);
 	}
 
 }
