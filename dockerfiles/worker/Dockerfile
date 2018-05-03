@@ -59,7 +59,7 @@ RUN mv omnetpp-4.6-src.tgz tools/ && \
   tar xof omnetpp-4.6-src.tgz && \
   cd omnetpp-4.6 && \
   NO_TCL=1 ./configure && \
-  make MODE=release -j 4
+  make -j 4
 
 # Compilation of INET
 RUN mv inet-3.0.0-src.tgz tools/ && \
@@ -70,7 +70,7 @@ RUN mv inet-3.0.0-src.tgz tools/ && \
 COPY dockerfiles/worker/sctphdr.h tools/omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/sctphdr.h
 RUN cd tools/omnetpp-4.6/samples/inet && \
   make makefiles && \
-  make MODE=release -j 4
+  make -j 4
 
 # List of R packages to create a data-set of experimental results per dissemination protocol
 ADD r-packages r-packages

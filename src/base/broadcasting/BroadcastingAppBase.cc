@@ -248,19 +248,6 @@ void BroadcastingAppBase::initialize(int stage) {
 		// adaptation parameters
 		delayed_event(APPROXIMATE_DENSITY, "approximation of nodes density",
 				d + par("deltaApprox").doubleValue());
-		// XXX what INOG is this for?
-		if (!par("single_source").boolValue()) {
-			cModule* host = getContainingNode(this);
-			const char* s = host->par("id_messages_to_send");
-			cStringTokenizer tokenizer(s);
-			while (tokenizer.hasMoreTokens()) {
-				int idx = atoi(tokenizer.nextToken());
-				if (idx <= nr_broadcast_msg) {
-					idx = idx - 1;
-					msgs.insert(idx);
-				}
-			}
-		}
 
 		if (is_source) {
 			msgs.clear();
