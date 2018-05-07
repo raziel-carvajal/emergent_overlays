@@ -62,30 +62,27 @@ text/main.log
 text/main.pdf
 text/main.synctex.gz
 
-# partial results
-results/n*.pdf
-
-#CVS
-results/summary.csv
-
 #LOGS
 src/scripts/debugging/logs/n_*
 
 #NON USED DATASETS
-results/batteryConsumptionDistribution-*
-results/broadcastSession-*
-results/duplicatedMsgsDistribution-*
-results/collisions_*
-results/graphConnectivity_*
-results/sentCtrlMsgsDistribution-*
-results/sentBroadcastMsgsDistribution-*
-results/relays-*
-results/recvCtrlMsgsDistribution-*
-results/recvBroadcastMsgsDistribution-*
-results/distributionOfDensity-*
-results/densityRelativeError-*
-results/coverage-*
-results/collisionsRelativeError-*
+results/batteryConsumptionDistribution*
+results/broadcastSession*
+results/duplicatedMsgsDistribution*
+results/collisions*
+results/graphConnectivity*
+results/sentCtrlMsgsDistribution*
+results/sentBroadcastMsgsDistribution*
+results/relays*
+results/recvCtrlMsgsDistribution*
+results/recvBroadcastMsgsDistribution*
+results/distributionOfDensity*
+results/densityRelativeError*
+results/coverage*
+results/collisionsRelativeError*
+results/noderoles*
+results/*.tgz
+results/*.pdf
 
 #ICDCS paper
 papers/ICDCS2017/main.aux
