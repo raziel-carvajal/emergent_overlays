@@ -77,6 +77,11 @@ ADD r-packages r-packages
 # Installation of R packages
 RUN cd r-packages && \
   wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
+  tar xof omnetpp_0.2-1.tar.gz && \
+  rm -f omnetpp_0.2-1.tar.gz && \
+  mv bigdecimal.cc omnetpp/src/common && \
+  tar czf omnetpp_0.2-1.tar.gz omnetpp && \
+  rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
 
 COPY src/base ./src/base
