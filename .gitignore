@@ -29,18 +29,9 @@
 *.app
 *.pyc
 
-# Vim files
-*.swp
-
-# backup files
-*~
-
 # Non useful config files
 src/scripts/omnet.config
 tools/omnetpp-4.6/
-tools/omnetpp-5.0/
-tools/inet/
-tools/networkx-1.11/
 src/protocols/*/*_m.cc
 src/protocols/*/*_m.h
 
@@ -52,10 +43,15 @@ src/protocols/Makefile
 built/
 experiments/configs/built_configs/*.ini
 experiments/configs/built_configs/results
+experiments/configs/in_common/config.xml
 experiments/networks/built_topologies/*.ned
+experiments/configs/built_configs/cfgs_for_workers
+
 experiments/networks/built_topologies/*.mobility
 experiments/networks/built_topologies/*.pdf
 experiments/networks/built_topologies/*.positions
+
+src/scripts/algo
 
 
 # Paper
@@ -108,10 +104,3 @@ papers/Middleware2017/main.log
 papers/Middleware2017/main.pdf
 papers/Middleware2017/main.out
 papers/Middleware2017/main.synctex.gz
-
-#
-src/scripts/algo
-tools/inet-3.3.0-src.tgz
-tools/omnetpp_0.7-1.tar.gz
-experiments/configs/in_common/config.xml
-experiments/configs/built_configs/cfgs_for_workers
