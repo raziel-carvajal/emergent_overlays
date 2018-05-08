@@ -281,7 +281,6 @@ get.graph <- function(nodes, positions, Tx, locationTimestamp,
     )
     dev.off()
   }
-  # return graph
   g
 }
 
@@ -326,63 +325,16 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
 energy.consumption.of.sent_recv.messages <- function(results_file,
   exp_duration, sent_packages, recv_packages, nodes){
 
-  energy_consumption <- subset(
-    replace.resultkey.with.node_id(results_file, "name(residualCapacity:vector)"),
-    time < exp_duration
+  energyConsumpAll <- replace.resultkey.with.node_id(
+    results_file, "name(residualCapacity:vector)")
+  energyConsumpAll <- subset(energyConsumpAll, time < exp_duration)
+
+  sapply(1:length(nodes),
+    function(i){
+      v <- subset(energyConsumpAll, node_id == nodes[i])$value
+      abs(v[length(v)]) * 1000 # get milli Joules
+    }
   )
-
-  e_consump_per_node <- sapply(nodes, function(n){
-
-    n_e_consump <- subset(energy_consumption, node_id == n)
-
-    n_recv_msgs <- subset(recv_packages, node_id == n)
-
-    key_timestamps <- unlist(
-      sapply(n_recv_msgs$time, function(t){
-        subset(n_e_consump, time == t)$time
-      })
-    )
-
-    e_consump_recv_msgs <- sapply(key_timestamps, function(t_i){
-      consump_before_t <- abs(
-        subset(
-          subset(n_e_consump, t_i - time >= 0),
-          abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
-        )
-      )
-      ifelse(
-        length(consump_before_t$node_id) >= 2,
-        abs(tail(consump_before_t$value, 1) - tail(consump_before_t$value, 2)[1]),
-        0
-      )
-    })
-
-    key_timestamps <- subset(sent_packages, node_id == n)$time
-
-    e_consump_sent_msgs <- sapply(key_timestamps, function(t_i){
-
-      t_i_consump_vec <- sort(
-        abs(
-          subset(
-            n_e_consump,
-            abs(t_i - time) < SENT_RECV_PKG_TOLERANCE
-          )$value
-        )
-      , decreasing = T)
-
-      ifelse(
-        length(t_i_consump_vec) >= 2,
-        highest.energy.consumption(t_i_consump_vec),
-        0
-      )
-
-    })
-
-    # this vector is multiplied by 1K to have milli Joules
-    sum( unlist(e_consump_sent_msgs), unlist(e_consump_recv_msgs) ) * 1000
-  })
-
-  e_consump_per_node
 }
 
 highest.energy.consumption <- function(v){

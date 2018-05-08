@@ -254,8 +254,6 @@ void BroadcastingAppBase::initialize(int stage) {
 			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo
 					<< endl;
 		}
-		cout << getLogHeader() << " BEGIN scheduling broadcast/denApprox sessions "
-				<< endl;
 		for (int i = 0; i < nr_broadcast_msg; i++) {
 			broadcastMsgTj = broadcastMsgTo + i * broadcastMsgFreq;
 			if (is_source) {
@@ -265,8 +263,6 @@ void BroadcastingAppBase::initialize(int stage) {
 			delayed_event(APPROXIMATE_DENSITY, "densityApprox",
 					broadcastMsgTj + deltaApprox);
 		}
-		cout << getLogHeader() << "END scheduling broadcast/denApprox sessions "
-				<< endl;
 	}
 		break;
 	default:

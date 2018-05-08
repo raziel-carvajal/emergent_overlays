@@ -64,7 +64,7 @@ sed -i -e "s/CTRL_MSG_FREQ/${ctrlMsgFreq}/" config.xml
 mv config.xml "../../../experiments/configs/in_common"
 
 cenPosXandY=`bc <<< "scale=2; ${cma} / 2"`
-denseAreaWi=`bc <<< "scale=2; ${cma} / (${regions} + 1)"`
+denseAreaWi=`bc <<< "scale=2; ( ${cma} / (${regions} + 1) ) / 2"`
 broaMsgFreq=`bc <<< "scale=2; x=(${SIMULATION_TIME} * 60 )/${BROADCAST_MSGS_NO}; if(x < 1.0) print "0",x else print x ;"`
 echo "broadcast msg freq ${broaMsgFreq}"
 # TODO this warm up phase must be independent of the control messages frequency

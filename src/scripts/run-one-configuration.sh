@@ -84,13 +84,10 @@ firstPosT=$(bc <<< "${wakeUpTime}+${deltaApprox}")
 broadcastMsgs=`cat ${CONF_FILE} | grep nr_broadcast_msg | head -1 | awk -F "=" '{print $2}'| grep -Eo '[0-9]{1,5}'`
 count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
-commAreaLen=`echo "${CONF_NAME}" | awk -F "_" '{print $8}'`
-DENSE_ZONE_X=`echo "${commAreaLen}" | awk -F "x" '{print $1}'`
-DENSE_ZONE_X_HALF_LEN=`bc <<< "scale=2; ${DENSE_ZONE_X} / 4"`
-DENSE_ZONE_Y=`echo "${commAreaLen}" | awk -F "x" '{print $2}'`
-DENSE_ZONE_Y_HALF_LEN=`bc <<< "scale=2; ${DENSE_ZONE_Y} / 4"`
-DENSE_ZONE_X=`bc <<< "scale=2; ${DENSE_ZONE_X} / 2"`
-DENSE_ZONE_Y=`bc <<< "scale=2; ${DENSE_ZONE_Y} / 2"`
+DENSE_ZONE_X=`cat ${CONF_FILE} | grep "centerDensAx" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
+DENSE_ZONE_Y=`cat ${CONF_FILE} | grep "centerDensAy" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
+DENSE_ZONE_X_HALF_LEN=`cat ${CONF_FILE} | grep "denseAreaWid" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
+DENSE_ZONE_Y_HALF_LEN=${DENSE_ZONE_X_HALF_LEN}
 
 echo "Simulation time [${simulation_time}]"
 echo "Frequency of broadcast messages: [${step}]"
