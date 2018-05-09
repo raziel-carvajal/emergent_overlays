@@ -14,7 +14,8 @@ RUN apt-get update && \
   python-setuptools \
   git \
   poppler-utils \
-  bc
+  bc \
+  gawk
 
 RUN git clone git://github.com/panisson/pymobility.git
 

@@ -22,7 +22,15 @@ cma=${COMM_AREA_LENGTH}
 regions=${DENSITY_REGIONS_NO}
 nodes=${NODES_NO_PER_REGION}
 tx=${NODES_TRANSMISSION_RANGE}
-overlays=$(bc <<< "(${SIMULATION_TIME} * 60) / ${NODES_MOV_FREQ}")
+overlays=$(bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${NODES_MOV_FREQ}")
+overlays=$(bc <<< "${overlays}/1")
+
+echo "Comm area length: ${cma}"
+echo "Regions No: ${regions}"
+echo "Nodes No: ${nodes}"
+echo "Tx of nodes: ${tx}"
+echo "No of overlays: ${overlays}"
+
 generator="./make-mobility-trace-same-den.py"
 #generator="./make-mobility-trace.py"
 # remove all configurations and topologies
@@ -39,7 +47,7 @@ pdfunite ${s} all.pdf
 rm -f Position_*.pdf
 ./make-ned-file.py --cma-w ${cma} --transmission-range ${tx}
 
-mobF=`file *.ned | awk -F ".ned" '{ print $1}'`
+mobF=`ls *.ned | awk -F ".ned" '{ print $1}'`
 mv mobility-trace "${mobF}.mobility"
 mv distribution-per-density "${mobF}.positions"
 mv all.pdf "${mobF}.pdf"
@@ -69,7 +77,8 @@ broaMsgFreq=`bc <<< "scale=2; x=(${SIMULATION_TIME} * 60 )/${BROADCAST_MSGS_NO};
 echo "broadcast msg freq ${broaMsgFreq}"
 # TODO this warm up phase must be independent of the control messages frequency
 warmUpPhase="3.0"
-newSimTime=`bc<<<"${ctrlMsgFreq} * 2 + ${SIMULATION_TIME} * 60 + ${ctrlMsgFreq}"`
+# INFO 5s more were added to allow experiment end without problems
+newSimTime=`bc<<<"scale=2; ${warmUpPhase} + ${SIMULATION_TIME} * 60 + 5"`
 
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 cfgFile='../../../experiments/configs/in_common/common.ini'
