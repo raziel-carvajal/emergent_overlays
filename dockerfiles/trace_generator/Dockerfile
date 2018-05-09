@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM debian:9
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 LABEL Description="Creates mobility traces using a Python implementation of the Lavy walk model"
 
@@ -7,16 +7,18 @@ WORKDIR /usr/emrg-ovrl
 
 # General dependencies
 RUN apt-get update && \
-  apt-get -y install \
+  apt-get -y --no-install-recommends install \
   python \
   python-pip \
   python-matplotlib \
+  python-setuptools \
   git \
   poppler-utils \
   bc
 
-RUN git clone git://github.com/panisson/pymobility.git && \
-  cd pymobility && \
+RUN git clone git://github.com/panisson/pymobility.git
+
+RUN cd pymobility && \
   python setup.py install
 
 ADD python_pkgs python_pkgs
