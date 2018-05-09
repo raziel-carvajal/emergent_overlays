@@ -75,7 +75,7 @@ fi
 
 # TODO: DO NOT FORGET TO WRITE EVERY VALUE AT THE INI FILE AS DOUBLE, EVEN IF IT IS INTEGER
 # NOTE: when you grep in this way, be sure that the INI file contains float values for wakeUpTime AND deltaApprox
-simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
+simulation_time=`cat ${CONF_FILE} | grep "sim-time-limit" | tail -n 1 | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 step=`cat ${CONF_FILE} |grep "intervalBroadcastTime" | head -1 | awk -F "=" '{print $2}'| grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 transmissionRange=`cat ${CONF_FILE} | grep "maxCommunicationRange" | tail -n 1 | grep -Eo '[0-9]{1,5}'`
 wakeUpTime=`cat ${CONF_FILE} | grep "wakeUpTime" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`

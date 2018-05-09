@@ -12,7 +12,7 @@ get.arguments <- function() {
                       help='Full path to the result file (without extension)')
   parser$add_argument('outputPath', metavar='outputPath', type="character",
                       help='Full path to a directory where the output wiil be saved')
-  parser$add_argument('simTime', metavar='simTime', type="integer",
+  parser$add_argument('simTime', metavar='simTime', type="double",
                       help='Simulation time in seconds')
   parser$add_argument('configuration', metavar='configuration', type="character",
                       help='Name of the configuration')
