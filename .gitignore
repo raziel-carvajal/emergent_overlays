@@ -59,12 +59,12 @@ experiments/configs/builtConfigs/results/
 experiments/configs/results/
 
 # Paper
-text/main.aux
-text/main.bbl
-text/main.blg
-text/main.log
-text/main.pdf
-text/main.synctex.gz
+main.aux
+main.bbl
+main.blg
+main.log
+main.pdf
+main.synctex.gz
 
 # partial results
 results/n*.pdf

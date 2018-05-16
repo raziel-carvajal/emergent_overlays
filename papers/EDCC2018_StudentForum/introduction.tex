@@ -1,0 +1,40 @@
+\section{Introduction}
+Mobile ad-hoc networks (\acs{nets}) are self-organized networks that do not relay on fixed infrastructures for their deployment.
+%
+Mobile nodes in such a network have wireless transceivers with a limited transmission range and forward packets to communicate with each other in a peer-to-peer fashion.
+%
+Application scenarios such as vehicular networks ~\cite{Slavik2014a}, monitoring of zones in danger or deploying communication infrastructures in rural areas are suitable scenarios for \acs{nets} where broadcast is a fundamental operation.
+%
+%\rcg{give concrete examples of systems where broadcast is important}
+%
+
+\acl{Bps} for \acs{nets} tackle the problem of selecting a set of forwarding nodes that retransmit received packets to reach every node in the network.
+%
+Choosing a forwarding set is not an easy task, a small set reduces the overall energy consumption but may lead in unreachable packets for other nodes.
+%
+On the contrarily, a bigger forwarding set increase the collisions and contentions in the network.
+%
+Mobility is another factor, if a forwarding set is not updated according to the velocity of nodes, obsolete choices of this set may cause lost of packets.
+%
+Additionally, mobility patterns may result in network partitions and heterogeneous \acs{nets} where the density of nodes varies within different sections in the area of communication.
+
+%%
+We are interested in designing adaptive approaches for \acl{bps} in \acs{nets}.
+%
+In our target context, adaptation refers to the ability of dynamically selecting and configuring the protocol used to broadcast.
+%
+Notice that the deployment of a \acl{bp} may take place either in the entire system, or more interestingly, just in a part of it.
+%
+To deal with the heterogeneous conditions of mobility and density in \acs{nets}, we propose an adaptive approach that converges in a system such that: on one side, overlays emerge in highly dense regions where nodes remains mostly static and on the other side, controlled flooding protocols are deployed in sparse regions where nodes move more rapidly.
+%
+We do not rely on a central entity with global information of the system.
+%
+Only with local information, nodes discover the need of adaptation and perform a collective decision towards a switch to a different protocol.
+%
+Our adaptive approach is provided in form of a framework with the implementation of \acl{bps} commonly found in the literature.
+%
+In our evaluation scenario, mobile devices are carried by humans where we use the truncated-levy walk model as a mobility pattern~\cite{Rhee:2011}.
+%
+The mobile device is modeled following the specifications of a transceiver, frequently used in mobile phones with \acl{wifp} capabilities.
+%
+Preliminary results of our simulations show that the energy cost tends to reduce with our adaptation approach, keeping a high coverage of nodes without overkilling the network bandwidth.

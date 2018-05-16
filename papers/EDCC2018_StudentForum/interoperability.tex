@@ -1,0 +1,206 @@
+\section{Interoperability in \acl{bps}}
+We assume that a set $\mathbb{P}$ of broadcast protocols is in execution in a deployed mobile network of $\mathbb{N}$ nodes where each node $n_{i} \in \mathbb{N}$ runs only one protocol $p_{j} \in \mathbb{P}$ at a time.
+%
+Our aim is letting a node $n_{i}$ chose in an autonomous way a certain protocol $p_{j}$, this decision is based in the local information available at the node.
+%
+Such information may be, and it is not limited to, remaining battery, signal strength of received packets or the node relative speed.
+%
+But we omit the case where $n_{i}$ is running more than one protocol concurrently.
+
+%%
+When $\mathbb{P}$ contains only one protocol the reachability of messages depends on the performance of such approach.
+%
+Notice that in our hybrid approach we do not intent to alter the internals of any protocol in $\mathbb{P}$.
+%
+On the contrarily, when the cardinality of $\mathbb{P}$ is $|\mathbb{P}| > 1$ packets lost may take place.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.20]{packets-lost-ex}
+  \caption{TBD}
+  \label{packets-lost-ex}
+\end{figure}
+
+%
+Figure~\ref{packets-lost-ex} depicts a situation where a set of nodes $\mathbb{T}=\{t_{i} \mid i \in \{1, \ldots, 6\}\}$ run a topology-based protocol while nodes in $\mathbb{F}=\{f_{j} \mid i \in \{1, \ldots, 3\}\}$ run blind flooding.
+%
+Broadcast sessions initiated at $t_{1}$ form a tree such that a forwarding set composed of $t_{1}, t_{2}, t_{3}$ guarantees the message reception of every node at $\mathbb{T}$.
+%
+Even if nodes in $t_{4}, t_{5}, t_{6}$ are within the communication range of some nodes in $\mathbb{F}$, their role as pure receivers in the tree avoids any node in $\mathbb{F}$ hearing from messages.
+
+\subsection{Detection of border nodes}
+
+Algorithm~\ref{interop-alg} is a simple mechanism we propose to deal with interoperability issues between nodes running different protocols.
+%%%% INTEROPERABILITY ALGORITHM %%%%
+\input{interop_algo}
+%%%% ALGO %%%%
+The main idea is increase the set of forwarding nodes from only one running protocol with a set we called border nodes.
+%
+Intuition says that the bigger the size of this set the higher the reachability of nodes among broadcast sessions.
+%
+Border nodes are within the transmission range of other nodes running a different protocol (this is the case of $t_{4}, t_{5}, t_{6}$ in figure~\ref{packets-lost-ex}).
+
+
+%%
+Our interoperability mechanism works as follows.
+%
+Messages in the network are triplets $msg = (\tau, \rho, \varrho)$ where $\tau$ is either a control or broadcast message, $\rho$ refers to the running protocol at the sender and $\varrho$ is the message payload.
+%
+Control messages are beacons, which nodes exchanged periodically, required by some protocols to operate and broadcast messages contain the information to disseminate.
+%
+When nodes receive a message $msg$ that corresponds to the running protocol of the sender or the current receiver is a border node (line 10), $msg$ is broadcast; notice that the function \textit{broadcast()} (line~\ref{interop-alg:bro}) hides the concrete implementation of a \acl{bp}.
+%
+In case the running protocols between sender and receiver differs (line 13) we distinguish between two cases:
+
+\begin{itemize}
+
+\item \textbf{Control message reception.}
+%
+This case fosters the election of border nodes.
+%
+We keep track of senders from a foreign algorithm with the set \textit{known\_nodes} (line~\ref{interop-alg:save-sender}), potential candidates of border nodes are within this set.
+%
+If receivers previously hear a beacon from a sender running a known foreign protocol, $msg$ is ignored.
+%
+Otherwise (line: 16), we keep a reference of the knew known protocol (line~\ref{interop-alg:save-alg}) and an event is scheduled with a timer (line~\ref{interop-alg:new-timer}).
+%
+Once the timer expires (line~\ref{interop-alg:timer-expires}), we create a new border message \emph{b} (line~\ref{interop-alg:new-border-msg}) with the following fields:
+
+\begin{itemize}
+
+\item chosen border node (line~\ref{interop-alg:new-border-msg:chosen}). For the moment this is a random choice, we can think in other methods, like piggybacking senders remaining battery to control messages for selecting a border node with the higher value of energy. 
+\item number of times $b$ is forward (line~\ref{interop-alg:new-border-msg:hops})
+\item sender identifier (line~\ref{interop-alg:new-border-msg:sender})
+\item sender running protocol (line~\ref{interop-alg:new-border-msg:sender-alg})
+\item foreign protocol that fosters the border election procedure (line~\ref{interop-alg:new-border-msg:sender-alg})
+
+\end{itemize}
+%
+Now we explore the case when nodes receive border messages (line 28).
+
+\item \textbf{Border message reception.} Receivers of this message decrease by one the number of times \textit{msg} is forwarded (line:~\ref{interop-alg:border-msg-case:dec}).
+%
+In case this counter has remaining hops to perform, \textit{msg} is forward (lines: 30,~\ref{interop-alg:border-msg-case:fwd}).
+%
+Notice that the function \textit{forward()} simply performs a retransmission within the communication range of the receiver.
+%
+Given that all packets are identified in a unique way further copies of previously known packets are ignored.
+%
+Furthermore, only one out of two possible situations take place.
+
+%%
+Either the message receiver is a potential candidate of border node (line: 32) or the receiver belongs to those nodes who foster the selection procedure (line 36).
+%
+When the former situation occurs, the receiver is labeled as border node only if its identifier was chosen (line~\ref{interop-alg:border-msg-case:select-as-border}).
+
+%
+The latter situation serves to cancel ongoing timers that triggered the border selection procedure (line:~\ref{interop-alg:border-msg-case:rm-timers}) by other senders, that is, nodes running a foreign algorithm. 
+%
+
+\end{itemize}
+
+
+\subsection{Evaluation scenario}
+
+We simulate a situation where a crowd of humans are carrying mobile devices with WiFi capabilities (mobile phones, tablets, etc).
+%
+As shown in Figure~\ref{packets-lost-ex}, the area of communication is partitioned in two regions, dense and sparse.
+%
+The aim of having such an arrangement is to measure the impact of discovered border nodes with our interoperability mechanism that surrounds the dense region.
+%
+Both regions contain 400 nodes each and approximately the same surface where the dimensions of the whole area are 120 meters of height and width.
+%
+Nodes are spread uniformly in both regions and their initial position is chosen in a random way.
+%
+The number of nodes neighbors within the sparse region varies between 1 to 10 while those nodes in the dense region may have up to 40 neighbors.
+%
+
+\smallskip
+\noindent
+\textbf{Broadcast protocols.}
+Running protocols on each node are defined in advance and nodes keep using this protocol until the end of the simulation.
+%
+Nodes in the sparse area use a controlled flooding approach that do not rely on an overlay.
+%
+When a node receives a broadcast message for the first time it starts a timer with a waiting period chosen randomly between the interval $[0,\dots,max]$. In our experiments the threshold \emph{max} is set to 10 ms.
+%
+If the number of received copies per message reaches the maximum number of allowed receptions before the timer expires, the message retransmission is canceled. Otherwise, the retransmission take place.
+%
+This approach was first propose in~\cite{Ni:1999:BSP:313451.313525} to deal with broadcast storms.
+%%
+Nodes in the dense area use an approximation of a connected-dominating set called multi-point relay technique (MPR)~\cite{qayyum:inria-00072756}.
+
+\smallskip
+\noindent
+\textbf{Broadcast sessions.}
+A total of 200 broadcast sessions are performed with a frequency of one second.
+%
+The source of each sessions is chosen randomly among all nodes.
+%
+The content of each message is randomly generated, unique and with a length of 32~Bytes. 
+
+
+\smallskip
+\noindent
+\textbf{Simulator.}
+We deploy our simulation with OMNET++4.6~\cite{Varga:2008:OOS:1416222.1416290} and the plug-in INET3.3 to model mobile ad hoc networks.
+%
+This framework provides a full implementation of the IEEE 802.11g standard, we use the standard model of energy consumption.
+%
+
+\smallskip
+\noindent
+\textbf{Transceiver settings.}
+Nodes have a transmission range of 10 m.
+%
+This metric depends on the wireless communication chip used.
+We model power consumption using the specifications of a commercial chip found in modern mobile devices.
+%
+We use Broadcom BCM4329 chip~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
+%
+Its energy consumption per operation modes is as follows: sleep (1mW), receive (10mW) and transmit (100mW).
+
+
+\smallskip
+\noindent
+\textbf{Mobility.}
+%\subsection*{Mobility}
+We use the \emph{truncated-levy walk} (LW) technique to model mobility patterns of humans carrying wireless devices~\cite{Rhee:2011}.
+%
+The evaluation of our interoperability mechanism is performed in a first scenario with mobility and in a second scenario where nodes remain static.
+%
+In the scenario with mobility, nodes at the dense region move at a speed of 0.5 m/s and the speed of those at the sparse region is 2.0 m/s; these values are based on an estimation of the preferred walking speed of humans in~\cite{Browning390}.
+%
+The LW model generates traces of frequent short walks and occasional rides to distant locations.
+%
+Nodes move within their region of density in the communication area without getting out of their designated region.
+
+	
+\subsection{Preliminary Results}
+\rcg{TBD...}
+
+\begin{figure}[!t]
+	\begin{center}
+		\subfigure[Overall energy consumption]{
+			\includegraphics[width=\linewidth]{energy_consump_static}
+			\label{plots:energy-consump}
+		}
+		\subfigure[Relative error of received messages]{
+			\includegraphics[width=\linewidth]{relative_error_rcv_msgs_static}
+			\label{plots:re-rcv-msgs}
+		}
+				\subfigure[Network coverage]{
+			\includegraphics[width=\linewidth]{netowrk_coverage_static}
+			\label{plots:net-coverage}
+		}
+		\caption{Preliminary results of broadcast metrics in the static scenario.} 
+		\label{fig:outbw}
+	\end{center}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[trim = 0 0 0 9mm, clip, scale=0.4]{fwd_types_dense_area_static}
+  \caption{Forwarding sets grouped by type of retransmission}
+  \label{plots:fwd-sets-type}
+\end{figure}

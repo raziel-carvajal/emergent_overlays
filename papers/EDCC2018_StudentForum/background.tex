@@ -1,0 +1,28 @@
+\section{Background}
+A simple approach to broadcast is blind flooding where every node retransmit an incoming packet just once, further copies of packets previously received are ignored.
+%
+Blind flooding cause broadcast storms, term referring to high rate of collisions and contentions in the network~\cite{Ni:1999:BSP:313451.313525}.
+%
+A vast amount of protocols have been proposed to deal with broadcast storms for finding an adequate trade-off between reachability and usage of nodes resources (mainly energy consumption).
+%
+P Ruiz and P Bouvry ~\cite{Ruiz2015} classify \acl{bps} for \acs{nets} in two groups.
+%
+Protocols of the first group build and maintain an overlay by the periodic exchange of control messages that announce the existence of nodes.
+%
+Overlay-based approaches may form trees~\cite{796997}, clusters or connected-dominating sets (CDS), where every node is either port of a CDS or adjacent to at least one member of this set~\cite{Wu2001}.
+%
+In other words, CDS are forwarding sets and every other node out of a CDS act only as receiver.
+%
+The second group of broadcast protocols do not rely on overlays, instead, the retransmission of packets take place when predefined thresholds are reached (number of copies of received packets, timers, number of neighbors, etc) or following a stochastic approach~\cite{Kermarrec:2003}.
+%
+We compare our hybrid approaches to the most representative protocols of each category shown in~\cite{Ruiz2015}.
+%
+Blind flooding is used as lower bound of performance and as an upper bound we use a centralized implementation of the ~\cite{Esfahanian:1988:CCE:46251.46257} algorithm to find an approximation of a CDS.
+%
+Our work is inspired from an evaluation study of \acl{bps} for \acs{nets}~\cite{7980187} driven by a plethora of configurations of mobility and density.
+%
+This study reveals that overlay-based approaches perform better in a dense-mobile network where nodes remain mostly static.
+%
+On the contrarily, in a sparse network where nodes move faster non overlay-based approaches show better results.
+%
+%\rcg{Mention some adaptation approaches for broadcast algorithms. These works change the value of threshold to decide when retransmissions take place but in general, they use one protocol per deployed MANET}
