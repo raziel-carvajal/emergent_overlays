@@ -1,3 +1,4 @@
+%!TEX root = main.tex
 \section{Interoperability in \acl{bps}}
 We assume that a set $\mathbb{P}$ of broadcast protocols is in execution in a deployed mobile network of $\mathbb{N}$ nodes where each node $n_{i} \in \mathbb{N}$ runs only one protocol $p_{j} \in \mathbb{P}$ at a time.
 %
@@ -106,29 +107,45 @@ We simulate a situation where a crowd of humans carry mobile devices with WiFi c
 %
 As shown in Figure~\ref{packets-lost-ex}, the area of communication has two regions, dense and sparse.
 %
-The aim of having such an arrangement is to measure the impact of discovered border nodes with our interoperability mechanism that surrounds the dense region.
+Each region contain 400 nodes and approximately the same surface where the dimensions of the whole area are 120 meters of height and width.
 %
-Both regions contain 400 nodes each and approximately the same surface where the dimensions of the whole area are 120 meters of height and width.
+The aim of having such an arrangement is measuring the impact of increasing the forwarding set of one protocol with border nodes found with Algorithm~\ref{interop-alg}.
 %
 Nodes are spread uniformly in both regions and their initial position is chosen in a random way.
 %
 The number of nodes neighbors within the sparse region varies between 1 to 10 while those nodes in the dense region may have up to 40 neighbors.
+
+
+\smallskip
+\noindent
+\textbf{Mobility.}
+%\subsection*{Mobility}
+We use the \emph{truncated-levy walk} (LW) technique to model mobility patterns of humans~\cite{Rhee:2011}.
 %
+The evaluation of Algorithm~\ref{interop-alg} take place in a static scenario where nodes do not move and in a dynamic scenario with mobility.
+%
+In this dynamic scenario, nodes move at a speed of 0.5 m/s within the dense region and the speed of those at the sparse region is 2.0 m/s. These rates of velocity are based on an estimation of the preferred walking speed of humans~\cite{Browning390}.
+%
+The LW model generates traces of frequent short walks and occasional rides to distant locations.
+%
+Nodes move within their region of density in the communication area without getting out of their designated region.
+
 
 \smallskip
 \noindent
 \textbf{Broadcast protocols.}
-Running protocols on each node are defined in advance and nodes keep using this protocol until the end of the simulation.
+In the static scenario, running protocols on each node are chosen in advance and nodes keep using this protocol until the simulation concludes.
 %
-Nodes in the sparse area use a controlled flooding approach that do not rely on an overlay.
+Nodes in the sparse area use controlled flooding.
 %
-When a node receives a broadcast message for the first time it starts a timer with a waiting period chosen randomly between the interval $[0,\dots,max]$. In our experiments the threshold \emph{max} is set to 10 ms.
+When a node receives a broadcast message for the first time, it starts a timer with a duration chosen randomly between the interval $[0,\dots,max]$. In our experiments the threshold \emph{max} is set to 10 ms.
 %
-If the number of received copies per message reaches the maximum number of allowed receptions before the timer expires, the message retransmission is canceled. Otherwise, the retransmission take place.
+When the number of received copies per message reaches a maximum number of receptions before the timer expires, the message is not forwarded. Otherwise, the retransmission take place.
 %
 This approach was first propose in~\cite{Ni:1999:BSP:313451.313525} to deal with broadcast storms.
 %%
 Nodes in the dense area use an approximation of a connected-dominating~\cite{qayyum:inria-00072756}.
+
 
 \smallskip
 \noindent
@@ -137,7 +154,7 @@ A total of 200 broadcast sessions are performed with a frequency of one second.
 %
 The source of each sessions is chosen randomly among all nodes.
 %
-The content of each message is randomly generated, unique and with a length of 32~Bytes. 
+The length of each message is 32 bytes. 
 
 
 \smallskip
@@ -147,6 +164,7 @@ We deploy our simulation with OMNET++4.6~\cite{Varga:2008:OOS:1416222.1416290} a
 %
 This framework provides a full implementation of the IEEE 802.11g standard, we use the standard energy consumption model of this simulator.
 %
+
 
 \smallskip
 \noindent
@@ -158,23 +176,8 @@ We model message transmission using the specifications of a commercial chip foun
 Its energy consumption per operation modes is as follows: sleep (1mW), receive (10mW) and transmit (100mW).
 
 
-\smallskip
-\noindent
-\textbf{Mobility.}
-%\subsection*{Mobility}
-We use the \emph{truncated-levy walk} (LW) technique to model mobility patterns of humans carrying wireless devices~\cite{Rhee:2011}.
-%
-The evaluation of our interoperability mechanism is performed in a first scenario with mobility and in a second scenario where nodes remain static.
-%
-In the scenario with mobility, nodes at the dense region move at a speed of 0.5 m/s and the speed of those at the sparse region is 2.0 m/s; these values are based on an estimation of the preferred walking speed of humans in~\cite{Browning390}.
-%
-The LW model generates traces of frequent short walks and occasional rides to distant locations.
-%
-Nodes move within their region of density in the communication area without getting out of their designated region.
-
-	
 \subsection{Preliminary Results}
-\rcg{TBD...}
+
 
 \begin{figure}[!t]
 	\begin{center}
