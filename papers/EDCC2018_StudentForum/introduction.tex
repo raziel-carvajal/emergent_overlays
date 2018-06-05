@@ -3,36 +3,34 @@ Mobile ad-hoc networks (\acs{nets}) do not rely on fixed infrastructures for the
 %
 Mobile nodes in such a network have wireless transceivers with a limited transmission range and forward packets to communicate with each other in a peer-to-peer fashion.
 %
-Application scenarios such as vehicular networks ~\cite{Slavik2014a}, monitoring of zones in danger or deploying communication infrastructures in rural areas are suitable scenarios for mobile networks where broadcast is a fundamental operation.
+Application scenarios such as vehicular networks~\cite{Slavik2014a}, monitoring of zones in danger or the deployment of communication infrastructures in rural zones are suitable scenarios MANETs where broadcast is a fundamental operation.
 %
 %\rcg{give concrete examples of systems where broadcast is important}
 %
 
 \acl{Bps} for \acs{nets} tackle the problem of selecting a set of forwarding nodes that retransmit received packets to reach every node in the network.
 %
-Choosing a forwarding set is not an easy task, a small set reduces the overall energy consumption but may lead in unreachable packets for other nodes.
+Choosing a forwarding set is not an easy task, a small set reduces the overall energy consumption but may result in unreachable packets for other nodes.
 %
 On the contrarily, a bigger forwarding set increase the collisions and contentions in the network.
 %
 Mobility is another factor, if a forwarding set is not updated according to the velocity of nodes, obsolete choices of this set may cause lost of packets.
 %
-Additionally, mobility patterns may result in network partitions and heterogeneous mobile networks where the density of nodes varies within different sections in the area of communication.
+Additionally, mobility patterns may result in partitions and heterogeneous networks where the density of nodes varies within the area of communication.
 
 %%
 We are interested in designing adaptive approaches for \acl{bps} in \acs{nets}.
 %
-In our target context, adaptation refers to the ability of dynamically selecting and configuring the protocol used to broadcast.
+In our context, adaptation refers to the ability of dynamically selecting and configuring the protocol use to broadcast.
 %
 Notice that the deployment of a \acl{bp} may take place either in the entire system, or more interestingly, just in a part of it.
 %
-To deal with the heterogeneous conditions of mobility and density, we propose an adaptive approach that converges to an hybrid system: on one side, overlays emerge in highly dense regions where nodes remains mostly static and on the other side, controlled flooding protocols are deployed in sparse regions where nodes move more rapidly.
+To deal with the heterogeneous conditions of mobility and density, we are working in the design of adaptive approaches that converge to hybrid systems: on one side, overlays emerge in highly dense regions where nodes remains mostly static and on the other side, controlled flooding protocols are deployed in sparse regions where nodes move more rapidly.
 %
-We do not rely on a central entity with global information of the system.
+In our vision, nodes discover (only with local information) the need of adaptation and perform a collective decision towards a switch to a different protocol.
 %
-Only with local information, nodes discover the need of adaptation and perform a collective decision towards a switch to a different protocol.
+Our evaluation scenario consist of mobile devices hold by humans, we use the truncated-levy walk model as mobility pattern~\cite{Rhee:2011}.
 %
-In our evaluation scenario, mobile devices are carried by humans and we use the truncated-levy walk model as mobility pattern~\cite{Rhee:2011}.
+The mobile device follows the specifications of a transceiver frequently use in cellphones with \acl{wifp} capabilities.
 %
-The mobile device follows the specifications of a transceiver frequently use in mobile phones with \acl{wifp} capabilities.
-%
-Preliminary results of our simulations show that the energy cost tends to reduce with our adaptation approach, keeping a high coverage of nodes without overkilling the network bandwidth.
+%Preliminary results of our simulations show that the energy cost tends to reduce with our adaptation approach, keeping a high coverage of nodes without overkilling the network bandwidth.

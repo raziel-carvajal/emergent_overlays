@@ -1,29 +1,32 @@
 \section{Background}
-A simple approach to broadcast is blind flooding where every node retransmit an incoming packet just once, further copies of previously received packets are ignored.
+A basic approach to broadcast is \emph{simple flooding} where every node retransmit an incoming packet just once, further copies of previously received packets are ignored.
 %
-Blind flooding cause broadcast storms, term referring to a high rate of collisions and contentions in the network~\cite{Ni:1999:BSP:313451.313525}.
+Simple flooding cause broadcast storms, term referring to a high rate of collisions and contentions in the network~\cite{Ni:1999:BSP:313451.313525}.
 %
 A vast amount of protocols have been proposed to deal with broadcast storms for finding an adequate trade-off between reachability and usage of nodes resources (mainly energy consumption).
 %
 P Ruiz and P Bouvry~\cite{Ruiz2015} classify \acl{bps} in two groups.
 %
-Protocols of the first group build and maintain an overlay by the periodic exchange of control messages that announce the existence of nodes.
+Protocols of the first group build and maintain an overlay via a periodic exchange of control messages that announce the existence of nodes.
 %
-Overlay-based approaches may form trees~\cite{796997}, clusters or connected-dominating sets (CDS), where every node is either port of a CDS or adjacent to at least one member of this set~\cite{Wu2001}.
+Overlay-based approaches may form trees~\cite{796997}, clusters or connected-dominating sets (CDS), where every node is either part of a CDS or adjacent to at least one member of this set~\cite{Wu2001}.
 %
 In other words, CDS are forwarding sets and every other node out of it acts as receiver.
 %
-The second group of broadcast protocols do not rely on overlays, instead, the retransmission of packets take place following a stochastic approach~\cite{Kermarrec:2003} or when predefined thresholds reach their maximum value (number of copies of received packets, timers, number of neighbors, etc).
+The second group of broadcast protocols do not rely on overlays.
+%
+Instead, the retransmission of packets take place following a stochastic approach~\cite{Kermarrec:2003} or when predefined thresholds reach their maximum value (ex., received packets).
 
 
 %
 We compare our hybrid approach to the most representative protocols of each category presented in~\cite{Ruiz2015}.
 %
-Blind flooding is used as lower bound of performance, as an upper bound we use a centralized implementation of W. Matula algorithm~\cite{Matula:1987:DEC:1382440.1383039} to find an approximation of a CDS.
+%Raziel: We use this in our next paper! 
+%Blind flooding is used as lower bound of performance, as an upper bound we use a centralized implementation of W. Matula algorithm~\cite{Matula:1987:DEC:1382440.1383039} to find an approximation of a CDS.
 %
 Our work is inspired from an evaluation study of \acl{bps} for \acs{nets}~\cite{7980187} driven by a plethora of configurations of mobility and density.
 %
-This study reveals that overlay-based approaches perform better in a dense-mobile network where nodes remain mostly static.
+This study reveals that overlay-based approaches perform better in a dense network where nodes remain mostly static.
 %
 On the contrarily, in a sparse network where nodes move faster non overlay-based approaches show better results.
 %

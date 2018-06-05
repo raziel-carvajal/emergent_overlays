@@ -1,10 +1,10 @@
 %!TEX root = main.tex
 \section{Interoperability in \acl{bps}}
-We assume that a set $\mathbb{P}$ of broadcast protocols is in execution in a deployed mobile network of $\mathbb{N}$ nodes where each node $n_{i} \in \mathbb{N}$ runs only one protocol $p_{j} \in \mathbb{P}$ at a time.
+We assume that a set $\mathbb{P}$ of broadcast protocols is in execution in a deployed MANET of $\mathbb{N}$ nodes where each node $n_{i} \in \mathbb{N}$ runs only one protocol $p_{j} \in \mathbb{P}$ at a time.
 %
-Our aim is letting a node $n_{i}$ chose in an autonomous way a certain protocol $p_{j}$, this decision is based on the local information available at the node.
+Our aim is letting a node $n_{i}$ chose in an autonomous way a certain protocol $p_{j}$ based on the local information available at $n_{i}$.
 %
-Such information may be, and it is not limited to, remaining battery, signal strength of received packets or the node relative speed.
+Such information may be, and it is not limited to, remaining battery, signal strength of received packets or node's velocity.
 %
 But we omit the case where $n_{i}$ is running more than one protocol concurrently.
 
@@ -14,21 +14,19 @@ When $\mathbb{P}$ contains only one protocol the reachability of messages depend
 Notice that in our hybrid approach we do not intent to alter the internals of any protocol in $\mathbb{P}$.
 %
 On the contrarily, when the cardinality of $\mathbb{P}$ is $|\mathbb{P}| > 1$ packets may be lost.
+%
+Figure~\ref{packets-lost-ex} depicts a situation where a set of nodes $\mathbb{T}=\{t_{i} \mid i \in \{1, \ldots, 6\}\}$ run a topology-based protocol while nodes in $\mathbb{F}=\{f_{j} \mid i \in \{1, \ldots, 3\}\}$ run simple flooding.
+%
+Broadcast sessions initiated at $t_{1}$ form a tree such that a forwarding set composed of $t_{1}, t_{2}, t_{3}$ guarantees the message reception only for nodes at $\mathbb{T}$.
+%
+Even if the leafs of this tree $t_{4}, t_{5}, t_{6}$ are within the range of some nodes in $\mathbb{F}$, their role as pure receivers in the tree avoids any node in $\mathbb{F}$ hearing from messages.
 
 \begin{figure}[t!]
   \centering
-  \includegraphics[scale=0.20]{packets-lost-ex}
+  \includegraphics[scale=0.4]{packets-lost-ex}
   \caption{Hybrid approach where blind flooding and a tree-based broadcast approach runs in a MANET.}
   \label{packets-lost-ex}
 \end{figure}
-
-%
-Figure~\ref{packets-lost-ex} depicts a situation where a set of nodes $\mathbb{T}=\{t_{i} \mid i \in \{1, \ldots, 6\}\}$ run a topology-based protocol while nodes in $\mathbb{F}=\{f_{j} \mid i \in \{1, \ldots, 3\}\}$ run blind flooding.
-%
-Broadcast sessions initiated at $t_{1}$ form a tree such that a forwarding set composed of $t_{1}, t_{2}, t_{3}$ guarantees the message reception of every node at $\mathbb{T}$.
-%
-Even if nodes $t_{4}, t_{5}, t_{6}$ are within the communication range of some nodes in $\mathbb{F}$, their role as pure receivers in the tree avoids any node in $\mathbb{F}$ hearing from messages.
-
 \subsection{Detection of border nodes}
 %%%% INTEROPERABILITY ALGORITHM %%%%
 \input{interop_algo}
@@ -43,16 +41,16 @@ Border nodes are within the transmission range of other nodes running a differen
 %
 In figure~\ref{packets-lost-ex} nodes $t_{4}, t_{5}, t_{6}$ are candidates of border nodes.
 %
-We consider that messages are vectors $(\iota, \tau, \rho, \varrho)$ with four entries where: $\iota$ is a unique identifier, $\tau$ defines either a control or broadcast message, $\rho$ refers to the running protocol at the sender and $\varrho$ is the message payload.
+We consider that \emph{broadcast messages} are vectors $(\iota, \tau, \rho, \varrho)$ with four entries where: $\iota$ is a unique identifier, $\tau$ defines either a control or broadcast message, $\rho$ refers to the running protocol at the sender and $\varrho$ is the message payload.
 %
-Control messages are beacons required by some protocols to operate and broadcast messages contain the information to disseminate.
+\emph{Control messages} on the other hand are beacons required by some protocols to operate.
 
 %%
 Our interoperability mechanism works as follows.
 %
-When nodes receive a message $msg$ that corresponds to the running protocol of the sender or this receiver was previously labeled as border node (line 10), $msg$ is broadcast; notice that the function \textit{broadcast} (line~\ref{interop-alg:bro}) hides the implementation of a \acl{bp}.
+When nodes receive a message $msg$ that corresponds to the running protocol of the sender or the actual receiver was previously labeled as border node (line 10), $msg$ is broadcast; notice that the function \textit{broadcast} (line~\ref{interop-alg:bro}) hides the protocol's implementation.
 %
-In case the running protocols between sender and receiver differs we distinguish between two cases (line 13):
+In case the running protocols of sender and receiver differs, we distinguish between two cases (line 13):
 
 \begin{itemize}
 
@@ -70,15 +68,15 @@ When the timer expires (line~\ref{interop-alg:timer-expires}), we create a new b
 
 \begin{itemize}
 
-\item \textit{border node} (line~\ref{interop-alg:new-border-msg:chosen}): for the moment this is a random choice, alternatively we can piggyback senders remaining battery to control messages for selecting a border node with the higher value of energy
+\item \textit{border node} (line~\ref{interop-alg:new-border-msg:chosen}): for the moment this is a random choice; alternatively, we may piggyback senders' remaining battery in control messages to select a border node with the highest value of energy
 \item \textit{traveled hops} (line~\ref{interop-alg:new-border-msg:hops}): number of times $b$ will be forwarded
 \item \textit{sender identifier} (line~\ref{interop-alg:new-border-msg:sender})
-\item \textit{sender running protocol} (line~\ref{interop-alg:new-border-msg:sender-alg})
+\item \textit{sender's running protocol} (line~\ref{interop-alg:new-border-msg:sender-alg})
 \item \textit{foreign protocol} (line 26): nodes running this protocol foster the border election procedure 
 
 \end{itemize}
 %
-We now explore the case when nodes receive border messages (line 28).
+We now explore the second case when nodes receive border messages (line 28).
 
 \item \textbf{Border message reception.} Receivers decrease by one the number of traveled hops (line:~\ref{interop-alg:border-msg-case:dec}).
 %
@@ -89,8 +87,7 @@ Notice that the function \textit{forward} simply performs a retransmission withi
 Given that all packets have in a unique identifier further copies of previously known packets are ignored.
 %
 Furthermore, only one out of two possible situations take place.
-
-%%
+%
 Either the receiver is a potential candidate of border node (line: 32) or it belongs to those nodes who foster the selection procedure (line 36).
 %
 The latter situation serves to cancel ongoing timers that triggered the border selection procedure by other senders (line:~\ref{interop-alg:border-msg-case:rm-timers}), that is, nodes running a foreign algorithm.
@@ -104,11 +101,9 @@ When the former situation occurs, the receiver is labeled as border node only if
 \subsection{Evaluation scenario}
 \label{interop:scenario}
 
-We simulate a situation where a crowd of humans carry mobile devices with WiFi capabilities (mobile phones, tablets, etc).
+We simulate a situation where a crowd of humans carry mobile devices with WiFi capabilities (cellphones, tablets, etc) and the area of communication has two regions, dense and sparse.
 %
-As shown in Figure~\ref{packets-lost-ex}, the area of communication has two regions, dense and sparse.
-%
-Each region contain 400 nodes and approximately the same surface where the dimensions of the whole area are 120 meters of height and width.
+Regions contain 400 nodes each and approximately the same surface, the dimensions of the whole area are 120 meters of height and width.
 %
 The aim of having such an arrangement is measuring the impact of increasing the forwarding set of one protocol with border nodes found with Algorithm~\ref{interop-alg}.
 %
@@ -119,23 +114,23 @@ The number of nodes neighbors within the sparse region varies between 1 to 10 wh
 
 \smallskip
 \noindent
-\textbf{Mobility.}
+\textbf{Static scenario.}
 %\subsection*{Mobility}
-We use the \emph{truncated-levy walk} (LW) technique to model mobility patterns of humans~\cite{Rhee:2011}.
+%We use the \emph{truncated-levy walk} (LW) technique to model mobility patterns of humans~\cite{Rhee:2011}.
 %
-The evaluation of Algorithm~\ref{interop-alg} take place in a static scenario where nodes do not move and in a dynamic scenario with mobility.
+The evaluation of Algorithm~\ref{interop-alg} takes place in a scenario where nodes do not move.
 %
-In this dynamic scenario, nodes move at a speed of 0.5 m/s within the dense region and the speed of those at the sparse region is 2.0 m/s. These rates of velocity are based on an estimation of the preferred walking speed of humans~\cite{Browning390}.
+In our future evaluation we will consider a dynamic scenario where nodes move at a speed of 0.5 m/s within the dense region and the speed of those at the sparse region will be 2.0 m/s. These rates of velocity are based on an estimation of the preferred walking speed of humans~\cite{Browning390}.
 %
-The LW model generates traces of frequent short walks and occasional rides to distant locations.
+%The LW model generates traces of frequent short walks and occasional rides to distant locations.
 %
-Nodes move within their region of density in the communication area without getting out of their designated region.
+%Nodes move within their region of density in the communication area without getting out of their designated region.
 
 
 \smallskip
 \noindent
 \textbf{Broadcast protocols.}
-In the static scenario, running protocols on each node are chosen in advance and nodes keep using this protocol until the simulation concludes.
+Running protocols on each node are chosen in advance and nodes keep using this protocol until the simulation concludes.
 %
 Nodes in the sparse area use controlled flooding.
 %
@@ -161,7 +156,7 @@ The length of each message is 32 bytes.
 \smallskip
 \noindent
 \textbf{Simulator.}
-We deploy our simulation with OMNET++4.6~\cite{Varga:2008:OOS:1416222.1416290} and the plug-in INET3.3 to model \acl{nets}.
+We deploy our simulation with OMNET++4.6~\cite{Varga:2008:OOS:1416222.1416290} and the plug-in INET3.3 to model MANETs.
 %
 This framework provides a full implementation of the IEEE 802.11g standard, we use the standard energy consumption model of this simulator.
 %
@@ -172,25 +167,16 @@ This framework provides a full implementation of the IEEE 802.11g standard, we u
 \textbf{Transceiver settings.}
 Nodes have a transmission range of 10 m.
 %
-We model message transmission using the specifications of a commercial chip found in modern mobile devices, that is the chip Broadcom BCM4329~\cite{BCM4329}, which supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
+We model message transmission using the specifications of a commercial chip found in modern mobile devices, that is, the chip Broadcom BCM4329~\cite{BCM4329}; this chip supports Wi-Fi 802.11g on the 2.4 GHz frequency band.
 %
 Its energy consumption per operation modes is as follows: sleep (1mW), receive (10mW) and transmit (100mW).
 
 \begin{figure}[!t]
 	\centering
 	\includegraphics[width=\linewidth]{energy_consump_static}
-	\caption{Overall energy consumption}
+	\caption{Distribution of the energy consumed by 800 nodes over 200 broadcast sessions. The mean is indicated with a horizontal line on each box.}
 	\label{plots:energy-consump}
 \end{figure}
-
-\begin{figure}[!t]
-	\centering
-	\includegraphics[width=\linewidth]{relative_error_rcv_msgs_static}
-	\caption{Relative error of received messages}
-	\label{plots:re-rcv-msgs}
-\end{figure}
-
-
 
 \subsection{Preliminary Results}
 We deploy the static scenario described in section~\ref{interop:scenario} to measure: energy consumption, throughput of broadcast messages and reachability.
@@ -200,13 +186,13 @@ We perform 4 independent executions: simple flooding, the overlay-based approach
 \smallskip
 \noindent
 \textbf{Energy consumption.}
-MPR reduces the required energy to disseminate 200 broadcast sessions in an static wireless topology.
+Figure~\ref{plots:energy-consump} reveals that MPR reduces the required energy to disseminate 200 broadcast sessions in a static wireless topology.
 %
 We observe that the forwarding set built per session contains up to 30\% of the nodes in the network while approximately 70\% of nodes act as receivers.
 %
-On the other hand, in a simple flooding where every node retransmits at least one leads in the lowest bound of performance for this metric.
+On the other hand, in a simple flooding approach where every node retransmits at least once leads in the lowest bound of performance for this metric.
 %
-The average consumed energy in our two hybrid approaches (21 mJ nad 19.5 mJ, respectively) remains closer to the one observed in MPR (17.9 mJ).
+The average consumed energy in our two hybrid approaches (21 mJ and 19.5 mJ, respectively) remains closer to the one observed in MPR (17.9 mJ).
 
 \smallskip
 \noindent
@@ -223,18 +209,18 @@ As expected, simple flooding shows the lowest performance (dotted line in gray).
 
 \smallskip
 \noindent
-\textbf{Reachability.}
+\textbf{Reachability of broadcast messages.}
 Figure~\ref{plots:net-coverage} shows another perspective of reached nodes over all broadcast sessions.
 %
 Once again, we observe that a flooding approach in an sparse region increases the reachability of messages (solid line in black).
 %
 Up to 94\% of nodes receive all broadcast messages and 3\% of nodes miss up to 1\% of messages.
 %
-Notice that even in an static scenario we can not guarantee completely reachability due to the presence of collisions.
+Notice that even in a static scenario, we can not guarantee completely reachability due to the presence of collisions.
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=\linewidth]{netowrk_coverage_static}
-	\caption{Network coverage}
-	\label{plots:net-coverage}
+	\includegraphics[width=\linewidth]{relative_error_rcv_msgs_static}
+	\caption{CDF of relative error for received messages.}
+	\label{plots:re-rcv-msgs}
 \end{figure}
