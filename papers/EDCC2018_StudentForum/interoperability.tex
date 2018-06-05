@@ -102,6 +102,7 @@ When the former situation occurs, the receiver is labeled as border node only if
 
 
 \subsection{Evaluation scenario}
+\label{interop:scenario}
 
 We simulate a situation where a crowd of humans carry mobile devices with WiFi capabilities (mobile phones, tablets, etc).
 %
@@ -175,26 +176,65 @@ We model message transmission using the specifications of a commercial chip foun
 %
 Its energy consumption per operation modes is as follows: sleep (1mW), receive (10mW) and transmit (100mW).
 
-
-\subsection{Preliminary Results}
-
-
 \begin{figure}[!t]
-	\begin{center}
-		\subfigure[Overall energy consumption]{
-			\includegraphics[width=\linewidth]{energy_consump_static}
-			\label{plots:energy-consump}
-		}
-		\subfigure[Relative error of received messages]{
-			\includegraphics[width=\linewidth]{relative_error_rcv_msgs_static}
-			\label{plots:re-rcv-msgs}
-		}
-				\subfigure[Network coverage]{
-			\includegraphics[width=\linewidth]{netowrk_coverage_static}
-			\label{plots:net-coverage}
-		}
-		\caption{Preliminary results of broadcast metrics in the static scenario.} 
-		\label{fig:outbw}
-	\end{center}
+	\centering
+	\includegraphics[width=\linewidth]{energy_consump_static}
+	\caption{Overall energy consumption}
+	\label{plots:energy-consump}
 \end{figure}
 
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\linewidth]{relative_error_rcv_msgs_static}
+	\caption{Relative error of received messages}
+	\label{plots:re-rcv-msgs}
+\end{figure}
+
+
+
+\subsection{Preliminary Results}
+We deploy the static scenario described in section~\ref{interop:scenario} to measure: energy consumption, throughput of broadcast messages and reachability.
+%
+We perform 4 independent executions: simple flooding, the overlay-based approach MPR (multi-point relaying technique~\cite{qayyum:inria-00072756}) and two hybrid configurations. MPR runs in the dense area of both hybrid configurations whereas simple flooding and controlled flooding run in the sparse region of each configuration, respectively.
+
+\smallskip
+\noindent
+\textbf{Energy consumption.}
+MPR reduces the required energy to disseminate 200 broadcast sessions in an static wireless topology.
+%
+We observe that the forwarding set built per session contains up to 30\% of the nodes in the network while approximately 70\% of nodes act as receivers.
+%
+On the other hand, in a simple flooding where every node retransmits at least one leads in the lowest bound of performance for this metric.
+%
+The average consumed energy in our two hybrid approaches (21 mJ nad 19.5 mJ, respectively) remains closer to the one observed in MPR (17.9 mJ).
+
+\smallskip
+\noindent
+\textbf{Relative Error (RE) of messages throughput.}
+For this metric, we obtain the wireless topology formed at each broadcast session to get the number of neighbors per node.
+%
+With this ground truth and the number of received broadcast messages at each node, we show the distribution of the RE of received messages in form of a CDF in figure~\ref{plots:re-rcv-msgs}.
+%
+We observe that the throughput of receptions increases in one hybrid approach (dotted line in black) where controlled flooding is running in 50\% of the nodes at the sparse region.
+%
+The periodic exchange of beacons in MPR, which approximates surroundings, reduces the throughput in a deployed MANET (solid line in gray).
+%
+As expected, simple flooding shows the lowest performance (dotted line in gray). 
+
+\smallskip
+\noindent
+\textbf{Reachability.}
+Figure~\ref{plots:net-coverage} shows another perspective of reached nodes over all broadcast sessions.
+%
+Once again, we observe that a flooding approach in an sparse region increases the reachability of messages (solid line in black).
+%
+Up to 94\% of nodes receive all broadcast messages and 3\% of nodes miss up to 1\% of messages.
+%
+Notice that even in an static scenario we can not guarantee completely reachability due to the presence of collisions.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=\linewidth]{netowrk_coverage_static}
+	\caption{Network coverage}
+	\label{plots:net-coverage}
+\end{figure}
