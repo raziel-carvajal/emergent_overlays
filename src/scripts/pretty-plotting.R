@@ -184,9 +184,11 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- as.character(s[which(s == "p") + 1])
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "CDS-based")
-      cn <- replace(cn, cn == "MPRT", "MPR")
+      # cn <- toupper(gsub("[[:digit:]]", "", cn))
+      cn <- replace(cn, cn == "MPRSF", "MPR & Simple Flooding")
+      cn <- replace(cn, cn == "MPRCF", "MPR & Controlled Flooding")
+      cn <- replace(cn, cn == "SF", "Simple Flooding")
+      # cn <- replace(cn, cn == "MPRT", "MPR")
 			data <- e[,1]
 			data.frame( dat = data,
 						alg = rep(cn, length(data)),
@@ -199,33 +201,41 @@ plot.data.using.boxes <- function(data, densities, ylabel, caption, usebox=TRUE)
 	data <- do.call("rbind", data.list)
 
 	p <- ggplot(data)
-  if (!usebox) {
-    p <- p + geom_violin(aes(x=alg, y=dat, fill=alg)) +
-          stat_summary(fun.y=median, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
-  }
-  else {
-    p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg))
-  }
+  p <- p + geom_boxplot(aes(x=alg, y=dat, fill=alg)) + ylim(0, 35)
+  p <- p + ylab("Energy Consumption [mJ]") + xlab("Algorithm")
+  p <- p + scale_fill_grey(start=1.0, end=0.4) + theme_bw() + theme(legend.position="none", text=element_text(size=16))
 
-  p <- p + facet_grid(. ~ density) +
-		 ylab(ylabel) +
-    #  xlab("Algorithm") +
-    #  theme(legend.position="none") +
-     theme(legend.position="top", text=element_text(size=18)) +
-     (if (print.titles)
-      #  labs(title=caption, x=NULL)
-       labs(title=caption, fill="Algorithms", shape="Algorithms")
-     else
-       labs(shape="Algorithms", fill="Algorithms")
-     ) +
+  # if (!usebox) {
+  #   p <- p + geom_violin(aes(x=alg, y=dat, fill=alg)) +
+  #         stat_summary(fun.y=median, geom="point", size=4, fill="white", aes(x=alg, y=dat, shape=alg))
+  # }
+  # else {
+  # }
+     # (if (print.titles)
+     #  #  labs(title=caption, x=NULL)
+     # else
+     #   labs(shape="Algorithms", fill="Algorithms")
+     # ) +
     #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
-     get.plot.theme.style() +
-     theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-    if (!print.titles) {
-        p <- p + scale_fill_grey(start = 0.3, end = .85)
-    }
+  # p <- p + facet_grid(. ~ density) +
+	# 	 ylab(ylabel) +
+  #   #  xlab("Algorithm") +
+  #   #  theme(legend.position="none") +
+  #    theme(legend.position="top", text=element_text(size=18)) +
+  #    (if (print.titles)
+  #     #  labs(title=caption, x=NULL)
+  #      labs(title=caption, fill="Algorithms", shape="Algorithms")
+  #    else
+  #      labs(shape="Algorithms", fill="Algorithms")
+  #    ) +
+  #   #  theme(axis.title.x=element_blank(),axis.text.x = element_text(), axis.ticks.x=element_blank()) +
+  #    get.plot.theme.style() +
+  #    theme(axis.title.x=element_blank(),
+  #       axis.text.x=element_blank(),
+  #       axis.ticks.x=element_blank())
+  #   if (!print.titles) {
+  #       p <- p + scale_fill_grey(start = 0.3, end = .85)
+  #   }
 	print(p)
 }
 
@@ -236,19 +246,24 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 			cn <- colnames(e)[1]
 			s <- unlist( strsplit(cn,'_'))
 	  	cn <- s[which(s == "p") + 1]
-      cn <- toupper(gsub("[[:digit:]]", "", cn))
-      cn <- replace(cn, cn == "CDS", "CDS-based")
-      cn <- replace(cn, cn == "MPRT", "MPR")
-      nr.nodes <- as.numeric(s[which(s == "n") + 1])
-      y <- transformation(e[,1], nr.nodes)
-      x <- 1:length(y)
-      p <- data.frame( x = x, y = y )
-      p <- lowess(x, y, f=1/10)
-			data.frame( dat = p$y,
-						alg = rep(cn, length(y)),
-            idx = p$x,
-						density=rep(as.factor(paste("Density", density)), length(y))
-			)
+      cn <- replace(cn, cn == "MPRSF", "MPR & Simple Flooding")
+      cn <- replace(cn, cn == "MPRCF", "MPR & Controlled Flooding")
+      cn <- replace(cn, cn == "SF", "Simple Flooding")
+      # nr.nodes <- as.numeric(s[which(s == "n") + 1])
+      			data <- e[,1]
+      			data.frame( dat = data,
+      						Algorithm = rep(cn, length(data)),
+      						density=rep(as.factor(paste("Density", density)), length(data))
+      			)
+      # y <- transformation(e[,1], nr.nodes)
+      # x <- 1:length(y)
+      # p <- data.frame( x = x, y = y )
+      # p <- lowess(x, y, f=1/10)
+			# data.frame( dat = p$y,
+			# 			alg = rep(cn, length(y)),
+      #       idx = p$x,
+			# 			density=rep(as.factor(paste("Density", density)), length(y))
+			# )
 		})
 
 		do.call("rbind", dd)
@@ -256,21 +271,30 @@ plot.data.using.lines <- function(data, densities, ylabel, caption, transformati
 
 	data <- do.call("rbind", data.list)
 
-	p <- ggplot(data) +
-		 geom_line(aes(x=idx, y=dat, colour=alg)) +
-		 facet_grid(. ~ density) +
-		 theme(legend.position="top", text=element_text(size=18)) +
-		 ylab(ylabel) + xlab("Broadcast Session") +
-     (if (print.titles)
-		   labs(title=caption, colour="Algorithms")
-     else
-       labs(colour="Algorithms")
-     ) +
-     get.plot.theme.style()
+	p <- ggplot(data, aes(x=dat, linetype=Algorithm, color=Algorithm)) + stat_ecdf(geom="step", lwd=1.5)
+  # p <- p + ylab("CDF over Nodes [%]") + xlab("Relative Error of Received Messages") + xlim(0, 1)
+  p <- p + ylab("CDF over Nodes [%]") + xlab("Broadcast Sessions [%]") + xlim(99, 100)
+  p <- p + theme_bw() + theme(legend.position="top", text=element_text(size=18))
+  p <- p + scale_color_manual(
+    values = c("gray", "black", "black", "gray")
+  )
+  p <- p + scale_linetype_manual(
+    values = c("solid", "solid", "dotted", "dotted")
+  )
 
-     if (!print.titles) {
-         p <- p + scale_colour_grey(start = 0.3, end = .85)
-     }
+		 # facet_grid(. ~ density) +
+		 # theme(legend.position="top", text=element_text(size=18)) +
+		 # ylab(ylabel) + xlab("Broadcast Session") +
+     # (if (print.titles)
+		 #   labs(title=caption, colour="Algorithms")
+     # else
+     #   labs(colour="Algorithms")
+     # ) +
+     # get.plot.theme.style()
+     #
+     # if (!print.titles) {
+     #     p <- p + scale_colour_grey(start = 0.3, end = .85)
+     # }
 
 	print(p)
 }
@@ -280,7 +304,7 @@ plot.saved_rebroadcast.per.session <- function(data, densities) {
   plot.data.using.lines(data, densities,
     "Saved rebroadcast messages", "Saved rebroadcast messages per session",
     function(d, nr.nodes) {
-      rep(nr.nodes, length(d)) -  d
+      d
     }
   )
 }
@@ -348,8 +372,8 @@ plot.simple.coverage <- function(df, algos) {
   ylabel <- "Coverage (%)"
   df <- do.call("rbind", lapply(algos, function(a) { df[which(df$alg == a),]  }))
   df$alg <- toupper(gsub("[[:digit:]]", "", df$alg))
-  df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
-  df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
+  # df$alg <- replace(df$alg, df$alg == "CDS", "CDS-based")
+  # df$alg <- replace(df$alg, df$alg == "MPRT", "MPR")
   caption <- "Coverage"
   p <- ggplot(df) +
 		 geom_line(aes(x=density, y=coverage, colour=alg), size=1.2) +
