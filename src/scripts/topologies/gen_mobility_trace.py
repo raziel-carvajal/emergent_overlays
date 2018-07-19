@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import os
-# import sys
 import math
 import argparse
 import networkx as nx
-# from time import sleep
 import itertools as iterT
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_direction
@@ -14,7 +12,7 @@ MIN_LOW_VELOCITY = 0.0
 MAX_LOW_VELOCITY = 1.0
 MIN_HIG_VELOCITY = 1.5
 MAX_HIG_VELOCITY = 2.0
-# WAITING_TIME = int(os.environ['NODES_MOV_FREQ'])
+WAITING_TIME = int(os.environ['NODES_MOV_FREQ'])
 FIRST_PLOT_NAME = 'Position_'
 MOBILITY_FILE= 'mobility-trace'
 DIST_PER_ZONE= 'distribution-per-density'
@@ -35,12 +33,18 @@ def getArgs() :
 class CommunicationArea :
     def __init__(self, length=100) :
         self.length = length
-        self.center = {'x': length / 2, 'y': length / 2}
-        self.denseAlen = length / math.sqrt(2)
-        self.sparseSubAwidth = self.center['x'] - (self.denseAlen / 2)
+        self.center = {
+            'x': float( "%.3f"%(length / 2) ),
+            'y': float( "%.3f"%(length / 2) ) }
+        self.denseAlen = float( "%.3f"%(length / math.sqrt(2)) )
+        self.sparseSubAwidth = float(
+            "%.3f"%( (length - self.denseAlen) / 2 )
+        )
+        print "sqrt length ::", self.sparseSubAwidth
         self.sqrtNoVer = int( math.floor(self.length / self.sparseSubAwidth) )
         self.sqrtNoHor = int( math.floor(self.denseAlen / self.sparseSubAwidth) )
-        print "Total number of cells:", 2 * (self.sqrtNoHor + self.sqrtNoVer)
+        print "# of vertical sqrts ::", self.sqrtNoVer, "\n# of horizontal sqrts ::",\
+            self.sqrtNoHor
         self.sparseRegions = [
             # initial position of vertical rectangles
             {'x': 0, 'y': 0}, {'x': self.sparseSubAwidth + self.denseAlen, 'y': 0},
@@ -50,53 +54,55 @@ class CommunicationArea :
         ]
 
     def setNodesPerSqrt(self, nodes) :
-        self.nodesPerSubSqrt = int( math.ceil( nodes / ( (self.sqrtNoHor + self.sqrtNoVer) * 2 ) ) )
+        self.nodesPerSubSqrt = int( math.ceil(
+            nodes / ( (self.sqrtNoHor + self.sqrtNoVer) * 2 ) ) )
         print "Nodes number per cell:", self.nodesPerSubSqrt
 
-    def inDenseArea(self, x, y) :
-    	atAbs = self.center['x'] - (self.denseAlen / 2) <= x and \
-            self.center['x'] + (self.denseAlen / 2) >= x
-    	atOrd = self.center['y'] - (self.denseAlen / 2) <= y and \
-    		self.center['y'] + (self.denseAlen / 2) >= y
-    	return atAbs and atOrd
+def appendPositions(coords, positions, inDenseZone):
+    for c in range(0, len(coords)) :
+        positions[ len(positions) + 1 ] = {
+            'x': coords[c][0], 'y': coords[c][1], 'inDenseZone': inDenseZone }
+    return positions
 
 def getRandCoorAt(x, y, n, sqrtLen) :
     g = nx.Graph()
     g.add_nodes_from( range(0, n) )
     return nx.random_layout( g, scale=sqrtLen, center=(x, y) )
 
-def appendPositions(coords, positions):
-    for c in range(0, len(coords)) :
-        positions[ len(positions) + 1 ] = {'x': coords[c][0], 'y': coords[c][1]}
-    return positions
-
 def getWirelessTopology(comArea, nodes) :
     positions = {}
     # create wireless topology at sparse area
     for k in range(0, len(comArea.sparseRegions)) :
         rec = comArea.sparseRegions[k]
-        if rec['x'] ==  self.sparseSubAwidth: # vertical rectangle
-            center_x += comArea.sparseSubAwidth / 2
-            for j in range(0, comArea.sqrtNoVer) :
-                center_y += center_x + (j * comArea.sparseSubAwidth)
-                coords = getRandCoorAt( center_x, center_y,
-                   comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
-                positions = appendPositions(coords, positions)
-    #     else : # horizontal rectangle
-    #         center_y += comArea.sparseSubAwidth / 2
-    #         for j in range(0, comArea.sqrtNoHor) :
-    #             center_x += center_y + (j * comArea.sparseSubAwidth)
-    #             coords = getRandCoorAt( center_x, center_y,
-    #                 comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
-    #             positions = appendPositions(coords, positions)
-    # # create wireles topology at dense area
-    # coords = getRandCoorAt( comArea.center['x'], comArea.center['y'],
-    #    nodes, comArea.denseAlen )
-    # positions = appendPositions(coords, positions)
-    # #XXX latest node is located at the center of the communication area
-    # positions[ len(positions) + 1 ] = {
-    #     'x': comArea.center['x'], 'y': comArea.center['y']
-    # }
+        sqrtAtX = rec['x'] + comArea.sparseSubAwidth / 2
+        sqrtAtY = rec['y'] + comArea.sparseSubAwidth / 2
+        # horizontal rectangle
+        if rec['x'] ==  comArea.sparseSubAwidth:
+            for _ in range(0, comArea.sqrtNoHor) :
+                # print "horizontal center", sqrtAtX, sqrtAtY
+                coords = getRandCoorAt( sqrtAtX, sqrtAtY,
+                    comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
+                positions = appendPositions(coords, positions, False)
+                sqrtAtX += comArea.sparseSubAwidth
+                # print "center (", sqrtAtX, ",", sqrtAtY, ")"
+                # print positions
+        # vertical rectangle
+        else :
+            for _ in range(0, comArea.sqrtNoVer) :
+                # print "vertical center", sqrtAtX, sqrtAtY
+                coords = getRandCoorAt( sqrtAtX, sqrtAtY,
+                    comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
+                positions = appendPositions(coords, positions, False)
+                sqrtAtY += comArea.sparseSubAwidth
+                # print "center (", sqrtAtX, ",", sqrtAtY, ")"
+                # print positions
+    # create wireles topology at dense area
+    coords = getRandCoorAt( comArea.center['x'], comArea.center['y'],
+       nodes, comArea.denseAlen )
+    positions = appendPositions(coords, positions, True)
+    # latest node is located at the center of the communication area
+    positions[ len(positions) + 1 ] = \
+        {'x': comArea.center['x'], 'y': comArea.center['y'], 'inDenseZone': True}
     return positions
 
 def getDistance(a, b) :
@@ -112,84 +118,84 @@ def getOverlay(positions, transRange) :
 			g.add_edge(p[0], p[1])
 	return g
 
-def placedNodesWithUniformDen(latestPos, centers, halfSqrt, staticPo, overlays, Tx, cma_w) :
-    overlayNo = 1
-    while overlayNo <= overlays :
-        for k_i, v_i in centers.iteritems() :
-            for k_j, v_j in v_i.iteritems() :
-                center = { 'x': v_j['x'], 'y': v_j['y'] }
-                nodesAtSqrt = {}
-                nodeIds = []
-                for n in range(1, len(latestPos) + 1) :
-                    if (inSquare(latestPos[n], center, halfSqrt)) :
-                        nodesAtSqrt[n] = latestPos[n]
-                        nodeIds.append(n)
-                if v_j['zoneId'] == 0 :
-                    # nodes at dense zone move slowly
-            	    velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
-                else :
-                    # nodes at sparse zone move rapidly
-                    velocity=(MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
-                mobMod = random_direction( \
-    	            len(nodesAtSqrt), \
-    	            (halfSqrt * 2, halfSqrt * 2), \
-    	            wt_max=WAITING_TIME, \
-    	            velocity=velocity, \
-    	            border_policy='reflect' )
-                # print(center)
-                nodesAtSqrt = makeStep(mobMod, nodesAtSqrt, center, halfSqrt)
-                savePositions(nodesAtSqrt)
-                nodeIdx = 0
-                for _, newPos in nodesAtSqrt.iteritems() :
-                    latestP[ nodeIds[nodeIdx] ] = newPos
-                    nodeIdx = nodeIdx + 1
-    	# latest node in list of positions is located at the center of
-    	# the communication area, for the moment, this node acts at the source
-    	# of every broadcast session
-        staticId = len(latestP) + 1
-        staticPo = { 'x': staticPo['x'], 'y': staticPo['y'] }
-        savePositions({ staticId: staticPo })
-        latestP[ staticId ] = staticPo
-        savePosPerZone(latestP, centers, halfSqr)
-        latestOv = getOverlay(latestP, Tx)
-        plotOverlay(overlayNo, latestOv, latestP, cma_w, cma_w)
-        print("Number of connected overlays [" + str(overlayNo) + "]")
-        del latestP[staticId]
-        overlayNo = overlayNo + 1
+def getCoordsAt(center, width, length, coords) :
+    result = {}
+    halfWid = float( "%.3f"%(width  / 2) )
+    halfLen = float( "%.3f"%(length / 2) )
+    limInfAtX = center['x'] - halfWid ; limSupAtX = center['x'] + halfWid
+    limInfAtY = center['y'] - halfLen ; limSupAtY = center['y'] + halfLen
+    for k, v in coords.iteritems() :
+        if ( v['x'] >= limInfAtX and v['x'] <= limSupAtX ) and \
+           ( v['y'] >= limInfAtY and v['y'] <= limSupAtY ) : result[k] = v
+    return result
 
+def makeMobilityTrace(coords, traceLen, Tx, cma, srcNodePo, srcNodeId) :
+    t = 1
+    while t < traceLen :
+        newCoords = {}
+        # update coordinates within the sparse zone
+        for r in range(0, len(cma.sparseRegions)) :
+            region = cma.sparseRegions[r]
+            if region['x'] == cma.sparseSubAwidth : # horizontal rectangle
+                centerOfR = {
+                    'x': region['x'] + ( cma.denseAlen / 2 ),
+                    'y': region['y'] + ( cma.sparseSubAwidth / 2 ) }
+                coordsAtR = getCoordsAt(centerOfR, cma.denseAlen, cma.sparseSubAwidth, coords)
+                dimOfR = { 'width': cma.denseAlen, 'length': cma.sparseSubAwidth }
+            else : # vertical rectangle
+                centerOfR = {
+                    'x': region['x'] + ( cma.sparseSubAwidth / 2 ),
+                    'y': region['y'] + ( cma.length / 2 ) }
+                coordsAtR = getCoordsAt(centerOfR, cma.sparseSubAwidth, cma.length, coords)
+                dimOfR = { 'width': cma.sparseSubAwidth, 'length': cma.length }
+            # nodes at sparse zone move faster
+            velocity = (MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
+            # initialise an instance of the Levy-Walk model
+            mobMod = random_direction( len(coordsAtR), (dimOfR['width'], dimOfR['length']),
+	            wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
+            # each node moves ONLY once according to the mobility model
+            coordsAtR = makeStep(mobMod, coordsAtR, centerOfR, dimOfR)
+            # append coordinates
+            newCoords.update(coordsAtR)
 
-def makeStep(mobMod, pos, center, halfSqrt) :
-    sqrtLeftInfCorner = {
-        'x': center['x'] - halfSqrt, 'y': center['y'] - halfSqrt }
-    i = 0
+        # update coordinates within the dense zone
+        coordsAtR = getCoordsAt(cma.center, cma.denseAlen, cma.denseAlen, coords)
+        dimOfR = { 'width': cma.denseAlen, 'length': cma.denseAlen }
+        # nodes at dense zone move slower
+        velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
+        # initialise instance of mobility model
+        mobMod = random_direction( len(coordsAtR), (dimOfR['width'], dimOfR['length']),
+            wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
+        coordsAtR = makeStep(mobMod, coordsAtR, cma.center, dimOfR)
+        # append coordinates and add position of source node
+        newCoords.update(coordsAtR); newCoords[ srcNodeId ] = srcNodePo
+        # create and plot new wireless topology
+        o = getOverlay(newCoords, Tx); plotOverlay(o, newCoords, cma.length, t)
+        # add a new stet in the mobility trace
+        savePositions(newCoords) ; t += 1
+
+def makeStep(mobMod, coords, centeredAt, dimension) :
     p_i = [ (k[0], k[1]) for k in next(mobMod) ]
     p_j = [ (k[0], k[1]) for k in next(mobMod) ]
     pDif = [( abs( p_i[k][0] - p_j[k][0] ), abs( p_i[k][1] - p_j[k][1] ) ) \
-        for k in range(0, len(pos)) ]
-    for k, v in pos.iteritems() :
+        for k in range(0, len(p_i)) ]
+    i = 0
+    halfWid = float( "%.3f"%(dimension['width']  / 2) )
+    halfLen = float( "%.3f"%(dimension['length'] / 2) )
+    for k, v in coords.iteritems() :
         point = { 'x': v['x'] + pDif[i][0], 'y': v['y'] + pDif[i][1] }
-        # implementation of reflect policy of points within square of size:
-        # [ sqrtLeftInfCorner[x] , sqrtLeftInfCorner[y] ] &&
-        # [ sqrtLeftInfCorner[x] + 2 * halfSqrt,
-        #   sqrtLeftInfCorner[y] + 2 * halfSqrt ]
-        if point['x'] < sqrtLeftInfCorner['x'] :
-            point['x'] = point['x'] + 2 * halfSqrt
-        if point['x'] > sqrtLeftInfCorner['x'] + 2 * halfSqrt :
-            point['x'] = point['x'] - 2 * halfSqrt
-        if point['y'] < sqrtLeftInfCorner['y'] :
-            point['y'] = point['y'] + 2 * halfSqrt
-        if point['y'] > sqrtLeftInfCorner['y'] + 2 * halfSqrt :
-            point['y'] = point['y'] - 2 * halfSqrt
-        i = i + 1
-        pos[k] = point
-    return pos
-
-def plotNodesPositions(pos, pltWidth) :
-	layout = plt.subplot(111)
-	layout.plot(pltWidth, pltWidth, linestyle='', marker='.')
-	plt.scatter( [ pos[p]['x'] for p in pos], [ pos[p]['y'] for p in pos] )
-	plt.savefig(FIRST_PLOT_NAME)
-	plt.clf()
+        # reflect policy at abscise when a new point is out of the region
+        if point['x'] < centeredAt['x'] - halfWid :
+            point['x'] = point['x'] + 2 * halfWid
+        if point['x'] > centeredAt['x'] + halfWid :
+            point['x'] = point['x'] - 2 * halfWid
+        # reflect policy at oordinate when a new point is out of the region
+        if point['y'] < centeredAt['y'] - halfLen :
+            point['y'] = point['y'] + 2 * halfLen
+        if point['y'] > centeredAt['y'] + halfLen :
+            point['y'] = point['y'] - 2 * halfLen
+        coords[k] = point ; i += 1
+    return coords
 
 def plotOverlay(graph, positions, maxLen, iD) :
 	pTmp = {}
@@ -202,7 +208,7 @@ def plotOverlay(graph, positions, maxLen, iD) :
 	plt.savefig(FIRST_PLOT_NAME + str(iD) + ".pdf")
 	plt.clf()
 
-def isConnected(g) :
+def withPartitions(g) :
 	try :
 		nx.average_shortest_path_length(g)
 		r = True
@@ -211,49 +217,48 @@ def isConnected(g) :
 	return r
 
 def savePositions(positions) :
-	with open(MOBILITY_FILE, 'a') as f:
-		for k, v in positions.iteritems() :
-			f.write(str(v['x']) + " " + str(v['y']) + "\n")
+    sortedKeys = sorted( positions.keys() )
+    with open(MOBILITY_FILE, 'a') as f:
+    	for i in range(0, len(sortedKeys)) :
+            v = positions[ sortedKeys[i] ]
+            f.write(str(v['x']) + " " + str(v['y']) + "\n")
 
 def addConnectEntry(fileName, entry) :
 	with open(fileName, 'a') as f :
 		f.write(entry + "\n")
 
-
 def savePosPerZone(positions, comArea) :
+    sortedKeys = sorted( positions.keys() )
     with open(DIST_PER_ZONE, 'a') as f :
-        for k, v in positions.iteritems() :
-            if comArea.inDenseArea( v['x'], v['y'] ) :
-                f.write( "%d %f %f %d\n" % (k, v['x'], v['y'], 1) )
-            else:
-                f.write( "%d %f %f %d\n" % (k, v['x'], v['y'], 0) )
+        for i in range(0, len(sortedKeys)) :
+            k = sortedKeys[i] ; v = positions[k]
+            f.write( "%d %f %f %d\n" % (k, v['x'], v['y'], int(v['inDenseZone'])) )
 
 if __name__ == '__main__':
     args = getArgs()
+    # initialise details of communication area
     comArea = CommunicationArea(args.area_l)
     comArea.setNodesPerSqrt(args.nodes_no)
-    tryNo = 0; hasPartitions = True
-    while hasPartitions :
-        print "Wireless topology number:", tryNo
-    	p = getWirelessTopology(comArea, args.nodes_no)
-    	o = getOverlay(p, args.tx)
-    	hasPartitions = not isConnected(o)
-        plotOverlay(o, p, args.area_l, 0)
-        savePosPerZone(p, comArea)
-        exit()
-    # 	if not hasPartitions :
-    # 	tryNo = tryNo + 1
-    # args.nodes_no = len(latestP)
-    # with open(MOBILITY_FILE, 'a') as f:
-    # 	f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
-    # savePositions(latestP)
-    # print("First connected graph was created")
-    #
-    # # source node remains fixed within the communication area, that's why
-    # # the source node is removed to create mobility traces from the rest of nodes
-    # staticNodeId = args.nodes_no
-    # staticNodePo = latestP[staticNodeId]
-    # del latestP[staticNodeId]
-    #
-    # placedNodesWithUniformDen(latestP, centers, halfSqr, staticNodePo,
-    #     args.overlays, args.Tx, args.cma_w)
+    tryNo = 1; partitioned = True
+    # create an initial wireless topology with no partitions
+    while partitioned :
+        print "new entry at mobility trace, try:", tryNo, "..."
+    	coords = getWirelessTopology(comArea, args.nodes_no)
+    	o = getOverlay(coords, args.tx)
+        partitioned = withPartitions(o)
+    	if not partitioned :
+            plotOverlay(o, coords, comArea.length, 0)
+            savePosPerZone(coords, comArea)
+    	tryNo = tryNo + 1
+    args.nodes_no = len(coords)
+    # header of mobility trace
+    with open(MOBILITY_FILE, 'a') as f:
+    	f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
+    # store first entry in the mobility trace
+    savePositions(coords)
+    print("First connected graph was created")
+    # source node remains fixed within the center of the dense area
+    srcNodeId = args.nodes_no ; srcNodePo = coords[srcNodeId]
+    del coords[srcNodeId]
+    # store the rest of entries of the mobility trace
+    makeMobilityTrace(coords, args.trace_size, args.tx, comArea, srcNodePo, srcNodeId)
