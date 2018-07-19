@@ -36,15 +36,19 @@ class CommunicationArea :
         self.center = {
             'x': float( "%.3f"%(length / 2) ),
             'y': float( "%.3f"%(length / 2) ) }
+        # NOTE REQUIRED AS OUTPUT
+        print "X_POSITION_OF_CMA_CENTER", self.center['x']
         self.denseAlen = float( "%.3f"%(length / math.sqrt(2)) )
+        # NOTE REQUIRED AS OUTPUT
+        print "WIDTH_OF_DENSE_REGION", self.denseAlen
         self.sparseSubAwidth = float(
             "%.3f"%( (length - self.denseAlen) / 2 )
         )
-        print "sqrt length ::", self.sparseSubAwidth
+        # print "sqrt length ::", self.sparseSubAwidth
         self.sqrtNoVer = int( math.floor(self.length / self.sparseSubAwidth) )
         self.sqrtNoHor = int( math.floor(self.denseAlen / self.sparseSubAwidth) )
-        print "# of vertical sqrts ::", self.sqrtNoVer, "\n# of horizontal sqrts ::",\
-            self.sqrtNoHor
+        # print "# of vertical sqrts ::", self.sqrtNoVer, "\n# of horizontal sqrts ::",\
+        #     self.sqrtNoHor
         self.sparseRegions = [
             # initial position of vertical rectangles
             {'x': 0, 'y': 0}, {'x': self.sparseSubAwidth + self.denseAlen, 'y': 0},
@@ -56,7 +60,9 @@ class CommunicationArea :
     def setNodesPerSqrt(self, nodes) :
         self.nodesPerSubSqrt = int( math.ceil(
             nodes / ( (self.sqrtNoHor + self.sqrtNoVer) * 2 ) ) )
-        print "Nodes number per cell:", self.nodesPerSubSqrt
+        # NOTE REQUIRED AS OUTPUT
+        print 'FIRST_NODE_AT_DENSE_AREA', \
+            (self.sqrtNoHor + self.sqrtNoVer) * 2 * self.nodesPerSubSqrt + 1
 
 def appendPositions(coords, positions, inDenseZone):
     for c in range(0, len(coords)) :
@@ -260,5 +266,7 @@ if __name__ == '__main__':
     # source node remains fixed within the center of the dense area
     srcNodeId = args.nodes_no ; srcNodePo = coords[srcNodeId]
     del coords[srcNodeId]
+    # NOTE REQUIRED AS OUTPUT
+    print 'SOURCE_NODE_ID', srcNodeId
     # store the rest of entries of the mobility trace
     makeMobilityTrace(coords, args.trace_size, args.tx, comArea, srcNodePo, srcNodeId)
