@@ -19,26 +19,22 @@
 
 set -o nounset                              # Treat unset variables as an error
 cma=${COMM_AREA_LENGTH}
-regions=${DENSITY_REGIONS_NO}
 nodes=${NODES_NO_PER_REGION}
 tx=${NODES_TRANSMISSION_RANGE}
 overlays=$(bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${NODES_MOV_FREQ}")
 overlays=$(bc <<< "${overlays}/1")
 
 echo "Comm area length: ${cma}"
-echo "Regions No: ${regions}"
 echo "Nodes No: ${nodes}"
 echo "Tx of nodes: ${tx}"
 echo "No of overlays: ${overlays}"
 
-generator="./make-mobility-trace-same-den.py"
-#generator="./make-mobility-trace.py"
 # remove all configurations and topologies
 rm -rf *.pdf *.ned *.mobility *.positions output \
   ../../../experiments/networks/built_topologies/* \
   ../../../experiments/configs/built_configs/*
-${generator} --cma-w ${cma} --regions ${regions} \
-  --nodes-no ${nodes} --transmission-range ${tx} --overlays-no ${overlays} >output
+./gen_mobility_trace.py --area-length ${cma}  --nodes-no ${nodes} \
+  --transmission-range ${tx} --trace-size ${overlays} >output
 s=""
 for f in `ls -t *.pdf`; do
   s="${f} ${s}"
@@ -54,11 +50,13 @@ mv all.pdf "${mobF}.pdf"
 mv *.pdf *.ned *.mobility *.positions \
   ../../../experiments/networks/built_topologies
 
-firsAtDenseA=`grep FIRST_NODE_AT_DENSE_AREA output | awk -F '=' '{print $2}' | tail -1`
-lastAtSparsA=`grep LAST_NODE_AT_SPARSE_AREA output | awk -F '=' '{print $2}' | tail -1`
-srcNodeId=`grep SOURCE_NODE_ID output | awk -F '=' '{print $2}' | tail -1`
+firsAtDenseA=`grep FIRST_NODE_AT_DENSE_AREA output | awk '{print $2}' | tail -1`
+srcNodeId=`grep SOURCE_NODE_ID output | awk '{print $2}' | tail -1`
+cenPosXandY=`grep X_POSITION_OF_CMA_CENTER output | awk '{print $2}' | tail -1`
+denseAreaWi=`grep WIDTH_OF_DENSE_REGION output | awk '{print $2}' | tail -1`
+echo "${firsAtDenseA}, ${srcNodeId}, ${cenPosXandY}, ${denseAreaWi}"
 rm -f output
-echo "1st[${firsAtDenseA}] last[${lastAtSparsA}] src[${srcNodeId}]"
+echo -e "1st node at dense area: [${firsAtDenseA}]\n Source node [${srcNodeId}]"
 
 rm -f "../../../experiments/configs/in_common/config.xml"
 cat "../../../experiments/configs/in_common/base_config" >config.xml
@@ -71,13 +69,11 @@ ctrlMsgFreq=`bc <<< "(${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
 sed -i -e "s/CTRL_MSG_FREQ/${ctrlMsgFreq}/" config.xml
 mv config.xml "../../../experiments/configs/in_common"
 
-cenPosXandY=`bc <<< "scale=2; ${cma} / 2"`
-denseAreaWi=`bc <<< "scale=2; ( ${cma} / (${regions} + 1) ) / 2"`
 broaMsgFreq=`bc <<< "scale=2; x=(${SIMULATION_TIME} * 60 )/${BROADCAST_MSGS_NO}; if(x < 1.0) print "0",x else print x ;"`
 echo "broadcast msg freq ${broaMsgFreq}"
 # TODO this warm up phase must be independent of the control messages frequency
 warmUpPhase="3.0"
-# INFO 5s more were added to allow experiment end without problems
+# NOTE 5s more were added to allow experiment end without problems
 newSimTime=`bc<<<"scale=2; ${warmUpPhase} + ${SIMULATION_TIME} * 60 + 5"`
 
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
@@ -109,21 +105,14 @@ for algo in ${algorithms} ; do
     for (( I=${firsAtDenseA}; I<${firsAtDenseA}+${nodes}; I+=1 )); do
       echo "*.hostR${I}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
 	  done
-    algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
-    for (( I=${firsAtDenseA}+${nodes}; I<=${lastAtSparsA}; I+=1 )); do
-      echo "*.hostR${I}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
-	  done
-    # NOTE for the moment there is a source node positioned within the dense area
-    algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.hostR${srcNodeId}.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
-    cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini"
   else
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo -e "*.host*.udpApp[0].initialProtocol=\"${algoClassName}\"" >> iniFile
-    cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"
   fi
   mv iniFile "${mobF}${algo}.ini"
   mv "${mobF}${algo}.ini" ../../../experiments/configs/built_configs
+  cfgsForWorkers="${cfgsForWorkers}${mobF}${algo}.ini\n"
 done
 builtCfgDir="../../../experiments/configs/built_configs"
 echo -e "FOR WORKERS:\n ${cfgsForWorkers}"
