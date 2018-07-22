@@ -40,12 +40,7 @@ RUN apt-get -y install \
   r-base
 
 # Fetch OMNeT++ source file
-RUN wget \
-  --header="Accept: text/html" \
-  --user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0" \
-  --referer="https://omnetpp.org" \
-  --output-document=omnetpp-4.6-src.tgz \
-  https://omnetpp.org/component/jdownloads/send/32-release-older-versions/2290-omnet-4-6-source-ide-tgz
+ADD dockerfiles/worker/omnetpp-4.6-src.tgz ./
 
 # Fetch INET source file
 RUN wget \
