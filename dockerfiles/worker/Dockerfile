@@ -40,7 +40,7 @@ RUN apt-get -y install \
   r-base
 
 # Fetch OMNeT++ source file
-ADD dockerfiles/worker/omnetpp-4.6-src.tgz ./
+COPY dockerfiles/worker/omnetpp-4.6-src.tgz omnetpp-4.6-src.tgz
 
 # Fetch INET source file
 RUN wget \
