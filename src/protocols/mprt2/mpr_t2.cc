@@ -72,16 +72,14 @@ void Mpr_t2::erase_old_hops() {
 
 void Mpr_t2::process_hello(const broadcasting::Hello* msg) {
 	string j = msg->getSender();
-	if (j == myself)
-		return;
+	if (j == myself) return;
+
 	auto m = dynamic_cast<const MprHello*>(msg);
 	if (!m) {
 		cerr << myself << " : hello from " << j << ", ptr=" << m << ", raw_ptr="
 				<< msg->getProtocolId() << endl;
 		return;
 	}
-	//for being able to measure collisions
-	neighbors[j] = Neighbor();
 
 	hop1[j] = NodeNeighbor(simTime());
 	hops_position[j] = Coord(m->getX(), m->getY());
@@ -136,8 +134,7 @@ void Mpr_t2::process_payload(const Broadcast* m) {
 	gateway->emitBroadcastMsgReceived(key);
 //    cout << simTime().str() << " " + gateway->get_name()
 //            << " msg rcv from " << m->getSender() << endl;
-	if (m->getSender() == myself)
-		return;
+	if (m->getSender() == myself) return;
 
 	if (payloads.find(key) == payloads.end()) {
 		payloads[key] = m->getPayload();
@@ -156,9 +153,6 @@ void Mpr_t2::process_payload(const Broadcast* m) {
 			else
 				gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::CDS_RELAY);
 			gateway->broadcast(key, build_message_to_broadcast());
-		} else {
-//            cout << simTime().str() << " " + gateway->get_name()<<
-//                " FOREING MSG RECEIVED [" << key << "] selector["<< from_selector << "]" << endl;
 		}
 	}
 }
@@ -178,7 +172,7 @@ set<string> Mpr_t2::compute_mpr() {
 	set<string> mpr;
 	if (first_exec) {
 		first_exec = false;
-		latest = hop1;
+		latest = make_cpy(hop1);
 	} else {
 		bool changeOfNeigs = false;
 		if (hop1.size() != 0) {
@@ -197,7 +191,7 @@ set<string> Mpr_t2::compute_mpr() {
 		}
 		if (changeOfNeigs) {
 			latest.clear();
-			latest = hop1;
+			latest = make_cpy(hop1);
 		}
 	}
 	hops[0].clear();
@@ -295,6 +289,7 @@ set<string> Mpr_t2::compute_mpr() {
 		iterations++;
 	}
 	hop1.clear();
+	hops_position.clear();
 	return mpr;
 }
 

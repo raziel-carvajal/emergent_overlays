@@ -53,21 +53,26 @@ private:
     set<string> currentMpr;
 
     void initialize(const std::string& node_name, const std::shared_ptr<IBroadcastGateway> gateway) override;
-
-
-    void process_payload(const broadcasting::Broadcast* m) override;
-    void time_to_broadcast_payload(void* user_data) override;
+    bool handle(const cMessage *msg) override;
+    map<string, NodeNeighbor> make_cpy(map<string, NodeNeighbor> a){
+    	map<string, NodeNeighbor> b;
+    	for (const auto& i : a) {
+    		NodeNeighbor n = NodeNeighbor();
+    		for(set<string>::iterator it = i.second.hop1.begin(); it != i.second.hop1.end(); ++it)
+    			n.hop1.insert(*it);
+    		b[i.first] = n;
+    	}
+    	return b;
+    }
 
     inet::broadcasting::Hello* build_hello_message() override;
     void process_hello(const broadcasting::Hello* msg) override;
     void on_saying_hello() override;
-    bool handle(const cMessage *msg) override;
 
+    void process_payload(const broadcasting::Broadcast* m) override;
+    void time_to_broadcast_payload(void* user_data) override;
     inet::mpr_t2::MprBroadcast* build_message_to_broadcast();
 
-  	/**
-  	 * This one is also useful. You can call it to get the position of a host
-  	 */
   	Coord get_hop_position(string n) {
   		if (hops_position.find(n) == hops_position.end()) {
   			throw new invalid_argument("unknown hop: " + n);
