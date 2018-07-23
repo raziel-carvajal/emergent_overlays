@@ -47,6 +47,7 @@ class INET_API BroadcastingAppBase : public ApplicationBase , public cListener
         APPROXIMATE_DENSITY,
         DO_ADAPTATION,
         BOOTSTRAP_MSG,
+        END_SIMULATION,
         BUILD_STRUCT,
         FWD_DELAYED_MSG,
         First = IDLE,

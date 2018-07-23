@@ -250,10 +250,6 @@ void BroadcastingAppBase::initialize(int stage) {
 		// adaptation parameters
 
 		double broadcastMsgTj;
-		if (is_source) {
-			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo
-					<< endl;
-		}
 		for (int i = 0; i < nr_broadcast_msg; i++) {
 			broadcastMsgTj = broadcastMsgTo + i * broadcastMsgFreq;
 			if (is_source) {
@@ -263,6 +259,12 @@ void BroadcastingAppBase::initialize(int stage) {
 			delayed_event_with_strict_time(APPROXIMATE_DENSITY, "APPROXIMATE_DENSITY",
 					broadcastMsgTj + deltaApprox);
 		}
+		if (is_source) {
+			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo
+					<< endl;
+			delayed_event_with_strict_time(END_SIMULATION, "END_SIMULATION", broadcastMsgTj + 1.0);
+		}
+
 	}
 		break;
 	default:
@@ -355,6 +357,11 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			cancelAndDelete(msg);
 		}
 			break;
+		case END_SIMULATION: {
+			cout << getLogHeader() << "END OF SIMULATION" << endl;
+			endSimulation();
+			break;
+		}
 		default:
 			break;
 		}
