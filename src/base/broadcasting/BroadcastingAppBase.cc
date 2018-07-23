@@ -257,10 +257,10 @@ void BroadcastingAppBase::initialize(int stage) {
 		for (int i = 0; i < nr_broadcast_msg; i++) {
 			broadcastMsgTj = broadcastMsgTo + i * broadcastMsgFreq;
 			if (is_source) {
-				delayed_event_with_strict_time(BROADCAST, "doBroadcast",
+				delayed_event_with_strict_time(BROADCAST, "BROADCAST",
 						broadcastMsgTj);
 			}
-			delayed_event(APPROXIMATE_DENSITY, "densityApprox",
+			delayed_event_with_strict_time(APPROXIMATE_DENSITY, "APPROXIMATE_DENSITY",
 					broadcastMsgTj + deltaApprox);
 		}
 	}
@@ -295,8 +295,8 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			if (msg != nullptr) {
 				void* data = msg->getContextPointer();
 				this->time_to_broadcast_payload(data);
-				cancelAndDelete(msg);
 			}
+			cancelAndDelete(msg);
 		}
 			break;
 		case DISPLAY_TIME: {
@@ -476,8 +476,14 @@ void BroadcastingAppBase::on_network_message_received(cPacket* pkt) {
 		 */
 		this->on_hello_received(dynamic_cast<Hello *>(pkt));
 		// INFO received message is of type: BROADCAST
-	} else if (dynamic_cast<Broadcast *>(pkt) != nullptr)
+	} else if (dynamic_cast<Broadcast *>(pkt) != nullptr){
+		/**
+		 * the instance of <this> is a FullyAdaptive, this
+		 * call will execute FullyAdaptive.on_payload_received()
+		 * instead of BroadcastingAppBase.on_payload_received()
+		 */
 		this->on_payload_received(dynamic_cast<Broadcast *>(pkt));
+	}
 	else
 		cerr << getLogHeader() << "unknown message received" << endl;
 }

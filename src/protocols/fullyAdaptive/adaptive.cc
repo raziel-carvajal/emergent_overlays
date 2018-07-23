@@ -43,7 +43,7 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 				knownProtocols[current_protocol_name]->on_saying_hello();
 				double t = gateway->get_parameter<double>(current_protocol_name,
 						"helloTime");
-				gateway->delayed_event(BUILD_STRUCT, "", t);
+				gateway->delayed_event(BUILD_STRUCT, "BUILD_STRUCT", t);
 			}
 			cancelAndDelete(msg);
 		}
@@ -71,8 +71,8 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 				 *  one-hop and two-hop neighbors. Such behavior depends
 				 *  on the implementation of the CDS-based algorithm
 				 */
-				gateway->delayed_event(SAY_HELLO, "helloTime",
-						gateway->get_parameter<double>(current_protocol_name, "helloTime"));
+				auto t = gateway->get_parameter<double>(current_protocol_name, "helloTime");
+				gateway->delayed_event(SAY_HELLO, "SAY_HELLO", t);
 			}
 			cancelAndDelete(msg);
 		}
@@ -332,14 +332,15 @@ void FullyAdaptive::processStart() {
 		keep_sending_hello_msgs = true;
 		int i = 1;
 		while (i <= (int) par("bootstrap_ctrl_msgs_no").longValue()) {
-			gateway->delayed_event(BOOTSTRAP_MSG, "helloTime", i * 1.0 + delta);
+			gateway->delayed_event(BOOTSTRAP_MSG, "BOOTSTRAP_MSG",
+					i * 1.0 + delta);
 			i = i + 1;
 		}
-		gateway->delayed_event(BUILD_STRUCT, "",
+		gateway->delayed_event(BUILD_STRUCT, "BUILD_STRUCT",
 				0.3 + par("bootstrap_ctrl_msgs_no").longValue() * 1.0);
 		auto t = par("wakeUpTime").doubleValue()
 				+ gateway->get_parameter<double>(current_protocol_name, "helloTime");
-		gateway->delayed_event(SAY_HELLO, "helloTime", t + delta);
+		gateway->delayed_event(SAY_HELLO, "SAY_HELLO", t + delta);
 	}
 
 }
