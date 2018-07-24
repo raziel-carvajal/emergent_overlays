@@ -58,9 +58,12 @@ private:
     	map<string, NodeNeighbor> b;
     	for (const auto& i : a) {
     		NodeNeighbor n = NodeNeighbor();
-    		for(set<string>::iterator it = i.second.hop1.begin(); it != i.second.hop1.end(); ++it)
-    			n.hop1.insert(*it);
-    		b[i.first] = n;
+    		string key(i.first);
+    		if( (key != "") && (i.second.hop1.size() != 0) ){
+					for(set<string>::iterator it = i.second.hop1.begin(); it != i.second.hop1.end(); ++it)
+						n.hop1.insert(*it);
+					b[i.first] = n;
+    		}
     	}
     	return b;
     }
@@ -86,6 +89,8 @@ private:
 
   		auto pA = get_hop_position(a);
   		auto pB = get_hop_position(b);
+//  		cout << simTime().str() << " " + gateway->get_name()
+//  										<< " getting positions"<< endl;
 
   		return (
   				b_radius * b_radius >

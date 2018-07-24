@@ -41,8 +41,6 @@ void Mpr_t2::initialize(const std::string& node_name,
 }
 
 void Mpr_t2::on_saying_hello() {
-//    std::cout << simTime().str() << " " + gateway->get_name() << " :: " << "Scheduling HelloMessage with type: " << refresh_hops_message << endl;
-//	gateway->delayed_event(refresh_hops_message, "", get_random_delay());
 	currentMpr = compute_mpr();
 }
 
@@ -132,10 +130,9 @@ Mpr_t2::build_message_to_broadcast() {
 void Mpr_t2::process_payload(const Broadcast* m) {
 	string key = m->getId();
 	gateway->emitBroadcastMsgReceived(key);
-//    cout << simTime().str() << " " + gateway->get_name()
-//            << " msg rcv from " << m->getSender() << endl;
 	if (m->getSender() == myself) return;
-
+//	cout << simTime().str() << " " + gateway->get_name()
+//		<< " msg reception " << key << " from" << m->getSender() << endl;
 	if (payloads.find(key) == payloads.end()) {
 		payloads[key] = m->getPayload();
 		auto mprBroadcast = dynamic_cast<const MprBroadcast*>(m);
@@ -148,10 +145,12 @@ void Mpr_t2::process_payload(const Broadcast* m) {
 			}
 		}
 		if (gateway->amIborderNode() || from_selector) {
+
 			if(gateway->amIborderNode())
 				gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::BORDER);
 			else
 				gateway->emitForwardTypeSignal(BroadcastingAppBase::ForwardType::CDS_RELAY);
+
 			gateway->broadcast(key, build_message_to_broadcast());
 		}
 	}
@@ -186,7 +185,6 @@ set<string> Mpr_t2::compute_mpr() {
 						break;
 					}
 				}
-
 			}
 		}
 		if (changeOfNeigs) {
@@ -198,10 +196,8 @@ set<string> Mpr_t2::compute_mpr() {
 	hops[1].clear();
 	// first fill the array hops
 	for (const auto& p : latest) {
-		hops[0].insert(p.first);
-	}
-	for (const auto& p : latest) {
-		string j = p.first;
+		string j(p.first);
+		hops[0].insert(j);
 		for (const auto& name : p.second.hop1) {
 			if (name == myself)
 				continue;
@@ -289,7 +285,6 @@ set<string> Mpr_t2::compute_mpr() {
 		iterations++;
 	}
 	hop1.clear();
-	hops_position.clear();
 	return mpr;
 }
 

@@ -174,8 +174,8 @@ bool BroadcastingAppBase::borderDetector(cMessage* msg) {
 							if(!known_foreign_algo) {
 								latest_rcv_ctrl_session = m->getSession();
 								double timer_dur = uniform(0.001, delta);
-//								cout << getLogHeader() << "scheduling border-detector event, duration [" <<
-//								timer_dur << "]" << endl;
+								cout << getLogHeader() << "scheduling border-detector event, duration [" <<
+								timer_dur << "]" << endl;
 								border_detector_timers[m->getProtocolId()] = delayed_event(
 										BORDER_DETECTOR_TIMER,
 										strdup(m->getProtocolId()),
@@ -205,7 +205,7 @@ void BroadcastingAppBase::initialize(int stage) {
 
 		is_source = par("is_source").boolValue();
 
-		nr_broadcast_msg = par("nr_broadcast_msg").longValue();
+		nr_broadcast_msg = (int) par("nr_broadcast_msg").longValue();
 
 		remote_port = par("remotePort").longValue();
 		local_port = par("localPort").longValue();
@@ -253,16 +253,14 @@ void BroadcastingAppBase::initialize(int stage) {
 		for (int i = 0; i < nr_broadcast_msg; i++) {
 			broadcastMsgTj = broadcastMsgTo + i * broadcastMsgFreq;
 			if (is_source) {
-				delayed_event_with_strict_time(BROADCAST, "BROADCAST",
-						broadcastMsgTj);
+				delayed_event_with_strict_time(BROADCAST, "BROADCAST", broadcastMsgTj);
 			}
 			delayed_event_with_strict_time(APPROXIMATE_DENSITY, "APPROXIMATE_DENSITY",
 					broadcastMsgTj + deltaApprox);
 		}
 		if (is_source) {
-			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo
-					<< endl;
-			delayed_event_with_strict_time(END_SIMULATION, "END_SIMULATION", broadcastMsgTj + 1.0);
+			cout << getLogHeader() << "first broadcast session at " << broadcastMsgTo << endl;
+			delayed_event_with_strict_time(END_SIMULATION, "END_SIMULATION", broadcastMsgTj + 3.0);
 		}
 
 	}
@@ -281,6 +279,7 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			cancelAndDelete(msg);
 			break;
 		case SAY_HELLO:
+			cout << getLogHeader() << "ERROR" << endl;
 			throw std::logic_error("Unimplemented: Nobody should be calling this");
 			cancelAndDelete(msg);
 			break;
@@ -314,7 +313,7 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 			 *   - how to up date this set of potential border nodes?
 			 *   - mobility has an impact on this decision
 			 */
-//			cout << getLogHeader() << "border-detector event expires " << endl;
+			cout << getLogHeader() << "border-detector event expires " << endl;
 			char* foreign_prot = (char*) msg->getContextPointer();
 			bool no_border_nodes = known_border_nodes[latest_rcv_ctrl_session].find(
 					foreign_prot) == known_border_nodes[latest_rcv_ctrl_session].end();
@@ -368,7 +367,7 @@ void BroadcastingAppBase::handleMessageWhenUp(cMessage *msg) {
 	} else if (msg->getKind() == UDP_I_DATA) {
 		// try to detect nodes at the border between two protocols
 		if (!borderDetector(msg)) {
-			/* when a border node wasn't detected, two reasons are possible:
+			/* when a border node wasn't detected, two cases are posible:
 			 *  (i) <msg> is a broadcast message
 			 *    1.- from same protocol
 			 *    2.- from a foreign one

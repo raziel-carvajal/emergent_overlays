@@ -61,10 +61,10 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 		case SAY_HELLO: {
 			if (keep_sending_hello_msgs) {
 				auto p = build_hello_message();
-				if (packet_to_piggybag) {
-					p->encapsulate(packet_to_piggybag);
-					packet_to_piggybag = nullptr;
-				}
+//				if (packet_to_piggybag) {
+//					p->encapsulate(packet_to_piggybag);
+//					packet_to_piggybag = nullptr;
+//				}
 				gateway->send_package(p);
 				/* NOTE: once the timeout of sending control messages is set,
 				 *  two consecutive messages must be sent to keep track of
@@ -89,61 +89,62 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 			cancelAndDelete(msg);
 		}
 			break;
-		default: {
-			auto initialProtocol = par("initialProtocol").stdstringValue();
-			if (msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
-				adaptation();
-				cancelAndDelete(msg);
-			} else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+			default: {
 				BroadcastingAppBase::handleMessageWhenUp(msg);
-			} else {
-				cancelAndDelete(msg);
+//			auto initialProtocol = par("initialProtocol").stdstringValue();
+//			if (msg->getKind() == DO_ADAPTATION && initialProtocol != "middleware") {
+//				adaptation();
+//				cancelAndDelete(msg);
+//			} else if (!knownProtocols[current_protocol_name]->handle(msg)) {
+//				BroadcastingAppBase::handleMessageWhenUp(msg);
+//			} else {
+//				cancelAndDelete(msg);
+//			}
 			}
-		}
 			break;
 		}
 	} else if (msg->getKind() == UDP_I_DATA) {
 		// keep track of known neighbors
-		monitor->handle_messages(msg);
-		auto pkt = PK(msg);
-		auto initialProtocol = par("initialProtocol").stdstringValue();
+//		monitor->handle_messages(msg);
+//		auto pkt = PK(msg);
+//		auto initialProtocol = par("initialProtocol").stdstringValue();
 		// XXX what the hell is this?
-		if (initialProtocol != "middleware") {
-			if (pkt->hasEncapsulatedPacket()) {
-				pkt = pkt->getEncapsulatedPacket();
-			}
-			/*
-			 * XXX this is a sort of collaborative decision to switch
-			 *   of dissemination protocol, but it is not clear how to
-			 *   tag those members who will execute the change
-			 */
-			auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
-			if (willing) {
-				if (willingToChange
-						&& willing->getTargetProtocol() == willingToChangeToProtocol
-						&& willingToChangeToProtocol != current_protocol_name) {
-
-					change_current_protocol(willingToChangeToProtocol);
-					std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol
-							<< '\n';
-
-					if (!packet_to_piggybag) {
-						packet_to_piggybag = new inet::WillingToChange("willing to change");
-						packet_to_piggybag->setSender(myself.c_str());
-						packet_to_piggybag->setTargetProtocol(
-								willingToChangeToProtocol.c_str());
-						if (!gateway->get_parameter<bool>(current_protocol_name,
-								"nr_hello_messages")) {
-							gateway->send_package(packet_to_piggybag);
-							packet_to_piggybag = nullptr;
-						}
-					}
-					willingToChangeToProtocol = "";
-					willingToChange = false;
-					willing = nullptr;
-				}
-			}
-		}
+//		if (initialProtocol != "middleware") {
+//			if (pkt->hasEncapsulatedPacket()) {
+//				pkt = pkt->getEncapsulatedPacket();
+//			}
+//			/*
+//			 * XXX this is a sort of collaborative decision to switch
+//			 *   of dissemination protocol, but it is not clear how to
+//			 *   tag those members who will execute the change
+//			 */
+//			auto willing = dynamic_cast<inet::WillingToChange*>(pkt);
+//			if (willing) {
+//				if (willingToChange
+//						&& willing->getTargetProtocol() == willingToChangeToProtocol
+//						&& willingToChangeToProtocol != current_protocol_name) {
+//
+//					change_current_protocol(willingToChangeToProtocol);
+//					std::cerr << "CHANGING PROTOCOL TO\t\t\t" << willingToChangeToProtocol
+//							<< '\n';
+//
+//					if (!packet_to_piggybag) {
+//						packet_to_piggybag = new inet::WillingToChange("willing to change");
+//						packet_to_piggybag->setSender(myself.c_str());
+//						packet_to_piggybag->setTargetProtocol(
+//								willingToChangeToProtocol.c_str());
+//						if (!gateway->get_parameter<bool>(current_protocol_name,
+//								"nr_hello_messages")) {
+//							gateway->send_package(packet_to_piggybag);
+//							packet_to_piggybag = nullptr;
+//						}
+//					}
+//					willingToChangeToProtocol = "";
+//					willingToChange = false;
+//					willing = nullptr;
+//				}
+//			}
+//		}
 		BroadcastingAppBase::handleMessageWhenUp(msg);
 	}
 
@@ -239,7 +240,7 @@ void FullyAdaptive::on_payload_received(const Broadcast* m) {
 }
 
 void FullyAdaptive::time_to_broadcast_payload(void* user_data) {
-	// cout << simTime().str() + " " + myself + " DOING BROADCAST" << endl;
+	cout << simTime().str() + " " + myself + " DOING BROADCAST" << endl;
 	knownProtocols[current_protocol_name]->time_to_broadcast_payload(user_data);
 }
 
@@ -323,14 +324,15 @@ void FullyAdaptive::processStart() {
 	gateway->setProtocolId(current_protocol_name);
 	emit(signal_protocol_change, current_protocol_name[0]);
 
-	/** NOTE when a protocol requires to send control messages,
-	 * we need to give a grace period to start the first
-	 * broadcast session.
-	 * */
 	if (gateway->get_parameter<bool>(current_protocol_name,
 			"nr_hello_messages")) {
 		keep_sending_hello_msgs = true;
 		int i = 1;
+
+		/**
+		 * CDS-based algorithms require to exchange neighbors before
+		 * the first broadcast session (bootstrap phase)
+		 * */
 		while (i <= (int) par("bootstrap_ctrl_msgs_no").longValue()) {
 			gateway->delayed_event(BOOTSTRAP_MSG, "BOOTSTRAP_MSG",
 					i * 1.0 + delta);
@@ -338,6 +340,8 @@ void FullyAdaptive::processStart() {
 		}
 		gateway->delayed_event(BUILD_STRUCT, "BUILD_STRUCT",
 				0.3 + par("bootstrap_ctrl_msgs_no").longValue() * 1.0);
+
+		// schedule the first control message
 		auto t = par("wakeUpTime").doubleValue()
 				+ gateway->get_parameter<double>(current_protocol_name, "helloTime");
 		gateway->delayed_event(SAY_HELLO, "SAY_HELLO", t + delta);
