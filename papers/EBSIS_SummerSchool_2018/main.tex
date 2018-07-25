@@ -1,0 +1,116 @@
+\documentclass[11pt,twoside]{article}
+
+\usepackage{fancyhdr}
+\usepackage{epsfig}
+\usepackage{latexsym}
+\usepackage{microtype}
+\usepackage{lastpage} 
+\usepackage{hyperref}
+
+\usepackage[dvipsnames*,svgnames]{xcolor}
+\hypersetup{colorlinks=true,allcolors=DarkBlue,linkcolor=black}
+
+%Please include other packages if you need them.
+
+% if you use BibTeX
+%\bibliographystyle{plainurl}
+% please also provide DOI information in your BibTeX entries
+
+%------------------------------------------------------------------------------
+% Please do not modify these values
+\setlength{\textwidth}{12.6cm}
+\setlength{\textheight}{19cm}
+\setlength{\evensidemargin}{1.9cm}
+\setlength{\oddsidemargin}{1.9cm}
+%------------------------------------------------------------------------------
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+%Please define other environments if you need them
+
+\newcommand{\proof}[1]{\par\noindent {\bf Proof:}\ \ \ #1 \hfill$\Box$\hspace{1ex}}
+\newcommand{\sketch}{\par\noindent {\bf Sketch of the proof:} \hspace{1ex}}
+
+%\setcounter{page}{}
+
+%------------------------------------------------------------------------------
+% For headings
+
+\thispagestyle{empty}
+
+\newcommand{\TheAuthor}{}
+\newcommand{\Author}[1]{\renewcommand{\TheAuthor}{#1}}
+
+\newcommand{\TheTitle}{}
+\newcommand{\Title}[1]{\renewcommand{\TheTitle}{#1}}
+
+\Author{Raziel Carvajal-G{\'o}mez}
+\Title{Towards an Adaptive Approach for Broadcast Algorithms in MANETs}
+
+\fancyfoot{} % clear all footer fields
+
+%------------------------------------------------------------------------------
+
+\begin{document}
+
+\pagenumbering{gobble}
+\vspace{0.2cm}
+
+\begin{center}
+{\Large\bf Towards an Adaptive Approach for Broadcast Algorithms in MANETs}
+\end{center}
+
+\begin{center}
+{\large Raziel Carvajal-G{\'o}mez}\\
+Universit{\'e} Catholique de Louvain\\
+Louvain-la-Neuve, Belgium\\ 
+\end{center}
+
+\date{}
+
+{\bf Keywords:} \emph{broadcast protocols, wireless networks, emergent overlays.}\\
+
+%\section{Introduction}
+Mobile ad-hoc networks (MANETs) do not rely on fixed infrastructures for their deployment.
+%
+Nodes in such a network have wireless transceivers with a limited transmission range and forward packets to communicate with each other in a peer-to-peer fashion.
+%
+Application scenarios such as vehicular networks, monitoring of zones in danger or the deployment of communication infrastructures in rural zones are suitable scenarios for MANETs where broadcast is a fundamental operation.
+%
+%\rcg{give concrete examples of systems where broadcast is important}
+%
+
+Broadcast protocols for MANETs tackle the problem of selecting a set of forwarding nodes that retransmit received packets to reach every node in the network.
+%
+Choosing a forwarding set is not an easy task, a small set reduces the overall energy consumption but may result in unreachable packets for other nodes.
+%
+On the contrarily, a bigger forwarding set increase the collisions and contentions in the network.
+%
+Mobility is another factor, if a forwarding set is not updated according to the velocity of nodes, obsolete choices of this set may cause lost of packets.
+%
+Additionally, mobility patterns may result in partitions and heterogeneous networks where the density of nodes varies within the area of communication.
+
+%%
+We are interested in designing adaptive approaches for broadcast protocols in MANETs.
+%
+In our context, adaptation refers to the ability of dynamically selecting and configuring the protocol use to broadcast.
+%
+Notice that the deployment of a broadcast protocol may take place either in the entire system, or more interestingly, just in a part of it.
+%
+To deal with the heterogeneous conditions of mobility and density, we are working in the design of adaptive approaches that converge to hybrid systems: overlays emerge in highly dense regions where nodes remains mostly static and, controlled flooding protocols are deployed in sparse regions where nodes move more rapidly.
+
+%
+
+In our vision, nodes discover (only with local information) the need of adaptation and perform a collective decision towards a switch to a different protocol.
+%
+Preliminary results of our simulations show that the energy cost tends to reduce with our adaptation approach, keeping a high coverage of nodes without overkilling the network bandwidth.
+
+\newpage
+
+\hypertarget{lastpage}{}
+\end{document}
+
