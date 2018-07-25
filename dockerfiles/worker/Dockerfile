@@ -87,3 +87,7 @@ ADD src/scripts/*.R src/scripts/
 CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \
   ./pull_task.sh
+
+RUN echo '* soft core 99999999' >> /etc/security/limits.conf
+RUN echo '* hard core 99999999' >> /etc/security/limits.conf
+RUN mkdir /cores
