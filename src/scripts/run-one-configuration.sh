@@ -86,8 +86,7 @@ count=`cat ${CONF_FILE} | grep repeat | awk -F "=" '{print $2}'`
 
 DENSE_ZONE_X=`cat ${CONF_FILE} | grep "centerDensAx" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 DENSE_ZONE_Y=`cat ${CONF_FILE} | grep "centerDensAy" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
-DENSE_ZONE_X_HALF_LEN=`cat ${CONF_FILE} | grep "denseAreaWid" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
-DENSE_ZONE_Y_HALF_LEN=${DENSE_ZONE_X_HALF_LEN}
+DENSE_ZONE_WIDTH=`cat ${CONF_FILE} | grep "denseAreaWid" | head -1 | awk -F "=" '{print $2}' | grep -Eo '[0-9]{1,5}.[0-9]{1,5}'`
 
 echo "Simulation time [${simulation_time}]"
 echo "Frequency of broadcast messages: [${step}]"
@@ -97,13 +96,12 @@ echo "Broadcast messages number [${broadcastMsgs}]"
 echo "First time when nodes print their position [${firstPosT}]"
 echo "Delta aproximation [${deltaApprox}]"
 echo "Dense zone cetered at [${DENSE_ZONE_X}, ${DENSE_ZONE_Y}]"
-echo "Dense zone [width/2, height/2] [${DENSE_ZONE_X_HALF_LEN}, ${DENSE_ZONE_Y_HALF_LEN}]"
+echo "Dense zone width [${DENSE_ZONE_WIDTH}]"
 
 Rscript extract-charts.R --show-averages ${CONFIG_PATH}/results/${CONF_NAME}-0 ../../results/ \
   ${simulation_time} ${CONF_NAME} ${step} -b ${broadcastMsgs} \
   -t ${transmissionRange} -f_t ${firstPosT} -f_b ${wakeUpTime} \
-  -d_x ${DENSE_ZONE_X} -d_y ${DENSE_ZONE_Y} -d_h_x ${DENSE_ZONE_X_HALF_LEN} \
-  -d_h_y ${DENSE_ZONE_Y_HALF_LEN}
+  -d_x ${DENSE_ZONE_X} -d_y ${DENSE_ZONE_Y} -d_z_w ${DENSE_ZONE_WIDTH}
 
 echo "Moving to debugging/logs/ every graph built in experiment ${CONF_NAME}"
 rm -fr debugging/logs/${CONF_NAME}

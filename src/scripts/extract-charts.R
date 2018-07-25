@@ -45,10 +45,8 @@ get.arguments <- function() {
     help='Abscissa of dense zone center')
   parser$add_argument('-d_y', type='double',
     help='Ordinate of dense zone center')
-  parser$add_argument('-d_h_x', type='double',
-    help='Half of the widht dense zone')
-  parser$add_argument('-d_h_y', type='double',
-    help='Half of the height dense zone')
+  parser$add_argument('-d_z_w', type='double',
+    help='Dense zone width')
 
   parser$parse_args()
 }
@@ -545,7 +543,8 @@ main <- function(args) {
   # INFO metadate of dense zone
   # NOTE ATM we consider that there is only one dense zone and one sparse zone
   denseZone <- data.frame(
-    atX=args$d_x, atY=args$d_y, halfLenAtX=args$d_h_x, halfLenAtY=args$d_h_y
+    atX=args$d_x, atY=args$d_y,
+    halfLenAtX=(args$d_z_w / 2), halfLenAtY=(args$d_z_w / 2)
   )
   exp_duration <-
 	  args$time_of_first_broadcast_message + args$broadcast_msgs * args$step
@@ -579,8 +578,8 @@ main <- function(args) {
   	args$file, "name(forward_type:vector)")
 
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
-  # creates a list of virtual overlays per broadcast session, where each
-  # overlay refers to the graph form by the message dissemination
+
+  # creates a list of wireless topologies using nodes positions
   overlays <- lapply(msgs_ids, function(msg) {
     # point in time where node
     locationTimestamp <-
