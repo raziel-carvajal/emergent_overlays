@@ -15,7 +15,12 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/worker/Dockerfile
+    ulimit:
+      core: 99999999999:99999999999
     volumes:
+      - type: volume
+        source: coredumps_volume
+        target: /cores
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
