@@ -18,66 +18,46 @@
 
 namespace inet {
 
-
 class BroadcastMsgBasedMonitor: public IMonitoringMechanism {
 
 private:
-    int latestApprox;
-    std::map<std::string, int> knownNeighbors;
-    std::shared_ptr<IBroadcastGateway> gateway = nullptr;
+	int latestApprox = 0;
+	std::set<std::string> knownNeighbors;
+	std::shared_ptr<IBroadcastGateway> gateway = nullptr;
 
 public:
 
-  void compute_density_approx() override {
-      int currentApprox = knownNeighbors.size();
-      if (getLatestApprox() == -1) {
-          latestApprox = currentApprox;
-          appendApprox(currentApprox);
-      } else {
-          if (appendApprox(currentApprox)) {
-              latestApprox = roundApprox();
-          } else {
-              latestApprox = currentApprox;
-              initialiseAproxArray();
-              appendApprox(currentApprox);
-          }
-      }
-      knownNeighbors.clear();
-  }
+	void compute_density_approx() override {
+		int currentApprox = knownNeighbors.size();
+		if ( currentApprox != 0 && latestApprox != currentApprox )
+			latestApprox = currentApprox;
+		knownNeighbors.clear();
+	}
 
-  int get_density_approx() override {
-//      std::cout << simTime().str() << " " << gateway->get_name() <<
-//          ": density approximation gets " << lastDensityApprox << endl;
-      return latestApprox;
-  }
+	int get_density_approx() override {
+		return latestApprox;
+	}
 
-  double mobility_estimation() override {
-    return 0.0;
-  }
+	double mobility_estimation() override {
+		return 0.0;
+	}
 
-  bool handle_messages(cMessage* m) override {
-    auto pkt = PK(m);
-    auto hello = dynamic_cast<const inet::broadcasting::Hello*>(pkt);
-    if (hello && hello->getSender() != gateway->get_name()) {
-//        std::cout << simTime().str() << " " << gateway->get_name() <<
-//            ": hello msg received from " << hello->getSender() << endl;
-        knownNeighbors[hello->getSender()] = 0;
-    }
-    auto br = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
-    if (br && br->getSender() != gateway->get_name()) {
-//        std::cout << simTime().str() << " " << gateway->get_name() <<
-//            ": broadcast msg received from " << br->getSender() << endl;
-        knownNeighbors[br->getSender()] = 0;
-    }
-    return true;
-  }
+	bool handle_messages(cMessage* m) override {
+		auto pkt = PK(m);
+		auto isCtrlMsg = dynamic_cast<const inet::broadcasting::Hello*>(pkt);
+//		auto isBroaMsg = dynamic_cast<const inet::broadcasting::Broadcast*>(pkt);
+//		if (isBroaMsg && isBroaMsg->getSender() != gateway->get_name()) {
+//			knownNeighbors.insert(isBroaMsg->getSender());
+		if (isCtrlMsg && isCtrlMsg->getSender() != gateway->get_name())
+			knownNeighbors.insert(isCtrlMsg->getSender());
+		return true;
+	}
 
-  void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
-//      std::cout << simTime().str() << " " << gateway->get_name() <<
-//        " new BroadcastMsgBasedMonitor()" << endl;
-      initialiseAproxArray();
-      this->gateway = gateway;
-  }
+	void initialise(std::shared_ptr<IBroadcastGateway> gateway) override {
+//		std::cout << simTime().str() << " " << gateway->get_name() <<
+//						"INIT() " << endl;
+		this->gateway = gateway;
+	}
 };
 
 Register_Class(BroadcastMsgBasedMonitor);

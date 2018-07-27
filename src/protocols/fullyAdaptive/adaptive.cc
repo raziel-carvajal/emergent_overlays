@@ -104,8 +104,6 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 			break;
 		}
 	} else if (msg->getKind() == UDP_I_DATA) {
-		// keep track of known neighbors
-//		monitor->handle_messages(msg);
 //		auto pkt = PK(msg);
 //		auto initialProtocol = par("initialProtocol").stdstringValue();
 		// XXX what the hell is this?
@@ -145,6 +143,8 @@ void FullyAdaptive::handleMessageWhenUp(cMessage *msg) {
 //				}
 //			}
 //		}
+		// keep track of known neighbors
+		monitor->handle_messages(msg);
 		BroadcastingAppBase::handleMessageWhenUp(msg);
 	}
 
