@@ -651,9 +651,11 @@ main <- function(args) {
   print('done')
 
   print("Calculating energy consumption...")
-  energy_consumption <- energy.consumption.of.sent_recv.messages(
-    args$file, exp_duration,
-    sent_packages, recv_packages, all_nodes
+  energy_consumption <- unlist(
+    energy.consumption.of.sent_recv.messages(
+      args$file, exp_duration,
+      sent_packages, recv_packages, all_nodes
+    )
   )
   saveDataFrame(
     data.frame(
