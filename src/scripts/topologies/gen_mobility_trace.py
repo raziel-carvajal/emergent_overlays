@@ -29,7 +29,7 @@ def getArgs() :
 	p.add_argument('--trace-size', dest='trace_size', type=int, default=50,
 		help='number of wireless topologies formed when nodes move')
 	# proportion of denze zone (in sqrt meters) to take into account
-	p.add_argument('--dense-zone-f', dest='dense_zone_f', type=float, default=,
+	p.add_argument('--dense-zone-f', dest='dense_zone_f', type=float, default=0.8,
 		help='Proportion of dense zone to take into consideration. Values varies \
 		within interval [0, 1]; for instance, set this value to 0.5 means that \
 		the dense zone will have half of its designed numbero of square meters.')
