@@ -28,22 +28,26 @@ def getArgs() :
 		help='transmission range of each node')
 	p.add_argument('--trace-size', dest='trace_size', type=int, default=50,
 		help='number of wireless topologies formed when nodes move')
+	# proportion of denze zone (in sqrt meters) to take into account
+	p.add_argument('--dense-zone-f', dest='dense_zone_f', type=float, default=,
+		help='Proportion of dense zone to take into consideration. Values varies \
+		within interval [0, 1]; for instance, set this value to 0.5 means that \
+		the dense zone will have half of its designed numbero of square meters.')
 	return p.parse_args()
 
 class CommunicationArea :
-    def __init__(self, length=100) :
+    def __init__(self, length=100, dense_zone_prop=0.80) :
         self.length = length
         self.center = {
             'x': float( "%.3f"%(length / 2) ),
             'y': float( "%.3f"%(length / 2) ) }
         # NOTE REQUIRED AS OUTPUT
         print "X_POSITION_OF_CMA_CENTER", self.center['x']
-        self.denseAlen = float( "%.3f"%(length / math.sqrt(2)) )
+        self.denseAlen = float( "%.3f"%(length / math.sqrt(2)) ) * dense_zone_prop
         # NOTE REQUIRED AS OUTPUT
         print "WIDTH_OF_DENSE_REGION", self.denseAlen
         self.sparseSubAwidth = float(
-            "%.3f"%( (length - self.denseAlen) / 2 )
-        )
+            "%.3f"%( (length - self.denseAlen) / 2 ) )
         # print "sqrt length ::", self.sparseSubAwidth
         self.sqrtNoVer = int( math.floor(self.length / self.sparseSubAwidth) )
         self.sqrtNoHor = int( math.floor(self.denseAlen / self.sparseSubAwidth) )
@@ -243,7 +247,7 @@ def savePosPerZone(positions, comArea) :
 if __name__ == '__main__':
     args = getArgs()
     # initialise details of communication area
-    comArea = CommunicationArea(args.area_l)
+    comArea = CommunicationArea(length=args.area_l)
     comArea.setNodesPerSqrt(args.nodes_no)
     tryNo = 1; partitioned = True
     # create an initial wireless topology with no partitions
