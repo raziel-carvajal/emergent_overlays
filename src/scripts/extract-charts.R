@@ -178,6 +178,8 @@ get.density.relative.error <- function(results_file, first_measure,
         }
       )
       densityRelativeError <- as.vector(densityRelativeError)
+      # print(densityRelativeError)
+      # stop()
       data.frame(
         density_relative_err=densityRelativeError,
         zone=rep(zone, length(densityRelativeError)),
@@ -186,6 +188,8 @@ get.density.relative.error <- function(results_file, first_measure,
       )
     }
   )
+  # print(denRelErrPerZone)
+  # stop()
   do.call('rbind', denRelErrPerZone)
 }
 
@@ -667,9 +671,11 @@ main <- function(args) {
   print("done")
 
   print("Calculating relative error of nodes neighborhood size")
-  densityRelativeError <- get.density.relative.error(
-    args$file, args$first_time_of_measuring_nodes_position,
-    args$step, msgs_ids, overlays, algorithmN
+  try(
+    densityRelativeError <- get.density.relative.error(
+      args$file, args$first_time_of_measuring_nodes_position,
+      args$step, msgs_ids, overlays, algorithmN
+    )
   )
   print("DONE!")
 
@@ -687,9 +693,11 @@ main <- function(args) {
   print("DONE")
 
   print("Exporting rest of broadcast metrics")
-  saveDataFrame(
-    densityRelativeError,
-    args$outputPath, 'densityRelativeError', args$configuration
+  try(
+    saveDataFrame(
+      densityRelativeError,
+      args$outputPath, 'densityRelativeError', args$configuration
+    )
   )
   saveDataFrame(
     data.frame(
