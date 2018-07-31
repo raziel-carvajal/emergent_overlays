@@ -91,5 +91,5 @@ CMD cd /usr/emrg-ovrl/src/scripts && \
 RUN echo '* soft core 99999999' >> /etc/security/limits.conf
 RUN echo '* hard core 99999999' >> /etc/security/limits.conf
 # to avoid 'core dumped' error in Docker (17.12.1-ce), set this core pattern in your host
-# su -c " echo '/tmp/core.%h.%e.%t' > /proc/sys/kernel/core_pattern "
+# echo '/tmp/core.%t.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
 RUN mkdir -p /tmp/core
