@@ -65,7 +65,7 @@ text/main.synctex.gz
 #LOGS
 src/scripts/debugging/logs/n_*
 experiments/configs/built_configs/completed_tasks_no
-.env
+./.env
 
 #NON USED DATASETS
 results/batteryConsumptionDistribution*
