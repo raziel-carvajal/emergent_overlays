@@ -249,24 +249,19 @@ if __name__ == '__main__':
     # initialise details of communication area
     comArea = CommunicationArea(length=args.area_l)
     comArea.setNodesPerSqrt(args.nodes_no)
-    tryNo = 1; partitioned = True
-    # create an initial wireless topology with no partitions
-    while partitioned :
-        print "new entry at mobility trace, try:", tryNo, "..."
-    	coords = getWirelessTopology(comArea, args.nodes_no)
-    	o = getOverlay(coords, args.tx)
-        partitioned = withPartitions(o)
-    	if not partitioned :
-            plotOverlay(o, coords, comArea.length, 0)
-            savePosPerZone(coords, comArea)
-    	tryNo = tryNo + 1
+
+    # create first topology
+    coords = getWirelessTopology(comArea, args.nodes_no)
+    o = getOverlay(coords, args.tx)
+    plotOverlay(o, coords, comArea.length, 0)
+    savePosPerZone(coords, comArea)
     args.nodes_no = len(coords)
     # header of mobility trace
     with open(MOBILITY_FILE, 'a') as f:
     	f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
     # store first entry in the mobility trace
     savePositions(coords)
-    print("First connected graph was created")
+
     # source node remains fixed within the center of the dense area
     srcNodeId = args.nodes_no ; srcNodePo = coords[srcNodeId]
     del coords[srcNodeId]
