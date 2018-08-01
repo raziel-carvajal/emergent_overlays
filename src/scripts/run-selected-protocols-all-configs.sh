@@ -12,13 +12,13 @@ cat ../../results/collisionsRelativeError-n_* > ../../results/collisionsRelative
 cat ../../results/densityRelativeError-n_* > ../../results/densityRelativeError
 cat ../../results/noderoles-n_* > ../../results/noderoles
 
+# -dre densityRelativeError \
 echo "Plotting aggregated results"
 Rscript pretty-plotting.R \
   -ds groundTruthDensityDist- \
 	-bs broadcastSession \
 	-cv coverage \
 	-cre collisionsRelativeError \
-	-dre densityRelativeError \
 	-sent_bro sentBroadcastMsgsDistribution \
 	-recv_bro recvBroadcastMsgsDistribution \
 	-sent_ctrl sentCtrlMsgsDistribution \
