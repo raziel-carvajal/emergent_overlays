@@ -65,7 +65,8 @@ algoClassName=`grep ${ALGO_AT_DENSE_AREA}  ${algoClassMap} | awk -F "=" '{print 
 sed -i -e "s/ALGO_AT_DENSE_AREA/${algoClassName}/" config.xml
 algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
 sed -i -e "s/ALGO_AT_SPARSE_AREA/${algoClassName}/" config.xml
-ctrlMsgFreq=`bc <<< "(${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
+ctrlMsgFreq=`bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
+echo "Ctrl messages frequency: ${ctrlMsgFreq}"
 sed -i -e "s/CTRL_MSG_FREQ/${ctrlMsgFreq}/" config.xml
 mv config.xml "../../../experiments/configs/in_common"
 
