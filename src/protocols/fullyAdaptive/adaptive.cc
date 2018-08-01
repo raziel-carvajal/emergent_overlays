@@ -344,6 +344,8 @@ void FullyAdaptive::processStart() {
 		// schedule the first control message
 		auto t = par("wakeUpTime").doubleValue()
 				+ gateway->get_parameter<double>(current_protocol_name, "helloTime");
+		std::cout << simTime().str() << " " + gateway->get_name() << " First Hello Msg at " <<
+		        t << endl;
 		gateway->delayed_event(SAY_HELLO, "SAY_HELLO", t + delta);
 	}
 
