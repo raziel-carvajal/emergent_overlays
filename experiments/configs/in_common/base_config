@@ -3,26 +3,26 @@
     <Parameter name="dense_region" value="ALGO_AT_DENSE_AREA" type="string"></Parameter>
     <Parameter name="sparse_region" value="ALGO_AT_SPARSE_AREA" type="string"></Parameter>
   </Protocol>
+  <Protocol name="PureFlooding">
+    <Parameter name="withCtrlMsg" value="false" type="boolean"></Parameter>
+  </Protocol>
   <Protocol name="Abba2">
     <Parameter name="timeOut" value="0.02" type="seconds"></Parameter>
-    <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
-  </Protocol>
-  <Protocol name="Flooding2">
-    <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
+    <Parameter name="withCtrlMsg" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Cds_3">
     <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
-    <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
+    <Parameter name="withCtrlMsg" value="true" type="boolean"></Parameter>
     <Parameter name="doRule2" value="true" type="boolean"></Parameter>
     <Parameter name="doOptiP" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Dist2Mean2">
     <Parameter name="maximumDelay" value="0.2" type="seconds"></Parameter>
-    <Parameter name="nr_hello_messages" value="false" type="boolean"></Parameter>
+    <Parameter name="withCtrlMsg" value="false" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="Mpr_t2">
     <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
-    <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
+    <Parameter name="withCtrlMsg" value="true" type="boolean"></Parameter>
   </Protocol>
   <Protocol name="TimeBasedFlooding">
     <Parameter name="max_waiting_time" value="0.01" type="seconds"></Parameter>
@@ -30,7 +30,7 @@
   </Protocol>
   <Protocol name="ProbFlooding">
     <Parameter name="helloTime" value="CTRL_MSG_FREQ" type="seconds"></Parameter>
-    <Parameter name="nr_hello_messages" value="true" type="boolean"></Parameter>
+    <Parameter name="withCtrlMsg" value="true" type="boolean"></Parameter>
     <Parameter name="scheme" value="DENSITY_BORDER_AWARE" type="string"></Parameter>
     <Parameter name="k" value="4" type="integer"></Parameter>
     <Parameter name="sigma" value="1.0" type="double"></Parameter>

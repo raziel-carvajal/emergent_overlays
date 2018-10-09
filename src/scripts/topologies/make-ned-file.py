@@ -3,14 +3,17 @@ import math
 import argparse
 
 NED_HEAD = "package built_topologies;\n\
-  import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n\
-  import inet.node.inet.INetworkNode;\n\
-  import inet.physicallayer.contract.packetlevel.IRadioMedium;\n\
-  import broadcasting.CenterHost;\n"
-NED_MIDD = "string mediumType = default(" + '"IdealRadioMedium");\n' +\
-  "submodules:\nconfigurator: IPv4NetworkConfigurator {\n@display(" +\
-  '"p=0,0");\n}\nradioMedium: <mediumType> like IRadioMedium{\n' +\
-  "@display(" + '"p=0,0");}\n'
+import inet.physicallayer.idealradio.IdealRadioMedium;\n\
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;\n\
+import inet.common.lifecycle.LifecycleController;\n\
+import emergent_overlays.tunned_modules.Cellphone;\n\
+"
+
+NED_MIDD = "submodules:\n\
+lifecycleController: LifecycleController;\n\
+radioMedium: IdealRadioMedium;\n\
+configurator: IPv4NetworkConfigurator;\n\
+"
 
 def getArgs() :
 	p = argparse.ArgumentParser(description='Creates a NED file from the initial'+
@@ -34,10 +37,9 @@ if __name__ == '__main__' :
 		initialPos = [ getCoordinate(f.readline()) for i in range(0, nodes_no)]
 	nedFilename = 'n_' + str(nodes_no) + '_d_0_tr_' + str(args.Tx) + '_a_' +\
 		str(args.cma_w) + 'x' + str(args.cma_w) + '_idx_0_p_'
-	content = NED_HEAD + 'network ' + nedFilename + '{\n@display("bgb=' +\
-		str(args.cma_w) + ', ' + str(args.cma_w) + '");\n' + NED_MIDD
+	content = NED_HEAD + 'network ' + nedFilename + '{\n' + NED_MIDD
 	for i in range(1, nodes_no + 1) :
-		content += "hostR{0}: CenterHost ".format(i) + "{@display(" + '"' +\
+		content += "host{0}: Cellphone ".format(i) + "{@display(" + '"' +\
 			"p={0},{1}".format(initialPos[i - 1][0], initialPos[i - 1][1]) + '"' +\
 			");}\n"
 	content += "}"

@@ -88,8 +88,8 @@ CMD cd /usr/emrg-ovrl/src/scripts && \
   ./compile_protocols.sh ../protocols ../../built && \
   ./pull_task.sh
 
-RUN echo '* soft core 99999999' >> /etc/security/limits.conf
-RUN echo '* hard core 99999999' >> /etc/security/limits.conf
+# RUN echo '* soft core 99999999' >> /etc/security/limits.conf
+# RUN echo '* hard core 99999999' >> /etc/security/limits.conf
 # to avoid 'core dumped' error in Docker (17.12.1-ce), set this core pattern in your host
 # echo '/tmp/core.%t.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
-RUN mkdir -p /tmp/core
+# RUN mkdir -p /tmp/core
