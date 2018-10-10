@@ -31,6 +31,9 @@
 src/emergent_overlays/src/Makefile
 src/emergent_overlays/src/*.so
 src/emergent_overlays/src/out
+src/deprecated/**/*_m.cc
+src/deprecated/**/*_m.h
+src/deprecated/**/Makefile
 
 # Non useful output files
 src/base/Makefile
