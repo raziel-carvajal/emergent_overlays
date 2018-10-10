@@ -6,8 +6,8 @@ RUN mkdir -p /usr/emrg-ovrl
 WORKDIR /usr/emrg-ovrl
 
 # General dependencies
-RUN apt-get update && \
-  apt-get -y --no-install-recommends install \
+RUN apt update && \
+  apt -y --no-install-recommends install \
   python \
   python-pip \
   python-matplotlib \

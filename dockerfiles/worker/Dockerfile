@@ -4,8 +4,8 @@ LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simu
 
 WORKDIR /usr/emrg-ovrl
 
-RUN apt-get update
-RUN apt-get -y install \
+RUN apt update
+RUN apt -y --no-install-recommends install \
 # OMNeT++ dependencies
   bc \
   build-essential \
@@ -70,8 +70,9 @@ RUN cd r-packages && \
   rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
 
-CMD env | sort
-#
-#CMD cd /usr/emrg-ovrl/src/scripts && \
-#  ./compile_protocols.sh ../protocols ../../built && \
-#  ./pull_task.sh
+ADD ../../src/emergent_overlays src/emergent_overlays
+ADD ../../src/scripts src/scripts
+
+CMD cd src/scripts && \
+ ./compile_protocols.sh ../../omnetpp-4.6 ../emergent_overlays && \
+ ./pull_task.sh

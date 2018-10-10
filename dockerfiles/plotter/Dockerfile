@@ -2,8 +2,8 @@ FROM r-base:latest
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 LABEL Description="r-base image to plot datasets of emergent_overlays"
 
-RUN apt-get update && \
-  apt-get install -y python
+RUN apt update && \
+  apt -y --no-install-recommends install python
 
 RUN mkdir -p /usr/emrg-ovrl/src/scripts
 WORKDIR /usr/emrg-ovrl

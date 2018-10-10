@@ -20,7 +20,6 @@ services:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
       - './results:/usr/emrg-ovrl/results'
-#      - 'coredumps:/cores'
   plotter:
     image: emergent_overlays_plotter:latest
     build:
@@ -29,5 +28,3 @@ services:
     volumes:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
-#volumes:
-#  coredumps:
