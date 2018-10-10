@@ -2,11 +2,6 @@ FROM debian:9
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simulate message dissemination in MANETs via the framework EmergentOverlays."
 
-RUN mkdir /usr/emrg-ovrl && \
-  mkdir /usr/emrg-ovrl/tools && \
-  mkdir /usr/emrg-ovrl/built && \
-  mkdir -p /usr/emrg-ovrl/src/scripts
-
 WORKDIR /usr/emrg-ovrl
 
 RUN apt-get update
@@ -39,31 +34,27 @@ RUN apt-get -y install \
   python \
   r-base
 
-# Fetch OMNeT++ source file
-COPY dockerfiles/worker/omnetpp-4.6-src.tgz omnetpp-4.6-src.tgz
+# Compilation of OMNeT++
+ADD dockerfiles/worker/omnetpp-4.6-src.tgz .
+RUN cd omnetpp-4.6 && \
+  export PATH="`pwd`/bin:${PATH}" && \
+  export LD_LIBRARY_PATH="`pwd`/lib:${LD_LIBRARY_PATH}" && \
+  echo "PATH = ${PATH}" && \
+  NO_TCL=1 ./configure && \
+  make -j 4
 
 # Fetch INET source file
 RUN wget \
   https://github.com/inet-framework/inet/releases/download/v3.0.0/inet-3.0.0-src.tgz
 
-# Compilation of OMNeT++
-ENV PATH $PATH:/usr/emrg-ovrl/tools/omnetpp-4.6/bin
-ENV OMNET_PATH /usr/emrg-ovrl/tools/omnetpp-4.6
-RUN mv omnetpp-4.6-src.tgz tools/ && \
-  cd tools && \
-  tar xof omnetpp-4.6-src.tgz && \
-  cd omnetpp-4.6 && \
-  NO_TCL=1 ./configure && \
-  make -j 4
-
 # Compilation of INET
-RUN mv inet-3.0.0-src.tgz tools/ && \
-  cd tools && \
-  tar xof inet-3.0.0-src.tgz && \
-  mv inet omnetpp-4.6/samples/
-# Apply patch
-COPY dockerfiles/worker/sctphdr.h tools/omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/sctphdr.h
-RUN cd tools/omnetpp-4.6/samples/inet && \
+ADD dockerfiles/worker/sctphdr.h .
+RUN tar xof inet-3.0.0-src.tgz && \
+  mv inet omnetpp-4.6/samples/ && \
+  mv sctphdr.h omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/ && \
+  cd omnetpp-4.6 && \
+  export PATH="`pwd`/bin:${PATH}" && \
+  cd samples/inet && \
   make makefiles && \
   make -j 4
 
@@ -79,17 +70,8 @@ RUN cd r-packages && \
   rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
 
-COPY src/base ./src/base
-COPY src/protocols ./src/protocols
-ADD src/scripts/*.sh src/scripts/
-ADD src/scripts/*.R src/scripts/
-
-CMD cd /usr/emrg-ovrl/src/scripts && \
-  ./compile_protocols.sh ../protocols ../../built && \
-  ./pull_task.sh
-
-# RUN echo '* soft core 99999999' >> /etc/security/limits.conf
-# RUN echo '* hard core 99999999' >> /etc/security/limits.conf
-# to avoid 'core dumped' error in Docker (17.12.1-ce), set this core pattern in your host
-# echo '/tmp/core.%t.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
-# RUN mkdir -p /tmp/core
+CMD env | sort
+#
+#CMD cd /usr/emrg-ovrl/src/scripts && \
+#  ./compile_protocols.sh ../protocols ../../built && \
+#  ./pull_task.sh
