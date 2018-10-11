@@ -28,6 +28,9 @@
 *.out
 *.app
 *.pyc
+
+# output of compilation via Omnet++ IDE
+src/emergent_overlays/src/emergent_overlays
 src/emergent_overlays/src/Makefile
 src/emergent_overlays/src/*.so
 src/emergent_overlays/src/out
