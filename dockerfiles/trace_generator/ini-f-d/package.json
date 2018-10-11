@@ -1,0 +1,19 @@
+{
+  "name": "trace_generator",
+  "version": "1.0.0",
+  "description": "HTTP server to dispatch configuration files on experiments in the emergents_overlays framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DEBUG=ini-f-d gulp --gulpfile gulpfile.js"
+  },
+  "author": "Raziel Carvajal-Gomez (raziel.carvajal-gomez@uclouvain.be)",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "2.6.6",
+    "morgan": "1.8.1",
+    "express": "4.15.2",
+    "gulp": "3.9.1",
+    "gulp-nodemon": "2.2.1"
+  }
+}

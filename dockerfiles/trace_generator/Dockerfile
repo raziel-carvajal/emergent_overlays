@@ -28,5 +28,16 @@ RUN pip install -r python_pkgs
 
 RUN echo "backend : Agg" > /etc/matplotlibrc && \
   rm -r /root/.cache
-ADD ini-f-d .
-CMD cd src/scripts/topologies && ./make-topology.sh
+
+# install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+  apt -y install nodejs
+# install deamon to dispatch INI files
+ADD ini-f-d ini-f-d
+RUN cd ini-f-d && npm install
+
+CMD workdir=`pwd` && cd src/scripts/topologies && \
+  ./make-topology.sh && \
+  cd ${workdir}/ini-f-d && \
+  INI_FILES_LIST=${workdir}/experiments/configs/built_configs/cfgs_for_workers \
+    npm start
