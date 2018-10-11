@@ -48,7 +48,7 @@ RUN cd omnetpp-4.6 && \
 
 # Fetch INET source file
 RUN wget \
-  https://github.com/inet-framework/inet/releases/download/v3.0.0/inet-3.0.0-src.tgz
+  https://github.com/inet-framework/inet/releases/download/v3.3.0/inet-3.3.0-src.tgz
 
 # Compilation of INET
 ADD dockerfiles/worker/sctphdr.h .
