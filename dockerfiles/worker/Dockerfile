@@ -52,7 +52,7 @@ RUN wget \
 
 # Compilation of INET
 ADD dockerfiles/worker/sctphdr.h .
-RUN tar xof inet-3.0.0-src.tgz && \
+RUN tar xof inet-3.3.0-src.tgz && \
   mv inet omnetpp-4.6/samples/ && \
   mv sctphdr.h omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/ && \
   cd omnetpp-4.6 && \
