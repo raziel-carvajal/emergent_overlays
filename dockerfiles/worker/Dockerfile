@@ -61,18 +61,6 @@ RUN tar xof inet-3.3.0-src.tgz && \
   make makefiles && \
   make -j 4
 
-# List of R packages to create a data-set of experimental results per dissemination protocol
-ADD r-packages r-packages
-# Installation of R packages
-RUN cd r-packages && \
-  wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
-  tar xof omnetpp_0.2-1.tar.gz && \
-  rm -f omnetpp_0.2-1.tar.gz && \
-  mv bigdecimal.cc omnetpp/src/common && \
-  tar czf omnetpp_0.2-1.tar.gz omnetpp && \
-  rm -fr omnetpp && \
-  R CMD BATCH r-worker-pkgs.R
-
 ADD src/emergent_overlays src/emergent_overlays
 ADD src/scripts/*.sh src/scripts/
 
@@ -82,7 +70,18 @@ RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
   cd src/scripts && \
   ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
 
+# List of R packages to create a data-set of experimental results per dissemination protocol
+ADD r-packages r-packages
 ADD src/scripts/*.R src/scripts/
+# Installation of R packages
+RUN cd r-packages && \
+  wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
+  tar xof omnetpp_0.2-1.tar.gz && \
+  rm -f omnetpp_0.2-1.tar.gz && \
+  mv bigdecimal.cc omnetpp/src/common && \
+  tar czf omnetpp_0.2-1.tar.gz omnetpp && \
+  rm -fr omnetpp && \
+  R CMD BATCH r-worker-pkgs.R
 
 CMD cd src/scripts && \
   ./pull_task.sh

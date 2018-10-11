@@ -58,8 +58,8 @@ void ReducedStateBasedEnergyConsumer::initialize(int stage) {
 		radioModule->subscribe(IRadio::radioModeChangedSignal, this);
 		radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
 		radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
-//		radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
-//		radioModule->subscribe(IRadio::transmittedSignalPartChangedSignal, this);
+		radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
+		radioModule->subscribe(IRadio::transmittedSignalPartChangedSignal, this);
 		radio = check_and_cast<IRadio *>(radioModule);
 		const char *energySourceModule = par("energySourceModule");
 		energySource = dynamic_cast<IEnergySource *>(getModuleByPath(energySourceModule));
@@ -90,15 +90,14 @@ W ReducedStateBasedEnergyConsumer::getPowerConsumption() const {
 			powerConsumption += receiverBusyPowerConsumption;
 		else if (receptionState == inet::physicallayer::IRadio::RECEPTION_STATE_RECEIVING) {
 			auto part = radio->getReceivedSignalPart();
-			if (part == IRadioSignal::SIGNAL_PART_NONE) {
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_WHOLE)
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_PREAMBLE)
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_HEADER)
-//				;
-			}
+			if (part == IRadioSignal::SIGNAL_PART_NONE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_WHOLE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_HEADER)
+				;
 			else if (part == IRadioSignal::SIGNAL_PART_DATA)
 				powerConsumption += receiverReceivingPowerConsumption;
 			else
@@ -112,15 +111,15 @@ W ReducedStateBasedEnergyConsumer::getPowerConsumption() const {
 			powerConsumption += transmitterIdlePowerConsumption;
 		else if (transmissionState == inet::physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING) {
 			auto part = radio->getTransmittedSignalPart();
-			if (part == IRadioSignal::SIGNAL_PART_NONE){
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_WHOLE)
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_PREAMBLE)
-//				;
-//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_HEADER)
-//				;
-			}else if (part == IRadioSignal::SIGNAL_PART_DATA)
+			if (part == IRadioSignal::SIGNAL_PART_NONE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_WHOLE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_HEADER)
+				;
+			else if (part == IRadioSignal::SIGNAL_PART_DATA)
 				powerConsumption += transmitterTransmittingPowerConsumption;
 			else
 				throw cRuntimeError("Unknown transmitted signal part");
