@@ -13,9 +13,13 @@ const fsPath = path.join(__dirname, process.env.INI_FILES_LIST)
 var iniFiles = fs.readFileSync(fsPath)
 assert(typeof(iniFiles) === 'object')
 iniFiles = `${iniFiles}`.split('\n')
+
 var iniFilesAr = []
 for (var i = 0; i < iniFiles.length; i++)
   if (iniFiles[i] !== '') iniFilesAr.push(iniFiles[i])
+
+var iniReqs = 0
+const totalTaskNo = iniFilesAr.length
 
 const daemon = express()
 daemon.use(loggerD('dev'))
@@ -29,6 +33,17 @@ daemon.get('/ini_file', function (req, res) {
   res.setHeader('Content-Type', 'text/html')
   logI(iniFilesAr)
   res.send(iniFilesAr.length !== 0 ? iniFilesAr.pop() : '')
+  iniReqs++
+})
+
+daemon.get('/all_task_done', function(req, res){
+  res.setHeader('Content-Type', 'text/html')
+  res.send(iniReqs >= totalTaskNo ? 'Y' : 'N')
+})
+
+daemon.get('/alive', function(req, res){
+  res.setHeader('Content-Type', 'text/html')
+  res.send('Y')
 })
 
 const port = process.env.INI_F_D_PORT ? process.env.INI_F_D_PORT : 80

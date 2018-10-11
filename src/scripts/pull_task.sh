@@ -24,10 +24,18 @@ taskList="cfgs_for_workers"
 while :
 do
 	[ -f "${shareDir}/${taskList}" ] && break
-	echo "Waiting until the list of task is ready!"
+	echo "Wait until the list of INI files is ready..."
   sleep 1
 done
 echo "list of tasks for workers is ready"
+
+while :
+do
+  curl trace_generator/alive
+  [ ${?} == 0 ] && echo "ini-f-d is UP !" && break
+  echo "Wait until ini-f-d is ready..."
+  sleep 1
+done
 
 # chose one task
 MY_TASK=`curl trace_generator/ini_file`
