@@ -83,5 +83,7 @@ RUN cd r-packages && \
   rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
 
+# pull_task. requires curl
+RUN apt -y install curl
 CMD cd src/scripts && \
   ./pull_task.sh
