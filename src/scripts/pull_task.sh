@@ -29,28 +29,22 @@ do
 done
 echo "list of tasks for workers is ready"
 
-# chose ONE task for the current worker
-while :
-do
-  ./was_task_choosen.sh ${shareDir} ${taskList} && break
-	echo "waiting until lock is released"
-	sleep 1
-done
+# chose one task
+MY_TASK=`curl trace_generator/ini_file`
+echo "Chosen task: ${MY_TASK}"
+[ ${MY_TASK} == "" ] && echo "No more task. End of ${0}" && exit 0
 
-[ ! -f "my_task" ] && echo "END OF ${0}" && exit 1
-
-MY_TASK=`head -1 my_task`
-./run-one-configuration.sh "../../experiments/configs/built_configs/${MY_TASK}" \
-  ../../tools/omnetpp-4.6/samples/inet 0
-[ ${?} != 0 ] && \
-	echo -e "Error during execution of [${MY_TASK}]\nEND OF ${0}" && \
-	exit 1
-
-# tell the plotter that this worker complete only ONE more task
-while :
-do
-  ./add_completed_task.sh ${shareDir} && break
-	echo "waiting until completed_tasks.lock is released"
-	sleep 1
-done
+# ./run-one-configuration.sh "../../experiments/configs/built_configs/${MY_TASK}" \
+#   ../../tools/omnetpp-4.6/samples/inet 0
+# [ ${?} != 0 ] && \
+# 	echo -e "Error during execution of [${MY_TASK}]\nEND OF ${0}" && \
+# 	exit 1
+#
+# # tell the plotter that this worker complete only ONE more task
+# while :
+# do
+#   ./add_completed_task.sh ${shareDir} && break
+# 	echo "waiting until completed_tasks.lock is released"
+# 	sleep 1
+# done
 echo "END OF ${0}"

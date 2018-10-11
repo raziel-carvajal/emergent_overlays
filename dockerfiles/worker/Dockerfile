@@ -61,15 +61,6 @@ RUN tar xof inet-3.3.0-src.tgz && \
   make makefiles && \
   make -j 4
 
-ADD src/emergent_overlays src/emergent_overlays
-ADD src/scripts/*.sh src/scripts/
-
-RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
-  export LD_LIBRARY_PATH="`pwd`/omnetpp-4.6/lib:${LD_LIBRARY_PATH}" && \
-  workdir=`pwd` && \
-  cd src/scripts && \
-  ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
-
 # List of R packages to create a data-set of experimental results per dissemination protocol
 ADD r-packages r-packages
 ADD src/scripts/*.R src/scripts/
@@ -82,6 +73,15 @@ RUN cd r-packages && \
   tar czf omnetpp_0.2-1.tar.gz omnetpp && \
   rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
+
+ADD src/emergent_overlays src/emergent_overlays
+ADD src/scripts/*.sh src/scripts/
+
+RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
+  export LD_LIBRARY_PATH="`pwd`/omnetpp-4.6/lib:${LD_LIBRARY_PATH}" && \
+  workdir=`pwd` && \
+  cd src/scripts && \
+  ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
 
 # pull_task. requires curl
 RUN apt -y install curl
