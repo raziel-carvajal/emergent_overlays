@@ -28,5 +28,5 @@ RUN pip install -r python_pkgs
 
 RUN echo "backend : Agg" > /etc/matplotlibrc && \
   rm -r /root/.cache
-
+ADD ini-f-d .
 CMD cd src/scripts/topologies && ./make-topology.sh

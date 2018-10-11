@@ -34,6 +34,8 @@ src/emergent_overlays/src/out
 src/deprecated/**/*_m.cc
 src/deprecated/**/*_m.h
 src/deprecated/**/Makefile
+# node.js packages
+**/node_modules
 
 # Non useful output files
 src/base/Makefile

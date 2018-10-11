@@ -49,7 +49,7 @@ class ReducedStateBasedEnergyConsumer : public cSimpleModule, public IEnergyCons
 		}
 		virtual void initialize(int stage) override;
 
-		virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
+		virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value) override;
 
 	public:
 		ReducedStateBasedEnergyConsumer();

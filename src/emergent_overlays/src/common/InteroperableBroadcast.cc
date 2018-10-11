@@ -73,7 +73,7 @@ void InteroperableBroadcast::sendPacket() {
 	//   before an experiment starts; lines of this file: <SESSION_ID> <NODE_ID>
 	if (par("isSource").boolValue()) {
 		ostringstream pkName;
-		pkName << packetName + to_string(numSent);
+		pkName << UDPBasicApp::packetName + to_string(numSent);
 		EV << "new broadcast session, BroadcastMsgId=" << pkName.str() << endl;
 
 		// setting up packet
