@@ -35,6 +35,8 @@ class InteroperableBroadcast : public UDPBasicApp {
 		string nodeId;
 		set<string> receivedMsg;
 
+		const char *packetName = UDPBasicApp::packetName;
+
 		// methods that sub-classes may override
 		virtual void onBroadcastMsg(cPacket* pk);
 		virtual void onControlMsg(cPacket* pk);

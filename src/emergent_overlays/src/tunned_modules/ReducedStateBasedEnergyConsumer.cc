@@ -14,7 +14,8 @@
 // 
 
 #include <tunned_modules/ReducedStateBasedEnergyConsumer.h>
-#include "inet/common/ModuleAccess.h"
+#include <inet/common/ModuleAccess.h>
+#include <inet/physicallayer/contract/packetlevel/IRadioSignal.h>
 
 Define_Module(ReducedStateBasedEnergyConsumer);
 
