@@ -70,9 +70,13 @@ RUN cd r-packages && \
   rm -fr omnetpp && \
   R CMD BATCH r-worker-pkgs.R
 
-ADD ../../src/emergent_overlays src/emergent_overlays
-ADD ../../src/scripts src/scripts
+ADD src/emergent_overlays src/emergent_overlays
+ADD src/scripts/*.sh src/scripts/
+ADD src/scripts/*.R src/scripts/
+
+RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
+  cd src/scripts && \
+ ./compile_protocols.sh ../../omnetpp-4.6 ../emergent_overlays
 
 CMD cd src/scripts && \
- ./compile_protocols.sh ../../omnetpp-4.6 ../emergent_overlays && \
- ./pull_task.sh
+  ./pull_task.sh

@@ -27,8 +27,11 @@ if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.
 fi
 
 here=`pwd`; cd ../../; root=`pwd`; cd ${here}
-# opp_makemake -f --deep -s -o emergent_overlays -O ${root}/out -I${INET} -L${INET} && \
 cd ${PROJECT_SRC}/src && \
   opp_makemake -f --deep -s -o emergent_overlays -I${INET} -L${INET} && \
   make -j 4
+if [[ ${?} != 0 ]]; then
+  echo "Error: during the compilation of emergent_overlays project"
+  exit 1
+fi
 cd ${here}
