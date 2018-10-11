@@ -34,8 +34,11 @@ RUN apt -y --no-install-recommends install \
   python \
   r-base
 
-# Compilation of OMNeT++
 ADD dockerfiles/worker/omnetpp-4.6-src.tgz .
+# in case the docker-compose version is lower than 3.0
+RUN if [ ! -d omnetpp-4.6 ] ; then tar xof omnetpp-4.6-src.tgz ; fi
+
+# Compilation of OMNeT++
 RUN cd omnetpp-4.6 && \
   export PATH="`pwd`/bin:${PATH}" && \
   export LD_LIBRARY_PATH="`pwd`/lib:${LD_LIBRARY_PATH}" && \
@@ -75,6 +78,7 @@ ADD src/scripts/*.sh src/scripts/
 ADD src/scripts/*.R src/scripts/
 
 RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
+  export LD_LIBRARY_PATH="`pwd`/omnetpp-4.6/lib:${LD_LIBRARY_PATH}" && \
   cd src/scripts && \
  ./compile_protocols.sh ../../omnetpp-4.6 ../emergent_overlays
 

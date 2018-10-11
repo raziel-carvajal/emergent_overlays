@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include <ReducedStateBasedEnergyConsumer.h>
+#include <tunned_modules/ReducedStateBasedEnergyConsumer.h>
 #include "inet/common/ModuleAccess.h"
 
 Define_Module(ReducedStateBasedEnergyConsumer);

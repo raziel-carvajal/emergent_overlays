@@ -19,7 +19,7 @@ if [ ! -d ${2} ]; then
 fi
 
 OMNET_PATH=${1}
-PROJECT_SRC=${2}
+PROJECT_SRC=${2}/src
 INET="${OMNET_PATH}/samples/inet/src"
 if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.h" ]; then
   echo "Error: ${OMNET_PATH} directory does not look like an OMNeT++ root directory"
@@ -27,8 +27,8 @@ if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.
 fi
 
 here=`pwd`; cd ../../; root=`pwd`; cd ${here}
-cd ${PROJECT_SRC}/src && \
-  opp_makemake -f --deep -s -o emergent_overlays -I${INET} -L${INET} && \
+cd ${PROJECT_SRC} && \
+  opp_makemake -I${INET} --projectdir . -f --deep --no-deep-includes -s -o emergent_overlays && \
   make -j 4
 if [[ ${?} != 0 ]]; then
   echo "Error: during the compilation of emergent_overlays project"
