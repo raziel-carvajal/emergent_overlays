@@ -75,12 +75,14 @@ RUN cd r-packages && \
 
 ADD src/emergent_overlays src/emergent_overlays
 ADD src/scripts/*.sh src/scripts/
-ADD src/scripts/*.R src/scripts/
 
 RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
   export LD_LIBRARY_PATH="`pwd`/omnetpp-4.6/lib:${LD_LIBRARY_PATH}" && \
+  workdir=`pwd` && \
   cd src/scripts && \
- ./compile_protocols.sh ../../omnetpp-4.6 ../emergent_overlays
+  ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
+
+ADD src/scripts/*.R src/scripts/
 
 CMD cd src/scripts && \
   ./pull_task.sh
