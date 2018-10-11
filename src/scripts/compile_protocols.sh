@@ -26,8 +26,8 @@ if [ ! -f "${OMNET_PATH}/configure.user" -o ! -f "${OMNET_PATH}/include/omnetpp.
   exit 1
 fi
 
-cd ${PROJECT_SRC}
-opp_makemake -I${INET} -I${PROJECT_SRC}/src -P ${PROJECT_SRC} --no-deep-includes -f --deep -s -o emergent_overlays
+cd ${PROJECT}
+opp_makemake --no-deep-includes -f --deep -s -I${INET} -I${PROJECT}/src -P ${PROJECT} -o emergent_overlays
 make -j 4
 
 if [[ ${?} != 0 ]]; then

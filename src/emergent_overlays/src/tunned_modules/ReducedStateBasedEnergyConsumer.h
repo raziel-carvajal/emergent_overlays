@@ -19,6 +19,7 @@
 #include <inet/power/contract/IEnergyConsumer.h>
 #include <inet/power/contract/IEnergySource.h>
 #include <inet/physicallayer/contract/packetlevel/IRadio.h>
+#include <inet/physicallayer/contract/packetlevel/IRadioSignal.h>
 
 using namespace inet::power;
 using namespace inet::physicallayer;

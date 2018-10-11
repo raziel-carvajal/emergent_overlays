@@ -90,7 +90,7 @@ W ReducedStateBasedEnergyConsumer::getPowerConsumption() const {
 			powerConsumption += receiverBusyPowerConsumption;
 		else if (receptionState == inet::physicallayer::IRadio::RECEPTION_STATE_RECEIVING) {
 			auto part = radio->getReceivedSignalPart();
-			if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_NONE){
+			if (part == IRadioSignal::SIGNAL_PART_NONE) {
 //				;
 //			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_WHOLE)
 //				;
@@ -98,7 +98,8 @@ W ReducedStateBasedEnergyConsumer::getPowerConsumption() const {
 //				;
 //			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_HEADER)
 //				;
-			}else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_DATA)
+			}
+			else if (part == IRadioSignal::SIGNAL_PART_DATA)
 				powerConsumption += receiverReceivingPowerConsumption;
 			else
 				throw cRuntimeError("Unknown received signal part");
@@ -111,15 +112,15 @@ W ReducedStateBasedEnergyConsumer::getPowerConsumption() const {
 			powerConsumption += transmitterIdlePowerConsumption;
 		else if (transmissionState == inet::physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING) {
 			auto part = radio->getTransmittedSignalPart();
-			if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_NONE)
-				;
-			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_WHOLE)
-				;
-			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_PREAMBLE)
-				;
-			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_HEADER)
-				;
-			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_DATA)
+			if (part == IRadioSignal::SIGNAL_PART_NONE){
+//				;
+//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_WHOLE)
+//				;
+//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_PREAMBLE)
+//				;
+//			else if (part == inet::physicallayer::IRadioSignal::SIGNAL_PART_HEADER)
+//				;
+			}else if (part == IRadioSignal::SIGNAL_PART_DATA)
 				powerConsumption += transmitterTransmittingPowerConsumption;
 			else
 				throw cRuntimeError("Unknown transmitted signal part");
