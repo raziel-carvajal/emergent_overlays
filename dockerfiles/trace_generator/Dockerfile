@@ -40,6 +40,7 @@ RUN cd ini-f-d && npm install
 
 CMD workdir=`pwd` && cd src/scripts/topologies && \
   ./make-topology.sh && \
-  cd ${workdir}/ini-f-d && \
-  INI_FILES_LIST=/usr/emrg-ovrl/experiments/configs/built_configs/cfgs_for_workers \
-    npm start
+  cd ${workdir} && \
+  mv experiments/configs/built_configs/cfgs_for_workers ini-f-d/ && \
+  cd ini-f-d && \
+  INI_FILES_LIST=cfgs_for_workers npm start

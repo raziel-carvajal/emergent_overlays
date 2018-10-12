@@ -20,22 +20,14 @@
 shareDir="../../experiments/configs/built_configs"
 taskList="cfgs_for_workers"
 
-# wait until trace_generator create configuration files
-while :
-do
-	[ -f "${shareDir}/${taskList}" ] && break
-	echo "Wait until the list of INI files is ready..."
-  sleep 1
-done
-echo "list of tasks for workers is ready"
-
 while :
 do
   curl trace_generator/alive
-  [ ${?} == 0 ] && echo "ini-f-d is UP !" && break
+  [ ${?} == 0 ] && break
   echo "Wait until ini-f-d is ready..."
   sleep 1
 done
+echo "ini-f-d is UP !"
 
 # chose one task
 MY_TASK=`curl trace_generator/ini_file`
