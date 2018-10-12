@@ -20,8 +20,9 @@ CONF_NAME=${filename%.*}
 CONFIG_PATH=$(dirname "${CONF_FILE}")
 
 INET_LIB=${INET_PATH}/src/INET
-EMOV_LIB=../emergent_overlays/out/gcc-debug/emergent_overlays
-NED_PATH=${INET_PATH}/src:../emergent_overlays:../../experiments/networks
+EMOV_LIB=../emergent_overlays/emergent_overlays
+
+NED_PATH=${INET_PATH}/src:../emergent_overlays/src:../../experiments/networks
 
 echo "Eperiment: ${CONF_NAME}"
 echo "Execution with command: opp_run -u Cmdenv -n ${NED_PATH} -l ${INET_LIB} -l ${EMOV_LIB} -c ${CONF_NAME} -f ${CONF_FILE}"
