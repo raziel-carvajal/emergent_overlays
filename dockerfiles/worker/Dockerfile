@@ -4,6 +4,9 @@ LABEL Description="Docker image with OMNeT++ (v4.6), INET (v3.0.0) and R to simu
 
 WORKDIR /usr/emrg-ovrl
 
+ENV PATH=/usr/emrg-ovrl/omnetpp-4.6/bin:${PATH}
+ENV LD_LIBRARY_PATH=/usr/emrg-ovrl/omnetpp-4.6/lib:${LD_LIBRARY_PATH}
+
 RUN apt update
 RUN apt -y --no-install-recommends install \
 # OMNeT++ dependencies
@@ -32,19 +35,14 @@ RUN apt -y --no-install-recommends install \
   git \
   wget \
   python \
-  r-base
+  r-base \
+  curl
 
 ADD dockerfiles/worker/omnetpp-4.6-src.tgz .
 # in case the docker-compose version is lower than 3.0
 RUN if [ ! -d omnetpp-4.6 ] ; then tar xof omnetpp-4.6-src.tgz ; fi
-
 # Compilation of OMNeT++
-RUN cd omnetpp-4.6 && \
-  export PATH="`pwd`/bin:${PATH}" && \
-  export LD_LIBRARY_PATH="`pwd`/lib:${LD_LIBRARY_PATH}" && \
-  echo "PATH = ${PATH}" && \
-  NO_TCL=1 ./configure && \
-  make -j 4
+RUN cd omnetpp-4.6 && NO_TCL=1 ./configure && make -j 4
 
 # Fetch INET source file
 RUN wget \
@@ -56,7 +54,6 @@ RUN tar xof inet-3.3.0-src.tgz && \
   mv inet omnetpp-4.6/samples/ && \
   mv sctphdr.h omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/ && \
   cd omnetpp-4.6 && \
-  export PATH="`pwd`/bin:${PATH}" && \
   cd samples/inet && \
   make makefiles && \
   make -j 4
@@ -77,13 +74,7 @@ RUN cd r-packages && \
 ADD src/emergent_overlays src/emergent_overlays
 ADD src/scripts/*.sh src/scripts/
 
-RUN export PATH="`pwd`/omnetpp-4.6/bin:${PATH}" && \
-  export LD_LIBRARY_PATH="`pwd`/omnetpp-4.6/lib:${LD_LIBRARY_PATH}" && \
-  workdir=`pwd` && \
-  cd src/scripts && \
+RUN workdir=`pwd` && cd src/scripts && \
   ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
 
-# pull_task. requires curl
-RUN apt -y install curl
-CMD cd src/scripts && \
-  ./pull_task.sh
+CMD cd src/scripts && ./pull_task.sh
