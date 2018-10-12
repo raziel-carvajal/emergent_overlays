@@ -32,6 +32,9 @@
 # output of compilation via Omnet++ IDE
 src/emergent_overlays/Makefile
 src/emergent_overlays/out
+src/emergent_overlays/src/Makefile
+src/emergent_overlays/src/emergent_overlays
+
 src/deprecated/**/*_m.cc
 src/deprecated/**/*_m.h
 src/deprecated/**/Makefile
