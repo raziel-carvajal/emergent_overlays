@@ -25,8 +25,8 @@ Define_Module(InteroperableBroadcast);
 simsignal_t InteroperableBroadcast::rcvdBroadcastMsg = registerSignal("rcvdBroadcastMsg");
 simsignal_t InteroperableBroadcast::sentBroadcastMsg = registerSignal("sentBroadcastMsg");
 
-simsignal_t InteroperableBroadcast::positionAtX = registerSignal("node_position_x");
-simsignal_t InteroperableBroadcast::positionAtY = registerSignal("node_position_y");
+simsignal_t InteroperableBroadcast::positionAtX = registerSignal("positionAtX");
+simsignal_t InteroperableBroadcast::positionAtY = registerSignal("positionAtY");
 
 void InteroperableBroadcast::initialize(int stage) {
 	EV << "DOING INITIALIZE" << endl;

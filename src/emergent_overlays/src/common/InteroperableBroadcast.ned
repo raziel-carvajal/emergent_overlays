@@ -32,11 +32,11 @@ simple InteroperableBroadcast extends UDPBasicApp
     @signal[sentBroadcastMsg](type=int);
     @statistic[sentBroadcastMsg](source=sentBroadcastMsg; record=vector; interpolationmode=none);
 
-	@signal[node_position_x](type=double);
-    @statistic[node_position_x](source=node_position_x; record=vector; interpolationmode=none);
+	@signal[positionAtX](type=double);
+    @statistic[positionAtX](source=positionAtX; record=vector; interpolationmode=none);
     
-    @signal[node_position_y](type=double);
-    @statistic[node_position_y](source=node_position_y; record=vector; interpolationmode=none);
+    @signal[positionAtY](type=double);
+    @statistic[positionAtY](source=positionAtY; record=vector; interpolationmode=none);
     
 //    @signal[forward_type](type=double);
 //    @statistic[forward_type](title="Type of message forwarding"; record=vector; source=forward_type);

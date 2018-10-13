@@ -5,56 +5,17 @@ library(e1071)
 library(grid)
 library(reshape2)
 
-#
-# Used to define the arguments of the script
-#
 get_arguments <- function() {
-  parser <- ArgumentParser(description='Plots the aggregated results of the experiments')
-  parser$add_argument('path', metavar='path', type="character",
-                      help='Path to result files')
-  parser$add_argument('-pc', '--power-consumption-file', dest='pc', type="character",
-                      help='Power consumption file name')
-  parser$add_argument('-dm', '--duplicated-messages-file', dest='dm', type="character",
-                      help='Duplicated messages file name')
-  parser$add_argument('-bs', '--broadcast-session-file', dest='bs', type="character",
-                      help='Broadcast session file name')
-  parser$add_argument('-rf', '--relays-file', dest='rf', type="character",
-                      help='Relays file name')
-  parser$add_argument('-cv', '--coverage-file', dest='cv', type="character",
-                      help='Coverage file name')
-  parser$add_argument('-dre', '--density-error-file', dest='dre', type="character",
-                      help='File with the density relative error for each experiment')
-  parser$add_argument('-cre', '--collisions-error-file', dest='cre', type="character",
-                      help='File with the collisions relative error for each experiment')
-  parser$add_argument('-ds', '--density-distribution', dest='ds', type="character",
-                      help='Distribution of nodes density')
+  parser <- ArgumentParser(description='Plot broadcast metrics.')
 
-  parser$add_argument('-sent_bro', '--sent-broadcast-msgs', type="character",
-                      help='Distribution of sent broadcast messages')
-  parser$add_argument('-recv_bro', '--recv-broadcast-msgs', type="character",
-                      help='Distribution of received broadcast messages')
-  parser$add_argument('-nodes_roles', '--nodes-roles', type="character",
-                      help='Distribution of nodes behaviour (relay or receiver)')
+  parser$add_argument('resultsDir',  type="character")
 
-  parser$add_argument('-sent_ctrl', '--sent-control-msgs', dest="sent_ctrl",
-                      type="character", help='Distribution of sent control messages')
-  parser$add_argument('-recv_ctrl', '--recv-control-msgs', dest="recv_ctrl",
-                      type="character", help='Distribution of received control messages')
-  parser$add_argument('-run_algo', '--running-algorithms', dest="run_algo",
-                      type="character", help='Distribution of running algorithm per nodes')
-  parser$add_argument('-sf', '--summary-file', dest='sf', type="character",
-                      help='Summary file name (should be * csv)')
-  parser$add_argument('-pctime', '--power-consumption-time-file', dest='pctime', type="character",
-                      help='useless')
+  parser$add_argument('--plot-energy-consumption', dest='pc', action='store_true')
+  parser$add_argument('--plot-coverage', dest='co', action='store_true')
+  parser$add_argument('--plot-packet-err', dest='pe', action='store_true')
+  parser$add_argument('--plot-sent-msgs', dest='sm', action='store_true')
+  parser$add_argument('--plot-recv-msgs', dest='rm', action='store_true')
 
-  parser$add_argument('-final', '--final-version', dest='final', action="store_true",
-                      help='If used, the script generates a version good enough for the paper')
-  parser$add_argument('-violin', '--use-violin', dest='violin', action="store_true",
-                      help='If used, the script generates a violin plots instead of box plots')
-
-  parser$add_argument('-ed', '--excluded-density', dest='excluded.densities', type='integer', action='append')
-
-  # parser$print_help()
   parser$parse_args()
 }
 
@@ -112,9 +73,12 @@ args <- get_arguments()
 metadata = NULL
 separate_dist = TRUE
 
-if (!is.null(args$pc)) {
+if (args$pc) {
   print('Plotting power consumption')
-  ds <- read.table( paste(args$path, args$pc, sep=''), header=F)
+  ds <- read.table(
+    paste(args$resultsDir, 'batteryConsumptionDistribution', sep=''),
+    header=F
+  )
   names(ds) <- c('data', 'algorithm')
   plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules (mJ)')
   plot.dist.as.cdf(
@@ -124,126 +88,116 @@ if (!is.null(args$pc)) {
   print('DONE')
 }
 
-if (!is.null(args$nodes_roles)) {
-  print('Plotting distribution of nodes roles')
-  ds <- read.table( paste(args$path, args$nodes_roles, sep=''), header=F)
-  plot.nodes.roles.distribution(ds)
-  print('DONE')
-}
-
-if (!is.null(args$sent_bro)) {
-  print('Plotting sent broadcast messages')
-  ds <- read.table( paste(args$path, args$sent_bro, sep=''), header=F)
-  names(ds) <- c('data', 'zone', 'algorithm')
-  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  plot.dist.as.cdf(
-    msgAtDenseZ, 'Sent Broadcast Messages within Dense Zone',
-    'Number of Messages', 'CDF over broadcast sessions'
-  )
-  plot.dist.as.cdf(
-    msgAtSparseZ, 'Sent Broadcast Messages within Sparse Zone',
-    'Number of Messages', 'CDF over broadcast sessions'
-  )
-  print('DONE')
-}
-
-if (!is.null(args$recv_bro)) {
-  print("Plotting received broadcast messages")
-  ds <- read.table( paste(args$path, args$recv_bro, sep=''), header=F)
-  names(ds) <- c('data', 'zone', 'algorithm')
-  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  plot.dist.as.cdf(
-    msgAtDenseZ, 'Received Broadcast Messages within Dense Zone',
-    'Number of Messages', 'CDF over broadcast sessions'
-  )
-  plot.dist.as.cdf(
-    msgAtSparseZ, 'Received Broadcast Messages within Sparse Zone',
-    'Number of Messages', 'CDF over broadcast sessions'
-  )
-  print('DONE')
-}
-
-if (!is.null(args$sent_ctrl)) {
-  print('Ploting sent ctrl messages')
-  ds <- read.table( paste(args$path, args$sent_ctrl, sep=''), header=F)
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, 'Sent Ctrl Messages (dense & sparse area)',
-    'Number of Messages', 'CDF over Ctrl sessions'
-  )
-  print('DONE')
-}
-
-if (!is.null(args$recv_ctrl)) {
-  print('Plotting received ctrl messages')
-  ds <- read.table( paste(args$path, args$recv_ctrl, sep=''), header=F)
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, 'Received Ctrl Messages (dense & sparse area)',
-    'Number of Messages', 'CDF over Ctrl sessions'
-  )
-  print('DONE')
-}
-
-if (!is.null(args$cv)) {
+if (args$co) {
   print('Ploting network coverage')
-  ds <- read.table( paste(args$path, args$cv, sep=''), header=F)
+  ds <- read.table(
+    paste(args$resultsDir, 'coverage', sep=''),
+    header=F
+  )
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
-    ds, 'Network Coverage of Broadcast Sessions',
-    '% of Covered Nodes', 'CDF over broadcast sessions'
+    ds, 'Network Coverage',
+    'Broadcast sessions (%)', 'Nodes'
   )
   print('DONE')
 }
 
-
-if (!is.null(args$dre)) {
-  print('Plotting density relative error')
-  ds <- read.table( paste(args$path, args$dre, sep=''), header=F)
-  names(ds) <- c('data', 'zone', 'algorithm')
-  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  plot.dist.as.cdf(
-    msgAtDenseZ, 'Relative Error of Nodes Neighbors No in Dense Zone',
-    'Relative Error', 'CDF over nodes'
+if (args$pe) {
+  print('Ploting packet error rate')
+  ds <- read.table(
+    paste(args$resultsDir, 'packetErrorRate', sep=''),
+    header=F
   )
+  names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
-    msgAtSparseZ, 'Relative Error of Nodes Neighbors No in Sparse Zone',
-    'Relative Error', 'CDF over nodes'
+    ds, 'Packet error rate',
+    'Dropped packets (%)', 'Nodes'
   )
   print('DONE')
 }
 
-if (!is.null(args$cre)) {
-  print('Plotting relative error of collisions')
-  ds <- read.table( paste(args$path, args$cre, sep=''), header=F)
-  names(ds) <- c('data', 'zone', 'algorithm')
-  msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  plot.dist.as.cdf(
-    msgAtDenseZ, 'Collisions of Recieved Broadcast Messages in Dense Zone',
-    'Relative Error', 'CDF over broadcast sessions'
+if (args$sm) {
+  print("Plotting received broadcast messages")
+  ds <- read.table(
+    paste(args$resultsDir, 'recvBroadcastMsgsDistribution', sep=''),
+    header=F
   )
-  plot.dist.as.cdf(
-    msgAtSparseZ, 'Collisions of Recieved Broadcast Messages in Sparse Zone',
-    'Relative Error', 'CDF over broadcast sessions'
-  )
+  # names(ds) <- c('data', 'zone', 'algorithm')
+  # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
+  # msgAtSparseZ <- subset(ds, zone == 'SPARSE')
+  # plot.dist.as.cdf(
+  #   msgAtDenseZ, 'Received Broadcast Messages within Dense Zone',
+  #   'Number of Messages', 'CDF over broadcast sessions'
+  # )
+  # plot.dist.as.cdf(
+  #   msgAtSparseZ, 'Received Broadcast Messages within Sparse Zone',
+  #   'Number of Messages', 'CDF over broadcast sessions'
+  # )
   print('DONE')
 }
 
-# TODO deal with old format to store broadcast session time
-# if (!is.null(args$bs)) {
-#   print("Importing broadcast time dataset")
-#   r <- load.dataset.with.metadata(args$path, args$bs, metadata, args$excluded.densities)
-#   metadata <- r$metadata
-#   print("Plotting broadcast time")
-#   plot.dist.as.cdf(r$data, "Broadcast session time (ms)")
+if (args$rm) {
+  print('Plotting sent broadcast messages')
+  ds <- read.table(
+    paste(args$resultsDir, 'sentBroadcastMsgsDistribution', sep=''),
+    header=F
+  )
+  # TODO
+  # names(ds) <- c('data', 'zone', 'algorithm')
+  # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
+  # msgAtSparseZ <- subset(ds, zone == 'SPARSE')
+  # plot.dist.as.cdf(
+  #   msgAtDenseZ, 'Sent Broadcast Messages within Dense Zone',
+  #   'Number of Messages', 'CDF over broadcast sessions'
+  # )
+  # plot.dist.as.cdf(
+  #   msgAtSparseZ, 'Sent Broadcast Messages within Sparse Zone',
+  #   'Number of Messages', 'CDF over broadcast sessions'
+  # )
+  print('DONE')
+}
+
+
+# TODO
+# if (!is.null(args$nodes_roles)) {
+#   print('Plotting distribution of nodes roles')
+#   ds <- read.table( paste(args$path, args$nodes_roles, sep=''), header=F)
+#   plot.nodes.roles.distribution(ds)
+#   print('DONE')
 # }
-# if (!is.null(args$run_algo)) {
-#   print("Importing distribution of running algorithms")
-#   r <- load.dataset.with.metadata(args$path, args$run_algo, metadata, args$excluded.densities)
-#   print("Plotting distribution of running algorithms")
-#   plot.running.algorithms.distri(r$data)
+# if (!is.null(args$sent_ctrl)) {
+#   print('Ploting sent ctrl messages')
+#   ds <- read.table( paste(args$path, args$sent_ctrl, sep=''), header=F)
+#   names(ds) <- c('data', 'algorithm')
+#   plot.dist.as.cdf(
+#     ds, 'Sent Ctrl Messages (dense & sparse area)',
+#     'Number of Messages', 'CDF over Ctrl sessions'
+#   )
+#   print('DONE')
+# }
+# if (!is.null(args$recv_ctrl)) {
+#   print('Plotting received ctrl messages')
+#   ds <- read.table( paste(args$path, args$recv_ctrl, sep=''), header=F)
+#   names(ds) <- c('data', 'algorithm')
+#   plot.dist.as.cdf(
+#     ds, 'Received Ctrl Messages (dense & sparse area)',
+#     'Number of Messages', 'CDF over Ctrl sessions'
+#   )
+#   print('DONE')
+# }
+# if (!is.null(args$dre)) {
+#   print('Plotting density relative error')
+#   ds <- read.table( paste(args$path, args$dre, sep=''), header=F)
+#   names(ds) <- c('data', 'zone', 'algorithm')
+#   msgAtDenseZ  <- subset(ds, zone == 'DENSE')
+#   msgAtSparseZ <- subset(ds, zone == 'SPARSE')
+#   plot.dist.as.cdf(
+#     msgAtDenseZ, 'Relative Error of Nodes Neighbors No in Dense Zone',
+#     'Relative Error', 'CDF over nodes'
+#   )
+#   plot.dist.as.cdf(
+#     msgAtSparseZ, 'Relative Error of Nodes Neighbors No in Sparse Zone',
+#     'Relative Error', 'CDF over nodes'
+#   )
+#   print('DONE')
 # }

@@ -1,28 +1,38 @@
 #!/bin/bash
+while :
+do
+  continue=`curl trace_generator/all_task_done`
+  [ "${continue}" == "Y" ] && break
+  echo "Wait for workers until they finish..."
+  sleep 5
+done
+echo "All workes have finished"
+cat ../../results/batteryConsumptionDistribution-* \
+  > ../../results/batteryConsumptionDistribution
+#
+cat ../../results/coverage-* > ../../results/coverage
+#
+cat ../../results/packetErrorRate-* > ../../results/packetErrorRate
+#
+cat ../../results/recvBroadcastMsgsDistribution-* \
+  > ../../results/recvBroadcastMsgsDistribution
+cat ../../results/sentBroadcastMsgsDistribution-* \
+  > ../../results/sentBroadcastMsgsDistribution
 
-echo "Creating aggregated results"
-cat ../../results/broadcastSession-n_* > ../../results/broadcastSession
-cat ../../results/batteryConsumptionDistribution-n_* > ../../results/batteryConsumptionDistribution
-cat ../../results/coverage-n_* > ../../results/coverage
-cat ../../results/sentBroadcastMsgsDistribution-n_* > ../../results/sentBroadcastMsgsDistribution
-cat ../../results/recvBroadcastMsgsDistribution-n_* > ../../results/recvBroadcastMsgsDistribution
-cat ../../results/sentCtrlMsgsDistribution-n_* > ../../results/sentCtrlMsgsDistribution
-cat ../../results/recvCtrlMsgsDistribution-n_* > ../../results/recvCtrlMsgsDistribution
-cat ../../results/collisionsRelativeError-n_* > ../../results/collisionsRelativeError
-cat ../../results/densityRelativeError-n_* > ../../results/densityRelativeError
-cat ../../results/noderoles-n_* > ../../results/noderoles
+# cat ../../results/broadcastSession-n_* > ../../results/broadcastSession
+# cat ../../results/sentCtrlMsgsDistribution-n_* > ../../results/sentCtrlMsgsDistribution
+# cat ../../results/recvCtrlMsgsDistribution-n_* > ../../results/recvCtrlMsgsDistribution
+# cat ../../results/collisionsRelativeError-n_* > ../../results/collisionsRelativeError
+# cat ../../results/densityRelativeError-n_* > ../../results/densityRelativeError
+# cat ../../results/noderoles-n_* > ../../results/noderoles
 
-# -dre densityRelativeError \
-echo "Plotting aggregated results"
-Rscript pretty-plotting.R \
-  -ds groundTruthDensityDist- \
-	-bs broadcastSession \
-	-cv coverage \
-	-cre collisionsRelativeError \
-	-sent_bro sentBroadcastMsgsDistribution \
-	-recv_bro recvBroadcastMsgsDistribution \
-	-sent_ctrl sentCtrlMsgsDistribution \
-	-recv_ctrl recvCtrlMsgsDistribution \
-  -nodes_roles noderoles \
-  -pc batteryConsumptionDistribution ../../results/
+echo "Plotting all broadcast metrics"
+Rscript plot-broadcast-metrics.R \
+  --plot-energy-consumption \
+  --plot-coverage \
+  --plot-packet-err \
+  --plot-sent-msgs \
+  --plot-recv-msgs \
+  ../../results/
 mv Rplots.pdf ../../results
+echo "End of ${0}"

@@ -7,47 +7,30 @@ BROADCAST_SESSION_TOLERANCE <- 1000e-03 # 1000 ms = 0.1 s
 SENT_RECV_PKG_TOLERANCE <- 1.5e-03
 
 get.arguments <- function() {
-  parser <- ArgumentParser(description='Process omnetpp result files to extract the measurements of our experiment')
-  parser$add_argument('file', metavar='file', type="character",
-                      help='Full path to the result file (without extension)')
-  parser$add_argument('outputPath', metavar='outputPath', type="character",
-                      help='Full path to a directory where the output wiil be saved')
-  parser$add_argument('simTime', metavar='simTime', type="double",
-                      help='Simulation time in seconds')
-  parser$add_argument('configuration', metavar='configuration', type="character",
-                      help='Name of the configuration')
-  parser$add_argument('step', metavar='step', type="double",
-                      help='Every broadcasting metric as function of time will use this value as xtics to be plotted')
-  parser$add_argument('-a','--algorithm', dest='algorithm', type="character",
-                      help='Algorithm used')
-  parser$add_argument('-density-treshold', '--density-treshold', metavar='density_tr',
-  	type="integer", help='Maximum value of density within a sparse region')
-  parser$add_argument('-ds', '--density-as-string', metavar='density_string', type="character",
-                      help='Density of the topology used as string')
-  parser$add_argument('--radio-mode', dest='computeRadioMode', action="store_true",
-                      help='Computing the time spent in each radio mode (a debug only option)')
-  parser$add_argument('--splitted', dest='splitted', action="store_true",
-                      help='If used, the script generates data per protocol when there are mnay used in a single scenario')
-
-  parser$add_argument('--show-averages', dest='showAverages', action="store_true",
-    help='Show the average of all the metrics')
-
-  parser$add_argument('-b', '--broadcast_msgs', type="integer",
-    help='Number of broadcast messages')
-  parser$add_argument('-t', '--transmission_range', type="integer",
-    help='Tx of nodes')
-  parser$add_argument('-f_t', '--first_time_of_measuring_nodes_position', type='double',
-    help='First point in time when nodes print out their position')
-  parser$add_argument('-f_b', '--time_of_first_broadcast_message', type='double',
-    help='Time when the first broadcast message was emitted')
-
-  parser$add_argument('-d_x', type='double',
-    help='Abscissa of dense zone center')
-  parser$add_argument('-d_y', type='double',
-    help='Ordinate of dense zone center')
-  parser$add_argument('-d_z_w', type='double',
-    help='Dense zone width')
-
+  parser <- ArgumentParser(
+    description='Get a distribution per broadcast metric from Omnet++ datasets.'
+  )
+  parser$add_argument(
+    'configName', type='character',
+    help='Configuration ID at INI file.')
+  parser$add_argument(
+    'datasetFile', type='character',
+    help='Dataset of an experiment with Omnet++/INET (no extension).')
+  parser$add_argument(
+    '--simulation-time', dest='simTime', type='double',
+    help='Duration of experiment in seconds.')
+  parser$add_argument(
+    '--broadcast-interval-lim-inf', dest='broaIntT0', type='double')
+  parser$add_argument(
+    '--broadcast-interval-lim-sup', dest='broaIntT1', type='double')
+  parser$add_argument('--results-dir', dest='resultsDir', type='character')
+  parser$add_argument('--transmission-range', dest='tx', type='integer',
+    help='Nodes transmission range.')
+  # center of dense zone
+  parser$add_argument('--dense-zone-at-x', dest='dzx', type='double')
+  parser$add_argument('--dense-zone-at-y', dest='dzy', type='double')
+  # dense zone width
+  parser$add_argument('--dense-zone-w', dest='dzw', type='double')
   parser$parse_args()
 }
 
@@ -56,17 +39,11 @@ build.filename <- function(path, filename, id, seP="-") {
   paste(filename, id, sep=seP)
 }
 
-load.datafile <- function(fname, query, extensions=c("sca", "vec")) {
-  ds <- loadVectors(loadDataset(paste(fname, sep= ".", extensions), add(type="vector", select=query) ), NULL)
-}
-
 broadcastingTime <- function(msgDs, broDs, simulation.time) {
 
   # create a separate list for each msg_sent vector
   list_of_sent <- lapply(msgDs$vectors$resultkey, function(p) subset(msgDs$vectordata, resultkey == p))
   # print(list_of_sent)
-
-
   # recover list of msg id
   id_msgs <- msgDs$vectordata[[4]][!duplicated(msgDs$vectordata[[4]])]
 
@@ -116,35 +93,10 @@ save.delay.time <- function(broadcast.info, max, outputPath, expeId){
   )
 }
 
-average.values <- function(pl, broadcast.info, max) {
-
-	nr.nodes <- length(pl)
-	n <- length(broadcast.info$id) # number of broadcast messages
-
-	c  <- sum(broadcast.info$n.received/nr.nodes*100)/n
-
-	valid.time <- broadcast.info$time[broadcast.info$time <= max ]
-	bt <- sum(valid.time, na.rm=TRUE)/length(valid.time)
-
-	pc <- sum(pl)/nr.nodes
-
-	dm <- sum(broadcast.info$B.i / broadcast.info$n.received)/n
-
-	rt <- mean(broadcast.info$n.sent)
-
-	data.frame(
-		coverage = mean(c),
-		broadcasting.time = mean(bt),
-		power_consumption = tail(pc,1),
-		duplicated_messages = mean(dm),
-		retransmitted_messages = mean(rt)
-	)
-}
-
 get.density.relative.error <- function(results_file, first_measure,
   msg_freq, msgs_ids, overlays, algorithmN){
-  measured_density <- replace.resultkey.with.node_id(
-    results_file, "name(density_approximation:vector)"
+  measured_density <- getVector(
+    results_file, 'density_approximation:vector'
   )
   denRelErrPerZone <- lapply(
     c('SPARSE', 'DENSE'),
@@ -152,7 +104,7 @@ get.density.relative.error <- function(results_file, first_measure,
       densityRelativeError <- sapply(
         msgs_ids,
         function(msg){
-          overlay <- overlays[[msg]]
+          overlay <- overlays[[msg +1]]
           nodes <- getVerticesFromBiggestCluster(overlay)
           nodesInZone <- sapply( nodes,
             function(n){ ifelse(V(overlay)$location[n] == zone, n, NA) }
@@ -193,96 +145,110 @@ get.density.relative.error <- function(results_file, first_measure,
   do.call('rbind', denRelErrPerZone)
 }
 
-get.graph <- function(nodes, positions, Tx, locationTimestamp,
-  msgTimestamp, msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
+get.graph <- function(nodes, positions, Tx, timestamp,
+  msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
 
   nodesPositions <-
-    positions[ abs(positions$time - locationTimestamp) < TOLERANCE, ]
+    positions[ timestamp[1] <= positions$time & timestamp[2] >= positions$time , ]
+  nodesPositions <- nodesPositions[order(nodesPositions$nodeId), ]
 
   edges <- unlist(
-    lapply(
-      nodes,
-      function(n){
-        node <- nodesPositions[nodesPositions$nodeId == n, ]
+    lapply(nodes, function(n) {
+      node <- nodesPositions[nodesPositions$nodeId == n, ]
 
-        nodeNeigs <- subset(
-          subset(
-            nodesPositions,
-            sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
-          ),
-          node$nodeId != nodeId
-        )$nodeId
+      nodeNeigs <- subset(
+        subset(
+          nodesPositions,
+          sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
+        ),
+        nodeId != node$nodeId
+      )$nodeId
 
-        sapply(nodeNeigs, function(neig){
-          c(node$nodeId, neig)
-        })
-      }
-    )
+      sapply(nodeNeigs, function(neig){
+        c(node$nodeId, neig)
+      })
+    })
   )
 
-  xlim <- data.frame(
-    infe=denseZone$atX - denseZone$halfLenAtX,
-    supe=denseZone$atX + denseZone$halfLenAtX
-  )
-  ylim <- data.frame(
-    infe=denseZone$atY - denseZone$halfLenAtY,
-    supe=denseZone$atY + denseZone$halfLenAtY
-  )
+  # TODO
+  #
+  # xlim <- data.frame(
+  #   infe=denseZone$atX - denseZone$halfLenAtX,
+  #   supe=denseZone$atX + denseZone$halfLenAtX
+  # )
+  # ylim <- data.frame(
+  #   infe=denseZone$atY - denseZone$halfLenAtY,
+  #   supe=denseZone$atY + denseZone$halfLenAtY
+  # )
+  #
+  # nodesLocation <- sapply(nodes,
+  #   function(n){
+  #     nPos <- nodesPositions[nodesPositions$nodeId == n, ]
+  #     ifelse(
+  #       nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
+  #       nPos$y >= ylim$infe && nPos$y <= ylim$supe,
+  #       'DENSE',
+  #       'SPARSE'
+  #     )
+  #   }
+  # )
 
-  nodesLocation <- sapply(nodes,
-    function(n){
-      nPos <- nodesPositions[nodesPositions$nodeId == n, ]
-      ifelse(
-        nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
-        nPos$y >= ylim$infe && nPos$y <= ylim$supe,
-        'DENSE',
-        'SPARSE'
-      )
-    }
-  )
   # create graph based on edges
-  forward_type <- subset( forward_type_ds,
-    abs(time - msgTimestamp) <= BROADCAST_SESSION_TOLERANCE
-  )
+  # TODO
+
+  # forward_type <- subset( forward_type_ds,
+  #   timestamp[1] <= time & timestamp[2] >= time
+  # )
+
   g <- graph( edges=edges )
   # label whether nodes are located at the dense zone
-  V(g)$location <- nodesLocation
+  # TODO
+  # V(g)$location <- nodesLocation
+
   # this code is followed IN DATASET to label nodes that forward messages:
   #   0 => SIMPLE
   #   1 => CDS RELAY
   #   2 => BORDER
   #   3 => RECEIVER
   #   4 => UNREACHABLE
-  labelCode <- rep(5, length(nodes))
-  labelCode[msgReceivers] <- 4
-  labelCode[ subset(forward_type, value == 0)$node_id ] <- 1
-  labelCode[ subset(forward_type, value == 1)$node_id ] <- 2
-  labelCode[ subset(forward_type, value == 2)$node_id ] <- 3
-  V(g)$colorCode <- labelCode
+
+  # TODO
+  # labelCode <- rep(5, length(nodes))
+  # labelCode[msgReceivers] <- 4
+  # labelCode[ subset(forward_type, value == 0)$node_id ] <- 1
+  # labelCode[ subset(forward_type, value == 1)$node_id ] <- 2
+  # labelCode[ subset(forward_type, value == 2)$node_id ] <- 3
+  # V(g)$colorCode <- labelCode
+
   if(savePlot){
+    # TODO
     E(g)$arrow.mode <- 0
     E(g)$color <- 'lightgrey'
-    V(g)$size <- 4
-    V(g)$label <- ''
-    V(g)$frame.color <- 'black'
-    colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
-    V(g)$color <- colors[labelCode]
+    # V(g)$size <- 4
+    # V(g)$label <- ''
+    # V(g)$frame.color <- 'black'
+    # colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
+    # V(g)$color <- colors[labelCode]
+
     # use node coordinates as layout
     layout <- cbind(nodesPositions$x, nodesPositions$y)
     # save one graph per broadcast session
-    name <- paste("graph_", locationTimestamp, ".pdf", sep="")
+    name <- paste("graph_", timestamp[1], ".pdf", sep="")
     pdf(name)
     plot.igraph(g, layout=layout)
-    legend(
-      x=0.7, y=1.4, title='Type of forward',
-      c(
-        paste('Simple [', length(labelCode[labelCode == 1]), ']'),
-        paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
-        paste('Border [', length(labelCode[labelCode == 3]), ']'),
-        paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
-        paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
-      ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-    )
+
+    # TODO
+    # legend(
+    #   x=0.7, y=1.4, title='Type of forward',
+    #   c(
+    #     paste('Simple [', length(labelCode[labelCode == 1]), ']'),
+    #     paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
+    #     paste('Border [', length(labelCode[labelCode == 3]), ']'),
+    #     paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
+    #     paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
+    #   ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+    # )
+
     dev.off()
   }
   g
@@ -298,11 +264,17 @@ getVerticesFromBiggestCluster <- function(g){
 
 # This method replace the column [resultkey] of a dataset with a string
 # obtained from the field [module], which refers to the node identifier
-replace.resultkey.with.node_id <- function(dataset_file, query){
-  dataset <- load.datafile(dataset_file, query)
+getVector <- function(dataset_file, vec_name){
+  dataset <- loadVectors(
+    loadDataset(
+      paste(dataset_file, "vec", sep= "."),
+      add(select=paste("name", "(", vec_name, ")", sep=""))
+    ),
+    NULL
+  )
   # getting node identifier from column [vectors$module]
   tmp <- toString(dataset$vectors$module)
-  tmp <- strsplit(unlist(strsplit(tmp, "\\.")), "hostR")
+  tmp <- strsplit(unlist(strsplit(tmp, "\\.")), "host")
   node_ids <- unlist(lapply(tmp, function(itm){ if(length(itm) == 2) {itm[2]} }))
   # map of node identifier per resultkey
   key_id_mapping <- data.frame(
@@ -326,25 +298,29 @@ replace.resultkey.with.node_id <- function(dataset_file, query){
   )
 }
 
-energy.consumption.of.sent_recv.messages <- function(results_file,
-  exp_duration, sent_packages, recv_packages, nodes){
+getEnergyConsumption <- function(dataset_loc, node_ids){
 
-  energyConsumpAll <- replace.resultkey.with.node_id(
-    results_file, "name(residualCapacity:vector)")
-  energyConsumpAll <- subset(energyConsumpAll, time < exp_duration)
+  radio_mode <- getVector(dataset_loc, "radioMode:vector")
+  e_consump  <- getVector(dataset_loc, "residualCapacity:vector")
 
-  sapply(1:length(nodes),
-    function(i){
-      v <- subset(energyConsumpAll, node_id == nodes[i])$value
-      abs(v[length(v)]) * 1000 # get milli Joules
-    }
-  )
-}
-
-highest.energy.consumption <- function(v){
-  quasi_v <- tail(v, length(v) - 1)
-  quasi_v <- c(quasi_v, tail(v,1)[1])
-  max(v - quasi_v)
+  sapply(node_ids, function(id){
+    # timestamps of radio in tranceiver mode
+    transciever_timestamp <- subset(
+      subset(radio_mode, node_id == id),
+      value == 2
+    )$time
+    e_consump_all_modes <- subset(e_consump, node_id == id)
+    # get energy consumption of tranceiver mode per node
+    e_consump_transcv_m <- sapply(transciever_timestamp, function(t){
+      # energy at node when radio switch to tranceiver mode
+      c0 <- subset(e_consump_all_modes, time == t)$value
+      i  <- match(c0, e_consump_all_modes$value) + 1
+      # energy at node when radio changed of mode (sleep, etc..)
+      c1 <- e_consump_all_modes$value[i]
+      c0 - c1
+    })
+    sum(e_consump_transcv_m[ !is.na(e_consump_transcv_m) ] * 1000) # convert to milli-Joules
+  })
 }
 
 # this code is followed IN DATASET to label nodes that forward messages:
@@ -357,7 +333,7 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   fw_code_str<- c('Simple', 'CDS relay', 'Border', 'Receiver', 'Unreachable')
   node_roles <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg]]
+      overlay <- overlays[[msg + 1]]
       connected_nodes <- getVerticesFromBiggestCluster(overlay)
       nodes_location <- sapply(
         1 : length( V(overlay)$location ),
@@ -425,57 +401,6 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   do.call('rbind', merged_ds)
 }
 
-collisions.relative.error <- function(sent_msgs, recv_msgs, msgs_ids, overlays){
-  relativeErr <- lapply( c('SPARSE', 'DENSE'),
-    function(zone){
-      relativeError <- sapply( msgs_ids,
-        function(msg){
-          overlay <- overlays[[msg]]
-          senders <- sort.int(unique( subset(sent_msgs, value == msg)$node_id ))
-          sendersAtZone <- sapply(
-            senders,
-            function(s){ ifelse(V(overlay)$location[s] == zone, s, NA) }
-          )
-          sendersAtZone <- sendersAtZone[ !is.na(sendersAtZone) ]
-          # ground truth of receptions
-          groundTruth <- sapply(
-            sendersAtZone,
-            function(s){
-              neigs <- overlay[s, ]
-              receivers <- sapply( 1:length(neigs),
-                function(i){ ifelse(neigs[i] == 1, i, NA) }
-              )
-              receivers <- receivers[ !is.na(receivers) ]
-              # when a sender S forwards a message, S is labed as a receiver too
-              receivers[length(receivers) + 1] <- s
-              receivers
-            }
-          )
-          expectedReceivers <- unique( unlist(groundTruth) )
-          # for each neighbor count measured receptions per broadcast session
-          measuredReceivers <- sapply(
-            expectedReceivers,
-            function(r){
-              subset(
-                subset( recv_msgs, value == msg ),
-                node_id == r
-              )$node_id
-            }
-          )
-          measuredReceivers <- unique( unlist(measuredReceivers) )
-          1 - length(measuredReceivers) / length(expectedReceivers)
-        }
-      )
-      data.frame(
-        relative_err=relativeError,
-        zone=rep(zone, length(relativeError)),
-        stringsAsFactors=F
-      )
-    }
-  )
- relativeErr <- do.call('rbind', relativeErr)
-}
-
 count.events.per.node <- function(nodes, ds){
   sapply(nodes, function(n_i){
     length( subset(ds, node_id == n_i)$node_id )
@@ -498,26 +423,29 @@ distribution.sent_recv.broadcast_control.messages <- function(
 #      (dense or sparse) where the sender was positioned
   sentMsgDist <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg]]
+      overlay <- overlays[[msg + 1]]
       senders <- unique( subset(sent_bro_msgs, value == msg)$node_id )
       data.frame(
         msgsNo=count.events.per.node(senders, sent_bro_msgs),
-        zone=V(overlay)$location[ senders ],
         algorithm=rep(algorithmN, length(senders)), stringsAsFactors=F
+        # TODO
+        # zone=V(overlay)$location[ senders ],
       )
     }
   )
+
   sentMsgDist <- do.call('rbind', sentMsgDist)
 # INFO get distribution of received broadcast messages, adding the type of zone
 #      (dense or sparse) where the receiver was positioned
   recvMsgDist <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg]]
+      overlay <- overlays[[msg + 1]]
       receivers <- unique( subset(recv_bro_msgs, value == msg)$node_id )
       data.frame(
         msgsNo=count.events.per.node(receivers, recv_bro_msgs),
-        zone=V(overlay)$location[ receivers ],
         algorithm=rep(algorithmN, length(receivers)), stringsAsFactors=F
+        # TODO
+        # zone=V(overlay)$location[ receivers ],
       )
     }
   )
@@ -536,7 +464,7 @@ distribution.sent_recv.broadcast_control.messages <- function(
   result
 }
 
-getExpectedCoverage <- function(overlays){
+getExpectedCoveredNodesNo <- function(overlays){
   sapply(overlays, function(overlay) {
     length( getVerticesFromBiggestCluster(overlay) )
   })
@@ -549,25 +477,48 @@ saveDataFrame <- function(df, dstPath, fileName, expeConfig){
   )
 }
 
-main <- function(args) {
-  print(paste("Simulation time", args$simTime, "seconds"))
-  expeConfig <- unlist(strsplit(args$configuration, '_'))
-  algorithmN <- toupper(expeConfig[ length(expeConfig) ])
-  # INFO metadate of dense zone
-  # NOTE ATM we consider that there is only one dense zone and one sparse zone
-  denseZone <- data.frame(
-    atX=args$d_x, atY=args$d_y,
-    halfLenAtX=(args$d_z_w / 2), halfLenAtY=(args$d_z_w / 2)
+getStatistics <- function(dataset_path, scalar_name, stat="mean"){
+  all_stats <- loadDataset(
+    paste(dataset_path, sep= ".", "sca"),
+    add(select=paste("name", "(", scalar_name, ")", sep=""))
   )
-  exp_duration <-
-	  args$time_of_first_broadcast_message + args$broadcast_msgs * args$step
 
-  xPositions <- replace.resultkey.with.node_id(
-    args$file, "name(node_position_x:vector)"
+  node_ids <- toString(all_stats$statistics$module)
+  node_ids <- strsplit(unlist(strsplit(node_ids, "\\.")), "host")
+  node_ids <-unlist(
+    lapply(node_ids, function(id_str){
+      tmp <- ifelse( length(id_str) == 2, id_str[2], NA )
+      tmp[!is.na(tmp)]
+    })
   )
-  yPositions <- replace.resultkey.with.node_id(
-    args$file, "name(node_position_y:vector)"
+
+  key_id_map <- data.frame(
+    key = all_stats$statistics$resultkey,
+    node_id = as.numeric(node_ids)
   )
+
+  scalar <- subset(all_stats$fields, fieldname == stat)
+  data.frame(
+    node_id = key_id_map$node_id,
+    data = subset(scalar, resultkey == key_id_map$key)$fieldvalue
+  )
+}
+
+main <- function(args) {
+  expeConfig <- unlist(strsplit(args$configName, '_'))
+  algorithmN <- toupper(expeConfig[ length(expeConfig) ])
+  broadcastIn<- c(args$broaIntT0, args$broaIntT1)
+  # TODO
+  # NOTE ATM we consider that there is only one dense zone and one sparse zone
+  # denseZone <- data.frame(
+  #   atX=args$d_x, atY=args$d_y,
+  #   halfLenAtX=(args$d_z_w / 2), halfLenAtY=(args$d_z_w / 2)
+  # )
+  datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
+  datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
+
+  xPositions <- getVector(datasetFile, 'positionAtX:vector')
+  yPositions <- getVector(datasetFile, 'positionAtY:vector')
   # merge nodes positions in one dataframe
   positions <- data.frame(
     nodeId = xPositions$node_id,
@@ -575,61 +526,60 @@ main <- function(args) {
     x = xPositions$value,
     y = yPositions[yPositions$node_id == xPositions$node_id, ]$value
   )
-  all_nodes <- unique(
-		replace.resultkey.with.node_id(
-      args$file, "name(density_approximation:vector)"
-    )$node_id
-	)
 
-  sent_broadcast_msgs <- replace.resultkey.with.node_id(
-  	args$file, "name(msg_sent:vector)")
-  recv_broadcast_msgs <- replace.resultkey.with.node_id(
-  	args$file, "name(broadcast_msg_received:vector)")
+  all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
+
+  sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
+  recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
   # nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
   # 2 is a CDS relay and 0 means simple FWD
-  forward_type_ds <- replace.resultkey.with.node_id(
-  	args$file, "name(forward_type:vector)")
+  # TODO
+  # forward_type_ds <- getVector(
+  # 	datasetFile, 'forward_type:vector')
 
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
 
   # creates a list of wireless topologies using nodes positions (ground thruth)
   overlays <- lapply(msgs_ids, function(msg) {
     # a snapshot of the topology is taken just before a broadcast session take place
-    locationTimestamp <-
-      args$first_time_of_measuring_nodes_position + args$step * (msg - 1)
-    msgTimestamp <-
-      args$time_of_first_broadcast_message + args$step * (msg - 1)
+    timestamp <- c(broadcastIn[1] * (msg + 1), broadcastIn[2] * (msg + 1) + .09)
 
     msgEmitters <- unique( subset(sent_broadcast_msgs, value == msg)$node_id )
     msgReceivers <-unique( subset(recv_broadcast_msgs, value == msg)$node_id )
     # build wireless topology
     get.graph(
-      all_nodes, positions, args$transmission_range, locationTimestamp,
-      msgTimestamp, msgReceivers, msgEmitters, denseZone, forward_type_ds,
+      all_nodes, positions, args$tx, timestamp,
+      msgReceivers, msgEmitters, NULL, NULL,
       savePlot=TRUE
     )
+    # TODO
+    # get.graph(
+    #   all_nodes, positions, args$tx, locationTimestamp,
+    #   msgReceivers, msgEmitters, denseZone, forward_type_ds,
+    #   savePlot=TRUE
+    # )
   })
+
   # save distribution of nodes per type of FWD they perform within the biggest
   # connected graph (a component of a wireless topology)
-  print('Get distribution of FWD roles...')
-  saveDataFrame(
-    get.node.roles(overlays, msgs_ids, algorithmN),
-    args$outputPath, 'noderoles', args$configuration
-  )
-  print('done')
+  # TODO
+  #print('Get distribution of forwading types')
+  # saveDataFrame(
+  #   get.node.roles(overlays, msgs_ids, algorithmN),
+  #   args$resultsDir, 'noderoles', algorithmN
+  # )
+  print('DONE - Get distribution of sent/received messages')
   sent_packages <- subset(
-    replace.resultkey.with.node_id(args$file, "name(sentPk:vector*)"),
-    time < exp_duration
+    getVector(datasetFile, 'sentPk:vector*'),
+    time < args$simTime
   )
   recv_packages <- subset(
-    replace.resultkey.with.node_id(args$file, "name(rcvdPk:vector*)"),
-    time < exp_duration
+    getVector(datasetFile, 'rcvdPk:vector*'),
+    time < args$simTime
   )
-
-  print("Calculating distribution of sent and received broadcast/control messages")
   sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
     sent_broadcast_msgs, recv_broadcast_msgs,
     sent_packages, recv_packages, all_nodes,
@@ -637,100 +587,74 @@ main <- function(args) {
   )
   # save distributions of sent/received messages (ctrl and broadcast)
   saveDataFrame(
-    sent_recv_msgs$sentBroMsgDist, args$outputPath,
-    'sentBroadcastMsgsDistribution', args$configuration
+    sent_recv_msgs$sentBroMsgDist, args$resultsDir,
+    'sentBroadcastMsgsDistribution', algorithmN
   )
   saveDataFrame(
-    sent_recv_msgs$recvBroMsgDist, args$outputPath,
-    'recvBroadcastMsgsDistribution', args$configuration
+    sent_recv_msgs$recvBroMsgDist, args$resultsDir,
+    'recvBroadcastMsgsDistribution', algorithmN
   )
   saveDataFrame(
-    sent_recv_msgs$sentCtrlMsgDist, args$outputPath,
-    'sentCtrlMsgsDistribution', args$configuration
+    sent_recv_msgs$sentCtrlMsgDist, args$resultsDir,
+    'sentCtrlMsgsDistribution', algorithmN
   )
   saveDataFrame(
-    sent_recv_msgs$recvCtrlMsgDist, args$outputPath,
-    'recvCtrlMsgsDistribution', args$configuration
+    sent_recv_msgs$recvCtrlMsgDist, args$resultsDir,
+    'recvCtrlMsgsDistribution', algorithmN
   )
-  print('done')
 
-  print("Calculating energy consumption...")
-  energy_consumption <- unlist(
-    energy.consumption.of.sent_recv.messages(
-      args$file, exp_duration,
-      sent_packages, recv_packages, all_nodes
-    )
-  )
+  print('DONE - Get distribution of energy consumption')
+  energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
   saveDataFrame(
     data.frame(
       data=energy_consumption,
       algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
     ),
-    args$outputPath, 'batteryConsumptionDistribution', args$configuration
+    args$resultsDir, 'batteryConsumptionDistribution', algorithmN
   )
-  print("done")
-
-  print("Calculating relative error of nodes neighborhood size")
-  try(
-    densityRelativeError <- get.density.relative.error(
-      args$file, args$first_time_of_measuring_nodes_position,
-      args$step, msgs_ids, overlays, algorithmN
-    )
-  )
-  print("DONE!")
-
-  print("Calculating relative error of collisions")
-  collisions_re <- collisions.relative.error(
-    sent_broadcast_msgs, recv_broadcast_msgs,
-    msgs_ids, overlays
-  )
-  print("DONE!")
-
-  print('Get distribution of broadcast session time')
-  sent_msgs <- load.datafile(args$file, "name(msg_sent:vector)" )
-  recv_msgs <- load.datafile(args$file, "name(broadcast_msg_received:vector)" )
-  bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
-  print("DONE")
-
-  print("Exporting rest of broadcast metrics")
-  try(
-    saveDataFrame(
-      densityRelativeError,
-      args$outputPath, 'densityRelativeError', args$configuration
-    )
-  )
+  # TODO
+  # print("DONE - Get relative error of density")
+  # try(
+  #   densityRelativeError <- get.density.relative.error(
+  #     datasetFile, args$first_time_of_measuring_nodes_position,
+  #     args$step, msgs_ids, overlays, algorithmN
+  #   )
+  # )
+  # try(
+  #   saveDataFrame(
+  #     densityRelativeError,
+  #     args$resultsDir, 'densityRelativeError', algorithmN
+  #   )
+  # )
+  print("DONE - Get packet error rate")
+  pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")
   saveDataFrame(
     data.frame(
-      data=collisions_re,
-      algo=rep(algorithmN, length(collisions_re)), stringsAsFactors=F
+      data=pktErrorRate$data * 100 , # in percetage
+      algo=rep(algorithmN, length(pktErrorRate$data)), stringsAsFactors=F
     ),
-    args$outputPath, 'collisionsRelativeError', args$configuration
+    args$resultsDir, 'packetErrorRate', algorithmN
   )
-  save.delay.time(bs, args$simTime, args$outputPath, args$configuration)
-
-  # expected number of nodes that must receive a broadcast message
-  # over all sessions of dissemination
-  expectedCoverage <- getExpectedCoverage(overlays)
-  # save network coverage
-  coverage <- (bs$n.received / expectedCoverage) * 100
+  print("DONE - Get network coverage")
+  expectedCoverage <- getExpectedCoveredNodesNo(overlays)
+  measuredCoverage <- sapply(msgs_ids, function(msg) {
+    length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
+  })
+  coverage <- (measuredCoverage / expectedCoverage) * 100
   saveDataFrame(
     data.frame(
       data=coverage,
       algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
     ),
-    args$outputPath, 'coverage', args$configuration
+    args$resultsDir, 'coverage', algorithmN
   )
-  print('DONE')
-  if (args$showAverages) {
-    print("Printing average values")
-    averages <- average.values(energy_consumption, bs, max=args$simTime)
-    print(
-      noquote( paste("average_values",
-      averages$coverage, averages$broadcasting.time, averages$power_consumption,
-			averages$duplicated_messages, averages$retransmitted_messages
-    )))
-    print("DONE")
-  }
+  # TODO
+  # print('Get distribution of broadcast session time')
+  # bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
+  # print("DONE")
+  # print("Exporting rest of broadcast metrics")
+  # save.delay.time(bs, args$simTime, args$resultsDir, algorithmN)
+  print('End of get-broadcast-metrics.R')
 }
 
 main(get.arguments())

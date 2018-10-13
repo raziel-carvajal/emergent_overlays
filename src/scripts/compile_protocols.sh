@@ -2,7 +2,7 @@
 
 if [ ${#} -ne 2 ]; then
   echo "Error: Wrong number of arguments"
-  echo "Usage: ${0} <omnet-path> <omnet-project-root-dir>"
+  echo "Usage: ${0} <omnet-path> <emergent-overlays-root-dir>"
   exit 1
 fi
 
