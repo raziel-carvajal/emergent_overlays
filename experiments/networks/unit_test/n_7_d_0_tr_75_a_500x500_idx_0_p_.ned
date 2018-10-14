@@ -15,48 +15,36 @@
 
 package unit_test;
 
+import inet.physicallayer.idealradio.IdealRadioMedium;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.INetworkNode;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.common.lifecycle.LifecycleController;
+import emergent_overlays.tunned_modules.Cellphone;
 
-import broadcasting.CenterHost;
-
-// - create a network and specify the size to 500x500
-// - drop an IPv4NetworkConfigurator and rename it to "configurator"
-// - drop an IdealRadioMedium module and rename to "radioMedium"
-// - drop two standardhosts at the 100,100 and 400,400 position and
-//   rename them to hostA and hostB
 network n_7_d_0_tr_75_a_500x500_idx_0_p_
 {
-    @display("bgb=500,500");
-    string hostType = default("WirelessHost");
-    string mediumType = default("IdealRadioMedium");
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=149,29");
-        }
-        radioMedium: <mediumType> like IRadioMedium {
-            @display("p=309,24");
-        }
-        hostR1: CenterHost {
+		    lifecycleController: LifecycleController;
+				radioMedium: IdealRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        host1: Cellphone {
             @display("p=116.928,217.72801;r=75");
         }
-        hostR2: CenterHost {
+        host2: Cellphone {
             @display("p=179.42401,217.72801;r=75");
         }
-        hostR3: CenterHost {
+        host3: Cellphone {
             @display("p=250,218;r=75");
         }
-        hostR4: CenterHost {
+        host4: Cellphone {
             @display("p=280,166;r=75");
         }
-        hostR5: CenterHost {
+        host5: Cellphone {
             @display("p=280,273;r=75");
         }
-        hostR6: CenterHost {
+        host6: Cellphone {
             @display("p=83,166;r=75");
         }
-        hostR7: CenterHost {
+        host7: Cellphone {
             @display("p=96,260;r=75");
         }
 }

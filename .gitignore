@@ -29,7 +29,7 @@
 *.app
 *.pyc
 
-# output of compilation via Omnet++ IDE
+# output of compilation with opp_* tools
 src/emergent_overlays/Makefile
 src/emergent_overlays/out
 src/emergent_overlays/src/Makefile
@@ -41,24 +41,13 @@ src/deprecated/**/Makefile
 # node.js packages
 **/node_modules
 
-# Non useful output files
-src/base/Makefile
-src/base/*/*_m.cc
-src/base/*/*_m.h
-src/protocols/Makefile
-built/
-experiments/configs/built_configs/*.ini
-experiments/configs/built_configs/results
+experiments/configs/built_configs/*
+experiments/configs/built_configs/*.*
+
+experiments/networks/built_topologies/*
+experiments/networks/built_topologies/*.*
+
 experiments/configs/in_common/config.xml
-experiments/networks/built_topologies/*.ned
-experiments/configs/built_configs/cfgs_for_workers
-
-experiments/networks/built_topologies/*.mobility
-experiments/networks/built_topologies/*.pdf
-experiments/networks/built_topologies/*.positions
-
-src/scripts/algo
-
 
 # Paper
 text/main.aux
@@ -70,27 +59,10 @@ text/main.synctex.gz
 
 #LOGS
 src/scripts/debugging/logs/n_*
-experiments/configs/built_configs/completed_tasks_no
-./.env
 
 #NON USED DATASETS
-results/batteryConsumptionDistribution*
-results/broadcastSession*
-results/duplicatedMsgsDistribution*
-results/collisions*
-results/graphConnectivity*
-results/sentCtrlMsgsDistribution*
-results/sentBroadcastMsgsDistribution*
-results/relays*
-results/recvCtrlMsgsDistribution*
-results/recvBroadcastMsgsDistribution*
-results/distributionOfDensity*
-results/densityRelativeError*
-results/coverage*
-results/collisionsRelativeError*
-results/noderoles*
-results/*.tgz
-results/*.pdf
+results/*
+results/*.*
 
 #ICDCS paper
 papers/ICDCS2017/main.aux
