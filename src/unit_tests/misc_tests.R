@@ -74,17 +74,24 @@ getEnergyConsumption <- function(dataset_loc, node_ids){
   e_consump  <- getVector(dataset_loc, "residualCapacity:vector")
 
   sapply(node_ids, function(id){
+    # timestamps of radio in tranceiver mode
     transciever_timestamp <- subset(
       subset(radio_mode, node_id == id),
-      value == 2 # when the radio mode is set to reception or transmission
+      value == 2
     )$time
     e_consump_all_modes <- subset(e_consump, node_id == id)
+    # get energy consumption of tranceiver mode per node
     e_consump_transcv_m <- sapply(transciever_timestamp, function(t){
-        subset(e_consump_all_modes, time == t)$value
+      # energy at node when radio switch to tranceiver mode
+      c0 <- subset(e_consump_all_modes, time == t)$value
+      i  <- match(c0, e_consump_all_modes$value) + 1
+      # energy at node when radio changed of mode (sleep, etc..)
+      c1 <- e_consump_all_modes$value[i]
+      c0 - c1
     })
-    pseudo_cpy <- e_consump_transcv_m[ 2 : length(e_consump_transcv_m) ]
-    node_e_consump <- e_consump_transcv_m[ 1 : (length(e_consump_transcv_m) - 1) ] - pseudo_cpy
-    sum( node_e_consump[!is.na(node_e_consump)] )
+    sum(
+      e_consump_transcv_m[ !is.na(e_consump_transcv_m) ]
+    ) * 1000 # convert to milli-Joules
   })
 
 }
@@ -96,12 +103,14 @@ parser$add_argument('dataset', metavar='dataset', type="character")
 
 args <- parser$parse_args()
 
-s <- getStatistics(args$dataset, "packetErrorRate:histogram")
-print(s)
+print(
+  getStatistics(args$dataset, "packetErrorRate:histogram")
+)
 
 node_ids <- unique(
   getVector(args$dataset, "radioMode:vector")$node_id
 )
 #
-t <- getEnergyConsumption(args$dataset, node_ids)
-print(t)
+print(
+  sum(getEnergyConsumption(args$dataset, node_ids))
+)
