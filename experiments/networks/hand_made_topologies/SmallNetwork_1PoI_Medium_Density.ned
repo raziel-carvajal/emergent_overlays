@@ -3,296 +3,288 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package hand_made_topologies;
+
+import inet.physicallayer.idealradio.IdealRadioMedium;
+//import inet.physicallayer.ieee80211.packetlevel.Ieee80211RadioMedium;
+//import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.INetworkNode;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import emergent_overlays.tunned_modules.Cellphone;
 
-import broadcasting.CenterHost;
+import inet.common.lifecycle.LifecycleController;
 
-// - create a network and specify the size to 500x500
-// - drop an IPv4NetworkConfigurator and rename it to "configurator"
-// - drop an IdealRadioMedium module and rename to "radioMedium"
-// - drop two standardhosts at the 100,100 and 400,400 position and
-//   rename them to hostA and hostB
 network SmallNetwork_1PoI_Medium_Density
 {
     @display("bgb=700,700");
-    string hostType = default("WirelessHost");
-    string mediumType = default("IdealRadioMedium");
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=149,29");
-        }
-        radioMedium: <mediumType> like IRadioMedium {
-            @display("p=309,24");
-        }
-        //                hostR0: INetworkNode {
-        //                    @display("p=362,312;r=180");
-        //                }
-        hostR1: CenterHost {
+        lifecycleController: LifecycleController;
+        radioMedium: IdealRadioMedium;
+        //        radioMedium: Ieee80211ScalarRadioMedium;
+        //        radioMedium: Ieee80211RadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        host1: Cellphone {
             @display("p=362,312;r=75");
         }
-        hostR2: CenterHost {
+        host2: Cellphone {
             @display("p=293,312;r=75");
         }
-        hostR3: CenterHost {
+        host3: Cellphone {
             @display("p=430,312;r=75");
         }
-        hostR4: CenterHost {
+        host4: Cellphone {
             @display("p=362,365;r=75");
         }
-        hostR5: CenterHost {
+        host5: Cellphone {
             @display("p=362,254;r=75");
         }
-        hostR6: CenterHost {
+        host6: Cellphone {
             @display("p=496,312;r=75");
         }
-        hostR7: CenterHost {
+        host7: Cellphone {
             @display("p=223,312;r=75");
         }
-        hostR8: CenterHost {
+        host8: Cellphone {
             @display("p=254,371;r=75");
         }
-        hostR9: CenterHost {
+        host9: Cellphone {
             @display("p=254,262;r=75");
         }
-        hostR10: CenterHost {
+        host10: Cellphone {
             @display("p=475,371;r=75");
         }
-        hostR11: CenterHost {
+        host11: Cellphone {
             @display("p=475,262;r=75");
         }
-        hostR12: CenterHost {
+        host12: Cellphone {
             @display("p=362,193;r=75");
         }
-        hostR13: CenterHost {
+        host13: Cellphone {
             @display("p=362,436;r=75");
         }
-        hostR14: CenterHost {
+        host14: Cellphone {
             @display("p=566,312;r=75");
         }
-        hostR15: CenterHost {
+        host15: Cellphone {
             @display("p=612,262;r=75");
         }
-        hostR16: CenterHost {
+        host16: Cellphone {
             @display("p=622,198;r=75");
         }
-        hostR17: CenterHost {
+        host17: Cellphone {
             @display("p=157,312;r=75");
         }
-        hostR18: CenterHost {
+        host18: Cellphone {
             @display("p=118,356;r=75");
         }
-        hostR19: CenterHost {
+        host19: Cellphone {
             @display("p=87,414;r=75");
         }
-        hostR20: CenterHost {
+        host20: Cellphone {
             @display("p=367,495;r=75");
         }
-        hostR21: CenterHost {
+        host21: Cellphone {
             @display("p=367,557;r=75");
         }
-        hostR22: CenterHost {
+        host22: Cellphone {
             @display("p=367,136;r=75");
         }
-        hostR23: CenterHost {
+        host23: Cellphone {
             @display("p=367,79;r=75");
         }
-        hostR24: CenterHost {
+        host24: Cellphone {
             @display("p=319,398;r=75");
         }
-        hostR25: CenterHost {
+        host25: Cellphone {
             @display("p=424,404;r=75");
         }
-        //                hostR0: INetworkNode {
+        //                host0: INetworkNode {
         //                    @display("p=362,312;r=180");
         //                }
-        hostR26: CenterHost {
+        host26: Cellphone {
             @display("p=362,337;r=75");
         }
-        hostR27: CenterHost {
+        host27: Cellphone {
             @display("p=293,337;r=75");
         }
-        hostR28: CenterHost {
+        host28: Cellphone {
             @display("p=430,337;r=75");
         }
-        hostR29: CenterHost {
+        host29: Cellphone {
             @display("p=362,390;r=75");
         }
-        hostR30: CenterHost {
+        host30: Cellphone {
             @display("p=362,279;r=75");
         }
-        hostR31: CenterHost {
+        host31: Cellphone {
             @display("p=496,337;r=75");
         }
-        hostR32: CenterHost {
+        host32: Cellphone {
             @display("p=223,337;r=75");
         }
-        hostR33: CenterHost {
+        host33: Cellphone {
             @display("p=254,396;r=75");
         }
-        hostR34: CenterHost {
+        host34: Cellphone {
             @display("p=254,287;r=75");
         }
-        hostR35: CenterHost {
+        host35: Cellphone {
             @display("p=475,396;r=75");
         }
-        hostR36: CenterHost {
+        host36: Cellphone {
             @display("p=475,287;r=75");
         }
-        hostR37: CenterHost {
+        host37: Cellphone {
             @display("p=362,461;r=75");
         }
-        hostR38: CenterHost {
+        host38: Cellphone {
             @display("p=319,423;r=75");
         }
-        hostR39: CenterHost {
+        host39: Cellphone {
             @display("p=424,429;r=75");
         }
-        //                hostR0: INetworkNode {
+        //                host0: INetworkNode {
         //                    @display("p=362,312;r=180");
         //                }
-        hostR40: CenterHost {
+        host40: Cellphone {
             @display("p=362,284;r=75");
         }
-        hostR41: CenterHost {
+        host41: Cellphone {
             @display("p=293,284;r=75");
         }
-        hostR42: CenterHost {
+        host42: Cellphone {
             @display("p=430,284;r=75");
         }
-        hostR43: CenterHost {
+        host43: Cellphone {
             @display("p=362,337;r=75");
         }
-        hostR44: CenterHost {
+        host44: Cellphone {
             @display("p=362,226;r=75");
         }
-        hostR45: CenterHost {
+        host45: Cellphone {
             @display("p=496,284;r=75");
         }
-        hostR46: CenterHost {
+        host46: Cellphone {
             @display("p=223,284;r=75");
         }
-        hostR47: CenterHost {
+        host47: Cellphone {
             @display("p=254,343;r=75");
         }
-        hostR48: CenterHost {
+        host48: Cellphone {
             @display("p=254,234;r=75");
         }
-        hostR49: CenterHost {
+        host49: Cellphone {
             @display("p=475,343;r=75");
         }
-        hostR50: CenterHost {
+        host50: Cellphone {
             @display("p=475,234;r=75");
         }
-        hostR51: CenterHost {
+        host51: Cellphone {
             @display("p=362,408;r=75");
         }
-        hostR52: CenterHost {
+        host52: Cellphone {
             @display("p=319,370;r=75");
         }
-        hostR53: CenterHost {
+        host53: Cellphone {
             @display("p=424,376;r=75");
         }
-        //                hostR0: INetworkNode {
+        //                host0: INetworkNode {
         //                    @display("p=362,312;r=180");
         //                }
-        hostR54: CenterHost {
+        host54: Cellphone {
             @display("p=328,342;r=75");
         }
-        hostR55: CenterHost {
+        host55: Cellphone {
             @display("p=259,342;r=75");
         }
-        hostR56: CenterHost {
+        host56: Cellphone {
             @display("p=396,342;r=75");
         }
-        hostR57: CenterHost {
+        host57: Cellphone {
             @display("p=328,395;r=75");
         }
-        hostR58: CenterHost {
+        host58: Cellphone {
             @display("p=328,284;r=75");
         }
-        hostR59: CenterHost {
+        host59: Cellphone {
             @display("p=462,342;r=75");
         }
-        hostR60: CenterHost {
+        host60: Cellphone {
             @display("p=189,342;r=75");
         }
-        hostR61: CenterHost {
+        host61: Cellphone {
             @display("p=220,401;r=75");
         }
-        hostR62: CenterHost {
+        host62: Cellphone {
             @display("p=220,292;r=75");
         }
-        hostR63: CenterHost {
+        host63: Cellphone {
             @display("p=441,401;r=75");
         }
-        hostR64: CenterHost {
+        host64: Cellphone {
             @display("p=441,292;r=75");
         }
-        hostR65: CenterHost {
+        host65: Cellphone {
             @display("p=328,466;r=75");
         }
-        hostR66: CenterHost {
+        host66: Cellphone {
             @display("p=285,428;r=75");
         }
-        hostR67: CenterHost {
+        host67: Cellphone {
             @display("p=390,434;r=75");
         }
-        //                hostR0: INetworkNode {
+        //                host0: INetworkNode {
         //                    @display("p=362,312;r=180");
         //                }
-        hostR68: CenterHost {
+        host68: Cellphone {
             @display("p=406,343;r=75");
         }
-        hostR69: CenterHost {
+        host69: Cellphone {
             @display("p=337,343;r=75");
         }
-        hostR70: CenterHost {
+        host70: Cellphone {
             @display("p=474,343;r=75");
         }
-        hostR71: CenterHost {
+        host71: Cellphone {
             @display("p=406,396;r=75");
         }
-        hostR72: CenterHost {
+        host72: Cellphone {
             @display("p=406,285;r=75");
         }
-        hostR73: CenterHost {
+        host73: Cellphone {
             @display("p=540,343;r=75");
         }
-        hostR74: CenterHost {
+        host74: Cellphone {
             @display("p=267,343;r=75");
         }
-        hostR75: CenterHost {
+        host75: Cellphone {
             @display("p=298,402;r=75");
         }
-        hostR76: CenterHost {
+        host76: Cellphone {
             @display("p=298,293;r=75");
         }
-        hostR77: CenterHost {
+        host77: Cellphone {
             @display("p=519,402;r=75");
         }
-        hostR78: CenterHost {
+        host78: Cellphone {
             @display("p=519,293;r=75");
         }
-        hostR79: CenterHost {
+        host79: Cellphone {
             @display("p=406,467;r=75");
         }
-        hostR80: CenterHost {
+        host80: Cellphone {
             @display("p=363,429;r=75");
         }
-        hostR81: CenterHost {
+        host81: Cellphone {
             @display("p=468,435;r=75");
         }
 }
