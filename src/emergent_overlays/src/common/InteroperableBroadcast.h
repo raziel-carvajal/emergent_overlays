@@ -18,6 +18,7 @@
 
 #include <inet/applications/udpapp/UDPBasicApp.h>
 #include <inet/mobility/contract/IMobility.h>
+#include <functional>
 
 using namespace inet;
 using namespace std;
@@ -25,6 +26,14 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
 
 	protected:
+		enum UdpPacket {
+			BROADCAST = 1, CTRL, BORDER
+		};
+
+		enum Timer {
+			HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MONITOR
+		};
+
 		// define a new implementation for these methods of class INET::UDPBasicApp
 		virtual void initialize(int stage) override;
 		virtual void processStart() override;
@@ -32,16 +41,23 @@ class InteroperableBroadcast : public UDPBasicApp {
 		virtual void handleMessageWhenUp(cMessage *msg) override;
 		virtual void processPacket(cPacket *msg) override;
 
+		double transRadious;
 		string nodeId;
 		set<string> receivedMsg;
+
+		L3Address localAddress;
+		L3Address broadcastAddress;
+
+		IMobility* mobilityModel;
 
 		// methods that sub-classes may override
 		virtual void onBroadcastMsg(cPacket* pk);
 		virtual void onControlMsg(cPacket* pk);
+		virtual void cancelSelfEvents();
 
 		void fwdBroadcastMsg(cPacket* pk);
 
-		cPacket* getCtrlMsg();
+		virtual cPacket* getCtrlMsg();
 		//
 		int getMsgId(const char* msgHeader);
 
@@ -51,29 +67,30 @@ class InteroperableBroadcast : public UDPBasicApp {
 		static simsignal_t positionAtX;
 		static simsignal_t positionAtY;
 
-	private:
+		void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
+		void addPacketType(cPacket* msg, long t);
+		void addSender(cPacket* pk);
 
-		enum Timer {
-			HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MONITOR
-		};
-		enum UdpPacket {
-			BROADCAST = 1, CTRL, BORDER
-		};
+		template<typename T> bool isPacket(cPacket* pkt, function<void(const T*)> action) {
+			T* t = dynamic_cast<T*>(pkt);
+			if (t != nullptr) {
+				action(t);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		cMessage* monitorTimer = nullptr;
+	private:
 
 		cMessage* ctrlMsgTimer = nullptr;
 		cMessage* haltSimTimer = nullptr;
 		cMessage* broaMsgTimer = nullptr;
-		cMessage* monitorTimer = nullptr;
 
-		L3Address localAddress;
-		L3Address broadcastAddress;
 
-		IMobility* mobilityModel;
 
 		L3Address getSrcAddress(cPacket *msg);
-		void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
-		void addPacketType(cPacket* msg, long t);
-		void addSender(cPacket* pk);
 
 		bool isSelfTimer(cMessage *msg);
 

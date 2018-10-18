@@ -22,6 +22,7 @@ using namespace std;
 class PureFlooding : public InteroperableBroadcast {
 	private:
 		virtual void onBroadcastMsg(cPacket* pk);
+		virtual void cancelSelfEvents(){};
 
 	public:
 		PureFlooding() {}

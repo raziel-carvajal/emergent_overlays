@@ -20,4 +20,10 @@ import emergent_overlays.common.InteroperableBroadcast;
 simple MPR extends InteroperableBroadcast
 {
     @class(MPR);
+    // from super class
+    withCtrlMsg = default(true);
+    // local atts
+    int bootCtrlMsgsNo = default(2);
+    double bootCtrlMsgInterval @unit(s) = uniform(.050s, .090s);
+    
 }

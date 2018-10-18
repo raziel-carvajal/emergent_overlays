@@ -17,6 +17,7 @@
 
 #include <inet/networklayer/common/L3AddressResolver.h>
 #include <inet/transportlayer/contract/udp/UDPControlInfo_m.h>
+#include <inet/physicallayer/idealradio/IdealTransmitter.h>
 #include <inet/common/geometry/common/Coord.h>
 #include <inet/common/ModuleAccess.h>
 
@@ -43,6 +44,10 @@ void InteroperableBroadcast::processStart() {
 	const char* id = getParentModule()->getFullName();
 	nodeId = id;
 
+	physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
+	    getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
+	transRadious = transmitter->getMaxCommunicationRange().get();
+
 	mobilityModel = check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility"));
 
 	localAddress = L3AddressResolver().resolve(id);
@@ -63,7 +68,6 @@ void InteroperableBroadcast::processStart() {
 		scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
 
 	// schedule event to end the simulation in all peers
-	EV << "ctrlMsg event at " << stopTime << endl;
 	scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
 }
 
@@ -130,6 +134,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 					cancelAndDelete(ctrlMsgTimer);
 				cancelAndDelete(haltSimTimer);
 				cancelAndDelete(monitorTimer);
+				// cancel events from sub-classes
+				cancelSelfEvents();
 				endSimulation();
 
 				break;
@@ -154,7 +160,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
 
 	switch (pkType) {
 		case UdpPacket::BROADCAST:
-			EV_ERROR << "Broadcast message [" << pk->getName() << "] received from [" << sender << "]" << endl;
+			EV_DEBUG << "Broadcast message [" << pk->getName() << "] received from [" << sender << "]" << endl;
 			// record all received broadcast messages
 			emit(rcvdBroadcastMsg, getMsgId(pk->getName()));
 			// count received broadcast messages
@@ -163,7 +169,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
 
 			break;
 		case UdpPacket::CTRL:
-			EV_ERROR << "Reception of CtrlMsg [" << pk->getName() << "] from [" << sender << "]" << endl;
+			EV_DEBUG << "Reception of CtrlMsg [" << pk->getName() << "] from [" << sender << "]" << endl;
 			onControlMsg(pk);
 
 			break;
@@ -209,7 +215,7 @@ void InteroperableBroadcast::onBroadcastMsg(cPacket* pk) {
 	 * -  senders of broadcast messages may run a protocol different than
 	 * 		the one running at the receiver
 	 */
-//	throw cRuntimeError("Every subclass of InteroperableBroadcast should implement onBroadcastMsg()");
+	throw cRuntimeError("Every subclass of InteroperableBroadcast should implement onBroadcastMsg()");
 }
 
 void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
@@ -237,4 +243,8 @@ cPacket* InteroperableBroadcast::getCtrlMsg() {
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
 	return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || monitorTimer == msg;
+}
+
+void InteroperableBroadcast::cancelSelfEvents() {
+  throw cRuntimeError("Every subclass of InteroperableBroadcast should implement cancelSelfEvents()");
 }
