@@ -49,21 +49,41 @@ plot.nodes.roles.distribution <- function(ds) {
   print(p2)
 }
 
-plot.dist.as.cdf <- function(ds, title, xlabel, ylabel) {
+plot.dist.as.cdf <- function(ds, title, xlabel, ylabel, xMax=NA) {
+  xUpLim <- ifelse(
+    is.na(xMax),
+    max(ds$data),
+    xMax
+  )
+  x_limits <- c(-1, xUpLim)
+
 	p <- ggplot(ds, aes(x=data, colour=algorithm, linetype=algorithm)) +
 		stat_ecdf(geom="step", lwd=1.5) +
 		ggtitle(title) + labs(x=xlabel, y=ylabel) +
-		scale_x_continuous(expand=c(0,0), limits=c(0, max(ds$data))) +
-		scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style()
+    scale_x_continuous(expand=c(0,0), limits=x_limits) +
+    scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style()
 	print(p)
 }
 
 plot.data.using.boxes <- function(ds, title, xlabel, ylabel) {
+  medians <- aggregate(ds$data ~ ds$algorithm, ds, median)
+  medians <- data.frame(
+    algorithm=medians[[1]], data=medians[[2]]
+  )
+  means <- aggregate(ds$data ~ ds$algorithm, ds, mean)
+  means <- data.frame(
+    algorithm=means[[1]], data=means[[2]]
+  )
 	p <- ggplot(data=ds, aes(x=algorithm, y=data, colour=algorithm))
+
+  # , show_guide = FALSE
   p <- p + geom_boxplot() +
     stat_summary(
-      fun.y=mean, colour="blue", geom="point", shape=18, size=3, show_guide = FALSE
-    )
+      fun.y=mean, colour="blue", geom="point", shape=18, size=3
+    ) +
+    geom_text(data=medians, aes(label=data, y=data - 20)) +
+    geom_text(data=means, aes(label=data, y=data + 10))
+
   p <- p + ggtitle(title) + labs(x=xlabel, y=ylabel) + get.plot.theme.style() +
     theme(legend.position='none')
   print(p)
@@ -80,10 +100,10 @@ if (args$pc) {
     header=F
   )
   names(ds) <- c('data', 'algorithm')
-  plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules (mJ)')
+  plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules [mJ]')
   plot.dist.as.cdf(
     ds, 'Energy consumption',
-    'Milli Joules (mJ)', 'CDF over nodes'
+    'Milli Joules [mJ]', 'CDF'
   )
   print('DONE')
 }
@@ -110,17 +130,22 @@ if (args$pe) {
   )
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
-    ds, 'Packet error rate',
-    'Dropped packets (%)', 'Nodes'
+    ds, '',
+    'Lost broadcast messages (%)', 'CDS', xMax=100
   )
   print('DONE')
 }
 
-if (args$sm) {
+if (args$rm) {
   print("Plotting received broadcast messages")
   ds <- read.table(
     paste(args$resultsDir, 'recvBroadcastMsgsDistribution', sep=''),
     header=F
+  )
+  names(ds) <- c('data', 'algorithm')
+  plot.dist.as.cdf(
+    ds, '',
+    'Received broadcast messages [#]', 'CDS'
   )
   # names(ds) <- c('data', 'zone', 'algorithm')
   # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
@@ -136,11 +161,16 @@ if (args$sm) {
   print('DONE')
 }
 
-if (args$rm) {
+if (args$sm) {
   print('Plotting sent broadcast messages')
   ds <- read.table(
     paste(args$resultsDir, 'sentBroadcastMsgsDistribution', sep=''),
     header=F
+  )
+  names(ds) <- c('data', 'algorithm')
+  plot.dist.as.cdf(
+    ds, '',
+    'Sent broadcast messages [#]', 'CDS'
   )
   # TODO
   # names(ds) <- c('data', 'zone', 'algorithm')

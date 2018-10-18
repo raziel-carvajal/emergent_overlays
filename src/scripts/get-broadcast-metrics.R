@@ -145,12 +145,8 @@ get.density.relative.error <- function(results_file, first_measure,
   do.call('rbind', denRelErrPerZone)
 }
 
-get.graph <- function(nodes, positions, Tx, timestamp,
+get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
-
-  nodesPositions <-
-    positions[ timestamp[1] <= positions$time & timestamp[2] >= positions$time , ]
-  nodesPositions <- nodesPositions[order(nodesPositions$nodeId), ]
 
   edges <- unlist(
     lapply(nodes, function(n) {
@@ -169,6 +165,7 @@ get.graph <- function(nodes, positions, Tx, timestamp,
       })
     })
   )
+  # print(edges)
 
   # TODO
   #
@@ -233,7 +230,7 @@ get.graph <- function(nodes, positions, Tx, timestamp,
     # use node coordinates as layout
     layout <- cbind(nodesPositions$x, nodesPositions$y)
     # save one graph per broadcast session
-    name <- paste("graph_", timestamp[1], ".pdf", sep="")
+    name <- paste("graph_", overlayNo, ".pdf", sep="")
     pdf(name)
     plot.igraph(g, layout=layout)
 
@@ -526,12 +523,34 @@ main <- function(args) {
     x = xPositions$value,
     y = yPositions[yPositions$node_id == xPositions$node_id, ]$value
   )
+  positions <- positions[order(positions$time), ]
 
   all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
+  sentBroMsgDist <- sapply(all_nodes, function(n){
+    length(subset(sent_broadcast_msgs, node_id == n)$value)
+  })
+  saveDataFrame(
+    data.frame(
+      data=sentBroMsgDist,
+      algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
+    ),
+    args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+  )
+
+  recvBroMsgDist <- sapply(all_nodes, function(n){
+    length(subset(recv_broadcast_msgs, node_id == n)$value)
+  })
+  saveDataFrame(
+    data.frame(
+      data=recvBroMsgDist,
+      algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
+    ),
+    args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+  )
   # nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
@@ -542,16 +561,23 @@ main <- function(args) {
 
   msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
 
+  overlaysNumber <- floor(length(positions$time) / length(all_nodes))
+  intervals <- data.frame(
+    lowerLim= c(1, c( 1 : (overlaysNumber - 1) ) * length(all_nodes) + 1 ),
+    upperLim= ( c(1:overlaysNumber) * length(all_nodes) )
+  )
   # creates a list of wireless topologies using nodes positions (ground thruth)
-  overlays <- lapply(msgs_ids, function(msg) {
+  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
     # a snapshot of the topology is taken just before a broadcast session take place
-    timestamp <- c(broadcastIn[1] * (msg + 1), broadcastIn[2] * (msg + 1) + .09)
+    nodesPositions <- positions[ c(intervals$lowerLim[o]:intervals$upperLim[o]), ]
+    nodesPositions <- nodesPositions[order(nodesPositions$nodeId), ]
 
-    msgEmitters <- unique( subset(sent_broadcast_msgs, value == msg)$node_id )
-    msgReceivers <-unique( subset(recv_broadcast_msgs, value == msg)$node_id )
+    # get emitters and receivers per snapshot
+    msgEmitters <- unique( subset(sent_broadcast_msgs, value == msgs_ids[o])$node_id )
+    msgReceivers <-unique( subset(recv_broadcast_msgs, value == msgs_ids[o])$node_id )
     # build wireless topology
     get.graph(
-      all_nodes, positions, args$tx, timestamp,
+      all_nodes, nodesPositions, args$tx, o,
       msgReceivers, msgEmitters, NULL, NULL,
       savePlot=TRUE
     )
@@ -580,28 +606,20 @@ main <- function(args) {
     getVector(datasetFile, 'rcvdPk:vector*'),
     time < args$simTime
   )
-  sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
-    sent_broadcast_msgs, recv_broadcast_msgs,
-    sent_packages, recv_packages, all_nodes,
-    overlays, msgs_ids, algorithmN
-  )
-  # save distributions of sent/received messages (ctrl and broadcast)
-  saveDataFrame(
-    sent_recv_msgs$sentBroMsgDist, args$resultsDir,
-    'sentBroadcastMsgsDistribution', algorithmN
-  )
-  saveDataFrame(
-    sent_recv_msgs$recvBroMsgDist, args$resultsDir,
-    'recvBroadcastMsgsDistribution', algorithmN
-  )
-  saveDataFrame(
-    sent_recv_msgs$sentCtrlMsgDist, args$resultsDir,
-    'sentCtrlMsgsDistribution', algorithmN
-  )
-  saveDataFrame(
-    sent_recv_msgs$recvCtrlMsgDist, args$resultsDir,
-    'recvCtrlMsgsDistribution', algorithmN
-  )
+  # TODO verify if this distributions make sense
+  # sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
+  #   sent_broadcast_msgs, recv_broadcast_msgs,
+  #   sent_packages, recv_packages, all_nodes,
+  #   overlays, msgs_ids, algorithmN
+  # )
+  # saveDataFrame(
+  #   sent_recv_msgs$sentCtrlMsgDist, args$resultsDir,
+  #   'sentCtrlMsgsDistribution', algorithmN
+  # )
+  # saveDataFrame(
+  #   sent_recv_msgs$recvCtrlMsgDist, args$resultsDir,
+  #   'recvCtrlMsgsDistribution', algorithmN
+  # )
 
   print('DONE - Get distribution of energy consumption')
   energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
