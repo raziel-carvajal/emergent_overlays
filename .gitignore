@@ -35,9 +35,10 @@ src/emergent_overlays/out
 src/emergent_overlays/src/Makefile
 src/emergent_overlays/src/emergent_overlays
 
-src/deprecated/**/*_m.cc
-src/deprecated/**/*_m.h
-src/deprecated/**/Makefile
+**/*_m.cc
+**/*_m.h
+**/*.msg
+**/Makefile
 # node.js packages
 **/node_modules
 
