@@ -7,23 +7,31 @@ if (!process.env.INI_FILES_LIST || process.env.INI_FILES_LIST === '') {
   logI('Error: list of INI files do not exist')
   process.exit(1)
 }
-const fs = require('fs'), path = require('path')
-const fsPath = path.join(__dirname, process.env.INI_FILES_LIST)
+if (!process.env.INI_FILES_DIR || process.env.INI_FILES_DIR === '') {
+  logI("'Error: directory of configuration files wasn't defined")
+  process.exit(1)
+}
+
+const fs = require('fs')
+const path = require('path')
+const fsPath = path.join(process.env.INI_FILES_DIR, process.env.INI_FILES_LIST)
 
 var iniFiles = fs.readFileSync(fsPath)
-assert(typeof(iniFiles) === 'object')
+assert(typeof (iniFiles) === 'object')
 iniFiles = `${iniFiles}`.split('\n')
 
 var iniFilesAr = []
-for (var i = 0; i < iniFiles.length; i++)
+var i
+for (i = 0; i < iniFiles.length; i++) {
   if (iniFiles[i] !== '') iniFilesAr.push(iniFiles[i])
+}
 
 var iniReqs = 0
-const totalTaskNo = iniFilesAr.length
+var totalTaskNo = iniFilesAr.length
 
 const daemon = express()
 daemon.use(loggerD('dev'))
-daemon.use(function(req, res, next) {
+daemon.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
   next()
@@ -36,17 +44,39 @@ daemon.get('/ini_file', function (req, res) {
   iniReqs++
 })
 
-daemon.get('/all_task_done', function(req, res){
+daemon.get('/all_task_done', function (req, res) {
   res.setHeader('Content-Type', 'text/html')
   res.send(iniReqs >= totalTaskNo ? 'Y' : 'N')
 })
 
-daemon.get('/alive', function(req, res){
+daemon.get('/alive', function (req, res) {
   res.setHeader('Content-Type', 'text/html')
   res.send('Y')
 })
 
-const port = process.env.INI_F_D_PORT ? process.env.INI_F_D_PORT : 80
+// in case you want to alter the list of dispatched configuration files
+if (process.env.NEW_LIST && process.env.NEW_LIST !== '') {
+  var newList = process.env.NEW_LIST.split(' ')
+  if (newList.length !== 0) {
+    var tmpList = []
+    for (i = 0; i < newList.length; i++) {
+      try {
+        fs.readFileSync(path.join(process.env.INI_FILES_DIR, newList[i]))
+        tmpList.push(newList[i])
+        logI(`New configuration: ${newList[i]}`)
+      } catch (e) {
+        logI(`Configuration file ${newList[i]} do not exist`)
+      }
+    }
+    if (tmpList.length !== 0) {
+      logI('Updating list of configuration files')
+      iniFilesAr = tmpList
+      totalTaskNo = tmpList.length
+    }
+  }
+}
+
+const port = process.env.INI_F_D_PORT ? process.env.INI_F_D_PORT : 3005
 daemon.listen(port, function () {
-  console.log(`Server listening on port ${port}!`)
+  logI(`Server listening on port ${port}!`)
 })
