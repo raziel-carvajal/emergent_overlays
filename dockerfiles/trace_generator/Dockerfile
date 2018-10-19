@@ -41,4 +41,6 @@ RUN cd ini-f-d && npm install
 CMD workdir=`pwd` && \
   cd src/scripts/topologies && \
   ./make-topology.sh && cd ${workdir}/ini-f-d && \
-  INI_FILES_LIST=cfgs_for_workers npm start
+  INI_FILES_LIST="cfgs_for_workers" \
+  INI_FILES_DIR="../experiments/configs/built_configs" \
+  npm start
