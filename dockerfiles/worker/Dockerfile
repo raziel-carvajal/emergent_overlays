@@ -69,7 +69,8 @@ RUN cd r-packages && \
   mv bigdecimal.cc omnetpp/src/common && \
   tar czf omnetpp_0.2-1.tar.gz omnetpp && \
   rm -fr omnetpp && \
-  R CMD BATCH r-worker-pkgs.R
+  R CMD BATCH r-worker-pkgs.R && \
+  if [ ${?} != 0 ] ; then echo 'Error: during installation of R libraries'; exit 1; fi
 
 ADD src/emergent_overlays src/emergent_overlays
 ADD src/scripts/*.sh src/scripts/
