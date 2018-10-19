@@ -27,16 +27,9 @@ cat ../../results/sentBroadcastMsgsDistribution-* \
 # cat ../../results/noderoles-n_* > ../../results/noderoles
 
 echo "Plotting all broadcast metrics"
-# Rscript plot-broadcast-metrics.R \
-#   --plot-energy-consumption \
-#   --plot-coverage \
-#   --plot-packet-err \
-#   --plot-sent-msgs \
-#   --plot-recv-msgs \
-#   ../../results/
-
 Rscript plot-broadcast-metrics.R \
   --plot-energy-consumption \
+  --plot-coverage \
   --plot-packet-err \
   --plot-sent-msgs \
   --plot-recv-msgs \

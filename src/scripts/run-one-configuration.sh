@@ -35,7 +35,7 @@ opp_run -u Cmdenv -n ${NED_PATH} -l ${INET_LIB} -l ${EMOV_LIB} -c ${CONF_NAME} -
 [ ${?} -ne 0 ] && \
   echo "Error. Unsuccessful execution of experiment: ${CONF_NAME}" && exit 1
 echo "Success, correct execution of ${CONF_NAME}"
-exit 0
+
 simTime=`grep "sim-time-limit" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
 broaInt=`grep "sendInterval" ${CONF_FILE} | awk -F "uniform" '{print $2}' | awk -F "(" '{print $2}' | awk -F ")" '{print $1}'`
