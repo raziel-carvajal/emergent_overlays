@@ -37,7 +37,6 @@ src/emergent_overlays/src/emergent_overlays
 
 **/*_m.cc
 **/*_m.h
-**/*.msg
 **/Makefile
 # node.js packages
 **/node_modules
