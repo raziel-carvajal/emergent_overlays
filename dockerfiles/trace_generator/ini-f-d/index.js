@@ -76,7 +76,7 @@ if (process.env.NEW_LIST && process.env.NEW_LIST !== '') {
   }
 }
 
-const port = process.env.INI_F_D_PORT ? process.env.INI_F_D_PORT : 3005
+const port = process.env.INI_F_D_PORT ? process.env.INI_F_D_PORT : 80
 daemon.listen(port, function () {
   logI(`Server listening on port ${port}!`)
 })
