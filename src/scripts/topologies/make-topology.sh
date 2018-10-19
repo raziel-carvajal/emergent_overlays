@@ -32,7 +32,8 @@ echo "No of overlays: ${overlays}"
 # remove all configurations and topologies
 rm -rf *.pdf *.ned *.mobility *.positions output \
   ../../../experiments/networks/built_topologies/* \
-  ../../../experiments/configs/built_configs/*
+  ../../../experiments/configs/built_configs/*.ini \
+  ../../../experiments/configs/built_configs/cfgs_for_workers
 
 ./gen_mobility_trace.py --area-length ${cma}  --nodes-no ${nodes} \
   --transmission-range ${tx} --trace-size ${overlays} >output
