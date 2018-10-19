@@ -16,7 +16,7 @@
 #include <common/InteroperableBroadcast.h>
 
 #include <inet/networklayer/common/L3AddressResolver.h>
-#include <inet/transportlayer/contract/udp/UDPControlInfo_m.h>
+//#include <inet/transportlayer/contract/udp/UDPControlInfo_m.h>
 #include <inet/physicallayer/idealradio/IdealTransmitter.h>
 #include <inet/common/geometry/common/Coord.h>
 #include <inet/common/ModuleAccess.h>
