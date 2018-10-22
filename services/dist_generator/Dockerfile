@@ -1,7 +1,7 @@
 FROM r-base
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 
-WORKDIR dist_generator
+WORKDIR /usr/emrg-ovrl
 RUN apt update && apt -y --no-install-recommends install curl
 
 # setting up omnetpp library
@@ -19,6 +19,7 @@ COPY r-packages/r-worker-pkgs.R .
 RUN R CMD BATCH r-worker-pkgs.R && \
   if [ ${?} != 0 ] ; then echo 'Error: during installation of R libraries'; exit 1; fi
 
-COPY src/scripts/get-broadcast-metrics.sh .
-COPY src/scripts/get-broadcast-metrics.R .
-CMD ./get-broadcast-metrics.sh
+RUN mkdir -p src/scripts
+COPY src/scripts/get-broadcast-metrics.sh ./src/scripts/
+COPY src/scripts/get-broadcast-metrics.R ./src/scripts/
+CMD cd src/scripts && ./get-broadcast-metrics.sh
