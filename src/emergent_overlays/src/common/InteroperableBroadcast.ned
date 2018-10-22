@@ -24,7 +24,7 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool withCtrlMsg = default(false);
 
     double ctrlMsgInterval @unit(s) = uniform(9.901s, 10.0s);
-    double monitorDelay @unit(s) = 0.090s;
+    double monitorDelay @unit(s) = 0.0001s;
 
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);

@@ -149,24 +149,19 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
 
   edges <- unlist(
-    lapply(nodes, function(n) {
-      node <- nodesPositions[nodesPositions$nodeId == n, ]
-
-      nodeNeigs <- subset(
-        subset(
-          nodesPositions,
-          sqrt((node$x - x)*(node$x - x) + (node$y - y)*(node$y - y)) <= Tx
-        ),
-        nodeId != node$nodeId
-      )$nodeId
-
-      sapply(nodeNeigs, function(neig){
-        c(node$nodeId, neig)
+    sapply(nodes, function(n) {
+      node <- subset(nodesPositions, nodeId == n)
+      others<-subset(nodesPositions, nodeId != n)
+      neigs <- sapply(others$nodeId, function(id) {
+        o <- others[others$nodeId == id,]
+        ifelse(
+          sqrt((node$x - o$x)*(node$x - o$x) + (node$y - o$y)*(node$y - o$y)) <= Tx, o$nodeId, NA
+        )
       })
+      neigs <- neigs[ !is.na(neigs) ]
+      sapply(neigs, function(neig) { c(node$nodeId, neig) })
     })
   )
-  # print(edges)
-
   # TODO
   #
   # xlim <- data.frame(
@@ -198,6 +193,7 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   # )
 
   g <- graph( edges=edges )
+  # g <- make_undirected_graph(edges)
   # label whether nodes are located at the dense zone
   # TODO
   # V(g)$location <- nodesLocation
@@ -524,33 +520,37 @@ main <- function(args) {
     y = yPositions[yPositions$node_id == xPositions$node_id, ]$value
   )
   positions <- positions[order(positions$time), ]
+  positions <- subset(positions, time <= args$simTime)
+  # print(length(positions$nodeId))
+  # print(positions)
+  # stop()
 
   all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
-  sentBroMsgDist <- sapply(all_nodes, function(n){
-    length(subset(sent_broadcast_msgs, node_id == n)$value)
-  })
-  saveDataFrame(
-    data.frame(
-      data=sentBroMsgDist,
-      algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
-  )
-
-  recvBroMsgDist <- sapply(all_nodes, function(n){
-    length(subset(recv_broadcast_msgs, node_id == n)$value)
-  })
-  saveDataFrame(
-    data.frame(
-      data=recvBroMsgDist,
-      algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
-  )
+  # sentBroMsgDist <- sapply(all_nodes, function(n){
+  #   length(subset(sent_broadcast_msgs, node_id == n)$value)
+  # })
+  # saveDataFrame(
+  #   data.frame(
+  #     data=sentBroMsgDist,
+  #     algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
+  #   ),
+  #   args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+  # )
+  #
+  # recvBroMsgDist <- sapply(all_nodes, function(n){
+  #   length(subset(recv_broadcast_msgs, node_id == n)$value)
+  # })
+  # saveDataFrame(
+  #   data.frame(
+  #     data=recvBroMsgDist,
+  #     algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
+  #   ),
+  #   args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+  # )
   # nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
