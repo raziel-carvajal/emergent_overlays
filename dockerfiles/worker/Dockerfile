@@ -60,7 +60,6 @@ RUN tar xof inet-3.3.0-src.tgz && \
 
 # List of R packages to create a data-set of experimental results per dissemination protocol
 ADD r-packages r-packages
-ADD src/scripts/*.R src/scripts/
 # Installation of R packages
 RUN cd r-packages && \
   wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz && \
@@ -74,6 +73,7 @@ RUN cd r-packages && \
 
 ADD src/emergent_overlays src/emergent_overlays
 ADD src/scripts/*.sh src/scripts/
+ADD src/scripts/*.R src/scripts/
 
 RUN workdir=`pwd` && cd src/scripts && \
   ./compile_protocols.sh ${workdir}/omnetpp-4.6 ${workdir}/src/emergent_overlays
