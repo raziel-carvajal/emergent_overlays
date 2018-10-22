@@ -7,7 +7,7 @@ RUN apt update && \
   apt -y --no-install-recommends install python
 
 COPY r-packages/r-plotter-pkgs.R .
-RUN CMD BATCH r-plotter-pkgs.R
+RUN R CMD BATCH r-plotter-pkgs.R
 
 COPY src/scripts/plot-all-broadcast-metrics.sh src/scripts/
 COPY src/scripts/plot-broadcast-metrics.R src/scripts/

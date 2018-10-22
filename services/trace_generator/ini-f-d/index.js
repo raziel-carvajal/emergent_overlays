@@ -1,6 +1,8 @@
 const assert = require('assert')
 const express = require('express')
 const loggerD = require('morgan')
+const bodyParser = require('body-parser')
+
 const logI = require('debug')('ini-f-d')
 
 if (!process.env.INI_FILES_LIST || process.env.INI_FILES_LIST === '') {
@@ -28,6 +30,8 @@ for (i = 0; i < iniFiles.length; i++) {
 
 const daemon = express()
 daemon.use(loggerD('dev'))
+daemon.use(bodyParser.json())
+daemon.use(bodyParser.urlencoded({ extended: false }))
 daemon.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
