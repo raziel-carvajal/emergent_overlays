@@ -28,6 +28,7 @@
 *.out
 *.app
 *.pyc
+.env
 
 # output of compilation with opp_* tools
 src/emergent_overlays/Makefile
