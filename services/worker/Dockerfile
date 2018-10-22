@@ -46,6 +46,7 @@ RUN wget \
   https://github.com/inet-framework/inet/releases/download/v3.3.0/inet-3.3.0-src.tgz
 # Compilation of INET
 ADD services/worker/sctphdr.h .
+RUN apt -y --no-install-recommends install python
 RUN tar xof inet-3.3.0-src.tgz && \
   mv inet omnetpp-4.6/samples/ && \
   mv sctphdr.h omnetpp-4.6/samples/inet/src/inet/common/serializer/sctp/headers/ && \

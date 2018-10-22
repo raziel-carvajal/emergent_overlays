@@ -2,7 +2,7 @@ FROM r-base
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 
 WORKDIR dist_generator
-RUN apt update && apt -y --no-install-recommends curl
+RUN apt update && apt -y --no-install-recommends install curl
 
 # setting up omnetpp library
 RUN \
