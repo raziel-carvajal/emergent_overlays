@@ -7,7 +7,7 @@ services:
     env_file: .env
     image: emergent_overlays_trace_generator:latest
     build:
-      context: ./dockerfiles/trace_generator
+      context: ./services/trace_generator
     volumes:
       - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies'
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
@@ -18,18 +18,26 @@ services:
     image: emergent_overlays_worker:latest
     build:
       context: .
-      dockerfile: ./dockerfiles/worker/Dockerfile
+      dockerfile: ./services/worker/Dockerfile
     volumes:
-      - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+      - './results:/usr/emrg-ovrl/results'
+  dist_generator:
+    networks: ["emerg_ovrl"]
+    image: emergent_overlays_dist_generator:latest
+    build:
+      context: .
+      dockerfile: ./services/dist_generator/Dockerfile
+    volumes:
+      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
   plotter:
     networks: ["emerg_ovrl"]
     image: emergent_overlays_plotter:latest
     build:
       context: .
-      dockerfile: ./dockerfiles/plotter/Dockerfile
+      dockerfile: ./services/plotter/Dockerfile
     volumes:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
