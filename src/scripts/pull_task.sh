@@ -30,9 +30,12 @@ MY_TASK=`curl trace_generator/ini_file`
 echo "Chosen task: ${MY_TASK}"
 [ "${MY_TASK}" == "" ] && echo "No more task. End of ${0}" && exit 0
 
-./run-one-configuration.sh \
-  "../../experiments/configs/built_configs/${MY_TASK}" ../../omnetpp-4.6/samples/inet
+taskAbsDir="../../experiments/configs/built_configs/${MY_TASK}"
+./run-one-configuration.sh ${taskAbsDir} ../../omnetpp-4.6/samples/inet
 [ ${?} != 0 ] && \
 	echo -e "Error: execution of ${MY_TASK} failed. \nEnd of ${0}" && exit 1
+
+curl -X POST --data "task=${taskAbsDir}" trace_generator/completed_task
+[ ${?} != 0 ] && echo "/!\ End of task ${MY_TASK} wasn't announced"
 
 echo "End of ${0}"

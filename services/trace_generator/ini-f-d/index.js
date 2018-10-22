@@ -26,9 +26,6 @@ for (i = 0; i < iniFiles.length; i++) {
   if (iniFiles[i] !== '') iniFilesAr.push(iniFiles[i])
 }
 
-var iniReqs = 0
-var totalTaskNo = iniFilesAr.length
-
 const daemon = express()
 daemon.use(loggerD('dev'))
 daemon.use(function (req, res, next) {
@@ -37,21 +34,30 @@ daemon.use(function (req, res, next) {
   next()
 })
 
+daemon.get('/alive', function (req, res) {
+  res.setHeader('Content-Type', 'text/html')
+  res.send('Y')
+})
+
 daemon.get('/ini_file', function (req, res) {
   res.setHeader('Content-Type', 'text/html')
   logI(iniFilesAr)
   res.send(iniFilesAr.length !== 0 ? iniFilesAr.pop() : '')
-  iniReqs++
 })
 
-daemon.get('/all_task_done', function (req, res) {
+var completedTasks = []
+daemon.post('/completed_task', function (req, res) {
+  logI(`New completed task: ${req.body.task}`)
+  completedTasks.push(req.body.task)
   res.setHeader('Content-Type', 'text/html')
-  res.send(iniReqs >= totalTaskNo ? 'Y' : 'N')
+  res.send('Ok')
 })
 
-daemon.get('/alive', function (req, res) {
+daemon.get('/dataset_to_plot', function (req, res) {
+  logI('New request to plot broadcast metrics, current datasets:')
+  logI(completedTasks)
   res.setHeader('Content-Type', 'text/html')
-  res.send('Y')
+  res.send(completedTasks.length !== 0 ? completedTasks.pop() : '')
 })
 
 // in case you want to alter the list of dispatched configuration files
@@ -71,7 +77,7 @@ if (process.env.NEW_LIST && process.env.NEW_LIST !== '') {
     if (tmpList.length !== 0) {
       logI('Updating list of configuration files')
       iniFilesAr = tmpList
-      totalTaskNo = tmpList.length
+      logI(iniFilesAr)
     }
   }
 }
