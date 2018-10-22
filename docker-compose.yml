@@ -1,6 +1,9 @@
 version: "2.0"
+networks:
+  emerg_ovrl:
 services:
   trace_generator:
+    networks: ["emerg_ovrl"]
     env_file: .env
     image: emergent_overlays_trace_generator:latest
     build:
@@ -11,6 +14,7 @@ services:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
   worker:
+    networks: ["emerg_ovrl"]
     image: emergent_overlays_worker:latest
     build:
       context: .
@@ -21,6 +25,7 @@ services:
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
       - './results:/usr/emrg-ovrl/results'
   plotter:
+    networks: ["emerg_ovrl"]
     image: emergent_overlays_plotter:latest
     build:
       context: .

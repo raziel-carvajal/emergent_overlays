@@ -521,36 +521,33 @@ main <- function(args) {
   )
   positions <- positions[order(positions$time), ]
   positions <- subset(positions, time <= args$simTime)
-  # print(length(positions$nodeId))
-  # print(positions)
-  # stop()
 
   all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
-  # sentBroMsgDist <- sapply(all_nodes, function(n){
-  #   length(subset(sent_broadcast_msgs, node_id == n)$value)
-  # })
-  # saveDataFrame(
-  #   data.frame(
-  #     data=sentBroMsgDist,
-  #     algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
-  #   ),
-  #   args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
-  # )
-  #
-  # recvBroMsgDist <- sapply(all_nodes, function(n){
-  #   length(subset(recv_broadcast_msgs, node_id == n)$value)
-  # })
-  # saveDataFrame(
-  #   data.frame(
-  #     data=recvBroMsgDist,
-  #     algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
-  #   ),
-  #   args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
-  # )
+  sentBroMsgDist <- sapply(all_nodes, function(n){
+    length(subset(sent_broadcast_msgs, node_id == n)$value)
+  })
+  saveDataFrame(
+    data.frame(
+      data=sentBroMsgDist,
+      algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
+    ),
+    args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+  )
+
+  recvBroMsgDist <- sapply(all_nodes, function(n){
+    length(subset(recv_broadcast_msgs, node_id == n)$value)
+  })
+  saveDataFrame(
+    data.frame(
+      data=recvBroMsgDist,
+      algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
+    ),
+    args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+  )
   # nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
