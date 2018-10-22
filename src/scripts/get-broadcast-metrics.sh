@@ -21,7 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 while :
 do
   CONF_FILE=`curl trace_generator/dataset_to_plot`
-  [ ${CONF_FILE} != '' ] && break
+  [ "${CONF_FILE}" != "" ] && break
   echo "No dataset to plot, wait and ask later..."
   sleep 5
 done
