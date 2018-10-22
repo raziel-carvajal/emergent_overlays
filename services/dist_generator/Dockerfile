@@ -15,9 +15,8 @@ RUN tar xof omnetpp_0.2-1.tar.gz && \
   rm -fr omnetpp
 
 # installing required libraries
-COPY r-packages/r-worker-pkgs.R .
-RUN R CMD BATCH r-worker-pkgs.R && \
-  if [ ${?} != 0 ] ; then echo 'Error: during installation of R libraries'; exit 1; fi
+COPY r-packages/r-plotter-pkgs.R .
+RUN R CMD BATCH r-plotter-pkgs.R
 
 RUN mkdir -p src/scripts
 COPY src/scripts/get-broadcast-metrics.sh ./src/scripts/
