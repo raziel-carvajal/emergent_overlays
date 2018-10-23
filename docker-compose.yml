@@ -4,7 +4,9 @@ networks:
 services:
   trace_generator:
     networks: ["emerg_ovrl"]
-    env_file: .env
+    env_file: env
+    environment:
+      NEW_LIST: "n_393_d_0_tr_6_a_50x50_idx_0_p_cds.ini n_393_d_0_tr_6_a_50x50_idx_0_p_simplef.ini"
     image: emergent_overlays_trace_generator:latest
     build:
       context: ./services/trace_generator
