@@ -1,7 +1,7 @@
 #!/bin/bash
 while :
 do
-  continue=`curl trace_generator/all_task_done`
+  continue=`curl trace_generator/all_tasks_done`
   [ "${continue}" == "Y" ] && break
   echo "Wait for workers until they finish..."
   sleep 10
