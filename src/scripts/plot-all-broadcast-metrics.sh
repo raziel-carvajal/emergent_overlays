@@ -1,12 +1,12 @@
 #!/bin/bash
-# while :
-# do
-#   continue=`curl trace_generator/all_task_done`
-#   [ "${continue}" == "Y" ] && break
-#   echo "Wait for workers until they finish..."
-#   sleep 5
-# done
-# echo "All workes have finished"
+while :
+do
+  continue=`curl trace_generator/all_task_done`
+  [ "${continue}" == "Y" ] && break
+  echo "Wait for workers until they finish..."
+  sleep 5
+done
+echo "All workes have finished"
 cat ../../results/batteryConsumptionDistribution-* \
   > ../../results/batteryConsumptionDistribution
 #

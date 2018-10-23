@@ -23,10 +23,11 @@ assert(typeof (iniFiles) === 'object')
 iniFiles = `${iniFiles}`.split('\n')
 
 var iniFilesAr = []
-var i
+var i, totalTaskNo
 for (i = 0; i < iniFiles.length; i++) {
   if (iniFiles[i] !== '') iniFilesAr.push(iniFiles[i])
 }
+totalTaskNo = iniFilesAr.length
 
 const daemon = express()
 daemon.use(loggerD('dev'))
@@ -50,9 +51,11 @@ daemon.get('/ini_file', function (req, res) {
 })
 
 var completedTasks = []
+var completedTaskNo = 0
 daemon.post('/completed_task', function (req, res) {
   logI(`New completed task: ${req.body.task}`)
   completedTasks.push(req.body.task)
+  completedTaskNo++
   res.setHeader('Content-Type', 'text/html')
   res.send('Ok')
 })
@@ -64,6 +67,10 @@ daemon.get('/dataset_to_plot', function (req, res) {
   res.send(completedTasks.length !== 0 ? completedTasks.pop() : '')
 })
 
+daemon.get('/all_tasks_done', function (req, res) {
+  res.setHeader('Content-Type', 'text/html')
+  res.send(completedTaskNo === totalTaskNo ? 'Y' : 'N')
+})
 // in case you want to alter the list of dispatched configuration files
 if (process.env.NEW_LIST && process.env.NEW_LIST !== '') {
   var newList = process.env.NEW_LIST.split(' ')
@@ -80,8 +87,9 @@ if (process.env.NEW_LIST && process.env.NEW_LIST !== '') {
     }
     if (tmpList.length !== 0) {
       logI('Updating list of configuration files')
+      logI(tmpList)
       iniFilesAr = tmpList
-      logI(iniFilesAr)
+      totalTaskNo = iniFilesAr.length
     }
   }
 }
