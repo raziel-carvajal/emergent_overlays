@@ -30,7 +30,7 @@ install.packages(
   dependencies = TRUE
 )
 install.packages(
-  "/usr/emrg-ovrl/r-packages/omnetpp_0.2-1.tar.gz",
+  "/usr/emrg-ovrl/omnetpp_0.2-1.tar.gz",
   Sys.getenv("R_LIBS_USER"),
   repos = NULL
 )
