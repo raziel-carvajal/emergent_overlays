@@ -52,9 +52,16 @@ daemon.get('/ini_file', function (req, res) {
 
 var completedTasks = []
 var completedTaskNo = 0
-daemon.post('/completed_task', function (req, res) {
-  logI(`New completed task: ${req.body.task}`)
+
+daemon.post('/dataset', function (req, res) {
+  logI(`New dataset ready: ${req.body.task}`)
   completedTasks.push(req.body.task)
+  res.setHeader('Content-Type', 'text/html')
+  res.send('Ok')
+})
+
+daemon.post('/completed_task', function (req, res) {
+  logI('New distribution ready to plot')
   completedTaskNo++
   res.setHeader('Content-Type', 'text/html')
   res.send('Ok')

@@ -2,6 +2,7 @@
 while :
 do
   continue=`curl trace_generator/all_tasks_done`
+  echo "All task done? ${continue}"
   [ "${continue}" == "Y" ] && break
   echo "Wait for workers until they finish..."
   sleep 10

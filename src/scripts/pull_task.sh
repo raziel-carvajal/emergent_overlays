@@ -35,4 +35,8 @@ taskAbsDir="../../experiments/configs/built_configs/${MY_TASK}"
 [ ${?} != 0 ] && \
 	echo -e "Error: execution of ${MY_TASK} failed. \nEnd of ${0}" && exit 1
 
+echo "Announce that dataset is ready..."
+curl -X POST --data "task=${taskAbsDir}" trace_generator/dataset
+[ ${?} != 0 ] && echo "/!\ End of task ${MY_TASK} wasn't announced"
+
 echo "End of ${0}"

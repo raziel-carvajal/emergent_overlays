@@ -64,7 +64,7 @@ tar czf ${CONF_NAME}.tgz ${CONF_NAME}/
 mv ${CONF_NAME}.tgz ../../results
 
 echo "Announce that the datasets are ready for plotting..."
-curl -X POST --data "task=${CONF_FILE}" trace_generator/completed_task
+curl -X POST trace_generator/completed_task
 [ ${?} != 0 ] && echo "/!\ End of task ${CONF_FILE} wasn't announced"
 
 echo -e "Done - Find distributions of broadcast metrics at ../../results \nEnd of ${0}"
