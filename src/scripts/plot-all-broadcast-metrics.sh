@@ -4,7 +4,7 @@ do
   continue=`curl trace_generator/all_task_done`
   [ "${continue}" == "Y" ] && break
   echo "Wait for workers until they finish..."
-  sleep 5
+  sleep 10
 done
 echo "All workes have finished"
 cat ../../results/batteryConsumptionDistribution-* \

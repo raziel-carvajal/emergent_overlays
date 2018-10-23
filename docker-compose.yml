@@ -39,5 +39,4 @@ services:
       context: .
       dockerfile: ./services/plotter/Dockerfile
     volumes:
-      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
