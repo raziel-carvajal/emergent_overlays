@@ -573,7 +573,6 @@ main <- function(args) {
       args$resultsDir, 'batteryConsumptionDistribution', algorithmN
     )
   }
-  stop()
   if(args$wsm){
     print('DONE - Get distribution of sent broadcast messages')
     sentBroMsgDist <- sapply(all_nodes, function(n){
