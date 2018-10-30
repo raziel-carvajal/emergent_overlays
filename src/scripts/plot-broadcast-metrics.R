@@ -100,10 +100,16 @@ if (args$pc) {
     header=F
   )
   names(ds) <- c('data', 'algorithm')
-  plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules [mJ]')
+  # NOTE uncomment to get energy consumption in Joules
+  # plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules [mJ]')
+  # plot.dist.as.cdf(
+  #   ds, 'Energy consumption',
+  #   'Milli Joules [mJ]', 'CDF'
+  # )
+  plot.data.using.boxes(ds, 'Power consumption', 'Algorithm', 'Watts [W]')
   plot.dist.as.cdf(
-    ds, 'Energy consumption',
-    'Milli Joules [mJ]', 'CDF'
+    ds, 'Power consumption',
+    'Watts [W]', 'CDF'
   )
   print('DONE')
 }

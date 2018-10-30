@@ -25,6 +25,8 @@ do
   echo "No dataset to plot, wait and ask later..."
   sleep 5
 done
+# TODO uncomment to perform unit tests
+# CONF_FILE=${1}
 echo "Getting broadcast metrics from configuration: ${CONF_FILE}"
 if [ ! -f "${CONF_FILE}" ]; then
  echo "Error: configuration file ${CONF_FILE} doesn't exist"
@@ -53,7 +55,12 @@ Rscript get-broadcast-metrics.R \
   --broadcast-interval-lim-sup ${broaT1} \
   --transmission-range ${tx} \
   --results-dir ../../results \
-  ${CONF_NAME} ${CONF_FILE}
+  ${CONF_NAME} ${CONF_FILE} \
+  --with-energy-consumption \
+  --with-coverage \
+  --with-packet-err \
+  --with-sent-msgs \
+  --with-recv-msgs
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}

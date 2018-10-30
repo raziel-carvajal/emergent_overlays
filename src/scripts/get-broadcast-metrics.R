@@ -10,27 +10,42 @@ get.arguments <- function() {
   parser <- ArgumentParser(
     description='Get a distribution per broadcast metric from Omnet++ datasets.'
   )
-  parser$add_argument(
-    'configName', type='character',
+
+  parser$add_argument('configName', type='character',
     help='Configuration ID at INI file.')
-  parser$add_argument(
-    'datasetFile', type='character',
+  parser$add_argument('datasetFile', type='character',
     help='Dataset of an experiment with Omnet++/INET (no extension).')
-  parser$add_argument(
-    '--simulation-time', dest='simTime', type='double',
-    help='Duration of experiment in seconds.')
-  parser$add_argument(
-    '--broadcast-interval-lim-inf', dest='broaIntT0', type='double')
-  parser$add_argument(
-    '--broadcast-interval-lim-sup', dest='broaIntT1', type='double')
-  parser$add_argument('--results-dir', dest='resultsDir', type='character')
-  parser$add_argument('--transmission-range', dest='tx', type='integer',
-    help='Nodes transmission range.')
+
+  parser$add_argument('--simulation-time',
+    dest='simTime', type='double', help='Duration of experiment in seconds.')
+  parser$add_argument('--broadcast-interval-lim-inf',
+    dest='broaIntT0', type='double')
+  parser$add_argument('--broadcast-interval-lim-sup',
+    dest='broaIntT1', type='double')
+  parser$add_argument('--results-dir',
+    dest='resultsDir', type='character')
+  parser$add_argument('--transmission-range',
+    dest='tx', type='integer', help='Nodes transmission range.')
+
+  parser$add_argument('--with-energy-consumption',
+    dest='wpc', action='store_true')
+  parser$add_argument('--with-coverage',
+    dest='wco', action='store_true')
+  parser$add_argument('--with-packet-err',
+    dest='wpe', action='store_true')
+  parser$add_argument('--with-sent-msgs',
+    dest='wsm', action='store_true')
+  parser$add_argument('--with-recv-msgs',
+    dest='wrm', action='store_true')
+
   # center of dense zone
-  parser$add_argument('--dense-zone-at-x', dest='dzx', type='double')
-  parser$add_argument('--dense-zone-at-y', dest='dzy', type='double')
+  parser$add_argument('--dense-zone-at-x',
+    dest='dzx', type='double')
+  parser$add_argument('--dense-zone-at-y',
+    dest='dzy', type='double')
   # dense zone width
-  parser$add_argument('--dense-zone-w', dest='dzw', type='double')
+  parser$add_argument('--dense-zone-w',
+    dest='dzw', type='double')
   parser$parse_args()
 }
 
@@ -316,6 +331,19 @@ getEnergyConsumption <- function(dataset_loc, node_ids){
   })
 }
 
+getWattsFromSentRecvMsgs <- function(sentMsgs, recvMsgs, nodes){
+  wattsFromEmi <- sapply(nodes, function(n){
+    length(subset(sentMsgs, node_id == n)$value) * 0.1
+  })
+  wattsFromRec <- sapply(nodes, function(n){
+    length(subset(recvMsgs, node_id == n)$value) * 0.01
+  })
+  data.frame(
+    recCost=unlist(wattsFromRec),
+    emiCost=unlist(wattsFromEmi)
+  )
+}
+
 # this code is followed IN DATASET to label nodes that forward messages:
 #   0 => SIMPLE
 #   1 => CDS RELAY
@@ -527,27 +555,51 @@ main <- function(args) {
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
-  sentBroMsgDist <- sapply(all_nodes, function(n){
-    length(subset(sent_broadcast_msgs, node_id == n)$value)
-  })
-  saveDataFrame(
-    data.frame(
-      data=sentBroMsgDist,
-      algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
-  )
-
-  recvBroMsgDist <- sapply(all_nodes, function(n){
-    length(subset(recv_broadcast_msgs, node_id == n)$value)
-  })
-  saveDataFrame(
-    data.frame(
-      data=recvBroMsgDist,
-      algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
-  )
+  if(args$wpc){
+    print('Get distribution of energy consumption')
+    # energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
+    energy_consumption <- getWattsFromSentRecvMsgs(
+      sent_broadcast_msgs, recv_broadcast_msgs, all_nodes
+    )
+    saveDataFrame(
+      # data.frame(
+      #   data=energy_consumption,
+      #   algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
+      # ),
+      data.frame(
+        data=energy_consumption$recCost + energy_consumption$emiCost,
+        algo=rep(algorithmN, length(energy_consumption$recCost)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'batteryConsumptionDistribution', algorithmN
+    )
+  }
+  stop()
+  if(args$wsm){
+    print('DONE - Get distribution of sent broadcast messages')
+    sentBroMsgDist <- sapply(all_nodes, function(n){
+      length(subset(sent_broadcast_msgs, node_id == n)$value)
+    })
+    saveDataFrame(
+      data.frame(
+        data=sentBroMsgDist,
+        algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+    )
+  }
+  if(args$wrm){
+    print('DONE - Get distribution of received broadcast messages')
+    recvBroMsgDist <- sapply(all_nodes, function(n){
+      length(subset(recv_broadcast_msgs, node_id == n)$value)
+    })
+    saveDataFrame(
+      data.frame(
+        data=recvBroMsgDist,
+        algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+    )
+  }
   # nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
@@ -594,15 +646,15 @@ main <- function(args) {
   #   get.node.roles(overlays, msgs_ids, algorithmN),
   #   args$resultsDir, 'noderoles', algorithmN
   # )
-  print('DONE - Get distribution of sent/received messages')
-  sent_packages <- subset(
-    getVector(datasetFile, 'sentPk:vector*'),
-    time < args$simTime
-  )
-  recv_packages <- subset(
-    getVector(datasetFile, 'rcvdPk:vector*'),
-    time < args$simTime
-  )
+  # print('DONE - Get distribution of sent/received messages')
+  # sent_packages <- subset(
+  #   getVector(datasetFile, 'sentPk:vector*'),
+  #   time < args$simTime
+  # )
+  # recv_packages <- subset(
+  #   getVector(datasetFile, 'rcvdPk:vector*'),
+  #   time < args$simTime
+  # )
   # TODO verify if this distributions make sense
   # sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
   #   sent_broadcast_msgs, recv_broadcast_msgs,
@@ -618,15 +670,6 @@ main <- function(args) {
   #   'recvCtrlMsgsDistribution', algorithmN
   # )
 
-  print('DONE - Get distribution of energy consumption')
-  energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
-  saveDataFrame(
-    data.frame(
-      data=energy_consumption,
-      algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'batteryConsumptionDistribution', algorithmN
-  )
   # TODO
   # print("DONE - Get relative error of density")
   # try(
@@ -641,28 +684,32 @@ main <- function(args) {
   #     args$resultsDir, 'densityRelativeError', algorithmN
   #   )
   # )
-  print("DONE - Get packet error rate")
-  pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")
-  saveDataFrame(
-    data.frame(
-      data=pktErrorRate$data * 100 , # in percetage
-      algo=rep(algorithmN, length(pktErrorRate$data)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'packetErrorRate', algorithmN
-  )
-  print("DONE - Get network coverage")
-  expectedCoverage <- getExpectedCoveredNodesNo(overlays)
-  measuredCoverage <- sapply(msgs_ids, function(msg) {
-    length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
-  })
-  coverage <- (measuredCoverage / expectedCoverage) * 100
-  saveDataFrame(
-    data.frame(
-      data=coverage,
-      algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'coverage', algorithmN
-  )
+  if(args$wpe){
+    print("DONE - Get packet error rate")
+    pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")
+    saveDataFrame(
+      data.frame(
+        data=pktErrorRate$data * 100 , # in percetage
+        algo=rep(algorithmN, length(pktErrorRate$data)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'packetErrorRate', algorithmN
+    )
+  }
+  if(args$wco){
+    print("DONE - Get network coverage")
+    expectedCoverage <- getExpectedCoveredNodesNo(overlays)
+    measuredCoverage <- sapply(msgs_ids, function(msg) {
+      length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
+    })
+    coverage <- (measuredCoverage / expectedCoverage) * 100
+    saveDataFrame(
+      data.frame(
+        data=coverage,
+        algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'coverage', algorithmN
+    )
+  }
   # TODO
   # print('Get distribution of broadcast session time')
   # bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
