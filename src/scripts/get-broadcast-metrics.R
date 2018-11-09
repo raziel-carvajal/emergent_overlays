@@ -333,9 +333,11 @@ getEnergyConsumption <- function(dataset_loc, node_ids){
 
 getWattsFromSentRecvMsgs <- function(sentMsgs, recvMsgs, nodes){
   wattsFromEmi <- sapply(nodes, function(n){
+    # this constant is the cost in watts to send one message
     length(subset(sentMsgs, node_id == n)$value) * 0.1
   })
   wattsFromRec <- sapply(nodes, function(n){
+    # this constant is the cost in watts to receive one message
     length(subset(recvMsgs, node_id == n)$value) * 0.01
   })
   data.frame(
@@ -556,16 +558,20 @@ main <- function(args) {
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
 
   if(args$wpc){
-    print('Get distribution of energy consumption')
+    # NOTE deprecated
     # energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
-    energy_consumption <- getWattsFromSentRecvMsgs(
-      sent_broadcast_msgs, recv_broadcast_msgs, all_nodes
-    )
-    saveDataFrame(
+    # saveDataFrame(
       # data.frame(
       #   data=energy_consumption,
       #   algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
       # ),
+      #args$resultsDir, 'batteryConsumptionDistribution', algorithmN
+    # )
+    print('Get distribution of energy consumption')
+    energy_consumption <- getWattsFromSentRecvMsgs(
+      sent_broadcast_msgs, recv_broadcast_msgs, all_nodes
+    )
+    saveDataFrame(
       data.frame(
         data=energy_consumption$recCost + energy_consumption$emiCost,
         algo=rep(algorithmN, length(energy_consumption$recCost)), stringsAsFactors=F
@@ -645,30 +651,6 @@ main <- function(args) {
   #   get.node.roles(overlays, msgs_ids, algorithmN),
   #   args$resultsDir, 'noderoles', algorithmN
   # )
-  # print('DONE - Get distribution of sent/received messages')
-  # sent_packages <- subset(
-  #   getVector(datasetFile, 'sentPk:vector*'),
-  #   time < args$simTime
-  # )
-  # recv_packages <- subset(
-  #   getVector(datasetFile, 'rcvdPk:vector*'),
-  #   time < args$simTime
-  # )
-  # TODO verify if this distributions make sense
-  # sent_recv_msgs <- distribution.sent_recv.broadcast_control.messages(
-  #   sent_broadcast_msgs, recv_broadcast_msgs,
-  #   sent_packages, recv_packages, all_nodes,
-  #   overlays, msgs_ids, algorithmN
-  # )
-  # saveDataFrame(
-  #   sent_recv_msgs$sentCtrlMsgDist, args$resultsDir,
-  #   'sentCtrlMsgsDistribution', algorithmN
-  # )
-  # saveDataFrame(
-  #   sent_recv_msgs$recvCtrlMsgDist, args$resultsDir,
-  #   'recvCtrlMsgsDistribution', algorithmN
-  # )
-
   # TODO
   # print("DONE - Get relative error of density")
   # try(
