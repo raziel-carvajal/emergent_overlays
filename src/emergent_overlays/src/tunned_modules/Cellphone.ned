@@ -23,6 +23,5 @@ module Cellphone extends AdhocHost
         wlan[*].radioType = default("IdealRadio");
         energyStorageType = default("SimpleEnergyStorage");
         wlan[*].radio.energyConsumerType = default("ReducedStateBasedEnergyConsumer");
-        mobilityType = "LinearMobility";
-        mobility.isMoving = false;
+        mobilityType = default("LinearMobility");
 }

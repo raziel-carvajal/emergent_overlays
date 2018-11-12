@@ -55,7 +55,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     L3Address localAddress;
     L3Address broadcastAddress;
 
-    IMobility* mobilityModel;
+    Coord currentPosition;
 
     // methods that sub-classes may override
     virtual void onBroadcastMsg(cPacket* pk);
@@ -89,6 +89,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
     cMessage* monitorTimer = nullptr;
   private:
+
+    IMobility* mobilityModel;
 
     cMessage* ctrlMsgTimer = nullptr;
     cMessage* haltSimTimer = nullptr;

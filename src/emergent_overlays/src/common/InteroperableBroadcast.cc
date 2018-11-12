@@ -128,9 +128,9 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       }
         break;
       case Timer::MONITOR: {
-        Coord p = mobilityModel->getCurrentPosition();
-        emit(positionAtX, p.x);
-        emit(positionAtY, p.y);
+        currentPosition = mobilityModel->getCurrentPosition();
+        emit(positionAtX, currentPosition.x);
+        emit(positionAtY, currentPosition.y);
         // TODO store density
         // emit(<density>, ?);
       }

@@ -197,9 +197,8 @@ cPacket* MPR::getCtrlMsg() {
   InteroperableBroadcast::addSender(ctrlMsg);
   InteroperableBroadcast::addSendersRunningAlgo(ctrlMsg);
 
-  Coord p = InteroperableBroadcast::mobilityModel->getCurrentPosition();
-  ctrlMsg->setSenderPosAtX(p.x);
-  ctrlMsg->setSenderPosAtY(p.y);
+  ctrlMsg->setSenderPosAtX(InteroperableBroadcast::currentPosition.x);
+  ctrlMsg->setSenderPosAtY(InteroperableBroadcast::currentPosition.y);
 
   MprNeighbors myNeigs;
   MprCoord positionsAtX;
