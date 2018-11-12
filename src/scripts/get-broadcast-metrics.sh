@@ -18,6 +18,7 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
+# [BEGIN] Comment to perform unit test
 while :
 do
   CONF_FILE=`curl trace_generator/dataset_to_plot`
@@ -25,6 +26,7 @@ do
   echo "No dataset to plot, wait and ask later..."
   sleep 5
 done
+# [END] Comment to perform unit test
 # TODO uncomment to perform unit tests
 # CONF_FILE=${1}
 echo "Getting broadcast metrics from configuration: ${CONF_FILE}"

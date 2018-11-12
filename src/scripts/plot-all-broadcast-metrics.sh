@@ -1,4 +1,5 @@
 #!/bin/bash
+# [BEGIN] Comment to perform unit test
 while :
 do
   continue=`curl trace_generator/all_tasks_done`
@@ -7,6 +8,7 @@ do
   echo "Wait for workers until they finish..."
   sleep 10
 done
+# [END] Comment to perform unit test
 echo "All workes have finished"
 cat ../../results/batteryConsumptionDistribution-* \
   > ../../results/batteryConsumptionDistribution
