@@ -69,6 +69,7 @@ src/scripts/debugging/logs/n_*
 #NON USED DATASETS
 results/*
 results/*.*
+!results/.nothing
 
 #ICDCS paper
 papers/ICDCS2017/main.aux
