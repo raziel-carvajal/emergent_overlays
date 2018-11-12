@@ -47,6 +47,7 @@ experiments/configs/built_configs/*
 experiments/configs/built_configs/*.*
 !experiments/configs/built_configs/.nothing
 experiments/configs/unit-tests/results
+experiments/configs/**/results
 
 experiments/networks/built_topologies/*
 experiments/networks/built_topologies/*.*
