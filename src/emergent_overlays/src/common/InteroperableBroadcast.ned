@@ -24,7 +24,9 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool withCtrlMsg = default(false);
 
     double ctrlMsgInterval @unit(s) = uniform(9.901s, 10.0s);
-    double monitorDelay @unit(s) = 0.0001s;
+    double monitorDelay @unit(s) = default(0.0001s);
+    double borderDetectorDelay @unit(s) = uniform(0.001s, 0.099s);
+    int hopsToLive = default(2);
 
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);
@@ -32,15 +34,17 @@ simple InteroperableBroadcast extends UDPBasicApp
     @signal[sentBroadcastMsg](type=int);
     @statistic[sentBroadcastMsg](source=sentBroadcastMsg; record=vector; interpolationmode=none);
 
-	@signal[positionAtX](type=double);
+    @signal[positionAtX](type=double);
     @statistic[positionAtX](source=positionAtX; record=vector; interpolationmode=none);
-    
+
     @signal[positionAtY](type=double);
     @statistic[positionAtY](source=positionAtY; record=vector; interpolationmode=none);
-    
-//    @signal[forward_type](type=double);
-//    @statistic[forward_type](title="Type of message forwarding"; record=vector; source=forward_type);
 
+    @signal[forward_type](type=int);
+    @statistic[forward_type](source=forward_type; record=vector; interpolationmode=none);
+//    
+//    @signal[density_approximation](type=double);
+//    @statistic[density_approximation](source=density_approximation; record=vector; interpolationmode=none);
 
     // set values of UDPBasicApp
     localPort = default(10);

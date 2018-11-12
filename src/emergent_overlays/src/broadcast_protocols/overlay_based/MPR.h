@@ -25,15 +25,22 @@ using namespace std;
 class MPR : public InteroperableBroadcast {
   private:
     enum MprTimers {
-      SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG
+      SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
     int sentBootEvents = 0;
+
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
+    cMessage* fwdBrMsgTimer = nullptr;
+
     virtual void onBroadcastMsg(cPacket* pk);
     virtual void onControlMsg(cPacket* pk);
-    virtual void cancelSelfEvents();
+    virtual void cancelSelfEvents() {
+      cancelAndDelete(buildCdsTimer);
+      cancelAndDelete(sCtrlMsgTimer);
+      cancelAndDelete(fwdBrMsgTimer);
+    }
 
     // variables/methods to implement MPR V0.0.1
     bool first_exec = true;
@@ -64,7 +71,6 @@ class MPR : public InteroperableBroadcast {
         return false;
     }
     set<string> compute_mpr();
-    cPacket* buildBroadcastMsg();
     cPacket* buildBroadcastMsg(const char* header);
 
   protected:

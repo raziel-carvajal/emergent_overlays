@@ -25,80 +25,102 @@ using namespace std;
 
 class InteroperableBroadcast : public UDPBasicApp {
 
-	protected:
-		enum UdpPacket {
-			BROADCAST = 1, CTRL, BORDER
-		};
+  protected:
+    // define a new implementation for some methods of super class (INET::UDPBasicApp)
+    virtual void initialize(int stage) override;
+    virtual void processStart() override;
+    virtual void sendPacket() override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void processPacket(cPacket *msg) override;
 
-		enum Timer {
-			HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MONITOR
-		};
+    enum UdpPacket {
+      BROADCAST = 1, CTRL, BORDER
+    };
+    enum Timer {
+      HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MONITOR, BORDER_DETECTOR
+    };
+    enum ForwardType {
+      SIMPLE, CDS_RELAY, BORDER_NODE
+    };
+    // attributes that are accessible from subclasses of InteroperableBroadcast
+    bool amIborderNode = false;
 
-		// define a new implementation for these methods of class INET::UDPBasicApp
-		virtual void initialize(int stage) override;
-		virtual void processStart() override;
-		virtual void sendPacket() override;
-		virtual void handleMessageWhenUp(cMessage *msg) override;
-		virtual void processPacket(cPacket *msg) override;
+    double transRadious;
 
-		double transRadious;
-		string nodeId;
-		set<string> receivedMsg;
+    string nodeId;
 
-		L3Address localAddress;
-		L3Address broadcastAddress;
+    set<string> receivedMsg;
+    set<string> receivedBorderMsgs;
 
-		IMobility* mobilityModel;
+    L3Address localAddress;
+    L3Address broadcastAddress;
 
-		// methods that sub-classes may override
-		virtual void onBroadcastMsg(cPacket* pk);
-		virtual void onControlMsg(cPacket* pk);
-		virtual void cancelSelfEvents();
+    IMobility* mobilityModel;
 
-		void fwdBroadcastMsg(cPacket* pk);
+    // methods that sub-classes may override
+    virtual void onBroadcastMsg(cPacket* pk);
+    virtual void onControlMsg(cPacket* pk);
+    virtual void cancelSelfEvents();
+    virtual cPacket* getCtrlMsg();
 
-		virtual cPacket* getCtrlMsg();
-		//
-		int getMsgId(const char* msgHeader);
+    // signals for this class
+    static simsignal_t rcvdBroadcastMsg;
+    static simsignal_t sentBroadcastMsg;
+    static simsignal_t positionAtX;
+    static simsignal_t positionAtY;
+    static simsignal_t forward_type;
+//    static simsignal_t density_approximation;
 
-		// signals for this class
-		static simsignal_t rcvdBroadcastMsg;
-		static simsignal_t sentBroadcastMsg;
-		static simsignal_t positionAtX;
-		static simsignal_t positionAtY;
+    void fwdBroadcastMsg(cPacket* pk);
+    int getMsgId(const char* msgHeader);
+    void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
+    void addPacketType(cPacket* msg, long t);
+    void addSender(cPacket* pk);
+    void addSendersRunningAlgo(cPacket* pk);
 
-		void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
-		void addPacketType(cPacket* msg, long t);
-		void addSender(cPacket* pk);
+    template<typename T> bool isPacket(cPacket* pkt, function<void(const T*)> action) {
+      T* t = dynamic_cast<T*>(pkt);
+      if (t != nullptr) {
+        action(t);
+        return true;
+      } else {
+        return false;
+      }
+    }
+    cMessage* monitorTimer = nullptr;
+  private:
 
-		template<typename T> bool isPacket(cPacket* pkt, function<void(const T*)> action) {
-			T* t = dynamic_cast<T*>(pkt);
-			if (t != nullptr) {
-				action(t);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		cMessage* monitorTimer = nullptr;
-	private:
+    cMessage* ctrlMsgTimer = nullptr;
+    cMessage* haltSimTimer = nullptr;
+    cMessage* broaMsgTimer = nullptr;
 
-		cMessage* ctrlMsgTimer = nullptr;
-		cMessage* haltSimTimer = nullptr;
-		cMessage* broaMsgTimer = nullptr;
+    set<string> knownNeigs;
 
+    L3Address getSrcAddress(cPacket *msg);
 
+    string runningAlgorithm;
 
-		L3Address getSrcAddress(cPacket *msg);
+    map<string, set<string>> knownForeignNodes;
+    map<string, cMessage*> borderNodeTimers;
 
-		bool isSelfTimer(cMessage *msg);
+    bool isSelfTimer(cMessage *msg);
+    bool isBorderDetectorTimer(cMessage *msg);
+    void detectBorderNode(string sender, string sendersAlgo);
+    cPacket* makeBorderMessage(const char* foreignAlgo, const char* chosenNode, double hopsToLive);
 
-	public:
-		InteroperableBroadcast() {
-		}
-		~InteroperableBroadcast() {
-		}
+    // misc functions
+    string splitString(string substr, string target) {
+      return target.substr(substr.size(), target.size() - substr.size());
+    }
+    string removeQuotes(string target) {
+      return target.substr(1, target.size() - 2);
+    }
+
+  public:
+    InteroperableBroadcast() {
+    }
+    ~InteroperableBroadcast() {
+    }
 };
 
 #endif /* INTEROPERABLEBROADCAST_H_ */
