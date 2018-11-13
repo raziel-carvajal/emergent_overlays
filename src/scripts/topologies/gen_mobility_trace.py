@@ -17,6 +17,8 @@ FIRST_PLOT_NAME = 'Position_'
 MOBILITY_FILE= 'mobility-trace'
 DIST_PER_ZONE= 'distribution-per-density'
 
+allPositions = {}
+
 def getArgs() :
 	p = argparse.ArgumentParser(description='creates a mobility trace of a '+
 		'wireless topology with 2 zones (dense and sparse)')
@@ -27,7 +29,10 @@ def getArgs() :
 	p.add_argument('--transmission-range', dest='tx', type=int, default=10,
 		help='transmission range of each node')
 	p.add_argument('--trace-size', dest='trace_size', type=int, default=50,
-		help='number of wireless topologies formed when nodes move')
+		help='number of wireless topologies formed every time nodes move')
+	p.add_argument('--motion-freq', dest='motion_freq', type=float, default=1.0,
+		help='frequency (in seconds) at which nodes move; every motion_freq seconds \
+		all nodes move following the Levy-walk model')
 	# proportion of denze zone (in sqrt meters) to take into account
 	p.add_argument('--dense-zone-f', dest='dense_zone_f', type=float, default=0.8,
 		help='Proportion of dense zone to take into consideration. Values varies \
@@ -139,7 +144,7 @@ def getCoordsAt(center, width, length, coords) :
            ( v['y'] >= limInfAtY and v['y'] <= limSupAtY ) : result[k] = v
     return result
 
-def makeMobilityTrace(coords, traceLen, Tx, cma, srcNodePo, srcNodeId) :
+def makeMobilityTrace(coords, traceLen, Tx, cma, srcNodePo, srcNodeId, motionIndx) :
     t = 1
     while t < traceLen :
         newCoords = {}
@@ -182,7 +187,8 @@ def makeMobilityTrace(coords, traceLen, Tx, cma, srcNodePo, srcNodeId) :
         # create and plot new wireless topology
         o = getOverlay(newCoords, Tx); plotOverlay(o, newCoords, cma.length, t)
         # add a new stet in the mobility trace
-        savePositions(newCoords) ; t += 1
+        allPositions[motionIndx] = newCoords; motionIndx += 1
+        t += 1
 
 def makeStep(mobMod, coords, centeredAt, dimension) :
     p_i = [ (k[0], k[1]) for k in next(mobMod) ]
@@ -226,12 +232,21 @@ def withPartitions(g) :
 		r = False
 	return r
 
-def savePositions(positions) :
-    sortedKeys = sorted( positions.keys() )
-    with open(MOBILITY_FILE, 'a') as f:
-    	for i in range(0, len(sortedKeys)) :
-            v = positions[ sortedKeys[i] ]
-            f.write(str(v['x']) + " " + str(v['y']) + "\n")
+def savePositions(motion_freq, nodesNo) :
+	allPositionsAsStr = {}
+	for i in range(0, len(allPositions)) :
+		coords = allPositions[i]
+		for m in range(1, nodesNo + 1) :
+			coord = coords[m]
+			trace = "%f %f %f" % (motion_freq * i, coord['x'], coord['y'])
+			if m in allPositionsAsStr :
+				allPositionsAsStr[m] += " " + trace
+			else :
+				allPositionsAsStr[m] = trace
+	with open(MOBILITY_FILE, 'a') as f:
+		f.write("\n")
+		for k in range(1, nodesNo + 1) :
+			f.write(allPositionsAsStr[k] + "\n")
 
 def addConnectEntry(fileName, entry) :
 	with open(fileName, 'a') as f :
@@ -256,16 +271,18 @@ if __name__ == '__main__':
     plotOverlay(o, coords, comArea.length, 0)
     savePosPerZone(coords, comArea)
     args.nodes_no = len(coords)
-    # header of mobility trace
-    with open(MOBILITY_FILE, 'a') as f:
-    	f.write(str(args.nodes_no) + "\n" + str(WAITING_TIME) + "\n")
-    # store first entry in the mobility trace
-    savePositions(coords)
-
     # source node remains fixed within the center of the dense area
     srcNodeId = args.nodes_no ; srcNodePo = coords[srcNodeId]
     del coords[srcNodeId]
+    motionIndx = 0
+    allPositions[motionIndx] = coords
+    allPositions[motionIndx][srcNodeId] = srcNodePo
+    motionIndx += 1
     # NOTE REQUIRED AS OUTPUT
     print 'SOURCE_NODE_ID', srcNodeId
     # store the rest of entries of the mobility trace
-    makeMobilityTrace(coords, args.trace_size, args.tx, comArea, srcNodePo, srcNodeId)
+    makeMobilityTrace(coords, args.trace_size, args.tx, comArea, srcNodePo, \
+        srcNodeId, motionIndx)
+    # keep all positions in a file following the BonnMotion format
+    # see more at https://omnetpp.org/doc/inet/api-current/neddoc/inet.mobility.single.BonnMotionMobility.html
+    savePositions(args.motion_freq, args.nodes_no)

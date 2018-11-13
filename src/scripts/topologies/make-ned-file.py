@@ -24,21 +24,22 @@ def getArgs() :
 	p.add_argument('--transmission-range', dest='Tx', type=int, default=15,
 		help='transmission range of each node')
 	p.add_argument('--mobility-trace', dest='mobTrace', type=str,
-		default="mobility-trace", help='file with a mobiliy trace of nodes')
+		default="distribution-per-density", help='file with a mobiliy trace of nodes')
+	p.add_argument('--nodes', dest='nodes', type=int,
+		help='nodes number in mobility trace')
 	return p.parse_args()
 
 def getCoordinate(coorAsStr) :
-	return (float(coorAsStr.split(" ")[0]), float(coorAsStr.split(" ")[1]))
+	return (float(coorAsStr.split(" ")[1]), float(coorAsStr.split(" ")[2]))
 
 if __name__ == '__main__' :
 	args = getArgs()
 	with open(args.mobTrace, 'r') as f :
-		nodes_no = int(f.readline()); f.readline()
-		initialPos = [ getCoordinate(f.readline()) for i in range(0, nodes_no)]
-	nedFilename = 'n_' + str(nodes_no) + '_d_0_tr_' + str(args.Tx) + '_a_' +\
+		initialPos = [ getCoordinate(f.readline()) for i in range(0, args.nodes)]
+	nedFilename = 'n_' + str(args.nodes) + '_d_0_tr_' + str(args.Tx) + '_a_' +\
 		str(args.cma_w) + 'x' + str(args.cma_w) + '_idx_0_p_'
 	content = NED_HEAD + 'network ' + nedFilename + '{\n' + NED_MIDD
-	for i in range(1, nodes_no + 1) :
+	for i in range(1, args.nodes + 1) :
 		content += "host{0}: Cellphone ".format(i) + "{@display(" + '"' +\
 			"p={0},{1}".format(initialPos[i - 1][0], initialPos[i - 1][1]) + '"' +\
 			");}\n"

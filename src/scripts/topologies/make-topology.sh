@@ -36,7 +36,8 @@ rm -rf *.pdf *.ned *.mobility *.positions output \
   ../../../experiments/configs/built_configs/cfgs_for_workers
 
 ./gen_mobility_trace.py --area-length ${cma}  --nodes-no ${nodes} \
-  --transmission-range ${tx} --trace-size ${overlays} >output
+  --transmission-range ${tx} --trace-size ${overlays} \
+  --motion-freq ${NODES_MOV_FREQ} >output
 
 s=""
 for f in `ls -t *.pdf`; do
@@ -45,7 +46,10 @@ done
 pdfunite ${s} all.pdf
 rm -f Position_*.pdf
 
-./make-ned-file.py --cma-w ${cma} --transmission-range ${tx}
+nodesNoAtTrace=`wc -l mobility-trace | awk '{print $1}'`
+let nodesNoAtTrace=nodesNoAtTrace-1
+./make-ned-file.py --cma-w ${cma} --transmission-range ${tx} \
+	--nodes ${nodesNoAtTrace}
 
 mobF=`ls *.ned | awk -F ".ned" '{ print $1}'`
 mv mobility-trace "${mobF}.mobility"
@@ -64,32 +68,39 @@ echo "X_POSITION_OF_CMA_CENTER = ${cenPosXandY}"
 echo "   WIDTH_OF_DENSE_REGION = ${denseAreaWi}"
 rm -f output
 
-# rm -f "../../../experiments/configs/in_common/config.xml"
-# cat "../../../experiments/configs/in_common/base_config" >config.xml
-# algoClassName=`grep ${ALGO_AT_DENSE_AREA}  ${algoClassMap} | awk -F "=" '{print $2}'`
-# sed -i -e "s/ALGO_AT_DENSE_AREA/${algoClassName}/" config.xml
-# sed -i -e "s/ALGO_AT_SPARSE_AREA/${algoClassName}/" config.xml
-# sed -i -e "s/CTRL_MSG_FREQ/${ctrlMsgInterval}/" config.xml
-# mv config.xml "../../../experiments/configs/in_common"
-
 ctrlMsgInterval=`bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
 echo "Ctrl message interval: ${ctrlMsgInterval}"
 broaMsgInterval=`bc <<< "scale=2; (${SIMULATION_TIME} * 60 ) / ${BROADCAST_MSGS_NO}"`
 # broaMsgInterval=`bc <<< "scale=2; x=(${SIMULATION_TIME} * 60 )/${BROADCAST_MSGS_NO}; if(x < 1.0) print "0",x else print x ;"`
 echo "Broadcast message interval ${broaMsgInterval}"
 
-# NOTE 2s more were added to allow experiment end without problems
-SIMULATION_TIME=`bc<<<"scale=2; ${SIMULATION_TIME} * 60 + 2"`
+# NOTE 1s more were added to allow experiment end without problems
+SIMULATION_TIME=`bc<<<"scale=2; ${SIMULATION_TIME} * 60 + 1"`
+
+# configuration of mobility model when ${WITH_MOBILITY} = TRUE
+mobModel="# mobility model\n"
+if [[ "${WITH_MOBILITY}" == "true" ]]; then
+	mobModel=${mobModel}"*.host*.mobilityType = \"BonnMotionMobility\"\n"
+	traceFilePath="../../experiments/networks/built_topologies/"
+	mobModel=${mobModel}"*.host*.mobility.traceFile = \"${traceFilePath}${mobF}.mobility\"\n"
+	for (( i = 1; i <= ${nodesNoAtTrace}; i++ )); do
+		mobModel=${mobModel}"*.host${i}.mobility.nodeId = ${i}\n"
+	done
+fi
+mobModel=${mobModel}"# concat all parameters of each algorithm\n"
 
 cfgsForWorkers=""
+# default configuration of INI file
 cfgFile='../../../experiments/configs/in_common/common.ini'
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 algoClassMap="../../../experiments/configs/in_common/algo_class_mapping"
 for algo in ${algorithms} ; do
-  cat "${cfgFile}" > iniFile
-  #
+  # add configuration of exepriment
+	cat "${cfgFile}" > iniFile
+	echo -e ${mobModel} >> iniFile
+
   sed -i -e "s/CONFIGURATION_NAME/${mobF}${algo}/" iniFile
-  sed -i -e "s/TOPOLOGY_NAME/${mobF}/" iniFile
+	sed -i -e "s/TOPOLOGY_NAME/${mobF}/" iniFile
   sed -i -e "s/SIMULATION_TIME/${SIMULATION_TIME}s/" iniFile
   sed -i -e "s/NODES_TRANSMISSION_RANGE/${NODES_TRANSMISSION_RANGE}m/" iniFile
   sed -i -e "s/SOURCE_NODE_ID/host${srcNodeId}/" iniFile
@@ -103,7 +114,6 @@ for algo in ${algorithms} ; do
   sed -i -e "s/BROADCAST_MSG_INTERVAL/uniform(${broaMsgLowerInterval}s, ${broaMsgInterval}s)/" iniFile
 
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
-  sed -i -e "s/WITH_MOBILITY/${WITH_MOBILITY}/" iniFile
   sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
 
   algoCfgFpath="../../../experiments/configs/in_common/protocols"
