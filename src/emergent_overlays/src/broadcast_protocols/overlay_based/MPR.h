@@ -28,7 +28,7 @@ class MPR : public InteroperableBroadcast {
       SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
-    int sentBootEvents = 0;
+    int sentBootEvents = 1;
 
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
@@ -79,6 +79,7 @@ class MPR : public InteroperableBroadcast {
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual cPacket* getCtrlMsg() override;
     virtual void sendPacket() override;
+    virtual void sendCtrlMsg() override;
 
   public:
     MPR() {

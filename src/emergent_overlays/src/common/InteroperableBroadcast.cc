@@ -39,7 +39,7 @@ void InteroperableBroadcast::initialize(int stage) {
     ctrlMsgTimer = new cMessage("ctrlMsgTimer");
     haltSimTimer = new cMessage("haltSimTimer");
     broaMsgTimer = new cMessage("broaMsgTimer");
-    monitorTimer = new cMessage("monitorTimer");
+    motionTimer = new cMessage("motionTimer");
   }
 }
 
@@ -56,6 +56,10 @@ void InteroperableBroadcast::processStart() {
   transRadious = transmitter->getMaxCommunicationRange().get();
 
   mobilityModel = check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility"));
+  // store initial position in case an algorithm requires node's position
+  currentPosition = mobilityModel->getCurrentPosition();
+  emit(positionAtX, currentPosition.x);
+  emit(positionAtY, currentPosition.y);
 
   localAddress = L3AddressResolver().resolve(id);
 
@@ -76,6 +80,8 @@ void InteroperableBroadcast::processStart() {
 
   // schedule event to end the simulation in all peers
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
+  // timer to store nodes position and density, when nodes move
+  scheduleEvent(Timer::MOTION, par("motionInterval").doubleValue(), motionTimer);
 }
 
 void InteroperableBroadcast::sendPacket() {
@@ -102,9 +108,6 @@ void InteroperableBroadcast::sendPacket() {
   // count sent broadcast messages in all nodes. This is useful in an experiment
   // where any node in the network act as source of a broadcast session
   UDPBasicApp::numSent++;
-  // timer to store nodes position and density
-  scheduleEvent(Timer::MONITOR, par("monitorDelay").doubleValue(), monitorTimer);
-
 }
 
 void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
@@ -120,19 +123,16 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       }
         break;
       case Timer::SEND_CTRL_MSG: {
-        // send a control message
-        socket.sendTo(getCtrlMsg(), broadcastAddress, destPort);
-        // and schedule next control message
-        scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
-
+        sendCtrlMsg();
       }
         break;
-      case Timer::MONITOR: {
+      case Timer::MOTION: {
+        // TODO store density
         currentPosition = mobilityModel->getCurrentPosition();
         emit(positionAtX, currentPosition.x);
         emit(positionAtY, currentPosition.y);
-        // TODO store density
         // emit(<density>, ?);
+        scheduleEvent(Timer::MOTION, par("motionInterval").doubleValue(), motionTimer);
       }
         break;
       case Timer::BORDER_DETECTOR: {
@@ -179,7 +179,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         if (ctrlMsgTimer)
           cancelAndDelete(ctrlMsgTimer);
         cancelAndDelete(haltSimTimer);
-        cancelAndDelete(monitorTimer);
+        cancelAndDelete(motionTimer);
         // cancel events from sub-classes
         cancelSelfEvents();
         endSimulation();
@@ -194,7 +194,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 }
 
 void InteroperableBroadcast::processPacket(cPacket* pk) {
-  // avoid receiving broadcast/control messages from local node
+// avoid receiving broadcast/control messages from local node
   if (getSrcAddress(pk) == localAddress) {
     delete pk;
     return;
@@ -237,7 +237,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       EV_DEBUG << "chosenBorderNode: [" << chosenBorderNode << "]" << endl;
       EV_DEBUG << "hopsToLive: [" << hopsToLive << "]" << endl;
 
-      if(receivedBorderMsgs.find(senderForeignAlgo) != receivedBorderMsgs.end()){
+      if (receivedBorderMsgs.find(senderForeignAlgo) != receivedBorderMsgs.end()) {
         EV_DEBUG << "BorderMsg already received [" << senderForeignAlgo << "]" << endl;
         break;
       }
@@ -328,7 +328,7 @@ void InteroperableBroadcast::onBroadcastMsg(cPacket* pk) {
 
 void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   cPacket* cpy = pk->dup();
-  // replace sender
+// replace sender
   cpy->getParList().remove("Sender");
   addSender(cpy);
   socket.sendTo(cpy, broadcastAddress, destPort);
@@ -344,7 +344,7 @@ cPacket* InteroperableBroadcast::getCtrlMsg() {
 }
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
-  return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || monitorTimer == msg
+  return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg
       || isBorderDetectorTimer(msg);
 }
 
@@ -380,7 +380,7 @@ cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, cons
   addSender(borderMsg);
   addSendersRunningAlgo(borderMsg);
 
-  // parameters to deal with interoperability procedure
+// parameters to deal with interoperability procedure
   cMsgPar* foreignAlgoPar = new cMsgPar("foreignAlgoPar");
   foreignAlgoPar->setStringValue(foreignAlgo);
   cMsgPar* hopsToLive = new cMsgPar("hopsToLive");
@@ -393,4 +393,13 @@ cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, cons
   borderMsg->addPar(borderNodeId);
 
   return borderMsg;
+}
+
+void InteroperableBroadcast::sendCtrlMsg() {
+  // send a control message
+  // socket.sendTo(getCtrlMsg(), broadcastAddress, destPort);
+  // and schedule next control message
+  // scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
+  throw cRuntimeError(
+      "Every subclass of InteroperableBroadcast, which exchange control messages, should implement sendCtrlMsg()");
 }

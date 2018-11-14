@@ -24,8 +24,9 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool withCtrlMsg = default(false);
 
     double ctrlMsgInterval @unit(s) = uniform(9.901s, 10.0s);
-    double monitorDelay @unit(s) = default(0.0001s);
     double borderDetectorDelay @unit(s) = uniform(0.001s, 0.099s);
+    double motionInterval @unit(s) = default(10.0s);
+    
     int hopsToLive = default(2);
 
     @signal[rcvdBroadcastMsg](type=int);

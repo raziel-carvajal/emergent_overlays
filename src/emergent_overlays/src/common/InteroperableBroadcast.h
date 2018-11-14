@@ -37,7 +37,7 @@ class InteroperableBroadcast : public UDPBasicApp {
       BROADCAST = 1, CTRL, BORDER
     };
     enum Timer {
-      HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MONITOR, BORDER_DETECTOR
+      HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MOTION, BORDER_DETECTOR
     };
     enum ForwardType {
       SIMPLE, CDS_RELAY, BORDER_NODE
@@ -62,6 +62,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     virtual void onControlMsg(cPacket* pk);
     virtual void cancelSelfEvents();
     virtual cPacket* getCtrlMsg();
+    virtual void sendCtrlMsg();
 
     // signals for this class
     static simsignal_t rcvdBroadcastMsg;
@@ -87,7 +88,6 @@ class InteroperableBroadcast : public UDPBasicApp {
         return false;
       }
     }
-    cMessage* monitorTimer = nullptr;
   private:
 
     IMobility* mobilityModel;
@@ -95,6 +95,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     cMessage* ctrlMsgTimer = nullptr;
     cMessage* haltSimTimer = nullptr;
     cMessage* broaMsgTimer = nullptr;
+    cMessage* motionTimer = nullptr;
 
     set<string> knownNeigs;
 

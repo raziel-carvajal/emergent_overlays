@@ -133,26 +133,21 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
     //TODO define a case in reception of self-message HALT_APP
     switch (msg->getKind()) {
       case SEND_CTRL_MSG_TO_BOOT:
-
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
 
-        sentBootEvents++;
-        if (sentBootEvents < par("bootCtrlMsgsNo").longValue()) {
+        if (sentBootEvents <= par("bootCtrlMsgsNo").longValue()) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
               sentBootEvents * par("bootCtrlMsgInterval").doubleValue(), buildCdsTimer);
         } else {
           EV_DEBUG << "1st BUILD_CDS" << endl;
           currentMpr = compute_mpr();
-          InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("ctrlMsgInterval").doubleValue(), buildCdsTimer);
-          InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(), sCtrlMsgTimer);
         }
+        sentBootEvents++;
         break;
       case BUILD_CDS:
         EV_DEBUG << "Nth BUILD_CDS" << endl;
         currentMpr = compute_mpr();
-        InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("ctrlMsgInterval").doubleValue(), buildCdsTimer);
-        InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(), sCtrlMsgTimer);
         break;
       case FWD_BROADCAST_MSG: {
         EV_DEBUG << "FWD message [" << msg->getName() << "] now" << endl;
@@ -185,9 +180,16 @@ void MPR::sendPacket() {
   // count sent broadcast messages in all nodes. This is useful in an experiment
   // where any node in the network act as source of a broadcast session
   InteroperableBroadcast::numSent++;
-  // timer to store nodes position and density
-  scheduleEvent(Timer::MONITOR, par("monitorDelay").doubleValue(), monitorTimer);
+}
 
+void MPR::sendCtrlMsg() {
+  // 2 exchanges of control messages are required to approximate a CDS
+  // - 1st exchange: neighbors
+  // - 2nd exchange: neighbors of neighbors
+  socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(), sCtrlMsgTimer);
+  // and then build the backbone; schedue event until the 2 exchange take place
+  InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("bootCtrlMsgInterval").doubleValue() * 3, buildCdsTimer);
 }
 
 cPacket* MPR::getCtrlMsg() {
