@@ -2,10 +2,6 @@ require(omnetpp)
 library(argparse)
 library(igraph)
 
-TOLERANCE <- 1e-8
-BROADCAST_SESSION_TOLERANCE <- 1000e-03 # 1000 ms = 0.1 s
-SENT_RECV_PKG_TOLERANCE <- 1.5e-03
-
 get.arguments <- function() {
   parser <- ArgumentParser(
     description='Get a distribution per broadcast metric from Omnet++ datasets.'

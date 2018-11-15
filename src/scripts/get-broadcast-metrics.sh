@@ -66,9 +66,11 @@ Rscript get-broadcast-metrics.R \
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}
-mkdir -p ${CONF_NAME}
+mkdir ${CONF_NAME}
+mkdir ${CONF_NAME}/dataset
 mv *.pdf ${CONF_NAME}/
 cp ${CONF_FILE} ${CONF_NAME}/
+mv ../../experiments/configs/built_configs/results/${CONF_NAME}-*  ${CONF_NAME}/dataset
 tar czf ${CONF_NAME}.tgz ${CONF_NAME}/
 mv ${CONF_NAME}.tgz ../../results
 

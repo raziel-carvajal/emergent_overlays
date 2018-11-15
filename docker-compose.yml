@@ -2,8 +2,8 @@ version: "2.0"
 services:
   trace_generator:
     env_file: env
-    # environtment:
-    #   USE_PREVIOUS_TRACE: 'yes'
+    environment:
+      USE_PREVIOUS_TRACE: 'yes'
     image: emergent_overlays_trace_generator:latest
     build:
       context: ./services/trace_generator
