@@ -2,8 +2,8 @@ version: "2.0"
 services:
   trace_generator:
     env_file: env
-    environment:
-      NEW_LIST: "n_393_d_0_tr_6_a_50x50_idx_0_p_cds.ini n_393_d_0_tr_6_a_50x50_idx_0_p_simplef.ini"
+    # environtment:
+    #   USE_PREVIOUS_TRACE: 'yes'
     image: emergent_overlays_trace_generator:latest
     build:
       context: ./services/trace_generator
@@ -12,8 +12,6 @@ services:
       - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
-    networks:
-      - emerg_ovrl
   worker:
     image: emergent_overlays_worker:latest
     build:
@@ -23,8 +21,6 @@ services:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
       - './results:/usr/emrg-ovrl/results'
-    networks:
-      - emerg_ovrl
   dist_generator:
     image: emergent_overlays_dist_generator:latest
     build:
@@ -33,8 +29,6 @@ services:
     volumes:
       - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
       - './results:/usr/emrg-ovrl/results'
-    networks:
-      - emerg_ovrl
   plotter:
     image: emergent_overlays_plotter:latest
     build:
@@ -42,7 +36,3 @@ services:
       dockerfile: ./services/plotter/Dockerfile
     volumes:
       - './results:/usr/emrg-ovrl/results'
-    networks:
-      - emerg_ovrl
-networks:
-  emerg_ovrl:

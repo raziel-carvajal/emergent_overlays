@@ -37,10 +37,6 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
 # install deamon to dispatch INI files
 ADD ini-f-d ini-f-d
 RUN cd ini-f-d && npm install
+ADD run-trace_generator.sh .
 
-CMD workdir=`pwd` && \
-  cd src/scripts/topologies && \
-  ./make-topology.sh && cd ${workdir}/ini-f-d && \
-  INI_FILES_LIST="cfgs_for_workers" \
-  INI_FILES_DIR="../experiments/configs/built_configs" \
-  npm start
+CMD ./run-trace_generator.sh
