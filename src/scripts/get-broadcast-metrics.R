@@ -33,6 +33,8 @@ get.arguments <- function() {
     dest='wsm', action='store_true')
   parser$add_argument('--with-recv-msgs',
     dest='wrm', action='store_true')
+	parser$add_argument('--with-fwd-type',
+		dest='wft', action='store_true')
 
   # center of dense zone
   parser$add_argument('--dense-zone-at-x',
@@ -42,6 +44,9 @@ get.arguments <- function() {
   # dense zone width
   parser$add_argument('--dense-zone-w',
     dest='dzw', type='double')
+	#
+	parser$add_argument('--with-mobility',
+		dest='wmob', action='store_true')
   parser$parse_args()
 }
 
@@ -157,7 +162,7 @@ get.density.relative.error <- function(results_file, first_measure,
 }
 
 get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
-  msgReceivers, msgEmitters, denseZone, forward_type_ds, savePlot=F) {
+  msgReceivers, denseZone, forward_type_ds, savePlot=F) {
 
   edges <- unlist(
     sapply(nodes, function(n) {
@@ -173,41 +178,32 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
       sapply(neigs, function(neig) { c(node$nodeId, neig) })
     })
   )
-  # TODO
-  #
-  # xlim <- data.frame(
-  #   infe=denseZone$atX - denseZone$halfLenAtX,
-  #   supe=denseZone$atX + denseZone$halfLenAtX
-  # )
-  # ylim <- data.frame(
-  #   infe=denseZone$atY - denseZone$halfLenAtY,
-  #   supe=denseZone$atY + denseZone$halfLenAtY
-  # )
-  #
-  # nodesLocation <- sapply(nodes,
-  #   function(n){
-  #     nPos <- nodesPositions[nodesPositions$nodeId == n, ]
-  #     ifelse(
-  #       nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
-  #       nPos$y >= ylim$infe && nPos$y <= ylim$supe,
-  #       'DENSE',
-  #       'SPARSE'
-  #     )
-  #   }
-  # )
+
+  xlim <- data.frame(
+    infe=denseZone$atX - denseZone$halfLenAtX,
+    supe=denseZone$atX + denseZone$halfLenAtX
+  )
+  ylim <- data.frame(
+    infe=denseZone$atY - denseZone$halfLenAtY,
+    supe=denseZone$atY + denseZone$halfLenAtY
+  )
+
+  nodesLocation <- sapply(nodes, function(n){
+    nPos <- subset(nodesPositions, nodeId == n)
+    ifelse(
+      nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
+      nPos$y >= ylim$infe && nPos$y <= ylim$supe,
+      'DENSE',
+      'SPARSE'
+    )
+  })
 
   # create graph based on edges
-  # TODO
-
-  # forward_type <- subset( forward_type_ds,
-  #   timestamp[1] <= time & timestamp[2] >= time
-  # )
-
   g <- graph( edges=edges )
   # g <- make_undirected_graph(edges)
-  # label whether nodes are located at the dense zone
-  # TODO
-  # V(g)$location <- nodesLocation
+
+	# label whether nodes are located at the dense zone
+  V(g)$location <- nodesLocation
 
   # this code is followed IN DATASET to label nodes that forward messages:
   #   0 => SIMPLE
@@ -215,24 +211,21 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   #   2 => BORDER
   #   3 => RECEIVER
   #   4 => UNREACHABLE
-
-  # TODO
-  # labelCode <- rep(5, length(nodes))
-  # labelCode[msgReceivers] <- 4
-  # labelCode[ subset(forward_type, value == 0)$node_id ] <- 1
-  # labelCode[ subset(forward_type, value == 1)$node_id ] <- 2
-  # labelCode[ subset(forward_type, value == 2)$node_id ] <- 3
-  # V(g)$colorCode <- labelCode
+  labelCode <- rep(5, length(nodes))
+  labelCode[msgReceivers] <- 4
+  labelCode[ subset(forward_type_ds, value == 0)$node_id ] <- 1
+  labelCode[ subset(forward_type_ds, value == 1)$node_id ] <- 2
+  labelCode[ subset(forward_type_ds, value == 2)$node_id ] <- 3
+  V(g)$colorCode <- labelCode
 
   if(savePlot){
-    # TODO
     E(g)$arrow.mode <- 0
     E(g)$color <- 'lightgrey'
-    # V(g)$size <- 4
-    # V(g)$label <- ''
-    # V(g)$frame.color <- 'black'
-    # colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
-    # V(g)$color <- colors[labelCode]
+    V(g)$size <- 4
+    V(g)$label <- ''
+    V(g)$frame.color <- 'black'
+    colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
+    V(g)$color <- colors[labelCode]
 
     # use node coordinates as layout
     layout <- cbind(nodesPositions$x, nodesPositions$y)
@@ -241,17 +234,16 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
     pdf(name)
     plot.igraph(g, layout=layout)
 
-    # TODO
-    # legend(
-    #   x=0.7, y=1.4, title='Type of forward',
-    #   c(
-    #     paste('Simple [', length(labelCode[labelCode == 1]), ']'),
-    #     paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
-    #     paste('Border [', length(labelCode[labelCode == 3]), ']'),
-    #     paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
-    #     paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
-    #   ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-    # )
+    legend(
+      x=0.7, y=1.4, title='Type of forward',
+      c(
+        paste('Simple [', length(labelCode[labelCode == 1]), ']'),
+        paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
+        paste('Border [', length(labelCode[labelCode == 3]), ']'),
+        paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
+        paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
+      ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+    )
 
     dev.off()
   }
@@ -527,12 +519,11 @@ main <- function(args) {
   expeConfig <- unlist(strsplit(args$configName, '_'))
   algorithmN <- toupper(expeConfig[ length(expeConfig) ])
   broadcastIn<- c(args$broaIntT0, args$broaIntT1)
-  # TODO
   # NOTE ATM we consider that there is only one dense zone and one sparse zone
-  # denseZone <- data.frame(
-  #   atX=args$d_x, atY=args$d_y,
-  #   halfLenAtX=(args$d_z_w / 2), halfLenAtY=(args$d_z_w / 2)
-  # )
+  denseZone <- data.frame(
+    atX=args$dzx, atY=args$dzy,
+    halfLenAtX=(args$dzw / 2), halfLenAtY=(args$dzw / 2)
+  )
   datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
   datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
 
@@ -601,53 +592,80 @@ main <- function(args) {
       args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
     )
   }
-  # nodes are labeled according to the type of FWD they perform OR whether they
+
+	msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
+	overlaysNumber <- length(msgs_ids)
+  intervals <- data.frame(
+    lowerLim= c( 1, c( 1 : (overlaysNumber - 1) ) * length(all_nodes) ),
+    upperLim= c( 1 : overlaysNumber) * length(all_nodes) - 1
+  )
+
+	# nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
   # information in form of integer values where: 3 means border node,
   # 2 is a CDS relay and 0 means simple FWD
-  # TODO
-  # forward_type_ds <- getVector(
-  # 	datasetFile, 'forward_type:vector')
+  forwardTypeDs <- getVector(datasetFile, 'forward_type:vector')
+	forwardTypeDs <- forwardTypeDs[ order(forwardTypeDs$time), ]
 
-  msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
+	# creates a list of wireless topologies using nodes positions (ground thruth)
+	if(args$wmob){
+		# get points in time where positions changed
+		p0 <- unique(positions$time)
+		timeLine <- data.frame(
+			t0=p0[ c( 1 : length(p0)-1 ) ],
+			t1=p0[ c( 2 : length(p0) ) ]
+		)
+		t <- 1
+	  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
+			# senders/receivers per broadcast message
+	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
+	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
 
-  overlaysNumber <- floor(length(positions$time) / length(all_nodes))
-  intervals <- data.frame(
-    lowerLim= c(1, c( 1 : (overlaysNumber - 1) ) * length(all_nodes) + 1 ),
-    upperLim= ( c(1:overlaysNumber) * length(all_nodes) )
-  )
-  # creates a list of wireless topologies using nodes positions (ground thruth)
-  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
-    # a snapshot of the topology is taken just before a broadcast session take place
-    nodesPositions <- positions[ c(intervals$lowerLim[o]:intervals$upperLim[o]), ]
-    nodesPositions <- nodesPositions[order(nodesPositions$nodeId), ]
-
-    # get emitters and receivers per snapshot
-    msgEmitters <- unique( subset(sent_broadcast_msgs, value == msgs_ids[o])$node_id )
-    msgReceivers <-unique( subset(recv_broadcast_msgs, value == msgs_ids[o])$node_id )
-    # build wireless topology
-    get.graph(
-      all_nodes, nodesPositions, args$tx, o,
-      msgReceivers, msgEmitters, NULL, NULL,
-      savePlot=TRUE
-    )
-    # TODO
-    # get.graph(
-    #   all_nodes, positions, args$tx, locationTimestamp,
-    #   msgReceivers, msgEmitters, denseZone, forward_type_ds,
-    #   savePlot=TRUE
-    # )
-  })
-
+			highT <- max(senders$time)
+			# get what type of FWD nodes perform
+			fwdTypeAtTopology <- subset(forwardTypeDs, time <= highT)
+			# get positions of nodes during dissemination of broadcast message
+			if(timeLine[t, ]$t0 <= highT & highT < timeLine[t, ]$t1) {
+				nodesPositions <- subset(positions, time == timeLine[t, ]$t0)
+				nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+			} else {
+				t <- t + 1
+				nodesPositions <- subset(positions, time == timeLine[t, ]$t0)
+				nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+			}
+	    # build wireless topology
+	    get.graph(
+	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
+				denseZone, fwdTypeAtTopology, savePlot=TRUE
+	    )
+	  })
+	} else {
+		# get unique position in static scenario
+		nodesPositions <- positions[ c(1:length(all_nodes)), ]
+		nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+	  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
+			# senders/receivers per broadcast message
+	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
+	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
+			# get what type of FWD nodes perform
+			fwdTypeAtTopology <- subset(forwardTypeDs, time <= max(senders$time))
+	    # build wireless topology
+	    get.graph(
+	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
+				denseZone, fwdTypeAtTopology, savePlot=TRUE
+	    )
+	  })
+	}
   # save distribution of nodes per type of FWD they perform within the biggest
   # connected graph (a component of a wireless topology)
-  # TODO
-  #print('Get distribution of forwading types')
-  # saveDataFrame(
-  #   get.node.roles(overlays, msgs_ids, algorithmN),
-  #   args$resultsDir, 'noderoles', algorithmN
-  # )
-  # TODO
+	if(args$wft){
+		print('Get distribution of forwading types')
+	  saveDataFrame(
+	    get.node.roles(overlays, msgs_ids, algorithmN),
+	    args$resultsDir, 'noderoles', algorithmN
+	  )
+	}
+	# TODO
   # print("DONE - Get relative error of density")
   # try(
   #   densityRelativeError <- get.density.relative.error(

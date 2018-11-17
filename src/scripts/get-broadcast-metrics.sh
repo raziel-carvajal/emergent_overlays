@@ -46,23 +46,41 @@ broaT1=`echo ${broaInt} | awk -F ", " '{print $2}' | awk -F "s" '{print $1}' | g
 
 tx=`grep "maxCommunicationRange" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
+denseZoneCenterAtXY=`grep "centerDensAx" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+denseZoneWidth=`grep "denseAreaWid" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+
+mobilityModel=`grep "mobilityType" ${CONF_FILE}`
+if [[ "${mobilityModel}" != "" ]]; then
+	withMobility="--with-mobility"
+else
+	withMobility=""
+fi
+
 echo "Details of experiment [${CONF_NAME}]"
 echo -e "\tSimulation time: ${simTime}"
 echo -e "\tBroadcast message interval: ${broaInt}"
 echo -e "\tNodes transmission range: ${tx}"
+echo -e "\tCenter of dense zone: (${denseZoneCenterAtXY}, ${denseZoneCenterAtXY})"
+echo -e "\tCenter zone width: ${denseZoneWidth}"
+echo -e "\tExperiment with mobility: ${withMobility}"
 
 Rscript get-broadcast-metrics.R \
   --simulation-time ${simTime} \
   --broadcast-interval-lim-inf ${broaT0} \
   --broadcast-interval-lim-sup ${broaT1} \
   --transmission-range ${tx} \
+	--dense-zone-at-x ${denseZoneCenterAtXY} \
+	--dense-zone-at-y ${denseZoneCenterAtXY} \
+	--dense-zone-w ${denseZoneWidth} \
   --results-dir ../../results \
   ${CONF_NAME} ${CONF_FILE} \
   --with-energy-consumption \
   --with-coverage \
   --with-packet-err \
   --with-sent-msgs \
-  --with-recv-msgs
+  --with-recv-msgs \
+	--with-fwd-type \
+	${withMobility}
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}
