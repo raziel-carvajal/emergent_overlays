@@ -49,6 +49,7 @@ void MPR::onBroadcastMsg(cPacket* pk) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
     EV_DEBUG << "MPR.onBroadcastMsg()" << endl;
     if (InteroperableBroadcast::receivedMsg.find(mprPk->getName()) == InteroperableBroadcast::receivedMsg.end()) {
+      EV_ERROR << "Received packet [" << mprPk->getName() << "]" << endl;
       InteroperableBroadcast::receivedMsg.insert(mprPk->getName());
 
       MprNeighbors senderNeigs = mprPk->getNeighbors();
@@ -64,12 +65,10 @@ void MPR::onBroadcastMsg(cPacket* pk) {
         from_selector = (*it == '"' + InteroperableBroadcast::nodeId + '"');
       }
       if (from_selector || amIborderNode) {
-        if(amIborderNode) {
+        if(amIborderNode)
           emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
-        }
-        else {
+        else
           emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-        }
         fwdBrMsgTimer->setName(mprPk->getName());
 
         InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("bootCtrlMsgInterval").doubleValue(),
