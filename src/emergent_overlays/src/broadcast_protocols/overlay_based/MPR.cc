@@ -277,7 +277,7 @@ set<string> MPR::compute_mpr() {
 
   int iterations = 0;
 
-  int MAX_ITERATION = 10; // FIXME: this is crap
+  int MAX_ITERATION = 100; // FIXME: this is crap
 
   set<string> already_covered;
   for (const auto& z : hops[1]) {

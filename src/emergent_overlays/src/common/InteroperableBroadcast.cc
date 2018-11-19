@@ -55,6 +55,8 @@ void InteroperableBroadcast::processStart() {
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
   transRadious = transmitter->getMaxCommunicationRange().get();
 
+  enableInterop = par("enableInterop").boolValue();
+
   mobilityModel = check_and_cast<IMobility*>(getContainingNode(this)->getSubmodule("mobility"));
   // store initial position in case an algorithm requires node's position
   currentPosition = mobilityModel->getCurrentPosition();
@@ -217,8 +219,10 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       string senderRunningAlgo(removeQuotes(pk->par("SendersRunningAlgo").str()));
       EV_DEBUG << "CtrlMsg [" << pk->getName() << "] received from [" << sender << "] running [" << senderRunningAlgo
           << "]" << endl;
-      // all control messages must contain the parameter: SendersRunningAlgo
-      detectBorderNode(sender, senderRunningAlgo);
+      if(enableInterop){
+        // all control messages must contain the parameter: SendersRunningAlgo
+        detectBorderNode(sender, senderRunningAlgo);
+      }
       // TODO deal with the situation when the received ctrl message
       // cames from a sender running a different algorithm than the local node
       // bool isMprPk =

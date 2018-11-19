@@ -46,6 +46,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     bool amIborderNode = false;
 
     double transRadious;
+    bool enableInterop;
 
     string nodeId;
 

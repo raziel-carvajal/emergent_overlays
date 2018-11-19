@@ -130,11 +130,12 @@ for algo in ${algorithms} ; do
     i=1; let j=${firsAtDenseA}-1
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.host{${i}..${j}}.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
-
     # set algorithm for nodes at dense area
     i=${firsAtDenseA}; let j=${firsAtDenseA}+${nodes}
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.host{${i}..${j}}.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
+		# enable interoperability mechanism 
+		echo "**.udpApp[0].enableInterop=true" >> iniFile
   else
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo -e "**.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
