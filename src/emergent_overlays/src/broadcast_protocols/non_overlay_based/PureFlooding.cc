@@ -21,7 +21,6 @@ void PureFlooding::onBroadcastMsg(cPacket* pk) {
   // forward only if message wasn't hear before
   if (receivedMsg.find(pk->getName()) == receivedMsg.end()) {
     InteroperableBroadcast::fwdBroadcastMsg(pk);
-    emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
     // tag packet as received
     receivedMsg.insert(pk->getName());
   }

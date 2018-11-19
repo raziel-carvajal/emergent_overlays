@@ -219,6 +219,9 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
           << "]" << endl;
       // all control messages must contain the parameter: SendersRunningAlgo
       detectBorderNode(sender, senderRunningAlgo);
+      // TODO deal with the situation when the received ctrl message
+      // cames from a sender running a different algorithm than the local node
+      // bool isMprPk =
       onControlMsg(pk);
 
     }
@@ -333,6 +336,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   addSender(cpy);
   socket.sendTo(cpy, broadcastAddress, destPort);
   emit(sentBroadcastMsg, getMsgId(cpy->getName()));
+  emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
 }
 
 cPacket* InteroperableBroadcast::getCtrlMsg() {

@@ -43,12 +43,10 @@ class MPR : public InteroperableBroadcast {
     }
 
     // variables/methods to implement MPR V0.0.1
-    bool first_exec = true;
-
     set<string> currentMpr;
 
-    map<string, set<string>> latest;
     map<string, set<string>> neighbors;
+
     map<string, Coord> neigsPositions;
 
     array<set<string>, 2> hops;

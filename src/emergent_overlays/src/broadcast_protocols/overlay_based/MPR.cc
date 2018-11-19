@@ -36,11 +36,6 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
 
   EV_DEBUG << "Neighbors at BroadcastMsgId=" << payload->getName() << endl;
   MprNeighbors myNeigs;
-//  for (const auto& p : neighbors) {
-//    string neig(p.first);
-//    EV_DEBUG << "[" << neig << "]" << endl;
-//    myNeigs.insert(neig);
-//  }
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
     EV_DEBUG << "[" << *it << "]" << endl;
     myNeigs.insert(*it);
@@ -86,8 +81,6 @@ void MPR::onBroadcastMsg(cPacket* pk) {
 }
 
 void MPR::onControlMsg(cPacket* pk) {
-  // TODO deal with the situation when received packet is not for MPR
-  // bool isMprPk =
   InteroperableBroadcast::isPacket<MprPacket>(pk, [&](const MprPacket* mprPk) {
     EV_DEBUG << "MPR.onControlMsg()" << endl;
 
@@ -135,19 +128,31 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
       case SEND_CTRL_MSG_TO_BOOT:
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
 
-        if (sentBootEvents <= par("bootCtrlMsgsNo").longValue()) {
+        if (sentBootEvents < par("bootCtrlMsgsNo").longValue()) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
               sentBootEvents * par("bootCtrlMsgInterval").doubleValue(), buildCdsTimer);
         } else {
-          EV_DEBUG << "1st BUILD_CDS" << endl;
-          currentMpr = compute_mpr();
+          EV_DEBUG << "schedule 1st approximation of a backbone" << endl;
+          InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("bootCtrlMsgInterval").doubleValue() * 2, buildCdsTimer);
         }
         sentBootEvents++;
         break;
-      case BUILD_CDS:
-        EV_DEBUG << "Nth BUILD_CDS" << endl;
+      case BUILD_CDS: {
+        EV_DEBUG << "Build CDS" << endl;
         currentMpr = compute_mpr();
+        neighbors.clear();
+        set<string> keys;
+        for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
+          keys.insert(it->first);
+        for(set<string>::iterator it = keys.begin(); it != keys.end(); ++it)
+          neighbors.erase(*it);
+        keys.clear();
+        for (auto it = neigsPositions.begin(); it != neigsPositions.end(); ++it)
+          keys.insert(it->first);
+        for(set<string>::iterator it = keys.begin(); it != keys.end(); ++it)
+          neigsPositions.erase(*it);
+      }
         break;
       case FWD_BROADCAST_MSG: {
         EV_DEBUG << "FWD message [" << msg->getName() << "] now" << endl;
@@ -222,30 +227,7 @@ cPacket* MPR::getCtrlMsg() {
 
 set<string> MPR::compute_mpr() {
   set<string> mpr;
-  if (first_exec) {
-    first_exec = false;
-    latest = neighbors;
-  } else {
-    bool changeOfNeigs = false;
-    if (neighbors.size() != 0) {
-      if (latest.size() != neighbors.size()) {
-        changeOfNeigs = true;
-      } else {
-        for (const auto& p : neighbors) {
-          string key = p.first;
-//          EV_DEBUG <<
-          if (latest.find(key) == latest.end()) {
-            changeOfNeigs = true;
-            break;
-          }
-        }
-      }
-    }
-    if (changeOfNeigs) {
-      latest.clear();
-      latest = make_cpy(neighbors);
-    }
-  }
+  map<string, set<string>> latest = make_cpy(neighbors);
   hops[0].clear();
   hops[1].clear();
   // first fill the array hops
@@ -295,7 +277,7 @@ set<string> MPR::compute_mpr() {
 
   int iterations = 0;
 
-  int MAX_ITERATION = 1000; // FIXME: this is crap
+  int MAX_ITERATION = 10; // FIXME: this is crap
 
   set<string> already_covered;
   for (const auto& z : hops[1]) {
@@ -338,6 +320,5 @@ set<string> MPR::compute_mpr() {
     still_uncovered = any_of(hops[1].begin(), hops[1].end(), is_not_covered_by_mpr);
     iterations++;
   }
-  neighbors.clear();
   return mpr;
 }
