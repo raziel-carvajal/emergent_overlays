@@ -3,22 +3,30 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-#include <broadcast_protocols/non_overlay_based/PureFlooding.h>
+cplusplus{{
+    typedef std::set< std::string > MprNeighbours;
+}}
+class noncobject MprNeighbours;
 
-Define_Module(PureFlooding);
-
-void PureFlooding::onBroadcastMsg(cPacket* pk, string sender) {
-  // forward iff message wasn't hear before
-  InteroperableBroadcast::fwdBroadcastMsg(pk);
+packet MprCtrl {
+	MprNeighbours neighbors;
 }
 
+packet MprBroadcast {
+	MprNeighbours mprSet;
+}
+
+packet MprCtrl_1_Neig {
+    string emitter;
+    int hops;
+}

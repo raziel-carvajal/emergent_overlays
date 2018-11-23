@@ -3,22 +3,26 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-#include <broadcast_protocols/non_overlay_based/PureFlooding.h>
+package emergent_overlays.broadcast_protocols.overlay_based;
+import emergent_overlays.common.InteroperableBroadcast;
 
-Define_Module(PureFlooding);
+simple MPR_1 extends InteroperableBroadcast
+{
+    @class(MPR_1);
+    // from super class
+    withCtrlMsg = default(true);
+    // local atts
+    int bootCtrlMsgsNo = default(2);
+    double bootCtrlMsgInterval @unit(s) = default(uniform(.0900s, .0999s));
 
-void PureFlooding::onBroadcastMsg(cPacket* pk, string sender) {
-  // forward iff message wasn't hear before
-  InteroperableBroadcast::fwdBroadcastMsg(pk);
 }
-

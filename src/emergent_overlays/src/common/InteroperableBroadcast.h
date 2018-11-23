@@ -59,8 +59,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     Coord currentPosition;
 
     // methods that sub-classes may override
-    virtual void onBroadcastMsg(cPacket* pk);
-    virtual void onControlMsg(cPacket* pk);
+    virtual void onBroadcastMsg(cPacket* pk, string sender);
+    virtual void onControlMsg(cPacket* pk, string sender);
     virtual void cancelSelfEvents();
     virtual cPacket* getCtrlMsg();
     virtual void sendCtrlMsg();
@@ -80,11 +80,14 @@ class InteroperableBroadcast : public UDPBasicApp {
     void addSender(cPacket* pk);
     void addSendersRunningAlgo(cPacket* pk);
 
-    template<typename T> bool isPacket(cPacket* pkt, function<void(const T*)> action) {
+    string removeQuotes(string target) {
+      return target.substr(1, target.size() - 2);
+    }
+
+    template<typename T> bool isPacket(cPacket* pkt, function<bool(const T*)> action) {
       T* t = dynamic_cast<T*>(pkt);
       if (t != nullptr) {
-        action(t);
-        return true;
+        return action(t);
       } else {
         return false;
       }
@@ -115,9 +118,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     // misc functions
     string splitString(string substr, string target) {
       return target.substr(substr.size(), target.size() - substr.size());
-    }
-    string removeQuotes(string target) {
-      return target.substr(1, target.size() - 2);
     }
 
   public:

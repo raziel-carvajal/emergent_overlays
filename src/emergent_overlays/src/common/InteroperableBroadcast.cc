@@ -196,7 +196,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 }
 
 void InteroperableBroadcast::processPacket(cPacket* pk) {
-// avoid receiving broadcast/control messages from local node
+  // avoid receiving broadcast/control messages from local node
   if (getSrcAddress(pk) == localAddress) {
     delete pk;
     return;
@@ -212,21 +212,26 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       emit(rcvdBroadcastMsg, getMsgId(pk->getName()));
       // count received broadcast messages
       UDPBasicApp::numReceived++;
-      onBroadcastMsg(pk);
+      if (receivedMsg.find(pk->getName()) == receivedMsg.end()) {
+        // tag packet as received
+        receivedMsg.insert(pk->getName());
+        // each algorithm deal with the reception of [pk]
+        onBroadcastMsg(pk, sender);
+      }
     }
       break;
     case UdpPacket::CTRL: {
       string senderRunningAlgo(removeQuotes(pk->par("SendersRunningAlgo").str()));
       EV_DEBUG << "CtrlMsg [" << pk->getName() << "] received from [" << sender << "] running [" << senderRunningAlgo
           << "]" << endl;
-      if(enableInterop){
+      if (enableInterop) {
         // all control messages must contain the parameter: SendersRunningAlgo
         detectBorderNode(sender, senderRunningAlgo);
       }
       // TODO deal with the situation when the received ctrl message
       // cames from a sender running a different algorithm than the local node
       // bool isMprPk =
-      onControlMsg(pk);
+      onControlMsg(pk, sender);
 
     }
       break;
@@ -292,7 +297,7 @@ void InteroperableBroadcast::scheduleEvent(short kind, double delay, cMessage* s
   scheduleAt(t, selfMsgPtr);
 }
 
-void InteroperableBroadcast::onControlMsg(cPacket* pk) {
+void InteroperableBroadcast::onControlMsg(cPacket* pk, string sender) {
   /* TODO missing features:
    * -  senders of ctrl messages may run a protocol different than
    * 		the one running at the receiver; this is THE trigger to
@@ -325,7 +330,7 @@ void InteroperableBroadcast::addSender(cPacket* pk) {
   pk->addPar(p);
 }
 
-void InteroperableBroadcast::onBroadcastMsg(cPacket* pk) {
+void InteroperableBroadcast::onBroadcastMsg(cPacket* pk, string sender) {
   /* TODO missing features:
    * -  senders of broadcast messages may run a protocol different than
    * 		the one running at the receiver
