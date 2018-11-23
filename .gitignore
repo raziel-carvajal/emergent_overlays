@@ -37,8 +37,8 @@ src/emergent_overlays/src/Makefile
 src/emergent_overlays/src/emergent_overlays
 **/npm-debug.log
 
-**/*_m.cc
-**/*_m.h
+*_m.cc
+*_m.h
 **/Makefile
 # node.js packages
 **/node_modules
