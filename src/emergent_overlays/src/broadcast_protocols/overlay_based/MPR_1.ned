@@ -23,6 +23,4 @@ simple MPR_1 extends InteroperableBroadcast
     withCtrlMsg = default(true);
     // local atts
     int bootCtrlMsgsNo = default(2);
-    double bootCtrlMsgInterval @unit(s) = default(uniform(.0900s, .0999s));
-
 }

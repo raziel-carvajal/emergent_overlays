@@ -31,36 +31,47 @@ void MPR_1::initialize(int stage) {
     p2->setStringValue("");
     fwdBrMsgTimer->addPar(p1);
     fwdBrMsgTimer->addPar(p2);
-    InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, par("bootCtrlMsgInterval").doubleValue(),
-        initNeigTimer);
   }
+}
+
+void MPR_1::processStart() {
+  InteroperableBroadcast::processStart();
+  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, initNeigTimer);
 }
 
 void MPR_1::handleMessageWhenUp(cMessage* msg) {
   if (msg->isSelfMessage()
       && (initNeigTimer == msg || sCtrlMsgTimer == msg || fwdBrMsgTimer == msg || rCtrlMsgTimer == msg)) {
-    //TODO define a case in reception of self-message HALT_APP
     switch (msg->getKind()) {
       case SEND_CTRL_MSG_TO_BOOT:
+        EV_DEBUG << nodeId << "Case: SEND_CTRL_MSG_TO_BOOT" << endl;
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-
         if (sentBootEvents < par("bootCtrlMsgsNo").longValue()) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
+          cancelEvent(msg);
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
-              sentBootEvents * par("bootCtrlMsgInterval").doubleValue(), initNeigTimer);
+              InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), initNeigTimer);
         } else {
-          InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS, par("bootCtrlMsgInterval").doubleValue(),
+          // this message will reach the nearest two-hop neighbor
+          // that is why the delay is multiplied by 2
+          InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS, par("sentMsgFixedDelay").doubleValue() * 2,
               sCtrlMsgTimer);
         }
         sentBootEvents++;
         break;
       case FWD_BROADCAST_MSG: {
         EV_DEBUG << "Case: FWD_BROADCAST_MSG" << endl;
-        if (msg->par("fwdType").boolValue() || InteroperableBroadcast::amIborderNode) {
+        if (InteroperableBroadcast::amIborderNode) {
+          // INFO: this action do NOT build a MPR set
+          socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
+              InteroperableBroadcast::destPort);
+          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
+        } else if (msg->par("fwdType").boolValue()) {
           // INFO: this action do NOT build a MPR set
           socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
               InteroperableBroadcast::destPort);
           emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(msg->getName()));
+          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
         } else {
           string ignoredSender(msg->par("sender").stringValue());
           EV_DEBUG << "fwdType == FALSE, sender = " << ignoredSender << endl;
@@ -72,13 +83,15 @@ void MPR_1::handleMessageWhenUp(cMessage* msg) {
           if (fwdMsg) {
             socket.sendTo(broadcastPk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
             emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastPk->getName()));
+            emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
           }
         }
       }
         break;
       case SEND_CTRL_MSG:
+        cancelEvent(msg);
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-        InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS, par("bootCtrlMsgInterval").doubleValue(),
+        InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS, par("sentMsgFixedDelay").doubleValue() * 2,
             sCtrlMsgTimer);
         break;
       case WAIT_CTRL_MSG_DISS:
@@ -168,32 +181,35 @@ void MPR_1::sendCtrlMsg() {
   // - 1st exchange: neighbors
   // - 2nd exchange: neighbors of neighbors
   socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(), sCtrlMsgTimer);
+  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG,
+      par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), sCtrlMsgTimer);
 }
 
-void MPR_1::eraseLocalState(){
+void MPR_1::eraseLocalState() {
   _1hopNeigs.clear();
   recvCtrlMsgs.clear();
   _2hopNodesWithOneNeig.clear();
-  _2hopNeigs.clear();
+  set<string> toDelete;
+  for (auto i = _2hopNeigs.begin(); i != _2hopNeigs.end(); ++i)
+    toDelete.insert(i->first);
+  for (set<string>::iterator j = toDelete.begin(); j != toDelete.end(); ++j)
+    _2hopNeigs.erase(*j);
+//  EV_DEBUG << "Current two-hop neighbors" << endl;
+//  for (auto i = _2hopNeigs.begin(); i != _2hopNeigs.end(); ++i)
+//    EV_DEBUG << "[" << i->first << "]" << endl;
 }
 
 set<string> MPR_1::getMprSet(string ignoredNode) {
   set<string> nonCoveredNodes;
   set<string>::iterator it1;
-  string msg;
-  EV_DEBUG << "Current neighbors" << endl;
   // every two-hop neighbor is considered as non-covered node
   for (auto it = _2hopNeigs.begin(); it != _2hopNeigs.end(); ++it) {
-    msg = "[" + it->first + "] = {";
     for (it1 = it->second.begin(); it1 != it->second.end(); ++it1) {
       // avoid covering local peer
       if (*it1 != InteroperableBroadcast::nodeId) {
         nonCoveredNodes.insert(*it1);
-        msg += *it1 + ", ";
       }
     }
-    EV_DEBUG << msg + "}" << endl;
   }
   // Rules i & ii from MPR heuristic (section 2.1 in paper)
   set<string> mprSet;
@@ -226,9 +242,10 @@ set<string> MPR_1::getMprSet(string ignoredNode) {
   if (mprSet.find(ignoredNode) != mprSet.end()) {
     EV_DEBUG << "delete " << ignoredNode << " from mprSet" << endl;
     mprSet.erase(ignoredNode);
-    int _1hopNeigsCard = _1hopNeigs.size();
-    if (mprSet.empty() && _1hopNeigsCard != 1)
-      mprSet.insert(InteroperableBroadcast::nodeId);
+    // XXX
+//    int _1hopNeigsCard = _1hopNeigs.size();
+//    if (mprSet.empty() && _1hopNeigsCard != 1)
+//      mprSet.insert(InteroperableBroadcast::nodeId);
   }
   EV_DEBUG << nodeId << " :: My MPR set" << endl;
   for (it1 = mprSet.begin(); it1 != mprSet.end(); ++it1)
@@ -275,7 +292,7 @@ void MPR_1::onBroadcastMsg(cPacket* pk, string sender) {
     // XXX found a situation where a FWD_BROADCAST event is scheduled twice
     //     how is that possible ?
     if( !fwdBrMsgTimer->isScheduled() ) {
-      InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("bootCtrlMsgInterval").doubleValue(),
+      InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(),
           fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
     }
     return true;
@@ -284,18 +301,17 @@ void MPR_1::onBroadcastMsg(cPacket* pk, string sender) {
 
 void MPR_1::onControlMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprCtrl>(pk, [&](const MprCtrl* ctrlMsg) {
-    EV_DEBUG << nodeId << " :: neighbors in CtrlMsg" << endl;
     _1hopNeigs.insert(sender);
-    if(_2hopNeigs.find(sender) != _2hopNeigs.end()) {
-      _2hopNeigs[sender].clear();
-    }
+    string msg("MyNeighbors ["+nodeId+"] :: ["+sender+"] = {");
     MprNeighbours neigs = ctrlMsg->getNeighbors();
     for(MprNeighbours::iterator it = neigs.begin(); it != neigs.end(); ++it) {
-      EV_DEBUG << "[" << *it << "]" << endl;
       if(*it != InteroperableBroadcast::nodeId) {
         _2hopNeigs[sender].insert(*it);
+        msg += *it + ", ";
       }
     }
+//    cerr << msg << "}" << endl;
+    EV_DEBUG << msg << "}" << endl;
     return true;
   });
   InteroperableBroadcast::isPacket<MprCtrl_1_Neig>(pk, [&](const MprCtrl_1_Neig* ctrlMsg) {
@@ -312,7 +328,7 @@ void MPR_1::onControlMsg(cPacket* pk, string sender) {
         rCtrlMsgTimer->addPar(p1);
         rCtrlMsgTimer->addPar(p2);
 
-        InteroperableBroadcast::scheduleEvent(FWD_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(),
+        InteroperableBroadcast::scheduleEvent(FWD_CTRL_MSG, InteroperableBroadcast::sentMsgDelay,
             rCtrlMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
     } else {
       EV_DEBUG << "New 2-hop-neighbor [" << ctrlMsg->getEmitter() << "] wit neighborhood size equal to 1" << endl;

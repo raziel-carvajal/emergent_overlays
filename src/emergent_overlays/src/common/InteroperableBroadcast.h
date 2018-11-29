@@ -37,16 +37,17 @@ class InteroperableBroadcast : public UDPBasicApp {
       BROADCAST = 1, CTRL, BORDER
     };
     enum Timer {
-      HALT_APP = 1, SEND_CTRL_MSG, BROADCAST_SESSION, MOTION, BORDER_DETECTOR
+      HALT_APP = 1, SEND_CTRL_MSG, FWD_BROADCAST_MSG, BROADCAST_SESSION, MOTION, BORDER_DETECTOR
     };
     enum ForwardType {
       SIMPLE, CDS_RELAY, BORDER_NODE
     };
     // attributes that are accessible from subclasses of InteroperableBroadcast
     bool amIborderNode = false;
+    bool enableInterop;
 
     double transRadious;
-    bool enableInterop;
+    double sentMsgDelay;
 
     string nodeId;
 
@@ -100,6 +101,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     cMessage* haltSimTimer = nullptr;
     cMessage* broaMsgTimer = nullptr;
     cMessage* motionTimer = nullptr;
+    cMessage* fwdBMsgTimer = nullptr;
 
     set<string> knownNeigs;
 
@@ -109,6 +111,8 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     map<string, set<string>> knownForeignNodes;
     map<string, cMessage*> borderNodeTimers;
+
+    cPacket* latestPkToFwd = nullptr;
 
     bool isSelfTimer(cMessage *msg);
     bool isBorderDetectorTimer(cMessage *msg);

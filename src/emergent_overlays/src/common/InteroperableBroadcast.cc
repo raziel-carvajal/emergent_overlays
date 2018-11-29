@@ -40,16 +40,30 @@ void InteroperableBroadcast::initialize(int stage) {
     haltSimTimer = new cMessage("haltSimTimer");
     broaMsgTimer = new cMessage("broaMsgTimer");
     motionTimer = new cMessage("motionTimer");
+    fwdBMsgTimer = new cMessage("fwdBMsgTimer");
   }
 }
 
 void InteroperableBroadcast::processStart() {
 
   runningAlgorithm = getContainingNode(this)->getModuleByPath(".udpApp[0]")->getClassName();
-  EV_DEBUG << "Running algorithm [" << runningAlgorithm << "]" << endl;
   const char* id = getParentModule()->getFullName();
   nodeId = id;
-  EV_DEBUG << "Node ID [" << nodeId << "]" << endl;
+  EV_DEBUG << "Running algorithm [" << runningAlgorithm << "] in node [" << nodeId << "]" << endl;
+  // nodes identifiers start with an alphabetic character
+  bool isNumeric = false;
+  int i = 0;
+  while (!isNumeric) {
+    if (!isalpha(nodeId[i]))
+      isNumeric = true;
+    else
+      i++;
+  }
+  // get numeric substring from node identifier
+  std::string::size_type sz;
+  int n = stoi(nodeId.substr(i, nodeId.size()), &sz);
+  // unique value per node identifier (i.e. the value for this attribute isn't the same, for any pair of nodes)
+  sentMsgDelay = (n % par("maxNodesNo").longValue()) * par("sentMsgFixedDelay").doubleValue();
 
   physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
@@ -124,8 +138,17 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 
       }
         break;
+      case Timer::FWD_BROADCAST_MSG: {
+        socket.sendTo(latestPkToFwd, broadcastAddress, destPort);
+        emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
+        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
+      }
+        break;
       case Timer::SEND_CTRL_MSG: {
         sendCtrlMsg();
+        cancelEvent(msg);
+        if (par("withCtrlMsg").boolValue())
+          scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
       }
         break;
       case Timer::MOTION: {
@@ -182,6 +205,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           cancelAndDelete(ctrlMsgTimer);
         cancelAndDelete(haltSimTimer);
         cancelAndDelete(motionTimer);
+        if (fwdBMsgTimer)
+          cancelAndDelete(fwdBMsgTimer);
         // cancel events from sub-classes
         cancelSelfEvents();
         endSimulation();
@@ -201,13 +226,10 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     delete pk;
     return;
   }
-
   string sender(removeQuotes(pk->par("Sender").str()));
-  long pkType = pk->par("PkType").longValue();
-
-  switch (pkType) {
+  EV_DEBUG << "Broadcast message [" << pk->getName() << "] received from [" << sender << "]" << endl;
+  switch (pk->par("PkType").longValue()) {
     case UdpPacket::BROADCAST: {
-      EV_DEBUG << "Broadcast message [" << pk->getName() << "] received from [" << sender << "]" << endl;
       // record all received broadcast messages
       emit(rcvdBroadcastMsg, getMsgId(pk->getName()));
       // count received broadcast messages
@@ -222,8 +244,6 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       break;
     case UdpPacket::CTRL: {
       string senderRunningAlgo(removeQuotes(pk->par("SendersRunningAlgo").str()));
-      EV_DEBUG << "CtrlMsg [" << pk->getName() << "] received from [" << sender << "] running [" << senderRunningAlgo
-          << "]" << endl;
       if (enableInterop) {
         // all control messages must contain the parameter: SendersRunningAlgo
         detectBorderNode(sender, senderRunningAlgo);
@@ -339,13 +359,11 @@ void InteroperableBroadcast::onBroadcastMsg(cPacket* pk, string sender) {
 }
 
 void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
-  cPacket* cpy = pk->dup();
+  latestPkToFwd = pk->dup();
 // replace sender
-  cpy->getParList().remove("Sender");
-  addSender(cpy);
-  socket.sendTo(cpy, broadcastAddress, destPort);
-  emit(sentBroadcastMsg, getMsgId(cpy->getName()));
-  emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
+  latestPkToFwd->getParList().remove("Sender");
+  addSender(latestPkToFwd);
+  scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
 }
 
 cPacket* InteroperableBroadcast::getCtrlMsg() {
@@ -358,7 +376,7 @@ cPacket* InteroperableBroadcast::getCtrlMsg() {
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
   return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg
-      || isBorderDetectorTimer(msg);
+      || fwdBMsgTimer == msg || isBorderDetectorTimer(msg);
 }
 
 void InteroperableBroadcast::cancelSelfEvents() {

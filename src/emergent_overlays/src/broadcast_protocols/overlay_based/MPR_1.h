@@ -51,6 +51,7 @@ class MPR_1 : public InteroperableBroadcast {
     virtual cPacket* getCtrlMsg() override;
     virtual void sendPacket() override;
     virtual void sendCtrlMsg() override;
+    virtual void processStart() override;
 
     cPacket* buildBroadcastMsg(const char* header, string discartedNode);
     virtual cPacket* getCtrlMsgC1();
