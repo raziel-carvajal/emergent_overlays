@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #ifndef MPR_H_
 #define MPR_H_
@@ -34,8 +34,8 @@ class MPR : public InteroperableBroadcast {
     cMessage* sCtrlMsgTimer = nullptr;
     cMessage* fwdBrMsgTimer = nullptr;
 
-    virtual void onBroadcastMsg(cPacket* pk);
-    virtual void onControlMsg(cPacket* pk);
+    virtual void onBroadcastMsg(cPacket* pk, string sender);
+    virtual void onControlMsg(cPacket* pk, string sender);
     virtual void cancelSelfEvents() {
       cancelAndDelete(buildCdsTimer);
       cancelAndDelete(sCtrlMsgTimer);
@@ -78,6 +78,7 @@ class MPR : public InteroperableBroadcast {
     virtual cPacket* getCtrlMsg() override;
     virtual void sendPacket() override;
     virtual void sendCtrlMsg() override;
+    virtual void processStart() override;
 
   public:
     MPR() {

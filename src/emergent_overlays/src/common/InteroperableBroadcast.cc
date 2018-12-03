@@ -206,7 +206,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         cancelAndDelete(haltSimTimer);
         cancelAndDelete(motionTimer);
         if (fwdBMsgTimer)
-          cancelAndDelete(fwdBMsgTimer);
+          cancelAndDelete (fwdBMsgTimer);
         // cancel events from sub-classes
         cancelSelfEvents();
         endSimulation();
@@ -239,7 +239,8 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
         receivedMsg.insert(pk->getName());
         // each algorithm deal with the reception of [pk]
         onBroadcastMsg(pk, sender);
-      }
+      } else
+        EV_DEBUG << "Broadcast message [" << pk->getName() << "] ignored" << endl;
     }
       break;
     case UdpPacket::CTRL: {
@@ -362,7 +363,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   latestPkToFwd = pk->dup();
 // replace sender
   latestPkToFwd->getParList().remove("Sender");
-  addSender(latestPkToFwd);
+  addSender (latestPkToFwd);
   scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
 }
 
@@ -375,8 +376,8 @@ cPacket* InteroperableBroadcast::getCtrlMsg() {
 }
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
-  return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg
-      || fwdBMsgTimer == msg || isBorderDetectorTimer(msg);
+  return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg || fwdBMsgTimer == msg
+      || isBorderDetectorTimer(msg);
 }
 
 void InteroperableBroadcast::cancelSelfEvents() {

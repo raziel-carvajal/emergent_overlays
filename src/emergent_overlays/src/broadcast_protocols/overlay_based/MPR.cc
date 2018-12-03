@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include <broadcast_protocols/overlay_based/MPR.h>
 #include <algorithm>
@@ -24,7 +24,7 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   if (header == nullptr) {
     ostringstream pkName;
     pkName << InteroperableBroadcast::packetName + to_string(InteroperableBroadcast::numSent);
-    EV_DEBUG << "[MPR] New broadcast session. MsgId=" << pkName.str() << endl;
+    EV_DEBUG << "New broadcast session [" << pkName.str() << "]" << endl;
     payload = new MprBroadcastPacket(pkName.str().c_str());
   } else {
     payload = new MprBroadcastPacket(header);
@@ -34,7 +34,7 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
   InteroperableBroadcast::addSender(payload);
 
-  EV_DEBUG << "Neighbors at BroadcastMsgId=" << payload->getName() << endl;
+  EV_DEBUG << "Neighbors: " << endl;
   MprNeighbors myNeigs;
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
     EV_DEBUG << "[" << *it << "]" << endl;
@@ -45,51 +45,42 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   return payload;
 }
 
-void MPR::onBroadcastMsg(cPacket* pk) {
+void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
-    EV_DEBUG << "MPR.onBroadcastMsg()" << endl;
-    if (InteroperableBroadcast::receivedMsg.find(mprPk->getName()) == InteroperableBroadcast::receivedMsg.end()) {
-      EV_DEBUG << "Received packet [" << mprPk->getName() << "]" << endl;
-      InteroperableBroadcast::receivedMsg.insert(mprPk->getName());
-
-      MprNeighbors senderNeigs = mprPk->getNeighbors();
-      EV_DEBUG << "My ID:" << nodeId << endl;
-      EV_DEBUG << "Nodes in MprBroadcast packet:" << endl;
-      for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-        EV_DEBUG << "[" << *it << "]" << endl;
-      }
-
-      bool from_selector = false;
-      for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
-        EV_DEBUG << "[" << *it << "] == " << '"' + InteroperableBroadcast::nodeId + '"' << endl;
-        from_selector = (*it == '"' + InteroperableBroadcast::nodeId + '"');
-      }
-      if (from_selector || amIborderNode) {
-        if(amIborderNode) {
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
-        }
-        else {
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-        }
-        fwdBrMsgTimer->setName(mprPk->getName());
-        // XXX found a situation where a FWD_BROADCAST event is scheduled twice
-        //     how is that possible ?
-        if(!fwdBrMsgTimer->isScheduled() ) {
-          InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("bootCtrlMsgInterval").doubleValue(),
-              fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
-        }
+    MprNeighbors senderNeigs = mprPk->getNeighbors();
+    EV_DEBUG << "My ID:" << nodeId << endl;
+    EV_DEBUG << "Nodes in MprBroadcast packet:" << endl;
+    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
+      EV_DEBUG << "[" << *it << "]" << endl;
     }
 
-  }
-});
+    bool from_selector = false;
+    for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
+      EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
+      from_selector = (*it == InteroperableBroadcast::nodeId);
+    }
+    if (from_selector || amIborderNode) {
+      if(amIborderNode) {
+        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
+      }
+      else {
+        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
+      }
+      fwdBrMsgTimer->setName(mprPk->getName());
+      // XXX found a situation where a FWD_BROADCAST event is scheduled twice
+      //     how is that possible ?
+      if(!fwdBrMsgTimer->isScheduled() ) {
+        InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(),
+            fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
+      }
+    }
+    return true;
+  });
 }
 
-void MPR::onControlMsg(cPacket* pk) {
+void MPR::onControlMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprPacket>(pk, [&](const MprPacket* mprPk) {
     EV_DEBUG << "MPR.onControlMsg()" << endl;
-
-    string sender(pk->par("Sender").str());
-
     neighbors[sender].clear();
     neigsPositions[sender].x = mprPk->getSenderPosAtX();
     neigsPositions[sender].y = mprPk->getSenderPosAtY();
@@ -100,15 +91,15 @@ void MPR::onControlMsg(cPacket* pk) {
     EV_DEBUG << "Sender [" << sender << "] has the following neighbors:" << endl;
 
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-      EV_DEBUG << "NEIG" << *it << endl;
-      if(*it != '"' + InteroperableBroadcast::nodeId + '"') {
+      EV_DEBUG << "NEIG [" << *it << "]" << endl;
+      if(*it != InteroperableBroadcast::nodeId) {
         EV_DEBUG << "\t [" << *it << "]" << endl;
         neighbors[sender].insert(*it);
         neigsPositions[*it].x = neigsPosAtX[*it];
         neigsPositions[*it].y = neigsPosAtY[*it];
       }
     }
-
+    return true;
   });
 }
 
@@ -119,10 +110,13 @@ void MPR::initialize(int stage) {
     buildCdsTimer = new cMessage("buildCdsTimer");
     sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
     fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
-    InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, par("bootCtrlMsgInterval").doubleValue(),
-        buildCdsTimer);
   }
 
+}
+
+void MPR::processStart() {
+  InteroperableBroadcast::processStart();
+  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
 }
 
 void MPR::handleMessageWhenUp(cMessage* msg) {
@@ -132,19 +126,24 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
       case SEND_CTRL_MSG_TO_BOOT:
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
 
+        cancelEvent(msg);
         if (sentBootEvents < par("bootCtrlMsgsNo").longValue()) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
-              sentBootEvents * par("bootCtrlMsgInterval").doubleValue(), buildCdsTimer);
+              InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), buildCdsTimer);
         } else {
           EV_DEBUG << "schedule 1st approximation of a backbone" << endl;
-          InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("bootCtrlMsgInterval").doubleValue() * 2, buildCdsTimer);
+          InteroperableBroadcast::scheduleEvent(BUILD_CDS,
+              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue() * 2, buildCdsTimer);
         }
         sentBootEvents++;
         break;
       case BUILD_CDS: {
         EV_DEBUG << "Build CDS" << endl;
         currentMpr = compute_mpr();
+        for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
+          EV_DEBUG << "[" << *it << "]" << endl;
+        }
         neighbors.clear();
         set<string> keys;
         for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -192,13 +191,17 @@ void MPR::sendPacket() {
 }
 
 void MPR::sendCtrlMsg() {
+  cancelEvent(sCtrlMsgTimer);
+  cancelEvent(buildCdsTimer);
   // 2 exchanges of control messages are required to approximate a CDS
   // - 1st exchange: neighbors
   // - 2nd exchange: neighbors of neighbors
   socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, par("bootCtrlMsgInterval").doubleValue(), sCtrlMsgTimer);
+  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG,
+      InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), sCtrlMsgTimer);
   // and then build the backbone; schedue event until the 2 exchange take place
-  InteroperableBroadcast::scheduleEvent(BUILD_CDS, par("bootCtrlMsgInterval").doubleValue() * 3, buildCdsTimer);
+  InteroperableBroadcast::scheduleEvent(BUILD_CDS,
+      par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue() * 2, buildCdsTimer);
 }
 
 cPacket* MPR::getCtrlMsg() {
@@ -239,8 +242,8 @@ set<string> MPR::compute_mpr() {
     string j(p.first);
     hops[0].insert(j);
     for (const auto& name : p.second) {
-      EV_DEBUG << "name [" << name << "] && nodeId [" << '"' + InteroperableBroadcast::nodeId + '"' << "]" << endl;
-      if (name == '"' + InteroperableBroadcast::nodeId + '"')
+      EV_DEBUG << "name [" << name << "] && nodeId [" << InteroperableBroadcast::nodeId << "]" << endl;
+      if (name == InteroperableBroadcast::nodeId)
         continue;
       bool no_neighbor = hops[0].find(name) == hops[0].end();
       if (no_neighbor) {
