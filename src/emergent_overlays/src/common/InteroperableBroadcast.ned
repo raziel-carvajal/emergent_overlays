@@ -23,16 +23,19 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool isSource = default(false);
     bool withCtrlMsg = default(false);
     bool enableInterop=default(false);
-
+	
+	// TODO: avoid the use of uniform()
     double ctrlMsgInterval @unit(s) = default(uniform(9.901s, 10.0s));
+    
     double borderDetectorDelay @unit(s) = default(uniform(0.001s, 0.099s));
+    
     double motionInterval @unit(s) = default(10.0s);
     // this parameter cannot be lower than 0.5 ms
     double sentMsgFixedDelay @unit(s) = default(0.0005s);
     double sentMsgRandDelay @unit(s) = default(uniform(0.00001s, 0.0019s));
     
     int hopsToLive = default(2);
-    int maxNodesNo  = default(100);
+    int maxNodesNo  = default(1000);
 
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);

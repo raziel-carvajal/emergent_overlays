@@ -130,11 +130,11 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         if (sentBootEvents < par("bootCtrlMsgsNo").longValue()) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
-              InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), buildCdsTimer);
+              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), buildCdsTimer);
         } else {
           EV_DEBUG << "schedule 1st approximation of a backbone" << endl;
           InteroperableBroadcast::scheduleEvent(BUILD_CDS,
-              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue() * 2, buildCdsTimer);
+              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), buildCdsTimer);
         }
         sentBootEvents++;
         break;
@@ -198,7 +198,7 @@ void MPR::sendCtrlMsg() {
   // - 2nd exchange: neighbors of neighbors
   socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG,
-      InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), sCtrlMsgTimer);
+      par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), sCtrlMsgTimer);
   // and then build the backbone; schedue event until the 2 exchange take place
   InteroperableBroadcast::scheduleEvent(BUILD_CDS,
       par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue() * 2, buildCdsTimer);
