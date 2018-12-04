@@ -92,7 +92,7 @@ void InteroperableBroadcast::processStart() {
 
   // schedule ctrlMsg
   if (par("withCtrlMsg").boolValue())
-    scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue() + sentMsgDelay, ctrlMsgTimer);
+    scheduleEvent(Timer::SEND_CTRL_MSG, par("startSendingCtrlMsgs").doubleValue() + sentMsgDelay, ctrlMsgTimer);
 
   // schedule event to end the simulation in all peers
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);

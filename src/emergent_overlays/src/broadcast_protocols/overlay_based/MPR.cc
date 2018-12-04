@@ -53,7 +53,7 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
       m += *it +", ";
     }
-    cerr << m << " } " << endl;
+//    cerr << m << " } " << endl;
     bool from_selector = false;
     int ctrlSession  = mprPk->getCtrlMsgSession();
     if(fwdDecisionHistory.find(ctrlSession) == fwdDecisionHistory.end()){
@@ -151,7 +151,7 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
           m += *it + ", ";
         }
-        cerr << m << " }" << endl;
+//        cerr << m << " }" << endl;
         neighbors.clear();
         set<string> keys;
         for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
