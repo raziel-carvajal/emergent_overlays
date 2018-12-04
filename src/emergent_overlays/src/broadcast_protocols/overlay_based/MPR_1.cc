@@ -50,12 +50,12 @@ void MPR_1::handleMessageWhenUp(cMessage* msg) {
           EV_DEBUG << "scheduling BOOT_CTRL_MSG [" << sentBootEvents << "]" << endl;
           cancelEvent(msg);
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
-              InteroperableBroadcast::sentMsgDelay * par("maxNodesNo").longValue(), initNeigTimer);
+              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), initNeigTimer);
         } else {
           // this message will reach the nearest two-hop neighbor
           // that is why the delay is multiplied by 2
-          InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS, par("sentMsgFixedDelay").doubleValue() * 2,
-              sCtrlMsgTimer);
+          InteroperableBroadcast::scheduleEvent(WAIT_CTRL_MSG_DISS,
+              par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), sCtrlMsgTimer);
         }
         sentBootEvents++;
         break;
@@ -311,9 +311,9 @@ void MPR_1::onControlMsg(cPacket* pk, string sender) {
       }
     }
 //    cerr << msg << "}" << endl;
-    EV_DEBUG << msg << "}" << endl;
-    return true;
-  });
+      EV_DEBUG << msg << "}" << endl;
+      return true;
+    });
   InteroperableBroadcast::isPacket<MprCtrl_1_Neig>(pk, [&](const MprCtrl_1_Neig* ctrlMsg) {
     if(recvCtrlMsgs.find(ctrlMsg->getName()) == recvCtrlMsgs.end()) {
       recvCtrlMsgs.insert(ctrlMsg->getName());

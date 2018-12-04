@@ -31,5 +31,6 @@ packet MprPacket {
 }
 
 packet MprBroadcastPacket {
+    int ctrlMsgSession;
 	MprNeighbors neighbors;
 }

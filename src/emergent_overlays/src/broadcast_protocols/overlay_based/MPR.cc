@@ -41,6 +41,7 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
     myNeigs.insert(*it);
   }
   payload->setNeighbors(myNeigs);
+  payload->setCtrlMsgSession(ctrlMsgSession);
 
   return payload;
 }
@@ -48,16 +49,21 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
 void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
-    EV_DEBUG << "My ID:" << nodeId << endl;
-    EV_DEBUG << "Nodes in MprBroadcast packet:" << endl;
+    string m(nodeId + " :: payload from sender [" + sender + "] = { ");
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-      EV_DEBUG << "[" << *it << "]" << endl;
+      m += *it +", ";
     }
-
+    cerr << m << " } " << endl;
     bool from_selector = false;
-    for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
-      EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
-      from_selector = (*it == InteroperableBroadcast::nodeId);
+    int ctrlSession  = mprPk->getCtrlMsgSession();
+    if(fwdDecisionHistory.find(ctrlSession) == fwdDecisionHistory.end()){
+      for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
+        EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
+        from_selector = (*it == InteroperableBroadcast::nodeId);
+      }
+      fwdDecisionHistory[ctrlSession] = from_selector;
+    } else {
+      from_selector = fwdDecisionHistory[ctrlSession];
     }
     if (from_selector || amIborderNode) {
       if(amIborderNode) {
@@ -117,6 +123,7 @@ void MPR::initialize(int stage) {
 void MPR::processStart() {
   InteroperableBroadcast::processStart();
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
+  ctrlMsgSession++;
 }
 
 void MPR::handleMessageWhenUp(cMessage* msg) {
@@ -139,11 +146,12 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         sentBootEvents++;
         break;
       case BUILD_CDS: {
-        EV_DEBUG << "Build CDS" << endl;
+        string m(nodeId + " :: cds = { ");
         currentMpr = compute_mpr();
         for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
-          EV_DEBUG << "[" << *it << "]" << endl;
+          m += *it + ", ";
         }
+        cerr << m << " }" << endl;
         neighbors.clear();
         set<string> keys;
         for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -191,6 +199,7 @@ void MPR::sendPacket() {
 }
 
 void MPR::sendCtrlMsg() {
+  ctrlMsgSession++;
   cancelEvent(sCtrlMsgTimer);
   cancelEvent(buildCdsTimer);
   // 2 exchanges of control messages are required to approximate a CDS

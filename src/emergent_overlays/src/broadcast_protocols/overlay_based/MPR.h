@@ -29,6 +29,7 @@ class MPR : public InteroperableBroadcast {
     };
 
     int sentBootEvents = 1;
+    int ctrlMsgSession = 0;
 
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
@@ -50,6 +51,8 @@ class MPR : public InteroperableBroadcast {
     map<string, Coord> neigsPositions;
 
     array<set<string>, 2> hops;
+
+    map<int, bool> fwdDecisionHistory;
 
     map<string, set<string>> make_cpy(map<string, set<string>> a) {
       map<string, set<string>> b;
