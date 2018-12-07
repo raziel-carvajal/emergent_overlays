@@ -47,31 +47,45 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   return payload;
 }
 
+bool MPR::amIrelay(MprNeighbors senderNeigs) {
+  bool relay = false;
+  for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it)
+    relay = (*it == InteroperableBroadcast::nodeId);
+  return relay;
+}
+
 void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
+
     string m(nodeId + " :: broadcast received from [" + sender + "] = { ");
-    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-      m += *it +", ";
-    }
+    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it)
+    m += *it +", ";
     cout << m << " } " << endl;
-    /*
-     * first time the MPR approximation takes place OR neighbors differ between two exchanges of control messages
-     */
-    bool from_selector = false;
-    if(neighborsStatus == 2 || neighborsStatus == 1) {
-      cout << nodeId << " :: FWD decision was computed" << endl;
-      for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
-        EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
-        from_selector = (*it == InteroperableBroadcast::nodeId);
-      }
-      previousFwdDecision = from_selector;
-    } else {
-      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
-      from_selector = previousFwdDecision;
+
+    bool relay = false;
+    switch (neighborsStatus) {
+      case 0:
+        cout << nodeId << " :: previous FWD decision was taken into account" << endl;
+        relay = previousFwdDecision;
+      break;
+      case 1:
+        cout << nodeId << " :: FWD decision was computed" << endl;
+        relay = amIrelay(senderNeigs);
+        previousFwdDecision = relay;
+      break;
+      case 2:
+        cout << nodeId << " :: compute FWD decision for the first time" << endl;
+        relay = amIrelay(senderNeigs);
+        updateNeighborsStatus();
+        previousFwdDecision = relay;
+      break;
+      default:
+        throw cRuntimeError("Invalid FWD decision [%d]", neighborsStatus);
+      break;
     }
-    cout << nodeId << " :: FWD decision is " << from_selector << endl;
-    if (from_selector || amIborderNode) {
+    cout << nodeId << " :: FWD decision is " << relay << endl;
+    if (relay || amIborderNode) {
       if(amIborderNode) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
       }
@@ -81,13 +95,6 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
       cPacket* broadcastMsg = buildBroadcastMsg(mprPk->getName());
       socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
       emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
-//      fwdBrMsgTimer->setName(mprPk->getName());
-//      // XXX found a situation where a FWD_BROADCAST event is scheduled twice
-//      //     how is that possible ?
-//      if(!fwdBrMsgTimer->isScheduled() ) {
-//        InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(),
-//            fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
-//      }
     }
     return true;
   });
@@ -133,6 +140,27 @@ void MPR::initialize(int stage) {
 void MPR::processStart() {
   InteroperableBroadcast::processStart();
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
+}
+
+void MPR::updateNeighborsStatus() {
+  // compare whether neighbors have differed between 2 exchanges of control messages
+  if (previousNeigs.size() != neighbors.size()) {
+    cout << nodeId << " :: size of neighbors differ" << endl;
+    neighborsStatus = 1;
+  } else {
+    bool firstInc = true;
+    for (auto it = neighbors.begin(); it != neighbors.end() && firstInc; ++it) {
+      if (previousNeigs.find(it->first) == previousNeigs.end())
+        firstInc = false;
+    }
+    bool seconInc = true;
+    for (set<string>::iterator it = previousNeigs.begin(); it != previousNeigs.end() && seconInc; ++it) {
+      if (neighbors.find(*it) == neighbors.end())
+        seconInc = false;
+    }
+    neighborsStatus = firstInc && seconInc ? 0 : 1;
+    cout << nodeId << " :: sets of neighbors equal ? = " << neighborsStatus << endl;
+  }
 }
 
 void MPR::handleMessageWhenUp(cMessage* msg) {
@@ -185,25 +213,8 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
       }
         break;
       case SEND_CTRL_MSG: {
+        updateNeighborsStatus();
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-        // compare whether neighbors have differed between 2 exchanges of control messages
-        if (previousNeigs.size() != neighbors.size()) {
-          cout << nodeId << " :: size of neighbors differ" << endl;
-          neighborsStatus = 1;
-        } else {
-          bool firstInc = true;
-          for (auto it = neighbors.begin(); it != neighbors.end() && firstInc; ++it) {
-            if (previousNeigs.find(it->first) == previousNeigs.end())
-              firstInc = false;
-          }
-          bool seconInc = true;
-          for (set<string>::iterator it = previousNeigs.begin(); it != previousNeigs.end() && seconInc; ++it) {
-            if (neighbors.find(*it) == neighbors.end())
-              seconInc = false;
-          }
-          neighborsStatus = firstInc && seconInc ? 0 : 1;
-          cout << nodeId << " :: sets of neighbors equal ? = " << neighborsStatus << endl;
-        }
         // update previous list of neighbors
         previousNeigs.clear();
         for (auto it = neighbors.begin(); it != neighbors.end(); ++it)

@@ -75,8 +75,13 @@ class MPR : public InteroperableBroadcast {
       else
         return false;
     }
+
     set<string> compute_mpr();
+
     cPacket* buildBroadcastMsg(const char* header);
+
+    void updateNeighborsStatus();
+    bool amIrelay(MprNeighbors senderNeigs);
 
   protected:
 
