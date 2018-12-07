@@ -222,7 +222,8 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
     E(g)$arrow.mode <- 0
     E(g)$color <- 'lightgrey'
     V(g)$size <- 4
-    V(g)$label <- ''
+    # V(g)$label <- ''
+		V(g)$label.cex <- 0.5
     V(g)$frame.color <- 'black'
     colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
     V(g)$color <- colors[labelCode]

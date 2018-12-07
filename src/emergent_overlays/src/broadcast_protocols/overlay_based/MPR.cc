@@ -50,27 +50,27 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
 void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
-    string m(nodeId + " :: payload from sender [" + sender + "] = { ");
+    string m(nodeId + " :: broadcast received from [" + sender + "] = { ");
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
       m += *it +", ";
     }
-//    cout << m << " } " << endl;
+    cout << m << " } " << endl;
     /*
      * first time the MPR approximation takes place OR neighbors differ between two exchanges of control messages
      */
     bool from_selector = false;
     if(neighborsStatus == 2 || neighborsStatus == 1) {
-//      cout << nodeId << " :: FWD decision was computed" << endl;
+      cout << nodeId << " :: FWD decision was computed" << endl;
       for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
         EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
         from_selector = (*it == InteroperableBroadcast::nodeId);
       }
       previousFwdDecision = from_selector;
     } else {
-//      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
+      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
       from_selector = previousFwdDecision;
     }
-//    cout << nodeId << " :: FWD decision is " << from_selector << endl;
+    cout << nodeId << " :: FWD decision is " << from_selector << endl;
     if (from_selector || amIborderNode) {
       if(amIborderNode) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
@@ -188,6 +188,7 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
         // compare whether neighbors have differed between 2 exchanges of control messages
         if (previousNeigs.size() != neighbors.size()) {
+          cout << nodeId << " :: size of neighbors differ" << endl;
           neighborsStatus = 1;
         } else {
           bool firstInc = true;
@@ -201,6 +202,7 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
               seconInc = false;
           }
           neighborsStatus = firstInc && seconInc ? 0 : 1;
+          cout << nodeId << " :: sets of neighbors equal ? = " << neighborsStatus << endl;
         }
         // update previous list of neighbors
         previousNeigs.clear();
