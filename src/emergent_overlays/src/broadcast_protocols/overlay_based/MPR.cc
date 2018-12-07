@@ -76,8 +76,8 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
       break;
       case 2:
         cout << nodeId << " :: compute FWD decision for the first time" << endl;
+        neighborsStatus = 0;
         relay = amIrelay(senderNeigs);
-        updateNeighborsStatus();
         previousFwdDecision = relay;
       break;
       default:
@@ -145,7 +145,7 @@ void MPR::processStart() {
 void MPR::updateNeighborsStatus() {
   // compare whether neighbors have differed between 2 exchanges of control messages
   if (previousNeigs.size() != neighbors.size()) {
-    cout << nodeId << " :: size of neighbors differ" << endl;
+    cout << nodeId << " :: size of neighbors differ [" << previousNeigs.size() << "] != [" << neighbors.size() << "]" << endl;
     neighborsStatus = 1;
   } else {
     bool firstInc = true;
