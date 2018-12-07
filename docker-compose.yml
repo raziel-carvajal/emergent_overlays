@@ -2,9 +2,10 @@ version: "2.0"
 services:
   trace_generator:
     env_file: env
-    # environment:
-    #   USE_PREVIOUS_TRACE: 'yes'
-    #   NEW_LIST: 'n_295_d_0_tr_3_a_20x20_idx_0_p_cds.ini'
+    environment:
+      USE_PREVIOUS_TRACE: 'no'
+      # replace the list of configuration files
+      # NEW_LIST: 'n_295_d_0_tr_3_a_20x20_idx_0_p_cds.ini'
     image: emergent_overlays_trace_generator:latest
     build:
       context: ./services/trace_generator
