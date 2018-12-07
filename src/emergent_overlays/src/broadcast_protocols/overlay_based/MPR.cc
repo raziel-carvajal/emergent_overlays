@@ -34,14 +34,14 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
   InteroperableBroadcast::addSender(payload);
 
-  string msg(nodeId + " :: current MPR set = {");
+//  string msg(nodeId + " :: current MPR set = {");
   MprNeighbors myNeigs;
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
     EV_DEBUG << "[" << *it << "]" << endl;
     myNeigs.insert(*it);
-    msg += *it + ", ";
+//    msg += *it + ", ";
   }
-  cout << msg << " }" << endl;
+//  cout << msg << " }" << endl;
   payload->setNeighbors(myNeigs);
 
   return payload;
@@ -54,23 +54,23 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
       m += *it +", ";
     }
-    cout << m << " } " << endl;
+//    cout << m << " } " << endl;
     /*
      * first time the MPR approximation takes place OR neighbors differ between two exchanges of control messages
      */
     bool from_selector = false;
     if(neighborsStatus == 2 || neighborsStatus == 1) {
-      cout << nodeId << " :: FWD decision was computed" << endl;
+//      cout << nodeId << " :: FWD decision was computed" << endl;
       for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
         EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
         from_selector = (*it == InteroperableBroadcast::nodeId);
       }
       previousFwdDecision = from_selector;
     } else {
-      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
+//      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
       from_selector = previousFwdDecision;
     }
-    cout << nodeId << " :: FWD decision is " << from_selector << endl;
+//    cout << nodeId << " :: FWD decision is " << from_selector << endl;
     if (from_selector || amIborderNode) {
       if(amIborderNode) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
