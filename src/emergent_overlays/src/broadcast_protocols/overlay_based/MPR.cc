@@ -34,14 +34,15 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
   InteroperableBroadcast::addSender(payload);
 
-  EV_DEBUG << "Neighbors: " << endl;
+  string msg(nodeId + " :: current MPR set = {");
   MprNeighbors myNeigs;
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
     EV_DEBUG << "[" << *it << "]" << endl;
     myNeigs.insert(*it);
+    msg += *it + ", ";
   }
+  cout << msg << " }" << endl;
   payload->setNeighbors(myNeigs);
-  payload->setCtrlMsgSession(ctrlMsgSession);
 
   return payload;
 }
@@ -53,18 +54,23 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
       m += *it +", ";
     }
-//    cerr << m << " } " << endl;
+    cout << m << " } " << endl;
+    /*
+     * first time the MPR approximation takes place OR neighbors differ between two exchanges of control messages
+     */
     bool from_selector = false;
-    int ctrlSession  = mprPk->getCtrlMsgSession();
-    if(fwdDecisionHistory.find(ctrlSession) == fwdDecisionHistory.end()){
+    if(neighborsStatus == 2 || neighborsStatus == 1) {
+      cout << nodeId << " :: FWD decision was computed" << endl;
       for (MprNeighbors::iterator it = senderNeigs.begin(); !from_selector && it != senderNeigs.end(); ++it) {
         EV_DEBUG << "[" << *it << "] == " << InteroperableBroadcast::nodeId << endl;
         from_selector = (*it == InteroperableBroadcast::nodeId);
       }
-      fwdDecisionHistory[ctrlSession] = from_selector;
+      previousFwdDecision = from_selector;
     } else {
-      from_selector = fwdDecisionHistory[ctrlSession];
+      cout << nodeId << " :: previous FWD decision was taken into account" << endl;
+      from_selector = previousFwdDecision;
     }
+    cout << nodeId << " :: FWD decision is " << from_selector << endl;
     if (from_selector || amIborderNode) {
       if(amIborderNode) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
@@ -72,13 +78,16 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
       else {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
       }
-      fwdBrMsgTimer->setName(mprPk->getName());
-      // XXX found a situation where a FWD_BROADCAST event is scheduled twice
-      //     how is that possible ?
-      if(!fwdBrMsgTimer->isScheduled() ) {
-        InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(),
-            fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
-      }
+      cPacket* broadcastMsg = buildBroadcastMsg(mprPk->getName());
+      socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+      emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
+//      fwdBrMsgTimer->setName(mprPk->getName());
+//      // XXX found a situation where a FWD_BROADCAST event is scheduled twice
+//      //     how is that possible ?
+//      if(!fwdBrMsgTimer->isScheduled() ) {
+//        InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(),
+//            fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
+//      }
     }
     return true;
   });
@@ -94,17 +103,18 @@ void MPR::onControlMsg(cPacket* pk, string sender) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
     MprCoord neigsPosAtX = mprPk->getPositionsAtX();
     MprCoord neigsPosAtY = mprPk->getPositionsAtY();
-    EV_DEBUG << "Sender [" << sender << "] has the following neighbors:" << endl;
+    string msg(nodeId + " :: neighbors of [" + sender +"] = {");
 
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-      EV_DEBUG << "NEIG [" << *it << "]" << endl;
+//      EV_DEBUG << "NEIG [" << *it << "]" << endl;
       if(*it != InteroperableBroadcast::nodeId) {
-        EV_DEBUG << "\t [" << *it << "]" << endl;
+        msg += *it + ", ";
         neighbors[sender].insert(*it);
         neigsPositions[*it].x = neigsPosAtX[*it];
         neigsPositions[*it].y = neigsPosAtY[*it];
       }
     }
+//    cout << msg << " }" << endl;
     return true;
   });
 }
@@ -123,7 +133,6 @@ void MPR::initialize(int stage) {
 void MPR::processStart() {
   InteroperableBroadcast::processStart();
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
-  ctrlMsgSession++;
 }
 
 void MPR::handleMessageWhenUp(cMessage* msg) {
@@ -139,6 +148,8 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
           InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT,
               par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), buildCdsTimer);
         } else {
+          for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
+            previousNeigs.insert(it->first);
           EV_DEBUG << "schedule 1st approximation of a backbone" << endl;
           InteroperableBroadcast::scheduleEvent(BUILD_CDS,
               par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), buildCdsTimer);
@@ -146,16 +157,17 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         sentBootEvents++;
         break;
       case BUILD_CDS: {
-        string m(nodeId + " :: cds = { ");
         currentMpr = compute_mpr();
-        for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
-          m += *it + ", ";
-        }
+//        string m(nodeId + " :: cds = { ");
+//        for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it) {
+//          m += *it + ", ";
+//        }
 //        cerr << m << " }" << endl;
         neighbors.clear();
         set<string> keys;
-        for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
+        for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
           keys.insert(it->first);
+        }
         for (set<string>::iterator it = keys.begin(); it != keys.end(); ++it)
           neighbors.erase(*it);
         keys.clear();
@@ -172,8 +184,29 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
       }
         break;
-      case SEND_CTRL_MSG:
+      case SEND_CTRL_MSG: {
         socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+        // compare whether neighbors have differed between 2 exchanges of control messages
+        if (previousNeigs.size() != neighbors.size()) {
+          neighborsStatus = 1;
+        } else {
+          bool firstInc = true;
+          for (auto it = neighbors.begin(); it != neighbors.end() && firstInc; ++it) {
+            if (previousNeigs.find(it->first) == previousNeigs.end())
+              firstInc = false;
+          }
+          bool seconInc = true;
+          for (set<string>::iterator it = previousNeigs.begin(); it != previousNeigs.end() && seconInc; ++it) {
+            if (neighbors.find(*it) == neighbors.end())
+              seconInc = false;
+          }
+          neighborsStatus = firstInc && seconInc ? 0 : 1;
+        }
+        // update previous list of neighbors
+        previousNeigs.clear();
+        for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
+          previousNeigs.insert(it->first);
+      }
         break;
       default:
         throw cRuntimeError("Invalid kind %d in Mpr.buildCdsTimer", (int) msg->getKind());
@@ -199,7 +232,6 @@ void MPR::sendPacket() {
 }
 
 void MPR::sendCtrlMsg() {
-  ctrlMsgSession++;
   cancelEvent(sCtrlMsgTimer);
   cancelEvent(buildCdsTimer);
   // 2 exchanges of control messages are required to approximate a CDS
@@ -227,6 +259,7 @@ cPacket* MPR::getCtrlMsg() {
   MprCoord positionsAtX;
   MprCoord positionsAtY;
 
+//  cout << nodeId << " :: neighbors.size = " << neighbors.size() << endl;
   EV_DEBUG << "Current neighbors:" << endl;
   for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
     EV_DEBUG << "\t " << it->first << endl;

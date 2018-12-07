@@ -29,7 +29,6 @@ class MPR : public InteroperableBroadcast {
     };
 
     int sentBootEvents = 1;
-    int ctrlMsgSession = 0;
 
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
@@ -52,7 +51,12 @@ class MPR : public InteroperableBroadcast {
 
     array<set<string>, 2> hops;
 
-    map<int, bool> fwdDecisionHistory;
+    // 0: neighbors DO NOT differ between exchange of Ctrl messages
+    // 1: neighbors DO differ between exchange of Ctrl messages
+    // 2: first build
+    int neighborsStatus = 2;
+    bool previousFwdDecision;
+    set<string> previousNeigs;
 
     map<string, set<string>> make_cpy(map<string, set<string>> a) {
       map<string, set<string>> b;
