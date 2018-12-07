@@ -26,7 +26,7 @@ version=`echo ${1} | grep -Eo '[0-9]{1,5}'`
 [[ ${?} != 0 ]] && \
 	echo -e "ERROR: docker-compose version must be an integer.\nEnd of ${0}" && \
 	exit 1
-[[ ${version} < 9 ]] && \
+[[ ${version} -lt 9 ]] && \
 	echo -e "ERROR: docker-compose version must be at least 9.\nEnd of ${0}" && \
 	exit 1
 
@@ -35,7 +35,7 @@ workers=`echo ${2} | grep -Eo '[0-9]{1,5}'`
 	echo -e "ERROR: number of workers must be an integer.\nEnd of ${0}" && \
 	exit 1
 
-if [[ ${version} >= 21 ]]; then
+if [[ ${version} -gt 200 ]]; then
 	docker-compose down && \
 		docker-compose build && \
 		docker-compose up -d --scale worker=${workers} --scale dist_generator=${workers}
