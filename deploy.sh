@@ -35,14 +35,14 @@ workers=`echo ${2} | grep -Eo '[0-9]{1,5}'`
 	echo -e "ERROR: number of workers must be an integer.\nEnd of ${0}" && \
 	exit 1
 
-if [[ ${version} -gt 200 ]]; then
+if [[ ${version} -gt 20 ]]; then
 	docker-compose down && \
 		docker-compose build && \
 		docker-compose up -d --scale worker=${workers} --scale dist_generator=${workers}
 	result=${?}
 else
-	sudo docker network create emergentoverlays_default && \
-		sudo docker-compose down && sudo docker-compose build && \
+	sudo docker-compose down && sudo docker-compose build && \
+		sudo docker network create emergentoverlays_default && \
 		sudo docker-compose scale worker=${workers} dist_generator=${workers} \
 			trace_generator=1 plotter=1
 	result=${?}
