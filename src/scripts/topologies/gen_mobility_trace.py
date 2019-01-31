@@ -40,15 +40,16 @@ class CommunicationArea :
 		self.center = {
 			'x': float( "%.3f"%(length / 2) ),
 	  		'y': float( "%.3f"%(length / 2) ) }
+
 		# NOTE REQUIRED AS OUTPUT
 		print "X_POSITION_OF_CMA_CENTER", self.center['x']
-
 		self.denseAlen = float( "%.3f"%(length / 2) )
 		# NOTE REQUIRED AS OUTPUT
 		print "WIDTH_OF_DENSE_REGION", self.denseAlen
-
 		# NOTE REQUIRED AS OUTPUT
 		print 'FIRST_NODE_AT_DENSE_AREA', int(nodes) + 1
+		# NOTE
+		print 'SOURCE_NODE_ID', int(nodes) * 2 + 1
 
 		# sparse area contains four subregions
 		self.nodesAtSubA = int(nodes) / 4
