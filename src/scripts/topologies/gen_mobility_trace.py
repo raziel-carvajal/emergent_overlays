@@ -6,7 +6,6 @@ import networkx as nx
 import itertools as iterT
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_direction
-from pymobility.models.mobility import truncated_levy_walk
 
 MIN_LOW_VELOCITY = 0.0
 MAX_LOW_VELOCITY = 1.0
@@ -33,92 +32,41 @@ def getArgs() :
 	p.add_argument('--motion-freq', dest='motion_freq', type=float, default=1.0,
 		help='frequency (in seconds) at which nodes move; every motion_freq seconds \
 		all nodes move following the Levy-walk model')
-	# proportion of denze zone (in sqrt meters) to take into account
-	p.add_argument('--dense-zone-f', dest='dense_zone_f', type=float, default=0.8,
-		help='Proportion of dense zone to take into consideration. Values varies \
-		within interval [0, 1]; for instance, set this value to 0.5 means that \
-		the dense zone will have half of its designed numbero of square meters.')
 	return p.parse_args()
 
 class CommunicationArea :
-    def __init__(self, length=100, dense_zone_prop=0.80) :
-        self.length = length
-        self.center = {
-            'x': float( "%.3f"%(length / 2) ),
-            'y': float( "%.3f"%(length / 2) ) }
-        # NOTE REQUIRED AS OUTPUT
-        print "X_POSITION_OF_CMA_CENTER", self.center['x']
-        self.denseAlen = float( "%.3f"%(length / math.sqrt(2)) ) * dense_zone_prop
-        # NOTE REQUIRED AS OUTPUT
-        print "WIDTH_OF_DENSE_REGION", self.denseAlen
-        self.sparseSubAwidth = float(
-            "%.3f"%( (length - self.denseAlen) / 2 ) )
-        # print "sqrt length ::", self.sparseSubAwidth
-        self.sqrtNoVer = int( math.floor(self.length / self.sparseSubAwidth) )
-        self.sqrtNoHor = int( math.floor(self.denseAlen / self.sparseSubAwidth) )
-        # print "# of vertical sqrts ::", self.sqrtNoVer, "\n# of horizontal sqrts ::",\
-        #     self.sqrtNoHor
-        self.sparseRegions = [
-            # initial position of vertical rectangles
-            {'x': 0, 'y': 0}, {'x': self.sparseSubAwidth + self.denseAlen, 'y': 0},
-            # initial position of horizontal rectangles
-            {'x': self.sparseSubAwidth, 'y': 0},
-            {'x': self.sparseSubAwidth, 'y': self.sparseSubAwidth + self.denseAlen}
-        ]
+	def __init__(self, nodes, length=100) :
+		self.length = length
+		self.center = {
+			'x': float( "%.3f"%(length / 2) ),
+	  		'y': float( "%.3f"%(length / 2) ) }
+		# NOTE REQUIRED AS OUTPUT
+		print "X_POSITION_OF_CMA_CENTER", self.center['x']
 
-    def setNodesPerSqrt(self, nodes) :
-        self.nodesPerSubSqrt = int( math.ceil(
-            nodes / ( (self.sqrtNoHor + self.sqrtNoVer) * 2 ) ) )
-        # NOTE REQUIRED AS OUTPUT
-        print 'FIRST_NODE_AT_DENSE_AREA', \
-            (self.sqrtNoHor + self.sqrtNoVer) * 2 * self.nodesPerSubSqrt + 1
+		self.denseAlen = float( "%.3f"%(length / 2) )
+		# NOTE REQUIRED AS OUTPUT
+		print "WIDTH_OF_DENSE_REGION", self.denseAlen
 
-def appendPositions(coords, positions, inDenseZone):
-    for c in range(0, len(coords)) :
-        positions[ len(positions) + 1 ] = {
-            'x': coords[c][0], 'y': coords[c][1], 'inDenseZone': inDenseZone }
-    return positions
+		# NOTE REQUIRED AS OUTPUT
+		print 'FIRST_NODE_AT_DENSE_AREA', int(nodes) + 1
 
-def getRandCoorAt(x, y, n, sqrtLen) :
-    g = nx.Graph()
-    g.add_nodes_from( range(0, n) )
-    return nx.random_layout( g, scale=sqrtLen, center=(x, y) )
+		# sparse area contains four subregions
+		self.nodesAtSubA = int(nodes) / 4
+		self.nodesRem = int(nodes) % 4
+		self.nodesAtDenseR = nodes
 
-def getWirelessTopology(comArea, nodes) :
-    positions = {}
-    # create wireless topology at sparse area
-    for k in range(0, len(comArea.sparseRegions)) :
-        rec = comArea.sparseRegions[k]
-        sqrtAtX = rec['x'] + comArea.sparseSubAwidth / 2
-        sqrtAtY = rec['y'] + comArea.sparseSubAwidth / 2
-        # horizontal rectangle
-        if rec['x'] ==  comArea.sparseSubAwidth:
-            for _ in range(0, comArea.sqrtNoHor) :
-                # print "horizontal center", sqrtAtX, sqrtAtY
-                coords = getRandCoorAt( sqrtAtX, sqrtAtY,
-                    comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
-                positions = appendPositions(coords, positions, False)
-                sqrtAtX += comArea.sparseSubAwidth
-                # print "center (", sqrtAtX, ",", sqrtAtY, ")"
-                # print positions
-        # vertical rectangle
-        else :
-            for _ in range(0, comArea.sqrtNoVer) :
-                # print "vertical center", sqrtAtX, sqrtAtY
-                coords = getRandCoorAt( sqrtAtX, sqrtAtY,
-                    comArea.nodesPerSubSqrt, comArea.sparseSubAwidth )
-                positions = appendPositions(coords, positions, False)
-                sqrtAtY += comArea.sparseSubAwidth
-                # print "center (", sqrtAtX, ",", sqrtAtY, ")"
-                # print positions
-    # create wireles topology at dense area
-    coords = getRandCoorAt( comArea.center['x'], comArea.center['y'],
-       nodes, comArea.denseAlen )
-    positions = appendPositions(coords, positions, True)
-    # latest node is located at the center of the communication area
-    positions[ len(positions) + 1 ] = \
-        {'x': comArea.center['x'], 'y': comArea.center['y'], 'inDenseZone': True}
-    return positions
+		self.sparseSubAlen = float( "%.3f"%( (length - self.denseAlen) / 2 ) )
+		self.subAreas = [
+			{'id': 1, 'x': 0, 'y': 0, 'verSubArea': True, 'isDense': False, \
+				'nodesNo': self.nodesAtSubA + self.nodesRem},
+			{'id': 2, 'x': self.sparseSubAlen, 'y': 0, 'verSubArea': False, \
+				'isDense': False, 'nodesNo': self.nodesAtSubA},
+			{'id': 3, 'x': self.sparseSubAlen + self.denseAlen, 'y': 0, \
+				'verSubArea': True, 'isDense': False, 'nodesNo': self.nodesAtSubA},
+			{'id': 4, 'x': self.sparseSubAlen, 'y': self.sparseSubAlen + self.denseAlen, \
+				'verSubArea': False, 'isDense': False, 'nodesNo': self.nodesAtSubA},
+			{'id': 5, 'x': self.sparseSubAlen, 'y': self.sparseSubAlen, \
+				'verSubArea': False, 'isDense': True, 'nodesNo': self.nodesAtDenseR} ]
 
 def getDistance(a, b) :
     return math.sqrt(math.pow(a['x'] - b['x'], 2) + math.pow(a['y'] - b['y'], 2))
@@ -133,85 +81,47 @@ def getOverlay(positions, transRange) :
 			g.add_edge(p[0], p[1])
 	return g
 
-def getCoordsAt(center, width, length, coords) :
-    result = {}
-    halfWid = float( "%.3f"%(width  / 2) )
-    halfLen = float( "%.3f"%(length / 2) )
-    limInfAtX = center['x'] - halfWid ; limSupAtX = center['x'] + halfWid
-    limInfAtY = center['y'] - halfLen ; limSupAtY = center['y'] + halfLen
-    for k, v in coords.iteritems() :
-        if ( v['x'] >= limInfAtX and v['x'] <= limSupAtX ) and \
-           ( v['y'] >= limInfAtY and v['y'] <= limSupAtY ) : result[k] = v
-    return result
+def generateWirelessTopologies(cma, topNo, Tx, motionIndx):
+	mobModels = {}
+	# new instance of mobility model per sub area
+	for subArea in cma.subAreas :
+		if subArea['isDense'] :
+			areaDim = (cma.denseAlen, cma.denseAlen)
+			velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
+		else:
+			abscissa = cma.sparseSubAlen if subArea['id'] % 2 == 1 else cma.denseAlen
+			ordinate = cma.length if subArea['id'] % 2 == 1 else cma.sparseSubAlen
+			areaDim = (abscissa, ordinate)
+			velocity = (MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
+		mobModels[ subArea['id'] ] = random_direction( subArea['nodesNo'], areaDim, \
+			wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
+	t = 0
+	# noves move ${topNo} times following the Levy-Walk model in dense and sparse areas
+	while t < topNo :
+		nodeId = 1; positions = {}
+		# iter in order to have every position identified in an unique way
+		for i in range(0, len(cma.subAreas)) :
+			subArea = cma.subAreas[i]
+			mobModel = mobModels[ subArea['id'] ]
+			incrAt = { 'x': subArea['x'], 'y': subArea['y'] }
+			coords = makeStep(mobModel, incrAt, nodeId, subArea['isDense'])
+			nodeId += len(coords)
+			positions.update(coords)
+		# source node is positioned at the center of communication area
+		positions[nodeId] = { 'x': cma.center['x'], 'y': cma.center['y'], 'atDenseZone': True }
+		# draw wireles topology
+		o = getOverlay(positions, Tx); plotOverlay(o, positions, cma.length, t)
+		# keep positions in a global reference
+		allPositions[motionIndx] = positions; motionIndx += 1
+		t += 1
 
-def makeMobilityTrace(coords, traceLen, Tx, cma, srcNodePo, srcNodeId, motionIndx) :
-    t = 1
-    while t < traceLen :
-        newCoords = {}
-        # update coordinates within the sparse zone
-        for r in range(0, len(cma.sparseRegions)) :
-            region = cma.sparseRegions[r]
-            if region['x'] == cma.sparseSubAwidth : # horizontal rectangle
-                centerOfR = {
-                    'x': region['x'] + ( cma.denseAlen / 2 ),
-                    'y': region['y'] + ( cma.sparseSubAwidth / 2 ) }
-                coordsAtR = getCoordsAt(centerOfR, cma.denseAlen, cma.sparseSubAwidth, coords)
-                dimOfR = { 'width': cma.denseAlen, 'length': cma.sparseSubAwidth }
-            else : # vertical rectangle
-                centerOfR = {
-                    'x': region['x'] + ( cma.sparseSubAwidth / 2 ),
-                    'y': region['y'] + ( cma.length / 2 ) }
-                coordsAtR = getCoordsAt(centerOfR, cma.sparseSubAwidth, cma.length, coords)
-                dimOfR = { 'width': cma.sparseSubAwidth, 'length': cma.length }
-            # nodes at sparse zone move faster
-            velocity = (MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
-            # initialise an instance of the Levy-Walk model
-            mobMod = random_direction( len(coordsAtR), (dimOfR['width'], dimOfR['length']),
-	            wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
-            # each node moves ONLY once according to the mobility model
-            coordsAtR = makeStep(mobMod, coordsAtR, centerOfR, dimOfR)
-            # append coordinates
-            newCoords.update(coordsAtR)
-
-        # update coordinates within the dense zone
-        coordsAtR = getCoordsAt(cma.center, cma.denseAlen, cma.denseAlen, coords)
-        dimOfR = { 'width': cma.denseAlen, 'length': cma.denseAlen }
-        # nodes at dense zone move slower
-        velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
-        # initialise instance of mobility model
-        mobMod = random_direction( len(coordsAtR), (dimOfR['width'], dimOfR['length']),
-            wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
-        coordsAtR = makeStep(mobMod, coordsAtR, cma.center, dimOfR)
-        # append coordinates and add position of source node
-        newCoords.update(coordsAtR); newCoords[ srcNodeId ] = srcNodePo
-        # create and plot new wireless topology
-        o = getOverlay(newCoords, Tx); plotOverlay(o, newCoords, cma.length, t)
-        # add a new stet in the mobility trace
-        allPositions[motionIndx] = newCoords; motionIndx += 1
-        t += 1
-
-def makeStep(mobMod, coords, centeredAt, dimension) :
-    p_i = [ (k[0], k[1]) for k in next(mobMod) ]
-    p_j = [ (k[0], k[1]) for k in next(mobMod) ]
-    pDif = [( abs( p_i[k][0] - p_j[k][0] ), abs( p_i[k][1] - p_j[k][1] ) ) \
-        for k in range(0, len(p_i)) ]
-    i = 0
-    halfWid = float( "%.3f"%(dimension['width']  / 2) )
-    halfLen = float( "%.3f"%(dimension['length'] / 2) )
-    for k, v in coords.iteritems() :
-        point = { 'x': v['x'] + pDif[i][0], 'y': v['y'] + pDif[i][1] }
-        # reflect policy at abscise when a new point is out of the region
-        if point['x'] < centeredAt['x'] - halfWid :
-            point['x'] = point['x'] + 2 * halfWid
-        if point['x'] > centeredAt['x'] + halfWid :
-            point['x'] = point['x'] - 2 * halfWid
-        # reflect policy at oordinate when a new point is out of the region
-        if point['y'] < centeredAt['y'] - halfLen :
-            point['y'] = point['y'] + 2 * halfLen
-        if point['y'] > centeredAt['y'] + halfLen :
-            point['y'] = point['y'] - 2 * halfLen
-        coords[k] = point ; i += 1
-    return coords
+def makeStep(mobMod, incrAt, lastPosition, atDenseZone) :
+	positions = {}
+	coords = [ (k[0] + incrAt['x'], k[1] + incrAt['y']) for k in next(mobMod) ]
+	for c in coords :
+		positions[lastPosition] = {'x': c[0], 'y': c[1], 'atDenseZone': atDenseZone}
+		lastPosition += 1
+	return positions
 
 def plotOverlay(graph, positions, maxLen, iD) :
 	pTmp = {}
@@ -224,19 +134,17 @@ def plotOverlay(graph, positions, maxLen, iD) :
 	plt.savefig(FIRST_PLOT_NAME + str(iD) + ".pdf")
 	plt.clf()
 
-def withPartitions(g) :
-	try :
-		nx.average_shortest_path_length(g)
-		r = True
-	except :
-		r = False
-	return r
-
-def savePositions(motion_freq, nodesNo) :
+def savePositions(motion_freq) :
+	# keep 1st wireless topology in a separate file
+	with open(DIST_PER_ZONE, 'a') as f :
+		for i in range(0, len(allPositions[0])) :
+			p = allPositions[0][ i + 1 ]
+			f.write( "%d %f %f %d\n" % (i + 1, p['x'], p['y'], int(p['atDenseZone'])) )
 	allPositionsAsStr = {}
+	# keep all positions in the mobility file
 	for i in range(0, len(allPositions)) :
 		coords = allPositions[i]
-		for m in range(1, nodesNo + 1) :
+		for m in range(1, len(coords) + 1) :
 			coord = coords[m]
 			trace = "%f %f %f" % (motion_freq * i, coord['x'], coord['y'])
 			if m in allPositionsAsStr :
@@ -245,44 +153,14 @@ def savePositions(motion_freq, nodesNo) :
 				allPositionsAsStr[m] = trace
 	with open(MOBILITY_FILE, 'a') as f:
 		f.write("\n")
-		for k in range(1, nodesNo + 1) :
+		for k in range(1, len(allPositionsAsStr) + 1) :
 			f.write(allPositionsAsStr[k] + "\n")
 
-def addConnectEntry(fileName, entry) :
-	with open(fileName, 'a') as f :
-		f.write(entry + "\n")
-
-def savePosPerZone(positions, comArea) :
-    sortedKeys = sorted( positions.keys() )
-    with open(DIST_PER_ZONE, 'a') as f :
-        for i in range(0, len(sortedKeys)) :
-            k = sortedKeys[i] ; v = positions[k]
-            f.write( "%d %f %f %d\n" % (k, v['x'], v['y'], int(v['inDenseZone'])) )
-
 if __name__ == '__main__':
-    args = getArgs()
-    # initialise details of communication area
-    comArea = CommunicationArea(length=args.area_l)
-    comArea.setNodesPerSqrt(args.nodes_no)
-
-    # create first topology
-    coords = getWirelessTopology(comArea, args.nodes_no)
-    o = getOverlay(coords, args.tx)
-    plotOverlay(o, coords, comArea.length, 0)
-    savePosPerZone(coords, comArea)
-    args.nodes_no = len(coords)
-    # source node remains fixed within the center of the dense area
-    srcNodeId = args.nodes_no ; srcNodePo = coords[srcNodeId]
-    del coords[srcNodeId]
-    motionIndx = 0
-    allPositions[motionIndx] = coords
-    allPositions[motionIndx][srcNodeId] = srcNodePo
-    motionIndx += 1
-    # NOTE REQUIRED AS OUTPUT
-    print 'SOURCE_NODE_ID', srcNodeId
-    # store the rest of entries of the mobility trace
-    makeMobilityTrace(coords, args.trace_size, args.tx, comArea, srcNodePo, \
-        srcNodeId, motionIndx)
-    # keep all positions in a file following the BonnMotion format
-    # see more at https://omnetpp.org/doc/inet/api-current/neddoc/inet.mobility.single.BonnMotionMobility.html
-    savePositions(args.motion_freq, args.nodes_no)
+	args = getArgs()
+	# initialise details of communication area
+	comArea = CommunicationArea(args.nodes_no, length=args.area_l)
+	# create ${args.trace_size} wireless topologies
+	generateWirelessTopologies(comArea, args.trace_size, args.tx, 0)
+    # keep all positions in a file following the BonnMotion format, see more at https://omnetpp.org/doc/inet/api-current/neddoc/inet.mobility.single.BonnMotionMobility.html
+	savePositions(args.motion_freq)
