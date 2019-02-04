@@ -58,24 +58,24 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
 
-    string m(nodeId + " :: broadcast received from [" + sender + "] = { ");
-    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it)
-    m += *it +", ";
-    cout << m << " } " << endl;
+//    string m(nodeId + " :: broadcast received from [" + sender + "] = { ");
+//    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it)
+//    m += *it +", ";
+//    cout << m << " } " << endl;
 
     bool relay = false;
     switch (neighborsStatus) {
       case 0:
-        cout << nodeId << " :: previous FWD decision was taken into account" << endl;
+//        cout << nodeId << " :: previous FWD decision was taken into account" << endl;
         relay = previousFwdDecision;
       break;
       case 1:
-        cout << nodeId << " :: FWD decision was computed" << endl;
+//        cout << nodeId << " :: FWD decision was computed" << endl;
         relay = amIrelay(senderNeigs);
         previousFwdDecision = relay;
       break;
       case 2:
-        cout << nodeId << " :: compute FWD decision for the first time" << endl;
+//        cout << nodeId << " :: compute FWD decision for the first time" << endl;
         neighborsStatus = 0;
         relay = amIrelay(senderNeigs);
         previousFwdDecision = relay;
@@ -84,7 +84,7 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
         throw cRuntimeError("Invalid FWD decision [%d]", neighborsStatus);
       break;
     }
-    cout << nodeId << " :: FWD decision is " << relay << endl;
+//    cout << nodeId << " :: FWD decision is " << relay << endl;
     if (relay || amIborderNode) {
       if(amIborderNode) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
@@ -139,13 +139,14 @@ void MPR::initialize(int stage) {
 
 void MPR::processStart() {
   InteroperableBroadcast::processStart();
+  // time required to approximate a CDS is 0.5s
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
 }
 
 void MPR::updateNeighborsStatus() {
   // compare whether neighbors have differed between 2 exchanges of control messages
   if (previousNeigs.size() != neighbors.size()) {
-    cout << nodeId << " :: size of neighbors differ [" << previousNeigs.size() << "] != [" << neighbors.size() << "]" << endl;
+//    cout << nodeId << " :: size of neighbors differ [" << previousNeigs.size() << "] != [" << neighbors.size() << "]" << endl;
     neighborsStatus = 1;
   } else {
     bool firstInc = true;
@@ -159,7 +160,7 @@ void MPR::updateNeighborsStatus() {
         seconInc = false;
     }
     neighborsStatus = firstInc && seconInc ? 0 : 1;
-    cout << nodeId << " :: sets of neighbors equal ? = " << neighborsStatus << endl;
+//    cout << nodeId << " :: sets of neighbors equal ? = " << neighborsStatus << endl;
   }
 }
 
@@ -179,6 +180,7 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
           for (auto it = neighbors.begin(); it != neighbors.end(); ++it)
             previousNeigs.insert(it->first);
           EV_DEBUG << "schedule 1st approximation of a backbone" << endl;
+          // time required to approximate a CDS is 0.5s
           InteroperableBroadcast::scheduleEvent(BUILD_CDS,
               par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").longValue(), buildCdsTimer);
         }

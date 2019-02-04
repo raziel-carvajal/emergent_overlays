@@ -30,7 +30,7 @@ simple InteroperableBroadcast extends UDPBasicApp
     double borderDetectorDelay @unit(s) = default(uniform(0.001s, 0.099s));
     double motionInterval @unit(s) = default(10.0s);
     
-    // this parameter cannot be lower than 0.5 ms
+    // WARNING: this parameter cannot be lower than 0.5 ms
     double sentMsgFixedDelay @unit(s) = default(0.0005s);
     double sentMsgRandDelay @unit(s) = default(uniform(0.00001s, 0.0019s));
     double startSendingCtrlMsgs @unit(s) = default(5.0s);
