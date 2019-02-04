@@ -329,10 +329,9 @@ getWattsFromSentRecvMsgs <- function(sentMsgs, recvMsgs, nodes){
     # this constant is the cost in watts to receive one message
     length(subset(recvMsgs, node_id == n)$value) * 0.01
   })
-  data.frame(
-    recCost=unlist(wattsFromRec),
-    emiCost=unlist(wattsFromEmi)
-  )
+	wattsFromEmi <- unlist(wattsFromEmi)
+	wattsFromRec <- unlist(wattsFromRec)
+	c(wattsFromEmi[ wattsFromEmi != 0 ], wattsFromRec[ wattsFromRec != 0 ])
 }
 
 # this code is followed IN DATASET to label nodes that forward messages:
@@ -561,8 +560,8 @@ main <- function(args) {
     )
     saveDataFrame(
       data.frame(
-        data=energy_consumption$recCost + energy_consumption$emiCost,
-        algo=rep(algorithmN, length(energy_consumption$recCost)), stringsAsFactors=F
+        data=energy_consumption,
+        algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
       ),
       args$resultsDir, 'batteryConsumptionDistribution', algorithmN
     )
@@ -572,6 +571,7 @@ main <- function(args) {
     sentBroMsgDist <- sapply(all_nodes, function(n){
       length(subset(sent_broadcast_msgs, node_id == n)$value)
     })
+		sentBroMsgDist <- sentBroMsgDist[ sentBroMsgDist != 0 ]
     saveDataFrame(
       data.frame(
         data=sentBroMsgDist,
@@ -585,6 +585,7 @@ main <- function(args) {
     recvBroMsgDist <- sapply(all_nodes, function(n){
       length(subset(recv_broadcast_msgs, node_id == n)$value)
     })
+		recvBroMsgDist <- recvBroMsgDist[ recvBroMsgDist != 0 ]
     saveDataFrame(
       data.frame(
         data=recvBroMsgDist,
@@ -596,10 +597,6 @@ main <- function(args) {
 
 	msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
 	overlaysNumber <- length(msgs_ids)
-  intervals <- data.frame(
-    lowerLim= c( 1, c( 1 : (overlaysNumber - 1) ) * length(all_nodes) ),
-    upperLim= c( 1 : overlaysNumber) * length(all_nodes) - 1
-  )
 
 	# nodes are labeled according to the type of FWD they perform OR whether they
   # are border nodes (hybrid deployment) or not, this vector contains that
