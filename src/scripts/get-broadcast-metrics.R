@@ -571,7 +571,6 @@ main <- function(args) {
     sentBroMsgDist <- sapply(all_nodes, function(n){
       length(subset(sent_broadcast_msgs, node_id == n)$value)
     })
-		sentBroMsgDist <- sentBroMsgDist[ sentBroMsgDist != 0 ]
     saveDataFrame(
       data.frame(
         data=sentBroMsgDist,
