@@ -86,6 +86,7 @@ if [[ "${WITH_MOBILITY}" == "true" ]]; then
 	for (( i = 1; i <= ${nodesNoAtTrace}; i++ )); do
 		mobModel=${mobModel}"*.host${i}.mobility.nodeId = ${i}\n"
 	done
+	mobModel=${mobModel}"**.udpApp[0].motionInterval=${NODES_MOV_FREQ}s\n"
 fi
 mobModel=${mobModel}"# concat all parameters of each algorithm\n"
 
