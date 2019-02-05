@@ -603,6 +603,8 @@ main <- function(args) {
   # 2 is a CDS relay and 0 means simple FWD
   forwardTypeDs <- getVector(datasetFile, 'forward_type:vector')
 	forwardTypeDs <- forwardTypeDs[ order(forwardTypeDs$time), ]
+	# print(forwardTypeDs)
+	# stop()
 
 	# creates a list of wireless topologies using nodes positions (ground thruth)
 	if(args$wmob){
@@ -612,24 +614,29 @@ main <- function(args) {
 			t0=p0[ c( 1 : length(p0)-1 ) ],
 			t1=p0[ c( 2 : length(p0) ) ]
 		)
-		t <- 1
+		# t <- 1
 	  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
 			# senders/receivers per broadcast message
 	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
 	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
 
-			highT <- max(senders$time)
+			# highT <- max(senders$time)
 			# get what type of FWD nodes perform
-			fwdTypeAtTopology <- subset(forwardTypeDs, time <= highT)
+			fwdTypeAtTopology <- subset(
+				forwardTypeDs, min(senders$time) <= time & time <= max(senders$time)
+			)
+			# print(fwdTypeAtTopology)
 			# get positions of nodes during dissemination of broadcast message
-			if(timeLine[t, ]$t0 <= highT & highT < timeLine[t, ]$t1) {
-				nodesPositions <- subset(positions, time == timeLine[t, ]$t0)
+			# if(timeLine[t, ]$t0 <= highT & highT < timeLine[t, ]$t1) {
+				nodesPositions <- subset(positions, time == timeLine[o, ]$t1)
 				nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
-			} else {
-				t <- t + 1
-				nodesPositions <- subset(positions, time == timeLine[t, ]$t0)
-				nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
-			}
+			# } else {
+			# 	t <- t + 1
+			# 	nodesPositions <- subset(positions, time == timeLine[t, ]$t0)
+			# 	nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+			# }
+			# print(t)
+			# print(nodesPositions)
 	    # build wireless topology
 	    get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
