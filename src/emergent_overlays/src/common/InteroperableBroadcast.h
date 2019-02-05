@@ -44,6 +44,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     };
     // attributes that are accessible from subclasses of InteroperableBroadcast
     bool amIborderNode = false;
+    bool positionChanged = true;
     bool enableInterop;
 
     double transRadious;

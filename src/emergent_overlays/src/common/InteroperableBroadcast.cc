@@ -153,7 +153,10 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         break;
       case Timer::MOTION: {
         // TODO store density
-        currentPosition = mobilityModel->getCurrentPosition();
+        Coord newP = mobilityModel->getCurrentPosition();
+        // TODO is it mandatory to create a trigger when nodes move?
+        positionChanged = newP.x != currentPosition.x || newP.y != currentPosition.y ? true : false;
+        currentPosition = newP;
         emit(positionAtX, currentPosition.x);
         emit(positionAtY, currentPosition.y);
         // emit(<density>, ?);
@@ -206,7 +209,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         cancelAndDelete(haltSimTimer);
         cancelAndDelete(motionTimer);
         if (fwdBMsgTimer)
-          cancelAndDelete (fwdBMsgTimer);
+          cancelAndDelete(fwdBMsgTimer);
         // cancel events from sub-classes
         cancelSelfEvents();
         endSimulation();
@@ -363,7 +366,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   latestPkToFwd = pk->dup();
 // replace sender
   latestPkToFwd->getParList().remove("Sender");
-  addSender (latestPkToFwd);
+  addSender(latestPkToFwd);
   scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
 }
 

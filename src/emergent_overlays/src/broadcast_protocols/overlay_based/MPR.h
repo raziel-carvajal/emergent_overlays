@@ -51,13 +51,6 @@ class MPR : public InteroperableBroadcast {
 
     array<set<string>, 2> hops;
 
-    // 0: neighbors DO NOT differ between exchange of Ctrl messages
-    // 1: neighbors DO differ between exchange of Ctrl messages
-    // 2: first build
-    int neighborsStatus = 2;
-    bool previousFwdDecision;
-    set<string> previousNeigs;
-
     map<string, set<string>> make_cpy(map<string, set<string>> a) {
       map<string, set<string>> b;
       for (auto it = a.begin(); it != a.end(); ++it) {
@@ -80,7 +73,6 @@ class MPR : public InteroperableBroadcast {
 
     cPacket* buildBroadcastMsg(const char* header);
 
-    void updateNeighborsStatus();
     bool amIrelay(MprNeighbors senderNeigs);
 
   protected:
