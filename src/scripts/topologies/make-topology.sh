@@ -111,6 +111,7 @@ for algo in ${algorithms} ; do
 
   ctrlMsgLowerInterval=`bc <<< "scale=4; ${ctrlMsgInterval} - 0.0099"`
   sed -i -e "s/CTRL_MSG_INTERVAL/uniform(${ctrlMsgLowerInterval}s, ${ctrlMsgInterval}s)/" iniFile
+	sed -i -e "s/FIRST_CTRL_MSG_AT/${FIRST_CTRL_MSG_AT}s/" iniFile
   broaMsgLowerInterval=`bc <<< "scale=4; ${broaMsgInterval} - 0.0099"`
   sed -i -e "s/BROADCAST_MSG_INTERVAL/uniform(${broaMsgLowerInterval}s, ${broaMsgInterval}s)/" iniFile
 
