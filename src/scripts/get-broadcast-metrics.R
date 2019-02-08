@@ -684,8 +684,9 @@ main <- function(args) {
     measuredCoverage <- sapply(msgs_ids, function(msg) {
       length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
     })
+    coverage <- (measuredCoverage / expectedCoverage) * 100
 		# XXX due to issue in igraph.components()
-    coverage <- min((measuredCoverage / expectedCoverage) * 100, 100)
+		coverage <- sapply(coverage, function(c){ min(c, 100) })
     saveDataFrame(
       data.frame(
         data=coverage,
