@@ -146,8 +146,6 @@ get.density.relative.error <- function(results_file, first_measure,
         }
       )
       densityRelativeError <- as.vector(densityRelativeError)
-      # print(densityRelativeError)
-      # stop()
       data.frame(
         density_relative_err=densityRelativeError,
         zone=rep(zone, length(densityRelativeError)),
@@ -156,8 +154,6 @@ get.density.relative.error <- function(results_file, first_measure,
       )
     }
   )
-  # print(denRelErrPerZone)
-  # stop()
   do.call('rbind', denRelErrPerZone)
 }
 
@@ -477,7 +473,7 @@ distribution.sent_recv.broadcast_control.messages <- function(
 
 getExpectedCoveredNodesNo <- function(overlays){
   sapply(overlays, function(overlay) {
-    length( getVerticesFromBiggestCluster(overlay) )
+		max(components(overlay)$csize)
   })
 }
 
@@ -688,7 +684,8 @@ main <- function(args) {
     measuredCoverage <- sapply(msgs_ids, function(msg) {
       length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
     })
-    coverage <- (measuredCoverage / expectedCoverage) * 100
+		# XXX due to issue in igraph.components()
+    coverage <- min((measuredCoverage / expectedCoverage) * 100, 100)
     saveDataFrame(
       data.frame(
         data=coverage,
