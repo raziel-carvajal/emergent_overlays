@@ -616,16 +616,17 @@ main <- function(args) {
 			# senders/receivers per broadcast message
 	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
 	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
-
 			# get what type of FWD nodes perform
 			fwdTypeAtTopology <- subset(
 				forwardTypeDs, min(senders$time) <= time & time <= max(senders$time)
 			)
-
+			# get interval where positions were printed
+			posInt <- subset(timeLine, t0 <= min(senders$time) & min(senders$time) <= t1 )
 			# get positions of nodes during dissemination of broadcast message
-			nodesPositions <- subset(positions, time == timeLine[o, ]$t1)
+			nodesPositions <- subset(positions, time == posInt$t1)
 			nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
-	    get.graph(
+
+			get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
 				denseZone, fwdTypeAtTopology, savePlot=TRUE
 	    )
