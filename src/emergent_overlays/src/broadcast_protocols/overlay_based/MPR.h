@@ -42,6 +42,8 @@ class MPR : public InteroperableBroadcast {
       cancelAndDelete(fwdBrMsgTimer);
     }
 
+    bool previousDec;
+
     // variables/methods to implement MPR V0.0.1
     set<string> currentMpr;
 

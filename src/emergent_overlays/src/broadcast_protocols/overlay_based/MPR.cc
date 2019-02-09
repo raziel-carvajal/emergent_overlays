@@ -48,6 +48,10 @@ bool MPR::amIrelay(MprNeighbors senderNeigs) {
   bool relay = false;
   for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it)
     relay = (*it == InteroperableBroadcast::nodeId);
+  if (InteroperableBroadcast::positionChanged)
+    previousDec = relay;
+  else
+    relay = previousDec;
   return relay;
 }
 
