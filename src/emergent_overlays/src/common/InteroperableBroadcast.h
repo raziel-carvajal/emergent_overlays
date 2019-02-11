@@ -44,7 +44,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     };
     // attributes that are accessible from subclasses of InteroperableBroadcast
     bool amIborderNode = false;
-    bool positionChanged = true;
     bool enableInterop;
 
     double transRadious;
@@ -66,6 +65,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     virtual void cancelSelfEvents();
     virtual cPacket* getCtrlMsg();
     virtual void sendCtrlMsg();
+    virtual void initializeState();
 
     // signals for this class
     static simsignal_t rcvdBroadcastMsg;

@@ -28,6 +28,8 @@ class MPR : public InteroperableBroadcast {
       SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
+    double similarity = 0.75;
+
     int sentBootEvents = 1;
 
     cMessage* buildCdsTimer = nullptr;
@@ -48,6 +50,7 @@ class MPR : public InteroperableBroadcast {
     set<string> currentMpr;
 
     map<string, set<string>> neighbors;
+    set<string> previousNeigs;
 
     map<string, Coord> neigsPositions;
 
@@ -77,6 +80,25 @@ class MPR : public InteroperableBroadcast {
 
     bool amIrelay(MprNeighbors senderNeigs);
 
+    bool neigsChanged() {
+      double ratio;
+      double currentSim = 0.0;
+      if (previousNeigs.size() < neighbors.size()) {
+        ratio = 1 / (1.0 * neighbors.size());
+        for (set<string>::iterator it = previousNeigs.begin(); it != previousNeigs.end(); ++it) {
+          if (neighbors.find(*it) != neighbors.end())
+            currentSim += ratio;
+        }
+      } else {
+        ratio = 1 / (1.0 * previousNeigs.size());
+        for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
+          if (previousNeigs.find(it->first) != previousNeigs.end())
+            currentSim += ratio;
+        }
+      }
+      return currentSim >= similarity ? false : true;
+    }
+
   protected:
 
     virtual void initialize(int stage) override;
@@ -85,6 +107,14 @@ class MPR : public InteroperableBroadcast {
     virtual void sendPacket() override;
     virtual void sendCtrlMsg() override;
     virtual void processStart() override;
+    virtual void initializeState() {
+      previousNeigs.clear();
+      for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
+        previousNeigs.insert(it->first);
+      }
+      neighbors.clear();
+      neigsPositions.clear();
+    }
 
   public:
     MPR() {

@@ -48,7 +48,7 @@ bool MPR::amIrelay(MprNeighbors senderNeigs) {
   bool relay = false;
   for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it)
     relay = (*it == InteroperableBroadcast::nodeId);
-  if (InteroperableBroadcast::positionChanged)
+  if (neigsChanged())
     previousDec = relay;
   else
     relay = previousDec;
@@ -84,7 +84,7 @@ void MPR::onControlMsg(cPacket* pk, string sender) {
     MprNeighbors senderNeigs = mprPk->getNeighbors();
     MprCoord neigsPosAtX = mprPk->getPositionsAtX();
     MprCoord neigsPosAtY = mprPk->getPositionsAtY();
-    string msg(nodeId + " :: neighbors of [" + sender +"] = {");
+    string msg(nodeId + "] neighbors of [" + sender +"] = {");
 
     for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
 //      EV_DEBUG << "NEIG [" << *it << "]" << endl;
@@ -95,7 +95,7 @@ void MPR::onControlMsg(cPacket* pk, string sender) {
         neigsPositions[*it].y = neigsPosAtY[*it];
       }
     }
-//    cout << msg << " }" << endl;
+    EV_DEBUG << "[" << simTime() << ", " << msg << " }" << endl;
     return true;
   });
 }
@@ -138,9 +138,7 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         break;
         // time required to approximate a CDS is 0.5s
       case BUILD_CDS: {
-        if (InteroperableBroadcast::positionChanged) {
-          currentMpr = compute_mpr();
-        }
+        currentMpr = compute_mpr();
       }
         break;
       case FWD_BROADCAST_MSG: {
@@ -163,14 +161,14 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
 
 void MPR::sendPacket() {
   if (par("isSource").boolValue()) {
-
     cPacket* pk = buildBroadcastMsg(nullptr);
-    socket.sendTo(pk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-    emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(pk->getName()));
-    emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
 
     // tag packet as received
     InteroperableBroadcast::receivedMsg.insert(pk->getName());
+
+    socket.sendTo(pk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+    emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(pk->getName()));
+    emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
   }
   // count sent broadcast messages in all nodes. This is useful in an experiment
   // where any node in the network act as source of a broadcast session

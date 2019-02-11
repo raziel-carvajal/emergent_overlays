@@ -145,6 +145,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       }
         break;
       case Timer::SEND_CTRL_MSG: {
+        initializeState();
         sendCtrlMsg();
         cancelEvent(msg);
         if (par("withCtrlMsg").boolValue())
@@ -153,10 +154,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         break;
       case Timer::MOTION: {
         // TODO store density
-        Coord newP = mobilityModel->getCurrentPosition();
-        // TODO is it mandatory to create a trigger when nodes move?
-        positionChanged = newP.x != currentPosition.x || newP.y != currentPosition.y ? true : false;
-        currentPosition = newP;
+        currentPosition = mobilityModel->getCurrentPosition();
         emit(positionAtX, currentPosition.x);
         emit(positionAtY, currentPosition.y);
         // emit(<density>, ?);
@@ -409,6 +407,11 @@ void InteroperableBroadcast::detectBorderNode(string sender, string sendersAlgo)
   }
 }
 
+void InteroperableBroadcast::initializeState() {
+  throw cRuntimeError(
+        "Every subclass of InteroperableBroadcast, which exchange control messages, should implement initializeState()");
+}
+
 cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, const char* chosenNode, double htl) {
   cPacket* borderMsg = new cPacket("BorderMsg");
   addPacketType(borderMsg, UdpPacket::BORDER);
@@ -431,10 +434,6 @@ cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, cons
 }
 
 void InteroperableBroadcast::sendCtrlMsg() {
-  // send a control message
-  // socket.sendTo(getCtrlMsg(), broadcastAddress, destPort);
-  // and schedule next control message
-  // scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
   throw cRuntimeError(
       "Every subclass of InteroperableBroadcast, which exchange control messages, should implement sendCtrlMsg()");
 }
