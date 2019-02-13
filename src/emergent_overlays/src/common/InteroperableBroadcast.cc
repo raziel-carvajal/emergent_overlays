@@ -89,6 +89,8 @@ void InteroperableBroadcast::processStart() {
 
   // schedule first broadcast session
   scheduleEvent(Timer::BROADCAST_SESSION, par("sendInterval").doubleValue(), broaMsgTimer);
+  // first broadcast session starts with ID = 1
+  UDPBasicApp::numSent = 1;
 
   // schedule ctrlMsg
   if (par("withCtrlMsg").boolValue())
@@ -141,7 +143,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       case Timer::FWD_BROADCAST_MSG: {
         socket.sendTo(latestPkToFwd, broadcastAddress, destPort);
         emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
-        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
+//        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
       }
         break;
       case Timer::SEND_CTRL_MSG: {
@@ -365,7 +367,8 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
 // replace sender
   latestPkToFwd->getParList().remove("Sender");
   addSender(latestPkToFwd);
-  scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
+//  scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
+  scheduleEvent(Timer::FWD_BROADCAST_MSG, sentMsgDelay, fwdBMsgTimer);
 }
 
 cPacket* InteroperableBroadcast::getCtrlMsg() {

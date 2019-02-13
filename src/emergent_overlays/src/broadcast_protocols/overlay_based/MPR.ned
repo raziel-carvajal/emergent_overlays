@@ -23,5 +23,7 @@ simple MPR extends InteroperableBroadcast
     // from super class
     withCtrlMsg = default(true);
     // local atts
-    int bootCtrlMsgsNo = default(2);    
+    int bootCtrlMsgsNo = default(2);
+    double similarity = default(0.75);
+    int viewSize = default(20);
 }

@@ -292,7 +292,7 @@ void MPR_1::onBroadcastMsg(cPacket* pk, string sender) {
     // XXX found a situation where a FWD_BROADCAST event is scheduled twice
     //     how is that possible ?
     if( !fwdBrMsgTimer->isScheduled() ) {
-      InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(),
+      InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, InteroperableBroadcast::sentMsgDelay,
           fwdBrMsgTimer); // to avoid collisions/contentions, schedule retransmission of broadcast message
     }
     return true;

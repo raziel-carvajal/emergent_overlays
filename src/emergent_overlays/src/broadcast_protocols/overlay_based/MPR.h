@@ -28,8 +28,8 @@ class MPR : public InteroperableBroadcast {
       SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
-    double similarity = 0.75;
-
+    double similarity;
+    int viewSize;
     int sentBootEvents = 1;
 
     cMessage* buildCdsTimer = nullptr;
@@ -67,11 +67,7 @@ class MPR : public InteroperableBroadcast {
     bool is_a_covered_by_b(string a, string b) {
       Coord pA = neigsPositions[a];
       Coord pB = neigsPositions[b];
-      double tx = InteroperableBroadcast::transRadious;
-      if (!pA.isNil() && !pB.isNil())
-        return (tx * tx > (pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y));
-      else
-        return false;
+      return InteroperableBroadcast::transRadious <= sqrt((pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y));
     }
 
     set<string> compute_mpr();

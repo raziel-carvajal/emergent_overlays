@@ -46,8 +46,12 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
 
 bool MPR::amIrelay(MprNeighbors senderNeigs) {
   bool relay = false;
-  for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it)
+  string msg(nodeId + "] sender neighbors {");
+  for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it){
     relay = (*it == InteroperableBroadcast::nodeId);
+    msg += *it + ", ";
+  }
+  cout << "[" << simTime() << ", " << msg << endl;
   if (neigsChanged())
     previousDec = relay;
   else
@@ -57,7 +61,8 @@ bool MPR::amIrelay(MprNeighbors senderNeigs) {
 
 void MPR::onBroadcastMsg(cPacket* pk, string sender) {
   InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk, [&](const MprBroadcastPacket* mprPk) {
-
+    string msg(nodeId + "] msg received from [" + sender +"]");
+    cout << "[" << simTime() << ", " << msg << endl;
     MprNeighbors senderNeigs = mprPk->getNeighbors();
     if (amIrelay(senderNeigs) || amIborderNode) {
       if(amIborderNode) {
@@ -67,8 +72,9 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
       }
       cPacket* broadcastMsg = buildBroadcastMsg(mprPk->getName());
-      socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-      emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
+//      socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+      InteroperableBroadcast::fwdBroadcastMsg(broadcastMsg);
+//      emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
     }
     return true;
   });
@@ -95,7 +101,7 @@ void MPR::onControlMsg(cPacket* pk, string sender) {
         neigsPositions[*it].y = neigsPosAtY[*it];
       }
     }
-    EV_DEBUG << "[" << simTime() << ", " << msg << " }" << endl;
+    cout << "[" << simTime() << ", " << msg << " }" << endl;
     return true;
   });
 }
@@ -112,6 +118,8 @@ void MPR::initialize(int stage) {
 }
 
 void MPR::processStart() {
+  similarity = par("similarity").doubleValue();
+  viewSize = par("viewSize").doubleValue();
   InteroperableBroadcast::processStart();
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG_TO_BOOT, InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
 }
