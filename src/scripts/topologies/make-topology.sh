@@ -109,11 +109,9 @@ for algo in ${algorithms} ; do
   sed -i -e "s/CENTER_POS_Y/${cenPosXandY}/" iniFile
   sed -i -e "s/DENSE_REGION_WIDTH/${denseAreaWi}/" iniFile
 
-  ctrlMsgLowerInterval=`bc <<< "scale=4; ${ctrlMsgInterval} - 0.0099"`
-  sed -i -e "s/CTRL_MSG_INTERVAL/uniform(${ctrlMsgLowerInterval}s, ${ctrlMsgInterval}s)/" iniFile
+  sed -i -e "s/CTRL_MSG_INTERVAL/${ctrlMsgInterval}s/" iniFile
 	sed -i -e "s/FIRST_CTRL_MSG_AT/${FIRST_CTRL_MSG_AT}s/" iniFile
-  broaMsgLowerInterval=`bc <<< "scale=4; ${broaMsgInterval} - 0.0099"`
-  sed -i -e "s/BROADCAST_MSG_INTERVAL/uniform(${broaMsgLowerInterval}s, ${broaMsgInterval}s)/" iniFile
+  sed -i -e "s/BROADCAST_MSG_INTERVAL/${broaMsgInterval}s/" iniFile
 
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
   sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile

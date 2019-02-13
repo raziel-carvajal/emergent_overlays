@@ -14,10 +14,6 @@ get.arguments <- function() {
 
   parser$add_argument('--simulation-time',
     dest='simTime', type='double', help='Duration of experiment in seconds.')
-  parser$add_argument('--broadcast-interval-lim-inf',
-    dest='broaIntT0', type='double')
-  parser$add_argument('--broadcast-interval-lim-sup',
-    dest='broaIntT1', type='double')
   parser$add_argument('--results-dir',
     dest='resultsDir', type='character')
   parser$add_argument('--transmission-range',
@@ -120,7 +116,7 @@ get.density.relative.error <- function(results_file, first_measure,
       densityRelativeError <- sapply(
         msgs_ids,
         function(msg){
-          overlay <- overlays[[msg +1]]
+          overlay <- overlays[[msg]]
           nodes <- getVerticesFromBiggestCluster(overlay)
           nodesInZone <- sapply( nodes,
             function(n){ ifelse(V(overlay)$location[n] == zone, n, NA) }
@@ -340,7 +336,7 @@ get.node.roles <- function(overlays, msgs_ids, algorithmN) {
   fw_code_str<- c('Simple', 'CDS relay', 'Border', 'Receiver', 'Unreachable')
   node_roles <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg + 1]]
+      overlay <- overlays[[msg]]
       connected_nodes <- getVerticesFromBiggestCluster(overlay)
       nodes_location <- sapply(
         1 : length( V(overlay)$location ),
@@ -430,7 +426,7 @@ distribution.sent_recv.broadcast_control.messages <- function(
 #      (dense or sparse) where the sender was positioned
   sentMsgDist <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg + 1]]
+      overlay <- overlays[[msg]]
       senders <- unique( subset(sent_bro_msgs, value == msg)$node_id )
       data.frame(
         msgsNo=count.events.per.node(senders, sent_bro_msgs),
@@ -446,7 +442,7 @@ distribution.sent_recv.broadcast_control.messages <- function(
 #      (dense or sparse) where the receiver was positioned
   recvMsgDist <- lapply( msgs_ids,
     function(msg){
-      overlay <- overlays[[msg + 1]]
+      overlay <- overlays[[msg]]
       receivers <- unique( subset(recv_bro_msgs, value == msg)$node_id )
       data.frame(
         msgsNo=count.events.per.node(receivers, recv_bro_msgs),
@@ -514,7 +510,6 @@ getStatistics <- function(dataset_path, scalar_name, stat="mean"){
 main <- function(args) {
   expeConfig <- unlist(strsplit(args$configName, '_'))
   algorithmN <- toupper(expeConfig[ length(expeConfig) ])
-  broadcastIn<- c(args$broaIntT0, args$broaIntT1)
   # NOTE ATM we consider that there is only one dense zone and one sparse zone
   denseZone <- data.frame(
     atX=args$dzx, atY=args$dzy,
@@ -539,7 +534,10 @@ main <- function(args) {
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
-
+	# temp <- sent_broadcast_msgs[order(sent_broadcast_msgs$time), ]
+	# print(tail(head(temp, 150), 40))
+	# print(length(subset(temp, value == 4)$value))
+	# stop()
   if(args$wpc){
     # NOTE deprecated
     # energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
@@ -619,7 +617,7 @@ main <- function(args) {
 			# get interval where positions were printed
 			posInt <- subset(timeLine, t0 <= min(senders$time) & min(senders$time) <= t1 )
 			# get positions of nodes during dissemination of broadcast message
-			nodesPositions <- subset(positions, time == posInt$t1)
+			nodesPositions <- subset(positions, time == posInt$t0)
 			nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
 
 			get.graph(
