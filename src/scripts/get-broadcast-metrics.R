@@ -213,9 +213,9 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   if(savePlot){
     E(g)$arrow.mode <- 0
     E(g)$color <- 'lightgrey'
-    V(g)$size <- 4
+    V(g)$size <- 5
     # V(g)$label <- ''
-		V(g)$label.cex <- 0.5
+		V(g)$label.cex <- 0.4
     V(g)$frame.color <- 'black'
     colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
     V(g)$color <- colors[labelCode]
@@ -529,15 +529,11 @@ main <- function(args) {
   )
   positions <- positions[order(positions$time), ]
   positions <- subset(positions, time <= args$simTime)
-
   all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
-	# temp <- sent_broadcast_msgs[order(sent_broadcast_msgs$time), ]
-	# print(tail(head(temp, 150), 40))
-	# print(length(subset(temp, value == 4)$value))
-	# stop()
+
   if(args$wpc){
     # NOTE deprecated
     # energy_consumption <- getEnergyConsumption(datasetFile, all_nodes)
@@ -600,12 +596,6 @@ main <- function(args) {
 
 	# creates a list of wireless topologies using nodes positions (ground thruth)
 	if(args$wmob){
-		# get points in time where positions changed
-		p0 <- unique(positions$time)
-		timeLine <- data.frame(
-			t0=p0[ c( 1 : length(p0)-1 ) ],
-			t1=p0[ c( 2 : length(p0) ) ]
-		)
 		overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
 			# senders/receivers per broadcast message
 	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
@@ -614,12 +604,10 @@ main <- function(args) {
 			fwdTypeAtTopology <- subset(
 				forwardTypeDs, min(senders$time) <= time & time <= max(senders$time)
 			)
-			# get interval where positions were printed
-			posInt <- subset(timeLine, t0 <= min(senders$time) & min(senders$time) <= t1 )
 			# get positions of nodes during dissemination of broadcast message
-			nodesPositions <- subset(positions, time == posInt$t0)
-			nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
-
+			nodesPositions <- tail(subset(positions, time < min(senders$time)), length(all_nodes))
+			# nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+			# print(nodesPositions[ order(nodesPositions$time), ])
 			get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
 				denseZone, fwdTypeAtTopology, savePlot=TRUE

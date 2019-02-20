@@ -40,9 +40,7 @@ CONF_NAME=${filename%.*}
 
 simTime=`grep "sim-time-limit" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
-broaInt=`grep "sendInterval" ${CONF_FILE} | awk -F "uniform" '{print $2}' | awk -F "(" '{print $2}' | awk -F ")" '{print $1}'`
-broaT0=`echo ${broaInt} | awk -F "," '{print $1}' | awk -F "s" '{print $1}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
-broaT1=`echo ${broaInt} | awk -F ", " '{print $2}' | awk -F "s" '{print $1}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+broaInt=`grep "sendInterval" ${CONF_FILE} | awk -F " = " '{print $2}' | awk -F "s" '{print $1}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
 
 tx=`grep "maxCommunicationRange" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
@@ -66,8 +64,6 @@ echo -e "\tExperiment with mobility: ${withMobility}"
 
 Rscript get-broadcast-metrics.R \
   --simulation-time ${simTime} \
-  --broadcast-interval-lim-inf ${broaT0} \
-  --broadcast-interval-lim-sup ${broaT1} \
   --transmission-range ${tx} \
 	--dense-zone-at-x ${denseZoneCenterAtXY} \
 	--dense-zone-at-y ${denseZoneCenterAtXY} \

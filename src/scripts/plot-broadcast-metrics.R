@@ -109,7 +109,7 @@ if (args$pc) {
   plot.data.using.boxes(ds, 'Power consumption', 'Algorithm', 'Watts [W]')
   plot.dist.as.cdf(
     ds, 'Power consumption',
-    'Watts [W]', 'CDF'
+    'Watts [W]', 'CDF over nodes'
   )
   print('DONE')
 }
@@ -151,7 +151,7 @@ if (args$rm) {
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
     ds, '',
-    'Received broadcast messages [#]', 'CDS'
+    'Received broadcast messages [#]', 'CDF over nodes'
   )
   # names(ds) <- c('data', 'zone', 'algorithm')
   # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
@@ -176,7 +176,7 @@ if (args$sm) {
   names(ds) <- c('data', 'algorithm')
   plot.dist.as.cdf(
     ds, '',
-    'Sent broadcast messages [#]', 'CDS'
+    'Sent broadcast messages [#]', 'CDF over nodes'
   )
   # TODO
   # names(ds) <- c('data', 'zone', 'algorithm')
