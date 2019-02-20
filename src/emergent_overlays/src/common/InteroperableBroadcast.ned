@@ -24,15 +24,12 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool withCtrlMsg = default(false);
     bool enableInterop=default(false);
 	
-	// TODO: avoid the use of uniform()
-    double ctrlMsgInterval @unit(s) = default(uniform(9.901s, 10.0s));
-    
+    double ctrlMsgInterval @unit(s) = default(10.0s);
     double borderDetectorDelay @unit(s) = default(uniform(0.001s, 0.099s));
-    double motionInterval @unit(s) = default(10.0s);
     
     // WARNING: this parameter cannot be lower than 0.5 ms
-    double sentMsgFixedDelay @unit(s) = default(0.0005s);
-    double sentMsgRandDelay @unit(s) = default(uniform(0.00001s, 0.0019s));
+    double minFixedDelay @unit(s) = default(0.005s);
+    double sentMsgFixedDelay @unit(s) = default(0.001s);
     double startSendingCtrlMsgs @unit(s) = default(5.0s);
     
     int hopsToLive = default(2);

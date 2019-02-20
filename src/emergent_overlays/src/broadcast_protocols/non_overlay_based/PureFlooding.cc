@@ -18,7 +18,11 @@
 Define_Module(PureFlooding);
 
 void PureFlooding::onBroadcastMsg(cPacket* pk, string sender) {
-  // forward iff message wasn't hear before
-  InteroperableBroadcast::fwdBroadcastMsg(pk);
+  // tag packet as received
+  if (InteroperableBroadcast::receivedMsg.find(pk->getName()) == InteroperableBroadcast::receivedMsg.end()) {
+    receivedMsg.insert(pk->getName());
+    // forward iff message wasn't hear before
+    InteroperableBroadcast::fwdBroadcastMsg(pk);
+  }
 }
 

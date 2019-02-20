@@ -63,7 +63,13 @@ void InteroperableBroadcast::processStart() {
   std::string::size_type sz;
   int n = stoi(nodeId.substr(i, nodeId.size()), &sz);
   // unique value per node identifier (i.e. the value for this attribute isn't the same, for any pair of nodes)
-  sentMsgDelay = (n % par("maxNodesNo").longValue()) * par("sentMsgFixedDelay").doubleValue();
+  int N = par("maxNodesNo").longValue();
+  sentMsgDelay = ((n - 1) % N) * par("sentMsgFixedDelay").doubleValue();
+
+  // approximation to let all nodes receive a message
+//  msgDisemDelay = (N - n) * par("sentMsgFixedDelay").doubleValue();
+//  if(msgDisemDelay == 0)
+//    msgDisemDelay = par("minFixedDelay").doubleValue();
 
   physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
@@ -99,7 +105,7 @@ void InteroperableBroadcast::processStart() {
   // schedule event to end the simulation in all peers
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
   // timer to store nodes position and density, when nodes move
-  scheduleEvent(Timer::MOTION, par("motionInterval").doubleValue(), motionTimer);
+  scheduleEvent(Timer::MOTION, par("sendInterval").doubleValue() - par("sentMsgFixedDelay").doubleValue(), motionTimer);
 }
 
 void InteroperableBroadcast::sendPacket() {
@@ -134,16 +140,14 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       // TODO add a procedure to chose in a random way the node that initiates a broadcast session
       // 			every time the SEND_BROADCAST timer reaches zero
       case Timer::BROADCAST_SESSION: {
-        // call sendPacket() periodically, every par("sendInterval") seconds,
-        // to perform one broadcast session; see event UDPBasicApp::SEND
+        // call sendPacket() every par("sendInterval") seconds to perform one broadcast session; see event UDPBasicApp::SEND
         UDPBasicApp::processSend();
-
       }
         break;
       case Timer::FWD_BROADCAST_MSG: {
         socket.sendTo(latestPkToFwd, broadcastAddress, destPort);
         emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
-//        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
+        emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
       }
         break;
       case Timer::SEND_CTRL_MSG: {
@@ -160,7 +164,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         emit(positionAtX, currentPosition.x);
         emit(positionAtY, currentPosition.y);
         // emit(<density>, ?);
-        scheduleEvent(Timer::MOTION, par("motionInterval").doubleValue(), motionTimer);
+        scheduleEvent(Timer::MOTION, par("sendInterval").doubleValue(), motionTimer);
       }
         break;
       case Timer::BORDER_DETECTOR: {
@@ -237,13 +241,8 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       emit(rcvdBroadcastMsg, getMsgId(pk->getName()));
       // count received broadcast messages
       UDPBasicApp::numReceived++;
-      if (receivedMsg.find(pk->getName()) == receivedMsg.end()) {
-        // tag packet as received
-        receivedMsg.insert(pk->getName());
-        // each algorithm deal with the reception of [pk]
-        onBroadcastMsg(pk, sender);
-      } else
-        EV_DEBUG << "Broadcast message [" << pk->getName() << "] ignored" << endl;
+      // each algorithm deal with the reception of [pk]
+      onBroadcastMsg(pk, sender);
     }
       break;
     case UdpPacket::CTRL: {
@@ -367,8 +366,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
 // replace sender
   latestPkToFwd->getParList().remove("Sender");
   addSender(latestPkToFwd);
-//  scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgRandDelay").doubleValue(), fwdBMsgTimer);
-  scheduleEvent(Timer::FWD_BROADCAST_MSG, sentMsgDelay, fwdBMsgTimer);
+  scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(), fwdBMsgTimer);
 }
 
 cPacket* InteroperableBroadcast::getCtrlMsg() {
@@ -412,7 +410,7 @@ void InteroperableBroadcast::detectBorderNode(string sender, string sendersAlgo)
 
 void InteroperableBroadcast::initializeState() {
   throw cRuntimeError(
-        "Every subclass of InteroperableBroadcast, which exchange control messages, should implement initializeState()");
+      "Every subclass of InteroperableBroadcast, which exchange control messages, should implement initializeState()");
 }
 
 cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, const char* chosenNode, double htl) {

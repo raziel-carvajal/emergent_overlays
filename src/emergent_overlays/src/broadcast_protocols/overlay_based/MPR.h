@@ -25,12 +25,17 @@ using namespace std;
 class MPR : public InteroperableBroadcast {
   private:
     enum MprTimers {
-      SEND_CTRL_MSG_TO_BOOT, BUILD_CDS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
+      BUILD_CDS, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
     double similarity;
+    bool previousDec;
+
     int viewSize;
     int sentBootEvents = 1;
+    int currentReceptions;
+
+    MprNeighbors latestPayload;
 
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
@@ -44,13 +49,12 @@ class MPR : public InteroperableBroadcast {
       cancelAndDelete(fwdBrMsgTimer);
     }
 
-    bool previousDec;
-
     // variables/methods to implement MPR V0.0.1
     set<string> currentMpr;
+    set<string> previousNeigs;
+    set<string> alreadyDispatched;
 
     map<string, set<string>> neighbors;
-    set<string> previousNeigs;
 
     map<string, Coord> neigsPositions;
 
@@ -67,7 +71,7 @@ class MPR : public InteroperableBroadcast {
     bool is_a_covered_by_b(string a, string b) {
       Coord pA = neigsPositions[a];
       Coord pB = neigsPositions[b];
-      return InteroperableBroadcast::transRadious <= sqrt((pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y));
+      return sqrt((pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y)) <= InteroperableBroadcast::transRadious;
     }
 
     set<string> compute_mpr();

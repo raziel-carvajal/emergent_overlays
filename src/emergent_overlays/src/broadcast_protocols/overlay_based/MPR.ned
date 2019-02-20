@@ -26,4 +26,5 @@ simple MPR extends InteroperableBroadcast
     int bootCtrlMsgsNo = default(2);
     double similarity = default(0.75);
     int viewSize = default(20);
+    int allowedReceptions = default(3);
 }
