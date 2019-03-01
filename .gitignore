@@ -122,3 +122,5 @@ papers/Middleware2017/*.fdb_latexmk
 
 #
 src/scripts/algo
+#latest paper
+papers/latest/main.pdf

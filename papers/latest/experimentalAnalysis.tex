@@ -57,14 +57,25 @@
 	\item We do count with preliminary results to observe how LCC evolves in dynamic scenarios, this is shown in~\reffigure{lcc}, ~\reffigure{lcc-zoom}, ~\reffigure{density}; here there is a description of such experiments:
 	\begin{itemize}
 		\item on each experiment there is a fixed number of nodes; such number varies from 20 to 1400
-		\item communication area of $10m^{2}$ remains the same in all experiments
+		\item communication area of $100m^{2}$ remains the same in all experiments
 		\item for an experiment $E_{i}$ a mobility trace $T_{i}$ was created where every node performs Levy walks every second with a random velocity between 0m/s to 1m/s; total time on each trace is 30s
 		\item transmission range of nodes remains the same for all experiments
 	\end{itemize}
 
 \end{itemize}
 
+\raziel{
+Takes away at the end of this section:
+\begin{itemize}
+	\item nodes acceleration and LCC are factors that make sense to determine whether or not nodes are at PoI
+	\item assure that LCC is a metric that haven't been explored (at least not explicitly) before to find out opportunities to broadcast in MANETs
+	\item we differ from other works that make use of explicit use of thresholds of density
+\end{itemize}
+}
 
-
-
-
+\raziel{
+Other ideas/questions to explore:
+\begin{itemize}
+	\item is there any other metric in graph theory that nodes can compute in a decentralized manner to improve network performance? or probably propose another policy of adaptation ?
+\end{itemize}
+}
