@@ -58,13 +58,30 @@ experiments/networks/builtTopologies/*.ned
 experiments/configs/builtConfigs/results/
 experiments/configs/results/
 
-# Paper
-main.aux
-main.bbl
-main.blg
-main.log
-main.pdf
-main.synctex.gz
+# .gitignore for latex
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
 
 # partial results
 results/n*.pdf
