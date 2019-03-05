@@ -8,15 +8,20 @@ get_args <- function() {
   p$add_argument("--transmission-range", dest = "tx", type = "double", default = "1.0")
   p$add_argument("--with-closure-coefficient", dest = "wclo", action = "store_true")
   p$add_argument("--with-clustering-coefficient", dest = "wclu", action = "store_true")
+	p$add_argument("--with-transitivity", dest = "wt", action = "store_true")
 	p$add_argument("--with-plotting", dest = "plot", action = "store_true")
   p$parse_args()
 }
 
 ### MAIN ###
 args <- get_args()
-if (!args$wclo & !args$wclu) {
-  print("Any coefs was chosen. Run again with the option --with-closure-coefs OR --with-clustering-coefs")
-  stop()
+if (!args$wt) {
+	if (!args$wclo & !args$wclu) {
+		print("Any coefficient was chosen. Run again with the option --with-closure-coefs OR --with-clustering-coefs")
+		stop()
+	}
+} else {
+	print("Dataset of coefficients is ignored, igraph.transitivity() use instead")
 }
 
 posAtX <- get_omnet_vector_as_dataset(args$omnet_dataset, "positionAtX:vector")
@@ -31,26 +36,34 @@ positions <- data.frame(
 positions <- positions[order(positions$time), ]
 
 # chose only one coefficient to draw
-if(args$wclo){
-	coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "closureCoef:vector")
-	graphPrefix <- "ClosureCoef_"
+if (!args$wt){
+	if(args$wclo){
+		coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "closureCoef:vector")
+		graphPrefix <- "ClosureCoef_"
+	} else {
+		coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "clusteringCoef:vector")
+		graphPrefix <- "ClusteringCoef_"
+	}
+	coefs <- coefs[order(coefs$time), ]
 } else {
-	coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "clusteringCoef:vector")
-	graphPrefix <- "ClusteringCoef_"
+	graphPrefix <- "IgraphClusteringCoef_"
 }
-coefs <- coefs[order(coefs$time), ]
 
-nodesNo <- length(unique(coefs$nodeId))
-overlaysNo <- floor(length(coefs$nodeId)/nodesNo)
+nodesNo <- length(unique(positions$nodeId))
+overlaysNo <- floor(length(positions$nodeId)/nodesNo)
 # get the wireless topology based on nodes positions
 sapply(c(1:overlaysNo), function(i) {
 	# datasets per overlay
 	posAt_i <- tail(head(positions, i * nodesNo), nodesNo)
-	coefAt_i <- tail(head(coefs, i * nodesNo), nodesNo)
 	g <- get_wireless_topology(posAt_i, args$tx, plot = T)
   if (args$plot) {
-		# in this way, the index of this vector refers to the node identifier
-		coefAt_i <- coefAt_i[order(coefAt_i$nodeId), ]$data
+		if (!args$wt) {
+			# in this way, the index of this vector refers to the node identifier
+			coefAt_i <- tail(head(coefs, i * nodesNo), nodesNo)
+			coefAt_i <- coefAt_i[order(coefAt_i$nodeId), ]$data
+		} else {
+			coefAt_i <- transitivity(g, type = "localundirected")
+		}
 		# in the resulting graph nodes have a colour based on their local closure/clustering coefficients:
 		# yellow -> coefficient at [0, 1/3]
 		# orange -> coefficient at (1/3, 2/3]
