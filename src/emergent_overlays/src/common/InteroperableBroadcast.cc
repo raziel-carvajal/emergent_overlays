@@ -41,6 +41,7 @@ void InteroperableBroadcast::initialize(int stage) {
     broaMsgTimer = new cMessage("broaMsgTimer");
     motionTimer = new cMessage("motionTimer");
     fwdBMsgTimer = new cMessage("fwdBMsgTimer");
+    borderMsgTimer = new cMessage("borderMsgTimer");
   }
 }
 
@@ -49,7 +50,7 @@ void InteroperableBroadcast::processStart() {
   runningAlgorithm = getContainingNode(this)->getModuleByPath(".udpApp[0]")->getClassName();
   const char* id = getParentModule()->getFullName();
   nodeId = id;
-  EV_DEBUG << "Running algorithm [" << runningAlgorithm << "] in node [" << nodeId << "]" << endl;
+  EV << "Running algorithm [" << runningAlgorithm << "] in node [" << nodeId << "]" << endl;
   // nodes identifiers start with an alphabetic character
   bool isNumeric = false;
   int i = 0;
@@ -66,10 +67,7 @@ void InteroperableBroadcast::processStart() {
   int N = par("maxNodesNo").longValue();
   sentMsgDelay = ((n - 1) % N) * par("sentMsgFixedDelay").doubleValue();
 
-  // approximation to let all nodes receive a message
-//  msgDisemDelay = (N - n) * par("sentMsgFixedDelay").doubleValue();
-//  if(msgDisemDelay == 0)
-//    msgDisemDelay = par("minFixedDelay").doubleValue();
+  EV << simTime() << ", " << nodeId << " :: sentMsgDelay = " << sentMsgDelay << endl;
 
   physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
@@ -94,7 +92,7 @@ void InteroperableBroadcast::processStart() {
     throw cRuntimeError("invalid broadcast address");
 
   // schedule first broadcast session
-  scheduleEvent(Timer::BROADCAST_SESSION, par("sendInterval").doubleValue(), broaMsgTimer);
+  scheduleEvent(Timer::SEND_BROADCAST_MSG, par("sendInterval").doubleValue(), broaMsgTimer);
   // first broadcast session starts with ID = 1
   UDPBasicApp::numSent = 1;
 
@@ -104,8 +102,10 @@ void InteroperableBroadcast::processStart() {
 
   // schedule event to end the simulation in all peers
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
-  // timer to store nodes position and density, when nodes move
-  scheduleEvent(Timer::MOTION, par("sendInterval").doubleValue() - par("sentMsgFixedDelay").doubleValue(), motionTimer);
+  // store nodes positions to get ground truth at roughly the same
+  // interval broadcast messages are sent
+  scheduleEvent(Timer::STORE_POSITION, par("sendInterval").doubleValue() - par("sentMsgFixedDelay").doubleValue(),
+      motionTimer);
 }
 
 void InteroperableBroadcast::sendPacket() {
@@ -115,13 +115,14 @@ void InteroperableBroadcast::sendPacket() {
   if (par("isSource").boolValue()) {
     ostringstream pkName;
     pkName << this->packetName + to_string(numSent);
-    EV << "new broadcast session, BroadcastMsgId=" << pkName.str() << endl;
+    EV_DEBUG << "new broadcast session, BroadcastMsgId=" << pkName.str() << endl;
 
     // setting up packet
     cPacket* payload = new cPacket(pkName.str().c_str());
     payload->setByteLength(par("messageLength").longValue());
     addPacketType(payload, UdpPacket::BROADCAST);
-    addSender(payload);
+    addPacketHeaders(payload);
+
     // send now
     socket.sendTo(payload, broadcastAddress, destPort);
     emit(sentBroadcastMsg, getMsgId(payload->getName()));
@@ -137,11 +138,22 @@ void InteroperableBroadcast::sendPacket() {
 void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
   if (msg->isSelfMessage() && isSelfTimer(msg)) {
     switch (msg->getKind()) {
-      // TODO add a procedure to chose in a random way the node that initiates a broadcast session
-      // 			every time the SEND_BROADCAST timer reaches zero
-      case Timer::BROADCAST_SESSION: {
+      case Timer::SEND_BROADCAST_MSG: {
         // call sendPacket() every par("sendInterval") seconds to perform one broadcast session; see event UDPBasicApp::SEND
         UDPBasicApp::processSend();
+      }
+        break;
+      case Timer::SEND_FOREIGN_MSG: {
+        socket.sendTo(makeForeignMessage(), broadcastAddress, destPort);
+      }
+        break;
+      case Timer::SEND_CTRL_MSG: {
+        knownForeignAlgos.clear();
+        initializeState();
+        sendCtrlMsg();
+        cancelEvent(msg);
+        if (par("withCtrlMsg").boolValue())
+          scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
       }
         break;
       case Timer::FWD_BROADCAST_MSG: {
@@ -150,58 +162,14 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::SIMPLE);
       }
         break;
-      case Timer::SEND_CTRL_MSG: {
-        initializeState();
-        sendCtrlMsg();
-        cancelEvent(msg);
-        if (par("withCtrlMsg").boolValue())
-          scheduleEvent(Timer::SEND_CTRL_MSG, par("ctrlMsgInterval").doubleValue(), ctrlMsgTimer);
-      }
-        break;
-      case Timer::MOTION: {
-        // TODO store density
+        // this event is useful to build the wireless topology (ground truth) that is
+        // formed during the dissemination of every broadcast message
+      case Timer::STORE_POSITION: {
         currentPosition = mobilityModel->getCurrentPosition();
         emit(positionAtX, currentPosition.x);
         emit(positionAtY, currentPosition.y);
-        // emit(<density>, ?);
-        scheduleEvent(Timer::MOTION, par("sendInterval").doubleValue(), motionTimer);
-      }
-        break;
-      case Timer::BORDER_DETECTOR: {
-        string tmp(msg->getName());
-        // remove substring [bd-timer-] to get algorithm name
-        string foreignAlgo(splitString("bd-timer-", tmp));
-        EV_DEBUG << "border-detector timer expires for algorithm: " << foreignAlgo << endl;
 
-        bool emptyCandidatesSet = knownForeignNodes.find(foreignAlgo) != knownForeignNodes.end()
-            && knownForeignNodes[foreignAlgo].empty();
-        if (emptyCandidatesSet) {
-          EV_ERROR << "Any border node will be chosen!" << endl;
-          cancelAndDelete(msg);
-        } else {
-          /* Policy to select a border node. Suggestions:
-           * - piggyback stored energy of nodes to chose that node
-           *   with the highest value as border node
-           * Currently, choosing a border node follows a first-received-first-chosen rule
-           * OPEN QUESTIONS
-           *   - how to up date this set of potential border nodes?
-           *   - mobility has an impact on this decision
-           */
-          set<string>::iterator it = knownForeignNodes[foreignAlgo].begin();
-          string chosenNode(*it);
-          EV_DEBUG << "Chosen border node [" << chosenNode << "]" << endl;
-
-          cPacket* borderMsg = makeBorderMessage(foreignAlgo.c_str(), chosenNode.c_str(),
-              par("hopsToLive").doubleValue());
-          socket.sendTo(borderMsg, broadcastAddress, destPort);
-
-          // delete local border-detector timer
-          cancelAndDelete(borderNodeTimers[foreignAlgo]);
-          borderNodeTimers.erase(borderNodeTimers.find(foreignAlgo));
-          // mark as already received
-          receivedBorderMsgs.insert(foreignAlgo);
-        }
-
+        scheduleEvent(Timer::STORE_POSITION, par("sendInterval").doubleValue(), motionTimer);
       }
         break;
       case Timer::HALT_APP: {
@@ -210,10 +178,14 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           cancelAndDelete(broaMsgTimer);
         if (ctrlMsgTimer)
           cancelAndDelete(ctrlMsgTimer);
-        cancelAndDelete(haltSimTimer);
-        cancelAndDelete(motionTimer);
+        if (borderMsgTimer)
+          cancelAndDelete(borderMsgTimer);
         if (fwdBMsgTimer)
           cancelAndDelete(fwdBMsgTimer);
+        if (motionTimer)
+          cancelAndDelete(motionTimer);
+
+        cancelAndDelete(haltSimTimer);
         // cancel events from sub-classes
         cancelSelfEvents();
         endSimulation();
@@ -228,13 +200,13 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 }
 
 void InteroperableBroadcast::processPacket(cPacket* pk) {
-  // avoid receiving broadcast/control messages from local node
+  // avoid when sender and receiver are the same peer
   if (getSrcAddress(pk) == localAddress) {
     delete pk;
     return;
   }
   string sender(removeQuotes(pk->par("Sender").str()));
-  EV_DEBUG << "Broadcast message [" << pk->getName() << "] received from [" << sender << "]" << endl;
+  EV_DEBUG << "Message [" << pk->getName() << "] received from [" << sender << "]" << endl;
   switch (pk->par("PkType").longValue()) {
     case UdpPacket::BROADCAST: {
       // record all received broadcast messages
@@ -246,62 +218,27 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     }
       break;
     case UdpPacket::CTRL: {
+      // all control messages must contain the parameter: SendersRunningAlgo
       string senderRunningAlgo(removeQuotes(pk->par("SendersRunningAlgo").str()));
-      if (enableInterop) {
-        // all control messages must contain the parameter: SendersRunningAlgo
-        detectBorderNode(sender, senderRunningAlgo);
-      }
-      // TODO deal with the situation when the received ctrl message
-      // cames from a sender running a different algorithm than the local node
-      // bool isMprPk =
-      onControlMsg(pk, sender);
 
+      // control message received from a foreign algorithm, i. e., sender is a border node
+      if (enableInterop && runningAlgorithm != senderRunningAlgo) {
+        bool isKnown = knownForeignAlgos.find(senderRunningAlgo) != knownForeignAlgos.end();
+        if (!isKnown) {
+          knownForeignAlgos.insert(senderRunningAlgo);
+          scheduleEvent(Timer::SEND_FOREIGN_MSG, par("sentMsgFixedDelay").doubleValue(), borderMsgTimer);
+        }
+      }
+      // this method isn't implemented for those algorithms
+      // that do not deal with exchange of control messages
+      onControlMsg(pk, sender);
     }
       break;
-    case UdpPacket::BORDER: {
-      /* Here we distinguish between 2 cases:
-       * TODO complete documentation
-       */
-      string senderForeignAlgo(removeQuotes(pk->par("foreignAlgoPar").str()));
+    case UdpPacket::FOREIGN: {
       string senderRunningAlgo(removeQuotes(pk->par("SendersRunningAlgo").str()));
-      string chosenBorderNode(removeQuotes(pk->par("borderNodeId").str()));
-      double hopsToLive(pk->par("hopsToLive").doubleValue());
-      EV_DEBUG << "Meta-data of Border message" << endl;
-      EV_DEBUG << "senderForeignAlgo: [" << senderForeignAlgo << "]" << endl;
-      EV_DEBUG << "senderRunningAlgo: [" << senderRunningAlgo << "]" << endl;
-      EV_DEBUG << "chosenBorderNode: [" << chosenBorderNode << "]" << endl;
-      EV_DEBUG << "hopsToLive: [" << hopsToLive << "]" << endl;
-
-      if (receivedBorderMsgs.find(senderForeignAlgo) != receivedBorderMsgs.end()) {
-        EV_DEBUG << "BorderMsg already received [" << senderForeignAlgo << "]" << endl;
-        break;
+      if (runningAlgorithm != senderRunningAlgo) {
+        knownForeignAlgos.insert(senderRunningAlgo);
       }
-      receivedBorderMsgs.insert(senderForeignAlgo);
-
-      if (!amIborderNode && runningAlgorithm == senderForeignAlgo && nodeId == chosenBorderNode) {
-        EV_DEBUG << "Node [" << nodeId << "] is border node" << endl;
-        amIborderNode = true;
-      }
-
-      bool ongoingTimer = borderNodeTimers.find(senderForeignAlgo) != borderNodeTimers.end();
-      if (ongoingTimer && borderNodeTimers[senderForeignAlgo] != nullptr) {
-        // delete ongoing border-detector timer
-        cancelAndDelete(borderNodeTimers[senderForeignAlgo]);
-        borderNodeTimers.erase(borderNodeTimers.find(senderForeignAlgo));
-        /* INFO remove candidates of being border nodes.
-         *   This measure is a little bit drastic because
-         *   the set could be reuse later. On the other hand,
-         *   this a way to deal with mobility.
-         */
-        knownForeignNodes[senderForeignAlgo].clear();
-      }
-
-      if (hopsToLive > 0) {
-        EV_DEBUG << "HopsToLive > 0, forwarding border message" << endl;
-        cPacket* borderMsg = makeBorderMessage(senderForeignAlgo.c_str(), chosenBorderNode.c_str(), hopsToLive - 1);
-        socket.sendTo(borderMsg, broadcastAddress, destPort);
-      }
-
     }
       break;
     default:
@@ -353,6 +290,11 @@ void InteroperableBroadcast::addSender(cPacket* pk) {
   pk->addPar(p);
 }
 
+void InteroperableBroadcast::addPacketHeaders(cPacket* c) {
+  addSender(c);
+  addSendersRunningAlgo(c);
+}
+
 void InteroperableBroadcast::onBroadcastMsg(cPacket* pk, string sender) {
   /* TODO missing features:
    * -  senders of broadcast messages may run a protocol different than
@@ -365,7 +307,9 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   latestPkToFwd = pk->dup();
 // replace sender
   latestPkToFwd->getParList().remove("Sender");
-  addSender(latestPkToFwd);
+  latestPkToFwd->getParList().remove("SendersRunningAlgo");
+  addPacketHeaders(latestPkToFwd);
+
   scheduleEvent(Timer::FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(), fwdBMsgTimer);
 }
 
@@ -379,33 +323,11 @@ cPacket* InteroperableBroadcast::getCtrlMsg() {
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
   return ctrlMsgTimer == msg || haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg || fwdBMsgTimer == msg
-      || isBorderDetectorTimer(msg);
+      || borderMsgTimer == msg;
 }
 
 void InteroperableBroadcast::cancelSelfEvents() {
   throw cRuntimeError("Every subclass of InteroperableBroadcast should implement cancelSelfEvents()");
-}
-
-bool InteroperableBroadcast::isBorderDetectorTimer(cMessage* msg) {
-  return msg->getKind() == Timer::BORDER_DETECTOR;
-}
-
-void InteroperableBroadcast::detectBorderNode(string sender, string sendersAlgo) {
-  if (runningAlgorithm != sendersAlgo) {
-    bool knownForeignSender = knownForeignNodes.find(sendersAlgo) != knownForeignNodes.end()
-        && knownForeignNodes[sendersAlgo].find(sender) != knownForeignNodes[sendersAlgo].end();
-    if (!knownForeignSender) {
-      EV_DEBUG << "Schedule border-detector timer for foreign algorithm " << sendersAlgo << " that expires in "
-          << par("borderDetectorDelay").doubleValue() << "s" << endl;
-      knownForeignNodes[sendersAlgo].insert(sender);
-
-      string timerName("bd-timer-" + sendersAlgo);
-      cMessage* timer = new cMessage(timerName.c_str());
-      borderNodeTimers[sendersAlgo] = timer;
-
-      scheduleEvent(Timer::BORDER_DETECTOR, par("borderDetectorDelay").doubleValue(), timer);
-    }
-  }
 }
 
 void InteroperableBroadcast::initializeState() {
@@ -413,28 +335,16 @@ void InteroperableBroadcast::initializeState() {
       "Every subclass of InteroperableBroadcast, which exchange control messages, should implement initializeState()");
 }
 
-cPacket* InteroperableBroadcast::makeBorderMessage(const char* foreignAlgo, const char* chosenNode, double htl) {
-  cPacket* borderMsg = new cPacket("BorderMsg");
-  addPacketType(borderMsg, UdpPacket::BORDER);
-  addSender(borderMsg);
-  addSendersRunningAlgo(borderMsg);
-
-// parameters to deal with interoperability procedure
-  cMsgPar* foreignAlgoPar = new cMsgPar("foreignAlgoPar");
-  foreignAlgoPar->setStringValue(foreignAlgo);
-  cMsgPar* hopsToLive = new cMsgPar("hopsToLive");
-  hopsToLive->setDoubleValue(htl);
-  cMsgPar* borderNodeId = new cMsgPar("borderNodeId");
-  borderNodeId->setStringValue(chosenNode);
-
-  borderMsg->addPar(foreignAlgoPar);
-  borderMsg->addPar(hopsToLive);
-  borderMsg->addPar(borderNodeId);
-
-  return borderMsg;
-}
-
 void InteroperableBroadcast::sendCtrlMsg() {
   throw cRuntimeError(
       "Every subclass of InteroperableBroadcast, which exchange control messages, should implement sendCtrlMsg()");
+}
+
+cPacket* InteroperableBroadcast::makeForeignMessage() {
+  cPacket* fMsg = new cPacket("ForeignMsg");
+  fMsg->setByteLength(par("ctrlMessageLength").longValue());
+
+  addPacketType(fMsg, UdpPacket::FOREIGN);
+  addPacketHeaders(fMsg);
+  return fMsg;
 }

@@ -34,16 +34,15 @@ class InteroperableBroadcast : public UDPBasicApp {
     virtual void processPacket(cPacket *msg) override;
 
     enum UdpPacket {
-      BROADCAST = 1, CTRL, BORDER
+      BROADCAST = 1, CTRL, FOREIGN
     };
     enum Timer {
-      HALT_APP = 1, SEND_CTRL_MSG, FWD_BROADCAST_MSG, BROADCAST_SESSION, MOTION, BORDER_DETECTOR
+      HALT_APP = 1, SEND_CTRL_MSG, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, STORE_POSITION, SEND_FOREIGN_MSG
     };
     enum ForwardType {
       SIMPLE, CDS_RELAY, BORDER_NODE
     };
     // attributes that are accessible from subclasses of InteroperableBroadcast
-    bool amIborderNode = false;
     bool enableInterop;
 
     double transRadious;
@@ -53,7 +52,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     string nodeId;
 
     set<string> receivedMsg;
-    set<string> receivedBorderMsgs;
 
     L3Address localAddress;
     L3Address broadcastAddress;
@@ -78,12 +76,16 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t forward_type;
 //    static simsignal_t density_approximation;
 
-    void fwdBroadcastMsg(cPacket* pk);
     int getMsgId(const char* msgHeader);
+
+    void fwdBroadcastMsg(cPacket* pk);
     void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
+    void addPacketHeaders(cPacket* c);
     void addPacketType(cPacket* msg, long t);
-    void addSender(cPacket* pk);
-    void addSendersRunningAlgo(cPacket* pk);
+
+    bool amIborderNode(){
+      return !knownForeignAlgos.empty();
+    }
 
     string removeQuotes(string target) {
       return target.substr(1, target.size() - 2);
@@ -97,6 +99,7 @@ class InteroperableBroadcast : public UDPBasicApp {
         return false;
       }
     }
+
   private:
 
     cMessage* ctrlMsgTimer = nullptr;
@@ -104,24 +107,21 @@ class InteroperableBroadcast : public UDPBasicApp {
     cMessage* broaMsgTimer = nullptr;
     cMessage* motionTimer = nullptr;
     cMessage* fwdBMsgTimer = nullptr;
+    cMessage* borderMsgTimer = nullptr;
 
-    set<string> knownNeigs;
-
-    L3Address getSrcAddress(cPacket *msg);
+    set<string> knownForeignAlgos;
 
     string runningAlgorithm;
 
-    map<string, set<string>> knownForeignNodes;
-    map<string, cMessage*> borderNodeTimers;
-
     cPacket* latestPkToFwd = nullptr;
 
-    bool isSelfTimer(cMessage *msg);
-    bool isBorderDetectorTimer(cMessage *msg);
-    void detectBorderNode(string sender, string sendersAlgo);
-    cPacket* makeBorderMessage(const char* foreignAlgo, const char* chosenNode, double hopsToLive);
+    L3Address getSrcAddress(cPacket *msg);
 
-    // misc functions
+    void addSender(cPacket* pk);
+    void addSendersRunningAlgo(cPacket* pk);
+    bool isSelfTimer(cMessage *msg);
+    cPacket* makeForeignMessage();
+
     string splitString(string substr, string target) {
       return target.substr(substr.size(), target.size() - substr.size());
     }

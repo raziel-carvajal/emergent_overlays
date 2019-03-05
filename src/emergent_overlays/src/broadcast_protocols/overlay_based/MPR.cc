@@ -32,7 +32,7 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
 
   payload->setByteLength(par("messageLength").longValue());
   InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
-  InteroperableBroadcast::addSender(payload);
+  InteroperableBroadcast::addPacketHeaders(payload);
 
   MprNeighbors myNeigs;
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it)
@@ -49,7 +49,7 @@ bool MPR::amIrelay(MprNeighbors senderNeigs) {
     relay = (*it == InteroperableBroadcast::nodeId);
     temp += *it + ", ";
   }
-  //cout << "[" << simTime() << ", " << temp << "}" << endl;
+  cout << "[" << simTime() << ", " << temp << "}" << endl;
 //  if (neigsChanged())
 //    previousDec = relay;
 //  else
@@ -64,7 +64,7 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
 
         string temp(nodeId + "]");
         if (InteroperableBroadcast::receivedMsg.find(mprPk->getName()) == InteroperableBroadcast::receivedMsg.end()) {
-          //cout << "[" << simTime() << ", " << temp << " 1st reception, schedule FWD in " << par("sentMsgFixedDelay").doubleValue() << endl;
+          cout << "[" << simTime() << ", " << temp << " 1st reception, schedule FWD in " << par("sentMsgFixedDelay").doubleValue() << endl;
           // tag packet as received
           receivedMsg.insert(mprPk->getName());
           // required to improve MPR algorithm
@@ -78,7 +78,7 @@ void MPR::onBroadcastMsg(cPacket* pk, string sender) {
         }
 
         if(currentReceptions <= par("allowedReceptions").doubleValue()) {
-          //cout << "[" << simTime() << ", " << temp << " reception No = " << currentReceptions << endl;
+          cout << "[" << simTime() << ", " << temp << " reception No = " << currentReceptions << endl;
 
           // keep payload from neighbors
           MprNeighbors senderNeigs = mprPk->getNeighbors();
@@ -111,7 +111,7 @@ void MPR::onControlMsg(cPacket* pk, string sender) {
         neigsPositions[*it].y = neigsPosAtY[*it];
       }
     }
-    //cout << "[" << simTime() << ", " << msg << endl;
+    cout << "[" << simTime() << ", " << msg << endl;
     return true;
   });
 }
@@ -148,23 +148,29 @@ void MPR::handleMessageWhenUp(cMessage* msg) {
         string temp(nodeId + "] my CDS is = ");
         for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it)
           temp += *it + ", ";
-        //cout << "[" << simTime() << ", " << temp << endl;
+        cout << "[" << simTime() << ", " << temp << endl;
       }
         break;
       case FWD_BROADCAST_MSG: {
-        string temp(nodeId + "] forwarding msg: " + msg->par("ReceivedMsgId").stringValue());
         alreadyDispatched.insert(msg->par("ReceivedMsgId").stringValue());
-        if (amIrelay(latestPayload) || amIborderNode) {
-          if (amIborderNode)
-            emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
-          else
-            emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
+        string temp(nodeId + "] deciding to FWD message: " + msg->par("ReceivedMsgId").stringValue());
 
-          //cout << "[" << simTime() << ", " << temp << endl;
+        bool fwdMsg = false;
+        if (amIrelay(latestPayload)) {
+          fwdMsg = true;
+          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
+        } else if (InteroperableBroadcast::amIborderNode()) {
+          fwdMsg = true;
+          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
+        }
+
+        if (fwdMsg) {
+          cout << "[" << simTime() << ", " << temp << endl;
           cPacket* broadcastMsg = buildBroadcastMsg(msg->par("ReceivedMsgId").stringValue());
           socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
           emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
         }
+
         cancelEvent(msg);
       }
         break;
@@ -213,20 +219,18 @@ void MPR::sendCtrlMsg() {
 
   double t = par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").doubleValue();
   InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, t, sCtrlMsgTimer);
-  //cout << "[" << simTime() << ", " << nodeId << "] next CtrlMsg at " << t << endl;
+  cout << "[" << simTime() << ", " << nodeId << "] next CtrlMsg at " << t << endl;
 
   InteroperableBroadcast::scheduleEvent(BUILD_CDS, 2 * t - InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
 
-  //cout << "[" << simTime() << ", " << nodeId << "] next BuildCdsMsg at " << 2 * t - InteroperableBroadcast::sentMsgDelay
+  cout << "[" << simTime() << ", " << nodeId << "] next BuildCdsMsg at " << 2 * t - InteroperableBroadcast::sentMsgDelay
       << endl;
 }
 
 cPacket* MPR::getCtrlMsg() {
   MprPacket* ctrlMsg = new MprPacket("CtrlMsg");
-
   InteroperableBroadcast::addPacketType(ctrlMsg, UdpPacket::CTRL);
-  InteroperableBroadcast::addSender(ctrlMsg);
-  InteroperableBroadcast::addSendersRunningAlgo(ctrlMsg);
+  InteroperableBroadcast::addPacketHeaders(ctrlMsg);
 
   ctrlMsg->setSenderPosAtX(InteroperableBroadcast::currentPosition.x);
   ctrlMsg->setSenderPosAtY(InteroperableBroadcast::currentPosition.y);
@@ -242,7 +246,7 @@ cPacket* MPR::getCtrlMsg() {
     positionsAtX[it->first] = neigsPositions[it->first].x;
     positionsAtY[it->first] = neigsPositions[it->first].y;
   }
-  //cout << "[" << simTime() << temp << endl;
+  cout << "[" << simTime() << temp << endl;
   ctrlMsg->setNeighbors(myNeigs);
   ctrlMsg->setPositionsAtX(positionsAtX);
   ctrlMsg->setPositionsAtY(positionsAtY);

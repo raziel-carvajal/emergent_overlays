@@ -61,31 +61,31 @@ void MPR_1::handleMessageWhenUp(cMessage* msg) {
         break;
       case FWD_BROADCAST_MSG: {
         EV_DEBUG << "Case: FWD_BROADCAST_MSG" << endl;
-        if (InteroperableBroadcast::amIborderNode) {
-          // INFO: this action do NOT build a MPR set
-          socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
-              InteroperableBroadcast::destPort);
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
-        } else if (msg->par("fwdType").boolValue()) {
-          // INFO: this action do NOT build a MPR set
-          socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
-              InteroperableBroadcast::destPort);
-          emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(msg->getName()));
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-        } else {
-          string ignoredSender(msg->par("sender").stringValue());
-          EV_DEBUG << "fwdType == FALSE, sender = " << ignoredSender << endl;
-          cPacket* broadcastPk = buildBroadcastMsg(msg->getName(), ignoredSender);
-          bool fwdMsg = InteroperableBroadcast::isPacket<MprBroadcast>(broadcastPk,
-              [&](const MprBroadcast* broadcastMsg) {
-                return !broadcastMsg->getMprSet().empty();
-              });
-          if (fwdMsg) {
-            socket.sendTo(broadcastPk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-            emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastPk->getName()));
-            emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-          }
-        }
+//        if (InteroperableBroadcast::amIborderNode) {
+//          // INFO: this action do NOT build a MPR set
+//          socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
+//              InteroperableBroadcast::destPort);
+//          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
+//        } else if (msg->par("fwdType").boolValue()) {
+//          // INFO: this action do NOT build a MPR set
+//          socket.sendTo(buildBroadcastMsg(msg->getName(), ""), InteroperableBroadcast::broadcastAddress,
+//              InteroperableBroadcast::destPort);
+//          emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(msg->getName()));
+//          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
+//        } else {
+//          string ignoredSender(msg->par("sender").stringValue());
+//          EV_DEBUG << "fwdType == FALSE, sender = " << ignoredSender << endl;
+//          cPacket* broadcastPk = buildBroadcastMsg(msg->getName(), ignoredSender);
+//          bool fwdMsg = InteroperableBroadcast::isPacket<MprBroadcast>(broadcastPk,
+//              [&](const MprBroadcast* broadcastMsg) {
+//                return !broadcastMsg->getMprSet().empty();
+//              });
+//          if (fwdMsg) {
+//            socket.sendTo(broadcastPk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
+//            emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastPk->getName()));
+//            emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
+//          }
+//        }
       }
         break;
       case SEND_CTRL_MSG:
@@ -117,8 +117,7 @@ cPacket* MPR_1::getCtrlMsg() {
   MprCtrl* ctrlMsg = new MprCtrl("CtrlMsg");
 
   InteroperableBroadcast::addPacketType(ctrlMsg, UdpPacket::CTRL);
-  InteroperableBroadcast::addSender(ctrlMsg);
-  InteroperableBroadcast::addSendersRunningAlgo(ctrlMsg);
+  InteroperableBroadcast::addPacketHeaders(ctrlMsg);
 
   MprNeighbours myNeigs;
   EV_DEBUG << "Current neighbors:" << endl;
@@ -137,8 +136,7 @@ cPacket* MPR_1::getCtrlMsgC1() {
   recvCtrlMsgs.insert(id);
 
   InteroperableBroadcast::addPacketType(ctrlMsg, UdpPacket::CTRL);
-  InteroperableBroadcast::addSender(ctrlMsg);
-  InteroperableBroadcast::addSendersRunningAlgo(ctrlMsg);
+  InteroperableBroadcast::addPacketHeaders(ctrlMsg);
 
   ctrlMsg->setEmitter(InteroperableBroadcast::nodeId.c_str());
   ctrlMsg->setHops(2);
@@ -150,8 +148,7 @@ cPacket* MPR_1::getCtrlMsgC1(string header, string emitter, int hops) {
   MprCtrl_1_Neig* ctrlMsg = new MprCtrl_1_Neig(header.c_str());
 
   InteroperableBroadcast::addPacketType(ctrlMsg, UdpPacket::CTRL);
-  InteroperableBroadcast::addSender(ctrlMsg);
-  InteroperableBroadcast::addSendersRunningAlgo(ctrlMsg);
+  InteroperableBroadcast::addPacketHeaders(ctrlMsg);
 
   ctrlMsg->setEmitter(emitter.c_str());
   ctrlMsg->setHops(hops);
@@ -271,7 +268,7 @@ cPacket* MPR_1::buildBroadcastMsg(const char* header, string discartedNode) {
 
   payload->setByteLength(par("messageLength").longValue());
   InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
-  InteroperableBroadcast::addSender(payload);
+  InteroperableBroadcast::addPacketHeaders(payload);
 
   return payload;
 }
