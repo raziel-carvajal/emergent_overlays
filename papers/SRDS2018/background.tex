@@ -1,0 +1,93 @@
+%!TEX root = main.tex
+%=========================================================
+
+\section{Background}
+\label{sec:background}
+
+We start by presenting background concepts used in the rest of this paper:
+  mobile ad-hoc networks (MANETs),
+  broadcast algorithms,
+  and adaptation mechanisms.
+
+\subsection{MANETs}
+\label{sec:background:manets}
+
+\er{%
+suggested content:
+\begin{itemize}
+	\item definition of manets, wireless communication
+	\item wireless medium and capabilities (point-to-point as well as local broadcast, fixed or variable range)
+	\item collisions and messages loss
+	\item MAC layer and necessary retransmissions, for local broadcast and point-to-point; cite and describe briefly some classical approaches (we will define our own later in the paper)
+	\item mobile: the neighborhood of each node changes
+	\item typically carried by humans or vehicles, cite a few papers that describe the mobility traces
+	\item typically operating using batteries hence power consumption is a key factor
+	\item two principal means of communication: instantaneous, best effort to reach everyone/someone, or using delay-tolerant networking, where nodes carry messages for others. We consider the former only in this work.
+\end{itemize}
+}
+
+\subsection{Broadcast algorithms}
+\label{sec:background:broadcast}
+
+\er{%
+suggested content:
+\begin{itemize}
+	\item provide the two algorithms for the network layer and the broadcast layer, define what the broadcast does
+	\item recap the taxonomy of Ruiz's survey (but do not reproduce the figure)
+	\item focus on the two families of overlay-based and flooding-based broadcast
+	\item provide and describe two algorithms: (1) controlled flooding and (2) overlay-based CDS
+	\item two examples of operations for the two protocols, including some collision and some duplicates receptions
+\end{itemize}
+}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
+
+\caption{\labalg{network_api}Network layer API}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
+	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate a new broadcast}
+	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
+
+\caption{\labalg{protocol_api}Broadcast protocol API}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	TODO
+
+\caption{\labalg{background_flooding}Controlled flooding protocol}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	TODO
+
+\caption{\labalg{background_}CDS: Connected Dominating Set overlay-based protocol}
+\end{algorithm}
+
+\subsection{Autonomous adaptation}
+
+\er{%
+suggested content:
+\begin{itemize}
+	\item a quick introduction to self-adaptive system (find survey)
+	\item a figure with the different steps in self adaptation (observation, policies, reaction)
+	\item define the notions of observable, policy, adaptation action
+	\item define that there is a separation from the mechanisms, that ensure that the system keeps functioning for any possible configuration choice made by adaptation, and policy, which decides on what this configuration should be based on observables. Ideally, one would want that the policy be independent from the mechanisms for correctness, yet this does not mean that any policy will be good for performance
+	\item emphasize the fact that in general this is done for a complete system while here we have a set of independent nodes that cannot collectively take a decision, maybe find examples of other decentralized systems for which it is also the case.
+\end{itemize}
+}
