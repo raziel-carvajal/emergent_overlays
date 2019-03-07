@@ -3,3 +3,25 @@
 
 \section{Overview}
 \label{sec:overview}
+
+Our goal is to allow nodes in a MANET to autonomously decide on the protocol that better suit their local environment.
+Different nodes may choose different protocols.
+In particular, nodes in dynamic and/or sparse environments should choose to use flooding-based broadcast approaches, where the decision to forward or not an incoming message is a purely node-local decision, or to emerge an overlay with other nodes using the same protocol in their vicinity, in which case the decision of whether or not a node should forward incoming broadcast messages is decided using an overlay bootstrap procedure independent of the actual transmissions.
+We provide in this section a high-level overview of the building blocks allowing the autonomous adaptation of broadcast in MANET, and ensuring that different protocols can be used in the same system without impairing correctness or dissemination coverage.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.35]{figures/architecture}
+	\caption{System overview}
+	\label{fig:overview}
+\end{figure}
+
+\er{%
+The goal of this section is to introduce the two next sections.
+It should be kept short and should include a figure showing the interplay between the components.
+\begin{itemize}
+	\item nodes may use different protocols, some expect to create an overlay (e.g. pre-select which nodes are forwarders and which are not, outside of a given broadcast operation) and some will use a flooding based approach where the decision of whether or not to forward is not collective but purely individual.
+	\item sketch the need for interoperatiliby but leave the details for the next section
+	\item sketch the requirements for adaptation and map this to the framework presented in the previous section.
+\end{itemize}
+}

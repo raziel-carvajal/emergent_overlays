@@ -6,6 +6,7 @@
 
 We start by presenting background concepts used in the rest of this paper:
   mobile ad-hoc networks (MANETs),
+  MAC-level networking,
   broadcast algorithms,
   and adaptation mechanisms.
 
@@ -26,6 +27,30 @@ suggested content:
 \end{itemize}
 }
 
+\subsection{Message sending and MAC layer}
+\label{sec:background:mac}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
+
+\caption{\labalg{network_api}Network layer API}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+	
+	TODO
+
+\caption{\labalg{network_mac_layer}MAC-level retransmission protocol}
+\end{algorithm}
+
+\er{this section should explain how the individual messages are sent locally using p2p or local broadcast; this should use an illustration and maybe an algorithm.}
+
 \subsection{Broadcast algorithms}
 \label{sec:background:broadcast}
 
@@ -39,16 +64,6 @@ suggested content:
 	\item two examples of operations for the two protocols, including some collision and some duplicates receptions
 \end{itemize}
 }
-
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-	
-	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
-	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
-
-\caption{\labalg{network_api}Network layer API}
-\end{algorithm}
 
 \begin{algorithm}
 	\footnotesize
