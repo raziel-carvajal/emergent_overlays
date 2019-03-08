@@ -3,3 +3,28 @@
 
 \section{Adaptation policies}
 \label{sec:evaluation}
+
+\er{
+The goal of this section is to present how adaptation is performed.
+It should start with a general discussion of the control loop: local sensing, collection of information, periodic checking of policies, trigger of adaptation actions (here, emerging an overlay). If we do it, explain that these phases may happen on a single node (single-node adaptation) or through the collaboration of several nodes in a neighborhood (multi-node adaptation).
+Suggested outline:
+\begin{itemize}
+	\item Adaptation control loop: Define sensing, information collection, policies checking, adaptation actions.
+	\item Define single-node adaptation and multi-node adaptation. Do not give details on how the latter is done, say this is described in a later subsection.
+	\item Subsection on sensing: Explain that we are limited in the information we can collect as we do not want to send probes to the neighbors, which would consume energy, increase the amount of collisions, and defeat the purpose. Henceforth we rely on what we can observe through existing interactions. In other word, we adopt passive sensing.
+	\item Define how we can classify the information we collect, and what is their nature: snapshot (instantaneous information about the surrounding of the node, at a given time), or continuous (history information about the evolution of some observable, over a window of time or a number of measurements), relative (from 0 to 1) or absolute, complete (e.g. the number of nodes in the neighborhood) or partial, and other criteria as necessary/possible.
+	\item Present a table with the set of observables we will collect and their classification according to the taxonomy presented in the previous point. We want at least 4-5 observables in order to form a diverse set of policies.
+	\item Add a discussion about the difference in observables depending on the protocol running, which makes our adaptation problem special: the policies may get different information for switching from one protocol to the other, than they get for doing the opposite. (keep if this is justified in practice for the policies we do present)
+	\item The next subsection is devoted to the design of a series of adaptation policies, from very simple, naive ones using a single observable to more advanced ones using multiple observables. They have to be presented using a table, with conjunction of rules based on thresholds, trigger time (periodic, when there is a new observable value obtained, etc.), and nature (single vs. multi-node)
+	\item Discuss each policy and give the design principle, the objective, rationale and expected benefits and limitations.
+	\item The multi-node policies should use figures to ease their explanation, and there can also be an algorithm showing how the nodes interact to collect information, and reach a decision.
+\end{itemize}
+}
+
+\er{
+Suggestion to discuss:
+it would also be possible to have two parts, one where we only discuss single-node policies, and a second one where we build an extension for multi-node policies.
+This could simplify the presentation.
+The multi-node policy requires communication.
+We need to assess whether this communication can happen on top of existing messages or not (would be ideal) or if it must use its own control messages.
+}

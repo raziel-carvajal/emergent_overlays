@@ -3,3 +3,23 @@
 
 \section{Interoperability mechanisms}
 \label{sec:mechanisms}
+
+\er{
+The goal of this section is to present the technical contributions that allow switching from one protocol to the other:
+\begin{itemize}
+	\item The mechanism by which a system with different protocols still guarantee the dissemination:
+	\begin{itemize}
+		\item Showing examples of why the straightforward approach does not work (I would suggest a reasoning based on system physical boundaries: the overlay-based approach considers that it spreads the message within the boundaries of the set of nodes that employ this mechanisms, and therefore ignores that there are exterior nodes that should also receive the message)
+		\item Introduce the role of interoperability relay nodes (or find another easy-to-understand name) and that we will need to identify at runtime these nodes and assign them with the role of forwarding from one system/protocol to another system/protocol. We note that this role is necessary only from the overlay-based to the flooding-based, but not in the other direction. Another way to present it is to say that the emergent overlay has to ``connect'' to the surrounding flooding-based system, hence needs connection points.
+		\item Showing the algorithm used to detect and enable interoperability connection points.
+		\item Prove, at least informally, that the algorithm is correct.
+		\item Discuss its potential limitations, in particular when the overlay-based zones are very small, in which case there will be more nodes that will have to act as connection points than nodes that are relays, which defeats the purpose
+		\item Discuss how connection points evolve when the system is subject to mobility
+	\end{itemize}
+	\item The grace period mechanism that ensures that the switch between flooding and overlay-based broadcast does not lead to missed messages:
+	\begin{itemize}
+		\item Using an example, show that the immediate switch, before the overlay creation protocol includes the node in the overlay, can lead to missed messages
+		\item On the same example, show that waiting for a bit of time, or under a certain condition is met (received at least one beacon from the overlay creation? Or do we need something more complex?), while participating to the two protocols, avoids the problem
+	\end{itemize}
+\end{itemize}
+}
