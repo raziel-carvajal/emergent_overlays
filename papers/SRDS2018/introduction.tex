@@ -13,7 +13,8 @@ Nodes connect directly to each other, and there is no guarantee for end-to-end c
 Wireless topologies change frequently due to the mobility of its participants, there is no central entity in charge of routing, and most participants operate on battery-powered devices.
 %
 Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor networks to end-user mobile applications, such as systems for traffic jam prevention or alert dissemination.
-%
+\er{maybe add some references to applications, in addition to the survey}
+
 \begin{figure*}[ht]
 	\begin{center}
 		\subfigure[Seminar]{
@@ -30,39 +31,39 @@ Applications based on MANETs~\cite{overview_adhoc_networks} range from sensor ne
 	\end{center}
 \end{figure*}
 
-
-%%
-Broadcast is a fundamental operation in MANETs, routing and group communication are examples of services that rely on this operation.
+Broadcast is a fundamental operation in MANETs, routing and group communication are examples of services that rely on this operation. \er{add references for this assertion}
 %
 A vast amount of protocols have been proposed to figure out a trade-off between reachability and nodes resources (mainly energy consumption).
 %
-In~\cite{SurveyRuiz} broadcast protocols are classified in two groups. Protocols of the first group rely on overlays where nodes either forward incoming messages or act as receivers.
+In~\cite{SurveyRuiz} \er{you cannot use a reference as a subject or object. Use ``A survey by Ruiz and Bouvry~\cite{SurveyRuiz} classifies protocols in two main families'' } broadcast protocols are classified in two groups.
+Protocols of the first group rely on overlays where nodes either forward incoming messages or act as receivers. \er{You should already emphasize that the overlay is built outside of the actual dissemination, while the flooding decides during the dissemination. This is the main difference that concerns us.}
 %
-Nodes build and maintain an overlay via the periodic exchange of control packets that announce nodes existence.
+Nodes build and maintain an overlay via the periodic exchange of control packets that announce nodes existence. \er{not sure we need to detail how the overlay is built here}
 %
-The second group of broadcast protocols do not build overlays, instead, nodes forward messages until predefined thresholds reach a maximum value (e.x. number of receives copies) or the forwarding decision is based on a stochastic approach.
+The second group of broadcast protocols do not build overlays, instead, nodes forward messages until predefined thresholds reach a maximum value (e.x. number of receives copies) or the forwarding decision is based on a stochastic approach. \er{you are too specific about the implementations of flooding. It should be enough to write that the nodes make the decision to forward or not based on local information available at the time the message is received.}
 %
 Reliable broadcast remains a challenging task, not only for deciding which is the protocol that shows better performance but also due to the operating conditions in MANETs.
 
-
-%%
+\er{It could make sense to discuss the operating conditions of MANETs before detailing the broadcast.}
 MANETs operate in dynamic scenarios where nodes move following patterns hard to predict and the interferences in transmission of packets are a constant.
 %
 We end up with a wireless heterogeneous network in terms of nodes density and the velocity at which nodes move within the area of communication.
 %
 This situation often takes place in real-life scenarios such as massive protest on the streets or in seminars with more than one speaker.
+\er{the motivating examples should be more developed: You must convince the speaker that using 4G for everyone is not the simplest option, and that there is a real problem here. I do not think protests are a good example, they happen in cities with good coverage. I prefer the example of the music festival, where you want to send information to all attendees about the ongoing events/happenings, etc. The seminar is not a very good example either: what is a seminar with more than one speaker? Why would you need wireless communication is you are busy listening to the speaker? A seminar happens in a hotel or at a university: There is also good infrastructure available.}
 %
-Figures~\ref{fig:manet-example}\raziel{TODO improve figure} shows with points the participants of a protest and a seminar, respectively.
+Figures~\ref{fig:manet-example}\raziel{TODO improve figure} \er{I will redo the figures using omnigraffle so do not waste time on this} shows with points the participants of a protest and a seminar, respectively.
 %
 In both figures the amount of participants spread at the communication area is heterogeneous, particularly, a bigger number of them depict points of interest; this is the case of rooms where keynotes take place (see figure~\ref{fig:manet-example:seminar}).
 %
-On the contrarily, a lower amount of points highlight more dynamic regions where participants tend to move faster, for instance, to transit between two points of interest (white gaps in figure~\ref{fig:manet-example:protest}).
+On the contrarily, a lower amount of points highlight more dynamic regions where participants tend to move faster, for instance, to transit between two points of interest (white gaps in figure~\ref{fig:manet-example:protest}). \er{the link between sparsity and high mobility is not clear and should probably not be made: you can have sparse regions with no mobility (e.g. the camping place at the festival) and regions dense and mobile regions (e.g. the entrance).}
 %
 Moreover, previous works on mobility models for wireless networks~\cite{bai2004mobility, ChaintreauA2006}, evaluation studies on broadcast strategies~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} or micro-benchmarks on highly dynamic networks~\cite{adaptive_group_com_iscc02, ObraczkaK_2001} have shown that the performance of protocols for MANETs is influenced by operating conditions in the network, where mobility and density are key factors.
+\er{coming back to broadcast here is not very natural. Presenting operating conditions first, with the example, then presenting broadcast, and then a paragraph with the impact conditions have on brodcast is more fluid/natural.}
 
 
-%%
 We propose a self-adaptive protocol for MANETs in which nodes switch broadcast protocols according to local observations of the network conditions.
+\er{The decision was to rather present this as: We propose an autonomous adaptation protocol for MANETs that allow nodes to automatically emerge overlays where they are beneficial for broadcast cost and performance, and dynamically adapt to changing mobility and density conditions. (to adapt)}
 %
 Nodes follow one main switching criterion that is triggered when the local perspective of nodes reaches predefined thresholds.
 %
