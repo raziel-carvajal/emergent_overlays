@@ -8,15 +8,48 @@
 suggested content:
 \begin{itemize}
 	\item broadcast algorithms in manets
+	\raziel{
+	\begin{itemize}
+		\item \cite{mpr-improvement}: recent improvement of MPR (multi-point relaying technique) to build backbones
+		\item \cite{ProbFlood}: broadcast approach to privilege that nodes located at the border of transmissions range act as relays
+		\item \cite{overlays_for_manets} recent study about how to maintain P2P overlays in MANETs
+		\item \cite{one-hop-broadcast}: this study shows that broadcast within the transmission range of nodes isn't solved yet; we can use it to argue that our basic MAC protocol is used to avoid the exchange of control messages from other MAC approaches
+		\item \cite{Ramdhany2008}: framework of routing protocols for MANETs
+		\item \cite{clustering-approach}: approach for clusters within MANETs that uses location and energy metrics 
+	\end{itemize}
+	}
 	\item studies of performance and surveys of broadcast
+	\raziel{
+	\begin{itemize}
+		\item evaluation of broadcast protocols~\cite{Williams2002}, there is also a first classification of protocols
+		\item survey of Ruiz \cite{SurveyRuiz}
+		\item in this work \cite{Bellavista2013} overlays are build on the top of wireless sensor networks (WSN) to speed up data dissemination. Such data is classified with a certain priority; interoperability issues between WSN and MANETs are tackled but no between dissemination protocols
+		\item \cite{Reina2015}: survey on probabilistic broadcast approaches
+	\end{itemize}
+	}
 	\item adaptation mechanisms in wireless systems, manets, sensor networks
 	\raziel{
 	\begin{itemize}
 		\item \cite{adaptive_group_com_iscc02} is basically one adaptation policy where the switching criteria is based on the relative velocity of nodes ; nodes switch between a list of controlled flooding approaches
+		\item \cite{2001:AAR:876878.879323} this work (aprox 700 citaitons) follows the paper about the broadcast storm problem to point out the need of adapting the value of thresholds shown in \cite{BroadcastStormProblem}
+		\item \cite{hypergossiping} : adaptive approach based on gossiping
+		\item \cite{closure_coef}: local closure coefficient used as metric of density in our policies of adaptation
+		\item \cite{prob-based-adaptive-tech} thresholds are change on the fly without using control messages (seems promising, still have to read carefully)
 	\end{itemize}
 	}
 	\item mobility traces
+	\raziel{
+		\begin{itemize}
+			\item \cite{Aschenbruck2009}: mobility model for disaster area scenarios
+		\end{itemize}
+	}
 	\item evaluation of manet algorithms using mobility traces
+		\raziel{
+			\begin{itemize}
+				\item \cite{mobility_density_model}: mobility model for clustered networks; this work uses mobility traces
+				\item \cite{ChaintreauA2006}: exploits the duration of links between nodes in MANETs; evaluation is based on 4 real mobility traces but seems unfeasible to re-use them for our context
+			\end{itemize}
+		}
 \end{itemize}
 }
 
