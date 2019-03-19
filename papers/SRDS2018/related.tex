@@ -3,10 +3,7 @@
 
 \section{Related Work}
 \label{sec:related}
-
-suggested content:
-\begin{itemize}
-	\item broadcast algorithms in manets \er{you could split this is in three parts: (1) existing surveys; (2) examples of 3-4 controlled flooding; (3) examples of 3-4 overlay based}
+broadcast algorithms in manets
 	\begin{itemize}
 		\item Surveys:
 		\begin{itemize}
@@ -16,46 +13,49 @@ suggested content:
 		\end{itemize}
 		\item Controlled flooding:
 		\begin{itemize}
-			\item \item \er{TODO: need to cite the classical papers on controlled flooding (the 3 more important ones from the survey)}
+			\item \cite{BroadcastStormProblem}: 3 controlled flooding approaches to deal with broadcast storms
+			\item \cite{ProbFlood}: 2003 broadcast approach to privilege that nodes located at the border of transmissions range act as relays
 		\end{itemize}
 		\item Overlay-based
 		\begin{itemize}
-			\item \item \cite{mpr-improvement}: 2014 recent improvement of MPR (multi-point relaying technique) to build backbones
-			\item \cite{overlays_for_manets} 2015 recent study about how to maintain P2P overlays in MANETs \er{overlays for routing, broadcast or both?}
+			\item \cite{stojmenovic-cds} 1st paper in determining connected dominating sets (CDS)
+			\item \cite{mpr} another approach to create CDS
+			\item \cite{mpr-improvement}: 2014 recent improvement of MPR (multi-point relaying technique) to build backbones
+			\item \cite{overlays_for_manets} 2015 recent study about how to maintain P2P overlays in MANETs for routing
 		\end{itemize}
-		
-		\item \cite{ProbFlood}: 2003 broadcast approach to privilege that nodes located at the border of transmissions range act as relays \er{would it classify as controlled flooding or overlay based?}
-		\item \cite{one-hop-broadcast}: 2013 this study shows that broadcast within the transmission range of nodes isn't solved yet; we can use it to argue that our basic MAC protocol is used to avoid the exchange of control messages from other MAC approaches \er{ok but then there is no need to repeat the reference here, put it in the section where we discuss your mac protocol}
-		\item \cite{Ramdhany2008}: 2008 framework of routing protocols for MANETs \er{if it is for routing, is it relevant?}
-		\item \cite{clustering-approach}: 2009 approach for clusters within MANETs that uses location and energy metrics \er{for clusters? from the title it seems it uses broadcast as a tool, so you could rather use it in the intro to motivate the uses of broadcast}
+
+%		\item \cite{clustering-approach}: 2009 approach for clusters within MANETs that uses location and energy metrics \er{for clusters? from the title it seems it uses broadcast as a tool, so you could rather use it in the intro to motivate the uses of broadcast}
 		\item To check: \url{https://ieeexplore.ieee.org/abstract/document/6895168}
 
 	\end{itemize}
-	\item studies of broadcast performance
+
+
+studies of broadcast performance
 	\begin{itemize}
 		\item \cite{DensityMobDrivenEval} \er{include your paper}
 		\item evaluation of broadcast protocols~\cite{Williams2002}, there is also a first classification of protocols
 	\end{itemize}
-	\item adaptation mechanisms in wireless systems, manets, sensor networks
+
+
+adaptation mechanisms in wireless systems, manets, sensor networks
 	\begin{itemize}
+		\item \cite{adaptive-multihop}
 		\item \cite{adaptive_group_com_iscc02} is basically one adaptation policy where the switching criteria is based on the relative velocity of nodes ; nodes switch between a list of controlled flooding approaches
 		\item in this work \cite{Bellavista2013} overlays are build on the top of wireless sensor networks (WSN) to speed up data dissemination. Such data is classified with a certain priority; interoperability issues between WSN and MANETs are tackled but no between dissemination protocols
 		\item \cite{2001:AAR:876878.879323} this work (aprox 700 citaitons) follows the paper about the broadcast storm problem to point out the need of adapting the value of thresholds shown in \cite{BroadcastStormProblem}
 		\item \cite{hypergossiping} : adaptive approach based on gossiping \er{more details?}
-		\item \cite{closure_coef}: local closure coefficient used as metric of density in our policies of adaptation \er{I do not see why this is in the RW. This is not on manets. Remove and put the ref in the part where we discuss metrics and policies.}
 		\item \cite{prob-based-adaptive-tech} thresholds are changed on the fly without using control messages (seems promising, still have to read carefully)
 		\item to check rapidly, as this is a C-rank journal: \url{https://link.springer.com/article/10.1007/s11277-016-3213-0} proposes to have two modes of operation depending on the mobility of the nodes (so quite linked to us)
 		\item to check as a possible example of a parameters adaptation (to group with the others of the same kind): \url{https://ieeexplore.ieee.org/abstract/document/7344460}
 	\end{itemize}
-	\item mobility traces \er{we want 3-4 references here, make a choice}
+
+
+
+mobility traces and models
 	\begin{itemize} 
 		\item \cite{Hess:2015:DHM:2856149.2840722}: a recent survey
-		\item \cite{batabyal2015mobility}: another recent survey (focus on dtn but can mention it nonetheless)
 		\item \cite{Aschenbruck2009}: mobility model for disaster area scenarios
-		\item \cite{camp2002survey}: highly cited survey on mobility models
-		\item \cite{bettstetter2003node}: to check, also highly cited
 		\item \cite{rhee2011levy}: Levy walk nature, classical paper
 		\item \cite{jardosh2003towards}: another highly cited paper on mobility
 	\end{itemize}
-\end{itemize}
 
