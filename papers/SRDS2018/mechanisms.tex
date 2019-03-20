@@ -2,49 +2,63 @@
 %=========================================================
 
 \section{Interoperability mechanisms}
-
 \label{sec:mechanisms}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.32]{figures/interop-example.pdf}
+	\caption{Example of lost of messages between nodes running different algorithms}\raziel{figure to be improved}
+	\label{fig:interop-example}
+\end{figure}
+
 \begin{itemize}
-	\item we follow a main switching criterion: nodes in dense areas maintain a dissemination overlay and nodes in sparse areas broadcast via a controlled flooding technique \er{this should have been said in the previous section, not here}
-	\item our adaptive approach is safe, i. e., broadcast messages are delivered to every node that is part of the wireless topology \raziel{we cannot say to every node at the communication area because connectivity between nodes is not a guarantee due to mobility}
-	\item in other words, our approach is as good as running one single broadcast technique in the whole network \er{I would not say it this way: Our approach ensures continuity in the delivery despite the fact that some regions use different protocols}
-	\item our adaptive approach is safe because we will prove that broadcast messages are delivered to every node in the network when source nodes: \er{this will need a figure to illustrate the point}
-	\begin{enumerate}
+	\item we follow a main switching criterion: nodes in dense areas maintain a dissemination overlay and nodes in sparse areas broadcast via a controlled flooding technique \er{this should have been said in the previous section, not here}\raziel{not even as a recap of previous section?}
+	
+	\item our interoperability mechanism ensures continuity in the delivery of messages despite the fact that nodes at regions with different densities use different protocols
+	
+	\item messages are delivered to every node that is part of the wireless topology when source nodes:
+		\begin{enumerate}
 		\item are part of a dissemination overlay, or
 		\item use controlled flooding
 	\end{enumerate}
-	\item prove 1 and 2 is equal to prove that messages are correctly forwarded when messages transit between any pair of nodes running different protocols \er{we got rid of this way of thinking and wanted to discuss about regions and going from a region to the other. This 'general interoperability' claim is too bold and too general.}
-	\begin{itemize}
-		\item once this transition takes place, delivery of messages among nodes running the same protocol is guaranteed by the safety properties of the protocol itself
-	\end{itemize}
-	\item let be $O$, $F$ nodes where $O$ is part of a dissemination overlay and $F$ runs a controlled flooding approach \er{inconsistent used of O and F, are these sets, nodes or protocols? No need to formalize now.}
-	\begin{itemize}
-		\item overlay-based techniques tagged $O$ as a node being part or not of the forwarding set \textit{FwdSet}
-		\item $F$ forwards incoming messages iif its forwarding condition isn't reached yet
-	\end{itemize}
-	\item transition of message $F \rightarrow O$
-	\begin{itemize}
-		\item \textbf{$O \in FwdSet$ ($O$ is a relay within the dissemination overlay):}  incoming messages, that haven't been previously heard are forwarded following the overlay approach. \textbf{OK1}
-		\item \textbf{$O \notin FwdSet$ ($O$ is not a relay):} here we tagged $O$ as a interoperable relay (border node?) \er{use border node}. The message is transformed in an overlay-based packet but forwarded using a simple flooding approach. \textbf{OK2} \raziel{this is done to avoid changing the structure of the overlay}. Or may be forwarded as if $O$ is a new source. \raziel{this may be possible but will have a bad impact in the prove} \er{I do not think you need the latter}
-	\end{itemize}
-	\item transition of message $O \rightarrow F$
-	\begin{itemize}
-		\item \textbf{$O \in FwdSet$ ($O$ is a relay within the dissemination overlay):} here again $F$ receive the message but forward it following the flooding approach \textbf{OK3}
-	\end{itemize}
-	\item still we need to prove two cases, a proof for one case is valid for the other\raziel{I do not follow the previous format because these cases are very similar}
+
+	\item interoperability issues: we show that messages may be lost when nodes run different protocols in the same network as shown in figure~\ref{fig:interop-example}
+	\begin{enumerate}
+		\item \textbf{Case: transit of messages from sparse to dense region}
 		\begin{itemize}
-			\item remind again that $F$ and $O$ are in range 
+			\item node $t_{4}, t_{5}$ are in the range of $f_{1}$
+			\item $f_{1}$ receives a message from $f_{2}$
+			\item threshold of retransmission is reached at $f_{1}$
+			\item $t_{4}, t_{5}$ do not receive message
 		\end{itemize}
-		\begin{enumerate}
-			\item $F$ reaches its forwarding condition, then, the message will not be delivered to $O$
-			\item $O$ is not a relay in the overlay, then, the message will not be delivered to $F$
-		\end{enumerate}
-	\item here, we need to remember that an adaptation policy requires the exchange of control messages to apply such policy otherwise we will never have a situation where different protocols are running in the network, i. e, the switching criterion already took place. \raziel{this require to present first the adaptation approach and then the problems of interoperability cause exchange of beacons is required to spot interoperable relays}
-	\er{this seems overly complicated to me. What you want to say first is that you assume that border nodes know they are border nodes, and simply explain why your protocol works when it is the case (no need for excessive formalism). Then you should justify that the key problem is for nodes to detect when they are border nodes and avoid too many false positives for performance reasons.}
-	\item This means that the closure coefficient \er{not sure what it has to do here} was previously computed or at least $F$ and $O$ have performed an exchange of control messages in the past. We called such exchange a history $H$
-		\item \er{the policy should go in the following section not here. You should only say that when the selection of border nodes is correct then the interoperability works.}	
-		we propose an interoperability policy based on nodes degree to deal with 1 and 2: if the local closure coefficient detects a border node, i. e. closure coefficient is in the threshold of medium density, and $H$ is not empty then, $F$ or $O$ turn to interoperable relays. \textbf{OK4} \raziel{of course, here we can show the distribution of the local closure coefficient of nodes located at the border to give a sort of proof in form of analytic study}
-		\item due to OK$[1-4]$ our approach is safe
+		
+		\item \textbf{Case:transit of messages from dense to sparse region}
+		\begin{itemize}
+			\item nodes $t_{6}$ is in the range of $f_{3}$
+			\item $t_{6}$ receives a message from $t_{3}$
+			\item $t_{6}$ doesn't forward due to its role in the overlay
+			\item $f_{3}$ do not receive message
+		\end{itemize}
+	\end{enumerate}
+	
+	\item we need that nodes be aware when they are located at the frontier of regions that run different algorithms; we call them border nodes
+	
+	\item assume that nodes are aware of being at the frontier of regions and they tag themselves as border nodes
+	
+	\item \textbf{Case: transit of messages from sparse to dense.} Border node $f_{1}$ in figure~\ref{fig:interop-example} is border node and it forwards only once a message when its threshold of retransmissions have been reached
+	
+	\item \textbf{Case: transit of messages from dense to sparse region.} Border node $t_{6}$ forwards a message using controlled flooding. This action requires a change in the package to avoid a change in the dissemination overlay
+	
+	\item transit of messages between zones is performed via border nodes (interoperability works)
+	
+	\item border detector mechanism \raziel{sketch of algorithm, but find it in appendix}
+
+	\begin{itemize}
+		\item we use control messages to form overlays are frequently hear by nodes located at the sparse region
+		\item nodes at the frontier of regions ($f_{1}, t_{6}$ in figure~\ref{fig:interop-example}) decide that they are border via handshake protocol see~\ref{algorithm:interop}
+		\item apply optimization to reduce number of border nodes
+	\end{itemize}
+
 \end{itemize}
 
 \er{
