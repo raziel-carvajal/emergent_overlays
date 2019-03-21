@@ -37,30 +37,39 @@
 	\item TER at 20\%
 	\item TER at 40\%
 	\item TER at 60\%
-	\item parameters of motion for each scenario
+	\item configuration per scenario
 	\begin{itemize}
-		\item motion in dense area: random between 0 and 1m/s
-		\item motion in sparse area: random between 1 and 2m/s
-		\item nodes perform levy walks \cite{rhee2011levy}
-		\item nodes follow random-way point approach
-	\end{itemize}
-	\item parameters of density: 5 thousand in total, 2,500 in dense and 2,500 sparse; we vary the transmission range to have different amount of neighbors\raziel{this number may vary cause I have to check the limits of the simulator, but seems feasible}
-	\item nodes transmission range (Tx)
-	\begin{itemize}
-		\item 10m, 20m and 30m (we cover bluetooth and wifi)
-	\end{itemize}
-	\item communication area
-	\begin{itemize}
-		\item long 120m - wide 53m size of American football field; total area 6,360$m^{2}$
+		\item parameters of motion for each scenario
 		\begin{itemize}
-			\item 30\% of this area represents the dense area (PoI) with a total surface of 1,908$m^{2}$ - this is equivalent of having 0.76$m^{2}$ per person
-			\item 70\% of this area represents the sparse area with a total surface of 4,452$m^{2}$ - this is equivalent of having 1.78$m^{2}$ per person
+			\item motion in dense area: random between 0 and 1m/s
+			\item motion in sparse area: random between 1 and 2m/s
+			\item nodes perform levy walks \cite{rhee2011levy}
+			\item nodes follow random-way point approach
 		\end{itemize}
-		\item scenario with 1 and 2 point of interest
+		\item parameters of density: 5 thousand in total, 2,500 in dense and 2,500 sparse; we vary the transmission range to have different amount of neighbors\raziel{this number may vary cause I have to check the limits of the simulator, but seems feasible}
+		\item nodes transmission range (Tx)
+		\begin{itemize}
+			\item 10m, 20m and 30m (we cover bluetooth and wifi)
+		\end{itemize}
+		\item communication area
+		\begin{itemize}
+			\item long 120m - wide 53m size of American football field; total area 6,360$m^{2}$
+			\begin{itemize}
+				\item 30\% of this area represents the dense area (PoI) with a total surface of 1,908$m^{2}$ - this is equivalent of having 0.76$m^{2}$ per person
+				\item 70\% of this area represents the sparse area with a total surface of 4,452$m^{2}$ - this is equivalent of having 1.78$m^{2}$ per person
+			\end{itemize}
+			\item scenario with 1 and 2 point of interest
+		\end{itemize}
 	\end{itemize}
 \end{enumerate}
 
-
+\textbf{broadcast metrics}
+\begin{enumerate}
+	\item packet delivery ratio
+	\item collisions ratio
+	\item ratio of send and received messages
+	\item delay of messages reception over
+\end{enumerate}
 
 \er{
 Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
