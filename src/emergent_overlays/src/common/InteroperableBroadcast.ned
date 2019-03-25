@@ -19,22 +19,26 @@ import inet.applications.udpapp.UDPBasicApp;
 simple InteroperableBroadcast extends UDPBasicApp
 {
     @class(InteroperableBroadcast);
+    // set values of UDPBasicApp
+    localPort = default(10);
+    destPort = default(10);
+    destAddresses = default("255.255.255.255");
+    receiveBroadcast = default(true);
+    messageLength = default(200B);
+    sendInterval = this.broadcastInterval;
 
-    bool isSource = default(false);
+    bool isSourceNode = default(false);
     bool withCtrlMsg = default(false);
-    bool enableInterop=default(false);
-	
+    bool enableInterop = default(false);
+
+    double broadcastInterval @unit(s) = default(0.1s);
     double ctrlMsgInterval @unit(s) = default(10.0s);
-//    double borderDetectorDelay @unit(s) = default(uniform(0.001s, 0.099s));
-    
-    // WARNING: this parameter cannot be lower than 0.5 ms
-    double minFixedDelay @unit(s) = default(0.005s);
-    double sentMsgFixedDelay @unit(s) = default(0.001s);
+    double sentMsgFixedDelay @unit(s) = default(0.0001s);
     double startSendingCtrlMsgs @unit(s) = default(5.0s);
-    
-//    int hopsToLive = default(2);
-    int maxNodesNo  = default(1000);
-    volatile int ctrlMessageLength @unit(B) = this.messageLength;
+
+    int maxNodesNo = default(1000);
+    // specify running protocol identifier (see enum InteroperableBroadcast.Protocols)
+    int runningProtocolId;
 
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);
@@ -54,11 +58,7 @@ simple InteroperableBroadcast extends UDPBasicApp
 //    @signal[density_approximation](type=double);
 //    @statistic[density_approximation](source=density_approximation; record=vector; interpolationmode=none);
 
-    // set values of UDPBasicApp
-    localPort = default(10);
-    destPort = default(10);
-    destAddresses = default("255.255.255.255");
-    receiveBroadcast = default(true);
+    
 
 }
 

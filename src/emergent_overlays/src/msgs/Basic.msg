@@ -14,26 +14,29 @@
 // 
 
 cplusplus{{
-    typedef std::set<std::string> Neighbors;
+    typedef std::set< std::string > OneHopNeigs;
+    typedef std::map< std::string, double> Positions;
 }}
 
-class noncobject Neighbors;
+class noncobject OneHopNeigs;
+class noncobject Positions;
 
-packet OneHopNeighbors {
-    string sender;
-    Neighbors neigs;
+packet Basic {
+    int runningProtocol;
 }
 
-packet Hello {
-    string sender;
+packet Broadcast extends Basic {}
+
+packet MprBroadcastPacket extends Basic {
+	OneHopNeigs neighbors;
 }
 
-packet Change {
-    string sender;
-    int density;
+packet MprCtrl extends Basic {
+    double senderPosAtX;
+	double senderPosAtY;
+	
+	OneHopNeigs neighbors;
+	Positions xs;
+	Positions ys;
 }
 
-packet ChangeNow {
-    string sender;
-    int algoId;
-}

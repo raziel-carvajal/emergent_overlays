@@ -19,88 +19,29 @@
 #include <inet/applications/udpapp/UDPBasicApp.h>
 #include <inet/mobility/contract/IMobility.h>
 #include <functional>
+#include <utils/IProtocol.h>
+
+// List of implementations of broadcast protocols
+#include <broadcast_protocols/overlay_based/MPR.h>
+#include <broadcast_protocols/non_overlay_based/Flooding.h>
 
 using namespace inet;
 using namespace std;
 
 class InteroperableBroadcast : public UDPBasicApp {
-
-  protected:
-    // define a new implementation for some methods of super class (INET::UDPBasicApp)
-    virtual void initialize(int stage) override;
-    virtual void processStart() override;
-    virtual void sendPacket() override;
-    virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual void processPacket(cPacket *msg) override;
-
-    enum UdpPacket {
-      BROADCAST = 1, CTRL, FOREIGN
-    };
+  private:
     enum Timer {
       HALT_APP = 1, SEND_CTRL_MSG, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, STORE_POSITION, SEND_FOREIGN_MSG
     };
-    enum ForwardType {
-      SIMPLE, CDS_RELAY, BORDER_NODE
+    enum UdpPacket {
+      BROADCAST = 1, CTRL, FOREIGN
     };
-    // attributes that are accessible from subclasses of InteroperableBroadcast
+
     bool enableInterop;
 
-    double transRadious;
-    double sentMsgDelay;
-    double msgDisemDelay;
+    int runningProtocolId;
 
-    string nodeId;
-
-    set<string> receivedMsg;
-
-    L3Address localAddress;
-    L3Address broadcastAddress;
-
-    Coord currentPosition;
-
-    IMobility* mobilityModel;
-
-    // methods that sub-classes may override
-    virtual void onBroadcastMsg(cPacket* pk, string sender);
-    virtual void onControlMsg(cPacket* pk, string sender);
-    virtual void cancelSelfEvents();
-    virtual cPacket* getCtrlMsg();
-    virtual void sendCtrlMsg();
-    virtual void initializeState();
-
-    // signals for this class
-    static simsignal_t rcvdBroadcastMsg;
-    static simsignal_t sentBroadcastMsg;
-    static simsignal_t positionAtX;
-    static simsignal_t positionAtY;
-    static simsignal_t forward_type;
-//    static simsignal_t density_approximation;
-
-    int getMsgId(const char* msgHeader);
-
-    void fwdBroadcastMsg(cPacket* pk);
-    void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
-    void addPacketHeaders(cPacket* c);
-    void addPacketType(cPacket* msg, long t);
-
-    bool amIborderNode(){
-      return !knownForeignAlgos.empty();
-    }
-
-    string removeQuotes(string target) {
-      return target.substr(1, target.size() - 2);
-    }
-
-    template<typename T> bool isPacket(cPacket* pkt, function<bool(const T*)> action) {
-      T* t = dynamic_cast<T*>(pkt);
-      if (t != nullptr) {
-        return action(t);
-      } else {
-        return false;
-      }
-    }
-
-  private:
+    IProtocol* runningProtocol = nullptr;
 
     cMessage* ctrlMsgTimer = nullptr;
     cMessage* haltSimTimer = nullptr;
@@ -111,25 +52,136 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     set<string> knownForeignAlgos;
 
-    string runningAlgorithm;
-
     cPacket* latestPkToFwd = nullptr;
+
+    L3Address localAddress;
+    L3Address broadcastAddress;
+
+  private:
+    void intializeCatalog() {
+      for (int i = 0; i < Protocols::LAST_PROTOCOL; ++i) {
+        switch (i) {
+          case Protocols::FLOODING: {
+            protocols[i] = new Flooding();
+            protocolsNames[i] = getProtocolName(FLOODING);
+          }
+            break;
+          case Protocols::MPR: {
+            protocols[i] = new Mpr();
+            protocolsNames[i] = getProtocolName(MPR);
+          }
+            break;
+          default:
+            throw cRuntimeError("[%d] is an invalid protocol identifier", i);
+            break;
+        }
+        protocols[i]->setController(this);
+      }
+    }
+
+    cPacket* makeForeignMessage();
+    cPacket* setAndGetBroadcastMsg();
 
     L3Address getSrcAddress(cPacket *msg);
 
-    void addSender(cPacket* pk);
-    void addSendersRunningAlgo(cPacket* pk);
     bool isSelfTimer(cMessage *msg);
-    cPacket* makeForeignMessage();
 
     string splitString(string substr, string target) {
       return target.substr(substr.size(), target.size() - substr.size());
     }
 
+  protected:
+    // define a new implementation for some methods of super class (INET::UDPBasicApp)
+    virtual void initialize(int stage) override;
+    virtual void processStart() override;
+    virtual void sendPacket() override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void processPacket(cPacket *msg) override;
+
+    void addPacketType(cPacket* msg, long t);
+
+    string removeQuotes(string target) {
+      return target.substr(1, target.size() - 2);
+    }
+
+//    template<typename T> bool isPacket(cPacket* pkt, function<bool(const T*)> action) {
+//      T* t = dynamic_cast<T*>(pkt);
+//      if (t != nullptr) {
+//        return action(t);
+//      } else {
+//        return false;
+//      }
+//    }
+
+  public:
+    enum Protocols {
+      FLOODING, MPR, LAST_PROTOCOL
+    };
+    enum ForwardType {
+      SIMPLE, CDS_RELAY, BORDER_NODE
+    };
+
+    IProtocol* protocols[Protocols::LAST_PROTOCOL];
+
+    string protocolsNames[Protocols::LAST_PROTOCOL];
+
+    set<string> receivedMsg;
+
+    string nodeId;
+
+    double transRadious;
+    double sentMsgDelay;
+    double sentMsgFixedDelay;
+
+    int maxNodesNo;
+
+    IMobility* mobilityModel;
+
+    // signals for this class
+    static simsignal_t rcvdBroadcastMsg;
+    static simsignal_t sentBroadcastMsg;
+    static simsignal_t positionAtX;
+    static simsignal_t positionAtY;
+    static simsignal_t forward_type;
+//    static simsignal_t density_approximation;
+
   public:
     InteroperableBroadcast() {
     }
     ~InteroperableBroadcast() {
+    }
+
+    void log(string msg) {
+      cout << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;
+    }
+    void recordCurrentPosition() {
+      inet::Coord pos = mobilityModel->getCurrentPosition();
+      emit(positionAtX, pos.x);
+      emit(positionAtY, pos.y);
+    }
+
+    void send(cPacket* pk);
+    void addBroadcastHeaders(cPacket* pk);
+    void addCtrlHeaders(cPacket* pk);
+    void addSender(cPacket* pk);
+    void fwdBroadcastMsg(cPacket* pk);
+    void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
+
+    string getProtocolName(Protocols p) {
+      switch (p) {
+        case FLOODING:
+          return "FLOODING";
+        case MPR:
+          return "MPR";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+    int getMsgId(string msgHeader);
+
+    bool amIborderNode() {
+      return !knownForeignAlgos.empty();
     }
 };
 

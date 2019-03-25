@@ -26,25 +26,32 @@ using namespace std;
 class DensityCoefficients : public UDPBasicApp {
 
   protected:
-
+    enum Zone {
+      UNDETERMINED, SPARSE, DENSE
+    };
     enum Events {
-      SEND_HELLO_MSG, SEND_CTRL_MSG, GET_DENSITY_METRICS
+      SEND_HELLO_MSG, SEND_CTRL_MSG, GET_DENSITY_METRICS, FWD_WILL_TO_CHANGE, UPDATE_WILL_TO_CHANGE, FWD_CHANGE_NOW_MSG
     };
     enum Timers {
       HELLO, CTRL, DENSITY_METRICS
     };
     enum PacketType {
-      HELLO_PK, CTRL_PK
+      HELLO_PK, CTRL_PK, WILL_TO_CHANGE_PK, CHANGE_NOW
     };
 
     cMessage* helloEvent = new cMessage("helloEvent");
     cMessage* ctrlEvent = new cMessage("ctrlEvent");
     cMessage* densityEvent = new cMessage("densityEvent");
+    cMessage* willToChangeEv = new cMessage("willToChangeEv");
+    cMessage* changeNowEv = new cMessage("changeNowEv");
 
     static simsignal_t clusteringCoef;
     static simsignal_t closureCoef;
     static simsignal_t positionAtX;
     static simsignal_t positionAtY;
+    static simsignal_t runningProtocol;
+
+    int changeMsgId = 1;
 
     double sentMsgDelay;
 
@@ -55,6 +62,7 @@ class DensityCoefficients : public UDPBasicApp {
     IMobility* mobilityModel;
 
     set<string> _1hopNeigs;
+    set<string> receivedMsgs;
 
     map<string, set<string>> _2hopNeigs;
 
@@ -70,12 +78,14 @@ class DensityCoefficients : public UDPBasicApp {
     void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
     cPacket* getHelloMsg();
     cPacket* getCtrlMsg();
+    cPacket* getChangeMsg(const char* name, int density);
+    cPacket* getChangeNowMsg(const char* name, int algoID);
     L3Address getSrcAddress(cPacket* msg) {
       return check_and_cast<UDPDataIndication *>(msg->getControlInfo())->getSrcAddr();
     }
 
     bool selfEvent(cMessage* msg) {
-      return msg == helloEvent || msg == ctrlEvent || msg == densityEvent;
+      return msg == helloEvent || msg == ctrlEvent || msg == densityEvent || msg == willToChangeEv || msg == changeNowEv;
     }
     void log(string msg) {
       EV << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;

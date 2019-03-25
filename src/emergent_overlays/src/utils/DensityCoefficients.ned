@@ -26,17 +26,22 @@ simple DensityCoefficients extends UDPBasicApp
     receiveBroadcast = default(true);
     
     int maxNodesNo  = default(10);
+    
     double minFixedDelay @unit(s) = default(0.005s);
     double sentMsgFixedDelay @unit(s) = default(0.001s);
+    
+    bool isSourceNode = default(false);
 
     @signal[clusteringCoef](type=double);
     @signal[closureCoef](type=double);
     @signal[positionAtX](type=double);
     @signal[positionAtY](type=double);
+    @signal[runningProtocol](type=int);
 
     @statistic[clusteringCoef](source=clusteringCoef; record=vector; interpolationmode=none);
     @statistic[closureCoef](source=closureCoef; record=vector; interpolationmode=none);
     @statistic[positionAtX](source=positionAtX; record=vector; interpolationmode=none);
     @statistic[positionAtY](source=positionAtY; record=vector; interpolationmode=none);
+    @statistic[runningProtocol](source=runningProtocol; record=vector; interpolationmode=none);
 }
 

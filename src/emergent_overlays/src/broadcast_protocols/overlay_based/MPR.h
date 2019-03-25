@@ -3,27 +3,27 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 
 #ifndef MPR_H_
 #define MPR_H_
 
-#include <common/InteroperableBroadcast.h>
+#include <utils/IProtocol.h>
 #include <inet/common/geometry/common/Coord.h>
-#include <broadcast_protocols/overlay_based/MPR_m.h>
 
 using namespace std;
 
-class MPR : public InteroperableBroadcast {
+class Mpr : public IProtocol {
   private:
+
     enum MprTimers {
       BUILD_CDS, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
@@ -33,32 +33,25 @@ class MPR : public InteroperableBroadcast {
 
     int viewSize;
     int sentBootEvents = 1;
-    int currentReceptions;
 
-    MprNeighbors latestPayload;
+    set<string> latestPayload;
 
     cMessage* buildCdsTimer = nullptr;
     cMessage* sCtrlMsgTimer = nullptr;
     cMessage* fwdBrMsgTimer = nullptr;
 
-    virtual void onBroadcastMsg(cPacket* pk, string sender);
-    virtual void onControlMsg(cPacket* pk, string sender);
-    virtual void cancelSelfEvents() {
-      cancelAndDelete(buildCdsTimer);
-      cancelAndDelete(sCtrlMsgTimer);
-      cancelAndDelete(fwdBrMsgTimer);
-    }
-
-    // variables/methods to implement MPR V0.0.1
     set<string> currentMpr;
     set<string> previousNeigs;
-    set<string> alreadyDispatched;
 
     map<string, set<string>> neighbors;
 
-    map<string, Coord> neigsPositions;
+    map<string, inet::Coord> neigsPositions;
 
     array<set<string>, 2> hops;
+
+    InteroperableBroadcast* controller = nullptr;
+
+  private:
 
     map<string, set<string>> make_cpy(map<string, set<string>> a) {
       map<string, set<string>> b;
@@ -68,17 +61,12 @@ class MPR : public InteroperableBroadcast {
       }
       return b;
     }
-    bool is_a_covered_by_b(string a, string b) {
-      Coord pA = neigsPositions[a];
-      Coord pB = neigsPositions[b];
-      return sqrt((pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y)) <= InteroperableBroadcast::transRadious;
-    }
+
+    bool is_a_covered_by_b(string a, string b);
 
     set<string> compute_mpr();
 
-    cPacket* buildBroadcastMsg(const char* header);
-
-    bool amIrelay(MprNeighbors senderNeigs);
+    bool amIrelay(set<string> senderNeigs);
 
     bool neigsChanged() {
       double ratio;
@@ -99,28 +87,32 @@ class MPR : public InteroperableBroadcast {
       return currentSim >= similarity ? false : true;
     }
 
-  protected:
-
-    virtual void initialize(int stage) override;
-    virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual cPacket* getCtrlMsg() override;
-    virtual void sendPacket() override;
-    virtual void sendCtrlMsg() override;
-    virtual void processStart() override;
-    virtual void initializeState() {
-      previousNeigs.clear();
-      for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
-        previousNeigs.insert(it->first);
-      }
-      neighbors.clear();
-      neigsPositions.clear();
-    }
-
   public:
-    MPR() {
+
+    Mpr() {
     }
-    ~MPR() {
+
+    bool isProtocolEvent(cMessage* msg);
+
+    void setController(InteroperableBroadcast* c) {
+      controller = c;
     }
+    void onBroadcastMsg(cPacket* pk, const char* pkName);
+
+    void handleEvent(cMessage* msg);
+    void addProtocolHeaders(cPacket* pk) {
+    }
+    void updateProtocolHeaders(cPacket* pk) {
+    }
+    void cancelSelfEvents();
+    void initialize();
+    void sendCtrlMsg();
+    void onControlMsg(cPacket* pk, const char* sender);
+
+    cPacket* createBroadcastMsg(const char* msgId);
+    cPacket* getCtrlMsg();
+
+    int getFwdType();
 };
 
 #endif /* MPR_H_ */

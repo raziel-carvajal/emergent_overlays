@@ -25,10 +25,12 @@ using namespace std;
 class DensityMetrics {
 
   private:
-    string nodeId;
+    int density;
 
     float clusteringCoef;
     float closureCoef;
+
+    string nodeId;
 
     set<string> oneHopNeigs;
 
@@ -40,6 +42,9 @@ class DensityMetrics {
     float getCloCordDenominator();
 
   public:
+    enum Level {
+      LOW, MEDIUM, HIGH
+    };
     virtual ~DensityMetrics() {
     }
     DensityMetrics() {
@@ -51,6 +56,7 @@ class DensityMetrics {
       float t = getTriangles();
       if (t == 0) {
         clusteringCoef = closureCoef = 0.0;
+        density = LOW;
       } else {
         float cluCoefDenom = getCluCoefDenominator();
         float cloCoefDenom = getCloCordDenominator();
@@ -58,6 +64,13 @@ class DensityMetrics {
         // coefficient remains undetermined; instead, we report zero
         clusteringCoef = cluCoefDenom != 0 ? t / cluCoefDenom : 0;
         closureCoef = cloCoefDenom != 0 ? t / cloCoefDenom : 0;
+        if (closureCoef <= 1.0 / 3.0) {
+          density = LOW;
+        } else if(closureCoef <= 2.0 / 3.0) {
+          density = MEDIUM;
+        } else {
+          density = HIGH;
+        }
       }
     }
     // getters
@@ -67,7 +80,9 @@ class DensityMetrics {
     float getClusteringCoef() const {
       return clusteringCoef;
     }
-
+    int getDensity() {
+      return density;
+    }
     void setNodeId(const string& nodeId) {
       this->nodeId = nodeId;
     }

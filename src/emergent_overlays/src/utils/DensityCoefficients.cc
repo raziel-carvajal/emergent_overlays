@@ -25,6 +25,7 @@ simsignal_t DensityCoefficients::clusteringCoef = registerSignal("clusteringCoef
 simsignal_t DensityCoefficients::closureCoef = registerSignal("closureCoef");
 simsignal_t DensityCoefficients::positionAtX = registerSignal("positionAtX");
 simsignal_t DensityCoefficients::positionAtY = registerSignal("positionAtY");
+simsignal_t DensityCoefficients::runningProtocol = registerSignal("runningProtocol");
 
 void DensityCoefficients::sendPacket() {
   _1hopNeigs.clear();
@@ -80,6 +81,22 @@ void DensityCoefficients::processStart() {
     throw cRuntimeError("invalid broadcast address");
 
   UDPBasicApp::processSend();
+  emit(runningProtocol, Zone::UNDETERMINED);
+
+  cMsgPar* d = new cMsgPar("density");
+  d->setDoubleValue(-1);
+  cMsgPar* name = new cMsgPar("name");
+  name->setStringValue("");
+  cMsgPar* name1 = new cMsgPar("name");
+  name1->setStringValue("");
+  cMsgPar* algoId = new cMsgPar("algoId");
+  algoId->setDoubleValue(-1);
+
+  willToChangeEv->addPar(d);
+  willToChangeEv->addPar(name);
+
+  changeNowEv->addPar(name1);
+  changeNowEv->addPar(algoId);
 }
 
 void DensityCoefficients::handleMessageWhenUp(cMessage* msg) {
@@ -101,10 +118,38 @@ void DensityCoefficients::handleMessageWhenUp(cMessage* msg) {
         break;
       case GET_DENSITY_METRICS: {
 //        log("get density metric");
-        printNeighbors();
+//        printNeighbors();
         metrics.setNeighbors(_1hopNeigs, _2hopNeigs);
+        log("My density is: " + to_string(metrics.getDensity()));
         emit(clusteringCoef, metrics.getClusteringCoef());
         emit(closureCoef, metrics.getClosureCoef());
+        if (par("isSourceNode").boolValue()) {
+          emit(runningProtocol, Zone::DENSE);
+          log("Sending WillToChange message");
+          string msgName = "ChangeMsg-" + to_string(changeMsgId);
+          UDPBasicApp::socket.sendTo(getChangeMsg(msgName.c_str(), metrics.getDensity()), broadcastAddress,
+              UDPBasicApp::destPort);
+          receivedMsgs.insert(msgName);
+          changeMsgId++;
+        }
+      }
+        break;
+      case FWD_WILL_TO_CHANGE: {
+        log("FWD_WILL_TO_CHANGE of msg: " + string(msg->par("name").stringValue()));
+        UDPBasicApp::socket.sendTo(getChangeMsg(msg->par("name").stringValue(), msg->par("density").longValue()),
+            broadcastAddress, UDPBasicApp::destPort);
+      }
+        break;
+      case UPDATE_WILL_TO_CHANGE: {
+        log("UPDATE_WILL_TO_CHANGE of msg: " + string(msg->par("name").stringValue()));
+        UDPBasicApp::socket.sendTo(getChangeNowMsg(msg->par("name").stringValue(), msg->par("algoId").longValue()),
+            broadcastAddress, UDPBasicApp::destPort);
+      }
+        break;
+      case FWD_CHANGE_NOW_MSG: {
+        log("FWD_CHANGE_NOW_MSG of msg: " + string(msg->par("name").stringValue()));
+        UDPBasicApp::socket.sendTo(getChangeNowMsg(msg->par("name").stringValue(), msg->par("algoId").longValue()),
+            broadcastAddress, UDPBasicApp::destPort);
       }
         break;
       default:
@@ -144,6 +189,70 @@ void DensityCoefficients::processPacket(cPacket* msg) {
       }
     }
       break;
+    case PacketType::WILL_TO_CHANGE_PK: {
+      Change* c = static_cast<Change*>(msg);
+      if (receivedMsgs.find(msg->getName()) == receivedMsgs.end()) {
+        receivedMsgs.insert(msg->getName());
+
+        cMsgPar* name = new cMsgPar("name");
+        name->setStringValue(msg->getName());
+
+        int sourceNodeDensity = c->getDensity();
+        if (sourceNodeDensity - metrics.getDensity() == sourceNodeDensity) {
+          // border node
+          log("[Border] My new density is: " + to_string(Zone::SPARSE));
+          emit(runningProtocol, Zone::SPARSE);
+
+          changeNowEv->getParList().remove("name");
+          changeNowEv->getParList().remove("algoId");
+
+          cMsgPar* iD = new cMsgPar("algoId");
+          iD->setDoubleValue(Zone::SPARSE);
+          changeNowEv->addPar(name);
+          changeNowEv->addPar(iD);
+
+          scheduleEvent(UPDATE_WILL_TO_CHANGE, par("sentMsgFixedDelay").doubleValue() + sentMsgDelay, changeNowEv);
+        } else {
+          // at zone with high or medium density
+          log("[Same Density] My new density is: " + to_string(Zone::DENSE));
+          emit(runningProtocol, Zone::DENSE);
+
+          willToChangeEv->getParList().remove("name");
+          willToChangeEv->getParList().remove("density");
+
+          cMsgPar* d = new cMsgPar("density");
+          d->setDoubleValue(sourceNodeDensity);
+          willToChangeEv->addPar(name);
+          willToChangeEv->addPar(d);
+
+          scheduleEvent(FWD_WILL_TO_CHANGE, par("sentMsgFixedDelay").doubleValue() + sentMsgDelay, willToChangeEv);
+        }
+      }
+    }
+      break;
+    case PacketType::CHANGE_NOW: {
+      ChangeNow* c = static_cast<ChangeNow*>(msg);
+      if (receivedMsgs.find(msg->getName()) == receivedMsgs.end()) {
+        receivedMsgs.insert(msg->getName());
+
+        log("[CHANGE NOW] My new density is: " + to_string(c->getAlgoId()));
+        emit(runningProtocol, c->getAlgoId());
+
+        changeNowEv->getParList().remove("name");
+        changeNowEv->getParList().remove("algoId");
+
+        cMsgPar* iD = new cMsgPar("algoId");
+        iD->setDoubleValue(c->getAlgoId());
+        cMsgPar* name1 = new cMsgPar("name");
+        name1->setStringValue(msg->getName());
+
+        changeNowEv->addPar(name1);
+        changeNowEv->addPar(iD);
+
+        scheduleEvent(FWD_CHANGE_NOW_MSG, par("sentMsgFixedDelay").doubleValue() + sentMsgDelay, changeNowEv);
+      }
+    }
+      break;
     default:
       throw cRuntimeError("Invalid kind of msg %d in self message", msgType);
       break;
@@ -174,4 +283,26 @@ cPacket* DensityCoefficients::getCtrlMsg() {
   }
   n->setNeigs(neigs);
   return n;
+}
+
+cPacket* DensityCoefficients::getChangeMsg(const char* name, int density) {
+  cMsgPar* p = new cMsgPar("PkType");
+  p->setLongValue(PacketType::WILL_TO_CHANGE_PK);
+
+  Change* c = new Change(name);
+  c->setSender(nodeId.c_str());
+  c->setDensity(density);
+  c->addPar(p);
+  return c;
+}
+
+cPacket* DensityCoefficients::getChangeNowMsg(const char* name, int algoID) {
+  cMsgPar* p = new cMsgPar("PkType");
+  p->setLongValue(PacketType::CHANGE_NOW);
+
+  ChangeNow* c = new ChangeNow(name);
+  c->setSender(nodeId.c_str());
+  c->setAlgoId(algoID);
+  c->addPar(p);
+  return c;
 }

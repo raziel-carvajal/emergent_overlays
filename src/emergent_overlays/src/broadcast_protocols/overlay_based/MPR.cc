@@ -3,38 +3,62 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 
-#include <broadcast_protocols/overlay_based/MPR.h>
+#include <MPR.h>
+#include <common/InteroperableBroadcast.h>
+#include <msgs/Basic_m.h>
 #include <algorithm>
 
-Define_Module(MPR);
-
-cPacket* MPR::buildBroadcastMsg(const char* header) {
-  MprBroadcastPacket* payload;
-
-  if (header == nullptr) {
-    ostringstream pkName;
-    pkName << InteroperableBroadcast::packetName + to_string(InteroperableBroadcast::numSent);
-    EV_DEBUG << "New broadcast session [" << pkName.str() << "]" << endl;
-    payload = new MprBroadcastPacket(pkName.str().c_str());
-  } else {
-    payload = new MprBroadcastPacket(header);
+void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
+  MprBroadcastPacket* m = dynamic_cast<MprBroadcastPacket*>(pk);
+  if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end() && m != nullptr) {
+    controller->log("1st reception, schedule FWD in " + to_string(controller->sentMsgFixedDelay));
+    // tag packet as received
+    controller->receivedMsg.insert(pkName);
+    latestPayload.clear();
+    OneHopNeigs senderNeigs = m->getNeighbors();
+    for (OneHopNeigs::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
+      latestPayload.insert(*it);
+    }
+    // schedule FWD decision
+    fwdBrMsgTimer->getParList().remove("ReceivedMsgId");
+    cMsgPar* p = new cMsgPar("ReceivedMsgId");
+    p->setStringValue(pkName);
+    fwdBrMsgTimer->addPar(p);
+    controller->scheduleEvent(FWD_BROADCAST_MSG, controller->sentMsgFixedDelay, fwdBrMsgTimer);
   }
 
-  payload->setByteLength(par("messageLength").longValue());
-  InteroperableBroadcast::addPacketType(payload, InteroperableBroadcast::UdpPacket::BROADCAST);
-  InteroperableBroadcast::addPacketHeaders(payload);
+}
 
-  MprNeighbors myNeigs;
+void Mpr::initialize() {
+  controller->log("Running protocol: " + controller->getProtocolName(controller->MPR));
+
+  buildCdsTimer = new cMessage("buildCdsTimer");
+  sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
+  fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
+  cMsgPar* p = new cMsgPar("ReceivedMsgId");
+  p->setStringValue("");
+  fwdBrMsgTimer->addPar(p);
+  double t = controller->sentMsgDelay + controller->sentMsgFixedDelay;
+  controller->scheduleEvent(SCHEDULE_CTRL_MSGS, t, sCtrlMsgTimer);
+}
+
+cPacket* Mpr::createBroadcastMsg(const char* msgId) {
+
+  MprBroadcastPacket* payload = new MprBroadcastPacket(msgId);
+  payload->setRunningProtocol(controller->MPR);
+  controller->addBroadcastHeaders(payload);
+
+  OneHopNeigs myNeigs;
   for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it)
     myNeigs.insert(*it);
   payload->setNeighbors(myNeigs);
@@ -42,218 +66,7 @@ cPacket* MPR::buildBroadcastMsg(const char* header) {
   return payload;
 }
 
-bool MPR::amIrelay(MprNeighbors senderNeigs) {
-  bool relay = false;
-  string temp(nodeId + "] deciding with neighbors = { ");
-  for (MprNeighbors::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it) {
-    relay = (*it == InteroperableBroadcast::nodeId);
-    temp += *it + ", ";
-  }
-  cout << "[" << simTime() << ", " << temp << "}" << endl;
-//  if (neigsChanged())
-//    previousDec = relay;
-//  else
-//    relay = previousDec;
-  return relay;
-}
-
-void MPR::onBroadcastMsg(cPacket* pk, string sender) {
-  InteroperableBroadcast::isPacket<MprBroadcastPacket>(pk,
-      [&](const MprBroadcastPacket* mprPk) {
-        if(alreadyDispatched.find(mprPk->getName()) != alreadyDispatched.end()) return true;
-
-        string temp(nodeId + "]");
-        if (InteroperableBroadcast::receivedMsg.find(mprPk->getName()) == InteroperableBroadcast::receivedMsg.end()) {
-          cout << "[" << simTime() << ", " << temp << " 1st reception, schedule FWD in " << par("sentMsgFixedDelay").doubleValue() << endl;
-          // tag packet as received
-          receivedMsg.insert(mprPk->getName());
-          // required to improve MPR algorithm
-          currentReceptions = 1;
-          latestPayload.clear();
-          // schedule FWD decision
-          fwdBrMsgTimer->par("ReceivedMsgId").setStringValue(mprPk->getName());
-          InteroperableBroadcast::scheduleEvent(FWD_BROADCAST_MSG, par("sentMsgFixedDelay").doubleValue(), fwdBrMsgTimer);
-        } else {
-          currentReceptions++;
-        }
-
-        if(currentReceptions <= par("allowedReceptions").doubleValue()) {
-          cout << "[" << simTime() << ", " << temp << " reception No = " << currentReceptions << endl;
-
-          // keep payload from neighbors
-          MprNeighbors senderNeigs = mprPk->getNeighbors();
-          for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-            latestPayload.insert(*it);
-          }
-        }
-        return true;
-      });
-}
-
-void MPR::onControlMsg(cPacket* pk, string sender) {
-  InteroperableBroadcast::isPacket<MprPacket>(pk, [&](const MprPacket* mprPk) {
-    EV_DEBUG << "MPR.onControlMsg()" << endl;
-    neighbors[sender].clear();
-    neigsPositions[sender].x = mprPk->getSenderPosAtX();
-    neigsPositions[sender].y = mprPk->getSenderPosAtY();
-
-    MprNeighbors senderNeigs = mprPk->getNeighbors();
-    MprCoord neigsPosAtX = mprPk->getPositionsAtX();
-    MprCoord neigsPosAtY = mprPk->getPositionsAtY();
-    string msg(nodeId + "] neighbors received from [" + sender +"] ::");
-
-    for (MprNeighbors::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-//      EV_DEBUG << "NEIG [" << *it << "]" << endl;
-      if(*it != InteroperableBroadcast::nodeId) {
-        msg += *it + ", ";
-        neighbors[sender].insert(*it);
-        neigsPositions[*it].x = neigsPosAtX[*it];
-        neigsPositions[*it].y = neigsPosAtY[*it];
-      }
-    }
-    cout << "[" << simTime() << ", " << msg << endl;
-    return true;
-  });
-}
-
-void MPR::initialize(int stage) {
-  InteroperableBroadcast::initialize(stage);
-
-  if (stage == inet::INITSTAGE_LOCAL) {
-    buildCdsTimer = new cMessage("buildCdsTimer");
-    sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
-    fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
-    cMsgPar* p = new cMsgPar("ReceivedMsgId");
-    p->setStringValue("");
-    fwdBrMsgTimer->addPar(p);
-  }
-
-}
-
-void MPR::processStart() {
-  similarity = par("similarity").doubleValue();
-  viewSize = par("viewSize").doubleValue();
-  InteroperableBroadcast::processStart();
-  InteroperableBroadcast::scheduleEvent(SCHEDULE_CTRL_MSGS,
-      InteroperableBroadcast::sentMsgDelay + par("sentMsgFixedDelay").doubleValue(), sCtrlMsgTimer);
-}
-
-void MPR::handleMessageWhenUp(cMessage* msg) {
-  if (msg->isSelfMessage() && (buildCdsTimer == msg || sCtrlMsgTimer == msg || fwdBrMsgTimer == msg)) {
-    //TODO define a case in reception of self-message HALT_APP
-    switch (msg->getKind()) {
-      // time required to approximate a CDS is ~0.5s
-      case BUILD_CDS: {
-        currentMpr = compute_mpr();
-        string temp(nodeId + "] my CDS is = ");
-        for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it)
-          temp += *it + ", ";
-        cout << "[" << simTime() << ", " << temp << endl;
-      }
-        break;
-      case FWD_BROADCAST_MSG: {
-        alreadyDispatched.insert(msg->par("ReceivedMsgId").stringValue());
-        string temp(nodeId + "] deciding to FWD message: " + msg->par("ReceivedMsgId").stringValue());
-
-        bool fwdMsg = false;
-        if (amIrelay(latestPayload)) {
-          fwdMsg = true;
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-        } else if (InteroperableBroadcast::amIborderNode()) {
-          fwdMsg = true;
-          emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::BORDER_NODE);
-        }
-
-        if (fwdMsg) {
-          cout << "[" << simTime() << ", " << temp << endl;
-          cPacket* broadcastMsg = buildBroadcastMsg(msg->par("ReceivedMsgId").stringValue());
-          socket.sendTo(broadcastMsg, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-          emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(broadcastMsg->getName()));
-        }
-
-        cancelEvent(msg);
-      }
-        break;
-      case SEND_CTRL_MSG: {
-        currentPosition = mobilityModel->getCurrentPosition();
-        emit(positionAtX, currentPosition.x);
-        emit(positionAtY, currentPosition.y);
-        socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-      }
-        break;
-      case SCHEDULE_CTRL_MSGS: {
-        sendCtrlMsg();
-      }
-        break;
-      default:
-        throw cRuntimeError("Invalid kind %d in Mpr.buildCdsTimer", (int) msg->getKind());
-    }
-  } else
-    InteroperableBroadcast::handleMessageWhenUp(msg);
-}
-
-void MPR::sendPacket() {
-  if (par("isSource").boolValue()) {
-    cPacket* pk = buildBroadcastMsg(nullptr);
-
-    // tag packet as received
-    InteroperableBroadcast::receivedMsg.insert(pk->getName());
-    alreadyDispatched.insert(pk->getName());
-
-    socket.sendTo(pk, InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-    emit(InteroperableBroadcast::sentBroadcastMsg, InteroperableBroadcast::getMsgId(pk->getName()));
-    emit(InteroperableBroadcast::forward_type, InteroperableBroadcast::ForwardType::CDS_RELAY);
-  }
-  // count sent broadcast messages in all nodes. This is useful in an experiment
-  // where any node in the network act as source of a broadcast session
-  InteroperableBroadcast::numSent++;
-}
-
-void MPR::sendCtrlMsg() {
-  cancelEvent(sCtrlMsgTimer);
-  cancelEvent(buildCdsTimer);
-  // 2 exchanges of control messages are required to approximate a CDS
-  // - 1st exchange: neighbors
-  // - 2nd exchange: neighbors of neighbors
-  socket.sendTo(getCtrlMsg(), InteroperableBroadcast::broadcastAddress, InteroperableBroadcast::destPort);
-
-  double t = par("sentMsgFixedDelay").doubleValue() * par("maxNodesNo").doubleValue();
-  InteroperableBroadcast::scheduleEvent(SEND_CTRL_MSG, t, sCtrlMsgTimer);
-  cout << "[" << simTime() << ", " << nodeId << "] next CtrlMsg at " << t << endl;
-
-  InteroperableBroadcast::scheduleEvent(BUILD_CDS, 2 * t - InteroperableBroadcast::sentMsgDelay, buildCdsTimer);
-
-  cout << "[" << simTime() << ", " << nodeId << "] next BuildCdsMsg at " << 2 * t - InteroperableBroadcast::sentMsgDelay
-      << endl;
-}
-
-cPacket* MPR::getCtrlMsg() {
-  MprPacket* ctrlMsg = new MprPacket("CtrlMsg");
-  InteroperableBroadcast::addPacketType(ctrlMsg, UdpPacket::CTRL);
-  InteroperableBroadcast::addPacketHeaders(ctrlMsg);
-
-  ctrlMsg->setSenderPosAtX(InteroperableBroadcast::currentPosition.x);
-  ctrlMsg->setSenderPosAtY(InteroperableBroadcast::currentPosition.y);
-
-  MprNeighbors myNeigs;
-  MprCoord positionsAtX;
-  MprCoord positionsAtY;
-
-  string temp(nodeId + "] Current neighbors : ");
-  for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
-    temp += it->first + ",";
-    myNeigs.insert(it->first);
-    positionsAtX[it->first] = neigsPositions[it->first].x;
-    positionsAtY[it->first] = neigsPositions[it->first].y;
-  }
-  cout << "[" << simTime() << temp << endl;
-  ctrlMsg->setNeighbors(myNeigs);
-  ctrlMsg->setPositionsAtX(positionsAtX);
-  ctrlMsg->setPositionsAtY(positionsAtY);
-  return ctrlMsg;
-}
-
-set<string> MPR::compute_mpr() {
+set<string> Mpr::compute_mpr() {
   set<string> mpr;
   map<string, set<string>> latest = make_cpy(neighbors);
   hops[0].clear();
@@ -263,8 +76,8 @@ set<string> MPR::compute_mpr() {
     string j(p.first);
     hops[0].insert(j);
     for (const auto& name : p.second) {
-      EV_DEBUG << "name [" << name << "] && nodeId [" << InteroperableBroadcast::nodeId << "]" << endl;
-      if (name == InteroperableBroadcast::nodeId)
+      controller->log("name [" + name + "] && nodeId [" + controller->nodeId + "]");
+      if (name == controller->nodeId)
         continue;
       bool no_neighbor = hops[0].find(name) == hops[0].end();
       if (no_neighbor) {
@@ -349,4 +162,152 @@ set<string> MPR::compute_mpr() {
     iterations++;
   }
   return mpr;
+}
+
+bool Mpr::amIrelay(set<string> senderNeigs) {
+  bool relay = false;
+  string temp("Deciding with neighbors = { ");
+  for (set<string>::iterator it = senderNeigs.begin(); !relay && it != senderNeigs.end(); ++it) {
+    relay = (*it == controller->nodeId);
+    temp += *it + ", ";
+  }
+  controller->log(temp + " }");
+  //  if (neigsChanged())
+  //    previousDec = relay;
+  //  else
+  //    relay = previousDec;
+  return relay;
+}
+
+bool Mpr::is_a_covered_by_b(string a, string b) {
+  inet::Coord pA = neigsPositions[a];
+  inet::Coord pB = neigsPositions[b];
+  return sqrt((pA.x - pB.x) * (pA.x - pB.x) + (pA.y - pB.y) * (pA.y - pB.y)) <= controller->transRadious;
+}
+
+bool Mpr::isProtocolEvent(cMessage* msg) {
+  return buildCdsTimer == msg || sCtrlMsgTimer == msg || fwdBrMsgTimer == msg;
+}
+
+void Mpr::handleEvent(cMessage* msg) {
+  switch (msg->getKind()) {
+    // time required to approximate a CDS is ~0.5s
+    case BUILD_CDS: {
+      currentMpr = compute_mpr();
+      string temp("My CDS is = ");
+      for (set<string>::iterator it = currentMpr.begin(); it != currentMpr.end(); ++it)
+        temp += *it + ", ";
+      controller->log(temp);
+    }
+      break;
+    case FWD_BROADCAST_MSG: {
+      string msgId = msg->par("ReceivedMsgId").stringValue();
+      string temp("FWD message: " + msgId);
+
+      bool fwdMsg = false;
+      if (amIrelay(latestPayload)) {
+        fwdMsg = true;
+        controller->emit(controller->forward_type, controller->CDS_RELAY);
+      } else if (controller->amIborderNode()) {
+        fwdMsg = true;
+        controller->emit(controller->forward_type, controller->BORDER_NODE);
+      }
+
+      if (fwdMsg) {
+        controller->log(temp);
+        cPacket* broadcastMsg = createBroadcastMsg(msgId.c_str());
+        controller->send(broadcastMsg);
+        controller->emit(controller->sentBroadcastMsg, controller->getMsgId(msgId));
+      }
+    }
+      break;
+    case SEND_CTRL_MSG: {
+      controller->recordCurrentPosition();
+      controller->send(getCtrlMsg());
+    }
+      break;
+    case SCHEDULE_CTRL_MSGS: {
+      sendCtrlMsg();
+    }
+      break;
+    default:
+      throw cRuntimeError("Invalid kind %d in Mpr.buildCdsTimer", (int) msg->getKind());
+  }
+}
+
+void Mpr::sendCtrlMsg() {
+  controller->cancelEvent(sCtrlMsgTimer);
+  controller->cancelEvent(buildCdsTimer);
+  // use to get the list of one-hop neighbors
+  controller->send(getCtrlMsg());
+  double t = controller->sentMsgFixedDelay * controller->maxNodesNo;
+  // use to get the list of two-hop neighbors
+  controller->scheduleEvent(SEND_CTRL_MSG, t, sCtrlMsgTimer);
+  controller->log("next CtrlMsg at " + to_string(t));
+  // approximation of a CDS when nodes have the list of two-hop neighbors
+  controller->scheduleEvent(BUILD_CDS, 2 * t - controller->sentMsgDelay, buildCdsTimer);
+  controller->log("next BuildCdsMsg at " + to_string(2 * t - controller->sentMsgDelay));
+}
+
+cPacket* Mpr::getCtrlMsg() {
+  MprCtrl* m = new MprCtrl();
+  m->setRunningProtocol(controller->MPR);
+  controller->addCtrlHeaders(m);
+
+  inet::Coord pos = controller->mobilityModel->getCurrentPosition();
+  m->setSenderPosAtX(pos.x);
+  m->setSenderPosAtY(pos.y);
+
+  OneHopNeigs myNeigs;
+  Positions positionsAtX;
+  Positions positionsAtY;
+
+  string temp("Current neighbors: ");
+  for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
+    temp += it->first + ",";
+    myNeigs.insert(it->first);
+    positionsAtX[it->first] = neigsPositions[it->first].x;
+    positionsAtY[it->first] = neigsPositions[it->first].y;
+  }
+  controller->log(temp);
+
+  m->setNeighbors(myNeigs);
+  m->setXs(positionsAtX);
+  m->setYs(positionsAtY);
+
+  return m;
+}
+
+void Mpr::onControlMsg(cPacket* pk, const char* sender) {
+  MprCtrl* m = dynamic_cast<MprCtrl*>(pk);
+  if (m != nullptr) {
+    neighbors[sender].clear();
+    neigsPositions[sender].x = m->getSenderPosAtX();
+    neigsPositions[sender].y = m->getSenderPosAtY();
+
+    OneHopNeigs senderNeigs = m->getNeighbors();
+    Positions neigsPosAtX = m->getXs();
+    Positions neigsPosAtY = m->getYs();
+    string temp("neighbors received from [" + string(sender) + "] ");
+
+    for (OneHopNeigs::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
+      if (*it != controller->nodeId) {
+        temp += *it + ", ";
+        neighbors[sender].insert(*it);
+        neigsPositions[*it].x = neigsPosAtX[*it];
+        neigsPositions[*it].y = neigsPosAtY[*it];
+      }
+    }
+    controller->log(temp);
+  }
+}
+
+void Mpr::cancelSelfEvents() {
+  controller->cancelAndDelete(buildCdsTimer);
+  controller->cancelAndDelete(fwdBrMsgTimer);
+  controller->cancelAndDelete(sCtrlMsgTimer);
+}
+
+int Mpr::getFwdType() {
+  return controller->CDS_RELAY;
 }
