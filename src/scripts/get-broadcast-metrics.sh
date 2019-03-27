@@ -40,7 +40,7 @@ CONF_NAME=${filename%.*}
 
 simTime=`grep "sim-time-limit" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
-broaInt=`grep "sendInterval" ${CONF_FILE} | awk -F " = " '{print $2}' | awk -F "s" '{print $1}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+broaInt=`grep "broadcastInterval" ${CONF_FILE} | awk -F " = " '{print $2}' | awk -F "s" '{print $1}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
 
 tx=`grep "maxCommunicationRange" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
@@ -72,10 +72,7 @@ Rscript get-broadcast-metrics.R \
   ${CONF_NAME} ${CONF_FILE} \
   --with-energy-consumption \
   --with-coverage \
-  --with-packet-err \
-  --with-sent-msgs \
-  --with-recv-msgs \
-	--with-fwd-type \
+	--with-saved-rebroadcasts \
 	${withMobility}
 
 echo "Moving built graphs..."

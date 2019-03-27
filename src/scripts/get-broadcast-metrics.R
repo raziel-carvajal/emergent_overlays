@@ -1,6 +1,6 @@
 require(omnetpp)
 library(argparse)
-library(igraph)
+source("R/wireless-topology.R")
 
 get.arguments <- function() {
   parser <- ArgumentParser(
@@ -31,6 +31,8 @@ get.arguments <- function() {
     dest='wrm', action='store_true')
 	parser$add_argument('--with-fwd-type',
 		dest='wft', action='store_true')
+	parser$add_argument('--with-saved-rebroadcasts',
+		dest='wsre', action='store_true')
 
   # center of dense zone
   parser$add_argument('--dense-zone-at-x',
@@ -43,6 +45,8 @@ get.arguments <- function() {
 	#
 	parser$add_argument('--with-mobility',
 		dest='wmob', action='store_true')
+	parser$add_argument('--with-plotting',
+		dest='wplot', action='store_true')
   parser$parse_args()
 }
 
@@ -156,46 +160,30 @@ get.density.relative.error <- function(results_file, first_measure,
 get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   msgReceivers, denseZone, forward_type_ds, savePlot=F) {
 
-  edges <- unlist(
-    sapply(nodes, function(n) {
-      node <- subset(nodesPositions, nodeId == n)
-      others<-subset(nodesPositions, nodeId != n)
-      neigs <- sapply(others$nodeId, function(id) {
-        o <- others[others$nodeId == id,]
-        ifelse(
-          sqrt((node$x - o$x)*(node$x - o$x) + (node$y - o$y)*(node$y - o$y)) <= Tx, o$nodeId, NA
-        )
-      })
-      neigs <- neigs[ !is.na(neigs) ]
-      sapply(neigs, function(neig) { c(node$nodeId, neig) })
-    })
-  )
+  # xlim <- data.frame(
+  #   infe=denseZone$atX - denseZone$halfLenAtX,
+  #   supe=denseZone$atX + denseZone$halfLenAtX
+  # )
+  # ylim <- data.frame(
+  #   infe=denseZone$atY - denseZone$halfLenAtY,
+  #   supe=denseZone$atY + denseZone$halfLenAtY
+  # )
 
-  xlim <- data.frame(
-    infe=denseZone$atX - denseZone$halfLenAtX,
-    supe=denseZone$atX + denseZone$halfLenAtX
-  )
-  ylim <- data.frame(
-    infe=denseZone$atY - denseZone$halfLenAtY,
-    supe=denseZone$atY + denseZone$halfLenAtY
-  )
-
-  nodesLocation <- sapply(nodes, function(n){
-    nPos <- subset(nodesPositions, nodeId == n)
-    ifelse(
-      nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
-      nPos$y >= ylim$infe && nPos$y <= ylim$supe,
-      'DENSE',
-      'SPARSE'
-    )
-  })
+  # nodesLocation <- sapply(nodes, function(n){
+  #   nPos <- subset(nodesPositions, nodeId == n)
+  #   ifelse(
+  #     nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
+  #     nPos$y >= ylim$infe && nPos$y <= ylim$supe,
+  #     'DENSE',
+  #     'SPARSE'
+  #   )
+  # })
 
   # create graph based on edges
-  g <- graph( edges=edges )
-  # g <- make_undirected_graph(edges)
+  g <- get_wireless_topology(nodesPositions, Tx)
 
 	# label whether nodes are located at the dense zone
-  V(g)$location <- nodesLocation
+  # V(g)$location <- nodesLocation
 
   # this code is followed IN DATASET to label nodes that forward messages:
   #   0 => SIMPLE
@@ -211,15 +199,8 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
   V(g)$colorCode <- labelCode
 
   if(savePlot){
-    E(g)$arrow.mode <- 0
-    E(g)$color <- 'lightgrey'
-    V(g)$size <- 5
-    # V(g)$label <- ''
-		V(g)$label.cex <- 0.4
-    V(g)$frame.color <- 'black'
     colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
     V(g)$color <- colors[labelCode]
-
     # use node coordinates as layout
     layout <- cbind(nodesPositions$x, nodesPositions$y)
     # save one graph per broadcast session
@@ -507,6 +488,20 @@ getStatistics <- function(dataset_path, scalar_name, stat="mean"){
   )
 }
 
+getSavedRebroadcasts <- function(overlay, recvMsgs) {
+	subG <- components(overlay)$membership
+	nodes <- sapply( c(1:length(subG)), function( i ) {
+		ifelse(subG[i] == 1, i, NA)
+	})
+	nodes <- nodes[!is.na(nodes)]
+	floodingRetrans <- sapply(nodes, function( n ) {
+		length(neighbors(overlay, n))
+	})
+	floodingRetrans <- sum(floodingRetrans)
+	measuredRetrans <- length(recvMsgs)
+	100 - (measuredRetrans * 100) / floodingRetrans
+}
+
 main <- function(args) {
   expeConfig <- unlist(strsplit(args$configName, '_'))
   algorithmN <- toupper(expeConfig[ length(expeConfig) ])
@@ -602,21 +597,19 @@ main <- function(args) {
 	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
 			# get what type of FWD nodes perform
 			fwdTypeAtTopology <- subset(
-				forwardTypeDs, min(senders$time) <= time & time <= max(senders$time)
+				forwardTypeDs, min(senders$time) <= time & time <= max(receivers$time)
 			)
 			# get positions of nodes during dissemination of broadcast message
-			nodesPositions <- tail(subset(positions, time < min(senders$time)), length(all_nodes))
-			# nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
-			# print(nodesPositions[ order(nodesPositions$time), ])
+			nodesPositions <- tail( head( positions, n=o*length(all_nodes) ), n=length(all_nodes) )
+			# build wireless topology
 			get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
-				denseZone, fwdTypeAtTopology, savePlot=TRUE
+				denseZone, fwdTypeAtTopology, savePlot=args$wplot
 	    )
 	  })
 	} else {
 		# get unique position in static scenario
-		nodesPositions <- positions[ c(1:length(all_nodes)), ]
-		nodesPositions <- nodesPositions[ order(nodesPositions$nodeId), ]
+		nodesPositions <- head(positions, n=length(all_nodes))
 	  overlays <- lapply( c( 1 : overlaysNumber ), function( o ) {
 			# senders/receivers per broadcast message
 	    senders <- subset(sent_broadcast_msgs, value == msgs_ids[o])
@@ -626,7 +619,7 @@ main <- function(args) {
 	    # build wireless topology
 	    get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
-				denseZone, fwdTypeAtTopology, savePlot=TRUE
+				denseZone, fwdTypeAtTopology, savePlot=args$wplot
 	    )
 	  })
 	}
@@ -681,6 +674,20 @@ main <- function(args) {
       args$resultsDir, 'coverage', algorithmN
     )
   }
+	if (args$wsre){
+		print("DONE - Get saved rebroadcasts")
+		savedRe <- sapply( c( 1 : overlaysNumber ), function( o ) {
+	    receivers <- subset(recv_broadcast_msgs, value == msgs_ids[o])$value
+			getSavedRebroadcasts(overlays[[o]], receivers)
+		})
+		saveDataFrame(
+      data.frame(
+        data=savedRe,
+        algo=rep(algorithmN, length(savedRe)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'savedRebroadcasts', algorithmN
+    )
+	}
   # TODO
   # print('Get distribution of broadcast session time')
   # bs <- broadcastingTime(sent_msgs, recv_msgs, simulation.time = args$simTime)
