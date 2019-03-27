@@ -40,3 +40,9 @@ packet MprCtrl extends Basic {
 	Positions ys;
 }
 
+packet BorderReq extends Basic {}
+
+packet Border extends Basic {
+	int foreignAlgoId;
+	bool fromOverlayRelay;
+}

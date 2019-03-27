@@ -42,14 +42,16 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
 void Mpr::initialize() {
   controller->log("Running protocol: " + controller->getProtocolName(controller->MPR));
 
-  buildCdsTimer = new cMessage("buildCdsTimer");
-  sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
-  fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
   cMsgPar* p = new cMsgPar("ReceivedMsgId");
   p->setStringValue("");
   fwdBrMsgTimer->addPar(p);
+
   double t = controller->sentMsgDelay + controller->sentMsgFixedDelay;
-  controller->scheduleEvent(SCHEDULE_CTRL_MSGS, t, sCtrlMsgTimer);
+  // build first overlay before dissemination of broadcast messages
+  controller->scheduleEvent(SCHEDULE_FIRST_CTRL_MSG, t, sCtrlMsgTimer);
+  // build remaining overlays
+  controller->scheduleEvent(SCHEDULE_CTRL_MSGS,
+      controller->par("startSendingCtrlMsgs").doubleValue() + controller->sentMsgDelay, sRemainingCtrlMsgTimer);
 }
 
 cPacket* Mpr::createBroadcastMsg(const char* msgId) {
@@ -172,10 +174,7 @@ bool Mpr::amIrelay(set<string> senderNeigs) {
     temp += *it + ", ";
   }
   controller->log(temp + " }");
-  //  if (neigsChanged())
-  //    previousDec = relay;
-  //  else
-  //    relay = previousDec;
+  isOverlayRelay = relay;
   return relay;
 }
 
@@ -186,7 +185,7 @@ bool Mpr::is_a_covered_by_b(string a, string b) {
 }
 
 bool Mpr::isProtocolEvent(cMessage* msg) {
-  return buildCdsTimer == msg || sCtrlMsgTimer == msg || fwdBrMsgTimer == msg;
+  return buildCdsTimer == msg || sCtrlMsgTimer == msg || fwdBrMsgTimer == msg || sRemainingCtrlMsgTimer == msg;
 }
 
 void Mpr::handleEvent(cMessage* msg) {
@@ -207,8 +206,9 @@ void Mpr::handleEvent(cMessage* msg) {
       bool fwdMsg = false;
       if (amIrelay(latestPayload)) {
         fwdMsg = true;
-        controller->emit(controller->forward_type, controller->CDS_RELAY);
-      } else if (controller->amIborderNode()) {
+        controller->isBorderNode = false;
+        controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
+      } else if (controller->isBorderNode) {
         fwdMsg = true;
         controller->emit(controller->forward_type, controller->BORDER_NODE);
       }
@@ -226,8 +226,14 @@ void Mpr::handleEvent(cMessage* msg) {
       controller->send(getCtrlMsg());
     }
       break;
+    case SCHEDULE_FIRST_CTRL_MSG: {
+      sendCtrlMsg();
+    }
+      break;
     case SCHEDULE_CTRL_MSGS: {
       sendCtrlMsg();
+      controller->scheduleEvent(SCHEDULE_CTRL_MSGS, controller->par("ctrlMsgInterval").doubleValue(),
+          sRemainingCtrlMsgTimer);
     }
       break;
     default:
@@ -236,6 +242,8 @@ void Mpr::handleEvent(cMessage* msg) {
 }
 
 void Mpr::sendCtrlMsg() {
+  neighbors.clear();
+  neigsPositions.clear();
   controller->cancelEvent(sCtrlMsgTimer);
   controller->cancelEvent(buildCdsTimer);
   // use to get the list of one-hop neighbors
@@ -309,5 +317,9 @@ void Mpr::cancelSelfEvents() {
 }
 
 int Mpr::getFwdType() {
-  return controller->CDS_RELAY;
+  return controller->OVERLAY_RELAY;
+}
+
+bool Mpr::amIoverlayRelay() {
+  return isOverlayRelay;
 }

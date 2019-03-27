@@ -28,6 +28,7 @@ class IProtocol {
 
     virtual void setController(InteroperableBroadcast* c) = 0;
     virtual void handleEvent(cMessage* msg) = 0;
+    // each implementation have to store the type of forward nodes perform
     virtual void onBroadcastMsg(cPacket* pk, const char* pkName) = 0;
     virtual void addProtocolHeaders(cPacket* pk) = 0;
     virtual void updateProtocolHeaders(cPacket* pk) = 0;
@@ -39,7 +40,7 @@ class IProtocol {
 
     virtual int getFwdType() = 0;
 
-//    virtual cPacket* getCtrlMsg() = 0;
+    virtual bool amIoverlayRelay() = 0;
 //    virtual void sendCtrlMsg() = 0;
 };
 

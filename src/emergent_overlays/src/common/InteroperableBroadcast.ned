@@ -28,8 +28,7 @@ simple InteroperableBroadcast extends UDPBasicApp
     sendInterval = this.broadcastInterval;
 
     bool isSourceNode = default(false);
-    bool withCtrlMsg = default(false);
-    bool enableInterop = default(false);
+    bool withDebugging = default(false);
 
     double broadcastInterval @unit(s) = default(0.1s);
     double ctrlMsgInterval @unit(s) = default(10.0s);

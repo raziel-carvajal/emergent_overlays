@@ -46,6 +46,8 @@ class Flooding : public IProtocol {
     cPacket* createBroadcastMsg(const char* msgId);
 
     int getFwdType();
+
+    bool amIoverlayRelay();
 };
 
 #endif /* FLOODING_H_ */

@@ -31,26 +31,23 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
   private:
     enum Timer {
-      HALT_APP = 1, SEND_CTRL_MSG, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, STORE_POSITION, SEND_FOREIGN_MSG
+      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, SEND_BORDER_MSG, STORE_POSITION
     };
     enum UdpPacket {
-      BROADCAST = 1, CTRL, FOREIGN
+      BROADCAST = 1, CTRL, BORDER_REQ, BORDER
     };
-
-    bool enableInterop;
 
     int runningProtocolId;
 
     IProtocol* runningProtocol = nullptr;
 
-    cMessage* ctrlMsgTimer = nullptr;
     cMessage* haltSimTimer = nullptr;
     cMessage* broaMsgTimer = nullptr;
     cMessage* motionTimer = nullptr;
     cMessage* fwdBMsgTimer = nullptr;
     cMessage* borderMsgTimer = nullptr;
 
-    set<string> knownForeignAlgos;
+    set<int> knownForeignAlgos;
 
     cPacket* latestPkToFwd = nullptr;
 
@@ -79,8 +76,9 @@ class InteroperableBroadcast : public UDPBasicApp {
       }
     }
 
-    cPacket* makeForeignMessage();
-    cPacket* setAndGetBroadcastMsg();
+    cPacket* getBroadcastMsg();
+    cPacket* getBorderReqMsg();
+    cPacket* getBorderMsg(int foreignAlgoId);
 
     L3Address getSrcAddress(cPacket *msg);
 
@@ -118,8 +116,16 @@ class InteroperableBroadcast : public UDPBasicApp {
       FLOODING, MPR, LAST_PROTOCOL
     };
     enum ForwardType {
-      SIMPLE, CDS_RELAY, BORDER_NODE
+      SIMPLE, OVERLAY_RELAY, BORDER_NODE
     };
+
+    // signals for this class
+    static simsignal_t rcvdBroadcastMsg;
+    static simsignal_t sentBroadcastMsg;
+    static simsignal_t positionAtX;
+    static simsignal_t positionAtY;
+    static simsignal_t forward_type;
+//    static simsignal_t density_approximation;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
 
@@ -137,13 +143,7 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     IMobility* mobilityModel;
 
-    // signals for this class
-    static simsignal_t rcvdBroadcastMsg;
-    static simsignal_t sentBroadcastMsg;
-    static simsignal_t positionAtX;
-    static simsignal_t positionAtY;
-    static simsignal_t forward_type;
-//    static simsignal_t density_approximation;
+    bool isBorderNode = false;
 
   public:
     InteroperableBroadcast() {
@@ -152,7 +152,11 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
 
     void log(string msg) {
-      cout << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;
+      if (par("withDebugging").boolValue()) {
+        cout << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;
+      } else {
+        EV_DEBUG << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;
+      }
     }
     void recordCurrentPosition() {
       inet::Coord pos = mobilityModel->getCurrentPosition();
@@ -179,10 +183,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
 
     int getMsgId(string msgHeader);
-
-    bool amIborderNode() {
-      return !knownForeignAlgos.empty();
-    }
 };
 
 #endif /* INTEROPERABLEBROADCAST_H_ */

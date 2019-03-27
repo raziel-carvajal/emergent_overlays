@@ -40,3 +40,7 @@ void Flooding::initialize() {
 int Flooding::getFwdType() {
   return controller->SIMPLE;
 }
+
+bool Flooding::amIoverlayRelay() {
+  return false;
+}

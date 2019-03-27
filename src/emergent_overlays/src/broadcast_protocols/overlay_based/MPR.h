@@ -25,20 +25,22 @@ class Mpr : public IProtocol {
   private:
 
     enum MprTimers {
-      BUILD_CDS, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
+      BUILD_CDS,  SCHEDULE_FIRST_CTRL_MSG, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
 
     double similarity;
-    bool previousDec;
+
+    bool isOverlayRelay = false;
 
     int viewSize;
     int sentBootEvents = 1;
 
     set<string> latestPayload;
 
-    cMessage* buildCdsTimer = nullptr;
-    cMessage* sCtrlMsgTimer = nullptr;
-    cMessage* fwdBrMsgTimer = nullptr;
+    cMessage* buildCdsTimer = new cMessage("buildCdsTimer");
+    cMessage* sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
+    cMessage* fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
+    cMessage* sRemainingCtrlMsgTimer = new cMessage("sRemainingCtrlMsgTimer");
 
     set<string> currentMpr;
     set<string> previousNeigs;
@@ -113,6 +115,8 @@ class Mpr : public IProtocol {
     cPacket* getCtrlMsg();
 
     int getFwdType();
+
+    bool amIoverlayRelay();
 };
 
 #endif /* MPR_H_ */
