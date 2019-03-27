@@ -10,14 +10,15 @@ get_args <- function() {
   p$add_argument("--with-clustering-coefficient", dest = "wclu", action = "store_true")
 	p$add_argument("--with-transitivity", dest = "wt", action = "store_true")
 	p$add_argument("--with-plotting", dest = "plot", action = "store_true")
+	p$add_argument("--show-adaptive-policy", dest = "adap", action = "store_true")
   p$parse_args()
 }
 
 ### MAIN ###
 args <- get_args()
 if (!args$wt) {
-	if (!args$wclo & !args$wclu) {
-		print("Any coefficient was chosen. Run again with the option --with-closure-coefs OR --with-clustering-coefs")
+	if (!args$wclo & !args$wclu &!args$adap) {
+		print("Any coefficient was chosen. Run again with the option --with-closure-coefs OR --with-clustering-coefs OR --show-adaptive-policy")
 		stop()
 	}
 } else {
@@ -40,9 +41,15 @@ if (!args$wt){
 	if(args$wclo){
 		coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "closureCoef:vector")
 		graphPrefix <- "ClosureCoef_"
-	} else {
+	}
+	if(args$wclu){
 		coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "clusteringCoef:vector")
 		graphPrefix <- "ClusteringCoef_"
+	}
+	if(args$adap){
+		coefs <- get_omnet_vector_as_dataset(args$omnet_dataset, "runningProtocol:vector")
+		coefs <- subset(coefs, time > 0)
+		graphPrefix <- "AdaptationPolicy_"
 	}
 	coefs <- coefs[order(coefs$time), ]
 } else {
@@ -59,18 +66,32 @@ sapply(c(1:overlaysNo), function(i) {
   if (args$plot) {
 		if (!args$wt) {
 			# in this way, the index of this vector refers to the node identifier
-			coefAt_i <- tail(head(coefs, i * nodesNo), nodesNo)
-			coefAt_i <- coefAt_i[order(coefAt_i$nodeId), ]$data
+			coefAt_i <- tail(head(coefs, i  * nodesNo), nodesNo)
+			if (args$wclo | args$wclu) {
+				coefAt_i <- coefAt_i[order(coefAt_i$nodeId), ]$data
+			} else {
+				coefAt_i <- sapply(c(1:nodesNo), function(k) {
+					row <- subset(coefAt_i, nodeId == k)
+					ifelse( length(row$nodeId) != 0, row$data, 0 )
+				})
+			}
 		} else {
 			coefAt_i <- transitivity(g, type = "localundirected")
 		}
-		# in the resulting graph nodes have a colour based on their local closure/clustering coefficients:
-		# yellow -> coefficient at [0, 1/3]
-		# orange -> coefficient at (1/3, 2/3]
-		# red 	 ->	coefficient at (2/3, 1]
-		color <- sapply( c(1:length(coefAt_i)), function(j) {
-			ifelse(coefAt_i[j] <= 1/3, 'yellow', ifelse(coefAt_i[j] <= 2/3, 'orange', 'red'))
-		})
+		if (args$wt | args$wclo | args$wclu) {
+			# in the resulting graph nodes have a colour based on their local closure/clustering coefficients:
+			# yellow -> coefficient at [0, 1/3]
+			# orange -> coefficient at (1/3, 2/3]
+			# red 	 ->	coefficient at (2/3, 1]
+			color <- sapply( c(1:length(coefAt_i)), function(j) {
+				ifelse(coefAt_i[j] <= 1/3, 'yellow', ifelse(coefAt_i[j] <= 2/3, 'orange', 'red'))
+			})
+		}
+		if (args$adap) {
+			color <- sapply( c(1:length(coefAt_i)), function(j) {
+				ifelse(coefAt_i[j] == 2, 'black', ifelse(coefAt_i[j] == 1, 'grey', 'white'))
+			})
+		}
 		V(g)$color <- color
     layout <- cbind(posAt_i$x, posAt_i$y)
     pdf(paste(graphPrefix, i, ".pdf", sep = ""))
