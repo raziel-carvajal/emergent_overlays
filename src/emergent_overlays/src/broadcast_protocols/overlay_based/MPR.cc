@@ -222,7 +222,6 @@ void Mpr::handleEvent(cMessage* msg) {
     }
       break;
     case SEND_CTRL_MSG: {
-      controller->recordCurrentPosition();
       controller->send(getCtrlMsg());
     }
       break;

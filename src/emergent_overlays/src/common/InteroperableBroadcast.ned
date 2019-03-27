@@ -32,7 +32,7 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     double broadcastInterval @unit(s) = default(0.1s);
     double ctrlMsgInterval @unit(s) = default(10.0s);
-    double sentMsgFixedDelay @unit(s) = default(0.0001s);
+    double sentMsgFixedDelay @unit(s) = default(0.00001s);
     double startSendingCtrlMsgs @unit(s) = default(5.0s);
 
     int maxNodesNo = default(1000);

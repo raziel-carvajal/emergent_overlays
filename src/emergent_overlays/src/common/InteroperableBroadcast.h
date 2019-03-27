@@ -31,7 +31,7 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
   private:
     enum Timer {
-      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, SEND_BORDER_MSG, STORE_POSITION
+      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, SEND_BORDER_MSG, STORE_POSITION, RESET_BORDER_STATUS
     };
     enum UdpPacket {
       BROADCAST = 1, CTRL, BORDER_REQ, BORDER
@@ -41,11 +41,12 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     IProtocol* runningProtocol = nullptr;
 
-    cMessage* haltSimTimer = nullptr;
-    cMessage* broaMsgTimer = nullptr;
-    cMessage* motionTimer = nullptr;
-    cMessage* fwdBMsgTimer = nullptr;
-    cMessage* borderMsgTimer = nullptr;
+    cMessage* haltSimTimer = new cMessage("haltSimTimer");
+    cMessage* broaMsgTimer = new cMessage("broaMsgTimer");
+    cMessage* motionTimer = new cMessage("motionTimer");
+    cMessage* fwdBMsgTimer = new cMessage("fwdBMsgTimer");
+    cMessage* borderMsgTimer = new cMessage("borderMsgTimer");
+    cMessage* resetBorderTimer = new cMessage("resetBorderTimer");
 
     set<int> knownForeignAlgos;
 
@@ -157,11 +158,6 @@ class InteroperableBroadcast : public UDPBasicApp {
       } else {
         EV_DEBUG << "[" << nodeId << ", " << simTime() << "] - " << msg << endl;
       }
-    }
-    void recordCurrentPosition() {
-      inet::Coord pos = mobilityModel->getCurrentPosition();
-      emit(positionAtX, pos.x);
-      emit(positionAtY, pos.y);
     }
 
     void send(cPacket* pk);

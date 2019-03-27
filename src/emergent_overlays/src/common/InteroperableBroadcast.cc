@@ -35,11 +35,11 @@ simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type"
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
-    haltSimTimer = new cMessage("haltSimTimer");
-    broaMsgTimer = new cMessage("broaMsgTimer");
-    motionTimer = new cMessage("motionTimer");
-    fwdBMsgTimer = new cMessage("fwdBMsgTimer");
-    borderMsgTimer = new cMessage("borderMsgTimer");
+//    haltSimTimer = new cMessage("haltSimTimer");
+//    broaMsgTimer = new cMessage("broaMsgTimer");
+//    motionTimer = new cMessage("motionTimer");
+//    fwdBMsgTimer = new cMessage("fwdBMsgTimer");
+//    borderMsgTimer = new cMessage("borderMsgTimer");
     cMsgPar* p = new cMsgPar("foreignAlgoId");
     p->setLongValue(0);
     borderMsgTimer->addPar(p);
@@ -87,8 +87,9 @@ void InteroperableBroadcast::processStart() {
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
   // store nodes positions to get an approximation of the wireless topology formed during
   // the dissemination of broadcast messages
-  scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue() + maxNodesNo * sentMsgFixedDelay,
-      motionTimer);
+  scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
+  // TODO find out if this event increase reachability in highly dense networks
+//  scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
 
   // initialize objects that implement broadcast protocols
   intializeCatalog();
@@ -108,6 +109,7 @@ void InteroperableBroadcast::sendPacket() {
     // send now
     send(m);
     emit(sentBroadcastMsg, getMsgId(m->getName()));
+    emit(forward_type, runningProtocol->getFwdType());
     // tag packet as received
     receivedMsg.insert(m->getName());
   }
@@ -150,6 +152,12 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
         }
           break;
+        case Timer::RESET_BORDER_STATUS: {
+          isBorderNode = false;
+          knownForeignAlgos.clear();
+          scheduleEvent(Timer::RESET_BORDER_STATUS, par("ctrlMsgInterval").doubleValue(), resetBorderTimer);
+        }
+          break;
         case Timer::HALT_APP: {
           EV << "End of simulation from peer: " << nodeId << endl;
           if (broaMsgTimer)
@@ -158,6 +166,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
             cancelAndDelete(fwdBMsgTimer);
           if (motionTimer)
             cancelAndDelete(motionTimer);
+          if (resetBorderTimer)
+            cancelAndDelete(resetBorderTimer);
 
           cancelAndDelete(haltSimTimer);
 
@@ -244,6 +254,8 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       if (b->getRunningProtocol() == runningProtocolId) {
         if (knownForeignAlgos.find(b->getForeignAlgoId()) == knownForeignAlgos.end()) {
           knownForeignAlgos.insert(b->getForeignAlgoId());
+          // TODO currently all leaves of an overlay relay are chosen as border nodes;
+          // find a way to minimize such number of border nodes
           if (runningProtocol->amIoverlayRelay()) {
             if (!b->getFromOverlayRelay()) {
               borderMsgTimer->getParList().remove("foreignAlgoId");
@@ -307,7 +319,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
   return haltSimTimer == msg || broaMsgTimer == msg || motionTimer == msg || fwdBMsgTimer == msg
-      || borderMsgTimer == msg;
+      || borderMsgTimer == msg || resetBorderTimer == msg;
 }
 
 cPacket* InteroperableBroadcast::getBroadcastMsg() {

@@ -32,6 +32,6 @@ get_wireless_topology <- function(positions, tx, plot = FALSE, graphName = "grap
   V(g)$label <- ""
   V(g)$label.cex <- 0.4
   V(g)$frame.color <- "black"
- 
+
   g
 }
