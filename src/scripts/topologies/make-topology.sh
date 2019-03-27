@@ -95,6 +95,7 @@ cfgsForWorkers=""
 cfgFile='../../../experiments/configs/in_common/common.ini'
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 algoClassMap="../../../experiments/configs/in_common/algo_class_mapping"
+let n=${firsAtDenseA}+${nodes}
 for algo in ${algorithms} ; do
   # add configuration of exepriment
 	cat "${cfgFile}" > iniFile
@@ -114,7 +115,6 @@ for algo in ${algorithms} ; do
   sed -i -e "s/BROADCAST_MSG_INTERVAL/${broaMsgInterval}s/" iniFile
 
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
-  sed -i -e "s/WITH_ADAPTATION/${WITH_ADAPTATION}/" iniFile
 
   algoCfgFpath="../../../experiments/configs/in_common/protocols"
   # concat attributes per algorithm
@@ -123,22 +123,21 @@ for algo in ${algorithms} ; do
       echo "**.udpApp[0].${opt}" >> iniFile
     done
   fi
-
+	# toatl number of nodes in the network
+	echo "**.udpApp[0].maxNodesNo = ${n}" >> iniFile
   # set the algorithm that nodes use to bootstrap
   if [ "${algo}" == "hybrid" ] ; then
     # set algorithm for nodes at sparse area
     i=1; let j=${firsAtDenseA}-1
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
-    echo "*.host{${i}..${j}}.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
+    echo "*.host{${i}..${j}}.udpApp[0].runningProtocolId = ${algoClassName}" >> iniFile
     # set algorithm for nodes at dense area
     i=${firsAtDenseA}; let j=${firsAtDenseA}+${nodes}
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
-    echo "*.host{${i}..${j}}.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
-		# enable interoperability mechanism
-		echo "**.udpApp[0].enableInterop=true" >> iniFile
+    echo "*.host{${i}..${j}}.udpApp[0].runningProtocolId = ${algoClassName}" >> iniFile
   else
     algoClassName=`grep ${algo} ${algoClassMap} | awk -F "=" '{print $2}'`
-    echo -e "**.udpApp[0].typename=\"${algoClassName}\"" >> iniFile
+    echo -e "**.udpApp[0].runningProtocolId = ${algoClassName}" >> iniFile
   fi
   mv iniFile "${mobF}${algo}.ini"
   mv "${mobF}${algo}.ini" ../../../experiments/configs/built_configs
