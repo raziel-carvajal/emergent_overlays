@@ -21,4 +21,5 @@ RUN R CMD BATCH r-worker-pkgs.R
 RUN mkdir -p src/scripts
 COPY src/scripts/get-broadcast-metrics.sh ./src/scripts/
 COPY src/scripts/get-broadcast-metrics.R ./src/scripts/
+ADD src/scripts/R ./src/scripts/R
 CMD cd src/scripts && ./get-broadcast-metrics.sh
