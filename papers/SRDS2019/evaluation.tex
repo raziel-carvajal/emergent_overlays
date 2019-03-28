@@ -1,20 +1,21 @@
 %!TEX root = main.tex
 %=========================================================
 
-\begin{figure*}[ht]
-	\begin{center}
-	\subfigure[Saved rebroadcasts]{
+\begin{figure}[htbp]
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/sre.pdf}
+    \caption{Saved rebroadcasts}
 		\label{fig:rebroadcasts}
-		\includegraphics[scale=0.30]{figures/sre.pdf}
-	}
-	\subfigure[Reachability]{
-		\label{fig:reachability}
-		\includegraphics[scale=0.30]{figures/coverage.pdf}
-	}
-	\caption{Saved rebroadcast and reachability over different networks.}
-	\label{fig:sre-coverage}
-	\end{center}
-\end{figure*}
+	\end{minipage}%
+  \hfill%
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/coverage.pdf}
+    \caption{Reachability}
+    \label{fig:reachability}
+	\end{minipage} 
+%	\caption{Saved rebroadcast and reachability over different networks.}
+%	\label{fig:sre-coverage}
+\end{figure}
 
 \section{Evaluation}
 \label{sec:evaluation}
