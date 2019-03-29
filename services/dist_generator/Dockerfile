@@ -1,9 +1,9 @@
-FROM r-base
+FROM debian:9
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 
 WORKDIR /usr/emrg-ovrl
-RUN apt update && apt -y --no-install-recommends install curl
 
+RUN apt-get update && apt-get -y --no-install-recommends install r-base curl wget python
 # setting up omnetpp library
 RUN \
   wget https://github.com/downloads/omnetpp/omnetpp-resultfiles/omnetpp_0.2-1.tar.gz
@@ -22,4 +22,5 @@ RUN mkdir -p src/scripts
 COPY src/scripts/get-broadcast-metrics.sh ./src/scripts/
 COPY src/scripts/get-broadcast-metrics.R ./src/scripts/
 ADD src/scripts/R ./src/scripts/R
+
 CMD cd src/scripts && ./get-broadcast-metrics.sh

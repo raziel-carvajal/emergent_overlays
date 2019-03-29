@@ -2,8 +2,10 @@ FROM r-base:latest
 MAINTAINER Raziel Carvajal-Gomez <raziel.carvajal@uclouvain.be>
 
 WORKDIR /usr/emrg-ovrl
+
+RUN apt update && apt -y --no-install-recommends install r-base python curl
+
 RUN mkdir -p src/scripts
-RUN apt update && apt -y --no-install-recommends install python curl
 
 COPY r-packages/r-plotter-pkgs.R .
 RUN R CMD BATCH r-plotter-pkgs.R
