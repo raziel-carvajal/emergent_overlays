@@ -2,13 +2,8 @@ library(igraph)
 
 get_neighbors <- function(nodeID, positions, tx) {
   node <- subset(positions, nodeId == nodeID)
-  others <- subset(positions, nodeId != nodeID)
-  neighbors <- sapply(others$nodeId, function(i) {
-    n <- subset(others, nodeId == i)
-    ifelse(sqrt((node$x - n$x) * (node$x - n$x) + (node$y - n$y) * (node$y -
-      n$y)) <= tx, n$nodeId, NA)
-  })
-  neighbors[!is.na(neighbors)]
+  neighbors <- subset(positions, abs(node$x - x) <= tx & abs(node$y - y) <= tx)
+	neighbors$nodeId
 }
 
 get_wireless_topology <- function(positions, tx, plot = FALSE, graphName = "graph") {
