@@ -16,8 +16,6 @@
 #       CREATED: 10/22/2018 14:58
 #      REVISION:  ---
 #===============================================================================
-
-set -o nounset                              # Treat unset variables as an error
 # [BEGIN] Comment to perform unit test
 while :
 do
@@ -65,15 +63,14 @@ echo -e "\tExperiment with mobility: ${withMobility}"
 Rscript get-broadcast-metrics.R \
   --simulation-time ${simTime} \
   --transmission-range ${tx} \
-	--dense-zone-at-x ${denseZoneCenterAtXY} \
-	--dense-zone-at-y ${denseZoneCenterAtXY} \
-	--dense-zone-w ${denseZoneWidth} \
+  --dense-zone-at-x ${denseZoneCenterAtXY} \
+  --dense-zone-at-y ${denseZoneCenterAtXY} \
+  --dense-zone-w ${denseZoneWidth} \
   --results-dir ../../results \
-  ${CONF_NAME} ${CONF_FILE} \
   --with-energy-consumption \
   --with-coverage \
-	--with-saved-rebroadcasts \
-	${withMobility}
+  --with-saved-rebroadcasts \
+  ${withMobility} ${CONF_NAME} ${CONF_FILE}
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}
