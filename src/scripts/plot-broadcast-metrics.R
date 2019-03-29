@@ -15,6 +15,8 @@ get_arguments <- function() {
   parser$add_argument('--plot-packet-err', dest='pe', action='store_true')
   parser$add_argument('--plot-sent-msgs', dest='sm', action='store_true')
   parser$add_argument('--plot-recv-msgs', dest='rm', action='store_true')
+	parser$add_argument('--plot-saved-rebroadcasts', dest='srb', action='store_true')
+	parser$add_argument('--with-colours', dest='wco', action='store_true')
 
   parser$parse_args()
 }
@@ -30,6 +32,9 @@ get.plot.theme.style <- function() {
   )
 }
 
+get.grey.theme <- function() {
+	scale_colour_grey() + theme_bw()
+}
 # TODO plot DENSE and SPARSE distribution in one plot
 # + scale_alpha_manual(values = c(0.3, 1))
 # guides(fill=guide_legend(title='Type:'), alpha=guide_legend(title='Zone:'))
@@ -65,27 +70,13 @@ plot.dist.as.cdf <- function(ds, title, xlabel, ylabel, xMax=NA) {
 	print(p)
 }
 
-plot.data.using.boxes <- function(ds, title, xlabel, ylabel) {
-  medians <- aggregate(ds$data ~ ds$algorithm, ds, median)
-  medians <- data.frame(
-    algorithm=medians[[1]], data=medians[[2]]
-  )
-  means <- aggregate(ds$data ~ ds$algorithm, ds, mean)
-  means <- data.frame(
-    algorithm=means[[1]], data=means[[2]]
-  )
-	p <- ggplot(data=ds, aes(x=algorithm, y=data, colour=algorithm))
-
-  # , show_guide = FALSE
-  p <- p + geom_boxplot() +
-    stat_summary(
-      fun.y=mean, colour="blue", geom="point", shape=18, size=3
-    ) +
-    geom_text(data=medians, aes(label=data, y=data - 20)) +
-    geom_text(data=means, aes(label=data, y=data + 10))
-
-  p <- p + ggtitle(title) + labs(x=xlabel, y=ylabel) + get.plot.theme.style() +
-    theme(legend.position='none')
+plot.data.using.boxes <- function(ds, title, xlabel, ylabel, y_limits = NA) {
+	p <- ggplot(data = ds, aes(x = network, y = data, colour = Algorithm))
+  p <- p + geom_boxplot(size = 1.0) + scale_colour_grey() + theme_bw()
+  p <- p + ggtitle(title) + labs(x = xlabel, y = ylabel)
+	if (!is.na(y_limits[1])) {
+		p <- p + scale_y_continuous(expand=c(0,0), limits=y_limits)
+	}
   print(p)
 }
 
@@ -93,25 +84,37 @@ args <- get_arguments()
 metadata = NULL
 separate_dist = TRUE
 
+headers <- c('network', 'data', 'Algorithm')
 if (args$pc) {
   print('Plotting power consumption')
   ds <- read.table(
     paste(args$resultsDir, 'batteryConsumptionDistribution', sep=''),
     header=F
   )
-  names(ds) <- c('data', 'algorithm')
+  names(ds) <- headers
   # NOTE uncomment to get energy consumption in Joules
   # plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules [mJ]')
   # plot.dist.as.cdf(
   #   ds, 'Energy consumption',
   #   'Milli Joules [mJ]', 'CDF'
   # )
-  plot.data.using.boxes(ds, 'Power consumption', 'Algorithm', 'Watts [W]')
-  plot.dist.as.cdf(
-    ds, 'Power consumption',
-    'Watts [W]', 'CDF over nodes'
-  )
+  plot.data.using.boxes(ds, 'Power consumption', '', 'Watts [W]')
+  # plot.dist.as.cdf(
+  #   ds, 'Power consumption',
+  #   'Watts [W]', 'CDF over nodes'
+  # )
   print('DONE')
+}
+
+if (args$srb) {
+  print('Plotting saved rebroadcasts')
+  ds <- read.table(
+    paste(args$resultsDir, 'savedRebroadcasts', sep=''),
+    header=F
+  )
+  names(ds) <- headers
+  plot.data.using.boxes(ds, 'Saved rebroadcasts', '', 'Broadcast sessions [%]', c(0, 100))
+	print('DONE')
 }
 
 if (args$co) {
@@ -120,10 +123,9 @@ if (args$co) {
     paste(args$resultsDir, 'coverage', sep=''),
     header=F
   )
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, 'Network Coverage',
-    'Broadcast sessions (%)', 'Nodes'
+  names(ds) <- headers
+  plot.data.using.boxes(
+    ds, 'Reachability', '', 'Broadcast sessions [%]', c(0, 100)
   )
   print('DONE')
 }
