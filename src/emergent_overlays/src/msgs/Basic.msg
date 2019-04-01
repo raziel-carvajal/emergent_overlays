@@ -41,8 +41,3 @@ packet MprCtrl extends Basic {
 }
 
 packet BorderReq extends Basic {}
-
-packet Border extends Basic {
-	int foreignAlgoId;
-	bool fromOverlayRelay;
-}

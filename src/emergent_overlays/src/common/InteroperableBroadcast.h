@@ -31,10 +31,11 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
   private:
     enum Timer {
-      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, SEND_BORDER_MSG, STORE_POSITION, RESET_BORDER_STATUS
+      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG,
+      STORE_POSITION, SEND_BORDER_REQ, RESET_BORDER_STATUS
     };
     enum UdpPacket {
-      BROADCAST = 1, CTRL, BORDER_REQ, BORDER
+      BROADCAST = 1, CTRL, BORDER_REQ
     };
 
     int runningProtocolId;
@@ -79,7 +80,6 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     cPacket* getBroadcastMsg();
     cPacket* getBorderReqMsg();
-    cPacket* getBorderMsg(int foreignAlgoId);
 
     L3Address getSrcAddress(cPacket *msg);
 
@@ -88,6 +88,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     string splitString(string substr, string target) {
       return target.substr(substr.size(), target.size() - substr.size());
     }
+
+//    set<string> choseBorderNodes();
 
   protected:
     // define a new implementation for some methods of super class (INET::UDPBasicApp)
@@ -102,15 +104,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     string removeQuotes(string target) {
       return target.substr(1, target.size() - 2);
     }
-
-//    template<typename T> bool isPacket(cPacket* pkt, function<bool(const T*)> action) {
-//      T* t = dynamic_cast<T*>(pkt);
-//      if (t != nullptr) {
-//        return action(t);
-//      } else {
-//        return false;
-//      }
-//    }
 
   public:
     enum Protocols {
@@ -135,6 +128,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     set<string> receivedMsg;
 
     string nodeId;
+    string foreignPkName = "2ndCtrlMsg";
 
     double transRadious;
     double sentMsgDelay;

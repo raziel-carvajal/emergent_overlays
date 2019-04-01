@@ -25,10 +25,8 @@ class Mpr : public IProtocol {
   private:
 
     enum MprTimers {
-      BUILD_CDS,  SCHEDULE_FIRST_CTRL_MSG, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
+      BUILD_CDS, SCHEDULE_FIRST_CTRL_MSG, SCHEDULE_CTRL_MSGS, SEND_CTRL_MSG, FWD_BROADCAST_MSG
     };
-
-    double similarity;
 
     bool isOverlayRelay = false;
 
@@ -43,7 +41,6 @@ class Mpr : public IProtocol {
     cMessage* sRemainingCtrlMsgTimer = new cMessage("sRemainingCtrlMsgTimer");
 
     set<string> currentMpr;
-    set<string> previousNeigs;
 
     map<string, set<string>> neighbors;
 
@@ -70,25 +67,6 @@ class Mpr : public IProtocol {
 
     bool amIrelay(set<string> senderNeigs);
 
-    bool neigsChanged() {
-      double ratio;
-      double currentSim = 0.0;
-      if (previousNeigs.size() < neighbors.size()) {
-        ratio = 1 / (1.0 * neighbors.size());
-        for (set<string>::iterator it = previousNeigs.begin(); it != previousNeigs.end(); ++it) {
-          if (neighbors.find(*it) != neighbors.end())
-            currentSim += ratio;
-        }
-      } else {
-        ratio = 1 / (1.0 * previousNeigs.size());
-        for (auto it = neighbors.begin(); it != neighbors.end(); ++it) {
-          if (previousNeigs.find(it->first) != previousNeigs.end())
-            currentSim += ratio;
-        }
-      }
-      return currentSim >= similarity ? false : true;
-    }
-
   public:
 
     Mpr() {
@@ -112,11 +90,19 @@ class Mpr : public IProtocol {
     void onControlMsg(cPacket* pk, const char* sender);
 
     cPacket* createBroadcastMsg(const char* msgId);
-    cPacket* getCtrlMsg();
+    cPacket* getCtrlMsg(int withName);
 
     int getFwdType();
 
     bool amIoverlayRelay();
+
+    set<string> getNeighbors() {
+      set<string> neigs;
+      for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+        neigs.insert(it->first);
+      }
+      return neigs;
+    }
 };
 
 #endif /* MPR_H_ */

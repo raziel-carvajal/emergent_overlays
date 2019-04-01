@@ -48,6 +48,11 @@ class Flooding : public IProtocol {
     int getFwdType();
 
     bool amIoverlayRelay();
+
+    std::set<std::string> getNeighbors(){
+      std::set<std::string> neigs;
+      return neigs;
+    }
 };
 
 #endif /* FLOODING_H_ */

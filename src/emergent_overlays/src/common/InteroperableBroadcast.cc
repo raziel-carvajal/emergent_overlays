@@ -35,11 +35,6 @@ simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type"
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
-//    haltSimTimer = new cMessage("haltSimTimer");
-//    broaMsgTimer = new cMessage("broaMsgTimer");
-//    motionTimer = new cMessage("motionTimer");
-//    fwdBMsgTimer = new cMessage("fwdBMsgTimer");
-//    borderMsgTimer = new cMessage("borderMsgTimer");
     cMsgPar* p = new cMsgPar("foreignAlgoId");
     p->setLongValue(0);
     borderMsgTimer->addPar(p);
@@ -88,8 +83,8 @@ void InteroperableBroadcast::processStart() {
   // store nodes positions to get an approximation of the wireless topology formed during
   // the dissemination of broadcast messages
   scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
-  // TODO find out if this event increase reachability in highly dense networks
-//  scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
+  // erase the content of previously known foreign algorithms
+  scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
 
   // initialize objects that implement broadcast protocols
   intializeCatalog();
@@ -129,12 +124,6 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           UDPBasicApp::processSend();
         }
           break;
-        case Timer::SEND_BORDER_MSG: {
-          log("Sending Border packet");
-          int algoId = msg->par("foreignAlgoId").longValue();
-          send(getBorderMsg(algoId));
-        }
-          break;
         case Timer::FWD_BROADCAST_MSG: {
           send(latestPkToFwd);
           emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
@@ -150,6 +139,11 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           emit(positionAtX, pos.x);
           emit(positionAtY, pos.y);
           scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
+        }
+          break;
+        case Timer::SEND_BORDER_REQ: {
+          log("Sending BorderReq packet");
+          send(getBorderReqMsg());
         }
           break;
         case Timer::RESET_BORDER_STATUS: {
@@ -215,10 +209,15 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
             "Ctrl msg [" + string(pk->getName()) + "] received from node running ["
                 + to_string(basicPk->getRunningProtocol()) + "]");
         if (knownForeignAlgos.find(basicPk->getRunningProtocol()) == knownForeignAlgos.end()) {
-          knownForeignAlgos.insert(basicPk->getRunningProtocol());
-          log("I am Border node (UdpPacket::CTRL)");
-          isBorderNode = true;
-          send(getBorderReqMsg());
+
+          if (basicPk->getName() == foreignPkName) {
+            knownForeignAlgos.insert(basicPk->getRunningProtocol());
+            log("I am Border node (UdpPacket::CTRL)");
+            isBorderNode = true;
+            scheduleEvent(Timer::SEND_BORDER_REQ, sentMsgFixedDelay, borderMsgTimer);
+          } else {
+            log("Ignoring foreign control message");
+          }
         }
       } else {
         runningProtocol->onControlMsg(pk, sender.c_str());
@@ -232,43 +231,14 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       // we haven't heard from another node running such foreign algorithm
       if (br->getRunningProtocol() != runningProtocolId
           && knownForeignAlgos.find(br->getRunningProtocol()) == knownForeignAlgos.end()) {
+        // leaf node in a overlay-based approach
         knownForeignAlgos.insert(br->getRunningProtocol());
 
         if (!runningProtocol->amIoverlayRelay()) {
           log("I am Border node UdpPacket::BORDER_REQ");
           isBorderNode = true;
         }
-        borderMsgTimer->getParList().remove("foreignAlgoId");
-        cMsgPar* p = new cMsgPar("foreignAlgoId");
-        p->setLongValue(br->getRunningProtocol());
-        borderMsgTimer->addPar(p);
-        scheduleEvent(Timer::SEND_BORDER_MSG, sentMsgFixedDelay, borderMsgTimer);
 
-      }
-    }
-      break;
-    case UdpPacket::BORDER: {
-      log("Border packet received");
-      Border* b = dynamic_cast<Border*>(pk);
-      // Border packets are accepted only from nodes running the same algorithm
-      if (b->getRunningProtocol() == runningProtocolId) {
-        if (knownForeignAlgos.find(b->getForeignAlgoId()) == knownForeignAlgos.end()) {
-          knownForeignAlgos.insert(b->getForeignAlgoId());
-          // TODO currently all leaves of an overlay relay are chosen as border nodes;
-          // find a way to minimize such number of border nodes
-          if (runningProtocol->amIoverlayRelay()) {
-            if (!b->getFromOverlayRelay()) {
-              borderMsgTimer->getParList().remove("foreignAlgoId");
-              cMsgPar* p = new cMsgPar("foreignAlgoId");
-              p->setLongValue(b->getForeignAlgoId());
-              borderMsgTimer->addPar(p);
-              scheduleEvent(Timer::SEND_BORDER_MSG, sentMsgFixedDelay, borderMsgTimer);
-            }
-          } else {
-            log("I am Border node UdpPacket::BORDER");
-            isBorderNode = true;
-          }
-        }
       }
     }
       break;
@@ -287,6 +257,48 @@ void InteroperableBroadcast::scheduleEvent(short kind, double delay, cMessage* s
   selfMsgPtr->setKind(kind);
   scheduleAt(t, selfMsgPtr);
 }
+
+//set<string> InteroperableBroadcast::choseBorderNodes() {
+//  string temp("Chosen border nodes: ");
+//  set<string> chosen;
+//  set<string> neigs = runningProtocol->getNeighbors();
+//  log("Neighbors number: " + to_string(neigs.size()));
+//  set<string>::iterator it = neigs.begin();
+//  if (neigs.size() == 1 || neigs.size() == 2) {
+//    chosen.insert(*it);
+//    log(temp + *it);
+//    return chosen;
+//  } else {
+//    int lim = ceil(neigs.size() / 2.0);
+//    while ((int) chosen.size() != lim) {
+//      int i = 0;
+//      int n = neigs.size();
+//      string ids[n];
+//      for (it = neigs.begin(); it != neigs.end(); ++it) {
+//        ids[i] = *it;
+//        i++;
+//      }
+//      double opts[n];
+//      double f = 1 / (n * 1.0);
+//      for (i = 0; i < n - 1; ++i) {
+//        opts[i] = (i + 1) * f;
+//      }
+//      opts[i] = 1;
+//      for (i = 0; i < n; ++i) {
+//        if (uniform(0, 1) <= opts[i]) {
+//          neigs.erase(ids[i]);
+//          chosen.insert(ids[i]);
+//          break;
+//        }
+//      }
+//    }
+//  }
+//  for (it = chosen.begin(); it != chosen.end(); ++it) {
+//    temp += *it + ", ";
+//  }
+//  log(temp);
+//  return chosen;
+//}
 
 int InteroperableBroadcast::getMsgId(string msgHeader) {
   string pkName(this->packetName);
@@ -313,7 +325,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   addSender(latestPkToFwd);
   // update headers of running protocol
   runningProtocol->updateProtocolHeaders(latestPkToFwd);
-
+  // uniform(sentMsgFixedDelay, sentMsgFixedDelay * 10)
   scheduleEvent(Timer::FWD_BROADCAST_MSG, sentMsgFixedDelay, fwdBMsgTimer);
 }
 
@@ -326,7 +338,7 @@ cPacket* InteroperableBroadcast::getBroadcastMsg() {
   UDPBasicApp::numSent++;
   string name(this->packetName);
   name += to_string(numSent);
-  // let each protocol create broadcast messages
+// let each protocol create broadcast messages
   cPacket* pk = runningProtocol->createBroadcastMsg(name.c_str());
   addBroadcastHeaders(pk);
 
@@ -338,15 +350,6 @@ cPacket* InteroperableBroadcast::getBorderReqMsg() {
   r->setRunningProtocol(runningProtocolId);
   addPacketType(r, UdpPacket::BORDER_REQ);
   return r;
-}
-
-cPacket* InteroperableBroadcast::getBorderMsg(int foreignAlgoId) {
-  Border* b = new Border();
-  b->setForeignAlgoId(foreignAlgoId);
-  b->setRunningProtocol(runningProtocolId);
-  b->setFromOverlayRelay(runningProtocol->amIoverlayRelay());
-  addPacketType(b, UdpPacket::BORDER);
-  return b;
 }
 
 void InteroperableBroadcast::send(cPacket* pk) {

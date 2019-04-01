@@ -16,6 +16,9 @@
 #ifndef IPROTOCOL_H_
 #define IPROTOCOL_H_
 
+#include <set>
+#include <string>
+
 class cMessage;
 class InteroperableBroadcast;
 class cPacket;
@@ -23,8 +26,6 @@ class cPacket;
 class IProtocol {
   public:
     virtual ~IProtocol() {}
-
-    virtual bool isProtocolEvent(cMessage* msg) = 0;
 
     virtual void setController(InteroperableBroadcast* c) = 0;
     virtual void handleEvent(cMessage* msg) = 0;
@@ -41,7 +42,9 @@ class IProtocol {
     virtual int getFwdType() = 0;
 
     virtual bool amIoverlayRelay() = 0;
-//    virtual void sendCtrlMsg() = 0;
+    virtual bool isProtocolEvent(cMessage* msg) = 0;
+
+    virtual std::set<std::string> getNeighbors() = 0;
 };
 
 #endif /* IPROTOCOL_H_ */

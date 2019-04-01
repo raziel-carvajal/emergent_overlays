@@ -222,7 +222,7 @@ void Mpr::handleEvent(cMessage* msg) {
     }
       break;
     case SEND_CTRL_MSG: {
-      controller->send(getCtrlMsg());
+      controller->send(getCtrlMsg(1));
     }
       break;
     case SCHEDULE_FIRST_CTRL_MSG: {
@@ -246,7 +246,7 @@ void Mpr::sendCtrlMsg() {
   controller->cancelEvent(sCtrlMsgTimer);
   controller->cancelEvent(buildCdsTimer);
   // use to get the list of one-hop neighbors
-  controller->send(getCtrlMsg());
+  controller->send(getCtrlMsg(0));
   double t = controller->sentMsgFixedDelay * controller->maxNodesNo;
   // use to get the list of two-hop neighbors
   controller->scheduleEvent(SEND_CTRL_MSG, t, sCtrlMsgTimer);
@@ -256,8 +256,13 @@ void Mpr::sendCtrlMsg() {
   controller->log("next BuildCdsMsg at " + to_string(2 * t - controller->sentMsgDelay));
 }
 
-cPacket* Mpr::getCtrlMsg() {
-  MprCtrl* m = new MprCtrl();
+cPacket* Mpr::getCtrlMsg(int withName) {
+  MprCtrl* m = nullptr;
+  if (withName == 1) {
+    m = new MprCtrl(controller->foreignPkName.c_str());
+  } else {
+    m = new MprCtrl();
+  }
   m->setRunningProtocol(controller->MPR);
   controller->addCtrlHeaders(m);
 
