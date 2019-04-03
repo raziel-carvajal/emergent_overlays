@@ -3,91 +3,187 @@
 
 \section{Introduction}
 \label{sec:introduction}
-Mobile Ad-hoc Networks (MANETs) are wireless networks that do not relay on fixed infrastructures, such as access points, antennas or routers.
-%
-The participants or nodes in these networks operate on battery powered devices, nodes move following patterns hard to predict and they communicate with each other in a peer-to-peer fashion.
-%
-As a result of these operating conditions, we obtain a dynamic mobile system.
-%
-Real-life scenarios are dynamic systems as well, and MANETs characterize some of their changing conditions.
-%
-For instance, restricted zones that are used for military exercises.
-%
-Figure~\ref{fig:manet-example} depicts another scenario, a city that has deployed its mitigation program to deal with a natural catastrophe.
-%
-Cellular networks or other communication systems are not reliable in this scenario, and at the same time, people need to be informed of latest events.
-%
-We notice an heterogeneous amount of people (represented with dots) spread over every zone in the figure.
-%
-Shelters or canteens usually gather more people than others zones such as information desks or corridors to allow transit between point of interests.
-%
-Another characteristic is mobility, civilians receiving instructions may remain more static from paramedics or police officers that are in constant movement.
-%
-\begin{figure}[h]
-	\centering
-	\includegraphics[scale=0.32]{figures/protest.png}
-	\caption{Examples of real-life scenarios where MANETs may be deployed.}
-	\label{fig:manet-example}
-\end{figure}
-%
-A messaging service deployed on the top of a MANET where people use their mobile phones (or any other wireless device) for relying information, may improve the efficiency of the mitigation program shown in figure~\ref{fig:manet-example}.
-%
-On the contrarily, reliable communication in such scenario is a challenging task because there is no guarantee of end-to-end connectivity between nodes due to the operating conditions in the network.
 
+Mobile Ad-hoc Networks (MANETs) are distributed systems that do not rely on a fixed networking infrastructure.
+Nodes are mobile and rely on wireless communication with other nodes in range, subject to faults and uncertainty.
+Furthermore, nodes are typically energy-bounded being powered by batteries.
+MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure is not sufficient.
+%
+A first example target is a large, ephemeral human gathering where the cost of setting up the required infrastructure for network communication of a few thousand users would be too high to even make sense.
+Music festivals are a good example of such ephemeral gathering where MANETs could allow communicating effectively with a large number of human users despite the lack of sufficient cell phone coverage and local network saturation.
+A second example is an emergency scenario where teams of rescuers must coordinate over an area where communication infrastructure or power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
+A final example will be with the upcoming bloom of vehicular networks, where efficient communication between autonomous or semi-autonomous cars must be enabled also in locations where infrastructure support is poor or non-existent~\cite{rahim2018vehicular}.
 
-%%
-Broadcast is a fundamental operation in MANETs that consist in delivering a message from a source node to every other node in the network.
-%
-Data dissemination in crowds, peer-to-peer mobile games or routing are examples of services that relay on this operation~\cite{overview_adhoc_networks}.
-%
-A vast amount of broadcast protocols have been proposed to figure out a trade-off between reachability and nodes resources (mainly energy consumption).
-%
-They differ in the way 
-%
-A survey by Ruiz and Bouvry~\cite{SurveyRuiz} classifies protocols in two main families.
-%
-Protocols of the first group rely on overlays where nodes either forward incoming messages or act as receivers. \er{You should already emphasize that the overlay is built outside of the actual dissemination, while the flooding decides during the dissemination. This is the main difference that concerns us.}
-%
-Nodes build and maintain an overlay via the periodic exchange of control packets that announce nodes existence. \er{not sure we need to detail how the overlay is built here}
-%
-The second group of broadcast protocols do not build overlays, instead, nodes forward messages until predefined thresholds reach a maximum value (e.x. number of receives copies) or the forwarding decision is based on a stochastic approach. \er{you are too specific about the implementations of flooding. It should be enough to write that the nodes make the decision to forward or not based on local information available at the time the message is received.}
-%
-Reliable broadcast remains a challenging task, not only for deciding which is the protocol that shows better performance but also due to the operating conditions in MANETs.
-%
-Moreover, previous works on mobility models for wireless networks~\cite{bai2004mobility, ChaintreauA2006}, evaluation studies on broadcast strategies~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} or micro-benchmarks on highly dynamic networks~\cite{adaptive_group_com_iscc02, ObraczkaK_2001} have shown that the performance of protocols for MANETs is influenced by operating conditions in the network, where mobility and density are key factors.
+A MANET typically involves a large number of nodes with arbitrary mobility patterns.
+For human-attached nodes such as smartphones or tablets, mobility models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy,jardosh2003towards,bai2004mobility,ChaintreauA2006}.
+Two constants in these models is that \emph{mobility} is heterogeneous, with nodes alternating between periods of high and low speed, and the presence of points of attraction around which users tend to aggregate~\cite{stepanov2005mobility_model_outdoor}.
+As a result, the \emph{density} of nodes is also heterogeneous, with areas around these points of interests that are densely populated and other areas that may only contain a few nodes.
+This heterogeneity in space has been confirmed by an experimental study performed at the Paléo music festival in Nyon, Switzerland~\cite{naini2015opportunistic}.
+The authors performed an estimation of the population size and of its spatial distribution during the event by collecting unique MAC address from the significant portion of attendees' mobiles phone that were discoverable via bluetooth.
+The authors report that the density of nodes in every $15m\times 15m$ areas can vary by at least one order of magnitude (10x).
+A similar study during a street festival in Ghent, Belgium~\cite{versichele2012use} also reports a high density heterogeneity, and confirms the intuition that users tend to alternate between aggregating in dense, lowly-mobile zones (points of interests) and moving between these zones with a higher mobility. % ER need to read in more detail to check if true.
 
+% A similar experiment in the EPFL campus~\cite{naini2015opportunistic} using Wifi discovery found density differences of up to 6 times between different zones.
 
-%%
-We propose an autonomous adaptation protocol for MANETs that allow nodes to automatically emerge overlays where they are beneficial for broadcast cost and performance, and dynamically adapt to changing mobility and density conditions.
+% ER: we could cite two more papers on bluetooth mobility mining:
+% \cite{Stange:2011:AWM:2077357.2077368}
+% \cite{Ellersiek:2013:UBT:2533810.2533813}
+
+Broadcast is one of the fundamental operations enabling applications in MANETs.
+It allows delivering message from any source to all nodes in the network, e.g. to forward announcements and news live to all nodes in the music festival mobile application.
+Efficient routing actually also depends on the availability of an efficient and reliable broadcast primitive~\cite{overview_adhoc_networks,survey_routing}.
+Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
+The main hinderance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
+Collisions are not always possible to detect, and costly to address.
+A MAC layer implementing acknowledgments and resubmissions can a significant performance and energy cost. %% ER: add ref to a MAC layer
+The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
+
+Broadcast protocols can be classified in two main families~\cite{SurveyRuiz}: 
+	Protocols based on controlled flooding on the one hand, 
+	and protocols relying on the creation and maintenance of an overlay network, on the other hand.
 %
-Nodes follow one main switching criterion that is triggered when the local perspective of nodes reaches predefined thresholds.
+Controlled flooding protocols propagate a message between nodes using local wireless broadcast.
+Each node receiving a message decides whether or not (and when) to retransmit the message locally, on the sole base of information attached to that message, the state of the local node and the observation of its surroundings.
+Controlled flooding is prone to broadcast storm but is expected to be robust to highly mobile and dynamic environments.
 %
-That is, overlays emerge in highly dense areas where nodes move slowly whereas controlled flooding techniques are deployed in dynamic areas with low density.
+Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the dissemination itself.
+A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange of control messages.
+Relay node form a dissemination structure, or overlay, over the MANET.
+The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve so much that it makes the structure obsolete too early.
+
+Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} show that the performance, reliability and energy consumption of various algorithms of the two classes is highly dependent on their deployment conditions.
+Controlled flooding algorithms, such as \er{give list + references} are efficient in sparsely-populated areas and when nodes are highly mobile.
+Overlay-based algorithms such as \er{give list + references} on the other hand, shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
+
+\smallskip
+\noindent
+\textbf{Contributions}
 %
-Dissemination overlays require nodes to keep track of their closest neighbors.
-%
-Dense areas with low velocity avoid abrupt changes in nodes surroundings, therefore, we find an opportunity for having more stable overlays that are easy to maintain.
-%
-Deploying controlled flooding techniques in more dynamic areas relies on previous studies on broadcast protocols~\cite{adaptive_group_com_iscc02} that have shown better performance. \raziel{add references to flooding approaches in sparse with low velocity of nodes}
-%
-Previous works on adaptive approaches for message dissemination in MANETs have shown that there is no one-fit-all solution~\cite{adaptive_group_com_iscc02}, we agree with this notion.\raziel{add references of adaptive approaches}.
-%
-Our adaptive approach, on the other hand, fills the gap in providing generalized solutions that integrate different broadcast techniques and deal with the interoperability issues of having multiple protocols running concurrently in a deployed MANET.
-%
-In concrete, our contributions are as follows:
+We are interested in this paper in efficient broadcast in heterogeneous MANETs.
+We start from the observation that controlled flooding protocols are efficient in the general case of mobile and lowly to moderately dense regions of the network, but become very inefficient and costly otherwise, that is, in conditions where paying the price of constructing and leveraging an overlay makes sense from a cost and reliability point of view.
+
+We present the novel notion of \emph{\textbf{emergent overlays}}.
+Emergent overlays is a adaptation technique in which nodes in a MANET autonomously decide to switch from the use of a default, controlled flooding based broadcast, to a protocol creating an overlay and using it for dissemination, based on their deployment density and nodes mobility.
+We make the following contributions towards the design, implementation and evaluation of emergent overlays:
 \begin{itemize}
-	\item A novel self-adaptive approach to broadcast in MANETs where nodes follows a main switching criterion, that is, the deployment of dissemination overlays in densely-populated areas whereas controlled flooding techniques are used in sparsely-populated areas.
-	\item A list of adaptive policies mainly based on nodes velocity and density to trigger our switching criterion. Such list may be easily extended with other information available in nodes.
-	\item To our knowledge, there is no previous work on broadcast protocols for MANETs that uses the local degree of nodes as a measure of density. We use the local clustering coefficient and a recently propose variation of it called closure coefficient~\cite{closure_coef} for the design of adaptation policies.
-	\item Our adaptive approach is available to the research community in form of a framework, which uses Docker containers to help in the reproducibility of results~\cite{emergent_overlays_repo}.
+	\item We present our system model and three base protocols (\S\ref{sec:background}):
+	\begin{itemize}
+		\item A controlled flooding protocol implementing best practices from \er{list the protocols you used as a basis for yours};
+		\item The CDS overlay-based protocol;
+		\item A novel MAC layer enabling cost-efficient local broadcast adapted to the needs of these two protocols.
+	\end{itemize}
+	\item We define the high-level requirements and objectives for emergent overlays adaptation (\S\ref{sec:overview}).
+	\item We address the interoperability challenge introduced by the presence of zones using different protocols, and discuss a protocol allowing to guarantee continuity in the broadcast process across heterogeneous protocols (\S\ref{sec:mechanisms});
+	\item We define a number of \emph{observables} allowing to drive the adaptation and emergence of overlays, and present a number of adaptation \emph{policies} leveraging them (\S\ref{sec:evaluation}).
+	\item We discuss the implementation and evaluation of emergent overlays in the OMNeT++ framework~\cite{Varga:2008:OOS:1416222.1416290}.
+	We evaluate our approach in a number of representative scenarios and compare it to other approaches for broadcast adaptation.
+	\er{our results ...} (\S\ref{sec:evaluation})
 \end{itemize}
+We finally discuss related work (\S\ref{sec:related}) and present our conclusions (\S\ref{sec:conclusion}).
 
-
-%%
-The rest of the paper is organized as follows.
 %
-In the next section, we give a background in broadcast algorithms and the terminology we use in our adaptive approach.
 %
-\raziel{TBD: the content here may change and we leave it for later}
+% %
+% Protocols of the first group rely on overlays where nodes either forward incoming messages or act as receivers. \er{You should already emphasize that the overlay is built outside of the actual dissemination, while the flooding decides during the dissemination. This is the main difference that concerns us.}
+% %
+% Nodes build and maintain an overlay via the periodic exchange of control packets that announce nodes existence. \er{not sure we need to detail how the overlay is built here}
+% %
+% The second group of broadcast protocols do not build overlays, instead, nodes forward messages until predefined thresholds reach a maximum value (e.x. number of receives copies) or the forwarding decision is based on a stochastic approach. \er{you are too specific about the implementations of flooding. It should be enough to write that the nodes make the decision to forward or not based on local information available at the time the message is received.}
+% %
+% Reliable broadcast remains a challenging task, not only for deciding which is the protocol that shows better performance but also due to the operating conditions in MANETs.
+% %
+% Moreover, previous works on mobility models for wireless networks~\cite{bai2004mobility, ChaintreauA2006}, evaluation studies on broadcast strategies~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} or micro-benchmarks on highly dynamic networks~\cite{adaptive_group_com_iscc02, ObraczkaK_2001} have shown that the performance of protocols for MANETs is influenced by operating conditions in the network, where mobility and density are key factors.
 %
-Finally, we discuss the perspective of this work in Section~\ref{sec:conclusion} and conclude in Section~\ref{sec:conclusion}.
+%
+%
+%
+%
+%
+% Mobile Ad-hoc Networks (MANETs) are wireless networks that do not relay on fixed infrastructures, such as access points, antennas or routers.
+% %
+% The participants or nodes in these networks operate on battery powered devices, nodes move following patterns hard to predict and they communicate with each other in a peer-to-peer fashion.
+% %
+% As a result of these operating conditions, we obtain a dynamic mobile system.
+% %
+% Real-life scenarios are dynamic systems as well, and MANETs characterize some of their changing conditions.
+% %
+% For instance, restricted zones that are used for military exercises.
+% %
+% Figure~\ref{fig:manet-example} depicts another scenario, a city that has deployed its mitigation program to deal with a natural catastrophe.
+% %
+% Cellular networks or other communication systems are not reliable in this scenario, and at the same time, people need to be informed of latest events.
+% %
+% We notice an heterogeneous amount of people (represented with dots) spread over every zone in the figure.
+% %
+% Shelters or canteens usually gather more people than others zones such as information desks or corridors to allow transit between point of interests.
+% %
+% Another characteristic is mobility, civilians receiving instructions may remain more static from paramedics or police officers that are in constant movement.
+% %
+% % \begin{figure}[h]
+% % 	\centering
+% % 	\includegraphics[scale=0.32]{figures/protest.png}
+% % 	\caption{Examples of real-life scenarios where MANETs may be deployed.}
+% % 	\label{fig:manet-example}
+% % \end{figure}
+% %
+% A messaging service deployed on the top of a MANET where people use their mobile phones (or any other wireless device) for relying information, may improve the efficiency of the mitigation program shown in figure~\ref{fig:manet-example}.
+% %
+% On the contrarily, reliable communication in such scenario is a challenging task because there is no guarantee of end-to-end connectivity between nodes due to the operating conditions in the network.
+%
+%
+% %%
+% Broadcast is a fundamental operation in MANETs that consist in delivering a message from a source node to every other node in the network.
+% %
+% Data dissemination in crowds, peer-to-peer mobile games or routing are examples of services that relay on this operation~\cite{overview_adhoc_networks}.
+% %
+% A vast amount of broadcast protocols have been proposed to figure out a trade-off between reachability and nodes resources (mainly energy consumption).
+% %
+% They differ in the way
+% %
+% A survey by Ruiz and Bouvry~\cite{SurveyRuiz} classifies protocols in two main families.
+% %
+% Protocols of the first group rely on overlays where nodes either forward incoming messages or act as receivers. \er{You should already emphasize that the overlay is built outside of the actual dissemination, while the flooding decides during the dissemination. This is the main difference that concerns us.}
+% %
+% Nodes build and maintain an overlay via the periodic exchange of control packets that announce nodes existence. \er{not sure we need to detail how the overlay is built here}
+% %
+% The second group of broadcast protocols do not build overlays, instead, nodes forward messages until predefined thresholds reach a maximum value (e.x. number of receives copies) or the forwarding decision is based on a stochastic approach. \er{you are too specific about the implementations of flooding. It should be enough to write that the nodes make the decision to forward or not based on local information available at the time the message is received.}
+% %
+% Reliable broadcast remains a challenging task, not only for deciding which is the protocol that shows better performance but also due to the operating conditions in MANETs.
+% %
+% Moreover, previous works on mobility models for wireless networks~\cite{bai2004mobility, ChaintreauA2006}, evaluation studies on broadcast strategies~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} or micro-benchmarks on highly dynamic networks~\cite{adaptive_group_com_iscc02, ObraczkaK_2001} have shown that the performance of protocols for MANETs is influenced by operating conditions in the network, where mobility and density are key factors.
+%
+%
+% %%
+% We propose an autonomous adaptation protocol for MANETs that allow nodes to automatically emerge overlays where they are beneficial for broadcast cost and performance, and dynamically adapt to changing mobility and density conditions.
+% %
+% Nodes follow one main switching criterion that is triggered when the local perspective of nodes reaches predefined thresholds.
+% %
+% That is, overlays emerge in highly dense areas where nodes move slowly whereas controlled flooding techniques are deployed in dynamic areas with low density.
+% %
+% Dissemination overlays require nodes to keep track of their closest neighbors.
+% %
+% Dense areas with low velocity avoid abrupt changes in nodes surroundings, therefore, we find an opportunity for having more stable overlays that are easy to maintain.
+% %
+% Deploying controlled flooding techniques in more dynamic areas relies on previous studies on broadcast protocols~\cite{adaptive_group_com_iscc02} that have shown better performance. \raziel{add references to flooding approaches in sparse with low velocity of nodes}
+% %
+% Previous works on adaptive approaches for message dissemination in MANETs have shown that there is no one-fit-all solution~\cite{adaptive_group_com_iscc02}, we agree with this notion.\raziel{add references of adaptive approaches}.
+% %
+% Our adaptive approach, on the other hand, fills the gap in providing generalized solutions that integrate different broadcast techniques and deal with the interoperability issues of having multiple protocols running concurrently in a deployed MANET.
+% %
+% In concrete, our contributions are as follows:
+% \begin{itemize}
+% 	\item A novel self-adaptive approach to broadcast in MANETs where nodes follows a main switching criterion, that is, the deployment of dissemination overlays in densely-populated areas whereas controlled flooding techniques are used in sparsely-populated areas.
+% 	\item A list of adaptive policies mainly based on nodes velocity and density to trigger our switching criterion. Such list may be easily extended with other information available in nodes.
+% 	\item To our knowledge, there is no previous work on broadcast protocols for MANETs that uses the local degree of nodes as a measure of density. We use the local clustering coefficient and a recently propose variation of it called closure coefficient~\cite{closure_coef} for the design of adaptation policies.
+% 	\item Our adaptive approach is available to the research community in form of a framework, which uses Docker containers to help in the reproducibility of results~\cite{emergent_overlays_repo}.
+% \end{itemize}
+%
+%
+% %%
+% The rest of the paper is organized as follows.
+% %
+% In the next section, we give a background in broadcast algorithms and the terminology we use in our adaptive approach.
+% %
+% \raziel{TBD: the content here may change and we leave it for later}
+% %
+% Finally, we discuss the perspective of this work in Section~\ref{sec:conclusion} and conclude in Section~\ref{sec:conclusion}.
