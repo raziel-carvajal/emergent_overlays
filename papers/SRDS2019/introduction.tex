@@ -33,9 +33,9 @@ Broadcast is one of the fundamental operations enabling applications in MANETs.
 It allows delivering message from any source to all nodes in the network, e.g. to forward announcements and news live to all nodes in the music festival mobile application.
 Efficient routing actually also depends on the availability of an efficient and reliable broadcast primitive~\cite{overview_adhoc_networks,survey_routing}.
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
-The main hinderance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
-Collisions are not always possible to detect, and costly to address.
-A MAC layer implementing acknowledgments and resubmissions can a significant performance and energy cost. %% ER: add ref to a MAC layer
+The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
+Collisions are not always possible to detect, and costly to address~\cite{hidden-terminal-problem}.
+A MAC layer implementing acknowledgments and resubmissions may result in lower performance and increase energy costs. %% ER: add ref to a MAC layer
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
 Broadcast protocols can be classified in two main families~\cite{SurveyRuiz}: 
@@ -44,16 +44,16 @@ Broadcast protocols can be classified in two main families~\cite{SurveyRuiz}:
 %
 Controlled flooding protocols propagate a message between nodes using local wireless broadcast.
 Each node receiving a message decides whether or not (and when) to retransmit the message locally, on the sole base of information attached to that message, the state of the local node and the observation of its surroundings.
-Controlled flooding is prone to broadcast storm but is expected to be robust to highly mobile and dynamic environments.
+Controlled flooding is prone to broadcast storms but is expected to be robust to highly mobile and dynamic environments.
 %
 Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the dissemination itself.
 A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange of control messages.
-Relay node form a dissemination structure, or overlay, over the MANET.
+Relay nodes form a dissemination structure, or overlay, over the MANET.
 The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve so much that it makes the structure obsolete too early.
 
 Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} show that the performance, reliability and energy consumption of various algorithms of the two classes is highly dependent on their deployment conditions.
-Controlled flooding algorithms, such as \er{give list + references} are efficient in sparsely-populated areas and when nodes are highly mobile.
-Overlay-based algorithms such as \er{give list + references} on the other hand, shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
+Controlled flooding algorithms, such as~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
+Overlay-based algorithms such as~\cite{Nikolov2015, stojmenovic-cds, mpr} on the other hand, shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
 
 \smallskip
 \noindent
@@ -68,7 +68,7 @@ We make the following contributions towards the design, implementation and evalu
 \begin{itemize}
 	\item We present our system model and three base protocols (\S\ref{sec:background}):
 	\begin{itemize}
-		\item A controlled flooding protocol implementing best practices from \er{list the protocols you used as a basis for yours};
+		\item A controlled flooding protocol implementing best practices from~\cite{mpr, 2001:AAR:876878.879323};
 		\item The CDS overlay-based protocol;
 		\item A novel MAC layer enabling cost-efficient local broadcast adapted to the needs of these two protocols.
 	\end{itemize}
