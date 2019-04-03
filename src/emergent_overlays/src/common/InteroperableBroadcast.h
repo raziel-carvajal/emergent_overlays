@@ -16,6 +16,7 @@
 #ifndef INTEROPERABLEBROADCAST_H_
 #define INTEROPERABLEBROADCAST_H_
 
+#include <MacLayerWithCD.h>
 #include <inet/applications/udpapp/UDPBasicApp.h>
 #include <inet/mobility/contract/IMobility.h>
 #include <functional>
@@ -31,14 +32,11 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
   private:
     enum Timer {
-      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG,
-      STORE_POSITION, SEND_BORDER_REQ, RESET_BORDER_STATUS
-    };
-    enum UdpPacket {
-      BROADCAST = 1, CTRL, BORDER_REQ
+      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, STORE_POSITION, SEND_BORDER_REQ, RESET_BORDER_STATUS
     };
 
     int runningProtocolId;
+    int numSentCtrlPk = 0;
 
     IProtocol* runningProtocol = nullptr;
 
@@ -99,8 +97,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void processPacket(cPacket *msg) override;
 
-    void addPacketType(cPacket* msg, long t);
-
     string removeQuotes(string target) {
       return target.substr(1, target.size() - 2);
     }
@@ -112,33 +108,33 @@ class InteroperableBroadcast : public UDPBasicApp {
     enum ForwardType {
       SIMPLE, OVERLAY_RELAY, BORDER_NODE
     };
+    enum UdpPacket {
+      BROADCAST = 1, CTRL, BORDER_REQ, PING, PONG, ACK
+    };
 
-    // signals for this class
+    double transRadious;
+
+    bool isBorderNode = false;
+
     static simsignal_t rcvdBroadcastMsg;
     static simsignal_t sentBroadcastMsg;
     static simsignal_t positionAtX;
     static simsignal_t positionAtY;
     static simsignal_t forward_type;
-//    static simsignal_t density_approximation;
+    static simsignal_t broaMsgCollisions;
+    static simsignal_t ctrlMsgCollisions;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
-
-    string protocolsNames[Protocols::LAST_PROTOCOL];
 
     set<string> receivedMsg;
 
     string nodeId;
     string foreignPkName = "2ndCtrlMsg";
-
-    double transRadious;
-    double sentMsgDelay;
-    double sentMsgFixedDelay;
-
-    int maxNodesNo;
+    string protocolsNames[Protocols::LAST_PROTOCOL];
 
     IMobility* mobilityModel;
 
-    bool isBorderNode = false;
+    MacLayerWithCD* mac = nullptr;
 
   public:
     InteroperableBroadcast() {
@@ -160,6 +156,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     void addSender(cPacket* pk);
     void fwdBroadcastMsg(cPacket* pk);
     void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
+    void addPacketType(cPacket* msg, long t);
 
     string getProtocolName(Protocols p) {
       switch (p) {
@@ -173,6 +170,10 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
 
     int getMsgId(string msgHeader);
+
+    double getRandomTime(double a, double b) {
+      return uniform(a, b);
+    }
 };
 
 #endif /* INTEROPERABLEBROADCAST_H_ */

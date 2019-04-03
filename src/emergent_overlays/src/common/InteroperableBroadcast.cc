@@ -30,7 +30,9 @@ simsignal_t InteroperableBroadcast::positionAtX = registerSignal("positionAtX");
 simsignal_t InteroperableBroadcast::positionAtY = registerSignal("positionAtY");
 
 simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type");
-//simsignal_t InteroperableBroadcast::density_approximation = registerSignal("density_approximation");
+
+simsignal_t InteroperableBroadcast::broaMsgCollisions = registerSignal("broaMsgCollisions");
+simsignal_t InteroperableBroadcast::ctrlMsgCollisions = registerSignal("ctrlMsgCollisions");
 
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
@@ -45,22 +47,6 @@ void InteroperableBroadcast::processStart() {
   // set unique node ID
   const char* id = getParentModule()->getFullName();
   nodeId = id;
-  bool isNumeric = false;
-  int i = 0;
-  while (!isNumeric) {
-    if (!isalpha(nodeId[i]))
-      isNumeric = true;
-    else
-      i++;
-  }
-
-  std::string::size_type sz;
-  int n = stoi(nodeId.substr(i, nodeId.size()), &sz);
-  maxNodesNo = par("maxNodesNo").longValue();
-  // unique value per node to delay delivery of messages and avoid collisions
-  sentMsgFixedDelay = par("sentMsgFixedDelay").doubleValue();
-  sentMsgDelay = ((n - 1) % maxNodesNo) * sentMsgFixedDelay;
-  log("My delay is: " + to_string(sentMsgDelay));
   // initialize mobility model and set transmission range
   physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
@@ -86,6 +72,11 @@ void InteroperableBroadcast::processStart() {
   // erase the content of previously known foreign algorithms
   scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
 
+  // MAC layer initialization
+  mac = new MacLayerWithCD();
+  mac->setController(this);
+  mac->initialize();
+
   // initialize objects that implement broadcast protocols
   intializeCatalog();
   // initialize first running protocol
@@ -102,7 +93,7 @@ void InteroperableBroadcast::sendPacket() {
     cPacket* m = getBroadcastMsg();
     log("New broadcast session [" + string(m->getName()) + "]");
     // send now
-    send(m);
+    mac->send(m);
     emit(sentBroadcastMsg, getMsgId(m->getName()));
     emit(forward_type, runningProtocol->getFwdType());
     // tag packet as received
@@ -125,7 +116,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         }
           break;
         case Timer::FWD_BROADCAST_MSG: {
-          send(latestPkToFwd);
+          mac->send(latestPkToFwd);
           emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
           if (isBorderNode) {
             emit(forward_type, ForwardType::BORDER_NODE);
@@ -174,6 +165,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       }
     } else if (runningProtocol->isProtocolEvent(msg)) {
       runningProtocol->handleEvent(msg);
+    } else if (mac->isSelfEvent(msg)) {
+      mac->handleEvent(msg);
     } else {
       throw cRuntimeError("Invalid kind %d in selfInteropMsg 2", (int) msg->getKind());
     }
@@ -190,6 +183,9 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
 
   switch (pk->par("PkType").longValue()) {
     case UdpPacket::BROADCAST: {
+      // let MAC layer deal with reception
+      mac->processMsg(pk->getName());
+
       string sender(removeQuotes(pk->par("Sender").str()));
       log("Broadcast msg [" + string(pk->getName()) + "] received from [" + sender + "]");
       // record integer identifier of received message
@@ -201,6 +197,9 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     }
       break;
     case UdpPacket::CTRL: {
+      // let MAC layer deal with reception
+//      mac->processMsg(pk->getName());
+
       string sender(removeQuotes(pk->par("Sender").str()));
       Basic* basicPk = dynamic_cast<Basic*>(pk);
       // sender's running protocol ID differs from receiver's; send request to chose border node
@@ -214,7 +213,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
             knownForeignAlgos.insert(basicPk->getRunningProtocol());
             log("I am Border node (UdpPacket::CTRL)");
             isBorderNode = true;
-            scheduleEvent(Timer::SEND_BORDER_REQ, sentMsgFixedDelay, borderMsgTimer);
+            scheduleEvent(Timer::SEND_BORDER_REQ, mac->getWaitingMsgDeliveryTime(), borderMsgTimer);
           } else {
             log("Ignoring foreign control message");
           }
@@ -225,6 +224,9 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     }
       break;
     case UdpPacket::BORDER_REQ: {
+      // let MAC layer deal with reception
+//      mac->processMsg(pk->getName());
+
       log("BorderReq packet received");
       BorderReq* br = dynamic_cast<BorderReq*>(pk);
       // BorderReq packets are accepted only from senders running a different algorithm AND
@@ -242,6 +244,21 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       }
     }
       break;
+    case UdpPacket::PING: {
+      Ping* ping = dynamic_cast<Ping*>(pk);
+      mac->processPingPk(ping);
+    }
+      break;
+    case UdpPacket::PONG: {
+      Pong* pong = dynamic_cast<Pong*>(pk);
+      mac->processPongPk(pong);
+    }
+      break;
+    case UdpPacket::ACK: {
+      Ack* a = dynamic_cast<Ack*>(pk);
+      mac->processAckPk(a);
+    }
+      break;
     default:
       throw cRuntimeError("Invalid kind of msg %d in self message", (int) pk->getKind());
   }
@@ -257,48 +274,6 @@ void InteroperableBroadcast::scheduleEvent(short kind, double delay, cMessage* s
   selfMsgPtr->setKind(kind);
   scheduleAt(t, selfMsgPtr);
 }
-
-//set<string> InteroperableBroadcast::choseBorderNodes() {
-//  string temp("Chosen border nodes: ");
-//  set<string> chosen;
-//  set<string> neigs = runningProtocol->getNeighbors();
-//  log("Neighbors number: " + to_string(neigs.size()));
-//  set<string>::iterator it = neigs.begin();
-//  if (neigs.size() == 1 || neigs.size() == 2) {
-//    chosen.insert(*it);
-//    log(temp + *it);
-//    return chosen;
-//  } else {
-//    int lim = ceil(neigs.size() / 2.0);
-//    while ((int) chosen.size() != lim) {
-//      int i = 0;
-//      int n = neigs.size();
-//      string ids[n];
-//      for (it = neigs.begin(); it != neigs.end(); ++it) {
-//        ids[i] = *it;
-//        i++;
-//      }
-//      double opts[n];
-//      double f = 1 / (n * 1.0);
-//      for (i = 0; i < n - 1; ++i) {
-//        opts[i] = (i + 1) * f;
-//      }
-//      opts[i] = 1;
-//      for (i = 0; i < n; ++i) {
-//        if (uniform(0, 1) <= opts[i]) {
-//          neigs.erase(ids[i]);
-//          chosen.insert(ids[i]);
-//          break;
-//        }
-//      }
-//    }
-//  }
-//  for (it = chosen.begin(); it != chosen.end(); ++it) {
-//    temp += *it + ", ";
-//  }
-//  log(temp);
-//  return chosen;
-//}
 
 int InteroperableBroadcast::getMsgId(string msgHeader) {
   string pkName(this->packetName);
@@ -326,7 +301,7 @@ void InteroperableBroadcast::fwdBroadcastMsg(cPacket* pk) {
   // update headers of running protocol
   runningProtocol->updateProtocolHeaders(latestPkToFwd);
   // uniform(sentMsgFixedDelay, sentMsgFixedDelay * 10)
-  scheduleEvent(Timer::FWD_BROADCAST_MSG, sentMsgFixedDelay, fwdBMsgTimer);
+  scheduleEvent(Timer::FWD_BROADCAST_MSG, mac->getMaxDisseminationTime(), fwdBMsgTimer);
 }
 
 bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
@@ -336,7 +311,7 @@ bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
 
 cPacket* InteroperableBroadcast::getBroadcastMsg() {
   UDPBasicApp::numSent++;
-  string name(this->packetName);
+  string name(packetName);
   name += to_string(numSent);
 // let each protocol create broadcast messages
   cPacket* pk = runningProtocol->createBroadcastMsg(name.c_str());

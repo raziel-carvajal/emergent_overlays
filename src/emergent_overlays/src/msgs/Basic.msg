@@ -33,11 +33,17 @@ packet MprBroadcastPacket extends Basic {
 
 packet MprCtrl extends Basic {
     double senderPosAtX;
-	double senderPosAtY;
-	
+	double senderPosAtY;	
 	OneHopNeigs neighbors;
 	Positions xs;
 	Positions ys;
 }
 
 packet BorderReq extends Basic {}
+
+packet Ack {
+    string sender;
+}
+
+packet Ping {}
+packet Pong extends Ack {}

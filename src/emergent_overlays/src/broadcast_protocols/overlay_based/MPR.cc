@@ -21,20 +21,36 @@
 void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
   MprBroadcastPacket* m = dynamic_cast<MprBroadcastPacket*>(pk);
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end() && m != nullptr) {
-    controller->log("1st reception, schedule FWD in " + to_string(controller->sentMsgFixedDelay));
     // tag packet as received
     controller->receivedMsg.insert(pkName);
-    latestPayload.clear();
+//    latestPayload.clear();
     OneHopNeigs senderNeigs = m->getNeighbors();
-    for (OneHopNeigs::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-      latestPayload.insert(*it);
-    }
+
+//    for (OneHopNeigs::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
+//      latestPayload.insert(*it);
+//    }
     // schedule FWD decision
-    fwdBrMsgTimer->getParList().remove("ReceivedMsgId");
-    cMsgPar* p = new cMsgPar("ReceivedMsgId");
-    p->setStringValue(pkName);
-    fwdBrMsgTimer->addPar(p);
-    controller->scheduleEvent(FWD_BROADCAST_MSG, controller->sentMsgFixedDelay, fwdBrMsgTimer);
+//    fwdBrMsgTimer->getParList().remove("ReceivedMsgId");
+//    cMsgPar* p = new cMsgPar("ReceivedMsgId");
+//    p->setStringValue(pkName);
+//    fwdBrMsgTimer->addPar(p);
+//    controller->scheduleEvent(FWD_BROADCAST_MSG, controller->minSentDelay, fwdBrMsgTimer);
+    bool fwdMsg = false;
+    if (amIrelay(senderNeigs)) {
+      fwdMsg = true;
+      controller->isBorderNode = false;
+      controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
+    } else if (controller->isBorderNode) {
+      fwdMsg = true;
+      controller->emit(controller->forward_type, controller->BORDER_NODE);
+    }
+
+    if (fwdMsg) {
+//      controller->log(temp);
+      cPacket* broadcastMsg = createBroadcastMsg(pkName);
+      controller->mac->send(broadcastMsg);
+      controller->emit(controller->sentBroadcastMsg, controller->getMsgId(pkName));
+    }
   }
 
 }
@@ -42,16 +58,28 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
 void Mpr::initialize() {
   controller->log("Running protocol: " + controller->getProtocolName(controller->MPR));
 
-  cMsgPar* p = new cMsgPar("ReceivedMsgId");
-  p->setStringValue("");
-  fwdBrMsgTimer->addPar(p);
+  bool isNumeric = false;
+  int i = 0;
+  while (!isNumeric) {
+    if (!isalpha(controller->nodeId[i]))
+      isNumeric = true;
+    else
+      i++;
+  }
+  std::string::size_type sz;
+  int n = stoi(controller->nodeId.substr(i, controller->nodeId.size()), &sz);
+  nodesNo = controller->par("nodesNo").longValue();
+  // unique value per node to delay delivery of messages and avoid collisions
+  minSentDelay = controller->par("minSentDelay").doubleValue();
+  sentCtrlMsgDelay = ((n - 1) % nodesNo) * minSentDelay;
+  controller->log("My delay is: " + to_string(sentCtrlMsgDelay));
 
-  double t = controller->sentMsgDelay + controller->sentMsgFixedDelay;
   // build first overlay before dissemination of broadcast messages
-  controller->scheduleEvent(SCHEDULE_FIRST_CTRL_MSG, t, sCtrlMsgTimer);
+  controller->scheduleEvent(SCHEDULE_FIRST_CTRL_MSG, sentCtrlMsgDelay + minSentDelay, sCtrlMsgTimer);
+
   // build remaining overlays
   controller->scheduleEvent(SCHEDULE_CTRL_MSGS,
-      controller->par("startSendingCtrlMsgs").doubleValue() + controller->sentMsgDelay, sRemainingCtrlMsgTimer);
+      controller->par("startSendingCtrlMsgs").doubleValue() + sentCtrlMsgDelay, sRemainingCtrlMsgTimer);
 }
 
 cPacket* Mpr::createBroadcastMsg(const char* msgId) {
@@ -73,7 +101,7 @@ set<string> Mpr::compute_mpr() {
   map<string, set<string>> latest = make_cpy(neighbors);
   hops[0].clear();
   hops[1].clear();
-  // first fill the array hops
+// first fill the array hops
   for (const auto& p : latest) {
     string j(p.first);
     hops[0].insert(j);
@@ -199,28 +227,28 @@ void Mpr::handleEvent(cMessage* msg) {
       controller->log(temp);
     }
       break;
-    case FWD_BROADCAST_MSG: {
-      string msgId = msg->par("ReceivedMsgId").stringValue();
-      string temp("FWD message: " + msgId);
-
-      bool fwdMsg = false;
-      if (amIrelay(latestPayload)) {
-        fwdMsg = true;
-        controller->isBorderNode = false;
-        controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
-      } else if (controller->isBorderNode) {
-        fwdMsg = true;
-        controller->emit(controller->forward_type, controller->BORDER_NODE);
-      }
-
-      if (fwdMsg) {
-        controller->log(temp);
-        cPacket* broadcastMsg = createBroadcastMsg(msgId.c_str());
-        controller->send(broadcastMsg);
-        controller->emit(controller->sentBroadcastMsg, controller->getMsgId(msgId));
-      }
-    }
-      break;
+//    case FWD_BROADCAST_MSG: {
+//      string msgId = msg->par("ReceivedMsgId").stringValue();
+//      string temp("FWD message: " + msgId);
+//
+//      bool fwdMsg = false;
+//      if (amIrelay(latestPayload)) {
+//        fwdMsg = true;
+//        controller->isBorderNode = false;
+//        controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
+//      } else if (controller->isBorderNode) {
+//        fwdMsg = true;
+//        controller->emit(controller->forward_type, controller->BORDER_NODE);
+//      }
+//
+//      if (fwdMsg) {
+//        controller->log(temp);
+//        cPacket* broadcastMsg = createBroadcastMsg(msgId.c_str());
+//        controller->send(broadcastMsg);
+//        controller->emit(controller->sentBroadcastMsg, controller->getMsgId(msgId));
+//      }
+//    }
+//      break;
     case SEND_CTRL_MSG: {
       controller->send(getCtrlMsg(1));
     }
@@ -231,6 +259,7 @@ void Mpr::handleEvent(cMessage* msg) {
       break;
     case SCHEDULE_CTRL_MSGS: {
       sendCtrlMsg();
+
       controller->scheduleEvent(SCHEDULE_CTRL_MSGS, controller->par("ctrlMsgInterval").doubleValue(),
           sRemainingCtrlMsgTimer);
     }
@@ -245,15 +274,17 @@ void Mpr::sendCtrlMsg() {
   neigsPositions.clear();
   controller->cancelEvent(sCtrlMsgTimer);
   controller->cancelEvent(buildCdsTimer);
-  // use to get the list of one-hop neighbors
+// get the list of one-hop neighbors
   controller->send(getCtrlMsg(0));
-  double t = controller->sentMsgFixedDelay * controller->maxNodesNo;
-  // use to get the list of two-hop neighbors
+
+  double t = minSentDelay * nodesNo;
+// get the list of two-hop neighbors
   controller->scheduleEvent(SEND_CTRL_MSG, t, sCtrlMsgTimer);
   controller->log("next CtrlMsg at " + to_string(t));
-  // approximation of a CDS when nodes have the list of two-hop neighbors
-  controller->scheduleEvent(BUILD_CDS, 2 * t - controller->sentMsgDelay, buildCdsTimer);
-  controller->log("next BuildCdsMsg at " + to_string(2 * t - controller->sentMsgDelay));
+
+// approximation of a CDS when nodes have the list of two-hop neighbors
+  controller->log("next BuildCdsMsg at " + to_string(2 * t - sentCtrlMsgDelay));
+  controller->scheduleEvent(BUILD_CDS, 2 * t - sentCtrlMsgDelay, buildCdsTimer);
 }
 
 cPacket* Mpr::getCtrlMsg(int withName) {

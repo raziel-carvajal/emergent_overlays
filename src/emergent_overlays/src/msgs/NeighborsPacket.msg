@@ -24,10 +24,6 @@ packet OneHopNeighbors {
     Neighbors neigs;
 }
 
-packet Hello {
-    string sender;
-}
-
 packet Change {
     string sender;
     int density;

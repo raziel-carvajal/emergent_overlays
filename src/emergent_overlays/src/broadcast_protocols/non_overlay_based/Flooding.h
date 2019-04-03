@@ -28,7 +28,7 @@ class Flooding : public IProtocol {
 
     bool isProtocolEvent(cMessage* msg) {
       // this implementation do not handle any self event
-      return true;
+      return false;
     }
 
     void setController(InteroperableBroadcast* c) {
