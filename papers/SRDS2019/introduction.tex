@@ -66,10 +66,10 @@ We present the novel notion of \emph{\textbf{emergent overlays}}.
 Emergent overlays is a adaptation technique in which nodes in a MANET autonomously decide to switch from the use of a default, controlled flooding based broadcast, to a protocol creating an overlay and using it for dissemination, based on their deployment density and nodes mobility.
 We make the following contributions towards the design, implementation and evaluation of emergent overlays:
 \begin{itemize}
-	\item We present our system model and three base protocols (\S\ref{sec:background}):
+	\item We present our system model and our three base protocols (\S\ref{sec:background}):
 	\begin{itemize}
-		\item A controlled flooding protocol implementing best practices from~\cite{mpr, 2001:AAR:876878.879323};
-		\item The CDS overlay-based protocol;
+		\item The \emph{counter-based} controlled flooding protocol~\cite{2001:AAR:876878.879323};
+		\item The \emph{MPR} overlay-based protocol~\cite{mpr};
 		\item A novel MAC layer enabling cost-efficient local broadcast adapted to the needs of these two protocols.
 	\end{itemize}
 	\item We define the high-level requirements and objectives for emergent overlays adaptation (\S\ref{sec:overview}).

@@ -4,18 +4,39 @@
 \section{Related Work}
 \label{sec:related}
 
+We review related work on broadcast in MANETs, adaptation mechanisms in wireless and mobile networks, and studies of mobility in these systems.
+
+A survey by Ruiz and Bouvry~\cite{SurveyRuiz} provides a comprehensive coverage of broadcast in MANETs.
+It provides a taxonomy of controlled flooding and overlay-based protocols, also covered respectively in surveys by Reina \emph{et~al.}~\cite{Reina2015} and Santi~\cite{Santi:2005:TCW:1089733.1089736}.
+Approaches are subdivided based on the use of fixed- or variable-range wireless communication.
+We considered in this paper only the former class of protocols~\cite{BroadcastStormProblem,ProbFlood,stojmenovic-cds,Nikolov2015,mpr,mpr-improvement,overlays_for_manets} and leave the adaptation of variable-range broadcast~\cite{woon2011variable,park2013efficient} to future work.
+
+\cite{BroadcastStormProblem}
+\cite{2001:AAR:876878.879323}: the one he uses, controlled flooding with timer and counters. Also proposes two others: using timers based on surface and others using signal noise threshold (both we assume we don't have)
+\er{we need two more papers of recent work on flooding protocols}
+
+overlay: also considered a \emph{connected dominated set} (CDS). Was pioneered by~\cite{stojmenovic-cds}, who is using the calculation of 2-hop neighbors, and calculating differences in covered nbors sets.
+Several other protocols proposed to construct CDS.
+\cite{mpr}: the one we use
+\cite{mpr-improvement}: improvements, we do not use. Detail?
+\cite{overlays_for_manets}: uses geolocation, based on the knowledge of the transmission areas of each node and neighbor sets
+\cite{Nikolov2015}: keeps history of past nbors, determines to switch to relay based on coverage of nodes in the recent past
+
+\bigskip
+
 broadcast algorithms in manets
 \begin{itemize}
 	\item Surveys:
 	\begin{itemize}
-		\item \cite{SurveyRuiz}: 2015 survey with the taxonomy
+		\item : 2015 survey with the taxonomy
 		\item \cite{Reina2015}: 2015 survey on probabilistic broadcast approaches 
 		\item \cite{Santi:2005:TCW:1089733.1089736}: 2005 survey on topology control in manets
 	\end{itemize}
 	\item Controlled flooding:
 	\begin{itemize}
 		\item \cite{BroadcastStormProblem}: 3 controlled flooding approaches to deal with broadcast storms
-		\item \cite{ProbFlood}: 2003 broadcast approach to privilege that nodes located at the border of transmissions range act as relays
+		
+		% \item \cite{ProbFlood}: 2003 broadcast approach to privilege that nodes located at the border of transmissions range act as relays
 	\end{itemize}
 	\item Overlay-based
 	\begin{itemize}
