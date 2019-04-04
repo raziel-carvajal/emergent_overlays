@@ -3,7 +3,8 @@
 
 \section{Background}
 \label{sec:background}
-
+\er{%
+suggested content:
 \begin{itemize}
 	\item system model
 	\begin{itemize}
@@ -13,59 +14,79 @@
 	\item controlled flooding protocol details
 	\item CDS details
 	\item MAC layer details
-\end{itemize}
-
-
-
-
-\section*{RECYCLE}
-
-We start by presenting background concepts used in the rest of this paper:
-  mobile ad-hoc networks (MANETs),
-  MAC-level networking,
-  broadcast algorithms,
-  and adaptation mechanisms.
-
-\subsection{MANETs}
-\label{sec:background:manets}
-
-\er{%
-suggested content:
-\begin{itemize}
-	\item definition of manets, wireless communication
-	\item wireless medium and capabilities (point-to-point as well as local broadcast, fixed or variable range)
-	\item collisions and messages loss
-	\item MAC layer and necessary retransmissions, for local broadcast and point-to-point; cite and describe briefly some classical approaches (we will define our own later in the paper)
-	\item mobile: the neighborhood of each node changes
-	\item typically carried by humans or vehicles, cite a few papers that describe the mobility traces
 	\item typically operating using batteries hence power consumption is a key factor
 	\item two principal means of communication: instantaneous, best effort to reach everyone/someone, or using delay-tolerant networking, where nodes carry messages for others. We consider the former only in this work.
 \end{itemize}
 }
+%\begin{itemize}
+%	\item system model
+%	\item controlled flooding protocol details
+%	\item CDS details
+%	\item MAC layer details
+%\end{itemize}
+\raziel{improve intro of this section}
+We start by presenting background concepts used in the rest of this paper: communication model in MANETs, MAC-level networking, broadcast algorithms, and adaptation mechanisms.
 
-\subsection{Message sending and MAC layer}
+\subsection{Communication model in MANETs}
+\label{sec:background:manets}
+Nodes in MANETs carry wireless transceivers that send networks packets or \emph{frames} in a broadcast fashion.
+%
+The covered area or broadcast area per transceiver is represented in the literature by a disk with radius \emph{Tx}.
+%
+The length of \emph{Tx} is commonly known as transmission range.
+%
+Figure~\ref{} depicts node $n_{1}$ at the center of its broadcast area \emph{A}, any node positioned at \emph{A} may receive frames from $n_{1}$.
+%
+Point-to-point communication take place if a path between the source and its destination exists in the wireless topology, nodes belonging to such path forward incoming frames.
+%
+This local broadcast approach of communication generates redundancy in received frames.
+%
+In Figure~\ref{}, nodes $n_{1}$ and $n_{4}$ communicate with each other via $n_{3}$, when $n_{1}$ sends a frame \emph{f} to aim $n_{4}$, node $n_{3}$ forwards \emph{f} to reach the destination node.
+%
+But, node $n_{2}$ receives twice a frame that was not intended to it because $n_{2}$ is within the broadcast areas of $n_{1}$ and $n_{3}$.
+%
+Another issue in wireless communication is collisions, which occurs when at least two nodes sharing a single broadcast area send packets concurrently.
+%
+In our example, if $n_{1}$ and $n_{2}$ send frames at the same time, $n_{3}$ may drop packets from any source node or not listen any packet at all.
+%
+Collision detection in wireless networks remains an open issue given that the current mechanisms require to transmit and listen at the same time for detecting potential collisions~\cite{mac-evaluation}.
+
+
+\subsection{MAC layer and collision avoidance}
 \label{sec:background:mac}
+Wireless distributed MAC (Medium Access Control) protocols such as IEEE 802.11 coordination function allows nodes to share a common channel for data transmission and relies in a collision avoidance mechanism commonly known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
+%
+This mechanism is a handshake protocol between a sender and any receiver that is positioned at the senders broadcast area.
+%
+When a node is willing to send a data frame, it starts by sending a Request To Send (RTS) frame.
+%
+On reception of RTS a receiver  holds the medium to expect data from RTS sender by answering with a Clear To Send (CTS) frame.
+%
+Once the sender receives CTS, the data transmission begins and it is tagged as successful transmission if the receiver acknowledge the sender (with another frame) when all data frames were correctly received.
+%
+In case interferences take place in any of the phases of the previous handshake protocol, nodes respond with error frames.
+%
+This is a drawback in collision avoidance mechanisms because nodes waste bandwidth by sending error frames along with data frames.
 
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-	
-	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
-	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
 
-\caption{\labalg{network_api}Network layer API}
-\end{algorithm}
+%
+Virtual carrier sensing is prone to errors when hidden nodes to senders interfere with the handshake protocol, this phenomenon is known as the \emph{hidden terminal problem} and it is depicted in figure~\ref{}.
+%
+Suppose node $n_{1}$ initiates the virtual carrier sensing protocol with node $n_{2}$, notice in the figure that node $n_{3}$ is hidden for $n_{1}$.
+%
+Once $n_{2}$ receives an RTS frame from $n_{1}$, the former replies with a CTS that will reach $n_{3}$.
+%
+Given that $n_{3}$ has not previously initiate an exchange with $n_{1}$, node $n_{3}$ sends an error packet and may interrupt the data transmission between $n_{1}$ and $n_{2}$.
+%
+Improved protocols to deal with the hidden terminal problem, such as the one presented in~\cite{mac-with-cd}, use out-of-band frames to explore the channel conditions without interfering with data transmission, this techniques achieve both collisions detection and avoidance.
+%
 
-\begin{algorithm}
-	\footnotesize
-	\DontPrintSemicolon
-	
-	TODO
-
-\caption{\labalg{network_mac_layer}MAC-level retransmission protocol}
-\end{algorithm}
-
-\er{this section should explain how the individual messages are sent locally using p2p or local broadcast; this should use an illustration and maybe an algorithm.}
+%
+One of our contributions is a virtual carrier sensing protocol that do not require the transmission of error frames and count the number of potential collisions of data frames (refer to section~\ref{sec:mechanisms}).
+%
+We aim to take advantage of the local broadcast approach to improve reliability of data frames and, at the same time, ameliorate the utilization of bandwidth.
+%
+We do not argue that our MAC protocol outperforms the implementation in the IEEE 802.11 coordination function, in fact, the evaluation of our MAC protocol is left as future work.
 
 \subsection{Broadcast algorithms}
 \label{sec:background:broadcast}
@@ -80,6 +101,26 @@ suggested content:
 	\item two examples of operations for the two protocols, including some collision and some duplicates receptions
 \end{itemize}
 }
+
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
+
+\caption{\labalg{network_api}Network layer API}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	TODO
+
+\caption{\labalg{network_mac_layer}MAC-level retransmission protocol}
+\end{algorithm}
 
 \begin{algorithm}
 	\footnotesize
