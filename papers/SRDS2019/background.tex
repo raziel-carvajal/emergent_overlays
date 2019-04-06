@@ -19,7 +19,7 @@
 \end{figure}
 
 We start by detailing our system model and the communication mechanisms available in a MANET.
-We present a MAC-level protocol allowing local broadcast with a compromise between cost and reliability.
+We present our MAC protocol for reliable local broadcast targeting energy-efficiency.
 We then present two broadcast protocols, one based on controlled flooding, the other based on an overlay, that we will combine to allow emergent overlays.
 
 \subsection{System and communication models}
@@ -32,6 +32,7 @@ We consider the fixed-range model: Local broadcasts can be received by every nod
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1}$ and $n_{2}$.
 Node $n_{3}$ is in range of both and may receive frames from either $n_{1}$ or $n_{2}$ when active in listening mode (i.e., not sending itself).
 Sending and receiving frames consumes energy from the node's limited power supply.
+We do not consider the availability of geolocation information (GPS) on the devices.
 
 The main obstacle to reliable broadcast in MANETs is the presence of \emph{collisions}.
 A collision may happen when two nodes have overlapping coverage areas.
@@ -61,14 +62,84 @@ Our rationale is that redundancy is already implemented at the global broadcast 
 We adopt instead a limited-cost resend \er{here describe \textbf{succinctly} the MAC protocol we use.}
 Figure~\ref{fig:mac_protocol} \er{the right-hand side of the figure should be for the MAC protocol}
 
-\subsection{Counter-based controlled flooding}
-\label{sec:background:flooding}
+\subsection{Broadcast protocols}
+\label{sec:background:broadcast}
 
+The goal of broadcast is to reliably send a message to all nodes in the network, subject to mobility and collisions.
+The source can be any node in the network.
+Nodes may forward a message using local broadcast upon its first reception.
+Subsequent receptions are \emph{duplicates} and do not lead to forwarding.
+The target is to reduce the number of necessary relays while ensuring a high or total coverage, measured as the number of nodes that receive the message during the broadcast.
+We note that incomplete broadcasts may be addressed through a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}, but the use of these techniques is orthogonal to our goal of reaching high coverage in the first place.
+Broadcast protocols can be classified in two families depending on how they choose relay nodes~\cite{survey-ruiz}.
+In controlled flooding, nodes decide whether to be a relay when receiving the message.
+In overlay-based approach, the selection of relays is the result of an overlay creation process that requires specific control messages.
+We present in the following the two protocols that we use in the rest of this paper.
 
-\subsection{CDS overlay-based broadcast}
-\label{sec:background:flooding}
+\subsubsection{Counter-based controlled flooding}
+\label{sec:background:broadcast:flooding}
 
+\begin{figure}[t]
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/manet-comm-model.png}
+    \caption{Broadcast using counter-based controlled flooding.}
+		\label{fig:manet-comm-model}
+	\end{minipage}%
+  \hfill%
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/example-of-collision.png}
+    \caption{Connected Dominating Sets (CDS) construction and broadcast.}
+    \label{fig:example-of-collision}
+	\end{minipage}
+\end{figure}
 
+Pure flooding is the simplest broadcast protocol where every node acts as a relay for any message.
+Relaying may happen after a random waiting time to reduce the risk of collisions \er{add the reference to the scheme that does this}.
+Some approaches even decide on a time value that is dependent on an estimation of the collision risk around the node, but require geographical coordinates to compute this estimation \er{}.
+
+The counter-based controlled flooding we employ is both simple and efficient in a variety of practical situations, as a comparative study has shown~\cite{DensityMobDrivenEval}.
+Upon first reception of a message, a node sets up a timer $t$ and a counter $c=$\er{fillme}.
+The duration of $t$ is chosen randomly in the range \er{fillme}.
+Every reception of a duplicate decreases $c$ by one.
+Upon expiration of $t$, the node only acts as a relay is $c>0$.
+An illustration of the process is given by Figure~\ref{}.
+
+\er{if space allows a short description of when controlled flooding is good and when it is not. Also we cannot choose the counter to be with a good value in both dense and sparse environments, so we must choose to guarantee coverage at least in sparse environments and make it not too large.}
+
+\subsubsection{Multipoint Relay (MPR)}
+\label{sec:background:broadcast:overlay}
+
+\begin{itemize}
+	\item periodic protocol (what period?)
+	\item goal is to learn the one and two hops neighborhoods
+	\item discovery (hello) messages periodically sent with the sender identity to learn one-hop
+	\item surrounding messages to learn two hops
+	\item description of protocol below, but it is unclear how the local decision is made (the description is a god-like one where an omniscient authority figures decides ... we want a node centric description)
+\end{itemize}
+
+In ~\cite{mpr}, Qayyum et al. propose a topology-based broadcast protocol called Multi-point Relaying (MPR).
+%
+The MPR protocol assumes that every node knows two sets, its one-hop and two-hop sets of neighbors.
+%
+Find out the first set requires sending \emph{hello} control messages with the sender's identifier in it.
+%
+Given that a node eventually receives hello messages from those located at the node's broadcast area, the set of two-hop neighbors is obtained by sending a ~\emph{surroundings} control message, which contains the list of hello message senders.
+%
+Before presenting the MPR protocol, we first define the set of one-hop neighbors of node $x$ as $N(x)$ and the set of two-hop neighbors as $N_{2}(x)$. The MPR protocol works as follows.
+
+\begin{enumerate}
+	\item Start with an empty set of relay nodes.
+	\item Mark every node $r \in N(x)$ as relay node, if a node $m \in N_{2}(x)$ exist such that nodes $m$ and $x$ are the only two one-hop neighbors of $r$.
+	\item While there is a node $n \in N_{2}(x)$ that is not covered, chose another relay node $r \in N_(x)$ with the highest number of neighbors.
+\end{enumerate}
+
+Figure~\ref{fig:mpr-example} shows the steps taken by a node $a$ to compute its set of relay, assume that node $a$ already knows the sets $N(a)$ and $N_{2}(a)$.
+%
+Node $b$ is marked as a relay node as it is the only neighbor of $f$.
+%
+The second rule indicates that node $c$ is a relay node too, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $g$ (here, zero).
+%
+The MPR technique is a distributed heuristic to figure out the minimum connected dominating set.
 
 \newpage
 ~

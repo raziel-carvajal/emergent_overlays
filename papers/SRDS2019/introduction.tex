@@ -4,13 +4,11 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Mobile Ad-hoc Networks (MANETs) are distributed systems that do not rely on a fixed networking infrastructure.
-Nodes are mobile and rely on wireless communication with other nodes in range, subject to faults and uncertainty.
-Furthermore, nodes are typically energy-bounded being powered by batteries.
+Mobile Ad-hoc Networks (MANETs) are formed of mobile, energy-bounded nodes relying on ad-hoc wireless communication subject to faults and uncertainty.
 MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure is not sufficient.
 %
-A first example target is a large, ephemeral human gathering where the cost of setting up the required infrastructure for network communication of a few thousand users would be too high to even make sense.
-Music festivals are a good example of such ephemeral gathering where MANETs could allow communicating effectively with a large number of human users despite the lack of sufficient cell phone coverage and local network saturation.
+A first target example is a music festival in a rural area, where setting up permanent network communication infrastructure is not viable economically.
+A MANET can allow communicating effectively with a large number of attendees despite local cellular network saturation.
 Another example is an emergency scenario where teams of rescuers coordinate over an area where communication infrastructure or power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
 % \raziel{I comment this paragraph to take rid of a reference that talks about VANETs, a topic we do not explore}
 %A final example will be with the upcoming bloom of vehicular networks, where efficient communication between autonomous or semi-autonomous cars must be enabled also in locations where infrastructure support is poor or non-existent~\cite{rahim2018vehicular}.
@@ -37,7 +35,7 @@ Efficient routing actually also depends on the availability of an efficient and 
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
 The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
 Collisions are not always possible to detect, and costly to address~\cite{hidden-terminal-problem}.
-A MAC layer implementing acknowledgments and resubmissions may result in lower performance and increase energy costs. %% ER: add ref to a MAC layer
+A MAC protocol~\cite{ieee1997wireless} using two many resubmissions may result in lower performance and increase energy costs.
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
 Broadcast protocols can be classified in two main families~\cite{survey-ruiz}:
@@ -51,21 +49,22 @@ Controlled flooding is prone to broadcast storms but is expected to be robust to
 Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the dissemination itself.
 A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange of control messages.
 Relay nodes form a dissemination structure, or overlay, over the MANET.
-The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve so much that it makes the structure obsolete too early.
+The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve and render the structure obsolete too quickly.
 
-Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval} show that the performance, reliability and energy consumption of various algorithms of the two classes is highly dependent on their deployment conditions.
-Controlled flooding algorithms, such as~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
-Overlay-based algorithms such as~\cite{Nikolov2015, stojmenovic-cds, mpr} on the other hand, shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
+Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval,Williams2002} show that the performance, reliability and energy consumption of  algorithms of the two classes is highly dependent on their deployment conditions.
+Controlled flooding algorithms~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
+Overlay-based algorithms~\cite{Nikolov2015, stojmenovic-cds, mpr} shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
 
 \smallskip
 \noindent
 \textbf{Contributions}
 %
-We are interested in this paper in efficient broadcast in heterogeneous MANETs.
+We are interested in this paper in efficient broadcast in \emph{heterogeneous} MANETs.
 We start from the observation that controlled flooding protocols are efficient in the general case of mobile and lowly to moderately dense regions of the network, but become very inefficient and costly otherwise, that is, in conditions where paying the price of constructing and leveraging an overlay makes sense from a cost and reliability point of view.
 
 We present the novel notion of \emph{\textbf{emergent overlays}}.
-Emergent overlays is a adaptation technique in which nodes in a MANET autonomously decide to switch from the use of a default, controlled flooding based broadcast, to a protocol creating an overlay and using it for dissemination, based on their deployment density and nodes mobility.
+Emergent overlays is a adaptation technique in which a subset of the nodes in a MANET may autonomously decide to switch from the use of default controlled flooding to the bootstrap and use of an overlay.
+The decision to emerge an overlay is based on local and autonomous decisions based on indicators of density and mobility.
 We make the following contributions towards the design, implementation and evaluation of emergent overlays:
 \begin{itemize}
 	\item We present our system model and three base protocols (\S\ref{sec:background}):
