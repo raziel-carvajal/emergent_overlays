@@ -11,17 +11,19 @@ MANETs allow networked applications in situations where no infrastructure is ava
 %
 A first example target is a large, ephemeral human gathering where the cost of setting up the required infrastructure for network communication of a few thousand users would be too high to even make sense.
 Music festivals are a good example of such ephemeral gathering where MANETs could allow communicating effectively with a large number of human users despite the lack of sufficient cell phone coverage and local network saturation.
-A second example is an emergency scenario where teams of rescuers must coordinate over an area where communication infrastructure or power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
-A final example will be with the upcoming bloom of vehicular networks, where efficient communication between autonomous or semi-autonomous cars must be enabled also in locations where infrastructure support is poor or non-existent~\cite{rahim2018vehicular}.
+Another example is an emergency scenario where teams of rescuers coordinate over an area where communication infrastructure or power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
+% \raziel{I comment this paragraph to take rid of a reference that talks about VANETs, a topic we do not explore}
+%A final example will be with the upcoming bloom of vehicular networks, where efficient communication between autonomous or semi-autonomous cars must be enabled also in locations where infrastructure support is poor or non-existent~\cite{rahim2018vehicular}.
 
 A MANET typically involves a large number of nodes with arbitrary mobility patterns.
-For human-attached nodes such as smartphones or tablets, mobility models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy,jardosh2003towards,bai2004mobility,ChaintreauA2006}.
+For human-attached nodes such as smartphones or tablets, mobility models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy}.
 Two constants in these models is that \emph{mobility} is heterogeneous, with nodes alternating between periods of high and low speed, and the presence of points of attraction around which users tend to aggregate~\cite{stepanov2005mobility_model_outdoor}.
 As a result, the \emph{density} of nodes is also heterogeneous, with areas around these points of interests that are densely populated and other areas that may only contain a few nodes.
 This heterogeneity in space has been confirmed by an experimental study performed at the Paléo music festival in Nyon, Switzerland~\cite{naini2015opportunistic}.
 The authors performed an estimation of the population size and of its spatial distribution during the event by collecting unique MAC address from the significant portion of attendees' mobiles phone that were discoverable via bluetooth.
 The authors report that the density of nodes in every $15m\times 15m$ areas can vary by at least one order of magnitude (10x).
-A similar study during a street festival in Ghent, Belgium~\cite{versichele2012use} also reports a high density heterogeneity, and confirms the intuition that users tend to alternate between aggregating in dense, lowly-mobile zones (points of interests) and moving between these zones with a higher mobility. \er{Raziel: read this paper in more detail to check if assertion is true (I only skimmed)}.
+A similar study during a street festival in Ghent, Belgium~\cite{versichele2012use} also reports a high density heterogeneity, and confirms the intuition that users tend to alternate between lowly-mobile zones (points of interests) with a higher number of users, and zones where the density of participants decreases (3x in the collected sample).
+
 
 % A similar experiment in the EPFL campus~\cite{naini2015opportunistic} using Wifi discovery found density differences of up to 6 times between different zones.
 
@@ -38,7 +40,7 @@ Collisions are not always possible to detect, and costly to address~\cite{hidden
 A MAC layer implementing acknowledgments and resubmissions may result in lower performance and increase energy costs. %% ER: add ref to a MAC layer
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
-Broadcast protocols can be classified in two main families~\cite{SurveyRuiz}: 
+Broadcast protocols can be classified in two main families~\cite{survey-ruiz}:
 	Protocols based on controlled flooding on the one hand, 
 	and protocols relying on the creation and maintenance of an overlay network, on the other hand.
 %
@@ -51,7 +53,7 @@ A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange
 Relay nodes form a dissemination structure, or overlay, over the MANET.
 The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve so much that it makes the structure obsolete too early.
 
-Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval, graph-mob-model_Sholz2005} show that the performance, reliability and energy consumption of various algorithms of the two classes is highly dependent on their deployment conditions.
+Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval} show that the performance, reliability and energy consumption of various algorithms of the two classes is highly dependent on their deployment conditions.
 Controlled flooding algorithms, such as~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
 Overlay-based algorithms such as~\cite{Nikolov2015, stojmenovic-cds, mpr} on the other hand, shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
 
