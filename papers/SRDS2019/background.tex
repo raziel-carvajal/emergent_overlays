@@ -95,9 +95,9 @@ We present in the following the two protocols that we use in the rest of this pa
 
 Pure flooding is the simplest broadcast protocol where every node acts as a relay for any message.
 Relaying may happen after a random waiting time to reduce the risk of collisions \er{add the reference to the scheme that does this}.
-Some approaches even decide on a time value that is dependent on an estimation of the collision risk around the node, but require geographical coordinates to compute this estimation \er{}.
+Some approaches even decide on a time value that is dependent on an estimation of the collision risk around the node, but require geographical coordinates to compute this estimation \er{same}.
 
-The counter-based controlled flooding we employ is both simple and efficient in a variety of practical situations, as a comparative study has shown~\cite{DensityMobDrivenEval}.
+We use a counter-based controlled flooding~\cite{2001:AAR:876878.879323} that is both simple and efficient in a variety of practical situations, as comparative studies have shown~\cite{DensityMobDrivenEval,Williams2002}.
 Upon first reception of a message, a node sets up a timer $t$ and a counter $c=$\er{fillme}.
 The duration of $t$ is chosen randomly in the range \er{fillme}.
 Every reception of a duplicate decreases $c$ by one.
