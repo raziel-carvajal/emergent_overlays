@@ -1,6 +1,74 @@
 %!TEX root = main.tex
 %=========================================================
 
+\section{Background}
+\label{sec:background}
+
+\begin{figure}[t]
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/manet-comm-model.png}
+    \caption{Multi-hop routing communication in MANETs and redundancy in received messages.}
+		\label{fig:manet-comm-model}
+	\end{minipage}%
+  \hfill%
+	\begin{minipage}[t]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{figures/example-of-collision.png}
+    \caption{MAC protocol and retransmissions.}
+    \label{fig:mac_protocol}
+	\end{minipage}
+\end{figure}
+
+We start by detailing our system model and the communication mechanisms available in a MANET.
+We present a MAC-level protocol allowing local broadcast with a compromise between cost and reliability.
+We then present the two broadcast protocols, one based on controlled flooding, the other based on an overlay, that we will combine to allow emergent overlays.
+
+\subsection{System and communication models}
+\label{sec:background:model}
+
+We consider an arbitrary number of nodes $n_{i},n_{j},\dots$
+These nodes are mobile in a 2-dimensional space.
+They communicate using wireless transceivers that can emit network frames using \emph{local broadcast}.
+We consider the fixed-range model: Local broadcasts can be received by every node within a transmission range Tx.
+Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1}$ and $n_{2}$.
+Node $n_{3}$ is in range of both and may receive frames from either $n_{1}$ or $n_{2}$ when active in listening mode (i.e., not sending itself).
+Sending and receiving frames consumes energy from the node's limited power supply.
+
+The main obstacle to reliable broadcast in MANETs is the presence of \emph{collisions}.
+A collision may happen when two nodes have overlapping coverage areas.
+If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive either of the frames.
+The same applies to a node that is currently sending and will not receive locally broadcast frames from other nodes in range.
+Detecting collisions is not possible directly.
+This phenomenon is known as the hidden terminal problem~\cite{hidden-terminal-problem}.
+
+\subsection{MAC protocol}
+\label{sec:background:model}
+
+To offer reliable local broadcast, a MAC (Medium Access Control) protocol must detect missed receptions due to collisions and implement frame retransmissions.
+There is a tradeoff between the number and cost of such retransmissions, and their impact on collisions: Too many retransmissions may make things worse and create local broadcast storm~\cite{BroadcastStormProblem}.
+Another difficulty is due to mobility: Nodes are not aware of the identities of other nodes within their coverage areas.
+
+\er{raziel please check the following in detail}
+The IEEE 802.11 coordination function is a classical MAC protocol for reliable local broadcast.
+It relies on a collision avoidance mechanisms known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
+It uses a handshake protocol between the source and any receiver in the coverage area.
+The source first locally broadcast a small Request To Send (RTS) frame.
+Destination nodes reply with Clear To Send (CTS) frames and switch to listening mode only for a time.
+The reception of the full packet (series of frames) is then acknowledged by all known destinations.
+If any node does not reply with an acknowledgment, or replies with an error message, the message is resent. \er{how many times???}
+
+We use a novel virtual carrier sensing MAC protocol that requires less messages exchanges and does not target a 100\% coverage of a local broadcast.
+Our rationale is that redundancy is already implemented at the global broadcast protocol level, and that the presence of collisions is mostly a result of these redundancy.
+We adopt instead a limited-cost resend \er{here describe \textbf{succinctly} the MAC protocol we use.}
+Figure~\ref{fig:mac_protocol} \er{the right-hand side of the figure should be for the MAC protocol}
+
+
+
+
+
+
+
+\er{old text below}
+
 \begin{figure}[t]
 	\begin{minipage}[t]{0.45\linewidth}
     \includegraphics[width=\linewidth]{figures/manet-comm-model.png}
@@ -15,15 +83,6 @@
 	\end{minipage}
 \end{figure}
 
-\section{Background}
-\label{sec:background}
-This section presents background concepts about the communication model for MANETs, MAC distributed protocols and adaptive techniques to broadcast.
-%
-An overview in broadcast protocols is given as well, particularly, we briefly present two protocols that we use in our adaptive approach ~\emph{emergent overlays}.
-
-
-\subsection{Communication model in MANETs}
-\label{sec:background:manets}
 Nodes in MANETs hold wireless transceivers that send networks packets in a broadcast fashion.
 %
 The covered area or broadcast area per transceiver is represented in the literature by a disk with radius Tx.
@@ -32,8 +91,10 @@ The length of Tx is commonly known as \emph{transmission range}.
 %
 Figure~\ref{fig:manet-comm-model} depicts node $n_{1}$ at the center of its broadcast area, any node positioned at such area may receive packets from $n_{1}$.
 %
+\er{there is a big confusion here between the model and the protocol we will put on top of the system. The redundancy you describe is a result of flooding and has nothing to do with the model. This must be removed and discussed in the subsection about the flooding protocol}
 This local broadcast approach of communication generates redundancy in received packets.
 %
+\er{a routing protocol is not part of the model. It is a protocol ...}
 In Figure~\ref{fig:manet-comm-model}, nodes $n_{1}$ and $n_{4}$ communicate with each other via $n_{3}$, when $n_{1}$ sends a packet \emph{p} to aim $n_{4}$, node $n_{3}$ forwards \emph{p} to reach the destination node.
 %
 But, node $n_{2}$ receives twice a packet that was not intended to it because this node is within two broadcast areas.
