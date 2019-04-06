@@ -4,6 +4,36 @@
 \section{Interoperability mechanisms}
 \label{sec:mechanisms}
 
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
+	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
+
+\caption{\labalg{network_api}Network layer API}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	TODO
+
+\caption{\labalg{network_mac_layer}MAC-level retransmission protocol}
+\end{algorithm}
+
+\begin{algorithm}
+	\footnotesize
+	\DontPrintSemicolon
+
+	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
+	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate a new broadcast}
+	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
+
+\caption{\labalg{protocol_api}Broadcast protocol API}
+\end{algorithm}
+
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.32]{figures/interop-example.pdf}

@@ -4,25 +4,11 @@
 \section{Emergent Overlays Requirements}
 \label{sec:overview}
 
-\begin{figure}[t!]
-	\centering
-	\includegraphics[scale=0.85]{figures/general_principle}
-	\caption{System overview}
-	\label{fig:general_principle}
-\end{figure}
-
 \er{following text is a sketch, can be shortened and improved in style}
 Our goal is to allow nodes in a MANET to autonomously decide on the protocol that better suit their local environment.
 As the decision is local and cannot rely on a global decision-making, different nodes, or group of nodes, may choose different protocols.
 For instance, nodes in dynamic and/or sparse environments should choose to use flooding-based broadcast approaches, where the decision to forward or not an incoming message is a purely node-local decision, or to emerge an overlay with other nodes using the same protocol in their vicinity, in which case the decision of whether or not a node should forward incoming broadcast messages is decided using an overlay bootstrap procedure independent of the actual transmissions.
 We provide in this section a high-level overview of the building blocks allowing the autonomous adaptation of broadcast in MANET, and ensuring that different protocols can be used in the same system without impairing correctness or dissemination coverage.
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[scale=0.35]{figures/architecture}
-	\caption{System overview}
-	\label{fig:overview}
-\end{figure}
 
 \er{%
 The goal of this section is to introduce the two next sections.
@@ -35,3 +21,17 @@ It should be kept short and should include a figure showing the interplay betwee
 }
 
 \cite{one-hop-broadcast}: 2013 this study shows that broadcast within the transmission range of nodes isn't solved yet; we can use it to argue that our basic MAC protocol is used to avoid the exchange of control messages from other MAC approaches
+
+\begin{figure}[t!]
+	\centering
+	\includegraphics[scale=0.85]{figures/general_principle}
+	\caption{System overview}
+	\label{fig:general_principle}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.35]{figures/architecture}
+	\caption{System overview}
+	\label{fig:overview}
+\end{figure}
