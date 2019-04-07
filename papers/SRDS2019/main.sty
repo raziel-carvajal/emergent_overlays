@@ -11,114 +11,16 @@
 \usepackage{pifont}
 
 % Algorithms
-%\usepackage{algorithmicx}
-%\usepackage[noend]{algpseudocode}
-%\usepackage{algorithm}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+% required blocks for algorithms
+\usepackage{algorithm_data_structures}
 
 \usepackage{cite}
 
 % % Algo2e
-\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
-\usepackage{intero_algo_vars}
-\usepackage{etex}
-%
-\SetKwData{MapT}{t}
-\SetKwData{MapC}{c}
-\SetKwData{R}{r}
-\SetKwData{T}{TRUE}
-\SetKwData{VoidType}{void}
-\SetKwData{MapFlo}{f}
-\SetKwData{Id}{id}
-\SetKwData{AdaptTimer}{timeout}
-\SetKwData{FloodTimer}{flooding\_}
-\SetKwData{RemTime}{time}
-\SetKwData{Delivered}{delivered}
-
-\SetKwData{Receptions}{receptions}
-
-\SetKwData{Bool}{willSwitch}
-% VARS IN OVERLAY-BASED ALGORITHMS
-\SetKwData{Relay}{am\_i\_relay}
-\SetKwData{Neigs}{neighbors}
-\SetKwData{ObsNeigs}{observed\_neigs}
-\SetKwData{ObsRelays}{observed\_relays}
-\SetKwData{CtrlMsgFun}{newControlMsg}
-\SetKwData{CtrlMsg}{ctrlMsg}
-\SetKwData{Emitter}{emitter}
-\SetKwData{IsRelay}{isRelay}
-\SetKwData{NodeId}{nodeId}
-% % % FUNCTIONS
-\SetKwData{Rule}{applyOverlayRule}
-\SetKwData{Min}{reduceBackbone}
-\SetKwFunction{Demon}{demon}
-\SetKwFunction{Update}{update}
-% %
-
-% VARS IN LOCATION-BASED ALGORITHMS
-\SetKwData{LocRule}{applyLocationRule}
-\SetKwData{MsgPos}{m.emitter.position}
-\SetKwData{Fwd}{forward}
-\SetKwData{Timeout}{getNewTimeout}
-\SetKwData{GetPo}{getPosition}
-% %
-
-\SetKwData{FloodMode}{flooding\_mode}
-\SetKwData{FloodRecpLi}{limit\_of\_receptions}
-\SetKwData{FloodSimp}{SIMPLE}
-\SetKwData{FloodCount}{COUNTER-BASED}
-\SetKwData{FloodFixed}{FIXED\_TIMER-BASED}
-\SetKwData{FloodRandom}{RANDOM\_TIMER-BASED}
-\SetKwData{FloodNewMsg}{newFloodingMsg}
-
-\SetKwData{Algo}{p}
-\SetKwData{AlgoPid}{p.pid}
-\SetKwData{AlgoInit}{init}
-\SetKwData{AlgoEmit}{emit}
-\SetKwData{AlgoHandle}{handle}
-\SetKwData{AlgoSend}{send}
-\SetKwData{AlgoBroFunc}{broadcast}
-\SetKwData{AlgoInitFunc}{init}
-\SetKwData{AlgoEmitFunc}{emit}
-\SetKwData{AlgoPSwitch}{pSwitch}
-
-% % %
-\SetKwData{Ms}{m}
-\SetKwData{Msg}{message}
-\SetKwData{MsgId}{m.id}
-\SetKwData{MsgPid}{m.pid}
-\SetKwData{MsgType}{m.type}
-\SetKwData{MsgBro}{BROADCAST}
-\SetKwData{MsgCtrl}{CONTROL}
-\SetKwData{MsgContent}{payload}
-\SetKwData{MsgPayload}{pl}
-\SetKwData{MsgEmitter}{m.emitter}
-\SetKwData{MsgEmitRel}{m.isRelay}
-% % %
-
-\SetKwData{MsgSwitch}{m.willSwitch}
-\SetKwData{MsgProtSwitch}{m.pSwitch}
-
-
-\SetKwData{Timer}{timer}
-\SetKwData{TimerFunc}{newTimer}
-\SetKwData{RandomFunc}{newRandom}
-
-% Function and Blocks
-\SetKwFunction{FuncHandler}{receive}
-\SetKwFunction{FuncSwitch}{switch}
-\SetKwFunction{FuncExp}{expires}
-\SetKwFunction{FuncExpFlo}{expiresInFlooding}
-\SetKwProg{Fn}{function}{}{}
-\SetKwBlock{BlockOfVar}{variables}{}{}
-\SetKwBlock{BlockOfConstants}{constants}{}{}
-\SetKwBlock{BlockOfFuncs}{running protocol API}{}{}
-\SetKwBlock{BlockOfAlgoAPI}{communication primitives}{}{}
-\SetKwBlock{BlockOfPolicySpecific}{policy-specific functions and parameters}{}{}
-\SetKwBlock{BlockOfMapAttributes}{attributes of map}{}{}
-\SetKwBlock{BlockOfFloodCounter}{use in counter-based version}{}{}
-\SetKwBlock{BlockOfFloodTimeBased}{use in timer-based versions}{}{}
-\SetKwBlock{BlockOfTimerExpires}{wait until t expires}{}{}
-\SetKwBlock{BlockOfMapTimerExpires}{wait until $\MapT[\MsgId].\RemTime$ expires}{}{}
+%\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+%\usepackage{etex}
 
 % Figures (tikz et al.)
 \usepackage{wrapfig}

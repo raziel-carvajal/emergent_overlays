@@ -57,6 +57,9 @@ Destination nodes reply with Clear To Send (CTS) frames and switch to listening 
 The reception of the full packet (series of frames) is then acknowledged by all known destinations.
 If any node does not reply with an acknowledgment, or replies with an error message, the message is resent. \er{how many times???}
 
+\input{mac_api}
+\input{mac_algorithm}
+
 We use a novel virtual carrier sensing MAC protocol that requires less messages exchanges and does not target a 100\% coverage of a local broadcast.
 Our rationale is that redundancy is already implemented at the global broadcast protocol level, and that the presence of collisions is mostly a result of these redundancy.
 We adopt instead a limited-cost resend \er{here describe \textbf{succinctly} the MAC protocol we use.}
@@ -140,6 +143,8 @@ Node $b$ is marked as a relay node as it is the only neighbor of $f$.
 The second rule indicates that node $c$ is a relay node too, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $g$ (here, zero).
 %
 The MPR technique is a distributed heuristic to figure out the minimum connected dominating set.
+
+\input{mpr_protocol}
 
 \newpage
 ~
@@ -332,24 +337,7 @@ In case another copy of $m$ is heard, the timer $t$ pauses, the counter of recep
 When $t$ has expired and the counter of receptions for $m$ is lower than the threshold of allowed receptions, then $m$ is forwarded; otherwise, the message is not forwarded.
 %
 In our adaptive approach we use the previous counter-based approach to broadcast in sparsely dense regions of the network where nodes move faster.
-% 
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
 %
-%	TODO
-%
-%\caption{\labalg{background_flooding}Controlled flooding protocol}
-%\end{algorithm}
-
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
-%
-%	TODO
-%
-%\caption{\labalg{background_}CDS: Connected Dominating Set overlay-based protocol}
-%\end{algorithm}
 
 \subsection{Autonomous adaptation}
 \label{sec:adaptation-background}

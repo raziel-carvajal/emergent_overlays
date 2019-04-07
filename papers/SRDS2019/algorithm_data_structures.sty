@@ -1,18 +1,21 @@
-% *** ARGS IN FUNCTIONS ***
-%
-\SetKwData{Msg}{message}
-\SetKwData{Delay}{delay}
-\SetKwData{And}{\textbf{and}}
-\SetKwData{Ork}{\textbf{or}}
+% BLOCKS
+\algblockdefx[Variables]{BeginVariables}{EndVariables}
+	{\textbf{variables}}{\textbf{end}}
 
-% *** FUNCTION NAMES ***
-%
-\SetKwData{receive}{receive}
+\algblockdefx[FrameClass]{BeginFrameDef}{EndFrameDef}
+	{\textbf{Frame} : \emph{class}}{\textbf{end}}
 
-% *** BLOCKS ***
-%
-\SetKwProg{func}{function}{}{}
-\SetKwBlock{vars}{variables}{}{}
-\SetKwBlock{MapAtts}{attributes of map}{}{}
-\SetKwBlock{MsgAtts}{attributes of message}{}{}
-\SetKwBlock{TimerExpires}{when $\Delay$ expires \label{interop-alg:timer-expires}}{}{}
+\algblockdefx[MapDetails]{BeginMapDetails}{EndMapDetails}
+	{\textbf{dictionary details}}{\textbf{end}}
+
+\algblockdefx[WhenS]{BeginWhenS}{EndWhenS}
+	{\textbf{when} s }{\textbf{end}}
+	
+\algblockdefx[WhenT]{BeginWhenT}{EndWhenT}
+	{\textbf{when} t }{\textbf{end}}
+	
+\algblockdefx[SelectN]{BeginSelectN}{EndSelectN}
+	{\textbf{select} n }{\textbf{end}}
+
+\algblockdefx[With]{BeginWith}{EndWith}
+	{\textbf{with} }{\textbf{end}}
