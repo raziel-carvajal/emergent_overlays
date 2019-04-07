@@ -1,0 +1,69 @@
+\begin{algorithm}[t]
+	\begin{algorithmic}[1]
+
+		\BeginVariables
+			\State me : \emph{string} \Comment{node identifier}
+			\State maxDelay : \emph{double}
+			\State minDelay : \emph{double}
+			\State allowedTries : \emph{int} \Comment{limit of retransmissions}
+			\State acks : \emph{set}
+			\State neighbors : \emph{set}			
+		\EndVariables
+
+		\State \emph{/* methods call only by a sender */}
+		
+		\Function{onCTS}{Frame f}
+			\State neighbors.\Call{insert}{f.sender}
+		\EndFunction
+		
+		\Function{onACK}{Frame f}
+			\State acks.\Call{insert}{f.sender}
+		\EndFunction
+
+		\Function{send}{Frame f}			
+			\State rts $\gets$ \Call{createRTS}{f.id}
+			\State \Call{broadcast}{rts}
+			\State s $\gets$ \Call{createTimer}{maxDuration}
+
+			\BeginWhenS \textbf{expires}
+				\If{neighbors $ = \emptyset $}
+					\Return \Comment{exit, no answers}
+				\EndIf
+				\State transmissions $\gets$ 1
+				\State \emph{retry:} \Call{broadcast}{f}
+				\State t $\gets$ \Call{createTimer}{maxDuration}
+				\BeginWhenT \textbf{expires}
+					\If{acks $=$ neighbors}
+						\Return
+					\EndIf
+					
+					\State transmissions $\gets$ transmissions + 1
+					\If{transmission $\le$ allowedTries}
+						\State \textbf{go to} \emph{retry}
+					\EndIf
+				
+				\EndWhenT
+			\EndWhenS
+		\EndFunction
+		
+		\State \emph{/* methods call only by a receiver */}
+		
+		\Function{onRTS}{Frame f}
+			\If{\textbf{firstReception} f.id }
+				\State cts $\gets$ \Call{createCTS}{me}
+				\State interval $\gets$ [minDelay, maxDelay)
+				\State s $\gets$ \Call{createRandomTimer}{interval}
+				\BeginWhenS \textbf{expires}
+					\State \Call{broadcast}{cts}
+					\State w $\gets$ allowedTries * maxDelay
+					\State t $\gets$ \Call{createTimer}{w}
+					\BeginWhenT \textbf{expires}
+						\State \Call{endHandshake}{f.sender}
+					\EndWhenT
+				\EndWhenS
+			\EndIf
+		\EndFunction
+		
+	\end{algorithmic}	
+\caption{Procedures of MAC protocol}\label{algorithm:mac:sender}
+\end{algorithm}

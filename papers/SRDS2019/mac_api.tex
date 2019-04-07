@@ -1,0 +1,37 @@
+\begin{algorithm}[t]
+	\begin{algorithmic}[1]
+	
+		\BeginVariables
+			\State me : \emph{string} \Comment{node identifier}
+		\EndVariables
+	
+		\BeginFrameDef
+			\State id : \emph{string} \Comment{frame identifier}
+			\State sender : \emph{string} \Comment{sender of frame}
+			\State data : \emph{string} \Comment{content}
+		\EndFrameDef
+
+		\State \Call{broadcast}{Frame f} \Comment{local broadcast}
+		\State \Call{deliver}{data} \Comment{deliver data to application}
+		\State \Call{endHandshake}{sender} \Comment{terminate handshake}
+
+ 		\Function{receive}{Frame f} \Comment{receive primitive}
+ 		 	\If{f \textbf{is} ACK}
+ 				\Return \Call{onACK}{f}
+ 			\EndIf
+ 		 	\If{f \textbf{is} CTS}
+ 				\Return \Call{onCTS}{f}
+ 			\EndIf
+ 			\If{f \textbf{is} RTS}
+ 				\Return \Call{onRTS}{f}
+ 			\EndIf
+ 			\If{f \textbf{is} DataFrame}
+ 				\State ack $\gets$ \Call{createACK}{me}
+				\State \Call{broadcast}{ack}
+ 				\State \Call{deliver}{f.data}
+ 			\EndIf
+ 		\EndFunction
+		
+	\end{algorithmic}	
+\caption{API of MAC protocol and used data structures}\label{algorithm:mac:api}
+\end{algorithm}
