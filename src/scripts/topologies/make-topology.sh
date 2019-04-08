@@ -60,8 +60,8 @@ mv *.pdf *.ned *.mobility *.positions \
 
 firsAtDenseA=`grep FIRST_NODE_AT_DENSE_AREA output | awk '{print $2}' | tail -1`
 srcNodeId=`grep SOURCE_NODE_ID output | awk '{print $2}' | tail -1`
-cenPosX=`grep DENSE_AREA_DIMENSIONS output | awk '{print $2}' | tail -1`
-cenPosY=`grep DENSE_AREA_DIMENSIONS output | awk '{print $3}' | tail -1`
+cenPosX=`grep CMA_CENTER output | awk '{print $2}' | tail -1`
+cenPosY=`grep CMA_CENTER output | awk '{print $3}' | tail -1`
 
 echo "FIRST_NODE_AT_DENSE_AREA = ${firsAtDenseA}"
 echo "          SOURCE_NODE_ID = ${srcNodeId}"
@@ -69,8 +69,6 @@ echo "              CMA_CENTER = ${cenPosX} x ${cenPosY}"
 echo "  DENSE_REGION_DIMENSION = ${DENSE_AREA_LENGTH} x ${DENSE_AREA_WIDTH}"
 rm -f output
 
-ctrlMsgInterval=`bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
-echo "Ctrl message interval: ${ctrlMsgInterval}"
 broaMsgInterval=`bc <<< "scale=2; (${SIMULATION_TIME} * 60 ) / ${BROADCAST_MSGS_NO}"`
 # broaMsgInterval=`bc <<< "scale=2; x=(${SIMULATION_TIME} * 60 )/${BROADCAST_MSGS_NO}; if(x < 1.0) print "0",x else print x ;"`
 echo "Broadcast message interval ${broaMsgInterval}"
@@ -111,11 +109,7 @@ for algo in ${algorithms} ; do
   sed -i -e "s/CENTER_POS_Y/${cenPosY}/" iniFile
   sed -i -e "s/DENSE_REGION_WIDTH/${DENSE_AREA_WIDTH}/" iniFile
 	sed -i -e "s/DENSE_REGION_LENGTH/${DENSE_AREA_LENGTH}/" iniFile
-
-  sed -i -e "s/CTRL_MSG_INTERVAL/${ctrlMsgInterval}s/" iniFile
-	sed -i -e "s/FIRST_CTRL_MSG_AT/${FIRST_CTRL_MSG_AT}s/" iniFile
   sed -i -e "s/BROADCAST_MSG_INTERVAL/${broaMsgInterval}s/" iniFile
-
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
 
   algoCfgFpath="../../../experiments/configs/in_common/protocols"
@@ -126,7 +120,7 @@ for algo in ${algorithms} ; do
     done
   fi
 	# toatl number of nodes in the network
-	echo "**.udpApp[0].maxNodesNo = ${n}" >> iniFile
+	echo "**.udpApp[0].nodesNo = ${n}" >> iniFile
   # set the algorithm that nodes use to bootstrap
   if [ "${algo}" == "hybrid" ] ; then
     # set algorithm for nodes at sparse area

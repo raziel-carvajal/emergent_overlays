@@ -47,11 +47,12 @@ def getArgs() :
 
 class CommunicationArea :
 	def __init__(self, nodes, cmaDim, denseAdim, nodesPerArea) :
+		print cmaDim
 		self.length = cmaDim['len']
 		self.width = cmaDim['wid']
 		self.center = {
-			'x': float( "%.3f"%(cmaDim['len'] / 2.0) ),
-	  		'y': float( "%.3f"%(cmaDim['wid'] / 2.0) ) }
+			'x': float( "%.3f"%(cmaDim['len'] / 2) ),
+	  		'y': float( "%.3f"%(cmaDim['wid'] / 2) ) }
 		self.denseAlen = float( "%.3f"%(denseAdim['len']) )
 		self.denseAwid = float( "%.3f"%(denseAdim['wid']) )
 

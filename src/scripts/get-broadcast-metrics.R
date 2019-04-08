@@ -632,20 +632,6 @@ main <- function(args) {
 	    args$resultsDir, 'noderoles', algorithmN
 	  )
 	}
-	# TODO
-  # print("DONE - Get relative error of density")
-  # try(
-  #   densityRelativeError <- get.density.relative.error(
-  #     datasetFile, args$first_time_of_measuring_nodes_position,
-  #     args$step, msgs_ids, overlays, algorithmN
-  #   )
-  # )
-  # try(
-  #   saveDataFrame(
-  #     densityRelativeError,
-  #     args$resultsDir, 'densityRelativeError', algorithmN
-  #   )
-  # )
   if(args$wpe){
     print("DONE - Get packet error rate")
     pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")

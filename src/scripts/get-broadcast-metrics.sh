@@ -70,6 +70,7 @@ Rscript get-broadcast-metrics.R \
   --with-energy-consumption \
   --with-coverage \
   --with-saved-rebroadcasts \
+	--with-plotting \
   ${withMobility} ${CONF_NAME} ${CONF_FILE}
 
 echo "Moving built graphs..."
