@@ -17,14 +17,12 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -o nounset                              # Treat unset variables as an error
-cma=${COMM_AREA_LENGTH}
-nodes=${NODES_NO_PER_REGION}
+let nodes=${NODES_AT_DENSE_AREA}+${NODES_AT_SPARSE_AREA}
 tx=${NODES_TRANSMISSION_RANGE}
 overlays=$(bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${NODES_MOV_FREQ}")
 overlays=$(bc <<< "${overlays}/1")
 
-echo "Comm area length: ${cma}"
+echo "Comm area length: ${COMM_AREA_LENGTH} x ${COMM_AREA_WIDTH}"
 echo "Nodes No: ${nodes}"
 echo "Tx of nodes: ${tx}"
 echo "No of overlays: ${overlays}"
@@ -35,9 +33,11 @@ rm -rf *.pdf *.ned *.mobility *.positions output mobility-trace \
   ../../../experiments/configs/built_configs/*.ini \
   ../../../experiments/configs/built_configs/cfgs_for_workers
 
-./gen_mobility_trace.py --area-length ${cma} --nodes-no ${nodes} \
-  --transmission-range ${tx} --trace-size ${overlays} \
-  --motion-freq ${NODES_MOV_FREQ} >output
+./gen_mobility_trace.py --cma-length ${COMM_AREA_LENGTH} \
+	--cma-width ${COMM_AREA_WIDTH} --dense-area-length ${DENSE_AREA_LENGTH} \
+	--dense-area-width ${DENSE_AREA_WIDTH} --nodes-at-dense ${NODES_AT_DENSE_AREA} \
+  --nodes-at-sparse ${NODES_AT_SPARSE_AREA} --transmission-range ${tx} \
+	--trace-size ${overlays} --motion-freq ${NODES_MOV_FREQ} >output
 
 s=""
 for f in `ls -t *.pdf`; do
@@ -48,8 +48,8 @@ rm -f Position_*.pdf
 
 nodesNoAtTrace=`wc -l mobility-trace | awk '{print $1}'`
 let nodesNoAtTrace=nodesNoAtTrace-1
-./make-ned-file.py --cma-w ${cma} --transmission-range ${tx} \
-	--nodes ${nodesNoAtTrace}
+./make-ned-file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
+	--transmission-range ${tx} --nodes ${nodesNoAtTrace}
 
 mobF=`ls *.ned | awk -F ".ned" '{ print $1}'`
 mv mobility-trace "${mobF}.mobility"
@@ -60,12 +60,13 @@ mv *.pdf *.ned *.mobility *.positions \
 
 firsAtDenseA=`grep FIRST_NODE_AT_DENSE_AREA output | awk '{print $2}' | tail -1`
 srcNodeId=`grep SOURCE_NODE_ID output | awk '{print $2}' | tail -1`
-cenPosXandY=`grep X_POSITION_OF_CMA_CENTER output | awk '{print $2}' | tail -1`
-denseAreaWi=`grep WIDTH_OF_DENSE_REGION output | awk '{print $2}' | tail -1`
+cenPosX=`grep DENSE_AREA_DIMENSIONS output | awk '{print $2}' | tail -1`
+cenPosY=`grep DENSE_AREA_DIMENSIONS output | awk '{print $3}' | tail -1`
+
 echo "FIRST_NODE_AT_DENSE_AREA = ${firsAtDenseA}"
 echo "          SOURCE_NODE_ID = ${srcNodeId}"
-echo "X_POSITION_OF_CMA_CENTER = ${cenPosXandY}"
-echo "   WIDTH_OF_DENSE_REGION = ${denseAreaWi}"
+echo "              CMA_CENTER = ${cenPosX} x ${cenPosY}"
+echo "  DENSE_REGION_DIMENSION = ${DENSE_AREA_LENGTH} x ${DENSE_AREA_WIDTH}"
 rm -f output
 
 ctrlMsgInterval=`bc <<< "scale=2; (${SIMULATION_TIME} * 60) / ${CONTROL_MSGS_NO}"`
@@ -95,7 +96,7 @@ cfgsForWorkers=""
 cfgFile='../../../experiments/configs/in_common/common.ini'
 algorithms=`echo -e "${ALGO_AT_DENSE_AREA}\n${ALGO_AT_SPARSE_AREA}\nhybrid"`
 algoClassMap="../../../experiments/configs/in_common/algo_class_mapping"
-let n=${firsAtDenseA}+${nodes}
+let n=${nodes}+1
 for algo in ${algorithms} ; do
   # add configuration of exepriment
 	cat "${cfgFile}" > iniFile
@@ -106,9 +107,10 @@ for algo in ${algorithms} ; do
   sed -i -e "s/SIMULATION_TIME/${SIMULATION_TIME}s/" iniFile
   sed -i -e "s/NODES_TRANSMISSION_RANGE/${NODES_TRANSMISSION_RANGE}m/" iniFile
   sed -i -e "s/SOURCE_NODE_ID/host${srcNodeId}/" iniFile
-  sed -i -e "s/CENTER_POS_X/${cenPosXandY}/" iniFile
-  sed -i -e "s/CENTER_POS_Y/${cenPosXandY}/" iniFile
-  sed -i -e "s/DENSE_REGION_WIDTH/${denseAreaWi}/" iniFile
+  sed -i -e "s/CENTER_POS_X/${cenPosX}/" iniFile
+  sed -i -e "s/CENTER_POS_Y/${cenPosY}/" iniFile
+  sed -i -e "s/DENSE_REGION_WIDTH/${DENSE_AREA_WIDTH}/" iniFile
+	sed -i -e "s/DENSE_REGION_LENGTH/${DENSE_AREA_LENGTH}/" iniFile
 
   sed -i -e "s/CTRL_MSG_INTERVAL/${ctrlMsgInterval}s/" iniFile
 	sed -i -e "s/FIRST_CTRL_MSG_AT/${FIRST_CTRL_MSG_AT}s/" iniFile
@@ -132,7 +134,7 @@ for algo in ${algorithms} ; do
     algoClassName=`grep ${ALGO_AT_SPARSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.host{${i}..${j}}.udpApp[0].runningProtocolId = ${algoClassName}" >> iniFile
     # set algorithm for nodes at dense area
-    i=${firsAtDenseA}; let j=${firsAtDenseA}+${nodes}
+    i=${firsAtDenseA}; let j=${firsAtDenseA}+${NODES_AT_DENSE_AREA}
     algoClassName=`grep ${ALGO_AT_DENSE_AREA} ${algoClassMap} | awk -F "=" '{print $2}'`
     echo "*.host{${i}..${j}}.udpApp[0].runningProtocolId = ${algoClassName}" >> iniFile
   else

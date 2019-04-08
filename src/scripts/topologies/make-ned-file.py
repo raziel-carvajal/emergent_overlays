@@ -19,7 +19,9 @@ def getArgs() :
 	p = argparse.ArgumentParser(description='Creates a NED file from the initial'+
 		' positions of nodes within a trace of mobility. Omnet++ requires NED ' +
 		'to represent a network topology.')
-	p.add_argument('--cma-w', dest='cma_w', type=int, default=100,
+	p.add_argument('--cma-len', dest='cma_l', type=int, default=100,
+		help='length of the communication area')
+	p.add_argument('--cma-width', dest='cma_w', type=int, default=100,
 		help='width of the communication area')
 	p.add_argument('--transmission-range', dest='Tx', type=int, default=15,
 		help='transmission range of each node')
@@ -37,7 +39,7 @@ if __name__ == '__main__' :
 	with open(args.mobTrace, 'r') as f :
 		initialPos = [ getCoordinate(f.readline()) for i in range(0, args.nodes)]
 	nedFilename = 'n_' + str(args.nodes) + '_d_0_tr_' + str(args.Tx) + '_a_' +\
-		str(args.cma_w) + 'x' + str(args.cma_w) + '_idx_0_p_'
+		str(args.cma_l) + 'x' + str(args.cma_w) + '_idx_0_p_'
 	content = NED_HEAD + 'network ' + nedFilename + '{\n' + NED_MIDD
 	for i in range(1, args.nodes + 1) :
 		content += "host{0}: Cellphone ".format(i) + "{@display(" + '"' +\
