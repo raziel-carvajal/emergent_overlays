@@ -203,9 +203,11 @@ double MacLayerWithCD::getMaxDisseminationTime() {
 }
 
 double MacLayerWithCD::getLowerBoundWaitingTime() {
-  return controller->par("minSentDelay").doubleValue();
+//  return controller->par("minSentDelay").doubleValue();
+  return controller->par("macLowerWaitingTime").doubleValue();
 }
 
 double MacLayerWithCD::getUpperBoundWaitingTime() {
-  return controller->par("minSentDelay").doubleValue() * 90;
+  return controller->par("macUpperWaitingTime").doubleValue();
+//  return controller->par("minSentDelay").doubleValue() * 90;
 }

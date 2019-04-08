@@ -67,8 +67,6 @@ void InteroperableBroadcast::processStart() {
   // schedule event to end the simulation in all peers
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
   // store nodes positions to get an approximation of the wireless topology formed during
-  // the dissemination of broadcast messages
-  scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
   // erase the content of previously known foreign algorithms
   scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
 
@@ -76,6 +74,8 @@ void InteroperableBroadcast::processStart() {
   mac = new MacLayerWithCD();
   mac->setController(this);
   mac->initialize();
+  // the dissemination of broadcast messages
+  scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
 
   // initialize objects that implement broadcast protocols
   intializeCatalog();
