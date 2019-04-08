@@ -35,3 +35,28 @@ It should be kept short and should include a figure showing the interplay betwee
 	\caption{System overview}
 	\label{fig:overview}
 \end{figure}
+
+
+\er{recycle below}
+\subsection{Autonomous adaptation}
+\label{sec:adaptation-background}
+Adaptation refers to the ability of a system to change its behavior based on the observations of the underlaying environment.
+%
+Examples of such observables in mobile nodes are: number of nodes within broadcast areas (density), interference in signal transmissions, rate of collisions or used bandwidth.
+%
+Local information of nodes is an observable as well, such as remining battery level or nodes relatively velocity (in case a giroscope or accelerometer is available).
+%
+These observables may not be homogeneous in all nodes.
+%
+Some nodes may be positioned in densely-populated areas while others may be in sparsely-populated areas, this situation occurs in the music festival use case (as described in section~\ref{sec:introduction}).
+
+%
+We believe that there is no one-fit-all solution to broadcast in MANETs, this has been shown by priors works on adaptive schemes~\cite{hypergossiping,2001:AAR:876878.879323,adaptive_group_com_iscc02}, where a switching criterion or ~\emph{adaptation policy} is triggered to perform broadcast protocol of the same class.
+%
+Given that the operating conditions in a network are heterogeneous, adaptation policies may concern only a set of nodes.
+%
+The application of adaptive policies are based on the system observables and generally, they are applied collectively by nodes.
+%
+\raziel{Etienne: please, help me to complete/modify this next paragraph based on your draw that shows the phases of adaptation; I recall you mention a first picture where nodes run protocol A, then a phase of transition where node collectively decide to use protocol B and a third one showing some protocols running A and others running B.}
+Figure~\ref{} depict the phases of an adaptive scheme. At first, every node in the network are running a protocol $A$ (...)
+

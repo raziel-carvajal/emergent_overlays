@@ -1,44 +1,93 @@
+%!TEX root = main.tex
+%=========================================================
+
 \begin{algorithm}[t]
+\begin{footnotesize}
 	\begin{algorithmic}[1]
+
+	\BeginInput
+		\State OneH : \emph{set} \Comment{one-hop neighbors}
+		\State TwoH[ ] : \emph{map} ($n_{j\neq i}\in$ OneH) $\rightarrow$ $\{n_k\}$ \Comment{two-hop neighbors}
+	\EndInput
 	
-		\BeginVariables
-			\State me : \emph{string} \Comment{node identifier}
-			\State oneHopNeigs : \emph{set}
-			\State twoHopNeigs[ ] : \emph{dictionary}
-			\BeginMapDetails
-				\State \emph{key} : \emph{string}
-				\State \emph{value} : \emph{set}
-			\EndMapDetails
-			
-		\EndVariables
+	\smallskip
+	
+	\Procedure{chooseRelays}{}
+		\State uncovered = $\bigcup\limits_{n_j\in \; \text{OneH}} \text{TwoH}[n_j]$
+			\Comment{all two-hop neighbors}
+		\State relays $\gets \emptyset$
 		
-		\Procedure{choseRelays}{}
-			\State relays $\gets \emptyset$ 
-			\State uncovered $\gets \emptyset$
-			\For{set \textbf{in} twoHopNeigs.\Call{values}{ } }
-				\State uncovered $\gets$ uncovered $\cup$ set
-			\EndFor
-			\For{n \textbf{in} oneHopNeigs}
-				\State $s = \{u, me\}$
-				\If{$\exists u \in$ uncovered \textbf{such} twoHopNeigs[n] = $s$ }
-					\State relays $\gets$ relays $\cup \{u\}$
-					\State \textbf{delete} $u$ \textbf{from} uncovered
-				\EndIf
-			\EndFor
-			\Repeat
-				\BeginSelectN \textbf{in} oneHopNeigs \textbf{when}
-				  \State $\nexists n' \in$  oneHopNeigs \textbf{such} $s_{1} > s_{2}$ 
- 					\BeginWith
- 						\State $s_{1} \gets |$ twoHopNeigs[n] $|$
- 						\State $s_{2} \gets |$ twoHopNeigs[$n'$] $|$
- 					\EndWith
- 					\State relays $\gets$ relays $\cup \{n\}$
- 					\State \textbf{delete} twoHopNeigs[n] \textbf{from} uncovered
- 					\State \textbf{delete} n \textbf{from} oneHopNeigs
-				\EndSelectN
-			\Until{uncovered $\neq \emptyset$ \textbf{or} oneHopNeigs $\neq \emptyset$}
-			\State \Return relays
-		\EndProcedure
-	\end{algorithmic}	
-\caption{Selection of relays with MPR technique}\label{algorithm:mpr}
+		\noindent \emph{// Phase 1: add as relays 1-hop nbors connecting to isolated a 2-hop nbor}
+			
+		\For{\textbf{every} $n_j$ \textbf{in} OneH}
+			\If{$\exists u \in$ uncovered \textbf{s. t.} TwoH[$n_j$] = $\{u, n_i\}$ }
+				\State relays $\gets$ relays $\cup \; \{n_j\}$
+				\State uncovered $\gets$ uncovered - $\{u\}$
+			\EndIf
+		\EndFor
+		
+		\noindent \emph{// Phase 2: tag high-degree 1-hop nbors as relays until coverage}
+		
+		% \State oneHopNbors.sort($n_j,n_k : \text{twoHopNbors}[n_j]>\text{twoHopNbors}[n_k]$)
+		
+		\For{\textbf{every} $n_j$ \textbf{in} OneH by decreasing value of $|\text{TwoH}[n_j]|$}
+			\State relays $\gets$ relays $\cup \; n_j$ 
+			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
+			\If{uncovered = $\emptyset$}
+				\State \Return relays
+			\EndIf
+		\EndFor
+		
+	\EndProcedure
+\end{algorithmic}	
+\end{footnotesize}
+\caption{Selection of relays at node $n_i$ with MPR}\label{algorithm:mpr}
 \end{algorithm}
+
+%
+%
+% \begin{algorithm}[t]
+% \begin{footnotesize}
+% 	\begin{algorithmic}[1]
+%
+% 	\BeginVariables
+% 		\State me : \emph{string} \Comment{node identifier}
+% 		\State oneHopNeigs : \emph{set}
+% 		\State twoHopNeigs[ ] : \emph{dictionary}
+% 		\BeginMapDetails
+% 			\State \emph{key} : \emph{string}
+% 			\State \emph{value} : \emph{set}
+% 		\EndMapDetails
+%
+% 	\EndVariables
+%
+% 	\Procedure{chooseRelays}{}
+% 		\State relays $\gets \emptyset$
+% 		\State uncovered $\gets \emptyset$
+% 		\For{set \textbf{in} twoHopNeigs.\Call{values}{ } }
+% 			\State uncovered $\gets$ uncovered $\cup$ set
+% 		\EndFor
+% 		\For{n \textbf{in} oneHopNeigs}
+% 			\If{$\exists u \in$ uncovered \textbf{such} twoHopNeigs[n] = $\{u, me\}$ }
+% 				\State relays $\gets$ relays $\cup \{u\}$
+% 				\State \textbf{delete} $u$ \textbf{from} uncovered
+% 			\EndIf
+% 		\EndFor
+% 		\Repeat
+% 			\BeginSelectN \textbf{in} oneHopNeigs \textbf{when}
+% 			  \State $\nexists n' \in$  oneHopNeigs \textbf{such} $s_{1} > s_{2}$
+% 				\BeginWith
+% 					\State $s_{1} \gets |$ twoHopNeigs[n] $|$
+% 					\State $s_{2} \gets |$ twoHopNeigs[$n'$] $|$
+% 				\EndWith
+% 				\State relays $\gets$ relays $\cup \{n\}$
+% 				\State \textbf{delete} twoHopNeigs[n] \textbf{from} uncovered
+% 				\State \textbf{delete} n \textbf{from} oneHopNeigs
+% 			\EndSelectN
+% 		\Until{uncovered $\neq \emptyset$ \textbf{or} oneHopNeigs $\neq \emptyset$}
+% 		\State \Return relays
+% 	\EndProcedure
+% \end{algorithmic}
+% \end{footnotesize}
+% \caption{Selection of relays with MPR}\label{algorithm:mpr}
+% \end{algorithm}

@@ -40,7 +40,7 @@ The same applies to a node that is currently sending and does not receive locall
 Detecting collisions as they happen is not possible.
 This phenomenon is known as the hidden terminal problem~\cite{hidden-terminal-problem}.
 
-\subsection{MAC protocol}
+\subsection{MAC protocol for local broadcast}
 \label{sec:background:mac}
 
 A MAC (Medium Access Control) protocol arbitrates the use of the communication medium to minimize collisions.
@@ -81,13 +81,13 @@ Our rationale is that beyond three failures for a node due to collisions indicat
 
 The goal of broadcast is to reliably send a message to all nodes in the network, subject to mobility and collisions.
 The source can be any node in the network.
-Nodes may forward a message using local broadcast upon its first reception.
+Nodes \emph{may} forward a message using local broadcast upon its first reception.
 Subsequent receptions are \emph{duplicates} and do not lead to forwarding.
-The target is to reduce the number of necessary relays while ensuring a high or total coverage, measured as the number of nodes that receive the message during the broadcast.
-We note that incomplete broadcasts may be addressed through a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}, but the use of these techniques is orthogonal to our goal of reaching high coverage in the first place.
-Broadcast protocols can be classified in two families depending on how they choose relay nodes~\cite{survey-ruiz}.
-In controlled flooding, nodes decide whether to be a relay when receiving the message.
-In overlay-based approach, the selection of relays is the result of an overlay creation process that requires specific control messages.
+The target is to reduce the number of necessary relay nodes while ensuring a high (or full) \emph{coverage}, measured as the number of nodes that receive the message during the broadcast.
+We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.
+Broadcast protocols can be classified in two families depending on how they select relay nodes~\cite{survey-ruiz}.
+In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
+In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the exchange of specific control messages.
 We present in the following the two protocols that we use in the rest of this paper.
 
 \subsubsection{Counter-based controlled flooding}
@@ -107,7 +107,7 @@ We present in the following the two protocols that we use in the rest of this pa
 	\end{minipage}
 \end{figure}
 
-Pure flooding is the simplest broadcast protocol where every node acts as a relay for any message.
+Pure flooding is the simplest broadcast protocol where every node acts as a relay for every message.
 Relaying may happen after a random waiting time to reduce the risk of collisions~\cite{BroadcastStormProblem}.
 Some approaches even decide on a time value that is dependent on an estimation of the collision risk around the node, but require geographical coordinates to compute this estimation~\cite{abba}.
 
@@ -122,6 +122,32 @@ An illustration of the process is given by Figure~\ref{}.
 
 \subsubsection{Multipoint Relay (MPR)}
 \label{sec:background:broadcast:overlay}
+
+Overlay-based approaches pre-establish which nodes should act as relays.
+This requires exchange of information between nodes outside of actual broadcast sessions.
+The goal is to form a connected dominating set, where the coverage area of all relays encompasses all the nodes in the network, is itself a connected component, and ideally contains the smallest possible number of relays.
+The overlay can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
+It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the dissemination path.
+We adopt a protocol of the latter type, MPR~\cite{mpr} (\emph{Multipoint relaying}).
+
+MPR collects at each node its set of one-hop neighbors, i.e. those in its coverage area, as well as two-hops neighbors.
+Nodes periodically locally broadcast their current set of one-hop neighbors and passively collect or update the information received from their neighbors.
+Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
+The frequency of announcements depends on the dynamism of the local network.
+Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
+
+Each nodes selects overlay nodes from its collected set of one- and two-hops neighbors 
+
+
+
+
+, as in the CDS algorithm
+
+
+explicit overlay: CDS -> nodes know whether they are a relay or not and act accordingly
+
+implicit overlay: MPR: source (actually any) node knows which of its neighbors are member of overlay, and forward explicitly with the identity of these nodes. They do the same except for the origin of the dissemination. The algorithm explains how the tagging of the next-in-overlay nodes is done for a local node. The advantage of the implicit overlay is that it avoid supplementary rounds of messages to inform the overlay nodes, only the discovery of one and two hops neighbors is necessary.
+
 
 \begin{itemize}
 	\item periodic protocol (what period?)
