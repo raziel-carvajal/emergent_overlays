@@ -3,36 +3,99 @@
 
 \section{Interoperability mechanisms}
 \label{sec:mechanisms}
+We revisit the issues and opportunities of communication in a situation where disjoint clusters of nodes broadcast following either, a controlled flooding approach or an overlay-based one.
+%
+We propose an interoperability mechanism that ensures continuity in the delivery of messages independently of the protocol running at each node.
 
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
+\subsection{Interoperability issues}
+\label{sec:mechanisms:interop-issues}
+In the general case, a system where the participants of a disjoint partition of the network are running a certain protocol, may avoid any interaction with participants from other partitions.
 %
-%	$\AlgoSend   ($\Ms: \Msg) : \VoidType  \tcp*[1]{send to all nodes in wireless range}
-%	$\FuncHandler($\Ms: \Msg) : \VoidType  \tcp*[1]{callback when a message is received}
+The combination of two protocols to broadcast in MANETs, controlled flooding and overlay-base, may avoid the delivery of frames coming from any source in the network.
 %
-%\caption{\labalg{network_api}Network layer API}
-%\end{algorithm}
+This situation is depicted in Figure~\ref{} that shows two disjoint partitions of nodes running different broadcast protocols.
 %
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
+The first partition of nodes use pure flooding and the second one maintains a dissemination overlay.
 %
-%	TODO
+As seen in section~\ref{sec:background:broadcast:overlay}, the construction of an overlay requires nodes sending hello frames to announce their existence.
 %
-%\caption{\labalg{network_mac_layer}MAC-level retransmission protocol}
-%\end{algorithm}
+Even if nodes located at the frontier of both partitions are in range to receive frames, nodes of the first partition do not reply back because such messages are unknown to them.
 %
-%\begin{algorithm}
-%	\footnotesize
-%	\DontPrintSemicolon
+Nodes participating in a dissemination overlay are limited by the second partition, therefore, any source node that is part of the overlay will reach only nodes of the second partition.
+
+\subsection{Interoperable relays}
+\label{sec:mechanisms:interop-relays}
+To assure that data frames or \emph{messages} transit between adjacent partitions of nodes running different algorithms, nodes must figure out when they are located at the frontier of partitions.
 %
-%	$\AlgoInit  ($pl: \MsgContent) : \Msg \tcp*[1]{create a new message}
-%	$\AlgoEmit  ($\Ms: \Msg) : \VoidType \tcp*[1]{initiate a new broadcast}
-%	$\AlgoHandle($\Ms: \Msg) : \VoidType \tcp*[1]{handle incoming broadcast}
+We call such nodes \emph{interoperable relays} and we give a proof that these relays enforce broadcast by covering nodes of every adjacent component in a MANET.
 %
-%\caption{\labalg{protocol_api}Broadcast protocol API}
-%\end{algorithm}
+First, we formalize the system model we present in section~\ref{sec:background:model}.
+
+%
+We define a network as an undirected graph $ G = (N, L, P) $ where $ N = \{ n_{i} \mid i \in 1, \dots, m \} $ is the set of all nodes, $ L = \{ (n_{i}, n_{j}) \mid n_{i}, n_{j} \in N, i \neq j, (n_{i}, n_{j}) = (n_{j}, n_{i}) \} $ is the set of all links, and $ P = \{p_{flood}, p_{cds} \} $ is the set of broadcast protocols with two elements, $p_{flood}$ represents controlled flooding and $p_{cds}$ an overlay-based approach.
+%
+A disjoint component in such graph, where its nodes use a single protocol to broadcast (within that component), is a set of nodes $ C_{k, p} \subset N $ such that $\bigcup\limits_{k \; \in \; 1 \dots c} C_{k, p} = N $ with $ c > 2 $ and $ p \in P $.
+%
+Additionally, we define the relation \emph{at the frontier of} denoted with the symbol $ \ominus $.
+%
+For a link $ (n_{i}, n_{j})\in L $ we say that $ n_{i} $ is \emph{at the frontier of} $ n_{j} $ or $ n_{i} \ominus n_{j} $, if each node belong to different components. i. e. $ n_{i} \in C_{k, p_{a}} $ and $ n_{j} \in C_{l, p_{b}} $ such that $ k \neq l, a \neq b $.
+%
+Following the previous definition of disjoint component, both nodes are running different broadcast protocols.
+%
+The relation $\ominus$ is only symmetric, i. e. if $ n_{i} \ominus n_{j} $ then $ n_{j} \ominus n_{i} $.
+%
+\begin{definition}
+The set of interoperable relays $ I = \{ (n_{i}, n_{j}) \in N \mid n_{i} \ominus n_{j}, (n_{i}, n_{j}) \in L \} $ are all pair of nodes that are in range and follow the relation $\ominus$.
+\end{definition}
+%
+\begin{theorem}
+Let $ n_{i}, n_{j} $ be two interoperable relays and a source $s$ located at any of the components of $ n_{i} $ or $ n_{j} $.
+%
+If both interoperable relays forward a received message from $s$, via a pure flooding approach, then such message is delivered to every node in the components of $ n_{i} $ and $ n_{j} $.
+\end{theorem}
+%
+\begin{proof}
+Randomly select $ n_{i}, n_{j} $ and chose that $n_i$ follows a controlled flooding approach and $n_j$ maintains a dissemination overlay.
+%
+The proof is still valid when both nodes switch of broadcast protocol.
+%
+Let $ C_{k, p_{flood}} $ and $ C_{l, p_{cds}} $ be the disjoint components of $n_i$ and  $n_j$, respectively.
+%
+We separate the proof in two cases, the first case deals with the situation where any interoperable relay is a source node.
+%
+In the second case, proved by contradiction, the source node is at any of both components.
+
+%
+\textbf{Case 1}. We consider that $n_i$ is a source for message $m$.
+%
+It follows that on reception of $m$ by any surrounding of $n_i$ running controlled flooding, results in the delivery of such message by every node in $ C_{k, p_{flood}} $.
+%
+$n_j$ is also a surrounding of $n_i$, when $n_j$ forwards $m$ it is received by at least one of its adjacent overlay relays.
+%
+It follows that all nodes in the overlay disseminate $m$ to every other node in $ C_{l, p_{cds}} $.
+%
+
+%
+\textbf{Case 2.} We now consider that $ s \in C_{l, p_{cds}} $ is a source node running an overlay based approach and given that $n_{j}$ is adjacent to at least one overlay node, $n_{j}$ delivers $m$ to $n_{i}$ which forwards such message as well.
+%
+Let $n_{h} \in C_{k, p_{flood}} $ be a node adjacent to $n_{i}$ that do not retransmit $m$.
+%
+This situation will result in having at least one node do not hear from $m$ (negation of \emph{for all} in Theorem 1).
+%
+This means that $n_{h}$ reach its condition to control flooding, which is a contradiction because it receives $m$ from $n_i$ for the very first time.
+%
+Without loss of generality we now assume that $ s \in C_{l, p_{flood}} $ and $n_j$ receives $m$ from $n_i$ and forwards it.
+%
+Let $n_{h} \in C_{l, p_{cds}} $ be a node adjacent to $n_{j}$ that do not retransmit $m$.
+%
+This means that $n_h$ is not an overlay relay and it is adjacent to $n_j$ which is also not an overlay relay (located at frontier), this a contradiction in the definition of a CDS~\cite{cds-explained}.
+%
+We then conclude that there is no node in both components that do not receive $m$ at least once.
+\end{proof}
+
+
+
+
 
 \begin{figure}[h]
 	\centering
@@ -42,16 +105,6 @@
 \end{figure}
 
 \begin{itemize}
-	\item we follow a main switching criterion: nodes in dense areas maintain a dissemination overlay and nodes in sparse areas broadcast via a controlled flooding technique \er{this should have been said in the previous section, not here}\raziel{not even as a recap of previous section?}
-	
-	\item our interoperability mechanism ensures continuity in the delivery of messages despite the fact that nodes at regions with different densities use different protocols
-	
-	\item messages are delivered to every node that is part of the wireless topology when source nodes:
-		\begin{enumerate}
-		\item are part of a dissemination overlay, or
-		\item use controlled flooding
-	\end{enumerate}
-
 	\item interoperability issues: we show that messages may be lost when nodes run different protocols in the same network as shown in figure~\ref{fig:interop-example}
 	\begin{enumerate}
 		\item \textbf{Case: transit of messages from sparse to dense region}
@@ -92,15 +145,10 @@
 \end{itemize}
 
 \er{
-The goal of this section is to present the technical contributions that allow switching from one protocol to the other:
 \begin{itemize}
 	\item The mechanism by which a system with different protocols still guarantee the dissemination:
 	\begin{itemize}
-		\item Showing examples of why the straightforward approach does not work (I would suggest a reasoning based on system physical boundaries: the overlay-based approach considers that it spreads the message within the boundaries of the set of nodes that employ this mechanisms, and therefore ignores that there are exterior nodes that should also receive the message)
-		\item Introduce the role of interoperability relay nodes (or find another easy-to-understand name) and that we will need to identify at runtime these nodes and assign them with the role of forwarding from one system/protocol to another system/protocol. We note that this role is necessary only from the overlay-based to the flooding-based, but not in the other direction. Another way to present it is to say that the emergent overlay has to ``connect'' to the surrounding flooding-based system, hence needs connection points.\raziel{interoperability should be address in both directions, for instance, nodes that aren't relays in dense zones may drop incoming messages from others running a controlled flooding approach.}
 		\item Showing the algorithm used to detect and enable interoperability connection points.
-		\item Prove, at least informally, that the algorithm is correct.\raziel{we do not have an algorithm per se, the technique that shows better results to spot interoperability relay nodes is when they do have a medium density based on their degree; we use the local closure coefficient as measure of degree}
-		\item Discuss its potential limitations, in particular when the overlay-based zones are very small, in which case there will be more nodes that will have to act as connection points than nodes that are relays, which defeats the purpose
 		\item Discuss how connection points evolve when the system is subject to mobility
 	\end{itemize}
 	\item The grace period mechanism that ensures that the switch between flooding and overlay-based broadcast does not lead to missed messages:
