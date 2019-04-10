@@ -82,7 +82,7 @@ Our rationale is that more than three failures for a local broadcast due to coll
 \label{sec:background:broadcast}
 
 The goal of \emph{global} broadcast (hereafter referred simply as broadcast) is to reliably send a message to all nodes in the network, despite mobility and collisions.
-The source can be any node in the network, and the message may require multiple frames.\footnote{A session protocol assists in splitting a message in multiple frames and calling the MAC protocol.
+The source can be any node in the network, and the message may require multiple frames.\footnote{A session protocol assists in splitting a message in multiple frames if necessary and calling the MAC protocol.
 We do not detail this protocol as it is straightforward to design and implement.}
 Nodes \emph{may} forward a message using local broadcast upon its first reception.
 We denote such nodes as \emph{relay} nodes.
@@ -118,7 +118,7 @@ This generates a high number of collisions and associated retransmissions at the
 The risk of collision may be reduced by waiting before retransmitting, either for a random amount of time~\cite{BroadcastStormProblem} or, when GPS coordinates are available, for a time that depends on a local density estimation~\cite{abba} but these mitigations do not reduce the number of duplicates.
 
 Controlled flooding enables nodes to decide \emph{not to} retransmit, when they estimate that their neighborhood has been sufficient covered.
-We use a counter-based approach~\cite{2001:AAR:876878.879323} that is both simple and efficient in a variety of practical situations, as comparative studies have shown~\cite{DensityMobDrivenEval,Williams2002}.
+We use the classical counter-based approach~\cite{BroadcastStormProblem} that is efficient in a variety of practical situations, as comparative studies have shown~\cite{DensityMobDrivenEval,Williams2002}.
 Upon first reception of a message, a node sets up a timer $t$ and a counter $c$.
 Every reception of a duplicate decreases $c$ by one.
 Upon expiration of $t$, the node only acts as a relay if $c>0$.
@@ -135,44 +135,32 @@ An illustration of counter-based controlled flooding is given by Figure~\ref{fig
 
 Overlay-based approaches pre-compute which nodes should act as relays.
 This requires exchange of information between nodes outside of actual broadcast sessions.
-The goal is to form an overlay forming a \emph{connected dominating set}.
-The coverage areas of all relays in the overlay must contain all nodes in the network.
+The goal is to form a \emph{connected dominating set} overlay
+The combined coverage areas of all relays must contain all nodes in the network.
 The overlay should be connected but at the same time contain as little relays as possible.
 It can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
-It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the dissemination path.
+It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the dissemination process.
 We adopt a protocol of the latter type, MPR~\cite{mpr,mpr-improvement} (\emph{Multipoint Relay}).
 
-The principle of MPR is to let each node decide which of its one-hop (direct) neighbors should be instructed to act as relays during a dissemination, in order to ensure the coverage of all of its two-hops neighbors.
-The discovery of both types of neighbors is based on periodic control messages.
-Nodes announce themselves to their direct neighbors and include their current view of their own direct neighborhood, and passively collect the announcements of other nodes.
+The principle of MPR is to let each node decide which of its one-hop (direct) neighbors should be instructed to act as relays during a dissemination in which it participates as a relay or source itself.
+It requires the discovery of all one-hop and two-hop neighbors using periodic control messages.
+Nodes periodically announce themselves using local broadcast and include their current neighborhood, as obtained from the last exchanges at the MAC level.
 Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
-The ideal frequency of announcements depends on the dynamism of the network.
+The ideal frequency of announcements depends on the network dynamics.
 Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
 
-The selection of which one-hop neighbors should be members of the overlay for future dissemination is local.
-It is detailed by Algorithm~\ref{algorithm:mpr}.
-The goal is to ensure that all two-hop neighbors are \emph{covered} by one of the selected relays.
+The selection of relays is detailed by Algorithm~\ref{algorithm:mpr}.
+The goal is to ensure that all two-hop neighbors are \emph{covered} by at least one relay.
 The selection is in two phases.
 The first phase (lines 8--11) selects relays that are \emph{necessary}, i.e. one-hop neighbors that are the only connection to ``isolated'' two-hop neighbors.
-The second phase (lines 12-16) selects relays that are \emph{sufficient} to complete the coverage.
-The heuristic is to start by 
+The second phase (lines 12--16) selects relays that are \emph{sufficient} to complete the coverage.
+The heuristic is add as relay nodes that cover the largest number of two-hop neighbors, until all nodes are covered.
+As the set of uncovered nodes is the union of all two-hop neighbors (line 6), the \texttt{while} loop on lines 12--15 always terminate.
+MPR is a local heuristic that may not guarantee the optimal selection of relays, but it has the advantage of requiring little computation and no GPS coordinates.
+It also does not require specific synchronization between nodes to agree on an explicit overlay (e.g. to inform nodes who must act as relays), reducing the cost of its maintenance.
 
-are the only ones connecting to at least one two-hop neighbors are pre-selected, as those will have to be in the final set in all cases.
-In a 
-
-
-
-
-
-Each node in MPR selects locally amongst its one-hop neighbors which should act as relays in future disseminations.
-This decision is local, avoiding the extra communication round required by the creation of an explicit overlay.
-The selection is detailed by Algorithm~\ref{algorithm:mpr}.
-All two-hop neighbors are initially considered uncovered by future dissemination, and the list of relays starts empty (lines 6-7).
-The selection is in two phase.
-In a first phase, isolated two-hop neighbors are detected and the one-hop neighbor connecting to these is selected as a relay (the two-hop neighborhood of that relay contains only the local node $n_i$ and this two-hop neighbor $u$, line 9).
-In a second phase, nodes are considered in decreasing order of their number of neighbors, and added to the relay set until all two-hop neighbors are covered.
-The interest of the first phase is to avoid going down the list until the lowly-connected nodes are considered, after all other nodes have been selected as relays.
-MPR is a simple heuristic that may not guarantee the optimal selection of relays, but it has the advantage of requiring little computation and no GPS coordinates, and works well in practice.
+An overlay-based broadcast is expected to be useful in scenario where nodes density is high, greatly reducing the number of relays without requiring a difficult-to-set counter or time value.
+It is however necessary that the nodes positions be sufficiently stable, or the frequency of control messages will need to be increased to a point where they will create collisions and potentially bear higher costs than for the dissemination themselves.
 
 % In ~\cite{mpr}, Qayyum et al. propose a topology-based broadcast protocol called Multi-point Relaying (MPR).
 % %

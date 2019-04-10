@@ -17,7 +17,7 @@
 			\Comment{all two-hop neighbors}
 		\State relays $\gets \emptyset$
 		
-		\noindent \emph{// Phase 1: select 1-hop nbors connecting isolated 2-hop nbors}
+		\noindent \emph{// Phase 1: select 1-hop neighbors connecting isolated 2-hop neighbors}
 		
 		\For{\textbf{every} $n_j$ \textbf{in} OneH}
 			\If{$\exists \; n_{iso} \in \text{TwoH}[n_j]$ s.t. $\forall n_{k\neq j}, n_{iso} \not\in \text{TwoH}[n_k]$}
@@ -26,18 +26,18 @@
 			\EndIf
 		\EndFor
 		
-		\noindent \emph{// Phase 2: select high-degree 1-hop nbors until coverage}
+		\noindent \emph{// Phase 2: select high-degree 1-hop neighbors until coverage}
 				
-		\For{\textbf{every} $n_j$ \textbf{in} OneH by decreasing value of $|\text{TwoH}[n_j]|$}
-			\State relays $\gets$ relays $\cup \; n_j$ 
-			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
-			\If{uncovered = $\emptyset$}
-				\State \Return relays
-			\EndIf
-		\EndFor
+		%%%% 
+		% \For{\textbf{every} $n_j$ \textbf{in} OneH by decreasing value of $|\text{TwoH}[n_j]|$}
+		% 	\State relays $\gets$ relays $\cup \; n_j$
+		% 	\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
+		% 	\If{uncovered = $\emptyset$}
+		% 		\State \Return relays
+		% 	\EndIf
+		% \EndFor
 		
-		%%% variant for phase two
-		
+	
 		\While{uncovered $\neq \emptyset$}
 			\State select $n_j \in \text{OneH}$ maximizing $|\text{TwoH}[n_j] \cap \text{uncovered}|$
 			\State relays $\gets$ relays $\cup \; n_j$ 
