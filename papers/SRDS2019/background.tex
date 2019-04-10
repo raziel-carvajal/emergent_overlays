@@ -5,13 +5,13 @@
 \label{sec:background}
 
 \begin{figure}[t]
-	\begin{minipage}[t]{0.45\linewidth}
+	\begin{minipage}[t]{0.475\linewidth}
     \includegraphics[width=\linewidth]{figures/model}
     \caption{Communication model and illustration of network collisions.}
 		\label{fig:manet-comm-model}
 	\end{minipage}%
   \hfill%
-	\begin{minipage}[t]{0.45\linewidth}
+	\begin{minipage}[t]{0.475\linewidth}
     \includegraphics[width=\linewidth]{figures/mac}
     \caption{MAC protocol for local broadcast: neighborhood discovery and frame retransmissions.}
     \label{fig:mac_protocol}
@@ -99,15 +99,15 @@ We present in the following two such protocols.
 \label{sec:background:broadcast:flooding}
 
 \begin{figure}[t]
-	\begin{minipage}[t]{0.45\linewidth}
+	\begin{minipage}[t]{0.475\linewidth}
     \includegraphics[width=\linewidth]{figures/flooding}
     \caption{Broadcast using counter-based controlled flooding, example with $c=2$, and details of counter and timer initial value for 4 sample nodes. Duplicates to previous relay nodes are omitted for clarity.}
 		\label{fig:background:flooding}
 	\end{minipage}%
   \hfill%
-	\begin{minipage}[t]{0.45\linewidth}
-    \includegraphics[width=\linewidth]{figures/example-of-collision.png}
-    \caption{Connected Dominating Sets (CDS) construction and broadcast.}
+	\begin{minipage}[t]{0.475\linewidth}
+    \includegraphics[width=\linewidth]{figures/mpr}
+    \caption{MPR selection of overlay nodes: $n_1$ and $n_2$ are selected during the first phase as they connect to isolated nodes, $n_3$ and $n_4$ in the second phase as they allow cover the most two-hop neighbors.}
     \label{fig:background:mpr}
 	\end{minipage}
 \end{figure}
@@ -149,7 +149,7 @@ Information about a neighbor is reset after a few missed announcements, to accou
 The ideal frequency of announcements depends on the network dynamics.
 Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
 
-The selection of relays is detailed by Algorithm~\ref{algorithm:mpr}.
+The selection of relays is detailed by Algorithm~\ref{algorithm:mpr} and illustrated by Figure~\ref{fig:background:mpr}.
 The goal is to ensure that all two-hop neighbors are \emph{covered} by at least one relay.
 The selection is in two phases.
 The first phase (lines 8--11) selects relays that are \emph{necessary}, i.e. one-hop neighbors that are the only connection to ``isolated'' two-hop neighbors.
