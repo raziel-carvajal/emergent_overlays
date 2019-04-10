@@ -3,46 +3,57 @@
 
 \section{Interoperability mechanisms}
 \label{sec:mechanisms}
-We revisit the issues and opportunities of communication in a situation where disjoint clusters of nodes broadcast following either, a controlled flooding approach or an overlay-based one.
+We revisit the issues and opportunities of broadcast in a situation where disjoint clusters of nodes follow either, a controlled flooding approach or an overlay-based one.
 %
 We propose an interoperability mechanism that ensures continuity in the delivery of messages independently of the protocol running at each node.
 
 \subsection{Interoperability issues}
 \label{sec:mechanisms:interop-issues}
-In the general case, a system where the participants of a disjoint partition of the network are running a certain protocol, may avoid any interaction with participants from other partitions.
+In the general case, a system where nodes of a disjoint cluster in the network run a certain protocol, may result in any interaction with other participants.
 %
 The combination of two protocols to broadcast in MANETs, controlled flooding and overlay-base, may avoid the delivery of frames coming from any source in the network.
 %
-This situation is depicted in Figure~\ref{} that shows two disjoint partitions of nodes running different broadcast protocols.
+This situation is depicted in Figure~\ref{fig:interop-issues} that shows two disjoint clusters.
 %
-The first partition of nodes use pure flooding and the second one maintains a dissemination overlay.
+Nodes of the first cluster use controlled flooding and the second one maintains a dissemination overlay.
 %
 As seen in section~\ref{sec:background:broadcast:overlay}, the construction of an overlay requires nodes sending hello frames to announce their existence.
 %
 Even if nodes located at the frontier of both partitions are in range to receive frames, nodes of the first partition do not reply back because such messages are unknown to them.
 %
-Nodes participating in a dissemination overlay are limited by the second partition, therefore, any source node that is part of the overlay will reach only nodes of the second partition.
+Nodes participating in a dissemination overlay are limited by the second partition, therefore, any source that is part of the overlay will reach only nodes at the second partition.
 
 \subsection{Interoperable relays}
 \label{sec:mechanisms:interop-relays}
-To assure that data frames or \emph{messages} transit between adjacent partitions of nodes running different algorithms, nodes must figure out when they are located at the frontier of partitions.
+To assure that data frames or \emph{messages} transit between adjacent clusters of nodes running different algorithms, nodes must figure out when they are located at the frontier of such clusters.
 %
-We call such nodes \emph{interoperable relays} and we give a proof that these relays enforce broadcast by covering nodes of every adjacent component in a MANET.
+We call such nodes \emph{interoperable relays} and give a proof that these relays enforce broadcast by covering nodes of every adjacent cluster in a MANET.
 %
 First, we formalize the system model we present in section~\ref{sec:background:model}.
 
 %
-We define a network as an undirected graph $ G = (N, L, P) $ where $ N = \{ n_{i} \mid i \in 1, \dots, m \} $ is the set of all nodes, $ L = \{ (n_{i}, n_{j}) \mid n_{i}, n_{j} \in N, i \neq j, (n_{i}, n_{j}) = (n_{j}, n_{i}) \} $ is the set of all links, and $ P = \{p_{flood}, p_{cds} \} $ is the set of broadcast protocols with two elements, $p_{flood}$ represents controlled flooding and $p_{cds}$ an overlay-based approach.
+We define a network as an undirected graph $ G = (N, L, P) $ where $ N = \{ n_{i} \mid i \in 1, \dots, m \} $ is the set nodes, $ L = \{ (n_{i}, n_{j}) \mid n_{i}, n_{j} \in N, i \neq j, (n_{i}, n_{j}) = (n_{j}, n_{i}) \} $ is the set of links, and $ P = \{p_{flood}, p_{cds} \} $ is a set of broadcast protocols.
 %
-A disjoint component in such graph, where its nodes use a single protocol to broadcast (within that component), is a set of nodes $ C_{k, p} \subset N $ such that $\bigcup\limits_{k \; \in \; 1 \dots c} C_{k, p} = N $ with $ c > 2 $ and $ p \in P $.
+$P$ contains only two elements, $p_{flood}$ represents a controlled flooding approach and $p_{cds}$ an overlay-based one.
+%
+A disjoint component in such graph, where its nodes use a single protocol (within that component), is a set of nodes $ C_{k, p} \subset N $ such that $\bigcup\limits_{k \; \in \; 1 \dots c} C_{k, p} = N $ with $ c > 2 $ and $ p \in P $.
 %
 Additionally, we define the relation \emph{at the frontier of} denoted with the symbol $ \ominus $.
 %
-For a link $ (n_{i}, n_{j})\in L $ we say that $ n_{i} $ is \emph{at the frontier of} $ n_{j} $ or $ n_{i} \ominus n_{j} $, if each node belong to different components. i. e. $ n_{i} \in C_{k, p_{a}} $ and $ n_{j} \in C_{l, p_{b}} $ such that $ k \neq l, a \neq b $.
+For a link $ (n_{i}, n_{j})\in L $ we say that $ n_{i} $ is \emph{at the frontier of} $ n_{j} $ or $ n_{i} \ominus n_{j} $ iif $n_i$ and $n_j$ do not belong to the same component.
 %
-Following the previous definition of disjoint component, both nodes are running different broadcast protocols.
+That is, $ n_{i} \in C_{k, p_{a}} $ and $ n_{j} \in C_{l, p_{b}} $ such that $ k \neq l$ and  $a \neq b $.
+%
+%Following the previous definition of disjoint component, both nodes run different broadcast protocols.
 %
 The relation $\ominus$ is only symmetric, i. e. if $ n_{i} \ominus n_{j} $ then $ n_{j} \ominus n_{i} $.
+%
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.2]{figures/interop-issues}
+	\caption{Two disjoint clusters where a pair of nodes running different algorithms drop received messages.}
+	\label{fig:interop-issues}
+\end{figure}
 %
 \begin{definition}
 The set of interoperable relays $ I = \{ (n_{i}, n_{j}) \in N \mid n_{i} \ominus n_{j}, (n_{i}, n_{j}) \in L \} $ are all pair of nodes that are in range and follow the relation $\ominus$.
@@ -54,10 +65,18 @@ Let $ n_{i}, n_{j} $ be two interoperable relays and a source $s$ located at any
 If both interoperable relays forward a received message from $s$, via a pure flooding approach, then such message is delivered to every node in the components of $ n_{i} $ and $ n_{j} $.
 \end{theorem}
 %
-\begin{proof}
-Randomly select $ n_{i}, n_{j} $ and chose that $n_i$ follows a controlled flooding approach and $n_j$ maintains a dissemination overlay.
+We recall one properties of each protocol in $P$ that we will use in the proof of Theorem 1.
 %
-The proof is still valid when both nodes switch of broadcast protocol.
+Nodes running $p_{flood}$ forward incoming messages only if a threshold $t$ haven't been reached
+%
+For instance, $t$ may be the number of received copies ~\cite{BroadcastStormProblem}.
+%
+On the other hand, every node running $p_{cds}$ is adjacent to at least one overlay relay, which is a property of a Connected Dominating Set (CDS)~\cite{cds-explained}.
+%
+\begin{proof}
+Randomly select $ n_{i}, n_{j} $ and decide that $n_i$ follows a controlled flooding approach and $n_j$ maintains a dissemination overlay.
+%
+The proof is still valid when we decide that $n_i$ runs $p_{cds}$ and $n_j$ runs $p_{flood}$ because, the relation $\ominus$ is reflexive.
 %
 Let $ C_{k, p_{flood}} $ and $ C_{l, p_{cds}} $ be the disjoint components of $n_i$ and  $n_j$, respectively.
 %
@@ -68,44 +87,42 @@ In the second case, proved by contradiction, the source node is at any of both c
 %
 \textbf{Case 1}. We consider that $n_i$ is a source for message $m$.
 %
-It follows that on reception of $m$ by any surrounding of $n_i$ running controlled flooding, results in the delivery of such message by every node in $ C_{k, p_{flood}} $.
+On reception of $m$ by any surrounding of $n_i$ running controlled flooding, results in the delivery of such message by every node in $ C_{k, p_{flood}} $.
 %
 $n_j$ is also a surrounding of $n_i$, when $n_j$ forwards $m$ it is received by at least one of its adjacent overlay relays.
 %
-It follows that all nodes in the overlay disseminate $m$ to every other node in $ C_{l, p_{cds}} $.
+Therefore all overlay relays forward $m$ and such message is received to every node in $ C_{l, p_{cds}} $
 %
 
 %
-\textbf{Case 2.} We now consider that $ s \in C_{l, p_{cds}} $ is a source node running an overlay based approach and given that $n_{j}$ is adjacent to at least one overlay node, $n_{j}$ delivers $m$ to $n_{i}$ which forwards such message as well.
+\textbf{Case 2.} We now consider that $ s \in C_{l, p_{cds}} $ is a source of $m$ and eventually, $n_{j}$ receives $m$, $n_{j}$ forwards $m$ to $n_{i}$ and the latter node forwards $m$ as well.
 %
 Let $n_{h} \in C_{k, p_{flood}} $ be a node adjacent to $n_{i}$ that do not retransmit $m$.
 %
-This situation will result in having at least one node do not hear from $m$ (negation of \emph{for all} in Theorem 1).
+This situation will result in having at least one node do not hear from $m$, which is a negation of the \emph{for all} statement in Theorem 1.
 %
-This means that $n_{h}$ reach its condition to control flooding, which is a contradiction because it receives $m$ from $n_i$ for the very first time.
+This means that $n_{h}$ reach its threshold, that is a contradiction, because it receives $m$ from $n_i$ for the very first time.
 %
-Without loss of generality we now assume that $ s \in C_{l, p_{flood}} $ and $n_j$ receives $m$ from $n_i$ and forwards it.
+Without loss of generality, we now assume that $ s \in C_{l, p_{flood}} $ and $n_j$ receives $m$ from $n_i$ and forwards it.
 %
 Let $n_{h} \in C_{l, p_{cds}} $ be a node adjacent to $n_{j}$ that do not retransmit $m$.
 %
-This means that $n_h$ is not an overlay relay and it is adjacent to $n_j$ which is also not an overlay relay (located at frontier), this a contradiction in the definition of a CDS~\cite{cds-explained}.
+This means that $n_h$ is not an overlay relay and it is adjacent to $n_j$ which is also not an overlay relay (located at frontier), this a contradiction in the construction of a CDS.
 %
-We then conclude that there is no node in both components that do not receive $m$ at least once.
+We then conclude that there is no node in both components that do not receive $m$ at least once when the source is located at $ C_{k, p_{flood}} $ or $ C_{l, p_{flood}}$.
 \end{proof}
 
-
-
-
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[scale=0.32]{figures/interop-example.pdf}
-	\caption{Example of lost of messages between nodes running different algorithms}\raziel{figure to be improved}
-	\label{fig:interop-example}
-\end{figure}
-
+\raziel{
+If space permits, we may have a section to discuss potential issues of having interoperable relays
 \begin{itemize}
-	\item interoperability issues: we show that messages may be lost when nodes run different protocols in the same network as shown in figure~\ref{fig:interop-example}
+	\item aren't we disturb the network with broadcast storms by letting interoperable relays forward via simple flooding
+	\item when a non overlay relay, which is also an interoperable overlay, forwards a message, is there an impact in the construction of the overlay ?
+\end{itemize}
+}
+
+\subsection{Selection of interoperable relays}
+\label{sec:mechanisms:interop-relays-selection}
+\raziel{road map to describe our interoberable mechanism just in text}
 	\begin{enumerate}
 		\item \textbf{Case: transit of messages from sparse to dense region}
 		\begin{itemize}
@@ -123,7 +140,9 @@ We then conclude that there is no node in both components that do not receive $m
 			\item $f_{3}$ do not receive message
 		\end{itemize}
 	\end{enumerate}
-	
+
+\begin{itemize}
+
 	\item we need that nodes be aware when they are located at the frontier of regions that run different algorithms; we call them border nodes
 	
 	\item assume that nodes are aware of being at the frontier of regions and they tag themselves as border nodes
