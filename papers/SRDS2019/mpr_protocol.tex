@@ -17,19 +17,17 @@
 			\Comment{all two-hop neighbors}
 		\State relays $\gets \emptyset$
 		
-		\noindent \emph{// Phase 1: add as relays 1-hop nbors connecting to isolated a 2-hop nbor}
-			
+		\noindent \emph{// Phase 1: select 1-hop nbors connecting isolated 2-hop nbors}
+		
 		\For{\textbf{every} $n_j$ \textbf{in} OneH}
-			\If{$\exists u \in$ uncovered \textbf{s. t.} TwoH[$n_j$] = $\{u, n_i\}$ }
+			\If{$\exists \; n_{iso} \in \text{TwoH}[n_j]$ s.t. $\forall n_{k\neq j}, n_{iso} \not\in \text{TwoH}[n_k]$}
 				\State relays $\gets$ relays $\cup \; \{n_j\}$
-				\State uncovered $\gets$ uncovered - $\{u\}$
+				\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
 			\EndIf
 		\EndFor
 		
-		\noindent \emph{// Phase 2: tag high-degree 1-hop nbors as relays until coverage}
-		
-		% \State oneHopNbors.sort($n_j,n_k : \text{twoHopNbors}[n_j]>\text{twoHopNbors}[n_k]$)
-		
+		\noindent \emph{// Phase 2: select high-degree 1-hop nbors until coverage}
+				
 		\For{\textbf{every} $n_j$ \textbf{in} OneH by decreasing value of $|\text{TwoH}[n_j]|$}
 			\State relays $\gets$ relays $\cup \; n_j$ 
 			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
@@ -38,11 +36,63 @@
 			\EndIf
 		\EndFor
 		
+		%%% variant for phase two
+		
+		\While{uncovered $\neq \emptyset$}
+			\State select $n_j \in \text{OneH}$ maximizing $|\text{TwoH}[n_j] \cap \text{uncovered}|$
+			\State relays $\gets$ relays $\cup \; n_j$ 
+			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
+		\EndWhile
+		\State \Return relays
+		
 	\EndProcedure
 \end{algorithmic}	
 \end{footnotesize}
 \caption{Selection of relays at node $n_i$ with MPR}\label{algorithm:mpr}
 \end{algorithm}
+
+% \begin{algorithm}[t]
+% \begin{footnotesize}
+% 	\begin{algorithmic}[1]
+%
+% 	\BeginInput
+% 		\State OneH : \emph{set} \Comment{one-hop neighbors}
+% 		\State TwoH[ ] : \emph{map} ($n_{j\neq i}\in$ OneH) $\rightarrow$ $\{n_k,\dots\}$ \Comment{two-hop neighbors}
+% 	\EndInput
+%
+% 	\smallskip
+%
+% 	\Procedure{chooseRelays}{}
+% 		\State uncovered = $\bigcup\limits_{n_j\in \; \text{OneH}} \text{TwoH}[n_j]$
+% 			\Comment{all two-hop neighbors}
+% 		\State relays $\gets \emptyset$
+%
+% 		\noindent \emph{// Phase 1: add as relays 1-hop nbors connecting to isolated a 2-hop nbor}
+%
+% 		\For{\textbf{every} $n_j$ \textbf{in} OneH}
+% 			\If{$\exists u \in$ uncovered \textbf{s. t.} TwoH[$n_j$] = $\{u, n_i\}$ }
+% 				\State relays $\gets$ relays $\cup \; \{n_j\}$
+% 				\State uncovered $\gets$ uncovered - $\{u\}$
+% 			\EndIf
+% 		\EndFor
+%
+% 		\noindent \emph{// Phase 2: tag high-degree 1-hop nbors as relays until coverage}
+%
+% 		% \State oneHopNbors.sort($n_j,n_k : \text{twoHopNbors}[n_j]>\text{twoHopNbors}[n_k]$)
+%
+% 		\For{\textbf{every} $n_j$ \textbf{in} OneH by decreasing value of $|\text{TwoH}[n_j]|$}
+% 			\State relays $\gets$ relays $\cup \; n_j$
+% 			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
+% 			\If{uncovered = $\emptyset$}
+% 				\State \Return relays
+% 			\EndIf
+% 		\EndFor
+%
+% 	\EndProcedure
+% \end{algorithmic}
+% \end{footnotesize}
+% \caption{Selection of relays at node $n_i$ with MPR --- OLD VERSION}\label{algorithm:mpr}
+% \end{algorithm}
 
 %
 %
