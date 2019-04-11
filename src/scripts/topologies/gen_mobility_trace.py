@@ -51,8 +51,8 @@ class CommunicationArea :
 		self.length = cmaDim['len']
 		self.width = cmaDim['wid']
 		self.center = {
-			'x': float( "%.3f"%(cmaDim['len'] / 2) ),
-	  		'y': float( "%.3f"%(cmaDim['wid'] / 2) ) }
+			'x': float( "%.3f"%(cmaDim['len'] / 2.0) ),
+	  		'y': float( "%.3f"%(cmaDim['wid'] / 2.0) ) }
 		self.denseAlen = float( "%.3f"%(denseAdim['len']) )
 		self.denseAwid = float( "%.3f"%(denseAdim['wid']) )
 
@@ -94,7 +94,7 @@ def getOverlay(positions, transRange) :
 			g.add_edge(p[0], p[1])
 	return g
 
-def generateWirelessTopologies(cma, topNo, Tx, motionIndx):
+def generateWirelessTopologies(cma, topNo, Tx):
 	mobModels = {}
 	# new instance of mobility model per sub area
 	for subArea in cma.subAreas :
@@ -102,14 +102,14 @@ def generateWirelessTopologies(cma, topNo, Tx, motionIndx):
 			areaDim = (cma.denseAlen, cma.denseAwid)
 			velocity = (MIN_LOW_VELOCITY, MAX_LOW_VELOCITY)
 		else:
-			abscissa = cma.sparseSubAlen if subArea['id'] % 2 == 1 else cma.denseAwid
-			ordinate = cma.length if subArea['id'] % 2 == 1 else cma.sparseSubAlen
-			areaDim = (abscissa, ordinate)
+			leng = cma.sparseSubAlen if subArea['verSubArea'] else cma.denseAlen
+			widt = cma.width if subArea['verSubArea'] else cma.sparseSubAwid
+			areaDim = (leng, widt)
 			velocity = (MIN_HIG_VELOCITY, MAX_HIG_VELOCITY)
 		mobModels[ subArea['id'] ] = random_direction( subArea['nodesNo'], areaDim, \
 			wt_max=WAITING_TIME, velocity=velocity, border_policy='reflect' )
-	t = 0
 	# noves move ${topNo} times following the Levy-Walk model in dense and sparse areas
+	t = 0 ; motionIndx = 0	
 	while t < topNo :
 		nodeId = 1; positions = {}
 		# iter in order to have every position identified in an unique way
@@ -123,7 +123,7 @@ def generateWirelessTopologies(cma, topNo, Tx, motionIndx):
 		# source node is positioned at the center of communication area
 		positions[nodeId] = { 'x': cma.center['x'], 'y': cma.center['y'], 'atDenseZone': True }
 		# draw wireles topology
-		o = getOverlay(positions, Tx); plotOverlay(o, positions, cma.length, t)
+		o = getOverlay(positions, Tx); plotOverlay(o, positions, (cma.length, cma.width), t)
 		# keep positions in a global reference
 		allPositions[motionIndx] = positions; motionIndx += 1
 		t += 1
@@ -136,13 +136,13 @@ def makeStep(mobMod, incrAt, lastPosition, atDenseZone) :
 		lastPosition += 1
 	return positions
 
-def plotOverlay(graph, positions, maxLen, iD) :
+def plotOverlay(graph, positions, dim, iD) :
 	pTmp = {}
 	for k, v in positions.iteritems():
 		pTmp[k] = [ v['x'], v['y'] ]
 	plt.subplot(111)
-	plt.xlim((0, maxLen))
-	plt.ylim((0, maxLen))
+	plt.xlim((0, dim[0]))
+	plt.ylim((0, dim[1]))
 	nx.draw_networkx(graph, pos=pTmp, node_size=10, with_labels=False)
 	plt.savefig(FIRST_PLOT_NAME + str(iD) + ".pdf")
 	plt.clf()
@@ -179,5 +179,5 @@ if __name__ == '__main__':
 		args.nodes_at_dense + args.nodes_at_sparse, cma, densA, nodesPerArea)
 	# create ${args.trace_size} wireless topologies, all positions are kept using
 	# the BonnMotion format, see more at https://omnetpp.org/doc/inet/api-current/neddoc/inet.mobility.single.BonnMotionMobility.html
-	generateWirelessTopologies(comArea, args.trace_size, args.tx, 0)
+	generateWirelessTopologies(comArea, args.trace_size, args.tx)
 	savePositions(args.motion_freq)
