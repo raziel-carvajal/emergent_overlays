@@ -36,7 +36,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     };
 
     int runningProtocolId;
-    int numSentCtrlPk = 0;
 
     IProtocol* runningProtocol = nullptr;
 
@@ -112,6 +111,11 @@ class InteroperableBroadcast : public UDPBasicApp {
       BROADCAST = 1, CTRL, BORDER_REQ, PING, PONG, ACK
     };
 
+    int sentCtrlMsgs = 0;
+    int recvCtrlMsgs = 0;
+    int broadcastMsgId = 0;
+    int ctrlMsgId = 0;
+
     double transRadious;
 
     bool isBorderNode = false;
@@ -121,8 +125,10 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t positionAtX;
     static simsignal_t positionAtY;
     static simsignal_t forward_type;
-    static simsignal_t broaMsgCollisions;
-    static simsignal_t ctrlMsgCollisions;
+    static simsignal_t sentDataFrames;
+    static simsignal_t recvDataFrames;
+    static simsignal_t sentCtrlFrames;
+    static simsignal_t recvCtrlFrames;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
 
@@ -173,6 +179,11 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     double getRandomTime(double a, double b) {
       return uniform(a, b);
+    }
+    double getRandWaitingTime() {
+      double t0 = mac->getLowerBoundWaitingTime();
+      double t1 = mac->getUpperBoundWaitingTime();
+      return uniform(t0, t1);
     }
 };
 

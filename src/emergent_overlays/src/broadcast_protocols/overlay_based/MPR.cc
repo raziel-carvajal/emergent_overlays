@@ -48,8 +48,8 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
     if (fwdMsg) {
 //      controller->log(temp);
       cPacket* broadcastMsg = createBroadcastMsg(pkName);
-      controller->mac->send(broadcastMsg);
-      controller->emit(controller->sentBroadcastMsg, controller->getMsgId(pkName));
+//      controller->emit(controller->sentBroadcastMsg, controller->getMsgId(pkName));
+      controller->fwdBroadcastMsg(broadcastMsg);
     }
   }
 
@@ -251,6 +251,7 @@ void Mpr::handleEvent(cMessage* msg) {
 //      break;
     case SEND_CTRL_MSG: {
       controller->send(getCtrlMsg(1));
+      controller->sentCtrlMsgs++;
     }
       break;
     case SCHEDULE_FIRST_CTRL_MSG: {
@@ -276,6 +277,7 @@ void Mpr::sendCtrlMsg() {
   controller->cancelEvent(buildCdsTimer);
 // get the list of one-hop neighbors
   controller->send(getCtrlMsg(0));
+  controller->sentCtrlMsgs++;
 
   double t = minSentDelay * nodesNo;
 // get the list of two-hop neighbors
@@ -346,9 +348,14 @@ void Mpr::onControlMsg(cPacket* pk, const char* sender) {
 }
 
 void Mpr::cancelSelfEvents() {
-  controller->cancelAndDelete(buildCdsTimer);
-  controller->cancelAndDelete(fwdBrMsgTimer);
-  controller->cancelAndDelete(sCtrlMsgTimer);
+  if (buildCdsTimer)
+    controller->cancelAndDelete(buildCdsTimer);
+  if (fwdBrMsgTimer)
+    controller->cancelAndDelete(fwdBrMsgTimer);
+  if (sCtrlMsgTimer)
+    controller->cancelAndDelete(sCtrlMsgTimer);
+  if(sRemainingCtrlMsgTimer)
+    controller->cancelAndDelete(sRemainingCtrlMsgTimer);
 }
 
 int Mpr::getFwdType() {

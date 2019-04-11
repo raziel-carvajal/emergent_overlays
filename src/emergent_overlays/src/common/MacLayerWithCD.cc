@@ -28,19 +28,24 @@ void MacLayerWithCD::resetStatus() {
 }
 
 void MacLayerWithCD::send(cPacket* pk) {
-  resetStatus();
+  if (controller->par("withMac").boolValue()) {
+    resetStatus();
 
-  amIsender = true;
-  payload = pk->dup();
-  payloadType = payload->par("PkType").longValue();
-  ongoingSession = payload->getName();
-  controller->log("[" + ongoingSession + "] payload type [" + to_string(payloadType) + "]");
+    amIsender = true;
+    payload = pk->dup();
+    payloadType = payload->par("PkType").longValue();
+    ongoingSession = payload->getName();
+    controller->log("[" + ongoingSession + "] payload type [" + to_string(payloadType) + "]");
 
-  cPacket* ping = getPingPk();
-  controller->send(ping);
-  controller->log("[" + ongoingSession + "] sending PingPk");
-  if (!waitPongTimer->isScheduled()) {
-    controller->scheduleEvent(WAIT_PONG_MSGs, getWaitingMsgReceptionTime(), waitPongTimer);
+    cPacket* ping = getPingPk();
+    controller->send(ping);
+    controller->log("[" + ongoingSession + "] sending PingPk");
+    if (!waitPongTimer->isScheduled()) {
+      controller->scheduleEvent(WAIT_PONG_MSGs, getWaitingMsgReceptionTime(), waitPongTimer);
+    }
+
+  } else {
+    controller->send(pk);
   }
 }
 
@@ -130,13 +135,13 @@ void MacLayerWithCD::handleEvent(cMessage* e) {
       if (amIsender) {
         switch (payloadType) {
           case controller->BROADCAST: {
-            controller->log("]" + ongoingSession + "] record collisions of broadcast message");
-            controller->emit(controller->broaMsgCollisions, collisions);
+//            controller->log("]" + ongoingSession + "] record collisions of broadcast message");
+//            controller->emit(controller->broaMsgCollisions, collisions);
           }
             break;
           case controller->CTRL: {
-            controller->log("]" + ongoingSession + "] record collisions of control message");
-            controller->emit(controller->ctrlMsgCollisions, collisions);
+//            controller->log("]" + ongoingSession + "] record collisions of control message");
+//            controller->emit(controller->ctrlMsgCollisions, collisions);
           }
             break;
           default:
@@ -162,16 +167,18 @@ double MacLayerWithCD::getWaitingMsgDeliveryTime() {
 }
 
 void MacLayerWithCD::processMsg(const char* id) {
-  if (ongoingSession == id) {
-    controller->log("[" + ongoingSession + "] payload received from ");
-    if (ongoingTry == 0) {
-      ++ongoingTry;
-      if (!resetTimer->isScheduled()) {
-        controller->scheduleEvent(RESET_STATE, getWaitingMsgReceptionTime() * MAX_TRIES, resetTimer);
+  if (controller->par("withMac").boolValue()) {
+    if (ongoingSession == id) {
+      controller->log("[" + ongoingSession + "] payload received from ");
+      if (ongoingTry == 0) {
+        ++ongoingTry;
+        if (!resetTimer->isScheduled()) {
+          controller->scheduleEvent(RESET_STATE, getWaitingMsgReceptionTime() * MAX_TRIES, resetTimer);
+        }
       }
-    }
-    if (!deliveryTimer->isScheduled()) {
-      controller->scheduleEvent(SEND_ACK, getWaitingMsgDeliveryTime(), deliveryTimer);
+      if (!deliveryTimer->isScheduled()) {
+        controller->scheduleEvent(SEND_ACK, getWaitingMsgDeliveryTime(), deliveryTimer);
+      }
     }
   }
 }
