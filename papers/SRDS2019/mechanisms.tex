@@ -59,10 +59,10 @@ The set of interoperable relays $ I = \{ (n_{i}, n_{j}) \in N \mid n_{i} \ominus
 \begin{theorem}
 Let $ n_{i}, n_{j} $ be two interoperable relays and a source $s$ located at any of the components of $ n_{i} $ or $ n_{j} $.
 %
-If both interoperable relays forward a received message from $s$, via a pure flooding approach, then such message is delivered to every node in the components of $ n_{i} $ and $ n_{j} $.
+If both interoperable relays forward a received message from $s$ at least once, then such message is delivered to every node in the components of $ n_{i} $ and $ n_{j} $.
 \end{theorem}
 %
-We recall one properties of each protocol in $P$ that we will use in the proof of Theorem 1.
+We recall one property for each protocol in $P$ that we use in the proof of Theorem 1.
 %
 Nodes running $p_{\text{flood}}$ forward incoming messages only if a threshold $t$ haven't been reached
 %
@@ -92,7 +92,9 @@ Therefore all overlay relays forward $m$ and such message is received to every n
 %
 
 %
-\textbf{Case 2.} We now consider that $ s \in C_{l, p_{\text{cds}}} $ is a source of $m$ and eventually, $n_{j}$ receives $m$, $n_{j}$ forwards $m$ to $n_{i}$ and the latter node forwards $m$ as well.
+\textbf{Case 2.} We now consider that $ s \in C_{l, p_{\text{cds}}} $ is a source of $m$.
+%
+Eventually $n_{j}$ receives $m$, $n_{j}$ forwards $m$ to $n_{i}$ and the latter node forwards such message as well.
 %
 Let $n_{h} \in C_{k, p_{\text{flood}}} $ be a node adjacent to $n_{i}$ that do not retransmit $m$.
 %
