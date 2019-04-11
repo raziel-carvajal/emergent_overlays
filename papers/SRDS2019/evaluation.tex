@@ -1,24 +1,62 @@
 %!TEX root = main.tex
 %=========================================================
 
-\begin{figure}[htbp]
-	\begin{minipage}[t]{0.45\linewidth}
-    \includegraphics[width=\linewidth]{figures/sre.pdf}
-    \caption{Saved rebroadcasts}
-		\label{fig:rebroadcasts}
-	\end{minipage}%
-  \hfill%
-	\begin{minipage}[t]{0.45\linewidth}
-    \includegraphics[width=\linewidth]{figures/coverage.pdf}
-    \caption{Reachability}
-    \label{fig:reachability}
-	\end{minipage} 
-%	\caption{Saved rebroadcast and reachability over different networks.}
-%	\label{fig:sre-coverage}
-\end{figure}
+%\begin{figure}[htbp]
+%	\begin{minipage}[t]{0.45\linewidth}
+%    \includegraphics[width=\linewidth]{figures/sre.pdf}
+%    \caption{Saved rebroadcasts}
+%		\label{fig:rebroadcasts}
+%	\end{minipage}%
+%  \hfill%
+%	\begin{minipage}[t]{0.45\linewidth}
+%    \includegraphics[width=\linewidth]{figures/coverage.pdf}
+%    \caption{Reachability}
+%    \label{fig:reachability}
+%	\end{minipage} 
+%%	\caption{Saved rebroadcast and reachability over different networks.}
+%%	\label{fig:sre-coverage}
+%\end{figure}
 
 \section{Evaluation}
 \label{sec:evaluation}
+
+\textbf{configurations of experiments:}
+\begin{enumerate}
+	\item communication area with a single PoI
+	\begin{itemize}
+		\item communication dimensions: 90m x 45m = 4,050$m^{2}$ (min dimensions of soccer field)
+		\item PoI dimensions (aprox. a quarter of the hole communication area): 50m x 20m = 1, 250$m^2$
+		\item parameters of motion in
+		\begin{itemize}
+			\item dense area: random between 0 and 1m/s
+			\item sparse area: random between 1 and 2m/s
+			\item nodes perform levy walks \cite{rhee2011levy} %\textbf{or} nodes follow random-way point approach
+			\item nodes moves continuously and every one second the direction of levy walks changes
+		\end{itemize}
+	\end{itemize}
+	\item fixed transmission range for every node 10m (bluethoot), which implies that the broadcast area of each node is 314.15$m^2$
+	\item total number of participants: 2K nodes where 1.5K at dense region and 0.5 at sparse region; such number of participants implies:
+	\begin{itemize}
+		\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = 0.83m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{83} = 9.11\text{cm}$ from each other at PoI
+		\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{2800}{500} = 5.4m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{5.4} = 2.32\text{m} $ from each other at sparse region
+		\item Tx$=10$ implies that every node have at least $\frac{BroadcastArea}{AreaPerNode} = \frac{314.15m^{2}}{0.83m^{2}/\text{node}} = 378$ neighbors in dense area
+		\item similarly, every node have at least $ \frac{314.15m^{2}}{5.4m^{2}/\text{node}} = 58$ neighbors in sparse area
+	\end{itemize}
+	\item duration of experiment 10 minutes	
+	\item data frame interval: 1s (600 broadcast sessions)
+	\item control frame interval: 5s (120 messages) , 15s (40 messages) or 25s (24 messages) (this may vary depending on how MPR maintains a robust overlay)
+
+\end{enumerate}
+
+\textbf{broadcast metrics}
+\begin{itemize}
+	\item power consumption
+	\item coverage
+	\item rebroadcast: comparison of number of transmissions of data frames with pure flooding
+	\item sent/received data frames
+	\item data frame error rate: number of not heard ACKs at mac layer over all data frames; this is our way of measure collisions
+\end{itemize}
+
 \textbf{protocols implementations}
 \begin{itemize}
 	\item overlay-based
@@ -29,12 +67,10 @@
 	\end{itemize}
 		\item non overlay-based
 	\begin{itemize}
-		\item simple flooding - DONE
-		\item controlled flooding
+		\item controlled flooding:
 		\begin{itemize}
-			\item counter based - DONE
-			\item timer based - DONE
-			\item context based: make a different of neighbors between two nodes (TODO)
+			\item counter based with timer - DONE
+			\item context based: make a different of neighbors between two nodes (TODO, maybe ?)
 		\end{itemize}
 	\end{itemize}
 \end{itemize}
@@ -44,48 +80,10 @@
 \begin{itemize}
 	\item 3 flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (TODO)
 	\item hypergossiping \cite{hypergossiping} (TODO)
-	\item hand-shake gossip \cite{adaptive-multihop} (TODO)
+%	\item hand-shake gossip \cite{adaptive-multihop} (TODO)
 \end{itemize}
 
-\textbf{configurations of experiments}
-\begin{enumerate}
-	\item ideal scenario with no interference (Transmission Error Rate 0)
-	\item TER at 20\%
-	\item TER at 40\%
-	\item TER at 60\%
-	\item configuration per scenario
-	\begin{itemize}
-		\item parameters of motion for each scenario
-		\begin{itemize}
-			\item motion in dense area: random between 0 and 1m/s
-			\item motion in sparse area: random between 1 and 2m/s
-			\item nodes perform levy walks \cite{rhee2011levy}
-			\item nodes follow random-way point approach
-		\end{itemize}
-		\item parameters of density: 5 thousand in total, 2,500 in dense and 2,500 sparse; we vary the transmission range to have different amount of neighbors\raziel{this number may vary cause I have to check the limits of the simulator, but seems feasible}
-		\item nodes transmission range (Tx)
-		\begin{itemize}
-			\item 10m, 20m and 30m (we cover bluetooth and wifi)
-		\end{itemize}
-		\item communication area
-		\begin{itemize}
-			\item long 120m - wide 53m size of American football field; total area 6,360$m^{2}$
-			\begin{itemize}
-				\item 30\% of this area represents the dense area (PoI) with a total surface of 1,908$m^{2}$ - this is equivalent of having 0.76$m^{2}$ per person
-				\item 70\% of this area represents the sparse area with a total surface of 4,452$m^{2}$ - this is equivalent of having 1.78$m^{2}$ per person
-			\end{itemize}
-			\item scenario with 1 and 2 point of interest
-		\end{itemize}
-	\end{itemize}
-\end{enumerate}
 
-\textbf{broadcast metrics}
-\begin{enumerate}
-	\item packet delivery ratio
-	\item collisions ratio
-	\item ratio of send and received messages
-	\item delay of messages reception over
-\end{enumerate}
 
 \er{
 Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
