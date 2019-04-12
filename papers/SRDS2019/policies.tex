@@ -7,18 +7,34 @@
 observables:
 \begin{itemize}
 	\item input source: MAC protocol, responses to RTS frames + only when MPR protocol is running, also responses to direct control frames
-	\item used to derive:
+	\item used to derive local:
 	\begin{itemize}
-		\item local density (how many nodes in range)
+		\item density (how many nodes in range)
 		\item clustering between one-hop neighbors
-		\item local stability (use a figure: we probe the network regularly through existing mac-layer messages, we can keep snapshots of the neighbors, and estimate how much time we see a neighbor)
+		\item stability (use a figure: we probe the network regularly through existing mac-layer messages, we can keep snapshots of the neighbors, and estimate how much time we see a neighbor)
 	\end{itemize}
 \end{itemize}
 
 policies:
-\begin{itemize}
-	\item to fill
-\end{itemize}
+\begin{enumerate}
+	\item switching criteria based on nodes degree: collective decision where nodes with similar values of degree chose the same protocol. Currently, the policy works as follows:
+	\begin{itemize}
+		\item 3 thresholds (low, medium, high) for local clustering coefficient $c$, for: 
+		$c \in [0, \frac{1}{3}) \rightarrow t_1 = 0$ (implies controlled flooding), 
+		$c \in [\frac{1}{3}, \frac{2}{3}) \rightarrow t_2 = 1 $ (these are usually border nodes), 
+		$c \in [\frac{2}{3}, 1) \rightarrow t_3 = 3 $ (implies MPR: overlay-based protocol).
+		\item remind that nodes know their degree using the clustering observable. Switching procedure is as follows:
+		\begin{enumerate}
+			\item the source of a message $m$ attach a frame $f$ that contains $t_i \in [0, 1, 2]$ and start a timer $s$ to switch of protocol
+			\item receivers of $m$ detect $f$ and make the difference $d$ between the threshold in $m$ and their local threshold; receivers start a timer $s$ to switch of protocol f.$t_i$ only if $d$ is equal to the threshold of the source node, otherwise:
+			\begin{itemize}
+				\item replace f.$t_i$ with $n_i$.$t_j$ (local threshold) in $m$ and forwards $m$
+				\item start timer $s$ if needed
+			\end{itemize}
+			\item when $s$ expires all nodes switch of protocol
+		\end{enumerate}
+	\end{itemize}
+\end{enumerate}
 
 \er{
 The goal of this section is to present how adaptation is performed.
