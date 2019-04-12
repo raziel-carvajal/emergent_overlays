@@ -20,7 +20,7 @@
 		\noindent \emph{// Phase 1: select 1-hop neighbors connecting isolated 2-hop neighbors}
 		
 		\For{\textbf{every} $n_j$ \textbf{in} OneH}
-			\If{$\exists \; n_{iso} \in \text{TwoH}[n_j]$ s.t. $\forall n_{k\neq j}, n_{iso} \not\in \text{TwoH}[n_k]$}
+			\If{$\exists \; n_{\text{iso}} \in \text{TwoH}[n_j]$ s.t. $\forall n_{k\neq j}, n_{\text{iso}} \not\in \text{TwoH}[n_k]$}
 				\State relays $\gets$ relays $\cup \; \{n_j\}$
 				\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
 			\EndIf
@@ -40,7 +40,7 @@
 	
 		\While{uncovered $\neq \emptyset$}
 			\State select $n_j \in \text{OneH}$ maximizing $|\text{TwoH}[n_j] \cap \text{uncovered}|$
-			\State relays $\gets$ relays $\cup \; n_j$ 
+			\State relays $\gets$ relays $\cup \; \{n_j\}$
 			\State uncovered $\gets$ uncovered - $\text{TwoH}[n_j]$
 		\EndWhile
 		\State \Return relays
