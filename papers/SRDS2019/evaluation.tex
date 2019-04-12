@@ -20,68 +20,131 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-\textbf{configurations of experiments:}
-\begin{enumerate}
-	\item communication area with a single PoI
-	\begin{itemize}
-		\item communication dimensions: 90m x 45m = 4,050$m^{2}$ (min dimensions of soccer field)
-		\item PoI dimensions (aprox. a quarter of the hole communication area): 50m x 20m = 1, 250$m^2$
-		\item parameters of motion in
-		\begin{itemize}
-			\item dense area: random between 0 and 1m/s
-			\item sparse area: random between 1 and 2m/s
-			\item nodes perform levy walks \cite{rhee2011levy} %\textbf{or} nodes follow random-way point approach
-			\item nodes moves continuously and every one second the direction of levy walks changes
-		\end{itemize}
-	\end{itemize}
-	\item fixed transmission range for every node 10m (bluethoot), which implies that the broadcast area of each node is 314.15$m^2$
-	\item total number of participants: 2K nodes where 1.5K at dense region and 0.5 at sparse region; such number of participants implies:
-	\begin{itemize}
-		\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = 0.83m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{83} = 9.11\text{cm}$ from each other at PoI
-		\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{2800}{500} = 5.4m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{5.4} = 2.32\text{m} $ from each other at sparse region
-		\item Tx$=10$ implies that every node have at least $\frac{BroadcastArea}{AreaPerNode} = \frac{314.15m^{2}}{0.83m^{2}/\text{node}} = 378$ neighbors in dense area
-		\item similarly, every node have at least $ \frac{314.15m^{2}}{5.4m^{2}/\text{node}} = 58$ neighbors in sparse area
-	\end{itemize}
-	\item duration of experiment 10 minutes	
-	\item data frame interval: 1s (600 broadcast sessions)
-	\item control frame interval: 5s (120 messages) , 15s (40 messages) or 25s (24 messages) (this may vary depending on how MPR maintains a robust overlay)
+\textbf{research questions}
+\er{state what the experiments aim to show and demonstrate. There should be about 3-5 clear research questions. The experiments must be tailored to answer these questions.}
 
-\end{enumerate}
-
-\textbf{broadcast metrics}
+\textbf{metrics}
+we should have a table listing these.
 \begin{itemize}
-	\item power consumption
-	\item coverage
-	\item rebroadcast: comparison of number of transmissions of data frames with pure flooding
-	\item sent/received data frames
+	\item power consumption \er{do we still have this? Or is this deprecated?}
+	\item coverage \er{these are actually two metrics: (1) average percentage of nodes covered by a dissemination and (2) percentage of the disseminations that reached all nodes.}
+	\item sent/received messages at the application level (number of calls to the MAC layer)
+	\item sent/received data frames (number of sendings/retransmissions at the MAC protocol level)
+	\item derived from the two previous, average number of MAC retransmissions (number of MAC retransmissions / number of calls)
 	\item data frame error rate: number of not heard ACKs at mac layer over all data frames; this is our way of measure collisions
+	\item rebroadcast: comparison of number of transmissions of data frames with pure flooding \er{this is already a 'meta' metric. Is the comparison with pure flooding where collisions may have led to missed messages, or to a hypothetical pure flooding where there are no collisions?} \er{can you cite papers where this is the metric of choice, to justify that we also use it?}
 \end{itemize}
 
-\textbf{protocols implementations}
-\begin{itemize}
-	\item overlay-based
-	\begin{itemize}
-		\item CDS - \cite{stojmenovic-cds} - DONE
-		\item MPR - \cite{mpr} - DONE
-		\item MPR improved - \cite{mpr-improvement} - TODO
-	\end{itemize}
-		\item non overlay-based
-	\begin{itemize}
-		\item controlled flooding:
-		\begin{itemize}
-			\item counter based with timer - DONE
-			\item context based: make a different of neighbors between two nodes (TODO, maybe ?)
-		\end{itemize}
-	\end{itemize}
-\end{itemize}
-
-
-\textbf{implementations to compare with}
+\textbf{comparison points}
 \begin{itemize}
 	\item 3 flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (TODO)
 	\item hypergossiping \cite{hypergossiping} (TODO)
 %	\item hand-shake gossip \cite{adaptive-multihop} (TODO)
 \end{itemize}
+
+\textbf{configurations of experiments:}
+\begin{enumerate}
+	% \item homogeneous areas
+% 	\begin{itemize}
+% 		\item reproducing the parameters for the sparse and dense areas described below but uniformly over the same space
+% 	\end{itemize}
+	\item communication area with a single PoI
+	\begin{itemize}
+		\item Distribution over space:
+		\begin{itemize}
+			\item communication dimensions: 90m x 45m = 4,050$m^{2}$ (min dimensions of soccer field)
+			\item PoI dimensions (aprox. a quarter of the hole communication area): 50m x 20m = 1, 250$m^2$
+			\item parameters of motion in
+			\begin{itemize}
+				\item dense area: random between 0 and 1m/s
+				\item sparse area: random between 1 and 2m/s
+				\item nodes perform levy walks \cite{rhee2011levy} %\textbf{or} nodes follow random-way point approach
+				\item nodes moves continuously and every one second the direction of levy walks changes
+			\end{itemize}
+		\end{itemize}
+		\item fixed transmission range for every node 10m (bluethoot), which implies that the broadcast area of each node is 314.15$m^2$
+		\item total number of participants: 2K nodes where 1.5K at dense region and 0.5 at sparse region; such number of participants implies:
+		\begin{itemize}
+			\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = 0.83m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{83} = 9.11\text{cm}$ from each other at PoI \er{centimeters? This is completely unrealistic, no?} \er{I do not know how you derivve the maximal distance from the density. What is the mathematical ground to this? Intuitively the only way you can compute this is for a certain probability and under distribution assumption over the surface}
+			\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{2800}{500} = 5.4m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{5.4} = 2.32\text{m} $ from each other at sparse region
+			\item Tx$=10$ implies that every node have at least $\frac{BroadcastArea}{AreaPerNode} = \frac{314.15m^{2}}{0.83m^{2}/\text{node}} = 378$ neighbors in dense area \er{same question. The 'at least' comes from where?}
+			\item similarly, every node have at least $ \frac{314.15m^{2}}{5.4m^{2}/\text{node}} = 58$ neighbors in sparse area \er{with 10-m ranges this seems like a lot.}
+		\end{itemize}
+		\item duration of experiment 10 minutes	
+		\item data frame interval: 1s (600 broadcast sessions)
+		\item control frame interval: 5s (120 messages) , 15s (40 messages) or 25s (24 messages) (this may vary depending on how MPR maintains a robust overlay)
+	\end{itemize}
+	\item multi-POI configuration (TODO)
+	\begin{itemize}
+		\item ideally a configuration based on one of the two examples used in the introduction
+	\end{itemize}
+\end{enumerate}
+
+\textbf{Experiments}
+\begin{enumerate}
+	\item setup: Expected figure: a 2-D representation of the nodes at time t0, with a dashed square showing the POI/dense zone in the middle.
+	Nodes should all have the same color (white). We will reverse the use of color to show the protocol being used. 
+	For two or three nodes, show a circle using a transparent pale color (as for the figures in the beginning of the paper) that show their transmission range. The figure \emph{must} be in vectorial (PDF or eps) format.
+	\item baseline benchmark
+	\begin{itemize}
+		\item we consider the controlled flooding (one instance) and the MPR (3 instances, for the three frequencies).
+		\item performance of using a single protocol. What you want to show is that an overlay everywhere leads to bad coverage, and flooding everywhere leads to high costs. The coverage should be measured and mentioned in a table, together with the number of collisions.
+		See placeholder for details of the table.
+		\item the plot will be a two-column-wide plot with three embedded subplots:
+		\begin{itemize}
+			\item Plot 1: coverage \#1 and coverage \#2. 
+			Y axis is \%-age from 0 to 100. 
+			X axis is 12 slots: 3 for the controlled flooding (CF), 3 for each of the configurations of MPR. 
+			Each triplet is (a) full network (b) only nodes in central area (c) only nodes in external areas.
+			For each in the triplet, use one bar showing the percentage.
+			\item Plot 2: \# of messages at the application level.
+			Y axis is 0 to max \# of messages
+			X axis is exactly as previous.
+			For each tic in a triplet, plot one violin plot showing the distribution of the number of messages over all nodes.
+			The number of messages includes control messages.
+			Since this number is known and the same for all nodes, show it as a small vertical bar (dashed) for the three MPR configurations. The meaning of the bar will be shown in the legend of the plot.
+			\item Plot 3: \# of messages at the MAC level.
+			Y axis is 0 to max \# of messages
+			X axis is exactly as previous.
+			For each tic in a triplet, plot the same as previous but for the number of MAC retransmissions. No need for the small bar of the previous plot in MPR configurations.
+		\end{itemize}
+	\end{itemize}
+	\item evaluation of the observables
+	\begin{itemize}
+		\item goal is to know how far the observables are far from the truth as known by the simulator
+	\end{itemize}
+	\item evaluation of the policies
+	\begin{itemize}
+		\item goal is to evaluate how good are the policies in deciding, and what is the impact on performance. Two main metrics are: quality of the resulting graph, and costs of the resulting hybrid system. Should include graphical representation of the selections.
+	\end{itemize}
+	\item comparison with related work
+	\begin{itemize}
+		\item running the two other approaches and comparing them to the emergent overlays (only with the best configuration found in the previous)
+		\item should ideally happen on a more sophisticated setup with multiple POIs.
+	\end{itemize}
+\end{enumerate}
+
+% \er{this is deprecated. The presenction of the algorithms is in the background section.}
+% \textbf{protocols implementations}
+% \begin{itemize}
+% 	\item overlay-based
+% 	\begin{itemize}
+% 		\item CDS - \cite{stojmenovic-cds} - DONE
+% 		\item MPR - \cite{mpr} - DONE
+% 		\item MPR improved - \cite{mpr-improvement} - TODO
+% 	\end{itemize}
+% 		\item non overlay-based
+% 	\begin{itemize}
+% 		\item controlled flooding:
+% 		\begin{itemize}
+% 			\item counter based with timer - DONE
+% 			\item context based: make a different of neighbors between two nodes (TODO, maybe ?)
+% 		\end{itemize}
+% 	\end{itemize}
+% \end{itemize}
+
+
+
 
 
 
