@@ -4,6 +4,22 @@
 \section{Adaptation: observables and policies}
 \label{sec:adaptation}
 
+observables:
+\begin{itemize}
+	\item input source: MAC protocol, responses to RTS frames + only when MPR protocol is running, also responses to direct control frames
+	\item used to derive:
+	\begin{itemize}
+		\item local density (how many nodes in range)
+		\item clustering between one-hop neighbors
+		\item local stability (use a figure: we probe the network regularly through existing mac-layer messages, we can keep snapshots of the neighbors, and estimate how much time we see a neighbor)
+	\end{itemize}
+\end{itemize}
+
+policies:
+\begin{itemize}
+	\item to fill
+\end{itemize}
+
 \er{
 The goal of this section is to present how adaptation is performed.
 It should start with a general discussion of the control loop: local sensing, collection of information, periodic checking of policies, trigger of adaptation actions (here, emerging an overlay). If we do it, explain that these phases may happen on a single node (single-node adaptation) or through the collaboration of several nodes in a neighborhood (multi-node adaptation).

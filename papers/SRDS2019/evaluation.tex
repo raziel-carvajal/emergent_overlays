@@ -25,19 +25,20 @@
 
 \textbf{metrics}
 we should have a table listing these.
+All metrics should be recorded together with the class (sparse or dense) of the node.
 \begin{itemize}
-	\item power consumption \er{do we still have this? Or is this deprecated?}
 	\item coverage \er{these are actually two metrics: (1) average percentage of nodes covered by a dissemination and (2) percentage of the disseminations that reached all nodes.}
 	\item sent/received messages at the application level (number of calls to the MAC layer)
 	\item sent/received data frames (number of sendings/retransmissions at the MAC protocol level)
-	\item derived from the two previous, average number of MAC retransmissions (number of MAC retransmissions / number of calls)
+	\item derived from the two previous, average number of MAC retransmissions of the payload (number of MAC retransmissions / number of calls)
 	\item data frame error rate: number of not heard ACKs at mac layer over all data frames; this is our way of measure collisions
-	\item rebroadcast: comparison of number of transmissions of data frames with pure flooding \er{this is already a 'meta' metric. Is the comparison with pure flooding where collisions may have led to missed messages, or to a hypothetical pure flooding where there are no collisions?} \er{can you cite papers where this is the metric of choice, to justify that we also use it?}
+	\item rebroadcast: comparison of number of sendings of application-level messages with real pure flooding (also subject to the same collisions and conditions etc. -- this is not the idealized ground truth)
+	\item number of duplicate receptions
 \end{itemize}
 
 \textbf{comparison points}
 \begin{itemize}
-	\item 3 flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (TODO)
+	\item 3 adaptive counter based flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (coded, not tested)
 	\item hypergossiping \cite{hypergossiping} (TODO)
 %	\item hand-shake gossip \cite{adaptive-multihop} (TODO)
 \end{itemize}
@@ -65,8 +66,8 @@ we should have a table listing these.
 		\item fixed transmission range for every node 10m (bluethoot), which implies that the broadcast area of each node is 314.15$m^2$
 		\item total number of participants: 2K nodes where 1.5K at dense region and 0.5 at sparse region; such number of participants implies:
 		\begin{itemize}
-			\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = 0.83m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{83} = 9.11\text{cm}$ from each other at PoI \er{centimeters? This is completely unrealistic, no?} \er{I do not know how you derivve the maximal distance from the density. What is the mathematical ground to this? Intuitively the only way you can compute this is for a certain probability and under distribution assumption over the surface}
-			\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{2800}{500} = 5.4m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{5.4} = 2.32\text{m} $ from each other at sparse region
+			\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = 0.83m^{2}/\text{node}$, this means that every node is separated at most $ \sqrt{0.83} = 91.1\text{cm}$ from each other at PoI \er{centimeters? This is completely unrealistic, no?} \er{I do not know how you derivve the maximal distance from the density. What is the mathematical ground to this? Intuitively the only way you can compute this is for a certain probability and under distribution assumption over the surface}
+			\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{2800}{500} = 5.4m^{2}/\text{node}$, this means that every node is separated on average by $ \sqrt{5.4} = 2.32\text{m} $ from each other at sparse region
 			\item Tx$=10$ implies that every node have at least $\frac{BroadcastArea}{AreaPerNode} = \frac{314.15m^{2}}{0.83m^{2}/\text{node}} = 378$ neighbors in dense area \er{same question. The 'at least' comes from where?}
 			\item similarly, every node have at least $ \frac{314.15m^{2}}{5.4m^{2}/\text{node}} = 58$ neighbors in sparse area \er{with 10-m ranges this seems like a lot.}
 		\end{itemize}
@@ -79,6 +80,27 @@ we should have a table listing these.
 		\item ideally a configuration based on one of the two examples used in the introduction
 	\end{itemize}
 \end{enumerate}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{figures/placeholders/setup.png}
+	\caption{Experimental setup with one point of interest and \protect\er{fillme} nodes.}
+	\label{fig:eval:setup}
+\end{figure}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{figures/placeholders/table_baseline.png}
+	\caption{to transform to a real table.}
+	\label{table:eval:baseline_performance}
+\end{figure}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{figures/placeholders/plots_baseline.png}
+	\caption{Performance of single-protocol deployments.}
+	\label{fig:eval:baseline_performance}
+\end{figure*}
 
 \textbf{Experiments}
 \begin{enumerate}
@@ -115,7 +137,7 @@ we should have a table listing these.
 		\item a first plot for density: distribution of the difference between the ground truth and the measured one, for the different ways to measure density
 		\item Single plot: Y axis is difference (negative or positive) from ground truth.
 		X axis is one triplet of tics per mechanism available to measure density (same meaning for the triplet as before)
-		For each tic, violin plot of the distribution of differences from ground truth
+		For each tic, violin plot of the distribution of differences from ground truth.
 	\end{itemize}
 	\item evaluation of the policies
 	\begin{itemize}
