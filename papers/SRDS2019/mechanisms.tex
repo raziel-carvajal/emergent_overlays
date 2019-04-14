@@ -4,6 +4,16 @@
 \section{Interoperability mechanisms}
 \label{sec:mechanisms}
 
+structure of the section and what can be reused from text below:
+\begin{itemize}
+	\item the interoperability has been defined in the previous section, no need to redefine it here
+	\item recap that the issue is that island of nodes using different protocols should be passed by the messages
+	\item this should also work when such regions are 'mixed' and overlap
+	\item we need nodes that are at the frontier/border between zones with heterogeneous protocols to be aware of their special role and act accordingly.
+\end{itemize}
+
+
+
 We revisit the issues and opportunities of broadcast in a situation where disjoint clusters of nodes follow either, a controlled flooding approach or an overlay-based one.
 %
 We propose an interoperability mechanism that ensures continuity in the delivery of messages independently of the protocol running at each node.
@@ -22,14 +32,18 @@ Nodes participating in a dissemination overlay are limited by the frontier of cl
 
 \subsection{Interoperable relays}
 \label{sec:mechanisms:interop-relays}
+
 To assure that data frames or \emph{messages} transit between adjacent clusters of nodes running different algorithms, nodes must figure out when they are located at the frontier of such clusters.
 %
-We call such nodes \emph{interoperable relays} and give a proof that these relays enforce broadcast by covering nodes of every adjacent cluster in a MANET.
+We call such nodes \emph{interoperable relays} \er{rather interoperability relays, or border relays?} and give a proof that these relays enforce broadcast by covering nodes of every adjacent cluster in a MANET.
 %
 First, we formalize the system model we present in section~\ref{sec:background:model}.
 
 %
 We define a network as an undirected graph $ G = (N, L, P) $ where $ N = \{ n_{i} \mid i \in 1, \dots, m \} $ is the set nodes, $ L = \{ (n_{i}, n_{j}) \mid n_{i}, n_{j} \in N, i \neq j, (n_{i}, n_{j}) = (n_{j}, n_{i}) \} $ is the set of links, and $ P = \{p_{\text{flood}}, p_{\text{cds}} \} $ is a set of broadcast protocols.
+\er{this must be simplified: we already defined N in the background section.} 
+\er{the definition of the links is inconsistent. What does $(n_{i}, n_{j}) = (n_{j}, n_{i})$ means?}
+\er{since there are only two protocols we could simply have one big zone CF and several zone OB$_k$.}
 %
 $P$ contains only two elements, $p_{\text{flood}}$ represents a controlled flooding approach and $p_{\text{cds}}$ an overlay-based one.
 %
@@ -38,12 +52,13 @@ A disjoint component in such graph, where its nodes use a single protocol (withi
 Additionally, we define the relation \emph{at the frontier of} denoted with the symbol $ \ominus $.
 %
 For a link $ (n_{i}, n_{j})\in L $ we say that $ n_{i} $ is \emph{at the frontier of} $ n_{j} $ or $ n_{i} \ominus n_{j} $ iif $n_i$ and $n_j$ do not belong to the same component.
+\er{the definition says that you are at the frontier of another node. I thought we were at the frontier of another zone/protocol instead?}
 %
 That is, $ n_{i} \in C_{k, p_{a}} $ and $ n_{j} \in C_{l, p_{b}} $ such that $ k \neq l$ and  $a \neq b $.
 %
 %Following the previous definition of disjoint component, both nodes run different broadcast protocols.
 %
-The relation $\ominus$ is only symmetric, i. e. if $ n_{i} \ominus n_{j} $ then $ n_{j} \ominus n_{i} $.
+The relation $\ominus$ is only symmetric, i. e. if $ n_{i} \ominus n_{j} $ then $ n_{j} \ominus n_{i} $. \er{why 'only'?}
 %
 %\begin{figure}[t]
 %	\centering
