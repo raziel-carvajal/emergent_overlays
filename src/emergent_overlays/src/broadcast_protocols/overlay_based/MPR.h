@@ -33,9 +33,13 @@ class Mpr : public IProtocol {
     int viewSize;
     int sentBootEvents = 1;
     int nodesNo;
+    int ctrlMsgId = 0;
+    int sentCtrlMsgFreq = 0;
 
     double sentCtrlMsgDelay;
     double minSentDelay;
+
+    string ctrlMsgName = "1ctrlMsg-";
 
     set<string> latestPayload;
 

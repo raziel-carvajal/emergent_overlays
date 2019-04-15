@@ -26,15 +26,13 @@ Define_Module(InteroperableBroadcast);
 simsignal_t InteroperableBroadcast::rcvdBroadcastMsg = registerSignal("rcvdBroadcastMsg");
 simsignal_t InteroperableBroadcast::sentBroadcastMsg = registerSignal("sentBroadcastMsg");
 
+simsignal_t InteroperableBroadcast::sentCtrlFrames = registerSignal("sentCtrlFrames");
+simsignal_t InteroperableBroadcast::recvCtrlFrames = registerSignal("recvCtrlFrames");
+
 simsignal_t InteroperableBroadcast::positionAtX = registerSignal("positionAtX");
 simsignal_t InteroperableBroadcast::positionAtY = registerSignal("positionAtY");
 
 simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type");
-
-simsignal_t InteroperableBroadcast::sentDataFrames = registerSignal("sentDataFrames");
-simsignal_t InteroperableBroadcast::recvDataFrames = registerSignal("recvDataFrames");
-simsignal_t InteroperableBroadcast::sentCtrlFrames = registerSignal("sentCtrlFrames");
-simsignal_t InteroperableBroadcast::recvCtrlFrames = registerSignal("recvCtrlFrames");
 
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
@@ -96,7 +94,7 @@ void InteroperableBroadcast::sendPacket() {
     log("New broadcast session [" + string(m->getName()) + "]");
     // send now
     mac->send(m);
-    emit(sentBroadcastMsg, getMsgId(m->getName()));
+    emit(sentBroadcastMsg, getMsgId(m->getName(), this->packetName));
     emit(forward_type, runningProtocol->getFwdType());
     UDPBasicApp::numSent++;
     // tag packet as received
@@ -120,7 +118,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           break;
         case Timer::FWD_BROADCAST_MSG: {
           mac->send(latestPkToFwd);
-          emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName()));
+          emit(sentBroadcastMsg, getMsgId(latestPkToFwd->getName(), this->packetName));
           if (isBorderNode) {
             emit(forward_type, ForwardType::BORDER_NODE);
           } else {
@@ -139,7 +137,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         case Timer::SEND_BORDER_REQ: {
           log("Sending BorderReq packet");
           send(getBorderReqMsg());
-          this->sentCtrlMsgs++;
+          this->numSentCtrlMsgs++;
         }
           break;
         case Timer::RESET_BORDER_STATUS: {
@@ -149,11 +147,10 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         }
           break;
         case Timer::HALT_APP: {
-          recordScalar("sent broadcast msgs", UDPBasicApp::numSent);
-          emit(sentDataFrames, UDPBasicApp::numSent);
-          emit(recvDataFrames, UDPBasicApp::numReceived);
-          emit(sentCtrlFrames, sentCtrlMsgs);
-          emit(recvCtrlFrames, recvCtrlMsgs);
+          recordScalar("numSentBroMsgs", UDPBasicApp::numSent);
+          recordScalar("numRecvBroMsgs", UDPBasicApp::numReceived);
+          recordScalar("numSentCtrMsgs", numSentCtrlMsgs);
+          recordScalar("numRecvCtrMsgs", numRecvCtrlMsgs);
 
           log("End of simulation from peer: " + nodeId);
           if (broaMsgTimer)
@@ -201,7 +198,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       string sender(removeQuotes(pk->par("Sender").str()));
       log("Broadcast msg [" + string(pk->getName()) + "] received from [" + sender + "]");
       // record integer identifier of received message
-      emit(rcvdBroadcastMsg, getMsgId(pk->getName()));
+      emit(rcvdBroadcastMsg, getMsgId(pk->getName(), this->packetName));
       // count received messages
       UDPBasicApp::numReceived++;
       // let the algorithm deal with the reception
@@ -209,9 +206,9 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     }
       break;
     case UdpPacket::CTRL: {
-      // let MAC layer deal with reception
-//      mac->processMsg(pk->getName());
-      recvCtrlMsgs++;
+      numRecvCtrlMsgs++;
+      emit(recvCtrlFrames, getMsgId(pk->getName(), ctrlMsgName));
+
       string sender(removeQuotes(pk->par("Sender").str()));
       Basic* basicPk = dynamic_cast<Basic*>(pk);
       // sender's running protocol ID differs from receiver's; send request to chose border node
@@ -220,8 +217,8 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
             "Ctrl msg [" + string(pk->getName()) + "] received from node running ["
                 + to_string(basicPk->getRunningProtocol()) + "]");
         if (knownForeignAlgos.find(basicPk->getRunningProtocol()) == knownForeignAlgos.end()) {
-
-          if (basicPk->getName() == foreignPkName) {
+          // TODO handle when substring "ctrlMsgName" is part of the packet name
+          if (basicPk->getName() == ctrlMsgName) {
             knownForeignAlgos.insert(basicPk->getRunningProtocol());
             log("I am Border node (UdpPacket::CTRL)");
             isBorderNode = true;
@@ -238,7 +235,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     case UdpPacket::BORDER_REQ: {
       // let MAC layer deal with reception
 //      mac->processMsg(pk->getName());
-      recvCtrlMsgs++;
+      numRecvCtrlMsgs++;
       log("BorderReq packet received");
       BorderReq* br = dynamic_cast<BorderReq*>(pk);
       // BorderReq packets are accepted only from senders running a different algorithm AND
@@ -287,10 +284,9 @@ void InteroperableBroadcast::scheduleEvent(short kind, double delay, cMessage* s
   scheduleAt(t, selfMsgPtr);
 }
 
-int InteroperableBroadcast::getMsgId(string msgHeader) {
-  string pkName(this->packetName);
+int InteroperableBroadcast::getMsgId(string msgHeader, string substr) {
   string::size_type st;
-  return stoi(msgHeader.substr(pkName.size(), msgHeader.size()), &st);
+  return stoi(msgHeader.substr(substr.size(), msgHeader.size()), &st);
 }
 
 void InteroperableBroadcast::addPacketType(cPacket* msg, long l) {

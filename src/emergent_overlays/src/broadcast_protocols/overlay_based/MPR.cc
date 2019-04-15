@@ -250,8 +250,11 @@ void Mpr::handleEvent(cMessage* msg) {
 //    }
 //      break;
     case SEND_CTRL_MSG: {
-      controller->send(getCtrlMsg(1));
-      controller->sentCtrlMsgs++;
+      cPacket* pk = getCtrlMsg(1);
+      controller->send(pk);
+
+      controller->numSentCtrlMsgs++;
+      controller->emit(controller->sentCtrlFrames, controller->getMsgId(pk->getName(), ctrlMsgName));
     }
       break;
     case SCHEDULE_FIRST_CTRL_MSG: {
@@ -259,8 +262,11 @@ void Mpr::handleEvent(cMessage* msg) {
     }
       break;
     case SCHEDULE_CTRL_MSGS: {
-      sendCtrlMsg();
-
+      int n = controller->par("sentCtrlMsgFreq").longValue();
+      sentCtrlMsgFreq++;
+      if (sentCtrlMsgFreq % n == 0) {
+        sendCtrlMsg();
+      }
       controller->scheduleEvent(SCHEDULE_CTRL_MSGS, controller->par("ctrlMsgInterval").doubleValue(),
           sRemainingCtrlMsgTimer);
     }
@@ -276,8 +282,11 @@ void Mpr::sendCtrlMsg() {
   controller->cancelEvent(sCtrlMsgTimer);
   controller->cancelEvent(buildCdsTimer);
 // get the list of one-hop neighbors
-  controller->send(getCtrlMsg(0));
-  controller->sentCtrlMsgs++;
+  cPacket* pk = getCtrlMsg(0);
+  controller->send(pk);
+
+  controller->emit(controller->sentCtrlFrames, controller->getMsgId(pk->getName(), ctrlMsgName));
+  controller->numSentCtrlMsgs++;
 
   double t = minSentDelay * nodesNo;
 // get the list of two-hop neighbors
@@ -290,11 +299,16 @@ void Mpr::sendCtrlMsg() {
 }
 
 cPacket* Mpr::getCtrlMsg(int withName) {
+  ctrlMsgId++;
   MprCtrl* m = nullptr;
+  string name;
+  // 1 means control message with neighbors
   if (withName == 1) {
-    m = new MprCtrl(controller->foreignPkName.c_str());
-  } else {
-    m = new MprCtrl();
+    name = controller->ctrlMsgName + to_string(ctrlMsgId);
+    m = new MprCtrl(name.c_str());
+  } else { // 0 means control message with node identifier
+    name = ctrlMsgName + to_string(ctrlMsgId);
+    m = new MprCtrl(name.c_str());
   }
   m->setRunningProtocol(controller->MPR);
   controller->addCtrlHeaders(m);
@@ -354,7 +368,7 @@ void Mpr::cancelSelfEvents() {
     controller->cancelAndDelete(fwdBrMsgTimer);
   if (sCtrlMsgTimer)
     controller->cancelAndDelete(sCtrlMsgTimer);
-  if(sRemainingCtrlMsgTimer)
+  if (sRemainingCtrlMsgTimer)
     controller->cancelAndDelete(sRemainingCtrlMsgTimer);
 }
 

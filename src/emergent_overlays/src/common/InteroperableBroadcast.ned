@@ -33,6 +33,7 @@ simple InteroperableBroadcast extends UDPBasicApp
 
 	// WARNING this value cannot be lower than 100 (min timer to schedule events)
     int nodesNo = default(100);
+    int sentCtrlMsgFreq = default(1);
     double minSentDelay @unit(s) = default(0.00001s);
     double broadcastInterval @unit(s) = default(1s);
 
@@ -62,11 +63,6 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     @signal[forward_type](type=int);
     @statistic[forward_type](source=forward_type; record=vector; interpolationmode=none);
-    
-    @signal[sentDataFrames](type=int);
-    @statistic[sentDataFrames](source=sentDataFrames; record=vector; interpolationmode=none);
-    @signal[recvDataFrames](type=int);
-    @statistic[recvDataFrames](source=recvDataFrames; record=vector; interpolationmode=none);
     
     @signal[sentCtrlFrames](type=int);
     @statistic[sentCtrlFrames](source=sentCtrlFrames; record=vector; interpolationmode=none);

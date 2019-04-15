@@ -111,10 +111,9 @@ class InteroperableBroadcast : public UDPBasicApp {
       BROADCAST = 1, CTRL, BORDER_REQ, PING, PONG, ACK
     };
 
-    int sentCtrlMsgs = 0;
-    int recvCtrlMsgs = 0;
+    int numSentCtrlMsgs = 0;
+    int numRecvCtrlMsgs = 0;
     int broadcastMsgId = 0;
-    int ctrlMsgId = 0;
 
     double transRadious;
 
@@ -125,8 +124,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t positionAtX;
     static simsignal_t positionAtY;
     static simsignal_t forward_type;
-    static simsignal_t sentDataFrames;
-    static simsignal_t recvDataFrames;
     static simsignal_t sentCtrlFrames;
     static simsignal_t recvCtrlFrames;
 
@@ -135,7 +132,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     set<string> receivedMsg;
 
     string nodeId;
-    string foreignPkName = "2ndCtrlMsg";
+    string ctrlMsgName = "2ctrlMsg-";
     string protocolsNames[Protocols::LAST_PROTOCOL];
 
     IMobility* mobilityModel;
@@ -175,7 +172,7 @@ class InteroperableBroadcast : public UDPBasicApp {
       }
     }
 
-    int getMsgId(string msgHeader);
+    int getMsgId(string msgHeader, string substr);
 
     double getRandomTime(double a, double b) {
       return uniform(a, b);
