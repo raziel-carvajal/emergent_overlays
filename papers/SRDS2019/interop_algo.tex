@@ -10,7 +10,7 @@
 	\EndConstants
 	
 	\BeginVariables
-		\State b: boolean, init \texttt{false} \Comment{is the node a border node?}
+		\State b: boolean, init \texttt{false} \Comment{should the node act as a border node?}
 		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
 	\EndVariables
 	
@@ -26,28 +26,28 @@
 	\smallskip
 	
 	\begin{center}
-	{\textbf{Code for node currently using controlled flooding}}
+	{\textbf{Code for node currently using controlled flooding} (CF)}
 	\end{center}
 	\vspace{-2.5mm}
 	\hrulefill
-		
-	\Procedure{receive}{MPR \texttt{hello} from $n_j$}
+	
+	\Procedure{MAC.receive}{MPR \texttt{hello} from $n_j$}
 		\State $t_{n_j} \gets $ new timer with duration $\in [10:100]$ms
 	\EndProcedure
 	
-	\Procedure{receive}{\texttt{border}$(n_j)$ from $n_k$ }
+	\Procedure{CF.receive}{\texttt{border}$(n_j)$ from $n_k$ }
 		\State cancel $t_{n_j}$ (if it exists)
 	\EndProcedure
 	
-	\Procedure{expires}{$t_{n_j}$}
-		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
+	\BeginTimerExpires[$t_{n_j}$]
+		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$ s}
 		\State MAC.localBroadcast(\texttt{border}($n_j$))
-	\EndProcedure
+	\EndTimerExpires
 	
-	\Procedure{receive}{message $m$ for the first time}
-		\State CF.receive($m$) \Comment{Regular handling of new incoming message}
+	\Procedure{CF.receive}{message $m$ for the first time}
+		\State CF.handle($m$) \Comment{Regular handling of new incoming message}
 		\If{amIBorder()}
-			\State $\text{counter}_m \gets \infty$ \Comment{Always send $m$ when timer expires}
+			$\text{counter}_m \gets \infty$ \Comment{Be a relay}
 		\EndIf
 	\EndProcedure
 	
@@ -59,26 +59,26 @@
 	\vspace{-2.5mm}
 	\hrulefill
 	
-	\Procedure{receive}{\texttt{border}$(n_j)$ from $n_k$}
+	\Procedure{MAC.receive}{\texttt{border}$(n_j)$ from $n_k$}
 		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
 	\EndProcedure
 	
-	\Procedure{receive}{message $m$ for the first time, from $n_k$}
+	\Procedure{MPR.receive}{message $m$ for the first time, from $n_k$}
 		\If{$n_k$ uses controlled flooding}
-			\State MPR.broadcast($m$) \Comment{initiate the broadcast using MPR}
+			\State MPR.broadcast($m$) \Comment{initiate MPR broadcast}
 		\Else \Comment{$n_k$ uses MPR}
 			\If{$m$.relays includes $n_i$}
-				\State b $\gets$ \texttt{false}
-			\Else \Comment{$n_j$ is not an overlay relay}
+				b $\gets$ \texttt{false}
+			\Else \Comment{$n_i$ is not an overlay relay}
 				\If{amIBorder()}
-					CF.receive($m$) \Comment{use controlled flooding}
+					CF.handle($m$) \Comment{use controlled flooding}
 				\EndIf
 			\EndIf
-			\State MPR.receive($m$) \Comment{Regular handling of new incoming message}
+			\State MPR.handle($m$) \Comment{Regular handling of the message}
 		\EndIf
 	\EndProcedure
 
-\end{algorithmic}	
+\end{algorithmic}
 \end{footnotesize}
 \caption{Interoperability mechanisms on node $n_i$}\label{algorithm:interoperability:cf}
 \end{algorithm}
