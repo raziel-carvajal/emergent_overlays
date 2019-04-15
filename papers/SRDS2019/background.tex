@@ -169,7 +169,7 @@ We adopt a protocol of the latter type, MPR~\cite{mpr,mpr-improvement} (\emph{Mu
 The principle of MPR is to let each node decide which of its one-hop (direct) neighbors should be instructed to act as relays during a dissemination in which it participates as a relay or source itself.
 It requires the discovery of all one-hop and two-hop neighbors using periodic control messages.
 Nodes periodically announce themselves using best-effort local broadcast, i.e. by disabling retransmissions by the MAC protocol.
-They include their current neighborhood, as obtained from the last exchanges at the MAC level.
+These messages are called \texttt{hello} messages and include the current neighborhood, as obtained from recent MAC-level exchanges.
 Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
 The ideal frequency of announcements depends on the network dynamics.
 Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
@@ -177,10 +177,10 @@ Too frequent announcements bear the risk of extra collisions and energy costs, w
 The selection of relays is detailed by Algorithm~\ref{algorithm:mpr} and illustrated by Figure~\ref{fig:background:mpr}.
 The goal is to ensure that all two-hop neighbors are \emph{covered} by at least one relay.
 The selection is in two phases.
-The first phase (lines 8--11) selects relays that are \emph{necessary}, i.e. one-hop neighbors that are the only connection to ``isolated'' two-hop neighbors.
-The second phase (lines 12--16) selects relays that are \emph{sufficient} to complete the coverage.
+The first phase (lines 7--10) selects relays that are \emph{necessary}, i.e. one-hop neighbors that are the only connection to ``isolated'' two-hop neighbors.
+The second phase (lines 11--14) selects relays that are \emph{sufficient} to complete the coverage.
 The heuristic is add as relay nodes that cover the largest number of two-hop neighbors, until all nodes are covered.
-As the set of uncovered nodes is the union of all two-hop neighbors (line 6), the \texttt{while} loop on lines 12--15 always terminate.
+As the set of uncovered nodes is the union of all two-hop neighbors (line 5), the \texttt{while} loop on lines 11--14 always terminate.
 MPR is a local heuristic that may not guarantee the optimal selection of relays, but it has the advantage of requiring little computation and no GPS coordinates.
 It also does not require specific synchronization between nodes to agree on an explicit overlay (e.g. to inform nodes who must act as relays), reducing the cost of its maintenance.
 

@@ -1,13 +1,16 @@
 % BLOCKS
 
-\algblockdefx[Constants]{BeginConstants}{EndConstants}
-	{\textbf{constants}}{\textbf{end}}
+\algblockdefx[Constants]{BeginConstants}{EndConstants}[0]
+	{\textbf{constants}}
+	{\algorithmicend}
 
-\algblockdefx[Variables]{BeginVariables}{EndVariables}
-	{\textbf{variables}}{\textbf{end}}
+\algblockdefx[Variables]{BeginVariables}{EndVariables}[0]
+	{\textbf{variables}}
+	{\algorithmicend}
 
-\algblockdefx[Input]{BeginInput}{EndInput}
-	{\textbf{input}}{\textbf{end}}
+\algblockdefx[Input]{BeginInput}{EndInput}[0]
+	{\textbf{input}}
+	{\algorithmicend}
 
 \algblockdefx[FrameClass]{BeginFrameDef}{EndFrameDef}
 	{\textbf{Frame} : \emph{class}}{\textbf{end}}
@@ -33,6 +36,15 @@
 
 % Tell algorithmicx not to print an empty line if `noend' option is set 
 \makeatletter
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndConstants}}
+  {}%
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndVariables}}
+  {}%
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndInput}}
+  {}%
 \ifthenelse{\equal{\ALG@noend}{t}}%
   {\algtext*{EndTimerExpires}}
   {}%

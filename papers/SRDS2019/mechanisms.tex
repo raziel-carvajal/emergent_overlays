@@ -1,196 +1,52 @@
 %!TEX root = main.tex
 %=========================================================
 
-\section{Interoperability mechanisms}
+\section{Interoperability}
 \label{sec:mechanisms}
 
-structure of the section and what can be reused from text below:
-\begin{itemize}
-	\item the interoperability has been defined in the previous section, no need to redefine it here
-	\item recap that the issue is that island of nodes using different protocols should be passed by the messages
-	\item this should also work when such regions are 'mixed' and overlap
-	\item we need nodes that are at the frontier/border between zones with heterogeneous protocols to be aware of their special role and act accordingly.
-\end{itemize}
+Nodes can use different protocols, but broadcast is still required to reach all nodes.
+Emerged overlays construct dissemination structures that cover their boundaries, i.e. nodes running MPR only receive \texttt{hello} messages from nodes participating to the same protocol, and are not aware of nodes using controlled flooding outside of the emergent overlay boundary.
+Similarly, nodes running controlled flooding and located at the horizon of an emerged overlay may decide not to relay a message as their counter goes down to 0 before the timer expires.
+This may lead to the absence of propagation of this message inside the emerged overlay.
+
+We present in Algorithm~\ref{algorithm:interoperability} the interoperability mechanisms that allow messages to flow from regions using controlled flooding, to regions using an emerged overlay, and \emph{vice-versa}.
+Interoperability builds on top of the three base protocols, refereed as MAC, CF and MPR in the pseudo-code.
+The original calls of CF and MPR for receiving a message $m$ are named ``handle(m)'' and encapsulated in novel interoperability-enabling functions named ``receive(m)''.
+Lines 1--8 are common, while lines 9--18 and 19--28 apply to nodes running respectively CF or MPR.
+
+The core of the interoperability protocol is the autonomous detection of nodes that are at the \emph{border} of a zone using one protocol.
+When a node detects that it should act as a border, it triggers a boolean b for a duration of \emph{at least} two MPR \texttt{hello} message local broadcast periods, extended as necessary (lines 4--8).
+We present first how interoperability is enabled from CF nodes to MPR nodes, and then how it is enables in the other direction.
 
 \input{interop_algo}
 
-We revisit the issues and opportunities of broadcast in a situation where disjoint clusters of nodes follow either, a controlled flooding approach or an overlay-based one.
+\smallskip
+\noindent
+\textbf{From CF to MPR.}
 %
-We propose an interoperability mechanism that ensures continuity in the delivery of messages independently of the protocol running at each node.
+Nodes running CF detect that they are border nodes by reacting to \texttt{hello} messages sent by nearby MPR nodes.
+A CF border node will systematically act as a relay when receiving a new message from another node (running either protocol).
+This is enabled by setting an infinite value for the CF counter, which will therefore be positive when the CF timer expires (line 18).
 
-\subsection{Interoperability issues}
-\label{sec:mechanisms:interop-issues}
-In the general case, a system where nodes of a disjoint cluster in the network run a certain protocol, may result in any interaction with other participants.
-%
-The combination of two protocols to broadcast in MANETs, controlled flooding and overlay-base, may avoid the delivery of frames coming from any source in the network.
-%
-In our vision of emergent overlays (Figure~\ref{fig:general_principle}), nodes in clusters maintain an overlay.
-%
-Even if there are nodes out of the cluster that are in range to receive frames, such nodes do not reply back because such messages are unknown to them.
-%
-Nodes participating in a dissemination overlay are limited by the frontier of clusters, therefore, data frames are not delivered to nodes running controlled flooding.
+Selecting all CF nodes in range of a MPR zone as border zones, and thus as relays, is not desirable, as this will lead to massive amounts of redundant relaying and collisions in the frontier regions of an emerged overlay, when only a few dissemination across this frontier are actually sufficient to enable the overlay-based broadcast to take over.
+To reduce this number, CF nodes set a random timer $t_{n_j}$ when they receive a \texttt{hello} message from a MPR node $n_j$ (lines 9--10).
+If they receive a \texttt{border} message from another CF node to $n_j$ before the timer expires, they cancel this timer (lines 11-12).
+Otherwise, they tag themselves to act as a border node for the next $2\times \Delta$ seconds, and send their own \texttt{border} frame to announce their existence to $n_j$ (lines 13--15).
 
-\subsection{Interoperable relays}
-\label{sec:mechanisms:interop-relays}
+This mechanism allows a sufficient number of CF nodes in range of MPR nodes to be aware of the need to act as interoperability relays, while avoiding broadcast storms on the border regions.
 
-To assure that data frames or \emph{messages} transit between adjacent clusters of nodes running different algorithms, nodes must figure out when they are located at the frontier of such clusters.
+\smallskip
+\noindent
+\textbf{From MPR to CF.}
 %
-We call such nodes \emph{interoperable relays} \er{rather interoperability relays, or border relays?} and give a proof that these relays enforce broadcast by covering nodes of every adjacent cluster in a MANET.
-%
-First, we formalize the system model we present in section~\ref{sec:background:model}.
+Nodes running MPR must be aware of their border position.
+This simply happens through the reception of \texttt{border} messages from in-range CF nodes (lines 19--20).
+Border MPR nodes may be relays in the overlay or \emph{leaf} nodes.
+Upon a reception of a message $m$ using MPR (lines 22-26), the node first checks if it is a MPR relay (line 23) -- note that this check must be performed upon reception of a message, as the overlay is implicit and its structure carried along with the message.
+A MPR relay does not act as a border node as it will already forward the message during the regular MPR message handling procedure (line 26).
+MPR leaf nodes, on the other hand, may have to forward the message in order to reach CF nodes across the zone frontier.
+In contrast to CF nodes, MPR relay nodes do not pro-actively reduce their numbers to avoid broadcast storms.
+Instead, they simply use the controlled flooding broadcast (using timers and counters) for relaying the message between the two zones (line 25).
+We note that the MPR handler in that case (line 26) will not result in a duplicate sending, as a node reaching the statement on line 25 is necessarily a leaf node.
+Finally, when a MPR node receives an unseen message $m$ from a CF node, it acts as a source and forwards $m$ to its relay one-hop neighbors (line 28).
 
-%
-We define a network as an undirected graph $ G = (N, L, P) $ where $ N = \{ n_{i} \mid i \in 1, \dots, m \} $ is the set nodes, $ L = \{ (n_{i}, n_{j}) \mid n_{i}, n_{j} \in N, i \neq j, (n_{i}, n_{j}) = (n_{j}, n_{i}) \} $ is the set of links, and $ P = \{p_{\text{flood}}, p_{\text{cds}} \} $ is a set of broadcast protocols.
-\er{this must be simplified: we already defined N in the background section.} 
-\er{the definition of the links is inconsistent. What does $(n_{i}, n_{j}) = (n_{j}, n_{i})$ means?}
-\er{since there are only two protocols we could simply have one big zone CF and several zone OB$_k$.}
-%
-$P$ contains only two elements, $p_{\text{flood}}$ represents a controlled flooding approach and $p_{\text{cds}}$ an overlay-based one.
-%
-A disjoint component in such graph, where its nodes use a single protocol (within that component), is a set of nodes $ C_{k, p} \subset N $ such that $\bigcup\limits_{k \; \in \; 1 \dots c} C_{k, p} = N $ with $ c > 2 $ and $ p \in P $.
-%
-Additionally, we define the relation \emph{at the frontier of} denoted with the symbol $ \ominus $.
-%
-For a link $ (n_{i}, n_{j})\in L $ we say that $ n_{i} $ is \emph{at the frontier of} $ n_{j} $ or $ n_{i} \ominus n_{j} $ iif $n_i$ and $n_j$ do not belong to the same component.
-\er{the definition says that you are at the frontier of another node. I thought we were at the frontier of another zone/protocol instead?}
-%
-That is, $ n_{i} \in C_{k, p_{a}} $ and $ n_{j} \in C_{l, p_{b}} $ such that $ k \neq l$ and  $a \neq b $.
-%
-%Following the previous definition of disjoint component, both nodes run different broadcast protocols.
-%
-The relation $\ominus$ is only symmetric, i. e. if $ n_{i} \ominus n_{j} $ then $ n_{j} \ominus n_{i} $. \er{why 'only'?}
-%
-%\begin{figure}[t]
-%	\centering
-%	\includegraphics[scale=0.2]{figures/interop-issues}
-%	\caption{Two disjoint clusters where a pair of nodes running different %algorithms drop received messages.}
-%	\label{fig:interop-issues}
-%\end{figure}
-%
-\begin{definition}
-The set of interoperable relays $ I = \{ (n_{i}, n_{j}) \in N \mid n_{i} \ominus n_{j}, (n_{i}, n_{j}) \in L \} $ are all pair of nodes that are in range and follow the relation $\ominus$.
-\end{definition}
-%
-\begin{theorem}
-Let $ n_{i}, n_{j} $ be two interoperable relays and a source $s$ located at any of the components of $ n_{i} $ or $ n_{j} $.
-%
-If both interoperable relays forward a received message from $s$ at least once, then such message is delivered to every node in the components of $ n_{i} $ and $ n_{j} $.
-\end{theorem}
-%
-We recall one property for each protocol in $P$ that we use in the proof of Theorem 1.
-%
-Nodes running $p_{\text{flood}}$ forward incoming messages only if a threshold $t$ haven't been reached
-%
-For instance, $t$ may be the number of received copies ~\cite{BroadcastStormProblem}.
-%
-On the other hand, every node running $p_{\text{cds}}$ is adjacent to at least one overlay relay, which is a property of a Connected Dominating Set (CDS)~\cite{cds-explained}.
-%
-\begin{proof}
-Randomly select $ n_{i}, n_{j} $ and decide that $n_i$ follows a controlled flooding approach and $n_j$ maintains a dissemination overlay.
-%
-The proof is still valid when we decide that $n_i$ runs $p_{\text{cds}}$ and $n_j$ runs $p_{\text{flood}}$ because, the relation $\ominus$ is reflexive.
-%
-Let $ C_{k, p_{\text{flood}}} $ and $ C_{l, p_{\text{cds}}} $ be the disjoint components of $n_i$ and  $n_j$, respectively.
-%
-We separate the proof in two cases, the first case deals with the situation where any interoperable relay is a source node.
-%
-In the second case, proved by contradiction, the source node is at any of both components.
-
-%
-\textbf{Case 1}. We consider that $n_i$ is a source for message $m$.
-%
-On reception of $m$ by any surrounding of $n_i$ running controlled flooding, results in the delivery of such message by every node in $ C_{k, p_{\text{flood}}} $.
-%
-$n_j$ is also a surrounding of $n_i$, when $n_j$ forwards $m$ it is received by at least one of its adjacent overlay relays.
-%
-Therefore all overlay relays forward $m$ and such message is received to every node in $ C_{l, p_{\text{cds}}} $
-%
-
-%
-\textbf{Case 2.} We now consider that $ s \in C_{l, p_{\text{cds}}} $ is a source of $m$.
-%
-Eventually $n_{j}$ receives $m$, $n_{j}$ forwards $m$ to $n_{i}$ and the latter node forwards such message as well.
-%
-Let $n_{h} \in C_{k, p_{\text{flood}}} $ be a node adjacent to $n_{i}$ that do not retransmit $m$.
-%
-This situation will result in having at least one other node that do not hear from $m$, which is a negation of the \emph{to every} statement in Theorem 1.
-%
-%
-In other words $n_{h}$ reach its threshold, that is a contradiction, because it received $m$ from $n_i$ for the first time.
-%
-Without loss of generality, assume that $ s \in C_{l, p_{\text{flood}}} $ and $n_j$ receives $m$ from $n_i$.
-%
-Once $n_j$ forwards $m$ the overlay relay adjacent to $n_j$, such relay disseminates the message.
-%
-Assume that there is a node $n_{h} \in C_{l, p_{\text{cds}}} $ that do not receive $m$, which implies that $n_h$ is not connected to any relay node.
-%
-This a contradiction, because a CDS is a connected component.
-%
-We then conclude that every node in both components receive $m$ at least once when the source is located at $ C_{k, p_{\text{flood}}} $ or $ C_{l, p_{\text{flood}}}$.
-\end{proof}
-
-\raziel{
-If space permits, we may have a section to discuss potential issues of having interoperable relays
-\begin{itemize}
-	\item aren't we inducing broadcast storms by letting interoperable relays using pure flooding?
-	\item when a non overlay relay, which is also an interoperable overlay, forwards a message, is there an impact in the construction of the overlay ?
-\end{itemize}
-}
-
-\subsection{Selection of interoperable relays}
-\label{sec:mechanisms:interop-relays-selection}
-\raziel{road map to describe our interoberable mechanism just in text}
-	\begin{enumerate}
-		\item \textbf{Case: transit of messages from sparse to dense region}
-		\begin{itemize}
-			\item node $t_{4}, t_{5}$ are in the range of $f_{1}$
-			\item $f_{1}$ receives a message from $f_{2}$
-			\item threshold of retransmission is reached at $f_{1}$
-			\item $t_{4}, t_{5}$ do not receive message
-		\end{itemize}
-		
-		\item \textbf{Case:transit of messages from dense to sparse region}
-		\begin{itemize}
-			\item nodes $t_{6}$ is in the range of $f_{3}$
-			\item $t_{6}$ receives a message from $t_{3}$
-			\item $t_{6}$ doesn't forward due to its role in the overlay
-			\item $f_{3}$ do not receive message
-		\end{itemize}
-	\end{enumerate}
-
-\begin{itemize}
-
-	\item we need that nodes be aware when they are located at the frontier of regions that run different algorithms; we call them border nodes
-	
-	\item assume that nodes are aware of being at the frontier of regions and they tag themselves as border nodes
-	
-	\item \textbf{Case: transit of messages from sparse to dense.} Border node $f_{1}$ in figure~\ref{fig:interop-example} is border node and it forwards only once a message when its threshold of retransmissions have been reached
-	
-	\item \textbf{Case: transit of messages from dense to sparse region.} Border node $t_{6}$ forwards a message using controlled flooding. This action requires a change in the package to avoid a change in the dissemination overlay
-	
-	\item transit of messages between zones is performed via border nodes (interoperability works)
-	
-	\item border detector mechanism \raziel{sketch of algorithm, but find it in appendix}
-
-	\begin{itemize}
-		\item we use control messages to form overlays are frequently hear by nodes located at the sparse region
-		\item nodes at the frontier of regions ($f_{1}, t_{6}$ in figure~\ref{fig:interop-example}) decide that they are border via handshake protocol see~\ref{algorithm:interop}
-		\item apply optimization to reduce number of border nodes
-	\end{itemize}
-
-\end{itemize}
-
-\er{
-\begin{itemize}
-	\item The mechanism by which a system with different protocols still guarantee the dissemination:
-	\begin{itemize}
-		\item Showing the algorithm used to detect and enable interoperability connection points.
-		\item Discuss how connection points evolve when the system is subject to mobility
-	\end{itemize}
-	\item The grace period mechanism that ensures that the switch between flooding and overlay-based broadcast does not lead to missed messages:
-	\begin{itemize}
-		\item Using an example, show that the immediate switch, before the overlay creation protocol includes the node in the overlay, can lead to missed messages
-		\item On the same example, show that waiting for a bit of time, or under a certain condition is met (received at least one beacon from the overlay creation? Or do we need something more complex?), while participating to the two protocols, avoids the problem
-	\end{itemize}
-\end{itemize}
-}
