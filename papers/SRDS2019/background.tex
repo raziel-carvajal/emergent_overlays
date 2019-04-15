@@ -49,13 +49,6 @@ A MAC (\emph{Medium Access Control}) protocol arbitrates the use of the wireless
 It detects missed receptions and implement frame retransmissions when necessary.
 % There is a tradeoff between the number and cost of such retransmissions, and their impact on collisions: Too many retransmissions may make things worse and create a local broadcast storm~\cite{BroadcastStormProblem}.
 % Another difficulty is due to mobility: Nodes are not aware of the identities of other nodes within their coverage areas.
-\raziel{
-Revisit this section.
-\begin{itemize}
-	\item we rely on the IEEE 802.15.4 model which is more suitable for MANETs
-	\item give a short explanation about B-Mac~\cite{b-mac} 
-\end{itemize}
-}
 
 The IEEE 802.11 coordination function is a classical MAC protocol for reliable point-to-point communication, i.e. where the single destination for the frame is known.
 It relies on a collision avoidance mechanism known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
@@ -65,6 +58,16 @@ The destination node replies with a Clear To Send (CTS) control frame and switch
 The reception of the frame is then acknowledged by the destination.
 The sending can be repeated up to three times in case of missed or error-bearing acknowledgments.
 
+\raziel{
+\begin{itemize}
+	\item we relay on BWM ~\cite{tang2001mac}
+	\item BWM uses virtual carrier sensing to arbitrate the communication medium too
+	\item BWM maintains a local list of neighbors using CTS/data frames
+	\item retransmissions take place when ACKs haven't been received from at least one neighbor
+	\item there is a timer to wait the reception of ACKs
+\end{itemize}
+}
+\raziel{old text}
 Our MAC protocol targets \emph{efficient local broadcast} instead of point-to-point communication.
 It was developed independently but follows similar principles as the broadcast medium window protocol~\cite{tang2001mac}.
 It is illustrated by Figure~\ref{fig:mac_protocol}.

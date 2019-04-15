@@ -47,7 +47,7 @@
 	\Procedure{receive}{message $m$ for the first time}
 		\State CF.receive($m$) \Comment{Regular handling of new incoming message}
 		\If{amIBorder()}
-			\State $t_m \gets \infty$ \Comment{Border node always send $m$ when timer expires}
+			\State $\text{counter}_m \gets \infty$ \Comment{Always send $m$ when timer expires}
 		\EndIf
 	\EndProcedure
 	
