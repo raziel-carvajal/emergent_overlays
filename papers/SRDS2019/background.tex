@@ -58,16 +58,17 @@ The destination node replies with a Clear To Send (CTS) control frame and switch
 The reception of the frame is then acknowledged by the destination.
 The sending can be repeated up to three times in case of missed or error-bearing acknowledgments.
 
-\raziel{
+Structure to describe MAC protocol:
 \begin{itemize}
 	\item we relay on BWM ~\cite{tang2001mac}
 	\item BWM uses virtual carrier sensing to arbitrate the communication medium too
 	\item BWM maintains a local list of neighbors using CTS/data frames
-	\item retransmissions take place when ACKs haven't been received from at least one neighbor
-	\item there is a timer to wait the reception of ACKs
+	\item retransmissions take place when ACKs haven't been received from at least one neighbor, up to 3 retransmissions are allowed
+	\item in case contention is so high (example, any ACK was received) BWM switches to unreliable delivery of IEEE 802.11 (no RTS/CTS/ACK frames) where only physical carrier sensing arbitrates use of communication medium	
 \end{itemize}
-}
-\raziel{old text}
+
+
+
 Our MAC protocol targets \emph{efficient local broadcast} instead of point-to-point communication.
 It was developed independently but follows similar principles as the broadcast medium window protocol~\cite{tang2001mac}.
 It is illustrated by Figure~\ref{fig:mac_protocol}.
