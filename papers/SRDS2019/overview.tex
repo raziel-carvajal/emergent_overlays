@@ -11,64 +11,61 @@
 	\label{fig:general_principle}
 \end{figure}
 
-Controlled flooding broadcast is efficient in the general case, allowing robust dissemination when nodes density over space is small to moderate.
-It is also robust in dynamic environments, as the decision of whether a node should act as a relay is based on the current conditions during a dissemination.
-However, it fails short when the density of the network increases, leading to the broadcast storm problem~\cite{BroadcastStormProblem}, where redundant communications at the application level interfere with each other, leading to more collisions.
-These collisions lead to additional retransmissions at the MAC level, further saturating the wireless medium.
-This decreases the reliability of the broadcast operation (and therefore, the achievable throughput), and increases the cost for all nodes in the area.
-Overlay-based broadcast such as MPR is well adapted to dense environments, where a small number of well-selected relays can be pre-selected and minimize the risk of collisions.
-However, overlay-based broadcast is ineffective when nodes are highly mobile, as maintaining the overlay would require a very frequent exchange of control messages, leading to an increase in these collisions, higher costs, and lower reliability.
+Controlled flooding is efficient when nodes density over space is small to moderate.
+It is also robust in dynamic environments, as the relaying decision is based on the \emph{current} conditions during a dissemination.
+However, it fails short when the density increases, leading to broadcast storm problems~\cite{BroadcastStormProblem}.
+Redundant communications at the application level interfere with each other, MAC protocols require more retransmissions, leading to a chain reaction of collisions.
+This quickly saturates the wireless medium, impairing reliability and increasing energy costs.
+%
+Overlay-based broadcast is in contrast adapted to dense environments, where a small number of well-selected relays are pre-selected and where broadcast minimizes the risk of collisions.
+However, it can be ineffective when nodes are highly mobile, as maintaining the overlay would require a very frequent exchange of control messages, leading to an increase in these collisions, higher costs, and eventually lower reliability.
 
-Interestingly, human mobility behavior indicates that a hybrid approach could be a sound solution to benefit from the resiliency and robustness of controlled flooding in general, while leveraging overlays where they are actually useful and beneficial.
+Human mobility behavior indicates that a hybrid approach could benefit from the resiliency and robustness of controlled flooding in general, while leveraging overlays where they are beneficial.
 Mobility models~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy} but also large-scale measurement campaigns at large human gathering~\cite{naini2015opportunistic,versichele2012use} indicate that human users tend to aggregate around points of interest for extended periods of time.
 When around these points of interests (e.g. the concert stages at the Paléo festival in~\cite{naini2015opportunistic}) the speed of users decreases or even comes to a stop.
-Mobility between points of interest happens at a greater speed, and through sparser areas.
-
-These observations motivate the core contribution of this paper, \emph{emergent overlays}.
-The objectives are illustrated by Figure~\ref{fig:general_principle}.
-Nodes in a MANET are using controlled flooding by default, configured for a good performance/reliability tradeoff in sparse to moderately dense areas.
+Mobility between points of interest happens at a greater speed, and through less densely-populated areas.
+%
+The core contribution of this paper is the notion of \emph{emergent overlays}, illustrated by Figure~\ref{fig:general_principle}:
+Nodes in a MANET use controlled flooding by default, configured for a good performance/reliability tradeoff in sparse to moderately dense areas.
 Nodes in denser and more ``static'' areas (i.e. around the points of interest) \emph{autonomously} decide to switch from the controlled flooding protocol and switch to overlay-based broadcast.
-
-Realizing the emergent overlay vision requires interoperability and observation, and proper adaptation policies.
+%
+Emergent overlays require interoperability, observation, and adaptation.
 
 \smallskip
 \noindent
 \textbf{Interoperability.}
 %
-Broadcast messages may be emitted at any node of the network (a single source being a special, easier case).
-This source node may either be in a zone using controlled flooding or one using an overlay.
-It is necessary however that the broadcast session traverses the \emph{boundary} of this zone, and be able to reach and spread to nodes using another protocol.
-This leads to a problem of protocol interoperability.
-In particular, overlay-based protocols maintain efficient dissemination structure for nodes within their boundaries.
+Broadcast messages may be emitted by any node of the network, from a zone using controlled flooding or in one using an overlay.
+It is necessary that the broadcast reaches all nodes regardless of the protocols they use.
+This is a problem of protocol interoperability.
+Overlay-based protocols maintain efficient dissemination structure for nodes \emph{within their boundaries}.
 They do not select relays for guaranteeing connectivity to nodes that do not participate to the protocol.
 We develop in \S\ref{sec:mechanisms} interoperability mechanisms that properly connect and bound regions using protocols of different types, regardless of the size and shape of these regions.
-Interoperability is the \emph{mechanism} that enables adaptation, but it does not guarantee good performance per se -- this is the role of the adaptation.
 
 \smallskip
 \noindent
 \textbf{Observation.}
 %
-In order to decide on the emergence of an overlay, nodes must be able to reflect on their environment and in particular on the two key aspects that are density and general mobility.
-Clearly, probing actively to collect these information would defeat the purpose of emergent overlays, which is to reduce the cost and improve the efficiency of broadcast, which includes decreasing the probability of collisions.
-Instead, we rely on passive observation, that leverages information already available at the level of the MAC protocol and of the currently-used broadcast protocol, to serve as the input to the adaptation mechanism.
-We describe the nature and accuracy of these \emph{observables} in the first part of \S\ref{sec:adaptation}.
+Nodes must be able to reflect on their deployment environment, and evaluate in particular density and mobility.
+Actively probing this information would defeat the purpose of reducing costs and improving efficiency.
+Instead, we rely on passive observation that collects information from the regular operation of the broadcast and MAC protocols running on each node. 
+We describe the nature and accuracy of the resulting \emph{observables} in the first part of \S\ref{sec:adaptation}.
 
 \smallskip
 \noindent
-\textbf{Adaptation policies.}
+\textbf{Adaptation.}
 %
-It is necessary to implement sound adaptation policies that drive the decision process of when to emerge, and when to break, up an emergent overlay.
-These policies must answer to two main goals.
-First, they must be implemented on a local fashion, and cannot rely on any form of global knowledge or decision making.
-We only allow that existing messages at the level of existing protocols be used to piggyback information, if necessary to allow nodes to synchronize over a decision.
-Second, it is necessary to ensure that the shape of emerged overlays correspond to the actual dense and/or static regions and do not result in too many small and isolated overlays.
-Indeed, while interoperability mechanisms ensure that broadcast will cross the boundaries of any number of zones using different protocols, it also incurs a cost by requiring the use of additional interoperability relays.
+The decision of when to emerge, and when to break, an emergent overlay is controlled by an adaptation policy.
+Policies must be decentralized: There is no global vision of the MANET or centralized decision-making.
+We only allow that specific information be piggybacked over existing messages to enable coordinated decisions between a cluster of nodes. %%% ER: remove if we do not have this in the end in the policies
+The goal of the adaptation is to emerge overlays that closely correspond to dense and/or static regions, avoiding a proliferation of small and isolated overlays that could increase the cost of interoperability.
 We discuss our adaptation policies in the second part of \S\ref{sec:adaptation}.
 
-\smallskip
-We note that we use counter-based controlled flooding and MPR in this paper but our results can easily be extended to other protocols of the same classes.
-Our approach may also be combined with other adaptation mechanisms that operate at the levels of the parameters of a single protocol.
-We reviews these approaches in \S\ref{sec:related}.
+% \smallskip
+% \er{keep this paragraph?}
+% We note that we use counter-based controlled flooding and MPR in this paper but our results can easily be extended to other protocols of the same classes.
+% Our approach may also be combined with other adaptation mechanisms that operate at the levels of the parameters of a single protocol.
+% We reviews these approaches in \S\ref{sec:related}.
 
 
 % \er{following text is a sketch, can be shortened and improved in style}
