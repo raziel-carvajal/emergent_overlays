@@ -1,85 +1,84 @@
-\raziel{old version, to be revised}
-\noindent
-\SetInd{0.0em}{0.60em}
-%\SetAlgoNoLine
-\begin{algorithm}
-\footnotesize
-\DontPrintSemicolon
-\caption{Interoperability mechanism to deal with more than one running protocol in a MANET.}
-\label{algorithm:interop}
-\vars{
-	% VARIABLES
-	node\_id \textit{: string} \tcp*[1]{node identifier}
-	running\_alg \textit{: string} \tcp*[1]{running algorithm}
-	timeout\textit {: double} \tcp*[1]{maximum waiting time to start the procedure of border dectection}
-	am\_i\_border \textit{: boolean} \tcp*[1]{says wether the local node is a border node or not}
+%!TEX root = main.tex
+%=========================================================
 
-	% SETS
-	known\_algs \textit{: set} \tcp*[1]{previously known foreign protocols}
+\begin{algorithm}[t]
+\begin{footnotesize}
+	\begin{algorithmic}[1]
+	
+	\BeginConstants
+		\State $\Delta$: time \Comment{period of sending of \texttt{hello} messages for MPR}
+	\EndConstants
+	
+	\BeginVariables
+		\State b: boolean, init \texttt{false} \Comment{is the node a border node?}
+		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
+	\EndVariables
+	
+	\smallskip
+	
+	\Procedure{amIBorder}{ }
+		\If{b $\wedge$ (currentTime - t) $> 2\times\Delta$}
+			b $\gets$ \texttt{false}
+		\EndIf
+		\State return b
+	\EndProcedure
+	
+	\smallskip
+	
+	\begin{center}
+	{\textbf{Code for node currently using controlled flooding}}
+	\end{center}
+	\vspace{-2.5mm}
+	\hrulefill
+		
+	\Procedure{receive}{MPR \texttt{hello} from $n_j$}
+		\State $t_{n_j} \gets $ new timer with duration $\in [10:100]$ms
+	\EndProcedure
+	
+	\Procedure{receive}{\texttt{border}$(n_j)$ from $n_k$ }
+		\State cancel $t_{n_j}$ (if it exists)
+	\EndProcedure
+	
+	\Procedure{expires}{$t_{n_j}$}
+		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
+		\State MAC.localBroadcast(\texttt{border}($n_j$))
+	\EndProcedure
+	
+	\Procedure{receive}{message $m$ for the first time}
+		\State CF.receive($m$) \Comment{Regular handling of new incoming message}
+		\If{amIBorder()}
+			\State $t_m \gets \infty$ \Comment{Border node always send $m$ when timer expires}
+		\EndIf
+	\EndProcedure
+	
+	\smallskip
+	
+	\begin{center}
+	{\textbf{Code for node currently using MPR}}
+	\end{center}
+	\vspace{-2.5mm}
+	\hrulefill
+	
+	\Procedure{receive}{\texttt{border}$(n_j)$ from $n_k$}
+		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
+	\EndProcedure
+	
+	\Procedure{receive}{message $m$ for the first time, from $n_k$}
+		\If{$n_k$ uses controlled flooding}
+			\State TODO, should I act immediately as a source, or wait? Should I do it only if I am border? Should I declare myself as a border?
+		\Else \Comment{$n_k$ uses MPR}
+			\If{$m$.relays includes $n_i$}
+				\State b $\gets$ \texttt{false}
+			\Else \Comment{$n_j$ is not an overlay relay}
+				\If{amIBorder()}
+					CF.receive($m$) \Comment{use controlled flooding}
+				\EndIf
+			\EndIf
+			\State MPR.receive($m$) \Comment{Regular handling of new incoming message}
+		\EndIf
+	\EndProcedure
 
-	% MAPS
-	timers \textit{: dictionary} \tcp*[1]{timers of border detection procedure}
-	known\_nodes \textit{: dictionary} \tcp*[1]{previously known nodes from a foreign protocol}
-}
-
-\func{ \receive{msg} \label{interop-alg:rcv-fun} }{ 
-	\eIf{ msg.sender\_alg = running\_alg \Ork am\_i\_border }{
-		broadcast(msg) \; \label{interop-alg:bro}
-	}{
-		\Switch{msg}{
-			\Case{ ControlMsg }{
-
-				known\_nodes[msg.sender\_alg] $\gets$ msg.sender\_id \; \label{interop-alg:save-sender}
-				
-				\If{ msg.sender\_alg $\notin$ known\_algs }{
-				
-					known\_algs $\gets$ known\_algs $\cup$ msg.sender\_alg \;	\label{interop-alg:save-alg}
-					delay $\gets$ $new$ Random(0, timeout) \;					
-					timers[msg.sender\_alg] $\gets$ $new$ Timer(delay) \; \label{interop-alg:new-timer}
-					
-					\TimerExpires{
-
-						b $\gets$ $new$ BorderMsg() \; \label{interop-alg:new-border-msg}
-						b.chosen\_node $\gets$ known\_nodes[msg.sender\_alg].pickOne() \label{interop-alg:new-border-msg:chosen} \;
-						b.fwd\_no $\gets$ MAX\_FWD\_NO \; \label{interop-alg:new-border-msg:hops}
-						b.sender\_id $\gets$ node\_id \; \label{interop-alg:new-border-msg:sender}						
-						b.sender\_alg $\gets$ running\_alg \; \label{interop-alg:new-border-msg:sender-alg}
-						b.foster\_by $\gets$ msg.sender\_alg \; \label{interop-alg:new-border-msg:alg}
-						forward(b) \; \label{interop-alg:fwd}
-
-					}
-				}
-			}
-			\Case{ BorderMsg }{
-			
-				msg.fwd\_no $\gets$ msg.fwd\_no - 1 \; \label{interop-alg:border-msg-case:dec}
-				
-				\If{ msg.fwd\_no $\neq$ 0 }{
-					forward(msg) \; \label{interop-alg:border-msg-case:fwd}
-				}
-				
-				\If{ running\_alg = msg.foster\_by \And msg.foster\_by $\notin$ known\_algs }{
-				
-					known\_algs $\gets$ known\_algs $\cup$ msg.foster\_by \; \label{interop-alg:border-msg-case:update-known-algs-1}
-
-					\If{ node\_id = msg.chosen\_node }{					
-						am\_i\_border $\gets$ True \; \label{interop-alg:border-msg-case:select-as-border}
-					}
-					
-				}
-				
-				\If{ running\_alg = msg.sender\_alg \And msg.sender\_alg $\notin$ known\_algs }{
-				
-					known\_algs $\gets$ known\_algs $\cup$ msg.sender\_alg \; \label{interop-alg:border-msg-case:update-known-algs-2}
-
-					\If{ timers[msg.sender\_alg] $\neq$ $\emptyset$ }{
-						cancelTimer(timers[msg.sender\_alg]) \; \label{interop-alg:border-msg-case:rm-timers}
-					}
-					
-				}
-					
-			}
-		}
-	}
-}
+\end{algorithmic}	
+\end{footnotesize}
+\caption{Interoperability mechanisms on node $n_i$}\label{algorithm:interoperability:cf}
 \end{algorithm}
