@@ -65,7 +65,7 @@
 	
 	\Procedure{receive}{message $m$ for the first time, from $n_k$}
 		\If{$n_k$ uses controlled flooding}
-			\State TODO, should I act immediately as a source, or wait? Should I do it only if I am border? Should I declare myself as a border?
+			\State MPR.broadcast($m$) \Comment{initiate the broadcast using MPR}
 		\Else \Comment{$n_k$ uses MPR}
 			\If{$m$.relays includes $n_i$}
 				\State b $\gets$ \texttt{false}
