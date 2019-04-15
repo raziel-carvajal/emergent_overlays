@@ -1,8 +1,26 @@
 %!TEX root = main.tex
 %=========================================================
 
-\section{Adaptation: observables and policies}
+\section{Emerging overlays}
 \label{sec:adaptation}
+
+We now present how overlays emerge autonomously in a system where all nodes initially use controlled flooding.
+We start by presenting how nodes leverage the running protocols to gather information about their environment and surrounding.
+The collected \emph{observables} are used by an adaptation \emph{policy}, that implements the decision to switch.
+The decision is taken collectively by nodes in a fully decentralized way, by piggybacking best-effort consensus messages over existing protocol messages.
+
+\subsection{Observables: Density and Dynamism}
+
+The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
+The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.
+Instead, we adopt a passive approach using existing communications.
+We collect the following \emph{observables} about the surroundings of a node.
+Each of them is averaged over a configurable number of observations in order to privilege long-term changes in the deployment environment.
+\begin{itemize}
+	\item The density is obtained from the MAC protocol BMW. It is the number of nodes who reply to local broadcast RTS requests.
+	\item 
+\end{itemize}
+
 
 observables:
 \begin{itemize}
