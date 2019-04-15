@@ -19,8 +19,10 @@
 \end{figure}
 
 We start by detailing our system and communication models.
-We follow-up with the description of a MAC protocol supporting reliable \emph{local} broadcast.
-We finally introduce the two (global) broadcast protocols, one based on controlled flooding, the other using an overlay, that we will later combine.
+We follow-up with the description of the three base protocols we combine in this paper.
+The first protocol is a MAC protocol enabling reliable local broadcast.
+The two other protocols implement global broadcast:
+One is based on controlled flooding and the other uses an overlay.
 
 \subsection{System and communication models}
 \label{sec:background:model}
@@ -29,57 +31,68 @@ A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional space.
 We do not consider the availability of geolocation information (GPS) on the devices.
 Nodes communicate using wireless transceivers that can emit network frames using \emph{local broadcast} and receive frames when active in listening mode.
 Nodes cannot send and receive simultaneously.
-We consider the fixed-range model: Local broadcasts can be received by every node within a transmission range Tx.
+We consider the fixed-range model: Local broadcasts can be received by nodes within a transmission range Tx.
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
-Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$ and may receive frames from either node.
+Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
 Sending and receiving frames consumes energy from the node's limited power supply.
 
-The main obstacle to reliable broadcast in MANETs is the presence of \emph{collisions}.
+The main obstacle to reliable broadcast in MANETs is the occurence of \emph{collisions}.
 A collision may happen when two nodes have overlapping coverage areas.
 If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
-The same applies to a node such as $n_4$ that is in sending mode and cannot receive locally broadcast frames from other nodes in range.
+The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
 Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
-
-% This phenomenon is known as the hidden terminal problem~\cite{hidden-terminal-problem}.
 
 \subsection{MAC protocol for local broadcast}
 \label{sec:background:mac}
 
 A MAC (\emph{Medium Access Control}) protocol arbitrates the use of the wireless medium to minimize collisions and their impact on communication reliability.
 It detects missed receptions and implement frame retransmissions when necessary.
+
+We use broadcast medium window (BMW), a MAC protocol for reliable local broadcast~\cite{tang2001mac}.
+The protocol is illustrated by Figure~\ref{fig:mac_protocol}.
+BWM relies on \emph{virtual carrier sensing}, as used for point-to-point communication in the classical IEEE 802.11 coordination protocol~\cite{ieee1997wireless}.
+A node initiates a local broadcast by sending a RTS (Request To Send) frame, with the goal of \emph{discovering} local neighbors.
+These neighbors reply with CTS (Clear To Send) messages containing their identity.
+Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
+Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
+The payload frame is then transmitted, and neighbors ack its reception, again using physical carrier sensing to avoid collisions.
+Up to two additional retransmission happen in case of missed or error-bearing acknowledgments.
+The rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem}.
+% Instead, BMW switches for the next two frames to best-effort delivery with a single sending and no virtual carrier sensing.
+
 % There is a tradeoff between the number and cost of such retransmissions, and their impact on collisions: Too many retransmissions may make things worse and create a local broadcast storm~\cite{BroadcastStormProblem}.
 % Another difficulty is due to mobility: Nodes are not aware of the identities of other nodes within their coverage areas.
 
-The IEEE 802.11 coordination function is a classical MAC protocol for reliable point-to-point communication, i.e. where the single destination for the frame is known.
-It relies on a collision avoidance mechanism known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
-It uses a handshake protocol.
-The source locally broadcasts a small Request To Send (RTS) control frame.
-The destination node replies with a Clear To Send (CTS) control frame and switches to listening mode for a predefined time.
-The reception of the frame is then acknowledged by the destination.
-The sending can be repeated up to three times in case of missed or error-bearing acknowledgments.
-
-Structure to describe MAC protocol:
-\begin{itemize}
-	\item we relay on BWM ~\cite{tang2001mac}
-	\item BWM uses virtual carrier sensing to arbitrate the communication medium too
-	\item BWM maintains a local list of neighbors using CTS/data frames
-	\item retransmissions take place when ACKs haven't been received from at least one neighbor, up to 3 retransmissions are allowed
-	\item in case contention is so high (example, any ACK was received) BWM switches to unreliable delivery of IEEE 802.11 (no RTS/CTS/ACK frames) where only physical carrier sensing arbitrates use of communication medium	
-\end{itemize}
-
-
-
-Our MAC protocol targets \emph{efficient local broadcast} instead of point-to-point communication.
-It was developed independently but follows similar principles as the broadcast medium window protocol~\cite{tang2001mac}.
-It is illustrated by Figure~\ref{fig:mac_protocol}.
-The source wishes to send the same frame to all the nodes that are in its coverage area.
-We modify the handshake to enable the \emph{discovery} of these nodes.
-All nodes reply with a CTS containing their identity, following the RTS of the sender.
-Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
-Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
-This enables the sender to obtain a snapshot of its local neighborhood.
-The sender collects acknowledgments from all nodes (also using physical carrier sensing to avoid collisions) and may retry locally broadcasting a frame up to three times, as in the original protocol.
-Our rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem} and further deteriorate the situation.
+% The IEEE 802.11 coordination function is a classical MAC protocol for reliable point-to-point communication, i.e. where the single destination for the frame is known.
+% It relies on a collision avoidance mechanism known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
+% It uses a handshake protocol.
+% The source locally broadcasts a small Request To Send (RTS) control frame.
+% The destination node replies with a Clear To Send (CTS) control frame and switches to listening mode for a predefined time.
+% The reception of the frame is then acknowledged by the destination.
+% The sending can be repeated up to three times in case of missed or error-bearing acknowledgments.
+%
+% Structure to describe MAC protocol:
+% \begin{itemize}
+% 	\item we relay on BWM ~\cite{tang2001mac}
+% 	\item BWM uses virtual carrier sensing to arbitrate the communication medium too
+% 	\item BWM maintains a local list of neighbors using CTS/data frames
+% 	\item retransmissions take place when ACKs haven't been received from at least one neighbor, up to 3 retransmissions are allowed
+% 	\item in case contention is so high (example, any ACK was received) BWM switches to unreliable delivery of IEEE 802.11 (no RTS/CTS/ACK frames) where only physical carrier sensing arbitrates use of communication medium
+% \end{itemize}
+%
+%
+%
+% Our MAC protocol targets \emph{efficient local broadcast} instead of point-to-point communication.
+% It was developed independently but follows similar principles as the broadcast medium window protocol~\cite{tang2001mac}.
+% It is illustrated by Figure~\ref{fig:mac_protocol}.
+% The source wishes to send the same frame to all the nodes that are in its coverage area.
+% We modify the handshake to enable the \emph{discovery} of these nodes.
+% All nodes reply with a CTS containing their identity, following the RTS of the sender.
+% Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
+% Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
+% This enables the sender to obtain a snapshot of its local neighborhood.
+% The sender collects acknowledgments from all nodes (also using physical carrier sensing to avoid collisions) and may retry locally broadcasting a frame up to three times, as in the original protocol.
+% Our rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem} and further deteriorate the situation.
 
 % \input{mac_api}
 % \input{mac_algorithm}
@@ -155,7 +168,8 @@ We adopt a protocol of the latter type, MPR~\cite{mpr,mpr-improvement} (\emph{Mu
 
 The principle of MPR is to let each node decide which of its one-hop (direct) neighbors should be instructed to act as relays during a dissemination in which it participates as a relay or source itself.
 It requires the discovery of all one-hop and two-hop neighbors using periodic control messages.
-Nodes periodically announce themselves using local broadcast and include their current neighborhood, as obtained from the last exchanges at the MAC level.
+Nodes periodically announce themselves using best-effort local broadcast, i.e. by disabling retransmissions by the MAC protocol.
+They include their current neighborhood, as obtained from the last exchanges at the MAC level.
 Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
 The ideal frequency of announcements depends on the network dynamics.
 Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.

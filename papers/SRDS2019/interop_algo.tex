@@ -13,9 +13,7 @@
 		\State b: boolean, init \texttt{false} \Comment{should the node act as a border node?}
 		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
 	\EndVariables
-	
-	\smallskip
-	
+		
 	\Procedure{amIBorder}{ }
 		\If{b $\wedge$ (currentTime - t) $> 2\times\Delta$}
 			b $\gets$ \texttt{false}
@@ -39,13 +37,13 @@
 		\State cancel $t_{n_j}$ (if it exists)
 	\EndProcedure
 	
-	\BeginTimerExpires[$t_{n_j}$]
+	\BeginTimerExpires{$t_{n_j}$}
 		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$ s}
 		\State MAC.localBroadcast(\texttt{border}($n_j$))
 	\EndTimerExpires
 	
 	\Procedure{CF.receive}{message $m$ for the first time}
-		\State CF.handle($m$) \Comment{Regular handling of new incoming message}
+		\State CF.handle($m$) \Comment{Regular handling of the message}
 		\If{amIBorder()}
 			$\text{counter}_m \gets \infty$ \Comment{Be a relay}
 		\EndIf

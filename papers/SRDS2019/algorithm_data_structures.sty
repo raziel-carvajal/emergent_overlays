@@ -27,5 +27,13 @@
 \algblockdefx[With]{BeginWith}{EndWith}
 	{\textbf{with} }{\textbf{end}}
 
-\algblockdefx[TimerExpires]{BeginTimerExpires}{EndTimerExpires}%
-	[1][Unknown]{\textbf{when timer} #1 \textbf{expires}}{\textbf{end}}
+\algblockdefx[TimerExpires]{BeginTimerExpires}{EndTimerExpires}[1]
+	{\textbf{when timer} #1 \textbf{expires}}
+	{\algorithmicend}
+
+% Tell algorithmicx not to print an empty line if `noend' option is set 
+\makeatletter
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndTimerExpires}}
+  {}%
+\makeatother
