@@ -50,3 +50,4 @@ Instead, they simply use the controlled flooding broadcast (using timers and cou
 We note that the MPR handler in that case (line 26) will not result in a duplicate sending, as a node reaching the statement on line 25 is necessarily a leaf node.
 Finally, when a MPR node receives an unseen message $m$ from a CF node, it acts as a source and forwards $m$ to its relay one-hop neighbors (line 28).
 
+\er{if space allows add a discussion on correctness, in particular when the two zones are overlapping a bit, or even completely. Does it still work? What is the expected extra cost of running two protocols on the same locations? We can insist on the fact that this is a mechanism (as context switching is in an operating system) so it guarantees safety even with random/arbitrary choices of protocols, but it does not guarantee performance or low costs -- this is the role of a policy (as the scheduling policy in an OS).}
