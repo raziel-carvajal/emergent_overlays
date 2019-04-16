@@ -42,6 +42,10 @@ get.arguments <- function() {
   # dense zone width
   parser$add_argument('--dense-zone-w',
     dest='dzw', type='double')
+  parser$add_argument('--dense-zone-l',
+    dest='dzl', type='double')
+  parser$add_argument('--fist-at-dense',
+    dest='fadz', type='integer')
 	#
 	parser$add_argument('--with-mobility',
 		dest='wmob', action='store_true')
@@ -448,16 +452,57 @@ distribution.sent_recv.broadcast_control.messages <- function(
   result
 }
 
-getExpectedCoveredNodesNo <- function(overlays){
-  sapply(overlays, function(overlay) {
-		max(components(overlay)$csize)
-  })
+getLocalCoverage <- function(overlay, senders, withBorderNode = NA) {
+	if( is.na(withBorderNode) ){ # all graph
+		# ground thruth of receptions
+		sum( sapply(senders, function(s) { length(neighbors(overlay, s)) }) )
+	} else { # in 2 partitions
+		sendersAtSparse <- senders[ senders < withBorderNode ]
+		if(length(sendersAtSparse) != 0){
+			atSparse <- sum( sapply(sendersAtSparse, function(s) { length(neighbors(overlay, s)) }) )
+		} else {
+			atSparse <- NA
+		}
+		sendersAtDense <- senders[ senders >= withBorderNode ]
+		if(length(sendersAtDense) != 0){
+			atDense <- sum( sapply(sendersAtDense, function(s) { length(neighbors(overlay, s)) }) )
+		} else {
+			atDense <- NA
+		}
+		data.frame(sparse = atSparse, dense = atDense)
+	}
+}
+
+getGlobalCoverage <- function(overlays, withBorderNode = NA) {
+	# all graph
+	if( is.na(withBorderNode) ){
+	  sapply(overlays, function(overlay) {
+			max(components(overlay)$csize)
+	  })
+	} else { # in 2 partitions
+		lapply(overlays, function(overlay) {
+			components <- components(overlay)$membership
+			atSparse <- sapply( c(1 : (withBorderNode - 1)), function(i) {
+				ifelse(components[i] == 1, 1, 0)
+			})
+			atDense <- sapply( c(withBorderNode:length(components)), function(i) {
+				ifelse(components[i] == 1, 1, 0)
+			})
+			data.frame(sparse = sum(atSparse), dense = sum(atDense))
+	  })
+	}
+}
+
+getComponentVertex <- function(overlays) {
+	sapply(overlays, function(overlay) {
+		components(overlay)$membership
+	})
 }
 
 saveDataFrame <- function(df, dstPath, fileName, expeConfig){
   write.table(
     df, file = build.filename(dstPath, fileName, expeConfig),
-    row.names=F, col.names=F
+    row.names=F
   )
 }
 
@@ -508,7 +553,7 @@ main <- function(args) {
   # NOTE ATM we consider that there is only one dense zone and one sparse zone
   denseZone <- data.frame(
     atX=args$dzx, atY=args$dzy,
-    halfLenAtX=(args$dzw / 2), halfLenAtY=(args$dzw / 2)
+    halfLenAtX=(args$dzw / 2), halfLenAtY=(args$dzl / 2)
   )
   datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
   datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
@@ -553,27 +598,37 @@ main <- function(args) {
   }
   if(args$wsm){
     print('DONE - Get distribution of sent broadcast messages')
-    sentBroMsgDist <- sapply(all_nodes, function(n){
-      length(subset(sent_broadcast_msgs, node_id == n)$value)
+    ds <- lapply(all_nodes, function(n){
+			data.frame(
+				sentMsgNo = length(subset(sent_broadcast_msgs, node_id == n)$value),
+				positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
+			)
     })
+		ds <- do.call('rbind', ds)
     saveDataFrame(
       data.frame(
-        data=sentBroMsgDist,
-        algo=rep(algorithmN, length(sentBroMsgDist)), stringsAsFactors=F
+        sentMsgNo = c(ds$sentMsgNo, ds$sentMsgNo),
+				positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
+        algorithm = rep(algorithmN, length(ds$sentMsgNo)*2), stringsAsFactors=F
       ),
       args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
     )
   }
   if(args$wrm){
     print('DONE - Get distribution of received broadcast messages')
-    recvBroMsgDist <- sapply(all_nodes, function(n){
-      length(subset(recv_broadcast_msgs, node_id == n)$value)
+    ds <- lapply(all_nodes, function(n){
+			data.frame(
+				recvMsgNo = length(subset(recv_broadcast_msgs, node_id == n)$value),
+				positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
+			)
     })
-		recvBroMsgDist <- recvBroMsgDist[ recvBroMsgDist != 0 ]
+		ds <- do.call('rbind', ds)
     saveDataFrame(
       data.frame(
-        data=recvBroMsgDist,
-        algo=rep(algorithmN, length(recvBroMsgDist)), stringsAsFactors=F
+        recvMsgNo = c(ds$recvMsgNo, ds$recvMsgNo),
+				duplicates = c((ds$recvMsgNo - 1), (ds$recvMsgNo - 1)),
+				positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
+        algorithm=rep(algorithmN, length(ds$recvMsgNo)*2), stringsAsFactors=F
       ),
       args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
     )
@@ -645,20 +700,69 @@ main <- function(args) {
   }
   if(args$wco){
     print("DONE - Get network coverage")
-    expectedCoverage <- getExpectedCoveredNodesNo(overlays)
+		# get GLOBAL coverage for the whole communication area
+    expectedCoverage <- getGlobalCoverage(overlays)
     measuredCoverage <- sapply(msgs_ids, function(msg) {
       length( unique( subset(recv_broadcast_msgs, value == msg)$node_id ) )
     })
     coverage <- (measuredCoverage / expectedCoverage) * 100
-		# XXX due to issue in igraph.components()
-		coverage <- sapply(coverage, function(c){ min(c, 100) })
-    saveDataFrame(
-      data.frame(
-        data=coverage,
-        algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
-      ),
-      args$resultsDir, 'coverage', algorithmN
-    )
+		# get GLOBAL coverage per region
+		expectedCoverage <- getGlobalCoverage(overlays, withBorderNode = args$fadz)
+    measuredCoverage <- lapply(msgs_ids, function(msg) {
+			measured <- subset(recv_broadcast_msgs, value == msg)
+			atSparse <- length(unique(subset(measured, node_id < args$fadz)$node_id))
+			atDense <- length(unique(subset(measured, node_id >= args$fadz)$node_id))
+			data.frame( sparse = atSparse, dense = atDense )
+    })
+		globalCoverageAtSparse <- sapply(msgs_ids, function(msg) {
+			( measuredCoverage[[ msg ]]$sparse / expectedCoverage[[ msg ]]$sparse ) * 100
+		})
+		globalCoverageAtDense <- sapply(msgs_ids, function(msg) {
+			( measuredCoverage[[ msg ]]$dense / expectedCoverage[[ msg ]]$dense ) * 100
+		})
+
+		# get LOCAL coverage for the whole communication area
+		localCov <- lapply(msgs_ids, function(msg) {
+			overlay <- overlays[[msg]]
+			senders <- unique(subset(sent_broadcast_msgs, value == msg)$node_id)
+			expectedCov <- getLocalCoverage(overlay, senders)
+			measuredCov <- length( subset(recv_broadcast_msgs, value == msg)$node_id )
+			data.frame(
+				coverage = (measuredCov / expectedCov) * 100,
+				collisions = abs(measuredCov - expectedCov)
+			)
+		})
+		localCov <- do.call('rbind', localCov)
+		# get LOCAL coverage per region
+		localCovPerZone <- lapply(msgs_ids, function(msg) {
+			overlay <- overlays[[msg]]
+			senders <- unique(subset(sent_broadcast_msgs, value == msg)$node_id)
+			expectedCov <- getLocalCoverage(overlay, senders, withBorderNode = args$fadz)
+
+			recvMsgs <- subset(recv_broadcast_msgs, value == msg)
+			measuredCovAtSparse <- length( subset(recvMsgs, node_id >= args$fadz)$node_id )
+			measuredCovAtDense <- length(recvMsgs$node_id) - measuredCovAtSparse
+			data.frame(
+				sparse= min((measuredCovAtSparse / expectedCov$sparse) * 100, 100),
+				dense = min((measuredCovAtDense / expectedCov$dense) * 100, 100),
+				collisionsAtSparse = abs(measuredCovAtSparse - expectedCov$sparse),
+				collisionsAtDense = abs(measuredCovAtDense - expectedCov$dense)
+			)
+    })
+		localCovPerZone <- do.call('rbind', localCovPerZone)
+		dataSet <- data.frame(
+			globalCoverageAtAll = coverage,
+			gloablCoverageAtSparse = globalCoverageAtSparse,
+			globalCoverageAtDense = globalCoverageAtDense,
+			localCoverageAtAll = localCov$coverage,
+			localCoverageAtSparse = localCovPerZone$sparse,
+			localCoverageAtDense = localCovPerZone$dense,
+			collisionsAtAll = localCovPerZone$collisionsAtSparse + localCovPerZone$collisionsAtDense,
+			collisionsAtSparse = localCovPerZone$collisionsAtSparse,
+			collisionsAtDense =  localCovPerZone$collisionsAtDense,
+			algo=rep(algorithmN, length(coverage)), stringsAsFactors=F
+		)
+		saveDataFrame(dataSet, args$resultsDir, 'coverage', algorithmN)
   }
 	if (args$wsre){
 		print("DONE - Get saved rebroadcasts")

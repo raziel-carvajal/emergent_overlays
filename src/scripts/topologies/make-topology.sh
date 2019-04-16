@@ -111,6 +111,7 @@ for algo in ${algorithms} ; do
 	sed -i -e "s/DENSE_REGION_LENGTH/${DENSE_AREA_LENGTH}/" iniFile
   sed -i -e "s/BROADCAST_MSG_INTERVAL/${broaMsgInterval}s/" iniFile
   sed -i -e "s/ADAPTATION_POLICY/${ADAPTATION_POLICY}/" iniFile
+	sed -i -e "s/FIRST_NODE_AT_DENSE_AREA/${firsAtDenseA}/" iniFile
 
   algoCfgFpath="../../../experiments/configs/in_common/protocols"
   # concat attributes per algorithm

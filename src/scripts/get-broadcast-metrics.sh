@@ -42,8 +42,13 @@ broaInt=`grep "broadcastInterval" ${CONF_FILE} | awk -F " = " '{print $2}' | awk
 
 tx=`grep "maxCommunicationRange" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{1,5}'`
 
-denseZoneCenterAtXY=`grep "centerDensAx" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+denseZoneCenterAtX=`grep "centerDensAx" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+denseZoneCenterAtY=`grep "centerDensAy" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+
 denseZoneWidth=`grep "denseAreaWid" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+denseZoneLengt=`grep "denseAreaLen" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}.[0-9]{0,5}'`
+
+firstAtDenseZone=`grep "firstAtDense" ${CONF_FILE} | awk -F " = " '{print $2}' | grep -Eo '[0-9]{0,5}'`
 
 mobilityModel=`grep "mobilityType" ${CONF_FILE}`
 if [[ "${mobilityModel}" != "" ]]; then
@@ -56,20 +61,22 @@ echo "Details of experiment [${CONF_NAME}]"
 echo -e "\tSimulation time: ${simTime}"
 echo -e "\tBroadcast message interval: ${broaInt}"
 echo -e "\tNodes transmission range: ${tx}"
-echo -e "\tCenter of dense zone: (${denseZoneCenterAtXY}, ${denseZoneCenterAtXY})"
-echo -e "\tCenter zone width: ${denseZoneWidth}"
+echo -e "\tCenter of dense zone: (${denseZoneCenterAtX}, ${denseZoneCenterAtY})"
+echo -e "\tDimensions: ${denseZoneWidth} x ${denseZoneLengt}"
 echo -e "\tExperiment with mobility: ${withMobility}"
 
 Rscript get-broadcast-metrics.R \
   --simulation-time ${simTime} \
   --transmission-range ${tx} \
-  --dense-zone-at-x ${denseZoneCenterAtXY} \
-  --dense-zone-at-y ${denseZoneCenterAtXY} \
+  --dense-zone-at-x ${denseZoneCenterAtX} \
+  --dense-zone-at-y ${denseZoneCenterAtY} \
   --dense-zone-w ${denseZoneWidth} \
+	--dense-zone-l ${denseZoneLengt} \
+	--fist-at-dense ${firstAtDenseZone} \
   --results-dir ../../results \
-  --with-energy-consumption \
   --with-coverage \
-  --with-saved-rebroadcasts \
+	--with-sent-msgs \
+	--with-recv-msgs \
 	--with-plotting \
   ${withMobility} ${CONF_NAME} ${CONF_FILE}
 
