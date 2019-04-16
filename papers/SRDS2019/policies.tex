@@ -4,12 +4,60 @@
 \section{Emerging overlays}
 \label{sec:adaptation}
 
-We now present how overlays emerge autonomously in a system where all nodes initially use controlled flooding.
-We start by presenting how nodes leverage the running protocols to gather information about their environment and surrounding.
-The collected \emph{observables} are used by an adaptation \emph{policy}, that implements the decision to switch.
-The decision is taken collectively by nodes in a fully decentralized way, by piggybacking best-effort consensus messages over existing protocol messages.
+We now present how overlays emerge (and \emph{dissolve}) autonomously in regions of a MANET where all nodes initially use CF.
+We start by presenting how nodes leverage the MAC protocol to collect information about their environment.
+An adaptation \emph{policy} triggers the creation of overlays based on thresholds over the collected \emph{observables}
+The decision is collectively enforced for the necessary lifetime of the overlay, by piggybacking control information over existing message broadcasts.
 
 \subsection{Observables: Density and Dynamism}
+
+The emergence of an overlay in a MANET region (and its later dissolution) is driven by observed density and mobility.
+Those could be measured explicitly by using periodic probing messages, as used by Tseng et~al.~\cite{2001:AAR:876878.879323} to adapt the parameters of controlled flooding.
+The use of extra messages go against our objective of reducing the costs and risk of collisions.
+Instead, we observe that the necessary information can be collected passively from the MAC protocol, BMW~\cite{tang2001mac}.
+CTS requests are sent for every local broadcast.
+Nodes in range reply with RTS frames, enabling the collection of their identities.
+We collect the set of repliers for each RTS/CTS exchange, and keep a limited-time history of these neighborhoods (last 10 seconds in our implementation).
+
+Density for a node $n_i$ is measured as its degree, or number of observed neighbors.
+The measurements in the time window for $n_i$ form a sequence $d_{-x},d_{-w},d_{-v}\dots,d_0$, where $x\leq 10$ is the time of the latest measurement. 
+Using only $d_0$ may lead to sudden fluctuations that do not reflect medium-term increases in density around the node.
+We compute instead the density average over periods of time, e.g. $\bar{d}_{-1},\bar{d}_{-2},\bar{d}_{-5},\bar{d}_{-10}$.
+As measurements are not taken with a fixed frequency, we weight each measurement using its validity window (e.g., $d_{-w}-d_{-x}$).
+
+Mobility is measured indirectly through the \emph{stability} of $n_i$'s neighborhood, measured as the average time its neighbors are observed.
+Again, we compute stability over varying periods of time, resulting in $\bar{s}_{-1},\bar{s}_{-2},\bar{s}_{-5},\bar{s}_{-10}$.
+
+\subsection{Switching thresholds}
+
+Nodes decide to emerge an overlay based on both $\bar{s}_{-\delta}$ and $\bar{d}_{-\delta}$ for a time window $\delta$.
+In order to avoid oscillations where nodes would switch back and forth between using CF and MPR, we use a hysteresis, with two pairs of thresholds: 
+	$({s}_{\text{min}},{d}_{\text{emerge}})$ 
+and $({s}_{\text{min}},{d}_{\text{keep}})$, where
+	${d}_{\text{keep}} < {d}_{\text{emerge}}$.
+Criteria ${s}_{\text{min}}$ is a minimal stability required in all cases.
+The two density criteria ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ indicate when to respectively emerge and maintain an overlay.
+The values of these criteria depend on the nature of the MANET, the wireless range of its nodes, and deployment factor.
+We define appropriate values for our test scenarios in our evaluation.
+
+\subsection{Switching policies}
+
+A simple policy is to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
+As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, the node continues using MPR.
+While this \emph{single-node} policy will lead homogeneously dense and stable regions to switch to MPR eventually, it has the risk of creating small regions using MPR surrounded by CF zones, when nodes density is close but does not reach ${d}_{\text{emerge}}$.
+
+\input{policy_algo}
+
+Our second \emph{coordinated} policy implements lightweight coordination between nodes, by piggybacking a single bit of information in the header of existing messages broadcast.
+This bit, named \texttt{em} for \emph{emerge!}, carries the information that 
+
+
+
+To switch from CF to MPR, nodes nee
+
+
+
+
 
 The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
 The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.

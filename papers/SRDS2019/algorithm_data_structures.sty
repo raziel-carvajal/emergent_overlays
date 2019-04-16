@@ -12,6 +12,10 @@
 	{\textbf{input}}
 	{\algorithmicend}
 
+\algblockdefx[Upon]{ProcedureAlt}{EndProcedureAlt}[1]
+	{\textbf{procedure} #1}
+	{\algorithmicend}
+
 \algblockdefx[FrameClass]{BeginFrameDef}{EndFrameDef}
 	{\textbf{Frame} : \emph{class}}{\textbf{end}}
 
@@ -33,6 +37,10 @@
 \algblockdefx[TimerExpires]{BeginTimerExpires}{EndTimerExpires}[1]
 	{\textbf{when timer} #1 \textbf{expires}}
 	{\algorithmicend}
+	
+\algblockdefx[Upon]{BeginUpon}{EndUpon}[1]
+	{\textbf{upon} #1}
+	{\algorithmicend}
 
 % Tell algorithmicx not to print an empty line if `noend' option is set 
 \makeatletter
@@ -47,5 +55,11 @@
   {}%
 \ifthenelse{\equal{\ALG@noend}{t}}%
   {\algtext*{EndTimerExpires}}
+  {}%
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndUpon}}
+  {}%
+\ifthenelse{\equal{\ALG@noend}{t}}%
+  {\algtext*{EndProcedureAlt}}
   {}%
 \makeatother

@@ -14,12 +14,12 @@
 		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
 	\EndVariables
 	
-	\Procedure{amIBorder}{ }
+	\ProcedureAlt{amIBorder()}{ }
 		\If{b $\wedge$ (currentTime - t) $> 2\times\Delta$}
 			b $\gets$ \texttt{false}
 		\EndIf
-		\State return b
-	\EndProcedure
+		\State \Return b
+	\EndProcedureAlt
 	
 	\smallskip
 	
@@ -29,25 +29,25 @@
 	\vspace{-2.5mm}
 	\hrulefill
 	
-	\Procedure{MAC.receive}{MPR \texttt{hello} from $n_j$}
+	\ProcedureAlt{MAC.receive(MPR \texttt{hello} from $n_j$)}
 		\State $t_{n_j} \gets $ new timer with duration $\in [10:100]$ms
-	\EndProcedure
+	\EndProcedureAlt
 	
-	\Procedure{CF.receive}{\texttt{border}$(n_j)$ from $n_k$ }
+	\ProcedureAlt{CF.receive(\texttt{border}$(n_j)$ from $n_k$)}
 		\State cancel $t_{n_j}$ (if it exists)
-	\EndProcedure
+	\EndProcedureAlt
 	
 	\BeginTimerExpires{$t_{n_j}$}
 		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$ s}
 		\State MAC.localBroadcast(\texttt{border}($n_j$))
 	\EndTimerExpires
 	
-	\Procedure{CF.receive}{message $m$ for the first time}
+	\ProcedureAlt{CF.receive(message $m$) for the first time}
 		\State CF.handle($m$) \Comment{regular handling of the message}
 		\If{amIBorder()}
 			$\text{counter}_m \gets \infty$ \Comment{forces being a relay}
 		\EndIf
-	\EndProcedure
+	\EndProcedureAlt
 	
 	\smallskip
 	
@@ -57,11 +57,11 @@
 	\vspace{-2.5mm}
 	\hrulefill
 	
-	\Procedure{MAC.receive}{\texttt{border}$(n_j)$ from $n_k$}
+	\ProcedureAlt{MAC.receive(\texttt{border}$(n_j)$ from $n_k$)}
 		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
-	\EndProcedure
+	\EndProcedureAlt
 	
-	\Procedure{MPR.receive}{message $m$ for the first time}
+	\ProcedureAlt{MPR.receive(message $m$) for the first time}
 		\If{$m$ was sent using MPR}
 			\If{$m$.relays includes $n_i$}
 				b $\gets$ \texttt{false}
@@ -74,7 +74,9 @@
 		\Else \Comment{$m$ received from a CF node}
 			\State MPR.broadcast($m$) \Comment{initiate MPR broadcast}
 		\EndIf
-	\EndProcedure
+	\EndProcedureAlt
+
+	\er{todo change the order to avoid double call to mpr and cf handlers, also in the text}
 
 \end{algorithmic}
 \end{footnotesize}

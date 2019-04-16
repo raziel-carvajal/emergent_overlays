@@ -12,7 +12,7 @@
 	
 	\smallskip
 	
-	\Procedure{chooseRelays}{}
+	\ProcedureAlt{chooseRelays()}
 		\State uncovered = $\bigcup\limits_{n_j\in \; \text{OneH}} \text{TwoH}[n_j]$
 			\Comment{all two-hop neighbors}
 		\State relays $\gets \emptyset$
@@ -45,7 +45,7 @@
 		\EndWhile
 		\State \Return relays
 		
-	\EndProcedure
+	\EndProcedureAlt
 \end{algorithmic}	
 \end{footnotesize}
 \caption{Selection of relays at node $n_i$ with MPR}\label{algorithm:mpr}
