@@ -48,86 +48,103 @@ While this \emph{single-node} policy will lead homogeneously dense and stable re
 
 \input{policy_algo}
 
-Our second \emph{coordinated} policy implements lightweight coordination between nodes, by piggybacking a single bit of information in the header of existing messages broadcast.
-This bit, named \texttt{em} for \emph{emerge!}, carries the information that 
+A \emph{coordinated} policy is given in Algorithm~\ref{algorithm:coordinated}.
+This policy targets two objectives:
+First, it should allow entire \emph{regions} of the MANET to switch simultaneously to the use of MPR, and thereby avoid single isolated nodes using an overlay.
+Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated remainder regions.
 
+The policy leverages nodes in very dense regions to lead the emergence and maintenance of overlays.
+The entry point to the policy algorithm (line 10) is weaved with the processing of a message $m$ by either of the protocols.
+Nodes whose local thresholds are above $({s}_{\text{min}},{d}_{\text{emerge}})$ will \emph{invite} other nodes contacted by the broadcast of $m$ to switch or keep using MPR.
+The invitation is a single bit \texttt{em} (for \emph{emerge!}) piggybacked in the header of $m$.
+We note that multiple nodes in a dense regions may set \texttt{em}, and possibly switch themselves to MPR (line 12).
+%
+Other nodes receiving a message with \texttt{em} set will check whether their local observables are above the $({s}_{\text{min}},{d}_{\text{keep}})$ thresholds (line 14).
+If it is the case, a node will start or continue using MPR.
+The value of \texttt{em} is unmodified and the message is further broadcast.
+%
+Nodes that do not pass any of the thresholds unset \texttt{em}, marking the boundary of the emerging overlay region (line 15).
 
+The switch from CF to MPR is not immediate.
+After starting sending \texttt{hello} frames (line 18), nodes wait for a period of $2\times\Delta$ before switching to the MPR protocol (line 19).
+%
+The lifetime of an MPR overlay is governed by the timer $t_\text{MPR}$ at each node.
+This timer is always set to a duration of $10\times\Delta$ when a node switches to, or continues using, MPR (line 20).
+If no further invitation to use MPR has been received when the timer expires, the node switches back to CF.
+This can happen either as nodes are in a moderately dense area where no node has consistently seen a density justifying sending an invitation, or if an increase in mobility jeopardizes the interest of using an overlay.
+An exception is made for nodes running MPR who do not receive a \texttt{hello} frame for more than a period of $2\Delta$.
+These nodes immediately switch back to CF.
+This accounts for mobile nodes who have moved out of a dense zone, and are no longer in range of any node using MPR.
 
-To switch from CF to MPR, nodes nee
-
-
-
-
-
-The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
-The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.
-Instead, we adopt a passive approach using existing communications.
-We collect the following \emph{observables} about the surroundings of a node.
-Each of them is averaged over a configurable number of observations in order to privilege long-term changes in the deployment environment.
-\begin{itemize}
-	\item The density is obtained from the MAC protocol BMW. It is the number of nodes who reply to local broadcast RTS requests.
-	\item 
-\end{itemize}
-
-
-observables:
-\begin{itemize}
-	\item input source: MAC protocol, responses to RTS frames + only when MPR protocol is running, also responses to direct control frames
-	\item used to derive local:
-	\begin{itemize}
-		\item density (how many nodes in range)
-		\item clustering between one-hop neighbors
-		\item stability (use a figure: we probe the network regularly through existing mac-layer messages, we can keep snapshots of the neighbors, and estimate how much time we see a neighbor)
-	\end{itemize}
-\end{itemize}
-
-policies:
-\begin{enumerate}
-	\item switching criteria based on nodes degree: collective decision where nodes with similar values of degree chose the same protocol. Currently, the policy works as follows:
-	\begin{itemize}
-		\item 3 thresholds (low, medium, high) for local clustering coefficient $c$, for: 
-		$c \in [0, \frac{1}{3}) \rightarrow t_1 = 0$ (implies controlled flooding), 
-		$c \in [\frac{1}{3}, \frac{2}{3}) \rightarrow t_2 = 1 $ (these are usually border nodes), 
-		$c \in [\frac{2}{3}, 1) \rightarrow t_3 = 3 $ (implies MPR: overlay-based protocol).
-		\item remind that nodes know their degree using the clustering observable. Switching procedure is as follows:
-		\begin{enumerate}
-			\item the source of a message $m$ attach a frame $f$ that contains $t_i \in [0, 1, 2]$ and start a timer $s$ to switch of protocol
-			\item receivers of $m$ detect $f$ and make the difference $d$ between the threshold in $m$ and their local threshold; receivers start a timer $s$ to switch of protocol f.$t_i$ only if $d$ is equal to the threshold of the source node, otherwise:
-			\begin{itemize}
-				\item replace f.$t_i$ with $n_i$.$t_j$ (local threshold) in $m$ and forwards $m$
-				\item start timer $s$ if needed
-			\end{itemize}
-			\item when $s$ expires all nodes switch of protocol
-		\end{enumerate}
-	\end{itemize}
-\end{enumerate}
-
-\er{
-The goal of this section is to present how adaptation is performed.
-It should start with a general discussion of the control loop: local sensing, collection of information, periodic checking of policies, trigger of adaptation actions (here, emerging an overlay). If we do it, explain that these phases may happen on a single node (single-node adaptation) or through the collaboration of several nodes in a neighborhood (multi-node adaptation).
-Suggested outline:
-\begin{itemize}
-	\item Adaptation control loop: Define sensing, information collection, policies checking, adaptation actions.
-	\item Define single-node adaptation and multi-node adaptation. Do not give details on how the latter is done, say this is described in a later subsection.
-	\item Subsection on sensing: Explain that we are limited in the information we can collect as we do not want to send probes to the neighbors, which would consume energy, increase the amount of collisions, and defeat the purpose. Henceforth we rely on what we can observe through existing interactions. In other word, we adopt passive sensing.
-	\item Define how we can classify the information we collect, and what is their nature: snapshot (instantaneous information about the surrounding of the node, at a given time), or continuous (history information about the evolution of some observable, over a window of time or a number of measurements), relative (from 0 to 1) or absolute, complete (e.g. the number of nodes in the neighborhood) or partial, and other criteria as necessary/possible.
-	\item Present a table with the set of observables we will collect and their classification according to the taxonomy presented in the previous point. We want at least 4-5 observables in order to form a diverse set of policies.
-	\item Add a discussion about the difference in observables depending on the protocol running, which makes our adaptation problem special: the policies may get different information for switching from one protocol to the other, than they get for doing the opposite. (keep if this is justified in practice for the policies we do present)
-	\item The next subsection is devoted to the design of a series of adaptation policies, from very simple, naive ones using a single observable to more advanced ones using multiple observables. They have to be presented using a table, with conjunction of rules based on thresholds, trigger time (periodic, when there is a new observable value obtained, etc.), and nature (single vs. multi-node)
-	\item Discuss each policy and give the design principle, the objective, rationale and expected benefits and limitations.
-	\item The multi-node policies should use figures to ease their explanation, and there can also be an algorithm showing how the nodes interact to collect information, and reach a decision.
-\end{itemize}
-}
-
-\er{
-Suggestion to discuss:
-it would also be possible to have two parts, one where we only discuss single-node policies, and a second one where we build an extension for multi-node policies.
-This could simplify the presentation.
-The multi-node policy requires communication.
-We need to assess whether this communication can happen on top of existing messages or not (would be ideal) or if it must use its own control messages.
-}
-
-% NOTE: These papers may help in the construction of a policy about density and mobility:
-%\cite{closure_coef}: local closure coefficient used as metric of density in our policies of adaptation
-% to check rapidly, as this is a C-rank journal: \url{https://link.springer.com/article/10.1007/s11277-016-3213-0} proposes to have two modes of operation depending on the mobility of the nodes (so quite linked to us)
-%to check as a possible example of a parameters adaptation (to group with the others of the same kind): \url{https://ieeexplore.ieee.org/abstract/document/7344460}
+% The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
+% The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.
+% Instead, we adopt a passive approach using existing communications.
+% We collect the following \emph{observables} about the surroundings of a node.
+% Each of them is averaged over a configurable number of observations in order to privilege long-term changes in the deployment environment.
+% \begin{itemize}
+% 	\item The density is obtained from the MAC protocol BMW. It is the number of nodes who reply to local broadcast RTS requests.
+% 	\item
+% \end{itemize}
+%
+%
+% observables:
+% \begin{itemize}
+% 	\item input source: MAC protocol, responses to RTS frames + only when MPR protocol is running, also responses to direct control frames
+% 	\item used to derive local:
+% 	\begin{itemize}
+% 		\item density (how many nodes in range)
+% 		\item clustering between one-hop neighbors
+% 		\item stability (use a figure: we probe the network regularly through existing mac-layer messages, we can keep snapshots of the neighbors, and estimate how much time we see a neighbor)
+% 	\end{itemize}
+% \end{itemize}
+%
+% policies:
+% \begin{enumerate}
+% 	\item switching criteria based on nodes degree: collective decision where nodes with similar values of degree chose the same protocol. Currently, the policy works as follows:
+% 	\begin{itemize}
+% 		\item 3 thresholds (low, medium, high) for local clustering coefficient $c$, for:
+% 		$c \in [0, \frac{1}{3}) \rightarrow t_1 = 0$ (implies controlled flooding),
+% 		$c \in [\frac{1}{3}, \frac{2}{3}) \rightarrow t_2 = 1 $ (these are usually border nodes),
+% 		$c \in [\frac{2}{3}, 1) \rightarrow t_3 = 3 $ (implies MPR: overlay-based protocol).
+% 		\item remind that nodes know their degree using the clustering observable. Switching procedure is as follows:
+% 		\begin{enumerate}
+% 			\item the source of a message $m$ attach a frame $f$ that contains $t_i \in [0, 1, 2]$ and start a timer $s$ to switch of protocol
+% 			\item receivers of $m$ detect $f$ and make the difference $d$ between the threshold in $m$ and their local threshold; receivers start a timer $s$ to switch of protocol f.$t_i$ only if $d$ is equal to the threshold of the source node, otherwise:
+% 			\begin{itemize}
+% 				\item replace f.$t_i$ with $n_i$.$t_j$ (local threshold) in $m$ and forwards $m$
+% 				\item start timer $s$ if needed
+% 			\end{itemize}
+% 			\item when $s$ expires all nodes switch of protocol
+% 		\end{enumerate}
+% 	\end{itemize}
+% \end{enumerate}
+%
+% \er{
+% The goal of this section is to present how adaptation is performed.
+% It should start with a general discussion of the control loop: local sensing, collection of information, periodic checking of policies, trigger of adaptation actions (here, emerging an overlay). If we do it, explain that these phases may happen on a single node (single-node adaptation) or through the collaboration of several nodes in a neighborhood (multi-node adaptation).
+% Suggested outline:
+% \begin{itemize}
+% 	\item Adaptation control loop: Define sensing, information collection, policies checking, adaptation actions.
+% 	\item Define single-node adaptation and multi-node adaptation. Do not give details on how the latter is done, say this is described in a later subsection.
+% 	\item Subsection on sensing: Explain that we are limited in the information we can collect as we do not want to send probes to the neighbors, which would consume energy, increase the amount of collisions, and defeat the purpose. Henceforth we rely on what we can observe through existing interactions. In other word, we adopt passive sensing.
+% 	\item Define how we can classify the information we collect, and what is their nature: snapshot (instantaneous information about the surrounding of the node, at a given time), or continuous (history information about the evolution of some observable, over a window of time or a number of measurements), relative (from 0 to 1) or absolute, complete (e.g. the number of nodes in the neighborhood) or partial, and other criteria as necessary/possible.
+% 	\item Present a table with the set of observables we will collect and their classification according to the taxonomy presented in the previous point. We want at least 4-5 observables in order to form a diverse set of policies.
+% 	\item Add a discussion about the difference in observables depending on the protocol running, which makes our adaptation problem special: the policies may get different information for switching from one protocol to the other, than they get for doing the opposite. (keep if this is justified in practice for the policies we do present)
+% 	\item The next subsection is devoted to the design of a series of adaptation policies, from very simple, naive ones using a single observable to more advanced ones using multiple observables. They have to be presented using a table, with conjunction of rules based on thresholds, trigger time (periodic, when there is a new observable value obtained, etc.), and nature (single vs. multi-node)
+% 	\item Discuss each policy and give the design principle, the objective, rationale and expected benefits and limitations.
+% 	\item The multi-node policies should use figures to ease their explanation, and there can also be an algorithm showing how the nodes interact to collect information, and reach a decision.
+% \end{itemize}
+% }
+%
+% \er{
+% Suggestion to discuss:
+% it would also be possible to have two parts, one where we only discuss single-node policies, and a second one where we build an extension for multi-node policies.
+% This could simplify the presentation.
+% The multi-node policy requires communication.
+% We need to assess whether this communication can happen on top of existing messages or not (would be ideal) or if it must use its own control messages.
+% }
+%
+% % NOTE: These papers may help in the construction of a policy about density and mobility:
+% %\cite{closure_coef}: local closure coefficient used as metric of density in our policies of adaptation
+% % to check rapidly, as this is a C-rank journal: \url{https://link.springer.com/article/10.1007/s11277-016-3213-0} proposes to have two modes of operation depending on the mobility of the nodes (so quite linked to us)
+% %to check as a possible example of a parameters adaptation (to group with the others of the same kind): \url{https://ieeexplore.ieee.org/abstract/document/7344460}
