@@ -47,9 +47,9 @@
 		\State $t_\text{MPR} \gets $ currentTime() $+ 10\times\Delta$ \Comment{set dissolution timer}
 	\EndProcedureAlt
 	
-	\BeginTimerExpires{$t_\text{MPR}$ \textbf{or no MPR hello received in} $2\Delta$}
+	\BeginTimerExpires{$t_\text{MPR}$}{\textbf{ or no MPR hello received in} $2\Delta$}
 		\State MPR.terminate()
-		\State $P \gets$ CF \Comment{return to using CF}
+		\State $P \gets$ CF \Comment{dissolve overlay and return to using CF}
 	\EndTimerExpires
 
 
