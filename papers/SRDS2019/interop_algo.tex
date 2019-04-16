@@ -14,7 +14,7 @@
 		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
 	\EndVariables
 	
-	\ProcedureAlt{amIBorder()}{ }
+	\ProcedureAlt{iAmBorder()}{ }
 		\If{b $\wedge$ (currentTime - t) $> 2\times\Delta$}
 			b $\gets$ \texttt{false}
 		\EndIf
@@ -44,7 +44,7 @@
 	
 	\ProcedureAlt{CF.receive(message $m$) for the first time}
 		\State CF.handle($m$) \Comment{regular handling of the message}
-		\If{amIBorder()}
+		\If{iAmBorder()}
 			$\text{counter}_m \gets \infty$ \Comment{forces being a relay}
 		\EndIf
 	\EndProcedureAlt
@@ -63,20 +63,17 @@
 	
 	\ProcedureAlt{MPR.receive(message $m$) for the first time}
 		\If{$m$ was sent using MPR}
-			\If{$m$.relays includes $n_i$}
-				b $\gets$ \texttt{false}
-			\Else \Comment{$n_i$ is not part of the overlay}
-				\If{amIBorder()}
-					CF.handle($m$) \Comment{if border, use CF}
-				\EndIf
+		
+			\If{$n_i \not \in m$.relays $\wedge$ iAmBorder()}
+				\State CF.handle($m$) \Comment{if border and not relay, use CF}
+			\Else
+				\If{$n_i \in m$.relays} b $\gets$ \texttt{false} \Comment{already a relay} \EndIf 
+				\State MPR.handle($m$) \Comment{regular handling of the message}
 			\EndIf
-			\State MPR.handle($m$) \Comment{regular handling of the message}
-		\Else \Comment{$m$ received from a CF node}
-			\State MPR.broadcast($m$) \Comment{initiate MPR broadcast}
+		
+		\Else ~MPR.broadcast($m$) \Comment{from CF, initiate MPR broadcast}
 		\EndIf
 	\EndProcedureAlt
-
-	\er{todo change the order to avoid double call to mpr and cf handlers, also in the text}
 
 \end{algorithmic}
 \end{footnotesize}
