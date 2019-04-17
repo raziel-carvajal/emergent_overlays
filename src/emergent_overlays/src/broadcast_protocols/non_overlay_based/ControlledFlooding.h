@@ -13,36 +13,49 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef FLOODING_H_
-#define FLOODING_H_
+#ifndef CONTROLLEDFLOODING_H_
+#define CONTROLLEDFLOODING_H_
 
 #include <utils/IProtocol.h>
+#include <map>
 
-class Flooding : public IProtocol {
+using namespace std;
+
+class ControlledFlooding : public IProtocol {
   private:
     InteroperableBroadcast* controller = nullptr;
 
-  public:
-    Flooding() {
-    }
+    map<string, cMessage*> timers;
+    map<string, int> counters;
+    map<string, cPacket*> msgs;
 
-    bool isProtocolEvent(cMessage* msg) {
-      // this implementation do not handle any self event
-      return false;
+    enum Timer { EXPIRES };
+
+    int allowedReceptions;
+
+  public:
+    ControlledFlooding() {
     }
+    ;
+
+    bool isProtocolEvent(cMessage* msg);
 
     void setController(InteroperableBroadcast* c) {
       controller = c;
     }
     void onBroadcastMsg(cPacket* pk, const char* pkName);
 
-    void handleEvent(cMessage* msg) {}
+    void handleEvent(cMessage* msg);
     // FIXME add headers for interop mechanism
-    void addProtocolHeaders(cPacket* pk) {}
-    void updateProtocolHeaders(cPacket* pk) {}
-    void cancelSelfEvents() {}
+    void addProtocolHeaders(cPacket* pk) {
+    }
+    void updateProtocolHeaders(cPacket* pk) {
+    }
+    void cancelSelfEvents() {
+    }
     void initialize();
-    void onControlMsg(cPacket* pk, const char* sender) {}
+    void onControlMsg(cPacket* pk, const char* sender) {
+    }
 
     cPacket* createBroadcastMsg(const char* msgId);
 
@@ -50,10 +63,10 @@ class Flooding : public IProtocol {
 
     bool amIoverlayRelay();
 
-    std::set<std::string> getNeighbors(){
+    std::set<std::string> getNeighbors() {
       std::set<std::string> neigs;
       return neigs;
     }
 };
 
-#endif /* FLOODING_H_ */
+#endif /* CONTROLLEDFLOODING_H_ */

@@ -47,8 +47,12 @@ simple InteroperableBroadcast extends UDPBasicApp
     //
     // specify running protocol identifier (see enum InteroperableBroadcast.Protocols)
     int runningProtocolId;
+    // Configuration of protocols
+    // Controlled flooding
+    int counterCfcondition = default(3);
+    
     int maxRetriesAtMac = default(2);
-
+    
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);
 

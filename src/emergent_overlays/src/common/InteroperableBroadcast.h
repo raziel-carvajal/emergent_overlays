@@ -25,6 +25,7 @@
 // List of implementations of broadcast protocols
 #include <broadcast_protocols/overlay_based/MPR.h>
 #include <broadcast_protocols/non_overlay_based/Flooding.h>
+#include <broadcast_protocols/non_overlay_based/ControlledFlooding.h>
 
 using namespace inet;
 using namespace std;
@@ -67,6 +68,11 @@ class InteroperableBroadcast : public UDPBasicApp {
             protocolsNames[i] = getProtocolName(MPR);
           }
             break;
+          case Protocols::CONTROLLED_FLOODING: {
+            protocols[i] = new ControlledFlooding();
+            protocolsNames[i] = getProtocolName(CONTROLLED_FLOODING);
+          }
+            break;
           default:
             throw cRuntimeError("[%d] is an invalid protocol identifier", i);
             break;
@@ -102,7 +108,7 @@ class InteroperableBroadcast : public UDPBasicApp {
 
   public:
     enum Protocols {
-      FLOODING, MPR, LAST_PROTOCOL
+      FLOODING, MPR, CONTROLLED_FLOODING, LAST_PROTOCOL
     };
     enum ForwardType {
       SIMPLE, OVERLAY_RELAY, BORDER_NODE
@@ -167,9 +173,14 @@ class InteroperableBroadcast : public UDPBasicApp {
           return "FLOODING";
         case MPR:
           return "MPR";
+        case CONTROLLED_FLOODING:
+          return "CONTROLLED_FLOODING";
         default:
           return "UNKNOWN";
       }
+    }
+    string getBroadcastMsgName(){
+      return this->packetName;
     }
 
     int getMsgId(string msgHeader, string substr);

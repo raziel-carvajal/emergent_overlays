@@ -88,6 +88,7 @@ class Mpr : public IProtocol {
     void onBroadcastMsg(cPacket* pk, const char* pkName);
 
     void handleEvent(cMessage* msg);
+    // FIXME add headers for interop mechanism
     void addProtocolHeaders(cPacket* pk) {
     }
     void updateProtocolHeaders(cPacket* pk) {
