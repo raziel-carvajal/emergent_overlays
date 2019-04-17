@@ -1,7 +1,7 @@
 %!TEX root = main.tex
 %=========================================================
 
-\section{Emerging overlays}
+\section{Autonomous adaptation}
 \label{sec:adaptation}
 
 We now present how overlays emerge (and \emph{dissolve}) autonomously in regions of a MANET where all nodes initially use CF.
@@ -28,7 +28,7 @@ As measurements are not taken with a fixed frequency, we weight each measurement
 Mobility is measured indirectly through the \emph{stability} of $n_i$'s neighborhood, measured as the average time its neighbors are observed.
 Again, we compute stability over varying periods of time, resulting in $\bar{s}_{-1},\bar{s}_{-2},\bar{s}_{-5},\bar{s}_{-10}$.
 
-\subsection{Switching thresholds}
+\subsection{Protocol switching thresholds}
 
 Nodes decide to emerge an overlay based on both $\bar{s}_{-\delta}$ and $\bar{d}_{-\delta}$ for a time window $\delta$.
 In order to avoid oscillations where nodes would switch back and forth between using CF and MPR, we use a hysteresis, with two pairs of thresholds: 
@@ -40,7 +40,7 @@ The two density criteria ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ indicate 
 The values of these criteria depend on the nature of the MANET, the wireless range of its nodes, and deployment factor.
 We define appropriate values for our test scenarios in our evaluation.
 
-\subsection{Switching policies}
+\subsection{Protocol switching policies}
 
 A simple policy is to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
 As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, the node continues using MPR.

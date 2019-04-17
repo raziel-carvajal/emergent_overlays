@@ -4,12 +4,13 @@
 \begin{abstract}
 Mobile Ad-Hoc Networks (MANETs) allow distributed applications in situations where no network infrastructure is available.
 Communication in MANETs is based on point-to-point wireless communication subject to faults and uncertainty.
-MANETs must support efficient broadcast, achieved either with controlled flooding or through the establishment of a network overlay and associated dissemination structure.
+MANETs must support efficient broadcast.
 Flooding is the solution of choice for highly-dynamic and sparse networks.
-It is however inefficient and unreliable in areas where nodes are densely packed, where paying the price of setting up and maintaining an overlay should be preferred.
-The density and mobility condition for a MANET may vary significantly over its deployment area, impairing from using a one-size-fits-all protocol.
+It is however inefficient and unreliable in areas where nodes are densely packed.
+In these cases establishing and maintaining an overlay forming a dissemination backbone is a better solution.
+Density and mobility conditions may vary significantly over a MANET deployment area.
 We propose in this paper the design and implementation of \emph{emergent overlays} for broadcast in heterogeneous MANETs.
-Emergent overlays is a novel adaptation technique allowing MANET nodes to autonomously decide to switch from a flooding-based approach to the use of an overlay when their local deployment conditions justifies it.
-We detail how to support the interoperation of the two protocols types in the same heterogeneous system, and devise a number of adaptation policies for emerging overlays based on local node observations.
+Emergent overlays is an adaptation technique allowing MANET nodes to autonomously decide to switch from a flooding-based approach to the use of an overlay when local deployment conditions justifies it.
+We detail how to support the interoperation of the two protocols types in the same heterogeneous system, and devise coordinated adaptation policies allowing regions of nodes to autonomously emerge and dissolve overlays at runtime.
 Our evaluation based on the simulation of the full network stack for up to \er{XXX} nodes shows that \er{highlights}, and compares favourably to state-of-the-art adaptive broadcast for MANETs such as \er{xxx}.
 \end{abstract}
