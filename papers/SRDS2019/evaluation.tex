@@ -1,22 +1,6 @@
 %!TEX root = main.tex
 %=========================================================
 
-%\begin{figure}[htbp]
-%	\begin{minipage}[t]{0.45\linewidth}
-%    \includegraphics[width=\linewidth]{figures/sre.pdf}
-%    \caption{Saved rebroadcasts}
-%		\label{fig:rebroadcasts}
-%	\end{minipage}%
-%  \hfill%
-%	\begin{minipage}[t]{0.45\linewidth}
-%    \includegraphics[width=\linewidth]{figures/coverage.pdf}
-%    \caption{Reachability}
-%    \label{fig:reachability}
-%	\end{minipage} 
-%%	\caption{Saved rebroadcast and reachability over different networks.}
-%%	\label{fig:sre-coverage}
-%\end{figure}
-
 \section{Evaluation}
 \label{sec:evaluation}
 
@@ -82,26 +66,34 @@ All metrics should be recorded together with the class (sparse or dense) of the 
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\linewidth]{figures/placeholders/setup.png}
-	\caption{Experimental setup with one point of interest and \protect\er{fillme} nodes.}
+	\includegraphics[width=\linewidth]{figures/setup}
+	\caption{Experimental setup with one point of interest and 600 nodes\protect\raziel{figure require improvement}.}
 	\label{fig:eval:setup}
 \end{figure}
 
 \input{coverage_density_table}
 
-%\begin{figure}[t]
-%	\centering
-%	\includegraphics[width=\linewidth]{figures/placeholders/table_baseline.png}
-%	\caption{to transform to a real table.}
-%	\label{table:eval:baseline_performance}
-%\end{figure}
 
 \begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{figures/placeholders/plots_baseline.png}
+	\begin{minipage}[t]{0.35\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
+		\label{fig:eval:baseline_performance:outgoing}
+	\end{minipage}%
+  \hfill
+	\begin{minipage}[t]{0.35\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
+    \label{fig:eval:baseline_performance:incoming}
+	\end{minipage} 
 	\caption{Performance of single-protocol deployments.}
 	\label{fig:eval:baseline_performance}
 \end{figure*}
+
+%\begin{figure*}[t]
+%	\centering
+%	\includegraphics[width=\linewidth]{figures/placeholders/plots_baseline.png}
+%	\caption{Performance of single-protocol deployments.}
+%	\label{fig:eval:baseline_performance}
+%\end{figure*}
 
 \textbf{Experiments}
 \begin{enumerate}
