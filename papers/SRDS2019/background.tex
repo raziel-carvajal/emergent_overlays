@@ -58,49 +58,6 @@ Nodes wait for an initial random duration and probe the wireless medium before s
 The payload frame is then transmitted, and neighbors ack its reception, again using physical carrier sensing to avoid collisions.
 Up to two additional retransmission happen in case of missed or error-bearing acknowledgments.
 The rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem}.
-% Instead, BMW switches for the next two frames to best-effort delivery with a single sending and no virtual carrier sensing.
-
-% There is a tradeoff between the number and cost of such retransmissions, and their impact on collisions: Too many retransmissions may make things worse and create a local broadcast storm~\cite{BroadcastStormProblem}.
-% Another difficulty is due to mobility: Nodes are not aware of the identities of other nodes within their coverage areas.
-
-% The IEEE 802.11 coordination function is a classical MAC protocol for reliable point-to-point communication, i.e. where the single destination for the frame is known.
-% It relies on a collision avoidance mechanism known as \emph{virtual carrier sensing}~\cite{ieee1997wireless}.
-% It uses a handshake protocol.
-% The source locally broadcasts a small Request To Send (RTS) control frame.
-% The destination node replies with a Clear To Send (CTS) control frame and switches to listening mode for a predefined time.
-% The reception of the frame is then acknowledged by the destination.
-% The sending can be repeated up to three times in case of missed or error-bearing acknowledgments.
-%
-% Structure to describe MAC protocol:
-% \begin{itemize}
-% 	\item we relay on BWM ~\cite{tang2001mac}
-% 	\item BWM uses virtual carrier sensing to arbitrate the communication medium too
-% 	\item BWM maintains a local list of neighbors using CTS/data frames
-% 	\item retransmissions take place when ACKs haven't been received from at least one neighbor, up to 3 retransmissions are allowed
-% 	\item in case contention is so high (example, any ACK was received) BWM switches to unreliable delivery of IEEE 802.11 (no RTS/CTS/ACK frames) where only physical carrier sensing arbitrates use of communication medium
-% \end{itemize}
-%
-%
-%
-% Our MAC protocol targets \emph{efficient local broadcast} instead of point-to-point communication.
-% It was developed independently but follows similar principles as the broadcast medium window protocol~\cite{tang2001mac}.
-% It is illustrated by Figure~\ref{fig:mac_protocol}.
-% The source wishes to send the same frame to all the nodes that are in its coverage area.
-% We modify the handshake to enable the \emph{discovery} of these nodes.
-% All nodes reply with a CTS containing their identity, following the RTS of the sender.
-% Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
-% Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
-% This enables the sender to obtain a snapshot of its local neighborhood.
-% The sender collects acknowledgments from all nodes (also using physical carrier sensing to avoid collisions) and may retry locally broadcasting a frame up to three times, as in the original protocol.
-% Our rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem} and further deteriorate the situation.
-
-% \input{mac_api}
-% \input{mac_algorithm}
-%
-% We use a novel virtual carrier sensing MAC protocol that requires less messages exchanges and does not target a 100\% coverage of a local broadcast.
-% Our rationale is that redundancy is already implemented at the global broadcast protocol level, and that the presence of collisions is mostly a result of these redundancy.
-% We adopt instead a limited-cost resend \er{here describe \textbf{succinctly} the MAC protocol we use.}
-% Figure~\ref{fig:mac_protocol} \er{the right-hand side of the figure should be for the MAC protocol}
 
 \subsection{(Global) Broadcast protocols}
 \label{sec:background:broadcast}
@@ -151,7 +108,7 @@ Controlled flooding is intuitively good for regions with high mobility, as the d
 Setting the value of the timer $t$ and of the counter $c$ is however difficult, as optimal values depend on node density.
 For sparse areas, too low a value of $c$ will lead to incomplete coverage.
 In dense areas, too high a value of $c$ will lead to a high number of collisions and duplicates.
-We choose to favor coverage in sparse areas and use $t \in [10^{-6}, 10^{-4})$ seconds and $c=4$.
+We choose to favor coverage in sparse areas and use $t \in [10^{-6}, 10^{-4})$ seconds and $c=3$.
 An illustration of counter-based controlled flooding is given by Figure~\ref{fig:background:flooding} using $c=2$.
 
 \subsubsection{Multipoint Relay (MPR)}
