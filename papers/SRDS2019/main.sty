@@ -5,7 +5,7 @@
 
 % Maths
 \usepackage{mathtools}
-\usepackage{amssymb}
+\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{amsthm}
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}{Theorem}
@@ -18,8 +18,15 @@
 \usepackage[noend]{algpseudocode}
 % required blocks for algorithms
 \usepackage{algorithm_data_structures}
-
 \usepackage{cite}
+
+\PassOptionsToPackage{bookmarks=false}{hyperref}
+\usepackage[
+  colorlinks = true,
+  linkcolor = blue,
+  urlcolor  = blue,
+  citecolor = blue,
+  anchorcolor = blue]{hyperref}
 
 % % Algo2e
 %\usepackage[ruled,vlined,linesnumbered]{algorithm2e}

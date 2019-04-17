@@ -3,14 +3,12 @@
 
 \begin{abstract}
 Mobile Ad-Hoc Networks (MANETs) allow distributed applications in situations where no network infrastructure is available.
-Communication in MANETs is based on point-to-point wireless communication subject to faults and uncertainty.
-MANETs must support efficient broadcast.
-Flooding is the solution of choice for highly-dynamic and sparse networks.
-It is however inefficient and unreliable in areas where nodes are densely packed.
-In these cases establishing and maintaining an overlay forming a dissemination backbone is a better solution.
-Density and mobility conditions may vary significantly over a MANET deployment area.
+They use wireless communication subject to faults and uncertainty.
+MANETs must support efficient \emph{broadcast}.
+Controlled flooding is appropriate for highly-dynamic and sparse networks, but is inefficient in areas where nodes are densely packed, where establishing an overlay as a dissemination backbone is a better solution.
+Density and mobility conditions vary significantly over a MANET deployment area.
 We propose in this paper the design and implementation of \emph{emergent overlays} for broadcast in heterogeneous MANETs.
-Emergent overlays is an adaptation technique allowing MANET nodes to autonomously decide to switch from a flooding-based approach to the use of an overlay when local deployment conditions justifies it.
-We detail how to support the interoperation of the two protocols types in the same heterogeneous system, and devise coordinated adaptation policies allowing regions of nodes to autonomously emerge and dissolve overlays at runtime.
-Our evaluation based on the simulation of the full network stack for up to \er{XXX} nodes shows that \er{highlights}, and compares favourably to state-of-the-art adaptive broadcast for MANETs such as \er{xxx}.
+This adaptation technique allows nodes to switch from controlled flooding to the use of an overlay when beneficial.
+We detail how to support the interoperation of the two protocols in a single heterogeneous system, and devise coordinated adaptation policies allowing regions of nodes to autonomously emerge and dissolve overlays at runtime.
+Our evaluation based on the simulation of the full network stack for up to 500 nodes shows that emergent overlays reduce energy consumption, improve reliability and coverage of broadcast compared to the use of a single protocol, including when it uses state-of-the-art adaptation techniques.
 \end{abstract}
