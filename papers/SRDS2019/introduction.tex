@@ -35,7 +35,7 @@ Efficient routing actually also depends on the availability of an efficient and 
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
 The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
 Collisions are not always possible to detect, and costly to address~\cite{hidden-terminal-problem}.
-A MAC protocol~\cite{ieee1997wireless} using two many resubmissions may result in lower performance and increase energy costs.
+A MAC protocol~\cite{ieee1997wireless} using many resubmissions may result in lower performance and increase energy costs.
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
 Broadcast protocols can be classified in two main families~\cite{survey-ruiz}:
@@ -44,7 +44,7 @@ Broadcast protocols can be classified in two main families~\cite{survey-ruiz}:
 %
 Controlled flooding protocols propagate a message between nodes using local wireless broadcast.
 Each node receiving a message decides whether or not (and when) to retransmit the message locally, on the sole base of information attached to that message, the state of the local node and the observation of its surroundings.
-Controlled flooding is prone to broadcast storms but is expected to be robust to highly mobile and dynamic environments.
+Controlled flooding is prone to broadcast storms but is expected to be robust in highly mobile and dynamic environments.
 %
 Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the dissemination itself.
 A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange of control messages.
@@ -63,7 +63,7 @@ We are interested in this paper in efficient broadcast in \emph{heterogeneous} M
 We start from the observation that controlled flooding protocols are efficient in the general case of mobile and lowly to moderately dense regions of the network, but become very inefficient and costly otherwise, that is, in conditions where paying the price of constructing and leveraging an overlay makes sense from a cost and reliability point of view.
 
 We present the novel notion of \emph{\textbf{emergent overlays}}.
-Emergent overlays is a adaptation technique in which a subset of the nodes in a MANET may autonomously decide to switch from the use of default controlled flooding to the bootstrap and use of an overlay.
+Emergent overlays is an adaptation technique in which a subset of the nodes in a MANET may autonomously decide to switch from the use of default controlled flooding to the bootstrap and use of an overlay.
 The decision to emerge an overlay is based on local and autonomous decisions based on indicators of density and mobility.
 We make the following contributions towards the design, implementation and evaluation of emergent overlays:
 \begin{itemize}
