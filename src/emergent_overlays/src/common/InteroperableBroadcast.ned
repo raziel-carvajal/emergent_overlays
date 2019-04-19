@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package emergent_overlays.common;
 import inet.applications.udpapp.UDPBasicApp;
@@ -54,18 +54,18 @@ simple InteroperableBroadcast extends UDPBasicApp
     double getObsInterval @unit(s) = this.broadcastInterval;
     double startObsApprox @unit(s)= this.broadcastInterval + (this.broadcastInterval / 2);
     // 			TODO for windows bigger than 10, be sure that there is an implementation for FIX ME
-	int windowSize = default(5);
+	int windowSize = default(10);
   	// 			FIX ME: turn indexSequence into a string and reimplement initialize() at utils/Observable.cc
 	int indexSequence = default(125);
 	bool withLastMeasure = default(true);
 	// 			when false, the weighted average is calculated instead
 	bool withRateOfChange = default(true);
-	
+
 	//		options for adaptation
 	bool withAdaptation = default(false);
 	int keepProtocolSlotsNo = default(20);
 	double keepProtocolInterval @unit(s) = this.keepProtocolSlotsNo * this.broadcastInterval;
-	
+
     // options for broadcast protocols
     // 		controlled flooding
     int counterCfcondition = default(3);
@@ -91,12 +91,11 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     @signal[recvCtrlFrames](type=int);
     @statistic[recvCtrlFrames](source=recvCtrlFrames; record=vector; interpolationmode=none);
-    
+
     @signal[densityObs](type=double);
     @statistic[densityObs](source=densityObs; record=vector; interpolationmode=none);
-    
+
     @signal[mobilityObs](type=double);
     @statistic[mobilityObs](source=mobilityObs; record=vector; interpolationmode=none);
 
 }
-
