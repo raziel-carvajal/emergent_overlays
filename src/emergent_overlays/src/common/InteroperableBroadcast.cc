@@ -34,6 +34,9 @@ simsignal_t InteroperableBroadcast::positionAtY = registerSignal("positionAtY");
 
 simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type");
 
+simsignal_t InteroperableBroadcast::densityObs = registerSignal("densityObs");
+simsignal_t InteroperableBroadcast::mobilityObs = registerSignal("mobilityObs");
+
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
@@ -74,6 +77,8 @@ void InteroperableBroadcast::processStart() {
   mac = new MacLayerWithCD();
   mac->setController(this);
   mac->initialize();
+  // collector of observable: mobility and density
+  collector = new Observables(this);
   // the dissemination of broadcast messages
   scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
 
@@ -165,6 +170,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
             cancelAndDelete(haltSimTimer);
 
           runningProtocol->cancelSelfEvents();
+          collector->cancelSelfEvents();
           UDPBasicApp::finish();
 //          endSimulation();
         }
@@ -176,6 +182,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       runningProtocol->handleEvent(msg);
     } else if (mac->isSelfEvent(msg)) {
       mac->handleEvent(msg);
+    } else if (collector->isSelfEvent(msg)) {
+      collector->handleEvent(msg);
     } else {
       throw cRuntimeError("Invalid kind %d in selfInteropMsg 2", (int) msg->getKind());
     }
@@ -190,12 +198,13 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
     return;
   }
 
+  string sender(removeQuotes(pk->par("Sender").str()));
+  collector->neighbors.insert(sender);
   switch (pk->par("PkType").longValue()) {
     case UdpPacket::BROADCAST: {
       // let MAC layer deal with reception
       mac->processMsg(pk->getName());
 
-      string sender(removeQuotes(pk->par("Sender").str()));
       log("Broadcast msg [" + string(pk->getName()) + "] received from [" + sender + "]");
       // record integer identifier of received message
       emit(rcvdBroadcastMsg, getMsgId(pk->getName(), this->packetName));
@@ -209,7 +218,6 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       numRecvCtrlMsgs++;
       emit(recvCtrlFrames, getMsgId(pk->getName(), ctrlMsgName));
 
-      string sender(removeQuotes(pk->par("Sender").str()));
       Basic* basicPk = dynamic_cast<Basic*>(pk);
       // sender's running protocol ID differs from receiver's; send request to chose border node
       if (basicPk->getRunningProtocol() != runningProtocolId) {

@@ -21,8 +21,9 @@
 #include <inet/mobility/contract/IMobility.h>
 #include <functional>
 #include <utils/IProtocol.h>
+#include <utils/Observables.h>
 
-// List of implementations of broadcast protocols
+// implementations of broadcast protocols
 #include <broadcast_protocols/overlay_based/MPR.h>
 #include <broadcast_protocols/non_overlay_based/Flooding.h>
 #include <broadcast_protocols/non_overlay_based/ControlledFlooding.h>
@@ -53,6 +54,8 @@ class InteroperableBroadcast : public UDPBasicApp {
 
     L3Address localAddress;
     L3Address broadcastAddress;
+
+    Observables* collector = nullptr;
 
   private:
     void intializeCatalog() {
@@ -132,6 +135,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t forward_type;
     static simsignal_t sentCtrlFrames;
     static simsignal_t recvCtrlFrames;
+    static simsignal_t densityObs;
+    static simsignal_t mobilityObs;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
 
@@ -179,7 +184,7 @@ class InteroperableBroadcast : public UDPBasicApp {
           return "UNKNOWN";
       }
     }
-    string getBroadcastMsgName(){
+    string getBroadcastMsgName() {
       return this->packetName;
     }
 

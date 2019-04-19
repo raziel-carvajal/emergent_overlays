@@ -19,40 +19,58 @@ import inet.applications.udpapp.UDPBasicApp;
 simple InteroperableBroadcast extends UDPBasicApp
 {
     @class(InteroperableBroadcast);
-    // set values of UDPBasicApp
+    // network layer options (from UDPBasicApp)
     localPort = default(10);
     destPort = default(10);
     destAddresses = default("255.255.255.255");
     receiveBroadcast = default(true);
     messageLength = default(200B);
-    sendInterval = this.broadcastInterval;
 
-    bool isSourceNode = default(false);
-    bool withDebugging = default(false);
+    // options of our MAC layer
+    int maxRetriesAtMac = default(2);
     bool withMac = default(false);
-
-	// WARNING this value cannot be lower than 100 (min timer to schedule events)
-    int nodesNo = default(100);
-    int sentCtrlMsgFreq = default(1);
-    double minSentDelay @unit(s) = default(0.00001s);
-    double broadcastInterval @unit(s) = default(1s);
-
-    double ctrlMsgInterval @unit(s) = this.broadcastInterval;
-    double startSendingCtrlMsgs @unit(s) = this.broadcastInterval - 2 * this.nodesNo * this.minSentDelay + this.minSentDelay;
-    
     double macWaitingTimeFactor = default(100);
     double macLowerWaitingTime @unit(s) = this.minSentDelay;
-//    double macUpperWaitingTime @unit(s) = this.minSentDelay * 90;
-    double macUpperWaitingTime @unit(s) = this.minSentDelay * this.macWaitingTimeFactor;   
-    //
-    // specify running protocol identifier (see enum InteroperableBroadcast.Protocols)
+    double macUpperWaitingTime @unit(s) = this.minSentDelay * this.macWaitingTimeFactor;
+
+    // options at application level
+    bool withDebugging = default(false);
+   	//		WARNING this value cannot be lower than 100 (min timer to schedule events in the simulator)
+    int nodesNo = default(100);
+    bool isSourceNode = default(false);
+	// 		options for messages
+    double minSentDelay @unit(s) = default(0.00001s);
+    double broadcastInterval @unit(s) = default(1s);
+    sendInterval = this.broadcastInterval;
+    //		options for protocols that need control frames
+    //			slot number at which a control message is sent
+    int sentCtrlMsgFreq = default(1);
+    double ctrlMsgInterval @unit(s) = this.broadcastInterval;
+    //			time to send the first control message
+    double startSendingCtrlMsgs @unit(s) = this.broadcastInterval - 2 * this.nodesNo * this.minSentDelay + this.minSentDelay;
+    //		specify running protocol identifier (see enum Protocols at InteroperableBroadcast.h)
     int runningProtocolId;
-    // Configuration of protocols
-    // Controlled flooding
+    // 		options to measure observables
+    double getObsInterval @unit(s) = this.broadcastInterval;
+    double startObsApprox @unit(s)= this.broadcastInterval + (this.broadcastInterval / 2);
+    // 			TODO for windows bigger than 10, be sure that there is an implementation for FIX ME
+	int windowSize = default(5);
+  	// 			FIX ME: turn indexSequence into a string and reimplement initialize() at utils/Observable.cc
+	int indexSequence = default(125);
+	bool withLastMeasure = default(true);
+	// 			when false, the weighted average is calculated instead
+	bool withRateOfChange = default(true);
+	
+	//		options for adaptation
+	bool withAdaptation = default(false);
+	int keepProtocolSlotsNo = default(20);
+	double keepProtocolInterval @unit(s) = this.keepProtocolSlotsNo * this.broadcastInterval;
+	
+    // options for broadcast protocols
+    // 		controlled flooding
     int counterCfcondition = default(3);
-    
-    int maxRetriesAtMac = default(2);
-    
+
+	// statistics
     @signal[rcvdBroadcastMsg](type=int);
     @statistic[rcvdBroadcastMsg](source=rcvdBroadcastMsg; record=vector; interpolationmode=none);
 
@@ -67,16 +85,18 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     @signal[forward_type](type=int);
     @statistic[forward_type](source=forward_type; record=vector; interpolationmode=none);
-    
+
     @signal[sentCtrlFrames](type=int);
     @statistic[sentCtrlFrames](source=sentCtrlFrames; record=vector; interpolationmode=none);
+
     @signal[recvCtrlFrames](type=int);
     @statistic[recvCtrlFrames](source=recvCtrlFrames; record=vector; interpolationmode=none);
-//    
-//    @signal[density_approximation](type=double);
-//    @statistic[density_approximation](source=density_approximation; record=vector; interpolationmode=none);
-
     
+    @signal[densityObs](type=double);
+    @statistic[densityObs](source=densityObs; record=vector; interpolationmode=none);
+    
+    @signal[mobilityObs](type=double);
+    @statistic[mobilityObs](source=mobilityObs; record=vector; interpolationmode=none);
 
 }
 
