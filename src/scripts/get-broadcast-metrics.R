@@ -33,7 +33,8 @@ get.arguments <- function() {
 		dest='wft', action='store_true')
 	parser$add_argument('--with-saved-rebroadcasts',
 		dest='wsre', action='store_true')
-
+	parser$add_argument('--with-observables',
+		dest='wobs', action='store_true')
   # center of dense zone
   parser$add_argument('--dense-zone-at-x',
     dest='dzx', type='double')
@@ -557,6 +558,34 @@ main <- function(args) {
   )
   datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
   datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
+
+	if(args$wobs){
+		densityObs  <- getVector(datasetFile, 'densityObs:vector')
+		denAtSparse <- subset(densityObs, node_id < args$fadz)
+		denAtDense  <- subset(densityObs, node_id >= args$fadz)
+		mobilityObs <- getVector(datasetFile, 'mobilityObs:vector')
+		mobAtSparse <- subset(mobilityObs, node_id < args$fadz)
+		mobAtDense  <- subset(mobilityObs, node_id >= args$fadz)
+		ds <- data.frame(
+			time=c(denAtSparse$time, denAtDense$time, densityObs$time),
+			density=c(denAtSparse$value, denAtDense$value, densityObs$value),
+			mobility=c(mobAtSparse$value, mobAtDense$value, mobilityObs$value),
+			positionedAt=c(
+				rep("Sparse", length(denAtSparse$value)),
+				rep("Dense", length(denAtDense$value)),
+				rep("All", length(densityObs$value))
+			),
+			algo=rep(
+				algorithmN,
+				length(denAtSparse$value) + length(denAtDense$value) + length(densityObs$value)
+			),
+			stringsAsFactors=F
+		)
+    saveDataFrame(
+      ds,
+      args$resultsDir, 'ObservablesDistribution', algorithmN
+    )
+	}
 
   xPositions <- getVector(datasetFile, 'positionAtX:vector')
   yPositions <- getVector(datasetFile, 'positionAtY:vector')

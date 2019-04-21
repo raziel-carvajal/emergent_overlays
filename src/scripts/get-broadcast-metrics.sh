@@ -74,11 +74,12 @@ Rscript get-broadcast-metrics.R \
 	--dense-zone-l ${denseZoneLengt} \
 	--fist-at-dense ${firstAtDenseZone} \
   --results-dir ../../results \
-  --with-coverage \
+	--with-coverage \
+	--with-observables \
 	--with-sent-msgs \
 	--with-recv-msgs \
 	--with-plotting \
-  ${withMobility} ${CONF_NAME} ${CONF_FILE}
+	${withMobility} ${CONF_NAME} ${CONF_FILE}
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}
