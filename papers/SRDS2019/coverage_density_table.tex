@@ -1,26 +1,48 @@
-\begin{table}[t]
+%!TEX root = main.tex
 
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-Protocol             & Region & Reachability (\%) & Local Coverage (\%) & Collisions      \\ \hline
-%
-\multirow{3}{*}{CF} 		 & All    &  99.99   & 78.51 &  8890.0 \\ \cline{2-5}
-                     		 & Sparse &  99.98   & 100   & 3070.1  \\ \cline{2-5}
-                     		 & Dense  &  100   & 35.09   & 5819.8   \\ \hline
-%
-\multirow{3}{*}{MPR$_{1}$} & All    &  99.9  & 94.4   & 612.9 \\ \cline{2-5}
-		                     & Sparse &  99.9  & 97.6   & 235.2 \\ \cline{2-5}
-		                     & Dense  &  100   & 81.8   & 377.6 \\ \hline
-%
-\multirow{3}{*}{MPR$_{2}$} & All    &  99.8  & 94.7   & 599.8 \\ \cline{2-5}
-		                     & Sparse &  99.6  & 98.0   & 231.5 \\ \cline{2-5}
-		                     & Dense  &  100   & 81.5   & 368.2 \\ \hline
-%
-\multirow{3}{*}{MPR$_{3}$} & All    &  99.3  & 95.0   & 621.6 \\ \cline{2-5}
-		                     & Sparse &  98.7  & 98.4   & 245.2 \\ \cline{2-5}
-		                     & Dense  &  99.9  & 79.5   & 376.3 \\ \hline
+\begin{table}[t]
+\setlength\tabcolsep{1pt}
+\footnotesize
+\centering
+\newcolumntype{C}{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{0.15\linewidth} }
+\newcolumntype{D}{>{\centering\arraybackslash} m{0.15\linewidth} }
+
+\newcolumntype{E}{>{\raggedleft\arraybackslash} m{0.2\linewidth} }
+
+\begin{tabular}{CDEEE}
+
+\toprule
+	Protocol & 
+	Region & 
+	Avg. reach (\%) & 
+	Complete (\%) & 
+	Collisions (\#)
+	\\
+\midrule
+	\multirow{3}{*}{CF}
+						& All    &  99.99  & 78.51  &  8890.0  \\ 
+						& Outside &  99.98  & 100.00    &  3070.1  \\
+						& At POI  &  100.00    & 35.09  &  5819.8  \\ 
+\midrule
+	% \multirow{3}{*}{\parbox{0.20\linewidth}{\noindent \centering MPR with $\Delta=$XX~s}} 
+	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs} 
+						& All    &  99.9  & 94.4   & 612.9 \\ 
+						& Outside &  99.9  & 97.6   & 235.2 \\
+						& At POI  &  100   & 81.8   & 377.6 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs}
+						& All    &  99.8  & 94.7   & 599.8 \\
+						& Outside &  99.6  & 98.0   & 231.5 \\
+						& At POI  &  100   & 81.5   & 368.2 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs} 	
+						& All    &  99.3  & 95.0   & 621.6 \\
+						& Outside &  98.7  & 98.4   & 245.2 \\
+						& At POI  &  99.9  & 79.5   & 376.3 \\ 
+\bottomrule
 \end{tabular}
-%
-\caption{Performance of MPR and CF.}
-\label{table:eval:baseline_performance}
+\caption{Coverage and collisions with a single protocol for the entire system, split between nodes that evolve \emph{outside} or \emph{at} the POI.
+\protect\er{Raziel: change the XX with the proper values. What does it mean to have decimal numbers for the number of collisions, this is an average?}
+}
+\label{tab.conf}
 \end{table}
