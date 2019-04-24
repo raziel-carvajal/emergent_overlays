@@ -2,13 +2,12 @@
 %=========================================================
 
 \begin{abstract}
-Mobile Ad-Hoc Networks (MANETs) allow distributed applications in situations where no network infrastructure is available.
-They use wireless communication subject to faults and uncertainty.
-MANETs must support efficient \emph{broadcast}.
-Controlled flooding is appropriate for highly-dynamic and sparse networks, but is inefficient in areas where nodes are densely packed, where establishing an overlay as a dissemination backbone is a better solution.
-Density and mobility conditions vary significantly over a MANET deployment area.
-We propose in this paper the design and implementation of \emph{emergent overlays} for broadcast in heterogeneous MANETs.
-This adaptation technique allows nodes to switch from controlled flooding to the use of an overlay when beneficial.
+Mobile Ad-Hoc Networks (MANETs) allow distributed applications when no fixed network infrastructure is available.
+MANETs use wireless communication subject to faults and uncertainty, and must support efficient \emph{broadcast}.
+Controlled flooding is suitable for highly-dynamic networks, but it is inefficient in areas where nodes are densely packed. where establishing an overlay as a dissemination backbone is a better solution.
+Density and mobility vary significantly over a MANET deployment area.
+We propose the design and implementation of \emph{emergent overlays} for broadcast in heterogeneous MANETs.
+This adaptation technique allows nodes to autonomously switch from controlled flooding to the use of an overlay.
 We detail how to support the interoperation of the two protocols in a single heterogeneous system, and devise coordinated adaptation policies allowing regions of nodes to autonomously emerge and dissolve overlays at runtime.
-Our evaluation based on the simulation of the full network stack for up to 500 nodes shows that emergent overlays reduce energy consumption, improve reliability and coverage of broadcast compared to the use of a single protocol, including when it uses state-of-the-art adaptation techniques.
+Our evaluation based on the simulation of the full network stack for up to 600 nodes shows that emergent overlays reduce energy consumption and improve reliability and coverage of broadcast compared to the use of a single protocol and to previously-proposed adaptation techniques.
 \end{abstract}

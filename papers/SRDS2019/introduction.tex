@@ -4,23 +4,20 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Mobile Ad-hoc Networks (MANETs) are formed of mobile, energy-bounded nodes relying on ad-hoc wireless communication subject to faults and uncertainty.
-MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure is not sufficient.
-%
+Mobile Ad-hoc Networks (MANETs) are formed of mobile, energy-bounded nodes relying on direct wireless communication subject to faults and uncertainty.
+MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure does not suffice.
 A first target example is a music festival in a rural area, where setting up permanent network communication infrastructure is not viable economically.
-A MANET can allow communicating effectively with a large number of attendees despite local cellular network saturation.
+A MANET allows communicating with a large number of attendees despite the saturation of the local cellular network.
 Another example is an emergency scenario where teams of rescuers coordinate over an area where communication infrastructure or power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
-% \raziel{I comment this paragraph to take rid of a reference that talks about VANETs, a topic we do not explore}
-%A final example will be with the upcoming bloom of vehicular networks, where efficient communication between autonomous or semi-autonomous cars must be enabled also in locations where infrastructure support is poor or non-existent~\cite{rahim2018vehicular}.
 
 A MANET typically involves a large number of nodes with arbitrary mobility patterns.
-For human-attached nodes such as smartphones or tablets, mobility models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy}.
-Two constants in these models is that \emph{mobility} is heterogeneous, with nodes alternating between periods of high and low speed, and the presence of points of attraction around which users tend to aggregate~\cite{stepanov2005mobility_model_outdoor}.
-As a result, the \emph{density} of nodes is also heterogeneous, with areas around these points of interests that are densely populated and other areas that may only contain a few nodes.
-This heterogeneity in space has been confirmed by an experimental study performed at the Paléo music festival in Nyon, Switzerland~\cite{naini2015opportunistic}.
+For human-attached nodes, mobility models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,rhee2011levy}.
+Two constants is that \emph{mobility} is heterogeneous, with nodes alternating between periods of high and low speed, and the presence of points of attraction around which users tend to aggregate~\cite{stepanov2005mobility_model_outdoor,Aschenbruck2009}.
+As a result, the \emph{density} of nodes is also heterogeneous, with areas around these points of interests that are densely populated and other areas that contain less nodes.
+Heterogeneity in space has been confirmed by an experiment at the Paléo music festival in Nyon, Switzerland~\cite{naini2015opportunistic}.
 The authors performed an estimation of the population size and of its spatial distribution during the event by collecting unique MAC address from the significant portion of attendees' mobiles phone that were discoverable via bluetooth.
-The authors report that the density of nodes in every $15m\times 15m$ areas can vary by at least one order of magnitude (10x).
-A similar study during a street festival in Ghent, Belgium~\cite{versichele2012use} also reports a high density heterogeneity, and confirms the intuition that users tend to alternate between lowly-mobile zones (points of interests) with a higher number of users, and zones where the density of participants decreases (3x in the collected sample).
+The authors report that the density of nodes between $15m\times 15m$ areas can vary by at least one order of magnitude (10x).
+A similar study during a street festival in Ghent, Belgium~\cite{versichele2012use} also reports a high heterogeneity of density, and confirms that users tend to alternate between lowly-mobile zones (points of interests) with a higher number of users, and zones where the density of participants decreases (3x in the collected sample).
 
 
 % A similar experiment in the EPFL campus~\cite{naini2015opportunistic} using Wifi discovery found density differences of up to 6 times between different zones.
@@ -29,27 +26,26 @@ A similar study during a street festival in Ghent, Belgium~\cite{versichele2012u
 % \cite{Stange:2011:AWM:2077357.2077368}
 % \cite{Ellersiek:2013:UBT:2533810.2533813}
 
-Broadcast is one of the fundamental operations enabling applications in MANETs.
-It allows delivering message from any source to all nodes in the network, e.g. to forward announcements and news live to all nodes in the music festival mobile application.
-Efficient routing actually also depends on the availability of an efficient and reliable broadcast primitive~\cite{overview_adhoc_networks,survey_routing}.
+Broadcast is a fundamental operation in MANETs.
+It allows delivering message from any source to all nodes in the network, e.g. to forward announcements live to all users of a music festival mobile application.
+Efficient routing also depends on broadcast~\cite{overview_adhoc_networks}.
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
 The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
-Collisions are not always possible to detect, and costly to address~\cite{hidden-terminal-problem}.
+Collisions are not always possible to detect, and are costly to address~\cite{hidden-terminal-problem}.
 A MAC protocol~\cite{ieee1997wireless} using many resubmissions may result in lower performance and increase energy costs.
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
-Broadcast protocols can be classified in two main families~\cite{ruiz2015survey}:
-	Protocols based on controlled flooding on the one hand, 
-	and protocols relying on the creation and maintenance of an overlay network, on the other hand.
+Broadcast protocols are classified in two families~\cite{ruiz2015survey}:
+	Protocols based on \emph{controlled flooding}, 
+	and protocols relying on the creation and maintenance of an \emph{overlay}.
 %
-Controlled flooding protocols propagate a message between nodes using local wireless broadcast.
-Each node receiving a message decides whether or not (and when) to retransmit the message locally, on the sole base of information attached to that message, the state of the local node and the observation of its surroundings.
-Controlled flooding is prone to broadcast storms but is expected to be robust in highly mobile and dynamic environments.
+With controlled flooding, any node receiving a message decides whether or not (and when) to retransmit it using a local broadcast, based on the information attached to that message, the local node state and possibly its observation of its surroundings.
+% Controlled flooding is prone to broadcast storms but is robust in highly mobile settings.
 %
-Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the dissemination itself.
-A subset of \emph{relay} nodes are selected \emph{a priori} through the exchange of control messages.
-Relay nodes form a dissemination structure, or overlay, over the MANET.
-The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by more efficient disseminations, under the assumption that the network does not evolve and render the structure obsolete too quickly.
+Overlay-based broadcast on the other hand decouples the decision process of which node will, and will not, forward incoming messages, from the actual dissemination.
+A subset of \emph{relay} nodes are selected \emph{a priori}, through the exchange of control messages prior to disseminations.
+Selected relay nodes form a persistent dissemination backbone, or overlay, over the MANET.
+% The rationale of overlay-based dissemination is that the cost of bootstrapping the structure will be compensated by efficient future disseminations, under the assumption that the network does not evolve and render the structure obsolete too quickly.
 
 Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval,Williams2002} show that the performance, reliability and energy consumption of algorithms of the two classes is highly dependent on their deployment conditions.
 Controlled flooding algorithms~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
@@ -57,30 +53,25 @@ Overlay-based algorithms~\cite{Nikolov2015, stojmenovic-cds, mpr} shine when nod
 
 \smallskip
 \noindent
-\textbf{Contributions}
+\textbf{Contributions.}
 %
-We are interested in this paper in efficient broadcast in \emph{heterogeneous} MANETs.
-We start from the observation that controlled flooding protocols are efficient in the general case of mobile and lowly to moderately dense regions of the network, but become very inefficient and costly otherwise, that is, in conditions where paying the price of constructing and leveraging an overlay makes sense from a cost and reliability point of view.
+We are interested in efficient broadcast in \emph{heterogeneous} MANETs.
+Our motivation is that controlled flooding protocols are efficient in the general case, but that overlays are beneficial in specific zones where the density increases and mobility decreases, typical of human movement scenarios.
+%
+We contribute the novel notion of \emph{\textbf{emergent overlays}}, allowing a subset of the nodes in a MANET to autonomously decide to switch from the use of controlled flooding to the bootstrap and use of an overlay.
+%
+The decision to emerge (or later dissolve) an overlay is based on local indicators of density and mobility, with the autonmous coordination of all nodes within a region.
 
-We present the novel notion of \emph{\textbf{emergent overlays}}.
-Emergent overlays is an adaptation technique in which a subset of the nodes in a MANET may autonomously decide to switch from the use of default controlled flooding to the bootstrap and use of an overlay.
-The decision to emerge an overlay is based on local and autonomous decisions based on indicators of density and mobility.
-We make the following contributions towards the design, implementation and evaluation of emergent overlays:
 \begin{itemize}
-	\item We present our system model that relies in three base protocols(\S\ref{sec:background}):
-	\begin{itemize}
-		\item Broadcast Medium Window (BMW) MAC protocol to improve the reliability of local broadcast~\cite{tang2001mac};
-		\item The \emph{counter-based} controlled flooding broadcast~\cite{2001:AAR:876878.879323};
-		\item The \emph{MPR} overlay-based broadcast~\cite{mpr}.
-	\end{itemize}
+	\item We present our system model and three base protocols (\S\ref{sec:background}): The Broadcast Medium Window (BMW) MAC protocol for reliable local broadcast~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr}.
 	\item We define the requirements for emergent overlays (\S\ref{sec:overview}).
-	\item We address the interoperability challenge introduced by the presence of zones using different protocols, and discuss a protocol allowing to guarantee continuity in the broadcast across these zones (\S\ref{sec:mechanisms}).
-	\item We define a number of \emph{observables} allowing to drive the adaptation and emergence of overlays, and present a number of adaptation \emph{policies} leveraging them (\S\ref{sec:evaluation}).
+	\item We address the interoperability challenge with a protocol allowing to guarantee continuity in the broadcast across heterogeneous zone using different protocols (\S\ref{sec:mechanisms}).
+	\item We present how nodes are able to collect \emph{observables} about their environment to drive the emergence of overlays, and how this emergence is coordinated autonomously across nodes in an homogeneous region of the MANET (\S\ref{sec:adaptation}).
 	\item We discuss the implementation and evaluation of emergent overlays in the OMNeT++ framework~\cite{Varga:2008:OOS:1416222.1416290}.
 	We evaluate our approach in a number of representative scenarios and compare it to other approaches for broadcast adaptation.
 	\er{our results ...} (\S\ref{sec:evaluation})
 \end{itemize}
-We finally discuss related work (\S\ref{sec:related}) and present our conclusions (\S\ref{sec:conclusion}).
+We finally discuss related work (\S\ref{sec:related}) and conclude (\S\ref{sec:conclusion}).
 
 %
 %
