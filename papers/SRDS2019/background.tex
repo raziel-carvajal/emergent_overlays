@@ -71,7 +71,7 @@ Subsequent receptions are \emph{duplicates} that are simply ignored.
 The target is to reduce the number of necessary relay nodes while ensuring a high (or full) \emph{coverage}, measured as the number of nodes that receive the message during the broadcast.
 We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.
 
-Broadcast protocols can be classified in two families depending on how they select relay nodes~\cite{survey-ruiz}.
+Broadcast protocols can be classified in two families depending on how they select relay nodes~\cite{ruiz2015survey}.
 In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
 In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the prior exchange of control messages.
 We present in the following two such protocols.
@@ -276,13 +276,13 @@ It is however necessary that the nodes positions be sufficiently stable, or the 
 % %
 % The lack of a central authority in MANETs requires to focus on distributed broadcast protocols that relay only in local data available at each node, avoiding any contact to services out of the network (like GPS or monitoring services).
 % %
-% Ruiz and Bouvry have surveyed broadcast protocols approaches~\cite{survey-ruiz} and classify them in two groups: topology-based and non topology-based protocols.
+% Ruiz and Bouvry have surveyed broadcast protocols approaches~\cite{ruiz2015survey} and classify them in two groups: topology-based and non topology-based protocols.
 % %
 % Each group in this classification distinguishes protocols that vary the transmission range (Tx) of transceivers from those who use a fixed Tx.
 % %
 % In order to let each node cover a fixed broadcast area, and this area of coverage is the same for every node in the network, in this paper we only considers protocols that use a fixed Tx and no GPS coordinates are fetched from an external service.
 % %
-% We now give a general overview of the classification proposed in~\cite{survey-ruiz} and describe the broadcast protocols we use in our adaptive approach (described in~\ref{sec:mechanisms}).
+% We now give a general overview of the classification proposed in~\cite{ruiz2015survey} and describe the broadcast protocols we use in our adaptive approach (described in~\ref{sec:mechanisms}).
 %
 % %
 % \subsubsection{Topology-based broadcast protocols}
