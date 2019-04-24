@@ -22,12 +22,14 @@ get_wireless_topology <- function(positions, tx, plot = FALSE, graphName = "grap
     })
   })
   g <- simplify(graph(edges = unlist(edges), directed = F))
+	# uncomment to remove all edeges in graph
+	# g <- delete_edges(g, E(g))
 
   E(g)$arrow.mode <- 0
   E(g)$color <- "lightgrey"
-  V(g)$size <- 5
-  # V(g)$label <- ""
-  V(g)$label.cex <- 0.4
+  V(g)$size <- 3
+  V(g)$label <- ""
+  # V(g)$label.cex <- 0.4
   V(g)$frame.color <- "black"
 
   g

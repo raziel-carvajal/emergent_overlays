@@ -163,66 +163,74 @@ get.density.relative.error <- function(results_file, first_measure,
 }
 
 get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
-  msgReceivers, denseZone, forward_type_ds, savePlot=F) {
-
-  # xlim <- data.frame(
-  #   infe=denseZone$atX - denseZone$halfLenAtX,
-  #   supe=denseZone$atX + denseZone$halfLenAtX
-  # )
-  # ylim <- data.frame(
-  #   infe=denseZone$atY - denseZone$halfLenAtY,
-  #   supe=denseZone$atY + denseZone$halfLenAtY
-  # )
-
-  # nodesLocation <- sapply(nodes, function(n){
-  #   nPos <- subset(nodesPositions, nodeId == n)
-  #   ifelse(
-  #     nPos$x >= xlim$infe && nPos$x <= xlim$supe &&
-  #     nPos$y >= ylim$infe && nPos$y <= ylim$supe,
-  #     'DENSE',
-  #     'SPARSE'
-  #   )
-  # })
-
+  msgReceivers, denseZone, forward_type_ds, runningAlgoAtTopology, savePlot=F) {
   # create graph based on edges
   g <- get_wireless_topology(nodesPositions, Tx)
 
-	# label whether nodes are located at the dense zone
-  # V(g)$location <- nodesLocation
+	# colour code for reachability
+  #   0 -> SIMPLE
+  #   1 -> CDS RELAY
+  #   2 -> BORDER
+	labelCode <- rep(NA, length(nodes))
+	labelCode[msgReceivers] <- 'dimgray'
+	labelCode[ subset(forward_type_ds, value == 0)$node_id ] <- 'cyan'
+  labelCode[ subset(forward_type_ds, value == 1)$node_id ] <- 'gold'
+  labelCode[ subset(forward_type_ds, value == 2)$node_id ] <- 'orangered'
+	labelCode[labelCode == NA] <- 'white'
 
-  # this code is followed IN DATASET to label nodes that forward messages:
-  #   0 => SIMPLE
-  #   1 => CDS RELAY
-  #   2 => BORDER
-  #   3 => RECEIVER
-  #   4 => UNREACHABLE
-  labelCode <- rep(5, length(nodes))
-  labelCode[msgReceivers] <- 4
-  labelCode[ subset(forward_type_ds, value == 0)$node_id ] <- 1
-  labelCode[ subset(forward_type_ds, value == 1)$node_id ] <- 2
-  labelCode[ subset(forward_type_ds, value == 2)$node_id ] <- 3
-  V(g)$colorCode <- labelCode
+	colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
+
+	# runningAlgoAtTopology <- runningAlgoAtTopology[order(runningAlgoAtTopology$node_id), ]
+	# # colour code for running algorithm
+	# # 0 -> simple flooding ; 1 -> MPR ; 2 -> controlled flooding
+	# labelCode <- sapply(runningAlgoAtTopology$value, function(a){
+	# 	ifelse(a == 0, 'dimgray', ifelse(a == 1, 'gold', 'cyan'))
+	# })
+	# colors <- c('dimgray', 'gold', 'cyan')
 
   if(savePlot){
-    colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
-    V(g)$color <- colors[labelCode]
+		V(g)$color <- labelCode
+
+		# BEGIN attributes values to show experimental scenario
+		# V(g)$color = 'white'
+		# V(g)$size <- 1.3
+		# END
+
+		# colour nodes according to its position at communication area
+		# lastAtSparse <- ceiling( (length(nodes) - 1) / 2 )
+		# V(g)$color <- c(rep('white', lastAtSparse), rep('lightgrey', length(nodes) - lastAtSparse) )
+    # colors <- c('white', 'lightgrey')
     # use node coordinates as layout
-    layout <- cbind(nodesPositions$x, nodesPositions$y)
+
+		layout <- cbind(nodesPositions$x, nodesPositions$y)
+
     # save one graph per broadcast session
     name <- paste("graph_", overlayNo, ".pdf", sep="")
-    pdf(name)
-    plot.igraph(g, layout=layout)
 
-    legend(
-      x=0.7, y=1.4, title='Type of forward',
-      c(
-        paste('Simple [', length(labelCode[labelCode == 1]), ']'),
-        paste('CDS relay [', length(labelCode[labelCode == 2]), ']'),
-        paste('Border [', length(labelCode[labelCode == 3]), ']'),
-        paste('Receiver [', length(labelCode[labelCode == 4]), ']'),
-        paste('Unreachable [', length(labelCode[labelCode == 5]), ']')
-      ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-    )
+		pdf(name)
+		plot.igraph(g, layout=layout)
+
+		# BEGIN attributes values to show experimental scenario
+		# pdf(name, width=10, height=5)
+		# plot(g, layout=layout*0.01, rescale=F, , xlim=c(0, 1), ylim=c(0, .45), margin=0.1)
+		# END
+
+		# legend(
+	  #   x=0.7, y=1.4, title='Running algorithm',
+	  #   c('Simple flooding ', 'MPR ', 'Controlled flooding'),
+		# 	pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+	  # )
+
+		legend(
+	    x=0.7, y=1.4, title='Type of forward',
+	    c(
+	      paste('Simple [', length(labelCode[labelCode == 'cyan']), ']'),
+	      paste('CDS relay [', length(labelCode[labelCode == 'gold']), ']'),
+	      paste('Border [', length(labelCode[labelCode == 'orangered']), ']'),
+	      paste('Receiver [', length(labelCode[labelCode == 'dimgray']), ']'),
+	      paste('Unreachable [', length(labelCode[labelCode == 'white']), ']')
+	    ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+	  )
 
     dev.off()
   }
@@ -598,6 +606,11 @@ main <- function(args) {
   )
   positions <- positions[order(positions$time), ]
   positions <- subset(positions, time <= args$simTime)
+
+	runningAlgorithm <- getVector(datasetFile, 'runningAlgorithm:vector')
+	runningAlgorithm <- runningAlgorithm[order(runningAlgorithm$time), ]
+	runningAlgorithm <- subset(runningAlgorithm, time <= args$simTime)
+
   all_nodes <- unique( getVector(datasetFile, 'positionAtX:vector')$node_id )
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
@@ -685,10 +698,12 @@ main <- function(args) {
 			)
 			# get positions of nodes during dissemination of broadcast message
 			nodesPositions <- tail( head( positions, n=o*length(all_nodes) ), n=length(all_nodes) )
+			# get the algorithm that nodes run during the dissemination of message: msgs_ids[o]
+			runningAlgoAtTopology <- tail( head( runningAlgorithm, n=o*length(all_nodes) ), n=length(all_nodes) )
 			# build wireless topology
 			get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
-				denseZone, fwdTypeAtTopology, savePlot=args$wplot
+				denseZone, fwdTypeAtTopology, runningAlgoAtTopology, savePlot=args$wplot
 	    )
 	  })
 	} else {
@@ -700,10 +715,12 @@ main <- function(args) {
 	    receivers<-subset(recv_broadcast_msgs, value == msgs_ids[o])
 			# get what type of FWD nodes perform
 			fwdTypeAtTopology <- subset(forwardTypeDs, time <= max(senders$time))
+			# get the algorithm that nodes run during the dissemination of message: msgs_ids[o]
+			runningAlgoAtTopology <- tail( head( runningAlgorithm, n=o*length(all_nodes) ), n=length(all_nodes) )
 	    # build wireless topology
 	    get.graph(
 	      all_nodes, nodesPositions, args$tx, o, unique(receivers$node_id),
-				denseZone, fwdTypeAtTopology, savePlot=args$wplot
+				denseZone, fwdTypeAtTopology, runningAlgoAtTopology, savePlot=args$wplot
 	    )
 	  })
 	}
