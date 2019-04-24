@@ -96,6 +96,8 @@ void Observables::updateTimeWindow() {
     controller->log("record observables");
     registerObservables(getDensityObs(), getMobilityObs());
     indx = 0;
+    for (auto it = mobilityApprox.begin(); it != mobilityApprox.end(); ++it)
+      it->second.clear();
   }
 }
 
