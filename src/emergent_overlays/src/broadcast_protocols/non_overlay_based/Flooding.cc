@@ -33,8 +33,9 @@ cPacket* Flooding::createBroadcastMsg(const char* msgId) {
   return m;
 }
 
-void Flooding::initialize() {
+void Flooding::initialize(bool firstCall) {
   controller->log("Running protocol: "+controller->getProtocolName(controller->FLOODING));
+  cancelSelfEvents();
 }
 
 int Flooding::getFwdType() {

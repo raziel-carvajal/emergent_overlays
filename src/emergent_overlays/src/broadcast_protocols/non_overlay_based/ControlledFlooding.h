@@ -36,7 +36,6 @@ class ControlledFlooding : public IProtocol {
   public:
     ControlledFlooding() {
     }
-    ;
 
     bool isProtocolEvent(cMessage* msg);
 
@@ -51,9 +50,8 @@ class ControlledFlooding : public IProtocol {
     }
     void updateProtocolHeaders(cPacket* pk) {
     }
-    void cancelSelfEvents() {
-    }
-    void initialize();
+    void cancelSelfEvents();
+    void initialize(bool firstCall);
     void onControlMsg(cPacket* pk, const char* sender) {
     }
 

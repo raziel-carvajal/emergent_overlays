@@ -32,10 +32,11 @@ simsignal_t InteroperableBroadcast::recvCtrlFrames = registerSignal("recvCtrlFra
 simsignal_t InteroperableBroadcast::positionAtX = registerSignal("positionAtX");
 simsignal_t InteroperableBroadcast::positionAtY = registerSignal("positionAtY");
 
-simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type");
-
 simsignal_t InteroperableBroadcast::densityObs = registerSignal("densityObs");
 simsignal_t InteroperableBroadcast::mobilityObs = registerSignal("mobilityObs");
+
+simsignal_t InteroperableBroadcast::forward_type = registerSignal("forward_type");
+simsignal_t InteroperableBroadcast::runningAlgorithm = registerSignal("runningAlgorithm");
 
 void InteroperableBroadcast::initialize(int stage) {
   UDPBasicApp::initialize(stage);
@@ -71,7 +72,7 @@ void InteroperableBroadcast::processStart() {
   scheduleEvent(Timer::HALT_APP, par("stopTime").doubleValue(), haltSimTimer);
   // store nodes positions to get an approximation of the wireless topology formed during
   // erase the content of previously known foreign algorithms
-  scheduleEvent(Timer::RESET_BORDER_STATUS, par("startSendingCtrlMsgs").doubleValue(), resetBorderTimer);
+  scheduleEvent(Timer::RESET_BORDER_STATUS, par("adaptationPolicy").doubleValue(), resetBorderTimer);
 
   // MAC layer initialization
   mac = new MacLayerWithCD();
@@ -79,6 +80,7 @@ void InteroperableBroadcast::processStart() {
   mac->initialize();
   // collector of observable: mobility and density
   collector = new Observables(this);
+  switchingPolicy = new SwitchingCriteria(this, collector);
   // the dissemination of broadcast messages
   scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
 
@@ -87,7 +89,7 @@ void InteroperableBroadcast::processStart() {
   // initialize first running protocol
   runningProtocolId = par("runningProtocolId").longValue();
   runningProtocol = protocols[runningProtocolId];
-  runningProtocol->initialize();
+  runningProtocol->initialize(true);
 }
 
 void InteroperableBroadcast::sendPacket() {
@@ -136,6 +138,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
           Coord pos = mobilityModel->getCurrentPosition();
           emit(positionAtX, pos.x);
           emit(positionAtY, pos.y);
+          emit(runningAlgorithm, runningProtocolId);
           scheduleEvent(Timer::STORE_POSITION, par("broadcastInterval").doubleValue(), motionTimer);
         }
           break;
@@ -148,7 +151,8 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
         case Timer::RESET_BORDER_STATUS: {
           isBorderNode = false;
           knownForeignAlgos.clear();
-          scheduleEvent(Timer::RESET_BORDER_STATUS, par("ctrlMsgInterval").doubleValue(), resetBorderTimer);
+          double t = 2 * par("windowSize").doubleValue() * par("broadcastInterval").doubleValue();
+          scheduleEvent(Timer::RESET_BORDER_STATUS, t, resetBorderTimer);
         }
           break;
         case Timer::HALT_APP: {
@@ -171,6 +175,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 
           runningProtocol->cancelSelfEvents();
           collector->cancelSelfEvents();
+          switchingPolicy->cancelSelfEvents();
           UDPBasicApp::finish();
 //          endSimulation();
         }
@@ -184,6 +189,9 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
       mac->handleEvent(msg);
     } else if (collector->isSelfEvent(msg)) {
       collector->handleEvent(msg);
+    } else if (switchingPolicy->isSelfEvent(msg)) {
+      if (par("withAdaptation").boolValue())
+        switchingPolicy->handleEvent(msg);
     } else {
       throw cRuntimeError("Invalid kind %d in selfInteropMsg 2", (int) msg->getKind());
     }
@@ -192,7 +200,7 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
 }
 
 void InteroperableBroadcast::processPacket(cPacket* pk) {
-  // avoid when sender and receiver are the same peer
+  // avoid that senders listen own messages
   if (getSrcAddress(pk) == localAddress) {
     delete pk;
     return;
@@ -221,12 +229,14 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       Basic* basicPk = dynamic_cast<Basic*>(pk);
       // sender's running protocol ID differs from receiver's; send request to chose border node
       if (basicPk->getRunningProtocol() != runningProtocolId) {
+
         log(
             "Ctrl msg [" + string(pk->getName()) + "] received from node running ["
                 + to_string(basicPk->getRunningProtocol()) + "]");
         if (knownForeignAlgos.find(basicPk->getRunningProtocol()) == knownForeignAlgos.end()) {
-          // TODO handle when substring "ctrlMsgName" is part of the packet name
-          if (basicPk->getName() == ctrlMsgName) {
+          string toCompare = ((string) basicPk->getName()).substr(0, ctrlMsgName.size());
+
+          if (toCompare ==  ctrlMsgName) {
             knownForeignAlgos.insert(basicPk->getRunningProtocol());
             log("I am Border node (UdpPacket::CTRL)");
             isBorderNode = true;
@@ -235,14 +245,13 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
             log("Ignoring foreign control message");
           }
         }
+
       } else {
         runningProtocol->onControlMsg(pk, sender.c_str());
       }
     }
       break;
     case UdpPacket::BORDER_REQ: {
-      // let MAC layer deal with reception
-//      mac->processMsg(pk->getName());
       numRecvCtrlMsgs++;
       log("BorderReq packet received");
       BorderReq* br = dynamic_cast<BorderReq*>(pk);
@@ -261,21 +270,21 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       }
     }
       break;
-    case UdpPacket::PING: {
-      Ping* ping = dynamic_cast<Ping*>(pk);
-      mac->processPingPk(ping);
-    }
-      break;
-    case UdpPacket::PONG: {
-      Pong* pong = dynamic_cast<Pong*>(pk);
-      mac->processPongPk(pong);
-    }
-      break;
-    case UdpPacket::ACK: {
-      Ack* a = dynamic_cast<Ack*>(pk);
-      mac->processAckPk(a);
-    }
-      break;
+//    case UdpPacket::PING: {
+//      Ping* ping = dynamic_cast<Ping*>(pk);
+//      mac->processPingPk(ping);
+//    }
+//      break;
+//    case UdpPacket::PONG: {
+//      Pong* pong = dynamic_cast<Pong*>(pk);
+//      mac->processPongPk(pong);
+//    }
+//      break;
+//    case UdpPacket::ACK: {
+//      Ack* a = dynamic_cast<Ack*>(pk);
+//      mac->processAckPk(a);
+//    }
+//      break;
     default:
       throw cRuntimeError("Invalid kind of msg %d in self message", (int) pk->getKind());
   }
@@ -290,6 +299,31 @@ void InteroperableBroadcast::scheduleEvent(short kind, double delay, cMessage* s
   simtime_t t = simTime() + delay;
   selfMsgPtr->setKind(kind);
   scheduleAt(t, selfMsgPtr);
+}
+
+void InteroperableBroadcast::updateRunningAlgorithm(int newAlgo) {
+  if (newAlgo == runningProtocolId)
+    return;      // avoid switching when both algorithms do not differ
+  int algoId;
+  switch (newAlgo) {
+    case FLOODING:
+      algoId = 0;
+      break;
+    case MPR:
+      algoId = 1;
+      break;
+    case CONTROLLED_FLOODING:
+      algoId = 2;
+      break;
+    default:
+      throw cRuntimeError("Invalid protocol ID [%d] in InteroperableBroadcast.updateRunningAlgorithm", newAlgo);
+      break;
+  }
+  runningProtocol->cancelSelfEvents();
+  log("switching from algo [" + to_string(runningProtocolId) + "] to [" + to_string(algoId) + "]");
+  runningProtocolId = algoId;
+  runningProtocol = protocols[runningProtocolId];
+  runningProtocol->initialize(false);
 }
 
 int InteroperableBroadcast::getMsgId(string msgHeader, string substr) {
@@ -339,6 +373,7 @@ cPacket* InteroperableBroadcast::getBroadcastMsg() {
 cPacket* InteroperableBroadcast::getBorderReqMsg() {
   BorderReq* r = new BorderReq();
   r->setRunningProtocol(runningProtocolId);
+  addSender(r);
   addPacketType(r, UdpPacket::BORDER_REQ);
   return r;
 }

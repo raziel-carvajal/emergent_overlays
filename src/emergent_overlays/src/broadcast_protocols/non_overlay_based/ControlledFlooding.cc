@@ -51,14 +51,15 @@ void ControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
   }
 }
 
-void ControlledFlooding::initialize() {
+void ControlledFlooding::initialize(bool firstCall) {
+  cancelSelfEvents();
   controller->log("Running protocol: " + controller->getProtocolName(controller->CONTROLLED_FLOODING));
   allowedReceptions = controller->par("counterCfcondition").longValue();
 }
 
 cPacket* ControlledFlooding::createBroadcastMsg(const char* msgId) {
   Broadcast* m = new Broadcast(msgId);
-  m->setRunningProtocol(controller->FLOODING);
+  m->setRunningProtocol(controller->CONTROLLED_FLOODING);
   return m;
 }
 
@@ -80,10 +81,12 @@ void ControlledFlooding::handleEvent(cMessage* msg) {
       controller->log("Sending msg: " + event + ", copies: " + to_string(counters[event]));
 
       controller->send(msgs[event]);
-      controller->emit(
-          controller->sentBroadcastMsg,
-          controller->getMsgId(msgs[event]->getName(), controller->getBroadcastMsgName()) );
-
+      controller->emit(controller->sentBroadcastMsg,
+          controller->getMsgId(msgs[event]->getName(), controller->getBroadcastMsgName()));
+      if (controller->isBorderNode)
+        controller->emit(controller->forward_type, controller->ForwardType::BORDER_NODE);
+      else
+        controller->emit(controller->forward_type, getFwdType());
       timers.erase(event);
       counters.erase(event);
       msgs.erase(event);
@@ -94,4 +97,12 @@ void ControlledFlooding::handleEvent(cMessage* msg) {
 
 bool ControlledFlooding::amIoverlayRelay() {
   return false;
+}
+
+void ControlledFlooding::cancelSelfEvents() {
+  for (map<string, cMessage*>::iterator it = timers.begin(); it != timers.end(); ++it) {
+    controller->cancelAndDelete(it->second);
+  }
+  timers.clear();
+  msgs.clear();
 }

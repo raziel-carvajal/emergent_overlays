@@ -23,18 +23,8 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end() && m != nullptr) {
     // tag packet as received
     controller->receivedMsg.insert(pkName);
-//    latestPayload.clear();
     OneHopNeigs senderNeigs = m->getNeighbors();
 
-//    for (OneHopNeigs::iterator it = senderNeigs.begin(); it != senderNeigs.end(); ++it) {
-//      latestPayload.insert(*it);
-//    }
-    // schedule FWD decision
-//    fwdBrMsgTimer->getParList().remove("ReceivedMsgId");
-//    cMsgPar* p = new cMsgPar("ReceivedMsgId");
-//    p->setStringValue(pkName);
-//    fwdBrMsgTimer->addPar(p);
-//    controller->scheduleEvent(FWD_BROADCAST_MSG, controller->minSentDelay, fwdBrMsgTimer);
     bool fwdMsg = false;
     if (amIrelay(senderNeigs)) {
       fwdMsg = true;
@@ -44,18 +34,15 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
       fwdMsg = true;
       controller->emit(controller->forward_type, controller->BORDER_NODE);
     }
-
     if (fwdMsg) {
-//      controller->log(temp);
       cPacket* broadcastMsg = createBroadcastMsg(pkName);
-//      controller->emit(controller->sentBroadcastMsg, controller->getMsgId(pkName));
       controller->fwdBroadcastMsg(broadcastMsg);
     }
   }
-
 }
 
-void Mpr::initialize() {
+void Mpr::initialize(bool firstCall) {
+  cancelSelfEvents();
   controller->log("Running protocol: " + controller->getProtocolName(controller->MPR));
 
   bool isNumeric = false;
@@ -78,8 +65,14 @@ void Mpr::initialize() {
   controller->scheduleEvent(SCHEDULE_FIRST_CTRL_MSG, sentCtrlMsgDelay + minSentDelay, sCtrlMsgTimer);
 
   // build remaining overlays
-  controller->scheduleEvent(SCHEDULE_CTRL_MSGS,
-      controller->par("startSendingCtrlMsgs").doubleValue() + sentCtrlMsgDelay, sRemainingCtrlMsgTimer);
+  double t = controller->par("startSendingCtrlMsgs").doubleValue() + sentCtrlMsgDelay;
+  if (firstCall) {
+    controller->scheduleEvent(SCHEDULE_CTRL_MSGS, t, sRemainingCtrlMsgTimer);
+  } else {
+    t += controller->par("getObsInterval").doubleValue() / 2.0;
+//    getObsInterval
+    controller->scheduleEvent(SCHEDULE_CTRL_MSGS, t, sRemainingCtrlMsgTimer);
+  }
 }
 
 cPacket* Mpr::createBroadcastMsg(const char* msgId) {
@@ -227,28 +220,6 @@ void Mpr::handleEvent(cMessage* msg) {
       controller->log(temp);
     }
       break;
-//    case FWD_BROADCAST_MSG: {
-//      string msgId = msg->par("ReceivedMsgId").stringValue();
-//      string temp("FWD message: " + msgId);
-//
-//      bool fwdMsg = false;
-//      if (amIrelay(latestPayload)) {
-//        fwdMsg = true;
-//        controller->isBorderNode = false;
-//        controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
-//      } else if (controller->isBorderNode) {
-//        fwdMsg = true;
-//        controller->emit(controller->forward_type, controller->BORDER_NODE);
-//      }
-//
-//      if (fwdMsg) {
-//        controller->log(temp);
-//        cPacket* broadcastMsg = createBroadcastMsg(msgId.c_str());
-//        controller->send(broadcastMsg);
-//        controller->emit(controller->sentBroadcastMsg, controller->getMsgId(msgId));
-//      }
-//    }
-//      break;
     case SEND_CTRL_MSG: {
       cPacket* pk = getCtrlMsg(1);
       controller->send(pk);
@@ -362,14 +333,11 @@ void Mpr::onControlMsg(cPacket* pk, const char* sender) {
 }
 
 void Mpr::cancelSelfEvents() {
-  if (buildCdsTimer)
-    controller->cancelAndDelete(buildCdsTimer);
-  if (fwdBrMsgTimer)
-    controller->cancelAndDelete(fwdBrMsgTimer);
-  if (sCtrlMsgTimer)
-    controller->cancelAndDelete(sCtrlMsgTimer);
-  if (sRemainingCtrlMsgTimer)
-    controller->cancelAndDelete(sRemainingCtrlMsgTimer);
+  ctrlMsgId = 0;
+  controller->cancelEvent(buildCdsTimer);
+  controller->cancelEvent(fwdBrMsgTimer);
+  controller->cancelEvent(sCtrlMsgTimer);
+  controller->cancelEvent(sRemainingCtrlMsgTimer);
 }
 
 int Mpr::getFwdType() {

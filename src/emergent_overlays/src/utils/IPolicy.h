@@ -13,16 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package emergent_overlays.tunned_modules;
+#ifndef IPOLICY_H_
+#define IPOLICY_H_
 
-import inet.node.inet.AdhocHost;
+class IPolicy {
+  public:
+    virtual ~IPolicy() {
+      // TODO Auto-generated destructor stub
+    }
+    virtual int choseAlgorithm(double density, double stability) = 0;
+};
 
-module Cellphone extends AdhocHost
-{
-    parameters:
-        wlan[*].radioType = default("IdealRadio");
-        energyStorageType = default("SimpleEnergyStorage");
-        wlan[*].radio.energyConsumerType = default("ReducedStateBasedEnergyConsumer");
-        // TODO evaluate with use Reference Point Group Mobility (RPGM) model
-        mobilityType = default("LinearMobility");
-}
+#endif /* IPOLICY_H_ */

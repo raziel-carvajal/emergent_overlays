@@ -41,8 +41,6 @@ class Mpr : public IProtocol {
 
     string ctrlMsgName = "1ctrlMsg-";
 
-    set<string> latestPayload;
-
     cMessage* buildCdsTimer = new cMessage("buildCdsTimer");
     cMessage* sCtrlMsgTimer = new cMessage("sCtrlMsgTimer");
     cMessage* fwdBrMsgTimer = new cMessage("fwdBrMsgTimer");
@@ -94,7 +92,7 @@ class Mpr : public IProtocol {
     void updateProtocolHeaders(cPacket* pk) {
     }
     void cancelSelfEvents();
-    void initialize();
+    void initialize(bool firstCall);
     void sendCtrlMsg();
     void onControlMsg(cPacket* pk, const char* sender);
 

@@ -13,16 +13,24 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package emergent_overlays.tunned_modules;
+#ifndef SINGLEPOLICY_H_
+#define SINGLEPOLICY_H_
 
-import inet.node.inet.AdhocHost;
+#include <IPolicy.h>
+#include <common/InteroperableBroadcast.h>
 
-module Cellphone extends AdhocHost
-{
-    parameters:
-        wlan[*].radioType = default("IdealRadio");
-        energyStorageType = default("SimpleEnergyStorage");
-        wlan[*].radio.energyConsumerType = default("ReducedStateBasedEnergyConsumer");
-        // TODO evaluate with use Reference Point Group Mobility (RPGM) model
-        mobilityType = default("LinearMobility");
-}
+class SinglePolicy : public IPolicy {
+  public:
+    double densityThr1;
+    double densityThr2;
+    double stabilityThr1;
+    double stabilityThr2;
+
+    InteroperableBroadcast* controller = nullptr;
+
+  public:
+    SinglePolicy(InteroperableBroadcast* c);
+    int choseAlgorithm(double density, double stability);
+};
+
+#endif /* SINGLEPOLICY_H_ */

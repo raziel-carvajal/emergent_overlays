@@ -41,7 +41,7 @@ class Flooding : public IProtocol {
     void addProtocolHeaders(cPacket* pk) {}
     void updateProtocolHeaders(cPacket* pk) {}
     void cancelSelfEvents() {}
-    void initialize();
+    void initialize(bool firstCall);
     void onControlMsg(cPacket* pk, const char* sender) {}
 
     cPacket* createBroadcastMsg(const char* msgId);

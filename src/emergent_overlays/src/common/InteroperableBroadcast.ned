@@ -51,7 +51,7 @@ simple InteroperableBroadcast extends UDPBasicApp
     //		specify running protocol identifier (see enum Protocols at InteroperableBroadcast.h)
     int runningProtocolId;
     // 		options to measure observables
-    double getObsInterval @unit(s) = this.broadcastInterval;
+    double getObsInterval @unit(s) = this.broadcastInterval - 0.01s;// lag to be sure that the swiching policy use latests observables
     double startObsApprox @unit(s)= this.broadcastInterval + (this.broadcastInterval / 2);
     // 			TODO for windows bigger than 10, be sure that there is an implementation for FIX ME
 	int windowSize = default(10);
@@ -63,8 +63,10 @@ simple InteroperableBroadcast extends UDPBasicApp
 
 	//		options for adaptation
 	bool withAdaptation = default(false);
-	int keepProtocolSlotsNo = default(20);
-	double keepProtocolInterval @unit(s) = this.keepProtocolSlotsNo * this.broadcastInterval;
+	double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2);
+	int adaptationPolicy = default(0);// single = 0, collective = 1
+	double densityThreshold = default(20.0);
+	double stabilityThreshold = default(1.0);
 
     // options for broadcast protocols
     // 		controlled flooding
@@ -97,5 +99,7 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     @signal[mobilityObs](type=double);
     @statistic[mobilityObs](source=mobilityObs; record=vector; interpolationmode=none);
-
+    
+    @signal[runningAlgorithm](type=int);
+    @statistic[runningAlgorithm](source=runningAlgorithm; record=vector; interpolationmode=none);
 }

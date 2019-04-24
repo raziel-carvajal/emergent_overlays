@@ -34,7 +34,9 @@ class IProtocol {
     virtual void addProtocolHeaders(cPacket* pk) = 0;
     virtual void updateProtocolHeaders(cPacket* pk) = 0;
     virtual void cancelSelfEvents() = 0;
-    virtual void initialize() = 0;
+    // NOTE call cancelSelfEvents() on each implementation of method initialize(),
+    //      this is required by the adaptation module
+    virtual void initialize(bool firstCall) = 0;
     virtual void onControlMsg(cPacket* pk, const char* sender) = 0;
 
     virtual cPacket* createBroadcastMsg(const char* msgId) = 0;

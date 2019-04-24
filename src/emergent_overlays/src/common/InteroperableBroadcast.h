@@ -22,6 +22,7 @@
 #include <functional>
 #include <utils/IProtocol.h>
 #include <utils/Observables.h>
+#include <utils/SwitchingCriteria.h>
 
 // implementations of broadcast protocols
 #include <broadcast_protocols/overlay_based/MPR.h>
@@ -56,6 +57,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     L3Address broadcastAddress;
 
     Observables* collector = nullptr;
+
+    SwitchingCriteria* switchingPolicy = nullptr;
 
   private:
     void intializeCatalog() {
@@ -137,6 +140,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t recvCtrlFrames;
     static simsignal_t densityObs;
     static simsignal_t mobilityObs;
+    static simsignal_t runningAlgorithm;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
 
@@ -171,6 +175,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     void fwdBroadcastMsg(cPacket* pk);
     void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
     void addPacketType(cPacket* msg, long t);
+    void updateRunningAlgorithm(int newAlgo);
 
     string getProtocolName(Protocols p) {
       switch (p) {

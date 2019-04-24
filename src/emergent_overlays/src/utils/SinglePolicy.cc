@@ -13,16 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package emergent_overlays.tunned_modules;
+#include <SinglePolicy.h>
 
-import inet.node.inet.AdhocHost;
+SinglePolicy::SinglePolicy(InteroperableBroadcast* c) {
+  controller = c;
+  densityThr1 = controller->par("densityThreshold").doubleValue();
+  controller->log("density threshold: " + to_string(densityThr1));
+}
 
-module Cellphone extends AdhocHost
-{
-    parameters:
-        wlan[*].radioType = default("IdealRadio");
-        energyStorageType = default("SimpleEnergyStorage");
-        wlan[*].radio.energyConsumerType = default("ReducedStateBasedEnergyConsumer");
-        // TODO evaluate with use Reference Point Group Mobility (RPGM) model
-        mobilityType = default("LinearMobility");
+int SinglePolicy::choseAlgorithm(double density, double stability) {
+  controller->log("doIswitch ? " + to_string(density) + " >= " + to_string(densityThr1));
+  return density >= densityThr1 ? controller->Protocols::MPR : controller->Protocols::CONTROLLED_FLOODING;
 }

@@ -46,6 +46,7 @@ double Observables::getDensityObs() {
   }
   rate /= (densityApprox.size() * 1.0);
   controller->log("Density rate: " + to_string(rate));
+  latestMobility = rate;
   return rate;
 }
 
@@ -77,6 +78,7 @@ double Observables::getMobilityObs() {
   }
   rate /= (intervals.size() * 1.0);
   controller->log("Mobility rate: " + to_string(rate));
+  latestStability = rate;
   return rate;
 }
 

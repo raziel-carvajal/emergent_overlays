@@ -13,65 +13,44 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef OBSERVABLES_H_
-#define OBSERVABLES_H_
+#ifndef SWITCHINGCRITERIA_H_
+#define SWITCHINGCRITERIA_H_
 
-#include <map>
-#include <set>
 #include <cmessage.h>
-#include <vector>
+#include <Observables.h>
+#include <IPolicy.h>
 
 using namespace std;
 
 class InteroperableBroadcast;
 
-class Observables {
+class SwitchingCriteria {
   private:
-
     enum Timers {
-      UPDATE_WINDOW
+      APPLY_CRITERIA
     };
 
-    int indx = 0;
-
-    bool withRateOfChange;
-
-    vector<int> windowIndx;
-
-    // time window of density and mobility
-    map<int, int> densityApprox;
-    map<int, set<string>> mobilityApprox;
-    map<int, int[2]> intervals;
+    enum Policies {
+      SINGLE, COLLECTIVE
+    };
 
     InteroperableBroadcast* controller = nullptr;
 
-    cMessage* updateTimer = new cMessage("updateTimer");
+    IPolicy* policy = nullptr;
+
+    Observables* observables = nullptr;
+
+    cMessage* switchTimer = new cMessage("swichTimer");
 
   private:
-
-    void registerObservables(double density, double mobility);
-    double getDensityObs();
-    double getMobilityObs();
-    void updateTimeWindow();
-
-    map<int, int[2]> getInvervals();
+    void applyCriteria();
 
   public:
-    double latestMobility;
-    double latestStability;
+    SwitchingCriteria(InteroperableBroadcast* c, Observables* obs);
 
-    set<string> neighbors;
-
-  public:
-    Observables(InteroperableBroadcast* c);
-    virtual ~Observables() {
-
-    }
-    void initForWeightedAvg();
-    void initForRateOfChange();
     bool isSelfEvent(cMessage* event);
     void handleEvent(cMessage* event);
     void cancelSelfEvents();
 };
 
-#endif /* OBSERVABLES_H_ */
+#endif /* SWITCHINGCRITERIA_H_ */

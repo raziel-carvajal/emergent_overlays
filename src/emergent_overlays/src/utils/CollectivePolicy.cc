@@ -13,16 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package emergent_overlays.tunned_modules;
+#include <CollectivePolicy.h>
 
-import inet.node.inet.AdhocHost;
+CollectivePolicy::CollectivePolicy(InteroperableBroadcast* c) {
+  controller = c;
+}
 
-module Cellphone extends AdhocHost
-{
-    parameters:
-        wlan[*].radioType = default("IdealRadio");
-        energyStorageType = default("SimpleEnergyStorage");
-        wlan[*].radio.energyConsumerType = default("ReducedStateBasedEnergyConsumer");
-        // TODO evaluate with use Reference Point Group Mobility (RPGM) model
-        mobilityType = default("LinearMobility");
+int CollectivePolicy::choseAlgorithm(double density, double stability) {
+  return -1;
 }
