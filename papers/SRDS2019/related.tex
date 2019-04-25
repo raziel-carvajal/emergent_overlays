@@ -6,13 +6,14 @@
 
 % We review related work on broadcast in MANETs, adaptation mechanisms in wireless and mobile networks, and studies of mobility in these systems.
 
-A survey by Ruiz and Bouvry~\cite{ruiz2015survey} provides a comprehensive taxonomy and list of controlled flooding and overlay-based protocols, also covered in surveys by Reina \emph{et~al.}~\cite{Reina2015} and Santi~\cite{Santi:2005:TCW:1089733.1089736}.
+A survey by Ruiz and Bouvry~\cite{ruiz2015survey} provides a comprehensive taxonomy of controlled flooding and overlay-based protocols, also covered in surveys by Reina \emph{et~al.}~\cite{Reina2015} and Santi~\cite{Santi:2005:TCW:1089733.1089736}.
 %
 % Broadcast protocols consider either fixed- or a variable-range communication~\cite{woon2011variable,park2013efficient}.
 % Our focus in this paper is on fixed-range communication.
 Our previous work~\cite{DensityMobDrivenEval} and the work of Williams and Camp~\cite{Williams2002} present comparative evaluations of broadcast protocols from different classes.
 Hess \emph{et~al.}~\cite{Hess:2015:DHM:2856149.2840722} survey human mobility models for mobile networking.
-Levy walk as a \emph{general} model~\cite{rhee2011levy}, while other proposals allow modeling mobility in specific scenarios, such as disaster areas~\cite{Aschenbruck2009}.
+Levy walk are a \emph{general} model~\cite{rhee2011levy}.
+Other proposals allow modeling mobility in specific scenarios, such as disaster areas~\cite{Aschenbruck2009}.
 
 The \emph{broadcast storm} problem associated with flooding is identified by Ni et al.~\cite{BroadcastStormProblem}, who also propose the \emph{controlled flooding} using counters and timers that we use in this paper.
 The collection of topology information~\cite{ProbFlood} or GPS locations~\cite{abba} allows optimizing controlled flooding.
@@ -26,14 +27,14 @@ Other approaches~\cite{woon2011variable,park2013efficient} consider variable-ran
 Determining the optimal configuration for a MANET broadcast algorithm is difficult.
 % Adaptation techniques have been proposed for different protocols and application contexts.
 Kokuti and Vilmos~\cite{kokuti2012adaptive} propose adaptation techniques to dynamically decide on parameters in controlled flooding.
-We described this approach together with our other comparison point Hypergossiping~\cite{hypergossiping} in our evaluation.
+We described this approach in \S\ref{sec:evaluation} together with our other comparison point Hypergossiping~\cite{hypergossiping}.
 Other approaches to adapt controlled flooding are based on measures of the nodes' velocity~\cite{adaptive_group_com_iscc02} or observed contention and collisions~\cite{2001:AAR:876878.879323}.
 Liarokapis and Shahrabi~\cite{prob-based-adaptive-tech} propose adaptation techniques to switch from simple flooding to controlled flooding, and adapts the switching threshold to locally measured density.
 Artimy~\cite{artimy2007local} proposes density estimation and dynamic range adaptation for vehicular networks, distinguishing between free-flow and congested phases.
 
 The term \emph{emergent overlay} has been previously used in another context, wired unstructured P2P network~\cite{galuba2007generic}, to denote the \emph{on demand} construction of distributed hash tables~\cite{jelasity2009t}, following a centralized decision.
-Bellavista \emph{et al.} combine a static sensor network using an overlay and a MANET with controlled flooding for data collection for an IoT scenario, but the use of either protocol is determined in advance.
-We are not aware of any previous approach combining in a single MANET controlled flooding and the use of emergent overlays.
+Bellavista \emph{et al.}~\cite{Bellavista2013} combine a static sensor network using an overlay and a MANET with controlled flooding for data collection for an IoT scenario, but the use of either protocol is determined in advance.
+We are not aware of any previous approach combining in a single MANET controlled flooding and overlays.
 
 
 

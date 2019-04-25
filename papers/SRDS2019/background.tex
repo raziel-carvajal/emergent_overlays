@@ -20,8 +20,8 @@
 
 We start by detailing our system and communication models.
 We follow-up with the description of the three base protocols we combine in this paper.
-The first protocol is a MAC protocol enabling reliable local broadcast.
-The two other protocols implement global broadcast:
+The first protocol is a MAC protocol enabling reliable \emph{local broadcast}.
+The two other protocols implement \emph{global broadcast}:
 One is based on controlled flooding and the other uses an overlay.
 
 \subsection{System and communication models}
@@ -114,6 +114,8 @@ An illustration of counter-based controlled flooding is given by Figure~\ref{fig
 \subsubsection{Multipoint Relay (MPR)}
 \label{sec:background:broadcast:overlay}
 
+\input{mpr_protocol}
+
 Overlay-based approaches pre-compute which nodes should act as relays.
 This requires exchange of information between nodes outside of actual broadcast sessions.
 The goal is to form a \emph{connected dominating set} overlay
@@ -168,7 +170,7 @@ It is however necessary that the nodes positions be sufficiently stable, or the 
 % %
 % The MPR technique is a distributed heuristic to figure out the minimum connected dominating set.
 
-\input{mpr_protocol}
+
 
 % \begin{figure}[t]
 % 	\begin{minipage}[t]{0.45\linewidth}
