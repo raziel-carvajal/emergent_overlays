@@ -11,18 +11,19 @@
 	\label{fig:general_principle}
 \end{figure}
 
-Controlled flooding is efficient when nodes density over space is small to moderate.
+Controlled flooding is efficient when node spatial density is small to moderate.
 It is also robust in dynamic environments, as the relaying decision is based on the \emph{current} conditions during a dissemination.
-However, it fails short when the density increases, leading to broadcast storm problems~\cite{BroadcastStormProblem}.
-Redundant communications at the application level interfere with each other, MAC protocols require more retransmissions, leading to a chain reaction of collisions.
+However, it falls short when density increases, leading to broadcast storms~\cite{BroadcastStormProblem}.
+Redundant communications at the application level interfere with each other, while MAC protocols require more retransmissions, leading to a chain reaction of collisions.
 This quickly saturates the wireless medium, impairing reliability and increasing energy costs.
 %
-Overlay-based broadcast is in contrast adapted to dense environments, where a small number of well-selected relays are pre-selected and where broadcast minimizes the risk of collisions.
-However, it can be ineffective when nodes are highly mobile, as maintaining the overlay would require a very frequent exchange of control messages, leading to an increase in these collisions, higher costs, and eventually lower reliability.
+Overlay-based broadcast is, in contrast, adapted to dense environments, where a small number of well-selected relays are pre-selected for broadcast, minimizing the risk of collisions.
+However, it can be ineffective when nodes are highly mobile, as maintaining the overlay would require a very frequent exchange of control messages, leading to an increase in collisions, %higher costs, 
+and eventually lower reliability.
 
-Human mobility behavior indicates that a hybrid approach could benefit from the resiliency and robustness of controlled flooding in general, while leveraging overlays where they are beneficial.
-Mobility models~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy} but also large-scale measurement campaigns at large human gathering~\cite{naini2015opportunistic,versichele2012use} indicate that human users tend to aggregate around points of interest for extended periods of time.
-When around these points of interests (e.g. the concert stages at the Paléo festival in~\cite{naini2015opportunistic}) the speed of users decreases or even comes to a stop.
+Human mobility behavior indicates that a hybrid approach could benefit from the resiliency and robustness of controlled flooding in general, while leveraging overlays where and when they are beneficial.
+Mobility models~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy} and measurement campaigns at large-scale gatherings~\cite{naini2015opportunistic,versichele2012use} indicate that human users tend to aggregate around points of interest for extended periods of time.
+When around such points of interests (e.g. the concert stages at the Paléo festival in~\cite{naini2015opportunistic}), the speed of users decreases or even comes to a stop.
 Mobility between points of interest happens at a greater speed, and through less densely-populated areas.
 %
 The core contribution of this paper is the notion of \emph{emergent overlays}, illustrated by Figure~\ref{fig:general_principle}:
