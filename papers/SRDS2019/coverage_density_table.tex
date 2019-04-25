@@ -19,30 +19,35 @@
 	Collisions (\#)
 	\\
 \midrule
-	\multirow{3}{*}{CF}
-						& All    &  99.99  & 78.51  &  8890.0  \\ 
-						& Outside &  99.98  & 100.00    &  3070.1  \\
-						& At POI  &  100.00    & 35.09  &  5819.8  \\ 
+	\multirow{3}{*}{$\text{CF}_{\text{counter}}=$3}
+						& All    &  99.99  & 78.51  &  8890.00 \\ 
+						& Outside &  99.98  & 100    &  3070.10  \\
+						& At POI  &  100    & 35.09  &  5819.80  \\ 
 \midrule
 	% \multirow{3}{*}{\parbox{0.20\linewidth}{\noindent \centering MPR with $\Delta=$XX~s}} 
-	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs} 
-						& All    &  99.9  & 94.4   & 612.9 \\ 
-						& Outside &  99.9  & 97.6   & 235.2 \\
-						& At POI  &  100.00   & 81.8   & 377.6 \\ 
+	\multirow{3}{0.125\linewidth}{$\text{MPR}_{\Delta}=$10s} 
+						& All    &  99.90  & 94.40   & 612.90 \\ 
+						& Outside &  99.90  & 97.60   & 235.20 \\
+						& At POI  &  100   & 81.80   & 377.60 \\ 
 \midrule
-	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs}
-						& All    &  99.8  & 94.7   & 599.8 \\
-						& Outside &  99.6  & 98.0   & 231.5 \\
-						& At POI  &  100   & 81.5   & 368.2 \\ 
+	\multirow{3}{0.125\linewidth}{$\text{MPR}_{\Delta}=$20s}
+						& All    &  99.80  & 94.70   & 599.80 \\
+						& Outside &  99.60  & 98   & 231.50 \\
+						& At POI  &  100   & 81.50   & 368.20 \\ 
 \midrule
-	\multirow{3}{0.125\linewidth}{MPR with $\Delta=$XXs} 	
-						& All    &  99.3  & 95.0   & 621.6 \\
-						& Outside &  98.7  & 98.4   & 245.2 \\
-						& At POI  &  99.9  & 79.5   & 376.3 \\ 
+	\multirow{3}{0.125\linewidth}{$\text{MPR}_{\Delta}=$30s} 	
+						& All    &  99.30  & 95   & 621.60 \\
+						& Outside &  98.70  & 98.40   & 245.20 \\
+						& At POI  &  99.90  & 79.50   & 376.30 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{Emerg. Ovl.}$ \\ $\text{MPR}_{\Delta}=$30s \\ $\text{CF}_{\text{counter}}=$3} 	
+						& All    & 99.99   & 87.35  & 3552.83 \\
+						& Outside & 99.99   & 93.13   & 1871.77 \\
+						& At POI  & 100   &  93.40  & 1681.05 \\ 
 \bottomrule
 \end{tabular}
 \caption{Coverage and collisions with a single protocol for the entire system, split between nodes that evolve \emph{outside} or \emph{at} the POI.
-\protect\er{Raziel: change the XX with the proper values. What does it mean to have decimal numbers for the number of collisions, this is an average? Why do we have numbers with one decimal and others with multiple decimals? This needs to be homogeneous (a single decimal is more than enough)}
+\protect\er{Raziel: What does it mean to have decimal numbers for the number of collisions, this is an average? Why do we have numbers with one decimal and others with multiple decimals? This needs to be homogeneous (a single decimal is more than enough)}
 }
 \label{tab.conf}
 \end{table}
