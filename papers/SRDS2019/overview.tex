@@ -40,8 +40,8 @@ Broadcast messages may be emitted by any node of the network, from a zone using 
 It is necessary that the broadcast reaches all nodes regardless of the protocols they use.
 This is a problem of protocol interoperability.
 Overlay-based protocols maintain efficient dissemination structure for nodes \emph{within their boundaries}.
-They do not select relays for guaranteeing connectivity to nodes that do not participate to the protocol.
-We develop in \S\ref{sec:mechanisms} interoperability mechanisms that properly connect and bound regions using protocols of different types, regardless of the size and shape of these regions.
+They do not select relays for guaranteeing connectivity to nodes that do not participate in the protocol.
+In \S\ref{sec:mechanisms}, we develop interoperability mechanisms that properly connect and bound regions using protocols of different types, regardless of the size and shape of these regions.
 
 \smallskip
 \noindent
@@ -49,16 +49,16 @@ We develop in \S\ref{sec:mechanisms} interoperability mechanisms that properly c
 %
 Nodes must be able to reflect on their deployment environment, and evaluate in particular density and mobility.
 Actively probing this information would defeat the purpose of reducing costs and improving efficiency.
-Instead, we rely on passive observation that collects information from the regular operation of the broadcast and MAC protocols running on each node. 
+Instead, we rely on passive observation of information collected from the regular operation of the broadcast and MAC protocols running on each node. 
 We describe the nature and accuracy of the resulting \emph{observables} in the first part of \S\ref{sec:adaptation}.
 
 \smallskip
 \noindent
 \textbf{Adaptation.}
 %
-The decision of when to emerge, and when to break, an emergent overlay is controlled by an adaptation policy.
+An emergent overlay is controlled by an adaptation policy to decide on when to emerge and when to dissolve. 
 Policies must be decentralized: There is no global vision of the MANET or centralized decision-making.
-We only allow that specific information be piggybacked over existing messages to enable coordinated decisions between a cluster of nodes. %%% ER: remove if we do not have this in the end in the policies
+We only allow specific information be piggybacked over existing messages to enable coordinated decisions between a cluster of nodes. %%% ER: remove if we do not have this in the end in the policies
 The goal of the adaptation is to emerge overlays that closely correspond to dense and/or static regions, avoiding a proliferation of small and isolated overlays that could increase the cost of interoperability.
 We discuss our adaptation policies in the second part of \S\ref{sec:adaptation}.
 
