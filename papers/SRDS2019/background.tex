@@ -36,8 +36,7 @@ Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\do
 Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
 Sending and receiving frames consumes energy from the node's limited power supply.
 
-The main obstacle to reliable broadcast in MANETs is the occurence of \emph{collisions}.
-A collision may happen when two nodes have overlapping coverage areas.
+The main obstacle to reliable broadcast in MANETs is the occurrence of \emph{collisions}, which may happen when two nodes have overlapping coverage areas.
 If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
 The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
 Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
@@ -46,7 +45,7 @@ Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
 \label{sec:background:mac}
 
 A MAC (\emph{Medium Access Control}) protocol arbitrates the use of the wireless medium to minimize collisions and their impact on communication reliability.
-It detects missed receptions and implement frame retransmissions when necessary.
+It detects missed receptions and implements frame retransmissions when necessary.
 
 We use broadcast medium window (BMW), a MAC protocol for reliable local broadcast~\cite{tang2001mac}.
 The protocol is illustrated by Figure~\ref{fig:mac_protocol}.
@@ -55,8 +54,8 @@ A node initiates a local broadcast by sending a RTS (Request To Send) frame, wit
 These neighbors reply with CTS (Clear To Send) messages containing their identity.
 Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
 Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
-The payload frame is then transmitted, and neighbors ack its reception, again using physical carrier sensing to avoid collisions.
-Up to two additional retransmission happen in case of missed or error-bearing acknowledgments.
+The payload frame is then transmitted, and neighbors acknowledge its reception, again using physical carrier sensing to avoid collisions.
+Up to two additional retransmissions happen in case of missed or error-bearing acknowledgments.
 The rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem}.
 
 \subsection{(Global) Broadcast protocols}

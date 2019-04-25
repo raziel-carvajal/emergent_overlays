@@ -37,7 +37,7 @@ The over-abundance of collisions due to multiple retransmissions has been coined
 
 Broadcast protocols are classified in two families~\cite{ruiz2015survey}:
 	Protocols based on \emph{controlled flooding}, 
-	and protocols relying on the creation and maintenance of an \emph{overlay}.
+	and those relying on the creation and maintenance of an \emph{overlay}.
 %
 With controlled flooding, any node receiving a message decides whether or not (and when) to retransmit it using a local broadcast, based on the information attached to that message, the local node state and possibly its observation of its surroundings.
 % Controlled flooding is prone to broadcast storms but is robust in highly mobile settings.
@@ -65,7 +65,7 @@ The decision to emerge (or later dissolve) an overlay is based on local indicato
 \begin{itemize}
 	\item We present our system model and three base protocols (\S\ref{sec:background}): The Broadcast Medium Window (BMW) MAC protocol for reliable local broadcast~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr}.
 	\item We define the requirements for emergent overlays (\S\ref{sec:overview}).
-	\item We address the interoperability challenge with a protocol allowing to guarantee continuity in the broadcast across heterogeneous zone using different protocols (\S\ref{sec:mechanisms}).
+	\item We address the interoperability challenge with a protocol allowing to guarantee continuity in the broadcast across heterogeneous zones using different protocols (\S\ref{sec:mechanisms}).
 	\item We present how nodes are able to collect \emph{observables} about their environment to drive the emergence of overlays, and how this emergence is coordinated autonomously across nodes in an homogeneous region of the MANET (\S\ref{sec:adaptation}).
 	\item We discuss the implementation and evaluation of emergent overlays in the OMNeT++ framework~\cite{Varga:2008:OOS:1416222.1416290}.
 	We evaluate our approach in a number of representative scenarios and compare it to other approaches for broadcast adaptation.
