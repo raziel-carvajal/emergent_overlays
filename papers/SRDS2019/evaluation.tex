@@ -1,9 +1,10 @@
 %!TEX root = main.tex
 %=========================================================
-%\er{research questions: state what the experiments aim to show and demonstrate. There should be about 3-5 clear research questions. The experiments must be tailored to answer these questions.}
 \section{Evaluation}
 \label{sec:evaluation}
-We conduct a simulation study using Omnet++ and its plug-in for wireless networks INET to evaluate our approach \textit{emergent overlays} and compare it with two state-of-the-art techniques to broadcast: adaptive controlled flooding and hypergossiping. \raziel{describe content of this section}
+We conduct a simulation study using Omnet++ (v5.4)~\cite{omnet} and its plug-in INET (v4.1) for wireless networks to evaluate our approach \textit{emergent overlays}.
+%
+This section describes the simulation set up, a micro-benchmark of broadcast protocols deployed in an heterogeneous MANET and a discussion about how our adaptive approach is positioned with existent techniques to broadcast.
 
 \subsection{Use case and mobility model}
 Figure~\ref{fig:eval:setup} depicts our experimental scenario where a crowd is carrying a single mobile device with WiFi capabilities.
@@ -14,7 +15,7 @@ The dimensions in this region were chosen such that nodes inside it have in aver
 %
 Such density have been previously reported in real-life scenarios~\cite{versichele2012use}.
 %
-We have a total of 600 nodes, when the simulation starts 300 nodes are randomly positioned at the PoI and 300 nodes out of it.
+There is a total of 600 nodes, when the simulation starts 300 nodes are randomly positioned at the PoI and 300 nodes out of it.
 %
 Nodes perform truncated levy walks, that is, frequent short walks and occasional rides to distant locations where the direction of nodes motion remains invariable between walks.
 %
@@ -22,25 +23,27 @@ This characterization fits well to mimic motion of humans in the context of MANE
 %
 The velocity of every walk is chosen randomly from a fixed interval.
 %
-The interval of velocity for nodes at the PoI is between 0m/s and 0.5m/s, while nodes out of it move between 1.5m/s and 2m/s.
+Such interval at the PoI varies between 0m/s and 0.5m/s, while out of it the velocity varies between 1.5m/s and 2m/s.
 %
 Nodes move freely within the whole communication area with one exception, when a node reaches the frontier of the PoI it may remain in its current region with a likelihood of 50\%.
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{figures/setup_with_poi.pdf}
-	\caption{Position of the 600 nodes in the simulation setup at $t=0$.}
+	\caption{Initial position of 600 nodes in the simulation setup.}
 	\label{fig:eval:setup}
 \end{figure}
 
 \subsection{Simulation set up}
-We rely on a simulation of the network stack for MANETs, that is, the IEEE 802.11g protocol at the physical and data-link layers.
+We rely on a simulation of the full network stack for MANETs, that is, the IEEE 802.11g protocol at the physical and data-link layers.
 %
 Ad-hoc routing in the network layer is disabled and we use BMW~\cite{tang2001mac} as MAC protocol instead of the virtual carrier sensing technique of the IEEE 802.11 standard.
 %
-The implementation of every broadcast protocol remains at the application layer and we use UDP packets for messages with a data size of 280 bytes, which is the length of a tweet with 140 characters.
+The implementation of every broadcast protocol remains at the application layer.
 %
-Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethoot devices and remains invariable during the whole simulation.
+UDP packets are used for messages with a data size of 280 bytes, which is the length of a tweet with 140 characters.
+%
+Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethoot devices and remains invariable during deployments.
 %
 Such transceiver works in the 2.4GHz band, with a maximum data rate of 11Mbps (default) and its power consumption per operation mode\footnote{These values correspond to the standard model of energy consumption in INET. Find more details in the official documentation (\href{https://doc.omnetpp.org/inet/api-current/neddoc/inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer.html}{link here}).} is as follows: 1mW (sleep), 5mW (listen), 10mW (receiving) and 100mW (transmitting).
 %
@@ -56,9 +59,9 @@ Such transceiver works in the 2.4GHz band, with a maximum data rate of 11Mbps (d
 %
 We deploy and evaluate a single broadcast approach in the scenario depicted in Fig~\ref{fig:eval:setup}.
 %
-Each deployment lasts for 10 minutes and broadcast messages are sent every second by a source node.
+Each deployment lasts for 10 minutes and messages are sent every second by source nodes.
 %
-We perform five iterations per deployment.
+We perform 5 iterations per deployment.
 %
 
 \smallskip
@@ -77,8 +80,20 @@ These preconditions provide a fair comparison between deployments.
 
 \smallskip
 \noindent
-\textbf{Broadcast metrics.} 
+\textbf{Broadcast metrics.}
+The following three metrics let us evaluate the performance of protocols:
 %
+\begin{itemize}
+	%
+	\item \emph{Coverage}. We distinguishes between two types of coverage. Reachability is the fraction of nodes that receive a message at least once. Completeness, on the other hand, is the fraction of receivers at the broadcast area of a relay node.
+	%
+	\item \emph{Collisions}. Number of dropped messages per node due to interference of concurrent transmissions or receptions when the transceiver is already in listening mode.
+	%
+	\item \emph{Network load}. Number of sent and received messages.
+	%
+\end{itemize} 
+%
+
 \input{baseline_individual_coverage}
 
 \subsection{Microbenchmark of individual protocols}
