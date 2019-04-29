@@ -46,11 +46,28 @@ UDP packets are used for messages with a data size of 280 bytes, which is the le
 Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethooth devices and remains invariable during each deployment.
 %
 Such transceiver works in the 2.4GHz band, with a maximum data rate of 11Mbps (default) and its power consumption per operation mode\footnote{These values correspond to the standard model of energy consumption in INET. Find more details in the official documentation (\href{https://doc.omnetpp.org/inet/api-current/neddoc/inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer.html}{link here}).} is as follows: 1mW (sleep), 5mW (listen), 10mW (receiving) and 100mW (transmitting).
-%
 
 \smallskip
 \noindent
-\textbf{Broadcast protocols.} Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and two adaptive approaches, controlled flooding~\cite{2001:AAR:876878.879323} as well as scoped-hyper flooding~\cite{adaptive_group_com_iscc02}.
+\textbf{Broadcast protocols.} 
+%
+Several studies in adaptation have been proposed to figure out which thresholds of local observables report a good trade-off between reachability and network load.
+%
+Tseng \emph{et al.}~\cite{2001:AAR:876878.879323} propose adaptive techniques to vary such thresholds in a dynamic way.
+%
+One of this techniques uses a function $c(d)$ instead of a counter as the condition to control flooding, where $d$ is the number of known neighbors when the forwarding decision takes place.
+%
+The image of $c(d)$ remains the number of allowed receptions.
+%
+Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}, on the other hand, propose a switching criteria based on nodes velocity to use \emph{scoped flooding} in dense regions  and \emph{hyper flooding} in sparse regions.
+%
+This technique requires the periodic exchange of \emph{hello} messages to approximate the list of nodes neighbors and such list is piggybacked in messages.
+%
+Upon message receptions, nodes compare the similarity between the transmitting node's neighbor list and the receiving node's list.
+%
+When such similarity reaches certain thresholds, message retransmissions take place.
+%
+Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and the previously described approaches of Tseng \emph{et al.} and Viswanath \emph{et al.}
 %
 
 \smallskip
@@ -76,9 +93,6 @@ At every walk we verify whether the wireless topology in the communication area 
 The second input is a list of source nodes, this selection is done randomly among those connected nodes on every wireless topology.
 %
 These preconditions provide a fair comparison between deployments.
-%
-\input{baseline_individual_coverage}
-%
 
 \smallskip
 \noindent
@@ -95,21 +109,10 @@ The following three metrics let us evaluate the performance of protocols:
 	%
 \end{itemize} 
 %
+\input{baseline_individual_coverage}
+%
 We report hereafter every broadcast metric in three regions: at the whole communication area, at the PoI and out of it. 
 %
-\begin{figure}[t]
-	\begin{minipage}[t]{0.5\linewidth}
-    \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
-		\label{fig:eval:baseline_performance:outgoing}
-	\end{minipage}%
-  \hfill
-	\begin{minipage}[t]{0.5\linewidth}
-    \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
-    \label{fig:eval:baseline_performance:incoming}
-	\end{minipage} 
-	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
-	\label{fig:eval:baseline_performance}
-\end{figure}
 
 %
 \subsection{Microbenchmark of individual protocols}
@@ -149,7 +152,21 @@ We aim at answering the following research questions:
 \end{itemize}
 }
 
-
+%
+\begin{figure}[t]
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
+		\label{fig:eval:baseline_performance:outgoing}
+	\end{minipage}%
+  \hfill
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
+    \label{fig:eval:baseline_performance:incoming}
+	\end{minipage} 
+	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
+	\label{fig:eval:baseline_performance}
+\end{figure}
+%
 
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
