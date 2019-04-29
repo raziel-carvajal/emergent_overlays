@@ -71,6 +71,8 @@ simple InteroperableBroadcast extends UDPBasicApp
     // options for broadcast protocols
     // 		controlled flooding
     int counterCfcondition = default(3);
+    //		scoped-hyper flooding
+    double neigSimilarity = default(0.85);
 
 	// statistics
     @signal[rcvdBroadcastMsg](type=int);

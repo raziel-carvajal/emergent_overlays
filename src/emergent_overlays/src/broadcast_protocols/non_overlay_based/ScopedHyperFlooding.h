@@ -13,30 +13,38 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CONTROLLEDFLOODING_H_
-#define CONTROLLEDFLOODING_H_
+#ifndef SCOPEDHYPERFLOODING_H_
+#define SCOPEDHYPERFLOODING_H_
 
 #include <utils/IProtocol.h>
-#include <map>
+#include <cmessage.h>
 
 using namespace std;
 
-class ControlledFlooding : public IProtocol {
+class ScopedHyperFlooding : public IProtocol {
   private:
+
+    enum Timers {
+      SEND_CTRL_MSG
+    };
+
+    set<string> neighbors;
+
     InteroperableBroadcast* controller = nullptr;
 
-    map<string, cMessage*> timers;
-    map<string, int> counters;
-    map<string, cPacket*> msgs;
+    cMessage* sendCtrlMsgTimer = new cMessage("sendCtrlMsgTimer");
 
-    enum Timer { EXPIRES };
+    int ctrlMsgId = 0;
 
-    int allowedReceptions;
+    double sentCtrlMsgDelay;
+    double minSentDelay;
+    double neigSimilarity;
 
   public:
-    ControlledFlooding() {
+    ScopedHyperFlooding() {
     }
 
+    cPacket* getCtrlMsg();
     bool isProtocolEvent(cMessage* msg);
 
     void setController(InteroperableBroadcast* c) {
@@ -52,8 +60,7 @@ class ControlledFlooding : public IProtocol {
     }
     void cancelSelfEvents();
     void initialize(bool firstCall);
-    void onControlMsg(cPacket* pk, const char* sender) {
-    }
+    void onControlMsg(cPacket* pk, const char* sender);
 
     cPacket* createBroadcastMsg(const char* msgId);
 
@@ -67,4 +74,4 @@ class ControlledFlooding : public IProtocol {
     }
 };
 
-#endif /* CONTROLLEDFLOODING_H_ */
+#endif /* SCOPEDHYPERFLOODING_H_ */

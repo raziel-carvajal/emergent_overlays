@@ -3,41 +3,44 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #ifndef FLOODING_H_
 #define FLOODING_H_
 
 #include <utils/IProtocol.h>
 
+using namespace std;
+
 class Flooding : public IProtocol {
   private:
     InteroperableBroadcast* controller = nullptr;
 
   public:
-    Flooding() {
+    Flooding(){
+
     }
 
-    bool isProtocolEvent(cMessage* msg) {
-      // this implementation do not handle any self event
+    bool isProtocolEvent(cMessage* msg){
       return false;
     }
 
     void setController(InteroperableBroadcast* c) {
       controller = c;
     }
+
     void onBroadcastMsg(cPacket* pk, const char* pkName);
 
     void handleEvent(cMessage* msg) {}
-    // FIXME add headers for interop mechanism
+
     void addProtocolHeaders(cPacket* pk) {}
     void updateProtocolHeaders(cPacket* pk) {}
     void cancelSelfEvents() {}
@@ -50,8 +53,8 @@ class Flooding : public IProtocol {
 
     bool amIoverlayRelay();
 
-    std::set<std::string> getNeighbors(){
-      std::set<std::string> neigs;
+    set<string> getNeighbors(){
+      set<string> neigs;
       return neigs;
     }
 };
