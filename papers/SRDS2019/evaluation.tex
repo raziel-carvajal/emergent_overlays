@@ -65,7 +65,7 @@ This technique requires the periodic exchange of \emph{hello} messages to approx
 %
 Upon message receptions, nodes compare the similarity between the transmitting node's neighbor list and the receiving node's list.
 %
-When such similarity reaches certain thresholds, message retransmissions take place.
+When such similarity reaches a certain threshold, message retransmissions take place.
 %
 Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and the previously described approaches of Tseng \emph{et al.} and Viswanath \emph{et al.}
 %
@@ -138,20 +138,6 @@ Similarly, the order of received messages between both protocols differs at leas
 
 \subsection{Performance of emergent overlays}
 
-
-\er{
-Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
-We aim at answering the following research questions:
-\begin{itemize}
-	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
-	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
-	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
-	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
-	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
-	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
-\end{itemize}
-}
-
 %
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
@@ -166,8 +152,8 @@ We aim at answering the following research questions:
 	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
 	\label{fig:eval:baseline_performance}
 \end{figure}
-%
 
+%
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/density}
@@ -181,4 +167,35 @@ We aim at answering the following research questions:
 	\caption{Distribution of observables in 3 regions, out of the PoI (dotted line), at the whole communication area (solid line), and at PoI (dashed line).}
 	\label{fig:eval:observables}
 \end{figure}
+
+%
+\input{coverage_of_adaptive_approaches}
+
+%
+\begin{figure}[t]
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/adaptive-sent-msgs}
+		\label{fig:eval:performance:outgoing}
+	\end{minipage}%
+  \hfill
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/adaptive-rcv-msgs}
+    \label{fig:eval:performance:incoming}
+	\end{minipage} 
+	\caption{Performance of adaptive approaches in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
+	\label{fig:eval:performance}
+\end{figure}
+
+\er{
+Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
+We aim at answering the following research questions:
+\begin{itemize}
+	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
+	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
+	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
+	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
+	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
+	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
+\end{itemize}
+}
 
