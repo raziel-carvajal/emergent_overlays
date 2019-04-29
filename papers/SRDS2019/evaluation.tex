@@ -1,78 +1,102 @@
 %!TEX root = main.tex
 %=========================================================
-
 \section{Evaluation}
 \label{sec:evaluation}
+We conduct a simulation study using Omnet++ (v5.4)~\cite{omnet} and its plug-in INET (v4.1) for wireless networks to evaluate our approach \textit{emergent overlays}.
+%
+This section describes the simulation set up, a micro-benchmark of broadcast protocols deployed in an heterogeneous MANET and a discussion about how our adaptive approach is positioned with existent techniques to broadcast.
 
-\textbf{research questions}
-\er{state what the experiments aim to show and demonstrate. There should be about 3-5 clear research questions. The experiments must be tailored to answer these questions.}
-
-\textbf{metrics}
-we should have a table listing these.
-All metrics should be recorded together with the class (sparse or dense) of the node.
-\begin{itemize}
-	\item coverage \er{these are actually two metrics: (1) average percentage of nodes covered by a dissemination and (2) percentage of the disseminations that reached all nodes.}
-	\item sent/received messages at the application level (number of calls to the MAC layer)
-	\item sent/received data frames (number of sendings/retransmissions at the MAC protocol level)
-	\item derived from the two previous, average number of MAC retransmissions of the payload (number of MAC retransmissions / number of calls)
-	\item data frame error rate: number of not heard ACKs at mac layer over all data frames; this is our way of measure collisions
-	\item rebroadcast: comparison of number of sendings of application-level messages with real pure flooding (also subject to the same collisions and conditions etc. -- this is not the idealized ground truth)
-	\item number of duplicate receptions
-\end{itemize}
-
-\textbf{comparison points}
-\begin{itemize}
-	\item 3 adaptive counter based flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (coded, not tested)
-	\item hypergossiping \cite{hypergossiping} (TODO)
-%	\item hand-shake gossip \cite{kokuti2012adaptive} (TODO)
-\end{itemize}
-
-\textbf{configurations of experiments:}
-\begin{enumerate}
-	% \item homogeneous areas
-% 	\begin{itemize}
-% 		\item reproducing the parameters for the sparse and dense areas described below but uniformly over the same space
-% 	\end{itemize}
-	\item communication area with a single PoI
-	\begin{itemize}
-		\item Distribution over space:
-		\begin{itemize}
-			\item communication dimensions: 90m x 45m = 4,050$m^{2}$ (min dimensions of soccer field)
-			\item PoI dimensions: 40 x 15 = 600$m^2$
-			\item parameters of motion in
-			\begin{itemize}
-				\item dense area: random between 0 and 1m/s
-				\item sparse area: random between 1 and 2m/s
-				\item nodes perform levy walks \cite{rhee2011levy} %\textbf{or} nodes follow random-way point approach
-				\item nodes moves continuously and every one second the direction of levy walks changes
-			\end{itemize}
-		\end{itemize}
-		\item fixed transmission range for every node 10m (bluethoot), which implies that the broadcast area of each node is 314.15$m^2$
-		\item total number of participants: 1, 000 nodes where 500 at dense region and 500 at sparse region; such number of participants implies:
-		\begin{itemize}
-			\item $\frac{\text{DenseArea}}{\text{NodesAtArea}} = \frac{600}{500} = 1.2m^{2}/\text{node}$; in average every node is separated from each other $\sqrt{1.2} = 1.09$m
-			\item $\frac{\text{SparseArea}}{\text{NodesAtArea}} = \frac{4050-600}{500} = 6.9m^{2}/\text{node}$; in average every node is separated from each other $\sqrt{6.9} = 2.62$m
-			\item with a transmission range of 10m, nodes at dense area have in average 4 times more neighbors than those in sparse area
-		\end{itemize}
-		\item duration of experiment 10 minutes	
-		\item data frame interval: 1s (600 broadcast sessions)
-		\item control frame interval: 5s (120 messages) , 15s (40 messages) or 25s (24 messages) (this may vary depending on how MPR maintains a robust overlay)
-	\end{itemize}
-	\item multi-POI configuration (TODO)
-	\begin{itemize}
-		\item ideally a configuration based on one of the two examples used in the introduction
-	\end{itemize}
-\end{enumerate}
+\subsection{Use case and mobility model}
+Figure~\ref{fig:eval:setup} depicts our experimental scenario where a crowd is carrying a single mobile device with WiFi capabilities.
+%
+We chose the dimensions of a soccer field as communication area with a single Point of Interest (PoI).
+%
+The dimensions in this region were chosen such that nodes inside it have in average three times more neighbors than those nodes out of the PoI.
+%
+Such density have been previously reported in real-life scenarios~\cite{versichele2012use}.
+%
+There is a total of 600 nodes, when the simulation starts 300 nodes are randomly positioned at the PoI and 300 nodes out of it.
+%
+Nodes perform truncated levy walks, that is, frequent short walks and occasional rides to distant locations where the direction of nodes motion remains invariable between walks.
+%
+This characterization fits well to mimic motion of humans in the context of MANETs~\cite{rhee2011levy}.
+%
+The velocity of every walk is chosen randomly from a fixed interval.
+%
+Such interval at the PoI varies between 0m/s and 0.5m/s, while out of it the velocity varies between 1.5m/s and 2m/s.
+%
+Nodes move freely within the whole communication area with one exception, when a node reaches the frontier of the PoI it may remain in its current region with a likelihood of 50\%.
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{figures/setup_with_poi.pdf}
-	\caption{Position of the 600 nodes in the simulation setup at $t=0$.}
+	\caption{Initial position of 600 nodes in the simulation setup.}
 	\label{fig:eval:setup}
 \end{figure}
 
-\input{coverage_density_table}
+\subsection{Simulation set up}
+We rely on a simulation of the full network stack for MANETs, that is, the IEEE 802.11g protocol at the physical and data-link layers.
+%
+Ad-hoc routing in the network layer is disabled and we use BMW~\cite{tang2001mac} as MAC protocol instead of the virtual carrier sensing technique of the IEEE 802.11 standard.
+%
+The implementation of every broadcast protocol remains at the application layer.
+%
+UDP packets are used for messages with a data size of 280 bytes, which is the length of a tweet with 140 characters.
+%
+Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethoot devices and remains invariable during deployments.
+%
+Such transceiver works in the 2.4GHz band, with a maximum data rate of 11Mbps (default) and its power consumption per operation mode\footnote{These values correspond to the standard model of energy consumption in INET. Find more details in the official documentation (\href{https://doc.omnetpp.org/inet/api-current/neddoc/inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer.html}{link here}).} is as follows: 1mW (sleep), 5mW (listen), 10mW (receiving) and 100mW (transmitting).
+%
 
+\smallskip
+\noindent
+\textbf{Broadcast protocols.} Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, an adaptive approach of controlled flooding~\cite{2001:AAR:876878.879323} and hypergossiping~\cite{hypergossiping}.
+%
+
+\smallskip
+\noindent
+\textbf{Individual deployments.}
+%
+We deploy and evaluate a single broadcast approach in the scenario depicted in Fig~\ref{fig:eval:setup}.
+%
+Each deployment lasts for 10 minutes and messages are sent every two second by source nodes.
+%
+We perform 5 iterations per deployment.
+%
+
+\smallskip
+\noindent
+\textbf{Preconditions.}
+Deployments require two inputs.
+%
+The first input consist in a mobility trace where nodes perform levy-walks every 0.1s.
+%
+At every walk we verify whether the wireless topology in the communication area is connected and keep in the mobility trace only connected topologies.
+%
+The second input is a list of source nodes, this selection is done randomly among those connected nodes on every wireless topology.
+%
+These preconditions provide a fair comparison between deployments.
+%
+\input{baseline_individual_coverage}
+%
+
+\smallskip
+\noindent
+\textbf{Broadcast metrics.}
+The following three metrics let us evaluate the performance of protocols:
+%
+\begin{itemize}
+	%
+	\item \emph{Coverage}. We distinguishes between two types of coverage. Reachability is the fraction of nodes that receive a message at least once. Completeness, on the other hand, is the fraction of receivers at the broadcast area per sender.
+	%
+	\item \emph{Collisions}. Number of dropped messages per node due to interference of concurrent transmissions or receptions when the transceiver is already in listening mode.
+	%
+	\item \emph{Network traffic}. Number of sent and received messages.
+	%
+\end{itemize} 
+%
+We report hereafter every broadcast metric in three regions: at the whole communication area, at the PoI and out of it. 
+%
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
@@ -83,9 +107,49 @@ All metrics should be recorded together with the class (sparse or dense) of the 
     \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
     \label{fig:eval:baseline_performance:incoming}
 	\end{minipage} 
-	\caption{Performance of single-protocol deployments.}
+	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
 	\label{fig:eval:baseline_performance}
 \end{figure}
+
+%
+\subsection{Microbenchmark of individual protocols}
+Table~\ref{eval:baseline:coverage-collisions} shows the performance of two deployments of MPR and Controlled Flooding (CF).
+%
+The use of an overlay at the PoI shows the lowest number of collisions, at least by an order of 10 compare to CF.
+%
+Completeness of message receptions is at least 79\% which is enough to deliver messages coming from any source in the network at such region (reachability of 100\%).
+%
+On the contrarily, nodes in a more dynamic region (out of PoI) hear at most 99\% of messages even when control messages, which help to maintain overlays, are sent at shorter intervals.
+%
+We do not report deployments of MPR with intervals of sent messages shorter than 20s because the number of collisions increases and this results in lower coverage.
+%
+Controlled flooding, on the other hand, reports the highest reachability at the whole communication area but more than a half of the total number of collisions for this protocol take place at the PoI, where completeness shows the lowest values.
+%
+Figure~\ref{fig:eval:baseline_performance} shows the network traffic where we observe a clear advantage of MPR over CF.
+%
+The mean of sent messages for all regions in CF is roughly twice the one observed in MPR.
+%
+Similarly, the order of received messages between both protocols differs at least by two when the comparison is done per region.
+
+\subsection{Quality of observables}
+
+\subsection{Performance of emergent overlays}
+
+
+\er{
+Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
+We aim at answering the following research questions:
+\begin{itemize}
+	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
+	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
+	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
+	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
+	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
+	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
+\end{itemize}
+}
+
+
 
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
@@ -101,101 +165,3 @@ All metrics should be recorded together with the class (sparse or dense) of the 
 	\label{fig:eval:observables}
 \end{figure}
 
-%\begin{figure*}[t]
-%	\centering
-%	\includegraphics[width=\linewidth]{figures/placeholders/plots_baseline.png}
-%	\caption{Performance of single-protocol deployments.}
-%	\label{fig:eval:baseline_performance}
-%\end{figure*}
-
-\textbf{Experiments}
-\begin{enumerate}
-	\item setup: Expected figure: a 2-D representation of the nodes at time t0, with a dashed square showing the POI/dense zone in the middle.
-	Nodes should all have the same color (white). We will reverse the use of color to show the protocol being used. 
-	For two or three nodes, show a circle using a transparent pale color (as for the figures in the beginning of the paper) that show their transmission range. The figure \emph{must} be in vectorial (PDF or eps) format.
-	\item baseline benchmark
-	\begin{itemize}
-		\item we consider the controlled flooding (one instance) and the MPR (3 instances, for the three frequencies).
-		\item performance of using a single protocol. What you want to show is that an overlay everywhere leads to bad coverage, and flooding everywhere leads to high costs. The coverage should be measured and mentioned in a table, together with the number of collisions.
-		See placeholder for details of the table.
-		\item the plot will be a two-column-wide plot with three embedded subplots:
-		\begin{itemize}
-			\item Plot 1: coverage \#1 and coverage \#2. 
-			Y axis is \%-age from 0 to 100. 
-			X axis is 12 slots: 3 for the controlled flooding (CF), 3 for each of the configurations of MPR. 
-			Each triplet is (a) full network (b) only nodes in central area (c) only nodes in external areas.
-			For each in the triplet, use one bar showing the percentage.
-			\item Plot 2: \# of messages at the application level.
-			Y axis is 0 to max \# of messages
-			X axis is exactly as previous.
-			For each tic in a triplet, plot one violin plot showing the distribution of the number of messages over all nodes.
-			The number of messages includes control messages.
-			Since this number is known and the same for all nodes, show it as a small vertical bar (dashed) for the three MPR configurations. The meaning of the bar will be shown in the legend of the plot.
-			\item Plot 3: \# of messages at the MAC level.
-			Y axis is 0 to max \# of messages
-			X axis is exactly as previous.
-			For each tic in a triplet, plot the same as previous but for the number of MAC retransmissions. No need for the small bar of the previous plot in MPR configurations.
-		\end{itemize}
-	\end{itemize}
-	\item evaluation of the observables
-	\begin{itemize}
-		\item goal is to know how far the observables are far from the truth as known by the simulator
-		\item a first plot for density: distribution of the difference between the ground truth and the measured one, for the different ways to measure density
-		\item Single plot: Y axis is difference (negative or positive) from ground truth.
-		X axis is one triplet of tics per mechanism available to measure density (same meaning for the triplet as before)
-		For each tic, violin plot of the distribution of differences from ground truth.
-	\end{itemize}
-	\item evaluation of the policies
-	\begin{itemize}
-		\item goal is to evaluate how good are the policies in deciding, and what is the impact on performance. Two main metrics are: quality of the resulting graph, and costs of the resulting hybrid system. Should include graphical representation of the selections.
-	\end{itemize}
-	\item comparison with related work
-	\begin{itemize}
-		\item running the two other approaches and comparing them to the emergent overlays (only with the best configuration found in the previous)
-		\item should ideally happen on a more sophisticated setup with multiple POIs.
-	\end{itemize}
-\end{enumerate}
-
-% \er{this is deprecated. The presentation of the algorithms is in the background section.}
-% \textbf{protocols implementations}
-% \begin{itemize}
-% 	\item overlay-based
-% 	\begin{itemize}
-% 		\item CDS - \cite{stojmenovic-cds} - DONE
-% 		\item MPR - \cite{mpr} - DONE
-% 		\item MPR improved - \cite{mpr-improvement} - TODO
-% 	\end{itemize}
-% 		\item non overlay-based
-% 	\begin{itemize}
-% 		\item controlled flooding:
-% 		\begin{itemize}
-% 			\item counter based with timer - DONE
-% 			\item context based: make a different of neighbors between two nodes (TODO, maybe ?)
-% 		\end{itemize}
-% 	\end{itemize}
-% \end{itemize}
-
-
-
-
-
-
-\er{
-Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
-We aim at answering the following research questions:
-\begin{itemize}
-	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
-	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
-	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
-	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
-	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
-	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
-\end{itemize}
-The section can be structured as follows:
-\begin{itemize}
-	\item Experimental setup: simulator, traces, models for the nodes energy consumption, etc.
-	\item Recap that we use our MAC layer
-	\item Microbenchmarks with the square setup
-	\item Macrobenchmarks with more complex setups, with different dense/dynamic regions over space
-\end{itemize}
-}

@@ -1,0 +1,41 @@
+%!TEX root = main.tex
+
+\begin{table}[t]
+\setlength\tabcolsep{1pt}
+\footnotesize
+\centering
+\newcolumntype{C}{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{0.15\linewidth} }
+\newcolumntype{D}{>{\centering\arraybackslash} m{0.15\linewidth} }
+
+\newcolumntype{E}{>{\raggedleft\arraybackslash} m{0.2\linewidth} }
+
+\begin{tabular}{CDEEE}
+
+\toprule
+	Protocol & 
+	Region & 
+	Avg. reach (\%) & 
+	Complete (\%) & 
+	Collisions (\#)
+	\\
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{Emerg. Ovl.}$ \\ $\text{MPR}_{\Delta}=$30s \\ $\text{CF}_{\text{counter}}=$3} 	
+						& All    & 99.99   & 87.35  & 3552.83 \\
+						& Outside & 99.99   & 93.13   & 1871.77 \\
+						& At POI  & 100   &  93.40  & 1681.05 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{Adaptive CF} 	
+						& All    &    &   &  \\
+						& Outside &    &    &  \\
+						& At POI  &    &    &  \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{Hyper-gossiping} 	
+						& All    &    &   &  \\
+						& Outside &    &    &  \\
+						& At POI  &    &    &  \\ 
+\bottomrule
+\end{tabular}
+\protect\raziel{add performance of other adaptive approaches}
+\caption{Coverage and collisions of adaptive approaches for the entire system, split between nodes that evolve \emph{outside} or \emph{at} the POI.}
+\label{tab.conf}
+\end{table}
