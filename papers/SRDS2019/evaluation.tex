@@ -43,14 +43,14 @@ The implementation of every broadcast protocol remains at the application layer.
 %
 UDP packets are used for messages with a data size of 280 bytes, which is the length of a tweet with 140 characters.
 %
-Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethoot devices and remains invariable during deployments.
+Each node holds a single transceiver with a transmission range of 10m, this value is commonly used in low-powered bluethooth devices and remains invariable during each deployment.
 %
 Such transceiver works in the 2.4GHz band, with a maximum data rate of 11Mbps (default) and its power consumption per operation mode\footnote{These values correspond to the standard model of energy consumption in INET. Find more details in the official documentation (\href{https://doc.omnetpp.org/inet/api-current/neddoc/inet.physicallayer.energyconsumer.StateBasedEpEnergyConsumer.html}{link here}).} is as follows: 1mW (sleep), 5mW (listen), 10mW (receiving) and 100mW (transmitting).
 %
 
 \smallskip
 \noindent
-\textbf{Broadcast protocols.} Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, an adaptive approach of controlled flooding~\cite{2001:AAR:876878.879323} and hypergossiping~\cite{hypergossiping}.
+\textbf{Broadcast protocols.} Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and two adaptive approaches, controlled flooding~\cite{2001:AAR:876878.879323} as well as scoped-hyper flooding~\cite{adaptive_group_com_iscc02}.
 %
 
 \smallskip
@@ -121,7 +121,7 @@ Completeness of message receptions is at least 79\% which is enough to deliver m
 %
 On the contrarily, nodes in a more dynamic region (out of PoI) hear at most 99\% of messages even when control messages, which help to maintain overlays, are sent at shorter intervals.
 %
-We do not report deployments of MPR with intervals of sent messages shorter than 20s because the number of collisions increases and this results in lower coverage.
+We do not report deployments of MPR with intervals of control messages shorter than 20s because the number of collisions increases and this results in lower coverage.
 %
 Controlled flooding, on the other hand, reports the highest reachability at the whole communication area but more than a half of the total number of collisions for this protocol take place at the PoI, where completeness shows the lowest values.
 %
