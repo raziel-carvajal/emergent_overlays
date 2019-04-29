@@ -56,7 +56,7 @@ void SwitchingCriteria::handleEvent(cMessage* event) {
   switch (event->getKind()) {
     case APPLY_CRITERIA: {
       controller->updateRunningAlgorithm(
-          policy->choseAlgorithm(observables->latestMobility, observables->latestStability));
+          policy->choseAlgorithm(observables->latestDensity, observables->latestStability));
 
       double t = 2 * controller->par("windowSize").doubleValue() * controller->par("broadcastInterval").doubleValue();
       controller->log("apply switching criteria in " + to_string(t) + "s");

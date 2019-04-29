@@ -46,7 +46,7 @@ double Observables::getDensityObs() {
   }
   rate /= (densityApprox.size() * 1.0);
   controller->log("Density rate: " + to_string(rate));
-  latestMobility = rate;
+  latestDensity = rate;
   return rate;
 }
 
@@ -167,4 +167,8 @@ void Observables::handleEvent(cMessage* event) {
 void Observables::cancelSelfEvents() {
   if (updateTimer)
     controller->cancelAndDelete(updateTimer);
+}
+
+int Observables::getLatestNeigsNo() {
+  return densityApprox[indx];
 }

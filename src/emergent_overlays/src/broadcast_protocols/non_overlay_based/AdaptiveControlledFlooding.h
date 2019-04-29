@@ -13,28 +13,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef CONTROLLEDFLOODING_H_
-#define CONTROLLEDFLOODING_H_
+#ifndef ADAPTIVECONTROLLEDFLOODING_H_
+#define ADAPTIVECONTROLLEDFLOODING_H_
 
 #include <utils/IProtocol.h>
+#include <Observables.h>
 #include <map>
 
 using namespace std;
 
-class ControlledFlooding : public IProtocol {
+class AdaptiveControlledFlooding : public IProtocol {
   private:
+
     InteroperableBroadcast* controller = nullptr;
+
+    Observables* collector = nullptr;
 
     map<string, cMessage*> timers;
     map<string, int> counters;
     map<string, cPacket*> msgs;
 
-    enum Timer { EXPIRES };
-
-    int allowedReceptions;
+    enum Timer {
+      EXPIRES
+    };
 
   public:
-    ControlledFlooding() {
+    AdaptiveControlledFlooding(Observables* obs) {
+      collector = obs;
     }
 
     bool isProtocolEvent(cMessage* msg);
@@ -42,16 +47,21 @@ class ControlledFlooding : public IProtocol {
     void setController(InteroperableBroadcast* c) {
       controller = c;
     }
+
     void onBroadcastMsg(cPacket* pk, const char* pkName);
 
     void handleEvent(cMessage* msg);
 
     void addProtocolHeaders(cPacket* pk) {
     }
+
     void updateProtocolHeaders(cPacket* pk) {
     }
+
     void cancelSelfEvents();
+
     void initialize(bool firstCall);
+
     void onControlMsg(cPacket* pk, const char* sender) {
     }
 
@@ -61,10 +71,10 @@ class ControlledFlooding : public IProtocol {
 
     bool amIoverlayRelay();
 
-    std::set<std::string> getNeighbors() {
-      std::set<std::string> neigs;
-      return neigs;
-    }
+    set<string> getNeighbors();
+
+    int getAllowedReceptions();
+
 };
 
-#endif /* CONTROLLEDFLOODING_H_ */
+#endif /* ADAPTIVECONTROLLEDFLOODING_H_ */

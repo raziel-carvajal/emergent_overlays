@@ -28,6 +28,7 @@
 #include <broadcast_protocols/overlay_based/MPR.h>
 #include <broadcast_protocols/non_overlay_based/Flooding.h>
 #include <broadcast_protocols/non_overlay_based/ControlledFlooding.h>
+#include <broadcast_protocols/non_overlay_based/AdaptiveControlledFlooding.h>
 
 using namespace inet;
 using namespace std;
@@ -79,6 +80,11 @@ class InteroperableBroadcast : public UDPBasicApp {
             protocolsNames[i] = getProtocolName(CONTROLLED_FLOODING);
           }
             break;
+          case Protocols::ADAPTIVE_CONTROLLED_FLOODING: {
+            protocols[i] = new AdaptiveControlledFlooding(collector);
+            protocolsNames[i] = getProtocolName(ADAPTIVE_CONTROLLED_FLOODING);
+          }
+            break;
           default:
             throw cRuntimeError("[%d] is an invalid protocol identifier", i);
             break;
@@ -114,7 +120,7 @@ class InteroperableBroadcast : public UDPBasicApp {
 
   public:
     enum Protocols {
-      FLOODING, MPR, CONTROLLED_FLOODING, LAST_PROTOCOL
+      FLOODING, MPR, CONTROLLED_FLOODING, ADAPTIVE_CONTROLLED_FLOODING, LAST_PROTOCOL
     };
     enum ForwardType {
       SIMPLE, OVERLAY_RELAY, BORDER_NODE
@@ -185,6 +191,8 @@ class InteroperableBroadcast : public UDPBasicApp {
           return "MPR";
         case CONTROLLED_FLOODING:
           return "CONTROLLED_FLOODING";
+        case ADAPTIVE_CONTROLLED_FLOODING:
+          return "ADAPTIVE_CONTROLLED_FLOODING";
         default:
           return "UNKNOWN";
       }

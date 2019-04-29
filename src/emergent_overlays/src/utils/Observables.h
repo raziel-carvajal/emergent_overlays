@@ -57,7 +57,7 @@ class Observables {
     map<int, int[2]> getInvervals();
 
   public:
-    double latestMobility;
+    double latestDensity;
     double latestStability;
 
     set<string> neighbors;
@@ -72,6 +72,7 @@ class Observables {
     bool isSelfEvent(cMessage* event);
     void handleEvent(cMessage* event);
     void cancelSelfEvents();
+    int getLatestNeigsNo();
 };
 
 #endif /* OBSERVABLES_H_ */
