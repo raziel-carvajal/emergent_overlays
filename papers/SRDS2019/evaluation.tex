@@ -77,6 +77,8 @@ The second input is a list of source nodes, this selection is done randomly amon
 %
 These preconditions provide a fair comparison between deployments.
 %
+\input{baseline_individual_coverage}
+%
 
 \smallskip
 \noindent
@@ -85,47 +87,53 @@ The following three metrics let us evaluate the performance of protocols:
 %
 \begin{itemize}
 	%
-	\item \emph{Coverage}. We distinguishes between two types of coverage. Reachability is the fraction of nodes that receive a message at least once. Completeness, on the other hand, is the fraction of receivers at the broadcast area of a relay node.
+	\item \emph{Coverage}. We distinguishes between two types of coverage. Reachability is the fraction of nodes that receive a message at least once. Completeness, on the other hand, is the fraction of receivers at the broadcast area per sender.
 	%
 	\item \emph{Collisions}. Number of dropped messages per node due to interference of concurrent transmissions or receptions when the transceiver is already in listening mode.
 	%
-	\item \emph{Network load}. Number of sent and received messages.
+	\item \emph{Network traffic}. Number of sent and received messages.
 	%
 \end{itemize} 
 %
+We report hereafter every broadcast metric in three regions: at the whole communication area, at the PoI and out of it. 
+%
+\begin{figure}[t]
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
+		\label{fig:eval:baseline_performance:outgoing}
+	\end{minipage}%
+  \hfill
+	\begin{minipage}[t]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
+    \label{fig:eval:baseline_performance:incoming}
+	\end{minipage} 
+	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
+	\label{fig:eval:baseline_performance}
+\end{figure}
 
-\input{baseline_individual_coverage}
-
+%
 \subsection{Microbenchmark of individual protocols}
+Table~\ref{eval:baseline:coverage-collisions} shows the performance of two deployments of MPR and Controlled Flooding (CF).
+%
+The use of an overlay at the PoI shows the lowest number of collisions, at least by an order of 10 compare to CF.
+%
+Completeness of message receptions is at least 79\% which is enough to deliver messages coming from any source in the network at such region (reachability of 100\%).
+%
+On the contrarily, nodes in a more dynamic region (out of PoI) hear at most 99\% of messages even when control messages, which help to maintain overlays, are sent at shorter intervals.
+%
+We do not report deployments of MPR with intervals of sent messages shorter than 20s because the number of collisions increases and this results in lower coverage.
+%
+Controlled flooding, on the other hand, reports the highest reachability at the whole communication area but more than a half of the total number of collisions for this protocol take place at the PoI, where completeness shows the lowest values.
+%
+Figure~\ref{fig:eval:baseline_performance} shows the network traffic where we observe a clear advantage of MPR over CF.
+%
+The mean of sent messages for all regions in CF is roughly twice the one observed in MPR.
+%
+Similarly, the order of received messages between both protocols differs at least by two when the comparison is done per region.
 
 \subsection{Quality of observables}
 
 \subsection{Performance of emergent overlays}
-
-\raziel{old text}
-
-\textbf{comparison points}
-\begin{itemize}
-	\item 3 adaptive counter based flooding implementations with velocity as switching criterion \cite{2001:AAR:876878.879323} (coded, not tested)
-	\item hypergossiping \cite{hypergossiping} (TODO)
-%	\item hand-shake gossip \cite{kokuti2012adaptive} (TODO)
-\end{itemize}
-
-
-
-
-\textbf{Experiments}
-\begin{enumerate}
-	\item evaluation of the policies
-	\begin{itemize}
-		\item goal is to evaluate how good are the policies in deciding, and what is the impact on performance. Two main metrics are: quality of the resulting graph, and costs of the resulting hybrid system. Should include graphical representation of the selections.
-	\end{itemize}
-	\item comparison with related work
-	\begin{itemize}
-		\item running the two other approaches and comparing them to the emergent overlays (only with the best configuration found in the previous)
-		\item should ideally happen on a more sophisticated setup with multiple POIs.
-	\end{itemize}
-\end{enumerate}
 
 
 \er{
@@ -139,30 +147,9 @@ We aim at answering the following research questions:
 	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
 	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
 \end{itemize}
-The section can be structured as follows:
-\begin{itemize}
-	\item Experimental setup: simulator, traces, models for the nodes energy consumption, etc.
-	\item Recap that we use our MAC layer
-	\item Microbenchmarks with the square setup
-	\item Macrobenchmarks with more complex setups, with different dense/dynamic regions over space
-\end{itemize}
 }
 
 
-
-\begin{figure}[t]
-	\begin{minipage}[t]{0.5\linewidth}
-    \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
-		\label{fig:eval:baseline_performance:outgoing}
-	\end{minipage}%
-  \hfill
-	\begin{minipage}[t]{0.5\linewidth}
-    \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
-    \label{fig:eval:baseline_performance:incoming}
-	\end{minipage} 
-	\caption{Performance of single-protocol deployments.}
-	\label{fig:eval:baseline_performance}
-\end{figure}
 
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
