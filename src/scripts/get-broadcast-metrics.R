@@ -52,6 +52,8 @@ get.arguments <- function() {
 		dest='wmob', action='store_true')
 	parser$add_argument('--with-plotting',
 		dest='wplot', action='store_true')
+	parser$add_argument('--with-metrics-over-time',
+		dest='wmot', action='store_true')
   parser$parse_args()
 }
 
@@ -306,18 +308,73 @@ getEnergyConsumption <- function(dataset_loc, node_ids){
   })
 }
 
-getWattsFromSentRecvMsgs <- function(sentMsgs, recvMsgs, nodes){
-  wattsFromEmi <- sapply(nodes, function(n){
-    # this constant is the cost in watts to send one message
-    length(subset(sentMsgs, node_id == n)$value) * 0.1
-  })
-  wattsFromRec <- sapply(nodes, function(n){
-    # this constant is the cost in watts to receive one message
-    length(subset(recvMsgs, node_id == n)$value) * 0.01
-  })
-	wattsFromEmi <- unlist(wattsFromEmi)
-	wattsFromRec <- unlist(wattsFromRec)
-	c(wattsFromEmi[ wattsFromEmi != 0 ], wattsFromRec[ wattsFromRec != 0 ])
+getAvgEnergyConsumption <- function(msgs, isSent = T) {
+	if (length(msgs) == 0) {
+		NA
+	} else {
+		# constant cost in watts
+		cost <- data.frame(sent = .1, recv = .01)
+		cons <- sapply(unique(msgs$node_id), function(n){
+			length(subset(msgs, node_id == n)$value) * ifelse(isSent, cost$sent, cost$recv)
+		})
+		mean(cons)
+	}
+}
+
+getRecvMsgsOverTime <- function(msgs, timeLine) {
+	metrics <- lapply(timeLine, function(t){
+		ds <- subset(msgs, time >= t$limInf & time < t$limSup)
+		nos<- sapply(unique(ds$node_id), function(n){
+			length(subset(ds, node_id == n)$value)
+		})
+		data.frame(
+			time = t$limInf,
+			data = ifelse(is.na(mean(nos)), 0, mean(nos))
+		)
+	})
+	do.call('rbind', metrics)
+}
+
+getWattsFromSentRecvMsgs <- function(sentMsgs, recvMsgs, sentCtrlFrames, recvCtrlFrames, timeLine){
+	metrics <- lapply(timeLine, function(t){
+		sentM <- subset(sentMsgs, time >= t$limInf & time < t$limSup)
+		recvM <- subset(recvMsgs, time >= t$limInf & time < t$limSup)
+		sentF <- subset(sentCtrlFrames, time >= t$limInf & time < t$limSup)
+		recvF <- subset(recvCtrlFrames, time >= t$limInf & time < t$limSup)
+		data.frame(
+			time = t$limSup,
+			consumption = sum(
+				getAvgEnergyConsumption(sentM),
+				getAvgEnergyConsumption(recvM, isSent = F),
+				getAvgEnergyConsumption(sentF),
+				getAvgEnergyConsumption(recvF, isSent = F), na.rm = T
+			)
+		)
+	})
+	do.call('rbind', metrics)
+}
+
+getRunningAlogrithm <- function(runAlgoDs, simTime) {
+	algosMap <- c('MPR', 'CF')
+	algos <- unique(runAlgoDs$value)
+	records <- unique(runAlgoDs$time)
+	d <- 10
+	timeLine <- lapply(1:floor(simTime / d), function(i){
+		data.frame(limInf = (i -1) * d, limSup = i * d)
+	})
+	metrics <- lapply(timeLine, function(t){
+		ts <- head(records[records < t$limSup], 1)
+		sDs <- subset(runAlgoDs, time == ts)
+		temp <- lapply(algos, function(a){
+			data.frame(
+				time = t$limInf,
+				algo = algosMap[a],
+				nodes= length(subset(sDs, value == a[1])$value)
+			)
+		})
+		do.call('rbind', temp)
+	})
+	do.call('rbind', metrics)
 }
 
 # this code is followed IN DATASET to label nodes that forward messages:
@@ -595,6 +652,9 @@ main <- function(args) {
     )
 	}
 
+	sentCtrlMsgs <- getVector(datasetFile, 'sentCtrlFrames:vector')
+	recvCtrlMsgs <- getVector(datasetFile, 'recvCtrlFrames:vector')
+
   xPositions <- getVector(datasetFile, 'positionAtX:vector')
   yPositions <- getVector(datasetFile, 'positionAtY:vector')
   # merge nodes positions in one dataframe
@@ -615,6 +675,48 @@ main <- function(args) {
 
   sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
   recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
+
+	if(args$wmot) {
+		d <- 5 # delta in seconds
+		timeLine <- lapply(1:floor(args$simTime / d), function(i){
+			data.frame(limInf = (i -1) * d, limSup = i * d)
+		})
+		sent_broadcast_msgs <- subset(sent_broadcast_msgs, time <= args$simTime)
+		recv_broadcast_msgs <- subset(recv_broadcast_msgs, time <= args$simTime)
+		sentCtrlMsgs <- subset(sentCtrlMsgs, time <= args$simTime)
+		recvCtrlMsgs <- subset(recvCtrlMsgs, time <= args$simTime)
+
+		recvMsgsOverTime <- getRecvMsgsOverTime(recv_broadcast_msgs, timeLine)
+		saveDataFrame(
+      data.frame(
+        time = recvMsgsOverTime$time,
+				avgRecvMsgs = recvMsgsOverTime$data,
+        algo=rep(algorithmN, length(recvMsgsOverTime$time)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'recvMessagesTimeline', algorithmN
+    )
+
+		energy_consumption <- getWattsFromSentRecvMsgs(
+      sent_broadcast_msgs, recv_broadcast_msgs,
+			sentCtrlMsgs, recvCtrlMsgs, timeLine
+    )
+		saveDataFrame(
+      data.frame(
+        time = energy_consumption$time,
+				e_consumption = energy_consumption$consumption,
+        algo=rep(algorithmN, length(energy_consumption$time)), stringsAsFactors=F
+      ),
+      args$resultsDir, 'batteryConsumptionTimeline', algorithmN
+    )
+
+		runningAlgosDist <- getRunningAlogrithm(runningAlgorithm, args$simTime)
+		saveDataFrame(
+      runningAlgosDist,
+      args$resultsDir,
+			'runningAlgorithmTimeline',
+			algorithmN
+    )
+	}
 
   if(args$wpc){
     # NOTE deprecated

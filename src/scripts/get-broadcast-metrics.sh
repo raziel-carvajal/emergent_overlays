@@ -74,22 +74,24 @@ Rscript get-broadcast-metrics.R \
 	--dense-zone-l ${denseZoneLengt} \
 	--fist-at-dense ${firstAtDenseZone} \
   --results-dir ../../results \
-	--with-coverage \
-	--with-observables \
-	--with-sent-msgs \
-	--with-recv-msgs \
-	--with-plotting \
+	--with-metrics-over-time \
 	${withMobility} ${CONF_NAME} ${CONF_FILE}
+	# --with-energy-consumption \
+	# --with-coverage \
+	# --with-plotting \
+	# --with-observables \
+	# --with-sent-msgs \
+	# --with-recv-msgs \
 
 echo "Moving built graphs..."
-rm -fr ${CONF_NAME}
-mkdir ${CONF_NAME}
-mkdir ${CONF_NAME}/dataset
-mv *.pdf ${CONF_NAME}/
-cp ${CONF_FILE} ${CONF_NAME}/
-mv ../../experiments/configs/built_configs/results/${CONF_NAME}-*  ${CONF_NAME}/dataset
-tar czf ${CONF_NAME}.tgz ${CONF_NAME}/
-mv ${CONF_NAME}.tgz ../../results
+# rm -fr ${CONF_NAME}
+# mkdir ${CONF_NAME}
+# mkdir ${CONF_NAME}/dataset
+# mv *.pdf ${CONF_NAME}/
+# cp ${CONF_FILE} ${CONF_NAME}/
+# mv ../../experiments/configs/built_configs/results/${CONF_NAME}-*  ${CONF_NAME}/dataset
+# tar czf ${CONF_NAME}.tgz ${CONF_NAME}/
+# mv ${CONF_NAME}.tgz ../../results
 
 echo "Announce that the datasets are ready for plotting..."
 curl -X POST trace_generator/completed_task
