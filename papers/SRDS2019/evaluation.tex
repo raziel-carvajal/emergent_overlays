@@ -82,26 +82,36 @@ As for ACF, we do not use explicit control messages but obtain these lists passi
 A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit is less than 85\% of the nodes overlap with its own.
 Hyper flooding is a variant of timer-based controlled flooding (without the use of a counter), but where a timed retransmission is only cancelled when the duplicate is received by a node in the currently-known neighbor set of the current node.
 
+\er{To update in intro etc.: the main drawback of MPR in dense areas is its cost, not necessarily its reliability of performance. The current intro insists too much on reliability but we should shift the focus on costs.}
+
+\er{TODO: udpate the title of the table to replace 'complete' by local coverage}
+
 \smallskip
 \noindent
 \textbf{Metrics.}
 We evaluate broadcast protocols using the following metrics, over a series of message dissemination.
 \begin{itemize}
-	\item Reliability of the broadcast is measured by two metrics.
-	The \emph{reach} (in \%) is the average proportion of nodes that receive each message.
-	The complete disseminations (in \%) is the fraction of messages that were received by all nodes.
-	%A protocol may achieve a high reach, but never yield complete disseminations.
-	%
-	\item Contention on the wireless medium is measured as the number of \emph{collisions}, resulting in dropped messages.
-	%
+	\item Reliability of the (global) broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive a message.
+	\item Reliability of local broadcast at the MAC level is measured by the \emph{local coverage} (in \%), the average proportion of neighbors that receive the retransmission despite collisions;
+	\item Overall contention on the wireless medium is measured as the number of \emph{collisions}, resulting in dropped messages.
 	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
-	%
 	\item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
 
 \subsection{Performance of base protocols}
 
 \input{baseline_individual_coverage}
+
+We start by evaluating the performance and reliability of our base protocols CF and MPR.
+Table~\ref{eval:baseline:coverage-collisions} reports the metrics for two variants of CF with initial counter values of 3 and 4, and two variants of MPR with the period $\Delta$ of 20 and 30 seconds.
+We present the metrics for the entire system, and the breakdown outside and inside the central point of interest (POI).
+
+We observe that CF achives a good reach out of the POI with a 100
+
+MPR with control messages periods $\Delta$ lower than 20 seconds yield a significant number of collisions and suffer a loss in reliability.
+We use $\Delta=30s$ when emerging overlays in the following.
+
+\er{stopped here}
 
 %
 We report hereafter every broadcast metric in three regions: at the whole communication area, at the PoI and out of it. 

@@ -4,38 +4,38 @@
 \setlength\tabcolsep{1pt}
 \footnotesize
 \centering
-\newcolumntype{C}{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{0.15\linewidth} }
+\newcolumntype{C}{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{0.17\linewidth} }
 \newcolumntype{D}{>{\centering\arraybackslash} m{0.15\linewidth} }
 
-\newcolumntype{E}{>{\raggedleft\arraybackslash} m{0.2\linewidth} }
+\newcolumntype{E}{>{\raggedleft\arraybackslash} m{0.19\linewidth} }
 
 \begin{tabular}{CDEEE}
 
 \toprule
 	Protocol & 
 	Region & 
-	Avg. reach (\%) & 
+	Reach (\%) & 
 	Complete (\%) & 
 	Collisions (\#)
 	\\
 \midrule
-	\multirow{3}{0.125\linewidth}{$\text{Emerg. Ovl.}$ \\ $\text{CF}_{\text{counter}}=$3 \\ $\text{MPR}_{\Delta}=$30s} 	
+	\multirow{3}{0.125\linewidth}{$\text{Emerg. Ovl.}$ \\ $\text{CF}_{\text{c}=3}$ \\ $\text{MPR}_{\Delta=30s}$} 	
 						& All     & 99.99  & 87.35  & 3552.83 \\
-						& Outside & 99.99  & 93.13  & 1871.77 \\
-						& At POI  & 100    & 93.40  & 1681.05 \\ 
+						& Out of POI & 99.99  & 93.13  & 1871.77 \\
+						& At POI  & 100.00    & 93.40  & 1681.05 \\ 
 \midrule
-	\multirow{3}{0.125\linewidth}{Adaptive CF} 	
+	\multirow{3}{0.125\linewidth}{ACF} 	
 						& All     & 98.90 & 82.25 & 5058.26 \\
-						& Outside & 100   & 99.83 & 1515.69 \\
+						& Out of POI & 100.00   & 99.83 & 1515.69 \\
 						& At POI  & 98.90 & 50.27 & 3542.56 \\ 
 \midrule
-	\multirow{3}{0.125\linewidth}{Scoped/Hyper Flooding} 	
+	\multirow{3}{0.125\linewidth}{\mbox{S-H} Flooding} 	
 						& All     & 92.67 & 62.07 & 17501.30 \\
-						& Outside & 90.99 & 100   &  6609.07 \\
+						& Out of POI & 90.99 & 100.00   &  6609.07 \\
 						& At POI  & 96.34 & 25.23 & 10892.22 \\ 
 \bottomrule
 \smallskip
 \end{tabular}
-\caption{Coverage and collisions of adaptive approaches for the entire system, split between nodes that evolve \emph{outside} or \emph{at} the POI.}
+\caption{Performance and reliability of adaptive approaches.}
 \label{tab.conf}
 \end{table}
