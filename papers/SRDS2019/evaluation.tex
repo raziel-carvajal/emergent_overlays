@@ -4,29 +4,12 @@
 \label{sec:evaluation}
 
 We evaluate the performance and reliability of broadcast using emergent overlay using full-stack simulations with Omnet++ v5.4~\cite{omnet} and its plug-in INET (v4.1).
-We compare emergent overlays with the use of baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
+We compare emergent overlays with baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
 
 Our evaluation aims at answering the following research questions:
-(i) Do emergent MPR overlays allow improving reliability of broadcast in zones where CF is ineffective?
-(ii) Is the autonomous adaptation effective in emerging overlays without centralized control?
-(iii) How do emergent overlays compare to previous approaches to adaptive broadcast in MANETs?
-
-\smallskip
-\noindent
-\textbf{Metrics.}
-We evaluate broadcast protocols using the following metrics, over a series of message dissemination.
-\begin{itemize}
-	\item The reliability of the broadcast is measured by two metrics.
-	The \emph{reach} (in \%) is the average of the proportion of nodes that receive each of the messages.
-	The complete disseminations (in \%) is the fraction of messages that were received by 100\% of the nodes.
-	A protocol may achieve a high reach, but never yield complete disseminations.
-	%
-	\item The contention on the wireless medium is measured as the number of \emph{collisions}, resulting in dropped messages and missed receptions.
-	%
-	\item The \emph{bandwidth} cost for nodes is measured as the number of sent and received messages.
-	%
-	\item The energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
-\end{itemize}
+(i) Do emergent overlays allow improving broadcast reliability in zones where CF is inefficient?
+(ii) Is autonomous adaptation effective in emerging overlays without centralized control?
+(iii) How do emergent overlays compare to previous approaches to adaptive broadcast?
 
 \smallskip
 \noindent
@@ -35,8 +18,8 @@ We simulate a full MANET network stack, from the wireless medium to the applicat
 The physical and data-link layers follow the IEEE 802.11g specifications.
 However, we use the custom BMW~\cite{tang2001mac} MAC protocol in place of the standard virtual carrier sensing of IEEE 802.11g.
 
-Every node uses a single transceiver with a fixed transmission range of 10m, representative e.g. of the transmission range of bluetooth and similar radio devices.
-This transceiver uses the 2.4GHz frequency band, with a maximum achievable data rate of 11~Mbps.
+Every node uses a single transceiver with a fixed transmission range of 10~m, representative e.g. of the transmission range of bluetooth and similar radio devices.
+This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data rate of 11~Mbps.
 The power consumption for each state of the transceiver are as follows: 1~mW (\emph{sleep}), 5~mW (\emph{listen}), 10~mW (\emph{receiving}) and 100~mW (\emph{transmitting}).
 These is the standard model for energy consumption in INET.
 
@@ -53,20 +36,20 @@ These is the standard model for energy consumption in INET.
 We consider a set of 600 mobile nodes.
 The placement and mobility of nodes are inspired by real-life measurements of crowds at large events~\cite{naini2015opportunistic,versichele2012use}.
 Figure~\ref{fig:eval:setup} represents the initial position of nodes in the simulation setup.
-Nodes are deployed over a 90$\times$45~m field (about the size of a soccer field).
+Nodes are deployed over a 90$\times$45~m field. % (about the size of a soccer field).
 A 40$\times$15~m area in the middle of this field represents a point of interest (POI) where nodes tend to aggregate.
 
 At the beginning of the simulation, 300 nodes are randomly placed inside the POI and 300 nodes outside the POI.
 During the simulation, nodes are mobile.
-We use the \emph{truncated levy walks} model~\cite{rhee2011levy} to simulate the motion of human users.
-This model implements frequent short walks as well as occasional rides to distant locations, where the direction of nodes motion remains invariable between walks.
+We use the \emph{truncated levy walks}~\cite{rhee2011levy} to simulate the motion of human users.
+This model implements frequent short walks as well as occasional rides to distant locations. %, where the direction of nodes motion remains invariable between walks.
 The velocity of every walk is chosen randomly from an interval.
 The interval at the POI is [0:0.5]~m/s.
 Outside the POI, the interval is [1.5:2]~m/s.
 These values are representative of human mobility as measured in large gatherings.
 Nodes move freely within the entire communication area.
-We verify upon generation of a simulation setup and mobility trace with a given seed that, at any point in time, the graph formed of all nodes and their neighbors is connected (therefore, the potential for complete coverages is theoretically 100\%).
-We discard the highly infrequent seeds that do not ensure this connectedness.
+We verify upon generation of a mobility trace that at any point in time, the graph formed of all nodes is connected (therefore, the potential for complete coverages is theoretically 100\%).
+We discard the infrequent seeds that do not ensure connectedness.
 
 % However, when a node reaches the frontier of the POI it may remain in its current region with a likelihood of 50\%. %% This is too complicated, and raises eyebrows for no reason.
 
@@ -77,113 +60,46 @@ We run each experiment 5 times with different random seeds, and report aggregate
 \smallskip
 \noindent
 \textbf{Evaluated protocols.} 
-We consider our baseline protocols (counter-based CF and MPR) used in isolation, and combined under emergent overlays.
-In addition, we compare to the state-of-the-art with two adaptive approaches proposed by other authors.
+We consider our baseline protocols (counter-based CF and MPR) used in isolation, and combined for emergent overlays.
+In addition, we compare with two state-of-the-art adaptive approaches.
 We implemented these two protocols in the same simulation environment, also over the BMW MAC protocol for reliable local broadcast.
 
-Our first comparison point, \emph{adaptive counter-based controlled flooding}, or ACF, was proposed by Tseng \emph{et al.}~\cite{2001:AAR:876878.879323}.
-It is an adaptive variant of counter-based CF (as described in~\S\ref{sec:background}).
-Tseng~\emph{et al.} use explicit control message to collect density information around each node, but we can instead rely on the observables returned by the MAC protocol.
-The setting of timers is unchanged, but the initial value of counters is set as a function of density.
-We use the adaptation function suggested by Tseng~\emph{et al.} following their evaluation~\cite[Figure~6]{2001:AAR:876878.879323}, with a counter value varying from 2 to 5 for different densities (i.e., from 2 to 5 for density values 1 to 4, and then slowly down to 2 until 12+ neighbors).
+Our first comparison point is \emph{adaptive counter-based controlled flooding}, or ACF~\cite{2001:AAR:876878.879323}.
+It is an adaptive variant of counter-based CF (\S\ref{sec:background}).
+It uses control message to collect density information around each node.
+We rely instead on the observables from the MAC protocol.
+The setting of timers is unchanged, but the initial value of counters is a function of density.
+We use the adaptation function suggested by the authors~\cite[Figure~6]{2001:AAR:876878.879323}.
+Initial counter values vary from 2 to 5 for different densities (i.e., from 2 to 5 for density values 1 to 4, and then slowly down to 2 for 12+ neighbors).
 
-Our second comparison point, \emph{S-H flooding}, was proposed by Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}.
-It requires the list of one-hop neighbors at each node, which we can also collect from the MAC protocol in place of the explicit hello messages recommended by the authors.
-In addition, it requires information about the \emph{velocity} of nodes, and henceforth the use of an accelerometer or geo-location device.
-It uses two types of controlled flooding protocols, \emph{scoped flooding} in dense regions and \emph{hyper flooding} in sparse regions.
-\er{missing information in existing text:
-\begin{itemize}
-	\item what is the use of velocity? You only mention the comparison of one-hop neighbors
-	\item what is the difference between scoped and hyper gossiping?
-\end{itemize}}
+Our second comparison point is \emph{S-H flooding}~\cite{adaptive_group_com_iscc02}.
+% , was proposed by Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}.
+It uses two types of controlled flooding protocols, \emph{scoped flooding} for low-mobility nodes and \emph{hyper flooding} for high-mobility nodes.
+The decision of which protocol to use is made independently by each node based on its measured \emph{velocity}, therefore requiring accelerometers.
+We use 1 m/s as the switching threshold.
+S-H flooding needs the list of one-hop neighbors, which is piggybacked on all forwarded messages.
+As for ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
+A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit is less than 85\% of the nodes overlap with its own.
+Hyper flooding is a variant of timer-based controlled flooding (without the use of a counter), but where a timed retransmission is only cancelled when the duplicate is received by a node in the currently-known neighbor set of the current node.
 
-\raziel{ In Viswanath's paper, nodes' velocity vary between 10m/s and 25m/s. For our evaluation, the thresholds of velocity are those we use in our mobility model, that is:
+\smallskip
+\noindent
+\textbf{Metrics.}
+We evaluate broadcast protocols using the following metrics, over a series of message dissemination.
 \begin{itemize}
-	\item scoped flooding in POI
-	\item hyper flooding out of POI
-	\item velocity is checked on reception of broadcast messages, nodes use scoped flooding when velocity is in [0:0.5]~m/s or hyper flooding when velocity is in [1.5:2.0]~m/s
+	\item Reliability of the broadcast is measured by two metrics.
+	The \emph{reach} (in \%) is the average proportion of nodes that receive each message.
+	The complete disseminations (in \%) is the fraction of messages that were received by all nodes.
+	%A protocol may achieve a high reach, but never yield complete disseminations.
+	%
+	\item Contention on the wireless medium is measured as the number of \emph{collisions}, resulting in dropped messages.
+	%
+	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
+	%
+	\item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
-
-In both situations, nodes piggyback their list of neighbors in messages.Scoped flooding works as follows:
-
-\begin{itemize}
-	\item node $r$ receives message $m$ from node $s$ ; $r.l$ is the receiver's list of neighbors
-	\item if $m.l \subseteq r.l$, the local node updates the list in the message ($m.l \gets r.l$) and then the message is forwarded. Otherwise the message is not forward.
-	\item the list $m.l$ must contains at least 85\% of elements in $r.l$ to say that $m.l \subseteq r.l$
-\end{itemize}
-
-hyper flooding works as follows
-
-\begin{itemize}
-	\item 
-\end{itemize}
-}
-
-
-\er{previous text, will be deleted:}
-Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}, on the other hand, propose a switching criteria based on nodes velocity to use \emph{scoped flooding} in dense regions  and \emph{hyper flooding} in sparse regions.
-%
-This technique requires the periodic exchange of \emph{hello} messages to approximate the list of nodes neighbors and such list is piggybacked in messages.
-%
-Upon message receptions, nodes compare the similarity between the transmitting node's neighbor list and the receiving node's list.
-%
-When such similarity reaches a certain threshold, message retransmissions take place. \er{I don't understand this last sentence. Threshold of what?}
-
-% Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and the previously described approaches of Tseng \emph{et al.} and Viswanath \emph{et al.}
-
-% \smallskip
-% \noindent
-% \textbf{Broadcast protocols.}
-% \er{to make clear: the S-H flooding has higher requirements, as it needs information about the velocity, this requires an accelerometer.}
-% \er{the other approach~\cite{2001:AAR:876878.879323} uses the number of neighbors, it therefore needs to discover them, do we do this passively or explicitly?}
-% %
-% Several studies in adaptation have been proposed to figure out which thresholds of local observables report a good trade-off between reachability and network load.
-% %
-% Tseng \emph{et al.}~\cite{2001:AAR:876878.879323} propose adaptive techniques to vary such thresholds in a dynamic way.
-% %
-% One of this techniques uses a function $c(d)$ instead of a counter as the condition to control flooding, where $d$ is the number of known neighbors when the forwarding decision takes place.
-% %
-% The image of $c(d)$ remains the number of allowed receptions.
-% %
-% Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}, on the other hand, propose a switching criteria based on nodes velocity to use \emph{scoped flooding} in dense regions  and \emph{hyper flooding} in sparse regions.
-% %
-% This technique requires the periodic exchange of \emph{hello} messages to approximate the list of nodes neighbors and such list is piggybacked in messages.
-% %
-% Upon message receptions, nodes compare the similarity between the transmitting node's neighbor list and the receiving node's list.
-% %
-% When such similarity reaches a certain threshold, message retransmissions take place.
-% %
-% Along with our implementation of emergent overlays, we provide individual implementations for controlled flooding~\cite{BroadcastStormProblem}, the overlay-based technique MPR~\cite{mpr}, and the previously described approaches of Tseng \emph{et al.} and Viswanath \emph{et al.}
-% %
-
-% \smallskip
-% \noindent
-% \textbf{Individual deployments.}
-% %
-% We deploy and evaluate a single broadcast approach in the scenario depicted in Fig~\ref{fig:eval:setup}.
-% %
-% Each deployment lasts for 10 minutes and messages are sent every two second by source nodes.
-% %
-% We perform 5 iterations per deployment.
-% %
-
-% \smallskip
-% \noindent
-% \textbf{Preconditions.}
-% Deployments require two inputs.
-% %
-% The first input consist in a mobility trace where nodes perform levy-walks every 0.1s.
-% %
-% At every walk we verify whether the wireless topology in the communication area is connected and keep in the mobility trace only connected topologies.
-% %
-% The second input is a list of source nodes, this selection is done randomly among those connected nodes on every wireless topology.
-% %
-% These preconditions provide a fair comparison between deployments.
-
 
 \subsection{Performance of base protocols}
-
-\er{stopped here}
 
 \input{baseline_individual_coverage}
 
