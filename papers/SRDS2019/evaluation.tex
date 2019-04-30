@@ -97,6 +97,29 @@ It uses two types of controlled flooding protocols, \emph{scoped flooding} in de
 	\item what is the difference between scoped and hyper gossiping?
 \end{itemize}}
 
+\raziel{ In Viswanath's paper, nodes' velocity vary between 10m/s and 25m/s. For our evaluation, the thresholds of velocity are those we use in our mobility model, that is:
+\begin{itemize}
+	\item scoped flooding in POI
+	\item hyper flooding out of POI
+	\item velocity is checked on reception of broadcast messages, nodes use scoped flooding when velocity is in [0:0.5]~m/s or hyper flooding when velocity is in [1.5:2.0]~m/s
+\end{itemize}
+
+In both situations, nodes piggyback their list of neighbors in messages.Scoped flooding works as follows:
+
+\begin{itemize}
+	\item node $r$ receives message $m$ from node $s$ ; $r.l$ is the receiver's list of neighbors
+	\item if $m.l \subseteq r.l$, the local node updates the list in the message ($m.l \gets r.l$) and then the message is forwarded. Otherwise the message is not forward.
+	\item the list $m.l$ must contains at least 85\% of elements in $r.l$ to say that $m.l \subseteq r.l$
+\end{itemize}
+
+hyper flooding works as follows
+
+\begin{itemize}
+	\item 
+\end{itemize}
+}
+
+
 \er{previous text, will be deleted:}
 Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}, on the other hand, propose a switching criteria based on nodes velocity to use \emph{scoped flooding} in dense regions  and \emph{hyper flooding} in sparse regions.
 %
