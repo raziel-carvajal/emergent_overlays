@@ -28,15 +28,14 @@ These is the standard model for energy consumption in INET.
 \begin{figure}[t!]
 	\centering
 	\includegraphics[width=\linewidth]{figures/setup_with_poi.pdf}
-	\caption{Initial position of 600 nodes in the simulation setup.}
+	\caption{Initial position of 600 nodes in the simulation field.}
 	\label{fig:eval:setup}
 \end{figure}
 
 \smallskip
 \noindent
 \textbf{Use case and experiment model.}
-We consider a set of 600 mobile nodes.
-The placement and mobility of nodes are inspired by real-life measurements of crowds at large events~\cite{naini2015opportunistic,versichele2012use}.
+We consider a set of 600 mobile nodes, the placement and mobility of which are inspired by real-life measurements of crowds at large events~\cite{naini2015opportunistic,versichele2012use}.
 Figure~\ref{fig:eval:setup} represents the initial position of nodes in the simulation setup.
 Nodes are deployed over a 90$\times$45~m field. % (about the size of a soccer field).
 A 40$\times$15~m area in the middle of this field represents a point of interest (POI) where nodes tend to aggregate.
@@ -119,7 +118,7 @@ Table~\ref{eval:baseline:coverage-collisions} reports reliability metrics for tw
 Figure~\ref{fig:eval:baseline_performance} details the network traffic at the application level (i.e. forwarded messages, without control traffic).
 We distinguish between outgoing messages (i.e. forwarded messages) and incoming messages (i.e. received messages).
 The difference between the former and the latter stands for duplicates.
-We present all metrics for the entire system, and the breakdown outside and inside the central point of interest (POI).
+We present all metrics for the entire system, and the breakdown outside and inside the central point of interest.
 
 We can observe that CF with an initial counter value of 3 achieves a good reach in the entire system, but only through a high number of duplicates.
 This results in low LBC and a high number of collisions.
@@ -150,17 +149,17 @@ We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text
 \end{figure}
 
 We evaluate the quality of observables collected at the level of the MAC protocol, as defined in \S\ref{sec:adaptation:observables}.
-Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for a period of observation of 5 seconds.%
-\footnote{We do not present distributions for other aggregation periods due to space limitations.
+Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for an observation period of 5 seconds.%
+\footnote{We do not present distributions for other aggregation periods due to space limitations. 
 Our experiments confirm that short periods (e.g. 1 second) yield similar distributions, however the measurements for individual nodes is subject to higher noise.
 Longer periods (e.g. 10 seconds) do not allow more stability.}
 Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
-We present the distribution for both the entire system and regions at and out of the POI.
+We present the distribution for both the entire system and regions at and outside the POI.
 
-We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34 neighbors.
+We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34.
 These estimations are in line with a baseline of exact densities that we compute offline from the mobility trace.
 We only observe a slight deviation to lower density estimates for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
-Stability ranges from 0 to 6, and 1 to 7, seconds per neighbor on average, outside and at the POI respectively.
+Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside and at the POI, respectively.
 This is coherent with our mobility model.
 
 \subsection{Performance of emergent overlays}
@@ -188,10 +187,10 @@ We focus on the performance of the emerged overlay, and evaluate the adaptation 
 We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
 ${s}_{\text{min}}$ is set to 2 seconds/ node.
 ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
-These values were determined from the distribution of observables discussed in the previous subsection.
+These values were determined from the distribution of observables discussed in the previous subsection.%
 \footnote{We leave the implementation of autonomous adaptation mechanisms for these thresholds to future work.}
 
-Table~\ref{tab.conf} presents the reliability metrics, and Figure~\ref{fig:eval:performance} presents the number of forwarded and incoming messages.
+Table~\ref{tab.conf} presents the reliability metrics, and Figure~\ref{fig:eval:performance} depicts the number of forwarded and incoming messages.
 As for previous experiments we present the metrics for the entire system and the breakdown over the two zones.
 
 \er{discussion guidelines:
