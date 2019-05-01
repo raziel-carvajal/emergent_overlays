@@ -123,12 +123,12 @@ We present all metrics for the entire system, and the breakdown outside and insi
 
 We can observe that CF with an initial counter value of 3 achieves a good reach in the entire system, but only through a high number of duplicates.
 This results in low LBC and a high number of collisions.
-This is particularly true at the POI where the LBC goes down to 35.09\%, and where the number of collisions is significantly higher than outside of the POI for the same number of nodes.
-The use of a higher value of the counter ($\text{c}=4$) improves reach but also results in a major inefficiency in particular at the POI.
+This is particularly true at the POI where the LBC plummets down to 35.09\%, and where the number of collisions is significantly higher than outside of the POI for the same number of nodes.
+The use of a higher counter value ($\text{c}=4$) improves reach but also results in a major inefficiency particularly at the POI.
 
-MPR is able to reach a 100\% reach (with $\Delta=20s$) for nodes at the POI, with a significantly better LBC than CF, and less collisions.
+MPR is able to attain total reach (100\% with $\Delta=20s$) for nodes at the POI, with a significantly better LBC and less collisions than CF.
 The reliability out of the POI is good but not as high as with CF.
-We note that MPR with control messages periods $\Delta$ lower than 20 seconds yield a significant number of collisions and suffer a loss in reliability.
+We note that MPR with control messages periods $\Delta$ lower than 20 seconds yields a significant number of collisions and, thus, suffers a loss in reliability.
 
 The evaluation of individual protocols confirms that CF is inefficient in dense zones, where MPR is a better choice.
 We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text{c}=3$ otherwise.
