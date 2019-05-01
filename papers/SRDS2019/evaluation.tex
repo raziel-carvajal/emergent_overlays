@@ -154,30 +154,47 @@ We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text
 \end{figure}
 
 We evaluate the quality of observables collected at the level of the MAC protocol, as defined in \S\ref{sec:adaptation:observables}.
-Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for a period of observation of 5 seconds.
+Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for a period of observation of 5 seconds.%
+\footnote{We do not present distributions for other aggregation periods due to space limitations.
+Our experiments confirm that short periods (e.g. 1 second) yield similar distributions, however the measurements for individual nodes is subject to higher noise.
+Longer periods (e.g. 10 seconds) do not allow more stability.}
 Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
 We present the distribution for both the entire system and regions at and out of the POI.
 
 We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34 neighbors.
-These estimations are in line with a baseline of exact densities computed offline based on the mobility trace.
-We only observe a slight deviation to lower values for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
-
-Stability ranges from 0 to 6 seconds per nodes changes per second at the POI and 
-
-Based on these distributions, we use the following threshold in the adaptation policy.
-\footnote{Note that an automatic adaptation of thresholds based on observed performance and reliability would be ideal, but also difficult to implement in a fully distributed fashion. We leave its design to future work.}
-
-We do not present distributions for other aggregation periods due to space limitations.
-Our experiments confirm that shorter periods (e.g. 1 second) yield similar distributions, however the measurements for individual nodes is subject to higher noise.
-Longer periods (e.g. 10 seconds) do not allow more stability, therefore we use observables over 5 seconds windows in the following.
+These estimations are in line with a baseline of exact densities that we compute offline from the mobility trace.
+We only observe a slight deviation to lower density estimates for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
+Stability ranges from 0 to 6, and 1 to 7, seconds per neighbor on average, outside and at the POI respectively.
+This is coherent with our mobility model.
 
 \subsection{Performance of emergent overlays}
 
 \input{coverage_of_adaptive_approaches}
 
-We now proceed to evaluating the performance of emergent overlay, together with ACF and S-H flooding.
+We now proceed to evaluating the performance of emergent overlay, together with two other adaptive approaches, ACF and S-H flooding.
 
-%
+We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
+${s}_{\text{min}}$ is set to 2 seconds/ node.
+${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
+These values were determined from the distribution of observables discussed in the previous subsection.
+\footnote{We leave the implementation of autonomous adaptation mechanisms for these thresholds to future work.}
+
+Based on these observations, we use the following thresholds for emerging overlays:
+${s}_{\text{min}}$
+
+
+
+
+, therefore we use observables over 5 seconds windows in the following.
+
+
+
+dKeep = 10, dEmerge = 20,  min stability = 2
+
+
+
+
+
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/adaptive-sent-msgs}
