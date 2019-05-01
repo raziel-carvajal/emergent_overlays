@@ -162,7 +162,40 @@ We only observe a slight deviation to lower density estimates for nodes at the P
 Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside and at the POI, respectively.
 This is coherent with our mobility model.
 
-\subsection{Performance of emergent overlays}
+\subsection{Efficiency of emerging overlays}
+
+\begin{figure}[t]
+	\begin{minipage}[t]{0.5\linewidth}
+		\includegraphics[width=\linewidth]{./plots/power-consumption}
+		\label{fig:eval:performance:power-consumption}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}[t]{0.5\linewidth}
+		\includegraphics[width=\linewidth]{./plots/recv-msgs-in-time-emerg-ovl}
+		\label{fig:eval:performance:recv-msgs-over-time}
+	\end{minipage} 
+	\caption{write me.
+	\protect \er{This is a temporary figure. We will not keep the one on the left and we may include the one on the right to the figure we actually need.}
+	}
+	\label{fig:eval:performance:emerg-ovl}
+\end{figure}
+
+\er{this section contains:
+\begin{itemize}
+	\item one plot with three subplots: x axis is common to all plots, it is time.
+	First plot is the number of nodes using each of the two protocols.
+	Second plot is the reach using the same kind of lines for all + the two zones.
+	Third plot if the LBC, also with three lines.
+	If energy consumption is viable, make it a fourth plot. Otherwise use right plot of figure~\ref{fig:eval:performance:emerg-ovl}
+	\item a discussion of the plot.
+\end{itemize}
+}
+
+We evaluate the effectiveness of our adaptation protocol in emerging an overlay at the POI.
+The simulation starts with all nodes using CF.
+Figure~\ref{FILLME} presents, over time and from top to bottom, the evolution of the number of nodes using either protocol, the two metrics of reach and LBC, and the energy consumption for the entire network. \er{adapt to what we actually have.}
+
+\subsection{Performance of emerged overlays}
 
 \input{coverage_of_adaptive_approaches}
 
@@ -200,28 +233,3 @@ As for previous experiments we present the metrics for the entire system and the
 \end{itemize}
 }
 
-\subsection{Coordinated adaptation performance}
-
-\begin{figure}[t]
-	\begin{minipage}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{./plots/power-consumption}
-		\label{fig:eval:performance:power-consumption}
-	\end{minipage}%
-	\hfill
-	\begin{minipage}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{./plots/recv-msgs-in-time-emerg-ovl}
-		\label{fig:eval:performance:recv-msgs-over-time}
-	\end{minipage} 
-	\caption{write me.}
-	\label{fig:eval:performance:emerg-ovl}
-\end{figure}
-
-\er{this section contains:
-\begin{itemize}
-	\item one plot with three subplots: x axis is common to all plots, it is time.
-	First plot is the number of nodes using each of the two protocols.
-	Second plot is the reach and LBC.
-	Third plot is the energy consumption (or number of messages if energy makes no sense).
-	\item a discussion of the plot.
-\end{itemize}
-}
