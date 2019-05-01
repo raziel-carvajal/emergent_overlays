@@ -4,15 +4,12 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-\er{%
-suggested content:
-\begin{itemize}
-	\item perspectives:
-	\begin{itemize}
-		\item consider variable-range protocols, yet explain that the gain from these protocols may be limited (this was mentioned in one of the sources we have read, not sure which one)
-		\item consider more advanced policies that can adapt thresholds based on observations of the system performance
-		\item integrate variants of flooding to have a continuum of solutions between pure flooding and pure overlay-based solutions
-	\end{itemize}
-	\item conclusion: recap the contribution and findings of the paper.
-\end{itemize}
-}
+We presented the design and implementation of \emph{emergent overlays} for efficient broadcast in heterogeneous MANETs.
+Emergent overlays allow interoperability between regions of the MANET using controlled flooding and regions using an MPR overlay.
+Our decentralized adaptation mechanism allows such regions to autonomously coordinate on the emergence of  overlays, based on density and mobility.
+Our evaluation shows that emergent overlays offer good delivery guarantees with a lower cost than state-of-the-art adaptation techniques for controlled flooding.
+They reduce the number of messages and collisions and therefore the cost of broadcast.
+
+This works open interesting perspectives that we consider for our future work.
+A first one is the use of emergent overlays for \emph{routing}, e.g. based on the discovering at runtime of commonly-used paths between sources and destinations.
+A second one is adaptation strategies to automatically derive thresholds used for emerging overlays, based on observations of broadcast reliability and performance.
