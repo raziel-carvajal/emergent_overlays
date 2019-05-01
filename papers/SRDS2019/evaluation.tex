@@ -167,30 +167,6 @@ This is coherent with our mobility model.
 
 \input{coverage_of_adaptive_approaches}
 
-We now proceed to evaluating the performance of emergent overlay, together with two other adaptive approaches, ACF and S-H flooding.
-
-We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
-${s}_{\text{min}}$ is set to 2 seconds/ node.
-${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
-These values were determined from the distribution of observables discussed in the previous subsection.
-\footnote{We leave the implementation of autonomous adaptation mechanisms for these thresholds to future work.}
-
-Based on these observations, we use the following thresholds for emerging overlays:
-${s}_{\text{min}}$
-
-
-
-
-, therefore we use observables over 5 seconds windows in the following.
-
-
-
-dKeep = 10, dEmerge = 20,  min stability = 2
-
-
-
-
-
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/adaptive-sent-msgs}
@@ -201,9 +177,22 @@ dKeep = 10, dEmerge = 20,  min stability = 2
     \includegraphics[width=\linewidth]{./plots/adaptive-rcv-msgs}
     \label{fig:eval:performance:incoming}
 	\end{minipage} 
-	\caption{Performance of adaptive approaches in 3 regions, at the whole communication area (light grey), at POI (dark grey) and out of the POI (white).}
+	\caption{Performance of adaptive approaches, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).}
 	\label{fig:eval:performance}
 \end{figure}
+
+We now proceed to evaluating the performance of emergent overlay, and compare it with ACF and S-H flooding.
+We focus on the performance of the emerged overlay, and evaluate the adaptation itself in the next subsection.
+\er{it would make sense to show the emergence first (swap subsections)}
+
+We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
+${s}_{\text{min}}$ is set to 2 seconds/ node.
+${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
+These values were determined from the distribution of observables discussed in the previous subsection.
+\footnote{We leave the implementation of autonomous adaptation mechanisms for these thresholds to future work.}
+
+Table~\ref{tab.conf} presents the reliability metrics, and Figure~\ref{fig:eval:performance} presents the number of forwarded and incoming messages.
+As for previous experiments we present the metrics for the entire system and the breakdown over the two zones.
 
 \er{discussion guidelines:
 \begin{itemize}
@@ -212,18 +201,14 @@ dKeep = 10, dEmerge = 20,  min stability = 2
 \end{itemize}
 }
 
+\subsection{Coordinated adaptation performance}
 
-%
-% \er{
-% Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
-% We aim at answering the following research questions:
-% \begin{itemize}
-% 	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
-% 	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
-% 	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
-% 	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
-% 	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
-% 	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
-% \end{itemize}
-% }
-%
+\er{this section contains:
+\begin{itemize}
+	\item one plot with three subplots: x axis is common to all plots, it is time.
+	First plot is the number of nodes using each of the two protocols.
+	Second plot is the reach and LBC.
+	Third plot is the energy consumption (or number of messages if energy makes no sense).
+	\item a discussion of the plot.
+\end{itemize}
+}
