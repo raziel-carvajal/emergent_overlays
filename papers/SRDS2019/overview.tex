@@ -26,9 +26,9 @@ Mobility models~\cite{Hess:2015:DHM:2856149.2840722,Aschenbruck2009,rhee2011levy
 When around such points of interests (e.g. the concert stages at the Paléo festival in~\cite{naini2015opportunistic}), the speed of users decreases or even comes to a stop.
 Mobility between points of interest happens at a greater speed, and through less densely-populated areas.
 %
-The core contribution of this paper is the notion of \emph{emergent overlays}, illustrated by Figure~\ref{fig:general_principle}:
+The core contribution of this paper is the notion of \emph{emergent overlays} as illustrated by Figure~\ref{fig:general_principle}. 
 Nodes in a MANET use controlled flooding by default, configured for a good performance/reliability tradeoff in sparse to moderately dense areas.
-Nodes in denser and more ``static'' areas (i.e. around points of interest) \emph{autonomously} decide to switch from the controlled flooding protocol and switch to overlay-based broadcast.
+Nodes in denser and more ``static'' areas (i.e. around points of interest) \emph{autonomously} decide to switch from the controlled flooding protocol to overlay-based broadcast.
 %
 Emergent overlays require interoperability, observation, and adaptation.
 
@@ -56,9 +56,9 @@ We describe the nature and accuracy of the resulting \emph{observables} in the f
 \noindent
 \textbf{Adaptation.}
 %
-An emergent overlay is controlled by an adaptation policy to decide on when to emerge and when to dissolve. 
-Policies must be decentralized: There is no global vision of the MANET or centralized decision-making.
-We only allow specific information be piggybacked over existing messages to enable coordinated decisions between a cluster of nodes. %%% ER: remove if we do not have this in the end in the policies
+An emergent overlay is controlled by an adaptation policy to decide  when to emerge and when to dissolve. 
+Policies must be decentralized: there is no global vision of the MANET or centralized decision-making.
+We only allow specific information to be piggybacked over existing messages to enable coordinated decisions between a cluster of nodes. %%% ER: remove if we do not have this in the end in the policies
 The goal of the adaptation is to emerge overlays that closely correspond to dense and/or static regions, avoiding a proliferation of small and isolated overlays that could increase the cost of interoperability.
 We discuss our adaptation policies in the second part of \S\ref{sec:adaptation}.
 
