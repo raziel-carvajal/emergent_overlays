@@ -15,8 +15,8 @@ The original calls of CF and MPR for receiving a message $m$ are named ``handle(
 Lines 1--8 are common, while lines 9--18 and 19--28 apply to nodes running respectively CF or MPR.
 
 The core of the interoperability protocol is the autonomous detection of nodes that are at the \emph{border} of a zone using one protocol.
-When a node detects that it should act as a border, it triggers a boolean b for a duration of \emph{at least} two MPR \texttt{hello} message local broadcast periods, extended as necessary (lines 4--8).
-We present first how interoperability is enabled from CF nodes to MPR nodes, and then how it is enables in the other direction.
+When a node detects that it should act as a border, it triggers a boolean $b$ for a duration of \emph{at least} two MPR \texttt{hello} message local broadcast periods, extended as necessary (lines 4--8).
+We present first how interoperability is enabled from CF nodes to MPR nodes, and then how it is enabled in the other direction.
 
 \input{interop_algo}
 

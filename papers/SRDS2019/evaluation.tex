@@ -55,8 +55,8 @@ We discard the infrequent seeds that do not ensure connectedness.
 
 % However, when a node reaches the frontier of the POI it may remain in its current region with a likelihood of 50\%. %% This is too complicated, and raises eyebrows for no reason.
 
-Each experiment lasts 10 minutes, with one new broadcast every two second, starting from a randomly-selected source node.
-Messages are of constant size 280~Bytes, similar to the length of a typical message on social media.
+Each experiment lasts 10 minutes, with one new broadcast every two seconds, starting from a randomly-selected source node.
+Messages are consistently 280~Bytes in size, similar to the length of a typical message on social media.
 We run each experiment 5 times with different random seeds, and report aggregates over the five runs.
 
 \smallskip
@@ -68,7 +68,7 @@ We implemented these two protocols in the same simulation environment, also over
 
 Our first comparison point is \emph{adaptive counter-based controlled flooding}, or ACF~\cite{2001:AAR:876878.879323}.
 It is an adaptive variant of counter-based CF (\S\ref{sec:background}).
-It uses control message to collect density information around each node.
+It uses control messages to collect density information around each node.
 We rely instead on the observables from the MAC protocol.
 The setting of timers is unchanged, but the initial value of counters is a function of density.
 We use the adaptation function suggested by the authors~\cite[Figure~6]{2001:AAR:876878.879323}.
@@ -78,19 +78,19 @@ Our second comparison point is \emph{S-H flooding}~\cite{adaptive_group_com_iscc
 % , was proposed by Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}.
 It uses two types of controlled flooding protocols, \emph{scoped flooding} for low-mobility nodes and \emph{hyper flooding} for high-mobility nodes.
 The decision of which protocol to use is made independently by each node based on its measured \emph{velocity}, therefore requiring accelerometers.
-We use 1 m/s as the switching threshold.
+We use 1 m/s (a typical walking speed) as the switching threshold.
 S-H flooding needs the list of one-hop neighbors, which is piggybacked on all forwarded messages.
 As for ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
-A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit is less than 85\% of the nodes overlap with its own.
+A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit is \y{if??} less than 85\% of the nodes overlap with its own.
 Hyper flooding is a variant of timer-based controlled flooding (without the use of a counter), but where a timed retransmission is only cancelled when the duplicate is received by a node in the currently-known neighbor set of the current node.
 
 \smallskip
 \noindent
 \textbf{Metrics.}
-We evaluate broadcast protocols using the following metrics, over a series of message dissemination.
+We evaluate broadcast protocols using the following metrics, over a series of message dissemination \y{cycles??}.
 \begin{itemize}
 	\item Reliability of the broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive a message.
-	\item Reliability of local broadcast is measured at the MAC level by the \emph{local broadcast coverage} or \textbf{LBC} (in \%), as the average proportion of neighbors that successfully receive frames despite collisions;
+	\item Reliability of local broadcast is measured at the MAC level by the \emph{local broadcast coverage} or \textbf{LBC} (in \%) as the average proportion of neighbors that successfully receive frames despite collisions;
 	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions}, directly impacting LBC.
 	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
 	\item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
