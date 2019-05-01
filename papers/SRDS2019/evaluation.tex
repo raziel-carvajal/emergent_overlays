@@ -3,6 +3,8 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
+\er{To update in intro etc.: the main drawback of MPR in dense areas is its cost, not necessarily its reliability of performance. The current intro insists too much on reliability but we should shift the focus on costs.}
+
 We evaluate the performance and reliability of broadcast using emergent overlay using full-stack simulations with Omnet++ v5.4~\cite{omnet} and its plug-in INET (v4.1).
 We compare emergent overlays with baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
 
@@ -82,18 +84,14 @@ As for ACF, we do not use explicit control messages but obtain these lists passi
 A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit is less than 85\% of the nodes overlap with its own.
 Hyper flooding is a variant of timer-based controlled flooding (without the use of a counter), but where a timed retransmission is only cancelled when the duplicate is received by a node in the currently-known neighbor set of the current node.
 
-\er{To update in intro etc.: the main drawback of MPR in dense areas is its cost, not necessarily its reliability of performance. The current intro insists too much on reliability but we should shift the focus on costs.}
-
-\er{TODO: udpate the title of the table to replace 'complete' by local coverage}
-
 \smallskip
 \noindent
 \textbf{Metrics.}
 We evaluate broadcast protocols using the following metrics, over a series of message dissemination.
 \begin{itemize}
-	\item Reliability of the (global) broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive a message.
-	\item Reliability of local broadcast at the MAC level is measured by the \emph{local coverage} (in \%), the average proportion of neighbors that receive the retransmission despite collisions;
-	\item Overall contention on the wireless medium is measured as the number of \emph{collisions}, resulting in dropped messages.
+	\item Reliability of the broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive a message.
+	\item Reliability of local broadcast is measured at the MAC level by the \emph{local broadcast coverage} or \textbf{LBC} (in \%), as the average proportion of neighbors that successfully receive frames despite collisions;
+	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions}, directly impacting LBC.
 	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
 	\item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
@@ -102,54 +100,6 @@ We evaluate broadcast protocols using the following metrics, over a series of me
 
 \input{baseline_individual_coverage}
 
-We start by evaluating the performance and reliability of our base protocols CF and MPR.
-Table~\ref{eval:baseline:coverage-collisions} reports the metrics for two variants of CF with initial counter values of 3 and 4, and two variants of MPR with the period $\Delta$ of 20 and 30 seconds.
-We present the metrics for the entire system, and the breakdown outside and inside the central point of interest (POI).
-
-We observe that CF achives a good reach out of the POI with a 100
-
-MPR with control messages periods $\Delta$ lower than 20 seconds yield a significant number of collisions and suffer a loss in reliability.
-We use $\Delta=30s$ when emerging overlays in the following.
-
-\er{stopped here}
-
-%
-We report hereafter every broadcast metric in three regions: at the whole communication area, at the PoI and out of it. 
-%
-
-%
-
-
-Table~\ref{eval:baseline:coverage-collisions} shows the performance of two deployments of MPR and Controlled Flooding (CF).
-%
-The use of an overlay at the PoI shows the lowest number of collisions, at least by an order of 10 compare to CF.
-%
-Completeness of message receptions is at least 79\% which is enough to deliver messages coming from any source in the network at such region (reachability of 100\%).
-%
-On the contrarily, nodes in a more dynamic region (out of PoI) hear at most 99\% of messages even when control messages, which help to maintain overlays, are sent at shorter intervals.
-%
-We do not report deployments of MPR with intervals of control messages shorter than 20s because the number of collisions increases and this results in lower coverage.
-%
-Controlled flooding, on the other hand, reports the highest reachability at the whole communication area but more than a half of the total number of collisions for this protocol take place at the PoI, where completeness shows the lowest values.
-%
-Figure~\ref{fig:eval:baseline_performance} shows the network traffic where we observe a clear advantage of MPR over CF.
-%
-The mean of sent messages for all regions in CF is roughly twice the one observed in MPR.
-%
-Similarly, the order of received messages between both protocols differs at least by two when the comparison is done per region.
-
-\subsection{Quality of observables}
-
-\subsection{Performance of emergent overlays}
-
-\er{discussion guidelines:
-\begin{itemize}
-	\item S-H flood is less performant despite the need for velocity information
-	\item adaptive CF gives good results out of the POI but is not able to offer complete disseminations at the POI (twice as much collisions), while our use of an overlay in that part gives better reach.
-\end{itemize}
-}
-
-%
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/baseline-sent-msgs}
@@ -160,11 +110,31 @@ Similarly, the order of received messages between both protocols differs at leas
     \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
     \label{fig:eval:baseline_performance:incoming}
 	\end{minipage} 
-	\caption{Performance of single-protocol deployments in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
+	\caption{Performance of single-protocol deployments, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).}
 	\label{fig:eval:baseline_performance}
 \end{figure}
 
-%
+We start by evaluating the performance and reliability of the base protocols.
+Table~\ref{eval:baseline:coverage-collisions} reports reliability metrics for two variants of CF with initial counter values of 3 and 4, and two variants of MPR with period $\Delta$ of 20 and 30 seconds.
+Figure~\ref{fig:eval:baseline_performance} details the network traffic at the application level (i.e. forwarded messages, without control traffic).
+We distinguish between outgoing messages (i.e. forwarded messages) and incoming messages (i.e. received messages).
+The difference between the former and the latter stands for duplicates.
+We present all metrics for the entire system, and the breakdown outside and inside the central point of interest (POI).
+
+We can observe that CF with an initial counter value of 3 achieves a good reach in the entire system, but only through a high number of duplicates.
+This results in low LBC and a high number of collisions.
+This is particularly true at the POI where the LBC goes down to 35.09\%, and where the number of collisions is significantly higher than outside of the POI for the same number of nodes.
+The use of a higher value of the counter ($\text{c}=4$) improves reach but also results in a major inefficiency in particular at the POI.
+
+MPR is able to reach a 100\% reach (with $\Delta=20s$) for nodes at the POI, with a significantly better LBC than CF, and less collisions.
+The reliability out of the POI is good but not as high as with CF.
+We note that MPR with control messages periods $\Delta$ lower than 20 seconds yield a significant number of collisions and suffer a loss in reliability.
+
+The evaluation of individual protocols confirms that CF is inefficient in dense zones, where MPR is a better choice.
+We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text{c}=3$ otherwise.
+
+\subsection{Quality of observables}
+
 \begin{figure}[t]
 	\begin{minipage}[t]{0.5\linewidth}
     \includegraphics[width=\linewidth]{./plots/density}
@@ -175,12 +145,37 @@ Similarly, the order of received messages between both protocols differs at leas
     \includegraphics[width=\linewidth]{./plots/mobility}
     \label{fig:eval:observables:stability}
 	\end{minipage} 
-	\caption{Distribution of observables in 3 regions, out of the PoI (dotted line), at the whole communication area (solid line), and at PoI (dashed line).}
+	\caption{Distributions of density $\bar{d}_{5}$ (left) and stability $\bar{s}_{5}$ (right) in the 3 regions: for all of the communication area (solid line), at the POI (dashed line) and out of the POI (dotted line).
+	\protect \er{to fix in plot: 
+	it is not nodes/s but only nodes for the average of the density (left plot). Use ``Estimated density (neighbors)'' for x axis.
+	In second plot, it is not mobility, but stability. The metric is not nodes/s but seconds/node (??). Use ``Estimated stability (seconds/neighbor)''
+	}}
 	\label{fig:eval:observables}
 \end{figure}
 
-%
+We evaluate the quality of observables collected at the level of the MAC protocol, as defined in \S\ref{sec:adaptation:observables}.
+Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for a period of observation of 5 seconds.
+Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
+We present the distribution for both the entire system and regions at and out of the POI.
+
+We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34 neighbors.
+These estimations are in line with a baseline of exact densities computed offline based on the mobility trace.
+We only observe a slight deviation to lower values for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
+
+Stability ranges from 0 to 6 seconds per nodes changes per second at the POI and 
+
+Based on these distributions, we use the following threshold in the adaptation policy.
+\footnote{Note that an automatic adaptation of thresholds based on observed performance and reliability would be ideal, but also difficult to implement in a fully distributed fashion. We leave its design to future work.}
+
+We do not present distributions for other aggregation periods due to space limitations.
+Our experiments confirm that shorter periods (e.g. 1 second) yield similar distributions, however the measurements for individual nodes is subject to higher noise.
+Longer periods (e.g. 10 seconds) do not allow more stability, therefore we use observables over 5 seconds windows in the following.
+
+\subsection{Performance of emergent overlays}
+
 \input{coverage_of_adaptive_approaches}
+
+We now proceed to evaluating the performance of emergent overlay, together with ACF and S-H flooding.
 
 %
 \begin{figure}[t]
@@ -193,20 +188,29 @@ Similarly, the order of received messages between both protocols differs at leas
     \includegraphics[width=\linewidth]{./plots/adaptive-rcv-msgs}
     \label{fig:eval:performance:incoming}
 	\end{minipage} 
-	\caption{Performance of adaptive approaches in 3 regions, at the whole communication area (light grey), at PoI (dark grey) and out of the PoI (white).}
+	\caption{Performance of adaptive approaches in 3 regions, at the whole communication area (light grey), at POI (dark grey) and out of the POI (white).}
 	\label{fig:eval:performance}
 \end{figure}
 
-\er{
-Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
-We aim at answering the following research questions:
+\er{discussion guidelines:
 \begin{itemize}
-	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
-	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
-	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
-	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
-	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
-	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
+	\item S-H flood is less performant despite the need for velocity information
+	\item adaptive CF gives good results out of the POI but is not able to offer complete disseminations at the POI (twice as much collisions), while our use of an overlay in that part gives better reach.
 \end{itemize}
 }
 
+
+%
+% \er{
+% Goal for this section: show experimentally that the proposed algorithms and protocols answer the research questions set forth in the introduction.
+% We aim at answering the following research questions:
+% \begin{itemize}
+% 	\item Does the use of a single protocol in an heterogeneously distributed MANET lead to sub-optimal performance?
+% 	\item Is it beneficial to use different protocols for broadcast in a heterogeneously-distributed MANET, and does it reduce contention/collisions, costs, and improves overall reliability?
+% 	\item What is the relative impact of heterogeneity in motion, and heterogeneity in placement, to the difference in performance and reliability observed in the complete MANET?
+% 	\item What is the cost of the interoperability mechanism when a subset of the network decides to adapt and emerge an overlay in its region?
+% 	\item Are the observables available locally to each node a good representation of the actual deployment environment of each node?
+% 	\item How effective are the adaptation strategies in autonomously deciding on the emergence of overlays or the use of flooding-based broadcast?
+% \end{itemize}
+% }
+%
