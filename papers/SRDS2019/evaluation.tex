@@ -86,8 +86,10 @@ Hyper flooding is a variant of timer-based CF, without counters, where a timed r
 We use the following metrics:
 \begin{itemize}
 	\item Reliability of the broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive each message;
-	\item Reliability of local broadcast is measured at the MAC level by \emph{local broadcast coverage} or \textbf{LBC} (in \%), the average proportion of neighbors that successfully receive frames despite collisions;
-	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions}, directly impacting LBC;
+	\item Reliability of local broadcast is measured at the MAC level by \emph{local broadcast coverage} or \textbf{LBC} (in \%), the average proportion of neighbors that successfully receive frames despite collisions.
+	A low LBC indicates that nodes were not able to successfully disseminate frames to their neighbors despite using 3 MAC-level retransmissions.
+	It is a clear sign of a strongly locally contented wireless medium.
+	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions};
 	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
 	% \item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
