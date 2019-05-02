@@ -4,18 +4,18 @@
 \section{Interoperability}
 \label{sec:mechanisms}
 
-Nodes can use different protocols, but broadcast is still required to reach all nodes.
-Emerged overlays construct dissemination structures that cover their boundaries, i.e. nodes running MPR only receive \texttt{hello} messages from nodes participating to the same protocol, and are not aware of nodes using controlled flooding outside of the emergent overlay boundary.
-Similarly, nodes running controlled flooding and located at the horizon of an emerged overlay may decide not to relay a message as their counter goes down to 0 before the timer expires.
+Although nodes can use different protocols, broadcast is required to reach all nodes.
+Emerged overlays construct dissemination structures that cover their boundaries, i.e. nodes running MPR only receive \texttt{hello} messages from nodes participating to the same protocol, and are not aware of nodes using CF outside of the emerged overlay boundary.
+Similarly, nodes running CF and located at the horizon of an emerged overlay may not relay a message if their counter goes down to 0 before the timer expires.
 This may lead to the absence of propagation of this message inside the emerged overlay.
 
-We present in Algorithm~\ref{algorithm:interoperability} the interoperability mechanisms that allow messages to flow from regions using controlled flooding, to regions using an emerged overlay, and \emph{vice-versa}.
-Interoperability builds on top of the three base protocols, refereed as MAC, CF and MPR in the pseudo-code.
+We present in Algorithm~\ref{algorithm:interoperability} the interoperability mechanisms that allow messages to flow from regions using CF to regions using  MPR, and \emph{vice-versa}.
+%Interoperability builds on top of the three base protocols, refereed as MAC, CF and MPR in the pseudo-code.
 The original calls of CF and MPR for receiving a message $m$ are named ``handle(m)'' and encapsulated in novel interoperability-enabling functions named ``receive(m)''.
 Lines 1--8 are common, while lines 9--18 and 19--28 apply to nodes running respectively CF or MPR.
 
 The core of the interoperability protocol is the autonomous detection of nodes that are at the \emph{border} of a zone using one protocol.
-When a node detects that it should act as a border, it triggers a boolean $b$ for a duration of \emph{at least} two MPR \texttt{hello} message local broadcast periods, extended as necessary (lines 4--8).
+When a node detects that it should act as a border node, it triggers a boolean $b$ for a duration of \emph{at least} two MPR \texttt{hello} message local broadcast periods, extended as necessary (lines 4--8).
 We present first how interoperability is enabled from CF nodes to MPR nodes, and then in the other direction.
 
 \input{interop_algo}
@@ -29,7 +29,7 @@ A CF border node will systematically act as a relay when receiving a new message
 This is enabled by setting an infinite value for the CF counter, which will therefore be positive when the CF timer expires (line 18).
 
 Selecting all CF nodes in range of a MPR zone as border zones, and thus as relays, is not desirable. 
-This would lead to massive amounts of redundant relaying and collisions in the frontier regions of an emerged overlay although only a few dissemination across this frontier is actually sufficient to enable the overlay-based broadcast to take over.
+This would lead to massive amounts of redundant relaying and collisions in the frontier regions of an emergent overlay although only a few dissemination across this frontier is actually sufficient to enable the overlay-based broadcast to take over.
 To reduce this number, CF nodes set a random timer $t_{n_j}$ when they receive a \texttt{hello} message from a MPR node $n_j$ (lines 9--10).
 If they receive a \texttt{border} message from another CF node before the timer expires, they cancel this timer (lines 11-12).
 Otherwise, they tag themselves to act as a border node for the next $2\times \Delta$ seconds, and send their own \texttt{border} frame to announce their existence to $n_j$ (lines 13--15).
@@ -41,13 +41,13 @@ This mechanism allows a sufficient number of CF nodes in range of MPR nodes to b
 \textbf{From MPR to CF.}
 %
 Nodes running MPR must be aware of their border position.
-This simply happens through the reception of \texttt{border} messages from in-range CF nodes (lines 15 \& 19--20).
+This  happens through the reception of \texttt{border} messages from in-range CF nodes (lines 15 \& 19--20).
 Border MPR nodes may be relays in the overlay or \emph{leaf} nodes.
-Upon a reception of a message $m$ using MPR (lines 22-27), the node first checks if it is not a MPR relay while being a border node (line 23).
-This check must be performed upon reception of a message, as the overlay is implicit.
+Upon reception of a message using MPR (lines 22-27), the node first checks if it is not a MPR relay while being a border node (line 23).
+This check must be performed because the overlay is implicit.
 A MPR leaf node that is at the border may have to forward the message in order to reach CF nodes across the overlay boundary.
 In contrast to CF nodes, MPR relay nodes do not pro-actively reduce their numbers to avoid broadcast storms.
-Instead, they simply re-use the controlled flooding message handling (using timers and counters) which may relay the message between the two zones (line 24).
+Instead, they  re-use the controlled flooding message handling (using timers and counters) which may relay the message between the two zones (line 24).
 A MPR relay does not act as a border node as it will already forward the message during the regular MPR message handling procedure (line 26).
 Finally, when a MPR node receives an unseen message $m$ from a CF node, it acts as a source and forwards $m$ to its relay one-hop neighbors (line 28).
 
