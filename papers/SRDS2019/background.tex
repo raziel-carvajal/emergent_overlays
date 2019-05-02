@@ -77,14 +77,7 @@ The target is to reduce the number of relay nodes while ensuring a high (ideally
 % \footnote{We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.}
 
 Broadcast protocols use either controlled flooding or an overlay~\cite{ruiz2015survey}.
-We present next the two protocols 
-
-
-Broadcast protocols can be classified in two families depending on how
-they select relay nodes~\cite{ruiz2015survey}.
-% In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
-% In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the prior exchange of control messages.
-We present in the following two such protocols, one from each family.
+We present next the two protocols, one of each type, that we later combine to enable emergent overlays.
 
 \subsubsection{Counter-based controlled flooding}
 \label{sec:background:broadcast:flooding}
