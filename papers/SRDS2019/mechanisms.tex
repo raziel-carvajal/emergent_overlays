@@ -5,7 +5,7 @@
 \label{sec:mechanisms}
 
 Although nodes can use different protocols, broadcast is required to reach all nodes.
-Emerged overlays construct dissemination structures that cover their boundaries, i.e. nodes running MPR only receive \texttt{hello} messages from nodes participating to the same protocol, and are not aware of nodes using CF outside of the emerged overlay boundary.
+Emergent overlays construct dissemination structures that cover their boundaries, i.e. nodes running MPR only receive \texttt{hello} messages from nodes participating to the same protocol, and are not aware of nodes using CF outside of the emerged overlay boundary.
 Similarly, nodes running CF and located at the horizon of an emerged overlay may not relay a message if their counter goes down to 0 before the timer expires.
 This may lead to the absence of propagation of this message inside the emerged overlay.
 
@@ -28,7 +28,7 @@ Nodes running CF detect that they are border nodes by reacting to \texttt{hello}
 A CF border node will systematically act as a relay when receiving a new message from another node (running either protocol).
 This is enabled by setting an infinite value for the CF counter, which will therefore be positive when the CF timer expires (line 18).
 
-Selecting all CF nodes in range of a MPR zone as border zones, and thus as relays, is not desirable. 
+Selecting all CF nodes in range of a MPR zone as border nodes, and thus as relays, is not desirable. 
 This would lead to massive amounts of redundant relaying and collisions in the frontier regions of an emergent overlay although only a few dissemination across this frontier is actually sufficient to enable the overlay-based broadcast to take over.
 To reduce this number, CF nodes set a random timer $t_{n_j}$ when they receive a \texttt{hello} message from a MPR node $n_j$ (lines 9--10).
 If they receive a \texttt{border} message from another CF node before the timer expires, they cancel this timer (lines 11-12).
