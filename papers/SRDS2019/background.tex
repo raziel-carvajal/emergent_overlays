@@ -124,7 +124,7 @@ The goal is to form a \emph{connected dominating set}:
 The combined coverage areas of all relays must contain all nodes in the network.
 The overlay should be connected but at the same time contain as few relays as possible.
 It can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
-It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the broadcast process.
+It may also be implicit, when nodes are informed they should act as a relay from the source or previous relays in the broadcast process.
 We adopt a protocol of the latter type, MPR~\cite{mpr} (\emph{Multipoint Relay}).
 
 MPR lets each node $n_i$ decide which of its one-hop (direct) neighbors should be instructed to act as relays during a broadcast in which $n_i$ acts as a relay.
