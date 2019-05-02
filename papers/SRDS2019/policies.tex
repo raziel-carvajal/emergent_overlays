@@ -5,19 +5,21 @@
 \label{sec:adaptation}
 
 We now present how overlays emerge (and \emph{dissolve}) autonomously in regions of a MANET where all nodes initially use CF.
-We start by presenting how nodes leverage the MAC protocol to collect information about their environment.
-An adaptation \emph{policy} triggers the creation of overlays based on thresholds over the collected \emph{observables}
+We start by presenting how nodes leverage the MAC protocol to collect observables about their environment.
+An adaptation \emph{policy} triggers the creation of overlays based on thresholds over observables.
 The decision is collectively enforced for the necessary lifetime of the overlay, by piggybacking control information over existing message broadcasts.
 
 \subsection{Observables: Density and Stability}
 \label{sec:adaptation:observables}
 
-The emergence of an overlay in a MANET region (and its later dissolution) is driven by observed density and mobility.
-Those could be measured explicitly by using periodic probing messages, as used by Tseng et~al.~\cite{2001:AAR:876878.879323} to adapt the parameters of controlled flooding.
-The use of extra messages go against our objective of reducing the costs and risk of collisions.
-Instead, we observe that the necessary information can be collected passively from the MAC protocol, BMW~\cite{tang2001mac}\laurent{what is BMW?}.
-CTS requests are sent for every local broadcast.
-Nodes in range reply with RTS frames, enabling the collection of their identities.
+~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}
+
+The emergence of an overlay is driven by observed density and mobility.
+Those could be measured with periodic probing messages, as used by Tseng et~al.~\cite{2001:AAR:876878.879323} and Viswanath and Obraczka~\cite{adaptive_group_com_iscc02} to adapt the parameters of controlled flooding.
+The use of extra messages go against our objective of reducing costs and risks of collisions.
+Instead, we observe that the necessary information can be collected passively from the BMW MAC protocol.
+CTS requests are sent for every local broadcast, and nodes in range reply with RTS frames.
+This enables the collection of one-hop neighbors identities.
 We collect the set of repliers for each RTS/CTS exchange, and keep a limited-time history of these neighborhoods (last 10 seconds in our implementation).
 
 Density for a node $n_i$ is measured as its degree, or number of observed neighbors.
@@ -26,26 +28,26 @@ Using only $d_0$ may lead to sudden fluctuations that do not reflect medium-term
 We compute instead the density average over periods of time, e.g. $\bar{d}_{-1},\bar{d}_{-2},\bar{d}_{-5},\bar{d}_{-10}$.
 As measurements are not taken with a fixed frequency, we weight each measurement using its validity window (e.g., $d_{-w}-d_{-x}$).
 
-Mobility is measured indirectly through the \emph{stability} of $n_i$'s neighborhood, measured as the average time its neighbors are observed.
+Mobility is measured indirectly through the \emph{stability} of $n_i$'s neighborhood, measured as the average time unique neighbors are observed.
 Again, we compute stability over varying periods of time, resulting in $\bar{s}_{-1},\bar{s}_{-2},\bar{s}_{-5},\bar{s}_{-10}$.
 
 \subsection{Protocol switching thresholds}
 
 Nodes decide to emerge an overlay based on both $\bar{s}_{-\delta}$ and $\bar{d}_{-\delta}$ for a time window $\delta$.
-In order to avoid oscillations where nodes would switch back and forth between using CF and MPR, we use an hysteresis, with two pairs of thresholds: 
+In order to avoid oscillations where nodes would switch back and forth between using CF and MPR, we use a hysteresis, with two pairs of thresholds: 
 	$({s}_{\text{min}},{d}_{\text{emerge}})$ 
 and $({s}_{\text{min}},{d}_{\text{keep}})$, where
 	${d}_{\text{keep}} < {d}_{\text{emerge}}$.
 Criteria ${s}_{\text{min}}$ is a minimal stability required in all cases.
 The two density criteria ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ indicate when to respectively emerge and maintain an overlay.
 The values of these criteria depend on the nature of the MANET, the wireless range of its nodes, and deployment factor.
-We define appropriate values for our test scenarios in our evaluation.
+We define appropriate values for our test scenario in our evaluation.
 
 \subsection{Protocol switching policies}
 
 A simple policy is to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
 As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, the node continues using MPR.
-While this \emph{single-node} policy will lead homogeneously dense and stable regions to switch to MPR eventually, it has the risk of creating small regions using MPR surrounded by CF zones, when nodes density is close but does not reach ${d}_{\text{emerge}}$.
+While this \emph{single-node} policy will lead homogeneously dense and stable regions to eventually switch to MPR, it has the risk of creating small regions using MPR surrounded by CF zones, when nodes density is distributed between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
 
 \input{policy_algo}
 
@@ -60,11 +62,11 @@ Nodes whose local thresholds are above $({s}_{\text{min}},{d}_{\text{emerge}})$ 
 The invitation is a single bit \texttt{em} (for \emph{emerge!}) piggybacked in the header of $m$.
 We note that multiple nodes in a dense regions may set \texttt{em}, and possibly switch themselves to MPR (line 12).
 %
-Other nodes receiving a message with \texttt{em} set will check whether their local observables are above the $({s}_{\text{min}},{d}_{\text{keep}})$ thresholds (line 14).
+Other nodes receiving a message with the \texttt{em} bit set will check whether their local observables are above the $({s}_{\text{min}},{d}_{\text{keep}})$ thresholds (line 14).
 If it is the case, a node will start or continue using MPR.
 The value of \texttt{em} is unmodified and the message is further broadcast.
 %
-Nodes that do not pass any of the thresholds unset \texttt{em}, marking the boundary of the emerging overlay region (line 15).
+Nodes that do not pass any of the thresholds unset \texttt{em}, marking the boundary of the emerging overlay's region (line 15).
 
 The switch from CF to MPR is not immediate.
 After starting sending \texttt{hello} frames (line 18), nodes wait for a period of $2\times\Delta$ before switching to the MPR protocol (line 19).
