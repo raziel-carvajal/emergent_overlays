@@ -46,7 +46,7 @@ The main obstacle to reliable local broadcast is the occurrence of \emph{collisi
 If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
 The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
 Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
-Reliable local broadcast relies on a MAC protocol.
+Reliable local broadcast must therefore rely on a MAC protocol.
 
 \subsection{MAC protocol for local broadcast}
 \label{sec:background:mac}
@@ -97,8 +97,8 @@ We present next the two protocols, one of each type, that we later combine to en
 \end{figure}
 
 Uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
-It generates a potentially large number of duplicates, and many concurrent retransmissions in dense areas.
-This generates a high number of collisions and associated retransmissions at the MAC level.
+It generates a large number of duplicates, and many concurrent retransmissions in dense areas.
+% This creates a high number of collisions and retransmissions by the MAC protocol.
 The risk of collision may be reduced by waiting before retransmitting, either for a random amount of time~\cite{BroadcastStormProblem} or, when GPS coordinates are available, for a time that depends on a local density estimation~\cite{abba} but these mitigations do not reduce the number of duplicates.
 
 Controlled flooding enables nodes to decide \emph{not to} retransmit, when they estimate that their neighborhood has been sufficiently covered.
@@ -108,12 +108,12 @@ Every reception of a duplicate decreases $c$ by one.
 Upon expiration of $t$, the node only acts as a relay if $c>0$.
 
 Controlled flooding is intuitively good for regions with high mobility.
-The decision of whether or not to be a relay is made by each node independently based on its observation of the local neighborhood at dissemination time.
-Setting the value of the timer $t$ and of the counter $c$ is however difficult, as optimal values depend on nodes density.
-For sparse areas, a low value of $c$ will lead to incomplete coverage.
-In dense areas, a high value of $c$ will lead to a high number of collisions and duplicates.
-We choose to favor coverage in sparse areas and use $t \in [10^{-6}, 10^{-4})$ seconds and $c=3$.
-An illustration of counter-based controlled flooding is given by Figure~\ref{fig:background:flooding} using $c=2$.
+The decision of whether or not to be a relay is made by each node independently, based on its observation of the local neighborhood at dissemination time.
+Optimal values for $t$ and $c$ depend on nodes density.
+For sparse areas, a low value of $c$ can lead to incomplete coverage.
+In dense areas, a high value of $c$ will lead to many duplicates.
+We choose to favor coverage in sparse areas and use a random $t \in [10^{-6}, 10^{-4})$ seconds and $c=3$.
+An illustration of counter-based controlled flooding with $c=2$ is given by Figure~\ref{fig:background:flooding}.
 
 \subsubsection{Multipoint Relay (MPR)}
 \label{sec:background:broadcast:overlay}
@@ -121,18 +121,18 @@ An illustration of counter-based controlled flooding is given by Figure~\ref{fig
 \input{mpr_protocol}
 
 Overlay-based approaches pre-compute which nodes should act as relays.
-This requires exchange of information between nodes outside of actual broadcast sessions.
-The goal is to form a \emph{connected dominating set} overlay
+This requires exchange of information between nodes outside of actual message broadcasts.
+The goal is to form a \emph{connected dominating set}:
 The combined coverage areas of all relays must contain all nodes in the network.
-The overlay should be connected but at the same time contain as little relays as possible.
+The overlay should be connected but at the same time contain as few relays as possible.
 It can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
-It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the dissemination process.
+It may also be implicit, when nodes are informed they should act as a relay from the source or previous relay in the broadcast process.
 We adopt a protocol of the latter type, MPR~\cite{mpr,mpr-improvement} (\emph{Multipoint Relay}).
 
-The principle of MPR is to let each node decide which of its one-hop (direct) neighbors should be instructed to act as relays during a dissemination in which it participates as a relay or source itself.
+The principle of MPR is to let each node $n_i$ decide which of its one-hop (direct) neighbors should be instructed to act as relays during a broadcast in which $n_i$ participates as a relay itself.
 It requires the discovery of all one-hop and two-hop neighbors using periodic control messages.
-Nodes periodically announce themselves using best-effort local broadcast, i.e. by disabling retransmissions by the MAC protocol.
-These messages are called \texttt{hello} messages and include the current neighborhood, as obtained from recent MAC-level exchanges.
+Nodes periodically announce themselves using best-effort local broadcast, i.e. bypassing the BMW MAC protocol.
+These \texttt{hello} messages include the current neighborhood, collected by the MAC protocol in recent exchanges.
 Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
 The ideal frequency of announcements depends on the network dynamics.
 Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
