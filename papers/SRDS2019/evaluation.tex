@@ -5,13 +5,13 @@
 
 \er{To update in intro etc.: the main drawback of MPR in dense areas is its cost, not necessarily its reliability of performance. The current intro insists too much on reliability but we should shift the focus on costs.}
 
-We evaluate the performance and reliability of broadcast using full-stack simulations with Omnet++ v5.4~\cite{omnet} and its plug-in INET v4.1.
+We evaluate the performance and reliability of broadcast using full-stack simulations in Omnet++ v5.4~\cite{omnet} and its plug-in INET v4.1.
 We compare emergent overlays with baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
 
 Our evaluation aims at answering the following research questions:
 (i) Do emergent overlays allow improving the cost of broadcast in zones where CF is inefficient?
 (ii) Is autonomous adaptation effective in emerging overlays without centralized control?
-(iii) How do emergent overlays compare to previous approaches to adaptive broadcast?
+(iii) How do emergent overlays compare to previous approaches of adaptive broadcasting?
 
 \subsection{Experimental setup}
 
@@ -21,7 +21,7 @@ Our evaluation aims at answering the following research questions:
 We simulate a full MANET network stack, from the wireless medium to application-level protocols.
 The physical and data-link layers follow IEEE 802.11g specifications, with the additional use of BMW for MAC-level local broadcast.
 % However, we use the custom BMW~\cite{tang2001mac} MAC protocol in place of the standard virtual carrier sensing of IEEE 802.11g.
-Every node uses a single transceiver with a fixed transmission range of 10~m, representative e.g. of the transmission range of bluetooth and similar radio devices.
+Every node uses a single transceiver with a fixed transmission range of 10~m, representative of the range of bluetooth and similar radio devices. \y{{\color{red}RED FLAG} this is not a convincing range when we're using WiFi MAC. can we argue this range for high-density locales? not sure, maybe someone knows of evidence here?} 
 This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data rate of 11~Mbps.
 % The power consumption for each state of the transceiver are as follows: 1~mW (\emph{sleep}), 5~mW (\emph{listen}), 10~mW (\emph{receiving}) and 100~mW (\emph{transmitting}).
 % These is the standard model for energy consumption in INET.
@@ -37,27 +37,24 @@ This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data
 \noindent
 \textbf{Use case and experiment model.}
 We consider a set of 600 mobile nodes, the placement and mobility of which are inspired by real-life measurements of crowds at large events~\cite{naini2015opportunistic,versichele2012use}.
-Figure~\ref{fig:eval:setup} represents the initial position of nodes in the simulated setup.
+Figure~\ref{fig:eval:setup} portrays the starting node positions in the simulated setup.
 Nodes are deployed over a 90$\times$45~m field. % (about the size of a soccer field).
-A 40$\times$15~m area in the middle of this field represents a point of interest (POI) where a larger number of nodes tend to aggregate.
+A 40$\times$15~m area in the middle of this field represents a POI where a larger number of nodes tend to aggregate.
 
-At the beginning of the simulation, 300 nodes are randomly placed inside the POI and 300 nodes are outside the POI.
+At the beginning of the simulation, 300 nodes are randomly placed inside the POI and 300 others outside.
 During the simulation, nodes are mobile.
-We use \emph{truncated levy walks}~\cite{rhee2011levy} to simulate the motion of human users.
-This model combines frequent short walks with occasional rides to distant locations. %, where the direction of nodes motion remains invariable between walks.
-The velocity of every walk is chosen randomly from an interval.
-The interval at the POI is [0:0.5]~m/s.
-Outside the POI, the interval is [1.5:2]~m/s.
-These values are representative of human mobility as measured in large gatherings.
+To simulate human mobility, we use the \emph{truncated levy walks}~\cite{rhee2011levy} model, which combines frequent short walks with occasional rides to distant locations. %, where the direction of nodes motion remains invariable between walks.
+The velocity of every walk is chosen randomly from an interval: [0:0.5]~m/s at the POI and [1.5:2]~m/s outside it.
+These values are representative of mobility in large gatherings.
 Nodes move freely within the entire communication area.
-We verify upon generation of a mobility trace that at any point in time, the graph formed by all nodes and direct neighborhood relations is connected (therefore, the potential for complete coverages is theoretically 100\%).
+We verify upon generation of a mobility trace that at any point in time, the graph formed by all nodes and direct neighborhood relations is connected (therefore, the potential for complete coverage is theoretically 100\%).
 We discard (infrequent) random seeds that may not ensure this connectedness.
 
 % However, when a node reaches the frontier of the POI it may remain in its current region with a likelihood of 50\%. %% This is too complicated, and raises eyebrows for no reason.
 
 Each experiment lasts for 10 minutes, with one new broadcast every two seconds, starting from a randomly-selected source node.
 Messages are always 280~Bytes in size, similar to the length of a typical message on social media.
-We run each experiment 5 times with different random seeds, and report aggregates over the five runs.
+We report the aggregates of 5 experiment runs with different random seeds.
 
 \smallskip
 \noindent
