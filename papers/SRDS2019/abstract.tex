@@ -4,10 +4,11 @@
 \begin{abstract}
 Mobile Ad-Hoc Networks (MANETs) allow distributed applications when no fixed network infrastructure is available.
 MANETs use wireless communication subject to faults and uncertainty, and must support efficient \emph{broadcast}.
-Controlled flooding is suitable for highly-dynamic networks, but it is inefficient in areas where nodes are densely packed. where establishing an overlay as a dissemination backbone is a better solution.
+Controlled flooding is suitable for highly-dynamic networks, while overlay-based broadcast is suitable for dense and more static ones.
 Density and mobility vary significantly over a MANET deployment area.
-We propose the design and implementation of \emph{emergent overlays} for broadcast in heterogeneous MANETs.
-This adaptation technique allows nodes to autonomously switch from controlled flooding to the use of an overlay.
-We detail how to support the interoperation of the two protocols in a single heterogeneous system, and devise coordinated adaptation policies allowing regions of nodes to autonomously emerge and dissolve overlays at runtime.
-Our evaluation based on the simulation of the full network stack for up to 600 nodes shows that emergent overlays reduce energy consumption and improve reliability and coverage of broadcast compared to the use of a single protocol and to previously-proposed adaptation techniques.
+We present the design and implementation of \emph{emergent overlays} for efficient and reliable broadcast in heterogeneous MANETs.
+This adaptation technique allows nodes to automatically switch from controlled flooding to the use of an overlay.
+Interoperability protocols support the integration of both protocols in a single heterogeneous system.
+Coordinated adaptation policies allow regions of nodes to autonomously and collectively emerge and dissolve overlays.
+Our simulation of the full network stack of 600 mobile nodes shows that emergent overlays reduce energy consumption, and improve reliability and coverage compared to single protocols and to two previously-proposed adaptation techniques.
 \end{abstract}
