@@ -165,17 +165,21 @@ This is coherent with our mobility model.
 \subsection{Efficiency of emerging overlays}
 
 \begin{figure}[t]
-	\begin{minipage}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{./plots/power-consumption}
-		\label{fig:eval:performance:power-consumption}
-	\end{minipage}%
-	\hfill
-	\begin{minipage}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{./plots/recv-msgs-in-time-emerg-ovl}
-		\label{fig:eval:performance:recv-msgs-over-time}
-	\end{minipage} 
-	\caption{write me.
-	\protect \er{This is a temporary figure. We will not keep the one on the left and we may include the one on the right to the figure we actually need.}
+	\centering
+	\begin{subfigure}{}
+		\includegraphics[width=0.6\linewidth]{./plots/adaptation/recv-msgs}
+	\end{subfigure}
+	%
+	\begin{subfigure}{}
+		\includegraphics[width=0.6\linewidth]{./plots/adaptation/lbc-at-poi}
+	\end{subfigure}
+	%
+	\begin{subfigure}{}
+		\includegraphics[width=0.6\linewidth]{./plots/adaptation/running-algo}
+	\end{subfigure}
+	%	
+	\caption{Performance of emergent overlays. Average number of incoming messages at the whole region (top), local broadcast coverage at POI (middle) and proportion of nodes running MPR or CF (bottom).
+	\protect\raziel{Figure at the bottom: I use bars because having 2 curves makes it hard to read (curves cross with each other). Figure in the middle: same here, having reach/lbc in the 3 regions makes the figure so hard to read. Results: in the first 20 seconds there is the transition phase where nodes start running MPR then from 20-60 we observe the impact of border nodes (many nodes are chosen as border, they fwd using simple flooding) and then the number of border nodes reduces (tanks to timers). From 60 to 120 we observe the stabilisation. In the last figure (at top), we observe the impact (in whole system) of received messages.}
 	}
 	\label{fig:eval:performance:emerg-ovl}
 \end{figure}
