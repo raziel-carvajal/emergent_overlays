@@ -26,8 +26,7 @@ A similar study during a street festival in Ghent, Belgium~\cite{versichele2012u
 % \cite{Stange:2011:AWM:2077357.2077368}
 % \cite{Ellersiek:2013:UBT:2533810.2533813}
 
-Broadcast is a fundamental operation in MANETs.
-It allows delivering messages from any source to all nodes in the network, e.g. to forward live announcements to all users of a music festival mobile application.
+Such heterogeneity in space has inherently an impact on data dissemination, and more precisely on broadcast operations in MANETS. Broadcast is a fundamental operation that allows delivering messages from any source to all nodes in the network, e.g. to forward live announcements to all users of a music festival mobile application.
 Efficient routing also depends on broadcast~\cite{overview_adhoc_networks}.
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
 The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
@@ -35,7 +34,7 @@ Collisions are not always possible to detect, and are costly to address~\cite{hi
 A MAC protocol~\cite{ieee1997wireless} using many resubmissions may result in lower performance and increase energy costs.
 The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
-Broadcast protocols are classified in two families~\cite{ruiz2015survey}:
+To overcome this issue, various broadcast protocols have emerged, and can be classified in two families~\cite{ruiz2015survey}:
 	Protocols based on \emph{controlled flooding}, 
 	and those relying on the creation and maintenance of an \emph{overlay}.
 %
@@ -51,11 +50,13 @@ Evaluation studies of broadcast algorithms~\cite{DensityMobDrivenEval,Williams20
 Controlled flooding algorithms~\cite{ObraczkaK_2001, adaptive_group_com_iscc02} are efficient in sparsely-populated areas and when nodes are highly mobile.
 Overlay-based algorithms~\cite{Nikolov2015, stojmenovic-cds, mpr} shine when nodes are relatively stable and enable important saving in energy and retransmissions in densely-populated areas.
 
+As a result, there are no existing broadcast protocols that remain reliable and efficient whatever their deployment conditions. Further, nodes use either controlled flooding or overlay-based algorithms, two incompatible protocols. It leads to \textit{heterogeneous} MANETs made of non-interoperable clusters of nodes that arbitrary perfoms either good or bad according to their mobility patterns. 
+
 \smallskip
 \noindent
 \textbf{Contributions.}
 %
-We are interested in efficient broadcast in \emph{heterogeneous} MANETs.
+We are interested in efficient broadcast in heterogeneous MANETs.
 Our motivation is that controlled flooding protocols are efficient in the general case, but that overlays are beneficial in specific zones where the density increases and mobility decreases, typical of human movement scenarios.
 %
 We contribute the novel notion of \emph{\textbf{emergent overlays}}, allowing a subset of the nodes in a MANET to autonomously decide to switch from the use of controlled flooding to the bootstrap and use of an overlay.
@@ -63,7 +64,10 @@ We contribute the novel notion of \emph{\textbf{emergent overlays}}, allowing a 
 The decision to emerge (or later dissolve) an overlay is based on local indicators of density and mobility, with the autonmous coordination of all nodes within a region.
 
 \begin{itemize}
-	\item We present our system model and three base protocols (\S\ref{sec:background}): The Broadcast Medium Window (BMW) MAC protocol for reliable local broadcast~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr};
+\item We present our system model and %three base protocols
+  the building blocks of our approach (\S\ref{sec:background}): The Broadcast Medium Window (BMW), a MAC protocol with an improved reliability for wireless networks
+  % reliable local broadcast
+  ~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr};
 	\item We define the requirements for emergent overlays (\S\ref{sec:overview});
 	\item We address the interoperability challenge with a protocol allowing to guarantee continuity in the broadcast across heterogeneous zones using different protocols (\S\ref{sec:mechanisms});
 	\item We present how nodes are able to collect \emph{observables} about their environment to drive the emergence of overlays, and how this emergence is coordinated autonomously across nodes in an homogeneous region of the MANET (\S\ref{sec:adaptation});

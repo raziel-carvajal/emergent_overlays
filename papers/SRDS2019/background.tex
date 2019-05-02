@@ -1,7 +1,7 @@
 %!TEX root = main.tex
 %=========================================================
 
-\section{Building blocks}
+\section{Key concepts}
 \label{sec:background}
 
 \begin{figure}[t]
@@ -19,19 +19,37 @@
 \end{figure}
 
 We start by detailing our system and communication models.
-We follow-up with the description of the three base protocols we combine in this paper.
-The first protocol is a MAC protocol enabling reliable \emph{local broadcast}.
-The two other protocols implement \emph{global broadcast}:
-One is based on controlled flooding and the other uses an overlay.
+We follow-up with the description of the three base protocols we
+combine in our approach.
+
+% The first protocol is a MAC protocol enabling
+% reliable \emph{local broadcast}. The two other protocols implement
+% \emph{global broadcast}: One is based on controlled flooding and the other uses an overlay.
 
 \subsection{System and communication models}
 \label{sec:background:model}
 
-A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional space.
-We do not consider the availability of geolocation information (GPS) on the devices.
-Nodes communicate using wireless transceivers that can emit network frames using \emph{local broadcast} and receive frames when active in listening mode.
-Nodes cannot send and receive simultaneously.
-We consider the fixed-range model: Local broadcasts can be received by nodes within a transmission range Tx.
+A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional
+space. We do not consider the availability of geolocation information
+(GPS) on the devices. Nodes can not send and receive simultaneously,
+there are either in a sending or listening mode. Nodes in a sending mode
+communicate using wireless transceivers that have a limited and fixed
+transmission range $T_X$. Therefore, when nodes emit network frames,
+only nodes in their transmission range can receive them. We refer this
+transmition as a \emph{local broadcast}. To reach out-of-range destinations, 
+some nodes must act as relays to forward frames to other nodes of the
+network.  We refer this transmition as a \emph{global broadcast}.
+
+
+
+% that can emit network
+% frames using \emph{local broadcast} and receive frames when active in
+% listening mode.
+
+% Nodes cannot send and receive simultaneously.
+% We consider the fixed-range model: Local broadcasts can be received by
+% nodes within a transmission range Tx.
+
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
 Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
 Sending and receiving frames consumes energy from the node's limited power supply.
@@ -70,10 +88,12 @@ Subsequent receptions are \emph{duplicates} that are simply ignored.
 The target is to reduce the number of necessary relay nodes while ensuring a high (or full) \emph{coverage}, measured as the number of nodes that receive the message during the broadcast.
 We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.
 
-Broadcast protocols can be classified in two families depending on how they select relay nodes~\cite{ruiz2015survey}.
-In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
-In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the prior exchange of control messages.
-We present in the following two such protocols.
+Broadcast protocols can be classified in two families depending on how
+they select relay nodes~\cite{ruiz2015survey}.
+
+% In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
+% In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the prior exchange of control messages.
+We present in the following two such protocols, one from each family.
 
 \subsubsection{Counter-based controlled flooding}
 \label{sec:background:broadcast:flooding}
