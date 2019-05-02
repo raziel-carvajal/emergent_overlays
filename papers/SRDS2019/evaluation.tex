@@ -5,25 +5,26 @@
 
 \er{To update in intro etc.: the main drawback of MPR in dense areas is its cost, not necessarily its reliability of performance. The current intro insists too much on reliability but we should shift the focus on costs.}
 
-We evaluate the performance and reliability of broadcast using emergent overlay using full-stack simulations with Omnet++ v5.4~\cite{omnet} and its plug-in INET (v4.1).
+We evaluate the performance and reliability of broadcast using full-stack simulations with Omnet++ v5.4~\cite{omnet} and its plug-in INET v4.1.
 We compare emergent overlays with baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
 
 Our evaluation aims at answering the following research questions:
-(i) Do emergent overlays allow improving broadcast reliability in zones where CF is inefficient?
+(i) Do emergent overlays allow improving the cost of broadcast in zones where CF is inefficient?
 (ii) Is autonomous adaptation effective in emerging overlays without centralized control?
 (iii) How do emergent overlays compare to previous approaches to adaptive broadcast?
 
-\smallskip
+\subsection{Experimental setup}
+
+% \smallskip
 \noindent
 \textbf{Simulation settings.}
-We simulate a full MANET network stack, from the wireless medium to the application-level protocols.
-The physical and data-link layers follow the IEEE 802.11g specifications.
-However, we use the custom BMW~\cite{tang2001mac} MAC protocol in place of the standard virtual carrier sensing of IEEE 802.11g.
-
+We simulate a full MANET network stack, from the wireless medium to application-level protocols.
+The physical and data-link layers follow IEEE 802.11g specifications, with the additional use of BMW for MAC-level local broadcast.
+% However, we use the custom BMW~\cite{tang2001mac} MAC protocol in place of the standard virtual carrier sensing of IEEE 802.11g.
 Every node uses a single transceiver with a fixed transmission range of 10~m, representative e.g. of the transmission range of bluetooth and similar radio devices.
 This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data rate of 11~Mbps.
-The power consumption for each state of the transceiver are as follows: 1~mW (\emph{sleep}), 5~mW (\emph{listen}), 10~mW (\emph{receiving}) and 100~mW (\emph{transmitting}).
-These is the standard model for energy consumption in INET.
+% The power consumption for each state of the transceiver are as follows: 1~mW (\emph{sleep}), 5~mW (\emph{listen}), 10~mW (\emph{receiving}) and 100~mW (\emph{transmitting}).
+% These is the standard model for energy consumption in INET.
 
 \begin{figure}[t!]
 	\centering
@@ -36,42 +37,42 @@ These is the standard model for energy consumption in INET.
 \noindent
 \textbf{Use case and experiment model.}
 We consider a set of 600 mobile nodes, the placement and mobility of which are inspired by real-life measurements of crowds at large events~\cite{naini2015opportunistic,versichele2012use}.
-Figure~\ref{fig:eval:setup} represents the initial position of nodes in the simulation setup.
+Figure~\ref{fig:eval:setup} represents the initial position of nodes in the simulated setup.
 Nodes are deployed over a 90$\times$45~m field. % (about the size of a soccer field).
-A 40$\times$15~m area in the middle of this field represents a point of interest (POI) where nodes tend to aggregate.
+A 40$\times$15~m area in the middle of this field represents a point of interest (POI) where a larger number of nodes tend to aggregate.
 
-At the beginning of the simulation, 300 nodes are randomly placed inside the POI and 300 nodes outside the POI.
+At the beginning of the simulation, 300 nodes are randomly placed inside the POI and 300 nodes are outside the POI.
 During the simulation, nodes are mobile.
-We use the \emph{truncated levy walks}~\cite{rhee2011levy} to simulate the motion of human users.
-This model implements frequent short walks as well as occasional rides to distant locations. %, where the direction of nodes motion remains invariable between walks.
+We use \emph{truncated levy walks}~\cite{rhee2011levy} to simulate the motion of human users.
+This model combines frequent short walks with occasional rides to distant locations. %, where the direction of nodes motion remains invariable between walks.
 The velocity of every walk is chosen randomly from an interval.
 The interval at the POI is [0:0.5]~m/s.
 Outside the POI, the interval is [1.5:2]~m/s.
 These values are representative of human mobility as measured in large gatherings.
 Nodes move freely within the entire communication area.
-We verify upon generation of a mobility trace that at any point in time, the graph formed of all nodes is connected (therefore, the potential for complete coverages is theoretically 100\%).
-We discard the infrequent seeds that do not ensure connectedness.
+We verify upon generation of a mobility trace that at any point in time, the graph formed by all nodes and direct neighborhood relations is connected (therefore, the potential for complete coverages is theoretically 100\%).
+We discard (infrequent) random seeds that may not ensure this connectedness.
 
 % However, when a node reaches the frontier of the POI it may remain in its current region with a likelihood of 50\%. %% This is too complicated, and raises eyebrows for no reason.
 
-Each experiment lasts 10 minutes, with one new broadcast every two seconds, starting from a randomly-selected source node.
-Messages are consistently 280~Bytes in size, similar to the length of a typical message on social media.
+Each experiment lasts for 10 minutes, with one new broadcast every two seconds, starting from a randomly-selected source node.
+Messages are always 280~Bytes in size, similar to the length of a typical message on social media.
 We run each experiment 5 times with different random seeds, and report aggregates over the five runs.
 
 \smallskip
 \noindent
-\textbf{Evaluated protocols.} 
+\textbf{Comparison points.} 
 We consider our baseline protocols (counter-based CF and MPR) used in isolation, and combined for emergent overlays.
 In addition, we compare with two state-of-the-art adaptive approaches.
-We implemented these two protocols in the same simulation environment, also over the BMW MAC protocol for reliable local broadcast.
+We implemented these two protocols in the same simulation environment, and both use the BMW MAC protocol for reliable local broadcast.
 
 Our first comparison point is \emph{adaptive counter-based controlled flooding}, or ACF~\cite{2001:AAR:876878.879323}.
 It is an adaptive variant of counter-based CF (\S\ref{sec:background}).
 It uses control messages to collect density information around each node.
-We rely instead on the observables from the MAC protocol.
+We rely instead on the observable from the MAC protocol.
 The setting of timers is unchanged, but the initial value of counters is a function of density.
 We use the adaptation function suggested by the authors~\cite[Figure~6]{2001:AAR:876878.879323}.
-Initial counter values vary from 2 to 5 for different densities (i.e., from 2 to 5 for density values 1 to 4, and then slowly down to 2 for 12+ neighbors).
+Initial counter values vary from 2 to 5 for different densities (i.e., from 2 to 5 for density values 1 to 4, and then slowly down to a value of 2 for 12+ neighbors).
 
 Our second comparison point is \emph{S-H flooding}~\cite{adaptive_group_com_iscc02}.
 % , was proposed by Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}.
@@ -80,8 +81,8 @@ The decision of which protocol to use is made independently by each node based o
 We use 1 m/s (a typical walking speed) as the switching threshold.
 S-H flooding needs the list of one-hop neighbors, which is piggybacked on all forwarded messages.
 As for ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
-A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit if less than 85\% of the nodes overlap with its own.
-Hyper flooding is a variant of timer-based controlled flooding (without the use of a counter), but where a timed retransmission is only cancelled when the duplicate is received by a node in the currently-known neighbor set of the current node.
+A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit if less than 85\% of the two sets overlap.
+Hyper flooding is a variant of timer-based CF, without counters, where a timed retransmission at $n_i$ is only cancelled when the duplicate is received by a node present in $n_i$'s currently-known neighbor set.
 
 \smallskip
 \noindent
@@ -90,9 +91,9 @@ We use the following metrics:
 \begin{itemize}
 	\item Reliability of the broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive each message.
 	\item Reliability of local broadcast is measured at the MAC level by \emph{local broadcast coverage} or \textbf{LBC} (in \%), the average proportion of neighbors that successfully receive frames despite collisions;
-	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions}, directly impacting LBC.
+	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions}, directly impacting LBC;
 	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
-	\item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
+	% \item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
 
 \subsection{Performance of base protocols}
@@ -151,53 +152,50 @@ We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text
 We evaluate the quality of observables collected at the level of the MAC protocol, as defined in \S\ref{sec:adaptation:observables}.
 Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for an observation period of 5 seconds.%
 \footnote{We do not present distributions for other aggregation periods due to space limitations. 
-Our experiments confirm that short periods (e.g. 1 second) yield similar distributions, however the measurements for individual nodes is subject to higher noise.
-Longer periods (e.g. 10 seconds) do not allow more stability.}
+Our experiments confirm that short periods (e.g. 1 second) yield similar distributions, but measurements for individual nodes are subject to higher noise.
+Longer periods (e.g. 10 seconds) do not bring significant benefits.}
 Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
 We present the distribution for both the entire system and regions at and outside the POI.
 
 We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34.
 These estimations are in line with a baseline of exact densities that we compute offline from the mobility trace.
 We only observe a slight deviation to lower density estimates for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
-Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside and at the POI, respectively.
-This is coherent with our mobility model.
+Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside and at the POI, respectively, in coherence with our mobility model.
 
 \subsection{Efficiency of emerging overlays}
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.85\linewidth]{plots/adaptation-perf}
-	\caption{
-	Performance of emergent overlays. Average number of incoming messages at the whole region (top), local broadcast coverage at POI (middle) and proportion of nodes running MPR or CF (bottom).
-	\protect\raziel{Figure at the bottom: I use bars because having 2 curves makes it hard to read (curves cross with each other). Figure in the middle: same here, having reach/lbc in the 3 regions makes the figure so hard to read. Results: in the first 20 seconds there is the transition phase where nodes start running MPR then from 20-60 we observe the impact of border nodes (many nodes are chosen as border, they fwd using simple flooding) and then the number of border nodes reduces (tanks to timers). From 60 to 120 we observe the stabilisation. In the last figure (at top), we observe the impact (in whole system) of received messages.}
+	\caption{Timeline of an overlay emergence, with the number of nodes using the two protocols (first plot), the average LBC for nodes inside the POI (second plot) and the average number of incoming messages (third plot).
+	% \protect\raziel{Figure at the bottom: I use bars because having 2 curves makes it hard to read (curves cross with each other). Figure in the middle: same here, having reach/lbc in the 3 regions makes the figure so hard to read. Results: in the first 20 seconds there is the transition phase where nodes start running MPR then from 20-60 we observe the impact of border nodes (many nodes are chosen as border, they fwd using simple flooding) and then the number of border nodes reduces (tanks to timers). From 60 to 120 we observe the stabilisation. In the last figure (at top), we observe the impact (in whole system) of received messages.}
 	}
 	\label{fig:eval:performance:emerg-ovl}
 \end{figure}
 
-\er{this section contains:
-\begin{itemize}
-	\item one plot with three subplots: x axis is common to all plots, it is time.
-	First plot is the number of nodes using each of the two protocols.
-	Second plot is the reach using the same kind of lines for all + the two zones.
-	Third plot if the LBC, also with three lines.
-	If energy consumption is viable, make it a fourth plot. Otherwise use right plot of figure~\ref{fig:eval:performance:emerg-ovl}
-	\item a discussion of the plot.
-\end{itemize}
-}
-
 We evaluate the effectiveness of our adaptation protocol in emerging an overlay at the POI.
-The simulation starts with all nodes using CF.
+The simulation starts with all nodes using CF, with new messages being sent from the beginning, and every 2 seconds.
 
 We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
 ${s}_{\text{min}}$ is set to 2 seconds/ node.
 ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
-These values were determined from the distribution of observables discussed in the previous subsection.%
-\footnote{We leave the implementation of autonomous adaptation mechanisms for these thresholds to future work.}
+These values were determined from the distribution of observables discussed in the previous subsection.
 
-Figure~\ref{FILLME} presents, over time and from top to bottom, the evolution of the number of nodes using either protocol, the two metrics of reach and LBC, and the energy consumption for the entire network. \er{adapt to what we actually have.}
+Figure~\ref{fig:eval:performance:emerg-ovl} presents, over time and from top to bottom, the evolution of the number of nodes using either protocol, the LBC at the POI and the average number of incoming messages over the entire network.
+Reach is not shown but remains close to 100\% for the entire duration of the experiment.
 
-\er{discuss the results (8 lines)}
-65543` '
+We can observe the gradual increase in the number of nodes switching to MPR in the first plot.
+This number stabilizes at around two-thirds of the network for the rest of the simulation.
+The LBC at the POI is very low at first.
+This is a result of the high number of collisions of nodes in the dense region using CF.
+This results in a higher number of retransmissions and therefore a higher cost to obtain a high reach.
+At time t=60s, we can observe a sharp increase in the LBC for nodes at the POI.
+This corresponds to the end of the transition period (line 19 of Algorithm~\ref{algorithm:coordinated}), of duration $2\times\Delta=2\times 30$s.
+
+This experiment shows the capacity of nodes to trigger the adaptation.
+Actually, we can observe that more nodes that those strictly at the POI itself switch to MPR.
+This is a result of measurements for nodes out of the POI but close to it, who are neighbors with the denser area and pass the density threshold ${d}_{\text{keep}}$.
+
 \subsection{Performance of emerged overlays}
 
 \input{coverage_of_adaptive_approaches}
@@ -216,23 +214,23 @@ Figure~\ref{FILLME} presents, over time and from top to bottom, the evolution of
 	\label{fig:eval:performance}
 \end{figure}
 
-We finally proceed to evaluate the performance of the emerged overlay, and compare it with the result of the two other adaptive approaches, ACF and S-H flooding.
+We finally evaluate the performance of the emerged overlay, and compare it with the result of the two other adaptive approaches, ACF and S-H flooding.
 
 Table~\ref{tab.conf} presents the reliability metrics, and Figure~\ref{fig:eval:performance} depicts the number of forwarded and incoming messages.
 As for previous experiments we present the metrics for the entire system and a breakdown over the two zones.
 
 We first observe that our approach reaches an excellent reach of 99.99\% out of the POI, and 100\% at the POI where the overlay is used.
-The LBC in both zones is over 90\%.
+The LBC at the POI is over 90\%, and over 70\% outside of it.
 The number of collisions is below that of CF used alone, for nodes out of the POI.
-This is explained by the presence of border nodes who disseminate to a significant portion of these nodes, thereby increasing the coverage of the MPR overlay to nodes outside the overlay and requiring less CF propagations.
-This number of collisions for nodes at the POI is however higher than for the same nodes using MPR.
-This is also a result of the additional control messages and traffic generated by border nodes, that can interfere with the overlay dissemination itself.
+This is explained by the presence of border nodes who disseminate to a significant portion of these nodes, thereby increasing the coverage of the MPR overlay and reducing the number of necessary CF forwarding.
+This number of collisions for nodes at the POI is however higher than for the same nodes when the entire network uses only MPR.
+This is a result of the additional control messages and traffic generated by border nodes, that  interfere with the overlay dissemination itself.
 The emergent overlay realizes a compromise between the performance of MPR at the POI and the reliability of CF in the rest of the system.
-Its cost is slightly higher than MPR alone, but significantly less than CF alone.
+Its cost is slightly higher than MPR alone due to the use of interoperability protocols and border nodes, but it remains significantly less than CF alone.
 
 ACF offers good performance out of the POI with 100\% reach and a high LBC.
-However, the use of controlled flooding at the POI, despite the adaptation of the parameters, yields to inefficient broadcast for nodes at the POI, with a LBC reaching only 50.27\%, and with a number of collisions that is more than twice that of the emergent overlay.
-ACF indeed uses a similar number of incoming and outgoing messages outside of the POI but requires almost twice as much of the former, and results in about 20\% more of the latter, than for the use of the emerged overlay.
+However, the use of controlled flooding at the POI, despite the adaptation of its parameters, yields an inefficient broadcast for nodes at the POI, with a LBC reaching only 50.27\%, and with a number of collisions that is more than twice that of the emergent overlay.
+ACF indeed uses a similar number of incoming and outgoing messages outside of the POI but requires almost twice as much of the former, and results in about 20\% more of the latter.
 The performance of S-H flooding, on the other hand, is deceptive.
 Perhaps surprisingly, the reach is better at the POI than outside of it, despite the protocol being a controlled flooding approach.
 LBC out of the POI is 100\% but the reach is only 90.99\%.
