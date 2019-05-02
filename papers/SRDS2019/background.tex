@@ -55,7 +55,9 @@ Sending and receiving frames consumes energy from the node's limited power suppl
 The main obstacle to reliable broadcast in MANETs is the occurrence of \emph{collisions}, which may happen when two nodes have overlapping coverage areas.
 If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
 The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
-Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
+Detecting collisions as they happen in wireless network is not
+possible~\cite{ieee1997wireless}, and implies the use of a dedicated
+MAC protocol.
 
 \subsection{MAC protocol for local broadcast}
 \label{sec:background:mac}
@@ -88,7 +90,6 @@ We note that incomplete broadcasts may be completed using a palliative mechanism
 
 Broadcast protocols can be classified in two families depending on how
 they select relay nodes~\cite{ruiz2015survey}.
-
 % In controlled flooding, nodes decide autonomously whether to be a relay, for each received message.
 % In overlay-based approaches, the selection of relays is the result of an overlay creation process that requires the prior exchange of control messages.
 We present in the following two such protocols, one from each family.
