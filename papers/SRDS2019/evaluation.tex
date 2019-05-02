@@ -29,7 +29,8 @@ This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data
 \begin{figure}[t!]
 	\centering
 	\includegraphics[width=\linewidth]{figures/setup_with_poi.pdf}
-	\caption{Initial position of 600 nodes in the simulation field.}
+	\vspace{-1mm}
+	\caption{Initial position of 600 nodes in the simulation field.\vspace{-1mm}}
 	\label{fig:eval:setup}
 \end{figure}
 
@@ -58,7 +59,7 @@ We report the aggregates of 5 experiment runs with different random seeds.
 
 \smallskip
 \noindent
-\textbf{Comparison points.} 
+\textbf{Comparison to previous approaches.} 
 We consider our baseline protocols (counter-based CF and MPR) used in isolation, and combined for emergent overlays.
 In addition, we compare with two state-of-the-art adaptive approaches.
 We implemented these two protocols in the same simulation environment, and both use the BMW MAC protocol for reliable local broadcast.
@@ -85,12 +86,12 @@ Hyper flooding is a variant of timer-based CF, without counters, where a timed r
 \textbf{Metrics.}
 We use the following metrics:
 \begin{itemize}
-	\item Reliability of the broadcast is measured by its \emph{reach} (in \%), the average proportion of nodes that receive each message;
+	\item Reliability of the broadcast is measured by its \textbf{reach} (in \%), the average proportion of nodes that receive each message;
 	\item Reliability of local broadcast is measured at the MAC level by \emph{local broadcast coverage} or \textbf{LBC} (in \%), the average proportion of neighbors that successfully receive frames despite collisions.
 	A low LBC indicates that nodes were not able to successfully disseminate frames to their neighbors despite using 3 MAC-level retransmissions.
-	It is a clear sign of a strongly locally contented wireless medium.
-	\item Overall contention on the wireless medium is measured as the number of observed \emph{collisions};
-	\item Bandwidth cost for nodes is measured as the number of sent and received messages.
+	It is a clear sign of a strongly locally-contented wireless medium, which directly impacts on the reliability and cost of the broadcast;
+	\item Overall contention on the wireless medium is measured as the number of observed \textbf{collisions};
+	\item Bandwidth cost for nodes is measured as the number of \textbf{sent and received messages}.
 	% \item Energy consumption is directly linked to the bandwidth usage and the number of collisions, due to the need for the MAC protocol to use retransmissions.
 \end{itemize}
 
@@ -108,7 +109,8 @@ We use the following metrics:
     \includegraphics[width=\linewidth]{./plots/baseline-rcv-msgs}
     \label{fig:eval:baseline_performance:incoming}
 	\end{minipage} 
-	\caption{Performance of single-protocol deployments, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).}
+	\vspace{-1mm}
+	\caption{Performance of single-protocol deployments, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).\vspace{-1mm}}
 	\label{fig:eval:baseline_performance}
 \end{figure}
 
@@ -143,7 +145,8 @@ We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text
     \includegraphics[width=\linewidth]{./plots/mobility}
     \label{fig:eval:observables:stability}
 	\end{minipage} 
-	\caption{Distributions of density $\bar{d}_{5}$ (left) and stability $\bar{s}_{5}$ (right) in the 3 regions: for all of the communication area (solid line), at the POI (dashed line) and out of the POI (dotted line).}
+	\vspace{-2mm}
+	\caption{Distributions of density $\bar{d}_{5}$ (left) and stability $\bar{s}_{5}$ (right) in the 3 regions: for all of the communication area (solid line), at the POI (dashed line) and out of the POI (dotted line).\vspace{-2mm}}
 	\label{fig:eval:observables}
 \end{figure}
 
@@ -165,9 +168,8 @@ Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.9\linewidth]{plots/adaptation-perf}
-	\caption{Timeline of an overlay emergence, with the number of nodes using the two protocols (first plot), the average LBC for nodes inside the POI (second plot) and the average number of incoming messages (third plot).
-	% \protect\raziel{Figure at the bottom: I use bars because having 2 curves makes it hard to read (curves cross with each other). Figure in the middle: same here, having reach/lbc in the 3 regions makes the figure so hard to read. Results: in the first 20 seconds there is the transition phase where nodes start running MPR then from 20-60 we observe the impact of border nodes (many nodes are chosen as border, they fwd using simple flooding) and then the number of border nodes reduces (tanks to timers). From 60 to 120 we observe the stabilisation. In the last figure (at top), we observe the impact (in whole system) of received messages.}
-	}
+	\vspace{-5mm}
+	\caption{Timeline of an overlay emergence, with the number of nodes using the two protocols (first plot), the average LBC for nodes inside the POI (second plot) and the average number of incoming messages (third plot).\vspace{-5mm}}
 	\label{fig:eval:performance:emerg-ovl}
 \end{figure}
 
@@ -207,7 +209,8 @@ This is a result of measurements for nodes out of the POI but close to it, who a
     \includegraphics[width=\linewidth]{./plots/adaptive-rcv-msgs}
     \label{fig:eval:performance:incoming}
 	\end{minipage} 
-	\caption{Performance of adaptive approaches, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).}
+	\vspace{-1mm}
+	\caption{Performance of adaptive approaches, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).\vspace{-1mm}}
 	\label{fig:eval:performance}
 \end{figure}
 
