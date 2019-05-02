@@ -19,8 +19,7 @@
 \end{figure}
 
 We start by detailing our system and communication models.
-We follow-up with the description of the three base protocols we
-combine in our approach.
+We follow-up with the description of the three base protocols we combine in our approach.
 
 % The first protocol is a MAC protocol enabling
 % reliable \emph{local broadcast}. The two other protocols implement
@@ -29,35 +28,25 @@ combine in our approach.
 \subsection{System and communication models}
 \label{sec:background:model}
 
-A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional
-space. We do not consider the availability of geolocation information
-(GPS) on the devices. Nodes can not send and receive simultaneously,
-there are either in a sending or listening mode. Nodes in a sending mode
-communicate using wireless transceivers that have a limited and fixed
-transmission range $T_X$. Therefore, when nodes emit network frames,
-only nodes in their transmission range can receive them. We refer this
-as a \emph{local broadcast}. To reach out-of-range destinations, 
-some nodes must act as relays to forward frames to other nodes of the
-network.  We refer this as a \emph{global broadcast}.
-
-% that can emit network
-% frames using \emph{local broadcast} and receive frames when active in
-% listening mode.
-
-% Nodes cannot send and receive simultaneously.
-% We consider the fixed-range model: Local broadcasts can be received by
-% nodes within a transmission range Tx.
-
+A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional space.
+We do not consider the availability of geolocation information (GPS) on the devices.
+Nodes communicate using wireless transceivers with a limited and fixed transmission range Tx.
+Nodes cannot send and receive simultaneously: Transceivers are either in sending or listening mode.
+%
+When nodes emit network frames, only nodes in their coverage area can receive them.
+We refer to this as a \emph{local broadcast}.
+%
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
 Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
-Sending and receiving frames consumes energy from the node's limited power supply.
+% Sending and receiving frames consumes energy from the node's limited power supply.
+%
+% To reach out-of-range destinations, some nodes must act as relays to forward frames to other nodes of the network, enabling \emph{global broadcast}.
 
-The main obstacle to reliable broadcast in MANETs is the occurrence of \emph{collisions}, which may happen when two nodes have overlapping coverage areas.
+The main obstacle to reliable local broadcast is the occurrence of \emph{collisions}, which may happen when two nodes have overlapping coverage areas.
 If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
 The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
-Detecting collisions as they happen in wireless network is not
-possible~\cite{ieee1997wireless}, and implies the use of a dedicated
-MAC protocol.
+Detecting collisions as they happen is not possible~\cite{ieee1997wireless}.
+Reliable local broadcast relies on a MAC protocol.
 
 \subsection{MAC protocol for local broadcast}
 \label{sec:background:mac}
@@ -80,13 +69,16 @@ The rationale is that more than three failures for a local broadcast due to coll
 \label{sec:background:broadcast}
 
 The goal of \emph{global} broadcast (hereafter referred simply as broadcast) is to reliably send a message to all nodes in the network, despite mobility and collisions.
-The source can be any node in the network, and the message may require multiple frames.\footnote{A session protocol assists in splitting a message in multiple frames if necessary and calling the MAC protocol.
-We do not detail this protocol as it is straightforward to design and implement.}
+The source can be any node in the network, and the message may require multiple frames. % \footnote{A session protocol assists in splitting a message in multiple frames if necessary and calling the MAC protocol. We do not detail this protocol as it is straightforward to design and implement.}
 Nodes \emph{may} forward a message using local broadcast upon its first reception.
 We denote such nodes as \emph{relay} nodes.
 Subsequent receptions are \emph{duplicates} that are simply ignored.
-The target is to reduce the number of necessary relay nodes while ensuring a high (or full) \emph{coverage}, measured as the number of nodes that receive the message during the broadcast.
-We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.
+The target is to reduce the number of relay nodes while ensuring a high (ideally full) \emph{reach}, i.e. the average proportion of nodes that receive each broadcast.\footnote{Incomplete broadcasts may be completed using periodic anti-entropy~\cite{leme2017analyzing}.}
+% \footnote{We note that incomplete broadcasts may be completed using a palliative mechanism such as periodic anti-entropy~\cite{leme2017analyzing}.}
+
+Broadcast protocols use either controlled flooding or an overlay~\cite{ruiz2015survey}.
+We present next the two protocols 
+
 
 Broadcast protocols can be classified in two families depending on how
 they select relay nodes~\cite{ruiz2015survey}.
