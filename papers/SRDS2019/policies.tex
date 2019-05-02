@@ -15,7 +15,7 @@ The decision is collectively enforced for the necessary lifetime of the overlay,
 The emergence of an overlay in a MANET region (and its later dissolution) is driven by observed density and mobility.
 Those could be measured explicitly by using periodic probing messages, as used by Tseng et~al.~\cite{2001:AAR:876878.879323} to adapt the parameters of controlled flooding.
 The use of extra messages go against our objective of reducing the costs and risk of collisions.
-Instead, we observe that the necessary information can be collected passively from the MAC protocol, BMW~\cite{tang2001mac}.
+Instead, we observe that the necessary information can be collected passively from the MAC protocol, BMW~\cite{tang2001mac}\laurent{what is BMW?}.
 CTS requests are sent for every local broadcast.
 Nodes in range reply with RTS frames, enabling the collection of their identities.
 We collect the set of repliers for each RTS/CTS exchange, and keep a limited-time history of these neighborhoods (last 10 seconds in our implementation).
