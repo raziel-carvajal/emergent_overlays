@@ -19,7 +19,7 @@ Our evaluation aims at answering the following research questions:
 \noindent
 \textbf{Simulation settings.}
 We simulate a full MANET network stack, from the wireless medium to application-level protocols.
-The physical and data-link layers follow IEEE 802.11g specifications, with the additional use of BMW for MAC-level local broadcast.
+The physical and data-link layers follow IEEE 802.11 specifications, with the additional use of BMW for MAC-level local broadcast.
 % However, we use the custom BMW~\cite{tang2001mac} MAC protocol in place of the standard virtual carrier sensing of IEEE 802.11g.
 Every node uses a single transceiver with a fixed transmission range of 10~m, representative of the range of bluetooth and similar radio devices. \y{{\color{red}RED FLAG} this is not a convincing range when we're using WiFi MAC. can we argue this range for high-density locales? not sure, maybe someone knows of evidence here?} 
 This transceiver uses the 2.4~GHz frequency band, with a maximum achievable data rate of 11~Mbps.
@@ -72,12 +72,11 @@ We use the adaptation function suggested by the authors~\cite[Figure~6]{2001:AAR
 Initial counter values vary from 2 to 5 for different densities (i.e., from 2 to 5 for density values 1 to 4, and then slowly down to a value of 2 for 12+ neighbors).
 
 Our second comparison point is \emph{S-H flooding}~\cite{adaptive_group_com_iscc02}.
-% , was proposed by Viswanath \emph{et al.}~\cite{adaptive_group_com_iscc02}.
 It uses two types of controlled flooding protocols, \emph{scoped flooding} for low-mobility nodes and \emph{hyper flooding} for high-mobility nodes.
 The decision of which protocol to use is made independently by each node based on its measured \emph{velocity}, therefore requiring accelerometers.
 We use 1 m/s (a typical walking speed) as the switching threshold.
 S-H flooding needs the list of one-hop neighbors, which is piggybacked on all forwarded messages.
-For ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
+We do not use explicit control messages but obtain these lists passively from the MAC protocol, as we do for ACF.
 A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmits if less than 85\% of the two sets overlap.
 Hyper flooding is a variant of timer-based CF, without counters, where a timed retransmission at $n_i$ is only cancelled when the duplicate is received by a node present in $n_i$'s currently-known neighbor set.
 
