@@ -12,11 +12,11 @@ The decision is collectively enforced for the necessary lifetime of the overlay,
 \subsection{Observables: Density and Stability}
 \label{sec:adaptation:observables}
 
-~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}
+%~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}
 
-The emergence of an overlay is driven by observed density and mobility.
+The emergence of an overlay is driven by the observed density and mobility.
 Those could be measured with periodic probing messages, as used by Tseng et~al.~\cite{2001:AAR:876878.879323} and Viswanath and Obraczka~\cite{adaptive_group_com_iscc02} to adapt the parameters of controlled flooding.
-The use of extra messages go against our objective of reducing costs and risks of collisions.
+The use of extra messages go against our objective of reducing costs and risk of collisions.
 Instead, we observe that the necessary information can be collected passively from the BMW MAC protocol.
 CTS requests are sent for every local broadcast, and nodes in range reply with RTS frames.
 This enables the collection of one-hop neighbors identities.
@@ -38,7 +38,7 @@ In order to avoid oscillations where nodes would switch back and forth between u
 	$({s}_{\text{min}},{d}_{\text{emerge}})$ 
 and $({s}_{\text{min}},{d}_{\text{keep}})$, where
 	${d}_{\text{keep}} < {d}_{\text{emerge}}$.
-Criteria ${s}_{\text{min}}$ is a minimal stability required in all cases.
+The criterium ${s}_{\text{min}}$ is a minimal stability required in all cases.
 The two density criteria ${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ indicate when to respectively emerge and maintain an overlay.
 The values of these criteria depend on the nature of the MANET, the wireless range of its nodes, and deployment factor.
 We define appropriate values for our test scenario in our evaluation.
@@ -47,14 +47,13 @@ We define appropriate values for our test scenario in our evaluation.
 
 A simple policy is to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
 As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, the node continues using MPR.
-While this \emph{single-node} policy will lead homogeneously dense and stable regions to eventually switch to MPR, it has the risk of creating small regions using MPR surrounded by CF zones, when nodes density is distributed between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
+While this \emph{single-node} policy will lead homogeneously dense and stable regions to eventually switch to MPR, it has the risk of creating small MPR regions surrounded by CF zones, when nodes density is distributed between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
 
 \input{policy_algo}
 
-A \emph{coordinated} policy is given in Algorithm~\ref{algorithm:coordinated}.
-This policy targets two objectives:
-First, it should allow entire \emph{regions} of the MANET to switch simultaneously to the use of MPR, and thereby avoid single isolated nodes using an overlay.
-Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated remainder regions.
+A \emph{coordinated} policy is given in Algorithm~\ref{algorithm:coordinated}, targeting two objectives:
+First, it should allow entire \emph{regions} of the MANET to switch simultaneously to use MPR, thereby avoiding single isolated nodes using an overlay.
+Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated residual regions.
 
 The policy leverages nodes in very dense regions to lead the emergence and maintenance of overlays.
 The entry point to the policy algorithm (line 10) is weaved with the processing of a message $m$ by either of the protocols.
@@ -69,15 +68,14 @@ The value of \texttt{em} is unmodified and the message is further broadcast.
 Nodes that do not pass any of the thresholds unset \texttt{em}, marking the boundary of the emerging overlay's region (line 15).
 
 The switch from CF to MPR is not immediate.
-After starting sending \texttt{hello} frames (line 18), nodes wait for a period of $2\times\Delta$ before switching to the MPR protocol (line 19).
+After starting to send \texttt{hello} frames (line 18), nodes wait for a period of $2\times\Delta$ before switching to MPR (line 19).
 %
-The lifetime of an MPR overlay is governed by the timer $t_\text{MPR}$ at each node.
-This timer is always set to a duration of $10\times\Delta$ when a node switches to, or continues using, MPR (line 20).
+The lifetime of an MPR overlay is governed by the timer $t_\text{MPR}$ at each node, which is always set to $10\times\Delta$ when a node switches to, or continues using, MPR (line 20).
 If no further invitation to use MPR has been received when the timer expires, the node switches back to CF.
 This can happen either as nodes are in a moderately dense area where no node has consistently seen a density justifying sending an invitation, or if an increase in mobility jeopardizes the interest of using an overlay.
 An exception is made for nodes running MPR who do not receive a \texttt{hello} frame for more than a period of $2\Delta$.
-These nodes immediately switch back to CF.
-This accounts for mobile nodes who have moved out of a dense zone, and are no longer in range of any node using MPR.
+%These nodes immediately switch back to CF.
+This accounts for mobile nodes who have moved out of a dense zone, and are no longer in range of MPR nodes.
 
 % The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
 % The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.
