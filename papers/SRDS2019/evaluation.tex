@@ -166,7 +166,7 @@ This is coherent with our mobility model.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.65\linewidth]{plots/adaptation-perf}
+	\includegraphics[width=0.85\linewidth]{plots/adaptation-perf}
 	\caption{
 	Performance of emergent overlays. Average number of incoming messages at the whole region (top), local broadcast coverage at POI (middle) and proportion of nodes running MPR or CF (bottom).
 	\protect\raziel{Figure at the bottom: I use bars because having 2 curves makes it hard to read (curves cross with each other). Figure in the middle: same here, having reach/lbc in the 3 regions makes the figure so hard to read. Results: in the first 20 seconds there is the transition phase where nodes start running MPR then from 20-60 we observe the impact of border nodes (many nodes are chosen as border, they fwd using simple flooding) and then the number of border nodes reduces (tanks to timers). From 60 to 120 we observe the stabilisation. In the last figure (at top), we observe the impact (in whole system) of received messages.}
