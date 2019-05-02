@@ -77,8 +77,8 @@ It uses two types of controlled flooding protocols, \emph{scoped flooding} for l
 The decision of which protocol to use is made independently by each node based on its measured \emph{velocity}, therefore requiring accelerometers.
 We use 1 m/s (a typical walking speed) as the switching threshold.
 S-H flooding needs the list of one-hop neighbors, which is piggybacked on all forwarded messages.
-As for ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
-A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmit if less than 85\% of the two sets overlap.
+For ACF, we do not use explicit control messages but obtain these lists passively from the MAC protocol.
+A node using scoped flooding compares the list of neighbors of the forwarder to its own and only retransmits if less than 85\% of the two sets overlap.
 Hyper flooding is a variant of timer-based CF, without counters, where a timed retransmission at $n_i$ is only cancelled when the duplicate is received by a node present in $n_i$'s currently-known neighbor set.
 
 \smallskip
@@ -154,7 +154,7 @@ Longer periods (e.g. 10 seconds) do not bring significant benefits.}
 Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
 We present the distribution for both the entire system and regions at and outside the POI.
 
-We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, and the latter ranging from 18 to 34.
+We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, while the latter ranges from 18 to 34.
 These estimations are in line with a baseline of exact densities that we compute offline from the mobility trace.
 We only observe a slight deviation to lower density estimates for nodes at the POI, that we explain as a result of collisions leading to missed CTS messages by the MAC protocol.
 Stability ranges from 0 to 6 and 1 to 7 seconds per neighbor on average, outside and at the POI, respectively, in coherence with our mobility model.
@@ -181,10 +181,9 @@ These values were determined from the distribution of observables discussed in t
 Figure~\ref{fig:eval:performance:emerg-ovl} presents, over time and from top to bottom, the evolution of the number of nodes using either protocol, the LBC at the POI and the average number of incoming messages over the entire network.
 Reach is not shown but remains close to 100\% for the entire duration of the experiment.
 
-We can observe the gradual increase in the number of nodes switching to MPR in the first plot.
+We observe a gradual increase in the number of nodes switching to MPR in the first plot.
 This number stabilizes at around two-thirds of the network for the rest of the simulation.
-The LBC at the POI is very low at first.
-This is a result of the high number of collisions of nodes in the dense region using CF.
+The LBC at the POI is very low at first, as a result of the high number of collisions in the dense region using CF.
 This results in a higher number of retransmissions and therefore a higher cost to obtain a high reach.
 At time t=60s, we can observe a sharp increase in the LBC for nodes at the POI.
 This corresponds to the end of the transition period (line 19 of Algorithm~\ref{algorithm:coordinated}), of duration $2\times\Delta=2\times 30$s.
