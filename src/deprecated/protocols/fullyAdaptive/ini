@@ -1,0 +1,6 @@
+description = "Broadcasting messages using FullyAdaptive"
+*.host*.udpApp[0].typename = "FullyAdaptive"
+*.host*.udpApp[0].protocolsConfig = xmldoc("../../experiments/configs/config.xml")
+*.host*.udpApp[0].withAdaptation = true
+*.host*.udpApp[0].initialProtocol = "Flooding2"
+*.host*.udpApp[0].adaptation_policy = "swsp"

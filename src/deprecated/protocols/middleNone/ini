@@ -1,0 +1,7 @@
+description = "Experiment 1 middleware"
+*.host*.udpApp[0].typename = "FullyAdaptive"
+*.host*.udpApp[0].protocolsConfig = xmldoc("../../experiments/configs/config.xml")
+*.host*.udpApp[0].withAdaptation = true
+*.host*.udpApp[0].optimize_gluing = false
+*.host*.udpApp[0].use_topology_fix = false
+*.host*.udpApp[0].initialProtocol = "middleware"

@@ -1,0 +1,6 @@
+models
+# files created after the creation of a topology
+*.mobility
+*.ned
+*.pdf
+distribution-per-density

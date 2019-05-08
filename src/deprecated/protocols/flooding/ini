@@ -1,0 +1,5 @@
+description = "Broadcasting messages using Flooding"
+*.host*.udpApp[0].typename = "FullyAdaptive"
+*.host*.udpApp[0].protocolsConfig = xmldoc("../../experiments/configs/config.xml")
+*.host*.udpApp[0].withAdaptation = false
+*.host*.udpApp[0].initialProtocol = "Flooding2"
