@@ -1,6 +1,0 @@
-description = "Broadcasting messages using Dist2Mean"
-
-*.host*.udpApp[0].typename = "Dist2Mean2"
-
-*.host*.udpApp[0].nr_hello_messages = 5
-*.host*.udpApp[0].maximumDelay = 0.2s

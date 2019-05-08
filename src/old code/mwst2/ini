@@ -1,6 +1,0 @@
-description = "Broadcasting messages using MWST2"
-*.host*.udpApp[0].typename = "MWST2"
-*.host*.udpApp[0].spontaneously_awaken = true
-*.host*.udpApp[0].nr_hello_messages = 2
-*.host*.udpApp[0].maximumDelay = 0.1s
-*.host*.udpApp[0].display_time = 55s
