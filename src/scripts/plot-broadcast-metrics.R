@@ -4,6 +4,10 @@ library(argparse)
 library(e1071)
 library(grid)
 library(reshape2)
+library(Cairo)
+library(grid)
+library(gridExtra)
+source("R/theme-for-papers.R")
 
 get_arguments <- function() {
   parser <- ArgumentParser(description='Plot broadcast metrics.')
@@ -12,6 +16,10 @@ get_arguments <- function() {
 
   parser$add_argument('--plot-energy-consumption', dest='pc', action='store_true')
   parser$add_argument('--plot-coverage', dest='co', action='store_true')
+	parser$add_argument('--plot-observables', dest='obs', action='store_true')
+	parser$add_argument('--plot-recv-msgs-in-time', dest='recvt', action='store_true')
+	parser$add_argument('--plot-coverage-in-time', dest='covint', action='store_true')
+	parser$add_argument('--plot-runalgo-in-time', dest='algoint', action='store_true')
   parser$add_argument('--plot-packet-err', dest='pe', action='store_true')
   parser$add_argument('--plot-sent-msgs', dest='sm', action='store_true')
   parser$add_argument('--plot-recv-msgs', dest='rm', action='store_true')
@@ -21,23 +29,6 @@ get_arguments <- function() {
   parser$parse_args()
 }
 
-get.plot.theme.style <- function() {
-  theme(plot.title=element_text(hjust = 0.5)) +
-  theme(text=element_text(size=14)) +
-  theme(
-    panel.background = element_rect(fill = 'white', colour = 'black'),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.border     = element_blank()
-  )
-}
-
-get.grey.theme <- function() {
-	scale_colour_grey() + theme_bw()
-}
-# TODO plot DENSE and SPARSE distribution in one plot
-# + scale_alpha_manual(values = c(0.3, 1))
-# guides(fill=guide_legend(title='Type:'), alpha=guide_legend(title='Zone:'))
 plot.nodes.roles.distribution <- function(ds) {
   names(ds) <- c('count', 'fw_type', 'zone', 'algorithm')
   denseDs <- subset(ds, zone == 'DENSE')
@@ -54,55 +45,191 @@ plot.nodes.roles.distribution <- function(ds) {
   print(p2)
 }
 
-plot.dist.as.cdf <- function(ds, title, xlabel, ylabel, xMax=NA) {
-  xUpLim <- ifelse(
-    is.na(xMax),
-    max(ds$data),
-    xMax
-  )
-  x_limits <- c(-1, xUpLim)
-
-	p <- ggplot(ds, aes(x=data, colour=algorithm, linetype=algorithm)) +
-		stat_ecdf(geom="step", lwd=1.5) +
-		ggtitle(title) + labs(x=xlabel, y=ylabel) +
-    scale_x_continuous(expand=c(0,0), limits=x_limits) +
-    scale_y_continuous(expand=c(0,0), limits=c(0, 1)) + get.plot.theme.style()
-	print(p)
+plot.dist.as.cdf <- function(ds, title, xlabel, ylabel) {
+	p <- ggplot(ds, aes(x = data, linetype = region))
+	p <- p + stat_ecdf(aes(y = ..y..*100), pad = F, size = 1)
+	p <- p + scale_linetype_manual(
+		labels = c("All", "At PoI", "Out of PoI"),
+		values = c('solid', 'dashed', 'dotted')
+	)
+	p <- p + scale_x_continuous(breaks = seq(0, ceiling(max(ds$data)), by = 1))
+	p <- p + theme_Publication() + labs(y = ylabel, x = xlabel)
+	p <- p + ylim(0, 100)
+	# p <- p + xlim(0, ceiling(max(ds$data))) + ylim(0, 100)
+  print(p)
 }
 
-plot.data.using.boxes <- function(ds, title, xlabel, ylabel, y_limits = NA) {
-	p <- ggplot(data = ds, aes(x = network, y = data, colour = Algorithm))
-  p <- p + geom_boxplot(size = 1.0) + scale_colour_grey() + theme_bw()
-  p <- p + ggtitle(title) + labs(x = xlabel, y = ylabel)
-	if (!is.na(y_limits[1])) {
-		p <- p + scale_y_continuous(expand=c(0,0), limits=y_limits)
-	}
+plotRunAlgoOverTime <- function(ds, xlabel, ylabel){
+	p <- ggplot(
+		data = ds,
+		aes(x = time, y = nodes, group = algo)
+	)
+	p <- p + geom_col(aes(fill = algo), colour = 'black')
+	p <- p + geom_text(
+		aes(label = c('100\nCF', nodes[2:(length(nodes)-1)], '67\nMPR') ),
+		position = position_stack(vjust = 0.5),
+		size = 3
+	)
+	p <- p + scale_fill_manual(
+		values = c("#ffffff", "grey90")
+	)
+	# p <- p + geom_text(
+	# 	data = ds,
+	# 	aes(x = time, y = nodes, label = paste0(nodes,"%")),
+  # 	size = 4, position = position_stack(vjust = 0.5)
+	# )
+	p <- p + scale_x_continuous(
+		# limits = c(0, 125),
+		breaks = seq(0, 120, by = 20)
+	)
+
+	p <- p + labs(x = xlabel, y = ylabel)
+	p + theme0()
+}
+
+plotOverTimeReg <- function(ds, xlabel, ylabel, ylim, ybr){
+	p <- ggplot(data = ds, aes(
+		x = time, y = data, linetype = region
+	))
+	p <- p + geom_line()
+	p <- p + geom_point()
+
+	p <- p + scale_x_continuous(
+		limits = c(0, 120),
+		breaks = seq(0, 120, by = 20)
+	)
+	p <- p + scale_y_continuous(
+		limits = ylim,
+		breaks = ybr
+	)
+
+	p <- p + labs(x = xlabel, y = ylabel)
+	p + theme1()
+}
+
+plotOverTimeAlg <- function(ds, xlabel, ylabel, ylim, ybr){
+	p <- ggplot(data = ds, aes(
+		x = time, y = data, linetype = algo
+	))
+	p <- p + geom_line()
+	p <- p + geom_point()
+
+	p <- p + scale_x_continuous(
+		limits = c(0, 120),
+		breaks = seq(0, 120, by = 20)
+	)
+	p <- p + scale_y_continuous(
+		limits = ylim,
+		breaks = ybr
+	)
+
+	p <- p + labs(x = xlabel, y = ylabel)
+	p + theme2()
+}
+
+plot.data.using.boxes <- function(ds, title, xlabel, ylabel) {
+	p <- ggplot(data = ds, aes(x = algorithm, y = data, fill = region) )
+	p <- p + geom_boxplot()
+	p <- p + scale_fill_manual(
+		labels = c("All", "At PoI", "Out of PoI"),
+		values = c("#cccccc", "#666666", "#ffffff")
+	)
+	# "MPR3" = expression(MPR['\u0394=30']))
+	p <- p + scale_x_discrete(
+		labels = c(
+			"HYBRID1" = expression('Emerg Ovl'),
+			"ADAPTIVECF" = expression('Adaptive CF'),
+			"SCOPEDHYPFLOOD" = expression('S-H Flood')
+		)
+	)
+	p <- p + theme_Publication() + labs(y = ylabel) + ylim(0, max(ds$data))
+	cairo_pdf(file="plot.pdf")
   print(p)
+	dev.off()
 }
 
 args <- get_arguments()
 metadata = NULL
 separate_dist = TRUE
 
-headers <- c('network', 'data', 'Algorithm')
+if (args$algoint) {
+  ds <- read.table(
+    paste(args$resultsDir, 'runningAlgorithmTimeline-HYBRID1', sep=''),
+    header=T
+  )
+
+  p1 <- plotRunAlgoOverTime(ds, 'Time (s)', 'Nodes (%)')
+  print('DONE')
+}
+
+if (args$covint) {
+  ds <- read.table(
+    paste(args$resultsDir, 'coverage-HYBRID1', sep=''),
+    header=T
+  )
+	lim <- 120
+	timeLine <- seq(2, lim, 2)
+	ds <- data.frame(
+		time = rep(timeLine, 1),
+		region = c(
+			# rep('all', length(timeLine)),
+			# rep('outPoi', length(timeLine)),
+			rep('inPoi', length(timeLine))
+		),
+		data = c(
+			# ds$localCoverageAtAll[1:length(timeLine)],
+			# ds$localCoverageAtSparse[1:length(timeLine)],
+			ds$localCoverageAtDense[1:length(timeLine)]
+		)
+	)
+  p2 <- plotOverTimeReg(ds,
+		'Time (s)',
+		'LBC at POI (%)',
+		c(0, 100),
+		seq(0, 100, by = 25)
+	)
+
+  print('DONE')
+}
+
+if (args$recvt) {
+  ds <- read.table(
+    paste(args$resultsDir, 'recvMessagesTimeline', sep=''),
+    header=T
+  )
+	lim <- 120
+	timeLine <- seq(2, lim, 2)
+	ds <- data.frame(
+		time = timeLine,
+		data = ds$avgRecvMsgs,
+		algo = ds$algo
+	)
+  p3 <- plotOverTimeAlg(
+		ds,
+		'Time (s)',
+		'Inc. messages (#)',
+		c(0, 200),
+		seq(0, 200, by = 50)
+	)
+  print('DONE')
+}
+
+pdf(file="plot.pdf", width = unit(5.5, 'cm'), height = unit(4, 'cm'))
+grid.arrange(p1, p2, p3, ncol = 1)
+dev.off()
+
 if (args$pc) {
   print('Plotting power consumption')
   ds <- read.table(
-    paste(args$resultsDir, 'batteryConsumptionDistribution', sep=''),
-    header=F
+    paste(args$resultsDir, 'batteryConsumptionTimeline', sep=''),
+    header=T
   )
-  names(ds) <- headers
-  # NOTE uncomment to get energy consumption in Joules
-  # plot.data.using.boxes(ds, 'Energy consumption', 'Algorithm', 'Milli Joules [mJ]')
-  # plot.dist.as.cdf(
-  #   ds, 'Energy consumption',
-  #   'Milli Joules [mJ]', 'CDF'
-  # )
-  plot.data.using.boxes(ds, 'Power consumption', '', 'Watts [W]')
-  # plot.dist.as.cdf(
-  #   ds, 'Power consumption',
-  #   'Watts [W]', 'CDF over nodes'
-  # )
+	ds <- data.frame(
+		time = ds$time,
+		data = ds$e_consumption,
+		algo = ds$algo
+	)
+  plotOverTime(ds, 'Time (s)', 'Average power consumption (W)')
   print('DONE')
 }
 
@@ -144,28 +271,36 @@ if (args$pe) {
   print('DONE')
 }
 
+if (args$obs) {
+	print("Plotting distribution of observables")
+	ds <- read.table(
+		paste(args$resultsDir, 'ObservablesDistribution-SIMPLEF', sep=''),
+		header=T
+	)
+	window <- unique(ds$time)[1]
+	subDs <- subset(ds, time == window)
+	dsToPlot <- data.frame(
+		data = subDs$mobility,
+		# data = subDs$density,
+		region = subDs$positionedAt
+	)
+  plot.dist.as.cdf(
+		dsToPlot, '', 'Estimated stability (seconds/neighbor)', 'CDF in % (nodes)'
+	)
+	print('DONE')
+}
 if (args$rm) {
   print("Plotting received broadcast messages")
   ds <- read.table(
     paste(args$resultsDir, 'recvBroadcastMsgsDistribution', sep=''),
-    header=F
+    header=T
   )
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, '',
-    'Received broadcast messages [#]', 'CDF over nodes'
-  )
-  # names(ds) <- c('data', 'zone', 'algorithm')
-  # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  # msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  # plot.dist.as.cdf(
-  #   msgAtDenseZ, 'Received Broadcast Messages within Dense Zone',
-  #   'Number of Messages', 'CDF over broadcast sessions'
-  # )
-  # plot.dist.as.cdf(
-  #   msgAtSparseZ, 'Received Broadcast Messages within Sparse Zone',
-  #   'Number of Messages', 'CDF over broadcast sessions'
-  # )
+	subDs <- data.frame(
+		data = ds$recvMsgNo,
+		region = ds$positionedAt,
+		algorithm = ds$algorithm
+	)
+  plot.data.using.boxes(subDs, '', '', 'Incoming messages (application level)')
   print('DONE')
 }
 
@@ -173,69 +308,13 @@ if (args$sm) {
   print('Plotting sent broadcast messages')
   ds <- read.table(
     paste(args$resultsDir, 'sentBroadcastMsgsDistribution', sep=''),
-    header=F
+    header=T
   )
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, '',
-    'Sent broadcast messages [#]', 'CDF over nodes'
-  )
-  # TODO
-  # names(ds) <- c('data', 'zone', 'algorithm')
-  # msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-  # msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-  # plot.dist.as.cdf(
-  #   msgAtDenseZ, 'Sent Broadcast Messages within Dense Zone',
-  #   'Number of Messages', 'CDF over broadcast sessions'
-  # )
-  # plot.dist.as.cdf(
-  #   msgAtSparseZ, 'Sent Broadcast Messages within Sparse Zone',
-  #   'Number of Messages', 'CDF over broadcast sessions'
-  # )
+  subDs <- data.frame(
+		data = ds$sentMsgNo,
+		region = ds$positionedAt,
+		algorithm = ds$algorithm
+	)
+	plot.data.using.boxes(subDs, '', '', 'Outgoing messages (application level)')
   print('DONE')
 }
-
-
-# TODO
-# if (!is.null(args$nodes_roles)) {
-#   print('Plotting distribution of nodes roles')
-#   ds <- read.table( paste(args$path, args$nodes_roles, sep=''), header=F)
-#   plot.nodes.roles.distribution(ds)
-#   print('DONE')
-# }
-# if (!is.null(args$sent_ctrl)) {
-#   print('Ploting sent ctrl messages')
-#   ds <- read.table( paste(args$path, args$sent_ctrl, sep=''), header=F)
-#   names(ds) <- c('data', 'algorithm')
-#   plot.dist.as.cdf(
-#     ds, 'Sent Ctrl Messages (dense & sparse area)',
-#     'Number of Messages', 'CDF over Ctrl sessions'
-#   )
-#   print('DONE')
-# }
-# if (!is.null(args$recv_ctrl)) {
-#   print('Plotting received ctrl messages')
-#   ds <- read.table( paste(args$path, args$recv_ctrl, sep=''), header=F)
-#   names(ds) <- c('data', 'algorithm')
-#   plot.dist.as.cdf(
-#     ds, 'Received Ctrl Messages (dense & sparse area)',
-#     'Number of Messages', 'CDF over Ctrl sessions'
-#   )
-#   print('DONE')
-# }
-# if (!is.null(args$dre)) {
-#   print('Plotting density relative error')
-#   ds <- read.table( paste(args$path, args$dre, sep=''), header=F)
-#   names(ds) <- c('data', 'zone', 'algorithm')
-#   msgAtDenseZ  <- subset(ds, zone == 'DENSE')
-#   msgAtSparseZ <- subset(ds, zone == 'SPARSE')
-#   plot.dist.as.cdf(
-#     msgAtDenseZ, 'Relative Error of Nodes Neighbors No in Dense Zone',
-#     'Relative Error', 'CDF over nodes'
-#   )
-#   plot.dist.as.cdf(
-#     msgAtSparseZ, 'Relative Error of Nodes Neighbors No in Sparse Zone',
-#     'Relative Error', 'CDF over nodes'
-#   )
-#   print('DONE')
-# }
