@@ -57,19 +57,30 @@ experiments/networks/built_topologies/*.*
 experiments/configs/builtConfigs/results/
 experiments/configs/results/
 
-# Paper
-text/main.aux
-text/main.bbl
-text/main.blg
-text/main.log
-text/main.pdf
-text/main.synctex.gz
-
-# partial results
-results/n*.pdf
-
-#CVS
-results/summary.csv
+# .gitignore for latex
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
 
 #LOGS
 src/scripts/debugging/logs/n_*
