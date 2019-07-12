@@ -9,7 +9,7 @@ We start by presenting how nodes leverage the MAC protocol to collect observable
 An adaptation \emph{policy} triggers the creation of overlays based on thresholds over observables.
 The decision is collectively enforced for the necessary lifetime of the overlay, by piggybacking control information over existing message broadcasts.
 
-\subsection{Observables: Density and Stability}
+\subsection{Observables: density and stability}
 \label{sec:adaptation:observables}
 
 %~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}
@@ -44,16 +44,13 @@ The values of these criteria depend on the nature of the MANET, the wireless ran
 We define appropriate values for our test scenario in our evaluation.
 
 \subsection{Protocol switching policies}
-
-A simple policy is to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
-As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, the node continues using MPR.
-While this \emph{single-node} policy will lead homogeneously dense and stable regions to eventually switch to MPR, it has the risk of creating small MPR regions surrounded by CF zones, when nodes density is distributed between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
+Nodes keep using MPR when their local observables of density and stability $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceed a fixed threshold $({s}_{\text{min}},{d}_{\text{emerge}})$ otherwise, nodes switch to CF.
+This simple policy of adaptation results in having an overlay in dense and stable regions but it has the risk of creating small overlays surrounded by CF zones, when nodes density varies between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
+A \emph{coordinated} mechanism is given in Algorithm~\ref{algorithm:coordinated}, targeting two objectives:
+first, it should allow entire \emph{regions} of the MANET to switch simultaneously to use MPR, thereby avoiding single isolated nodes using an overlay.
+Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated residual regions.
 
 \input{policy_algo}
-
-A \emph{coordinated} policy is given in Algorithm~\ref{algorithm:coordinated}, targeting two objectives:
-First, it should allow entire \emph{regions} of the MANET to switch simultaneously to use MPR, thereby avoiding single isolated nodes using an overlay.
-Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated residual regions.
 
 The policy leverages nodes in very dense regions to lead the emergence and maintenance of overlays.
 The entry point to the policy algorithm (line 10) is weaved with the processing of a message $m$ by either of the protocols.

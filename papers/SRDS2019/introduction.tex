@@ -5,7 +5,7 @@
 \label{sec:introduction}
 
 Mobile Ad-hoc Networks (MANETs) are formed of mobile nodes relying on direct wireless communication subject to faults and uncertainty.
-MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure does not suffice.
+MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure does not suffice\cite{overview_adhoc_networks,Bellavista2013}.
 A first target example is a music festival in a rural area, where setting up a permanent communication infrastructure is not economically viable.
 MANETs let a large number of attendees communicate with each other despite the saturation of the local cellular network.
 Another example is an emergency scenario where teams of rescuers coordinate over an area where communication infrastructures and power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
@@ -32,10 +32,10 @@ Efficient routing also depends on broadcast~\cite{overview_adhoc_networks}.
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
 The main hindrance to reliability is the risk of collisions, when two nodes in wireless range attempt to send at the same time and cancel each others' transmissions.
 Collisions are not always possible to detect, and are costly to address~\cite{hidden-terminal-problem}.
-A MAC protocol~\cite{ieee1997wireless} using too many resubmissions may result in lower performance and increase energy costs (the broadcast storm problem~\cite{BroadcastStormProblem})
+A MAC protocol~\cite{ieee1997wireless} using too many resubmissions may result in lower performance and increase energy costs (the broadcast storm problem~\cite{BroadcastStormProblem}).
 % The over-abundance of collisions due to multiple retransmissions has been coined as the \emph{broadcast storm} problem~\cite{BroadcastStormProblem}.
 
-Broadcast protocols for MANETs aim at reliably delivering messages to all nodes despite collisions. They can be classified in two families~\cite{ruiz2015survey}: Protocols based on \emph{controlled flooding}, and those relying on the creation and maintenance of an \emph{overlay}.
+Broadcast protocols for MANETs aim at reliably delivering messages to all nodes despite collisions. They can be classified in two families~\cite{ruiz2015survey}: protocols based on \emph{controlled flooding}, and those relying on the creation and maintenance of an \emph{overlay}.
 %
 With controlled flooding, any node receiving a message decides independently whether or not (and when) to retransmit it using local broadcast. % , based on the information attached to that message, the local node state and possibly its observation of its surroundings.
 % Controlled flooding is prone to broadcast storms but is robust in highly mobile settings.
@@ -73,7 +73,7 @@ The decision to emerge (or later dissolve) an overlay is based on local indicato
 Interoperability protocols enable reliable broadcast between zones using heterogeneous protocols.
 
 \begin{itemize}
-	\item We present our system model and our building blocks (\S\ref{sec:background}): The Broadcast Medium Window (BMW), a MAC protocol for local broadcast~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr};
+	\item We present our system model and our building blocks (\S\ref{sec:background}): the Broadcast Medium Window (BMW), a MAC protocol for local broadcast~\cite{tang2001mac}; \emph{Counter-based} controlled flooding~\cite{2001:AAR:876878.879323}; and the \emph{MPR} overlay~\cite{mpr};
 	\item We define the requirements for emergent overlays (\S\ref{sec:overview});
 	\item We address the interoperability challenge with a protocol allowing to guarantee continuity in the broadcast across heterogeneous zones using different protocols (\S\ref{sec:mechanisms});
 	\item We present how nodes are able to collect \emph{observables} about their environment to drive the emergence of overlays, and how this emergence is coordinated autonomously across nodes in an homogeneous region of the MANET (\S\ref{sec:adaptation});

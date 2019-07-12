@@ -31,13 +31,13 @@ We follow-up with the description of the three base protocols we combine in our 
 A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional space.
 We do not consider the availability of geolocation information (GPS) on the devices.
 Nodes communicate using wireless transceivers with a limited and fixed transmission range Tx.
-Nodes cannot send and receive simultaneously: Transceivers are either in sending or listening mode.
+Nodes cannot send and receive simultaneously: transceivers are either in sending or listening mode.
 %
 When nodes emit network frames, only nodes in their coverage area can receive them.
 We refer to this as a \emph{local broadcast}.
 %
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
-Node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
+For example, node $n_{3}$ is in the range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
 % Sending and receiving frames consumes energy from the node's limited power supply.
 %
 % To reach out-of-range destinations, some nodes must act as relays to forward frames to other nodes of the network, enabling \emph{global broadcast}.
@@ -59,8 +59,8 @@ The protocol is illustrated by Figure~\ref{fig:mac_protocol}.
 BMW relies on \emph{virtual carrier sensing}, as used for point-to-point communication in the classical IEEE 802.11 coordination protocol~\cite{ieee1997wireless}.
 A node initiates a local broadcast by sending a RTS (Request To Send) frame, with the goal of \emph{discovering} local neighbors.
 These neighbors reply with CTS (Clear To Send) messages containing their identity.
-Physical carrier sensing~\cite{ieee1997wireless} allows minimizing the risk of collisions between CTS replies:
-Nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
+Physical carrier sensing~\cite{ieee1997wireless} reduce the risk of collisions between CTS replies:
+nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
 The payload frame is then transmitted, and neighbors acknowledge its reception, again using physical carrier sensing to avoid collisions.
 Up to two additional retransmissions happen in case of missed or error-bearing acknowledgments.
 % The rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\cite{BroadcastStormProblem}.
@@ -94,16 +94,16 @@ We present next the two protocols, one of each type, that we later combine to en
 	\end{minipage}
 \end{figure}
 
-Uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
+uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
 It generates a large number of duplicates, and many concurrent retransmissions in dense areas.
 % This creates a high number of collisions and retransmissions by the MAC protocol.
 The risk of collision may be reduced by waiting before retransmitting, either for a random amount of time~\cite{BroadcastStormProblem} or, when GPS coordinates are available, for a time that depends on a local density estimation~\cite{abba} but these mitigations do not reduce the number of duplicates.
 
-Controlled flooding enables nodes to decide \emph{not to} retransmit, when they estimate that their neighborhood has been sufficiently covered.
+\emph{Controlled Flooding} (CF) enables nodes to decide \emph{not to} retransmit, when they estimate that their neighborhood has been sufficiently covered.
 We use the classical counter-based approach~\cite{BroadcastStormProblem} that is efficient in a variety of practical situations, as comparative studies have shown~\cite{DensityMobDrivenEval,Williams2002}.
-Upon first reception of a message, a node sets up a timer $t$ and a counter $c$.
+Upon the first reception of a message, a node sets up a timer $t$ and a counter $c$.
 Every reception of a duplicate decreases $c$ by one.
-Upon expiration of $t$, the node only acts as a relay if $c>0$.
+When $t$ expires, the node only acts as a relay if $c>0$.
 
 Controlled flooding is intuitively good for regions with high mobility.
 The decision of whether or not to be a relay is made by each node independently, based on its observation of the local neighborhood at dissemination time.
@@ -118,14 +118,14 @@ An illustration of counter-based controlled flooding with $c=2$ is given by Figu
 
 \input{mpr_protocol}
 
-Overlay-based approaches pre-compute which nodes should act as relays.
+overlay-based approaches pre-compute which nodes should act as relays.
 This requires exchange of information between nodes outside of actual message broadcasts.
 The goal is to form a \emph{connected dominating set}:
-The combined coverage areas of all relays must contain all nodes in the network.
+the combined coverage areas of all relays must contain all nodes in the network.
 The overlay should be connected but at the same time contain as few relays as possible.
 It can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
 It may also be implicit, when nodes are informed they should act as a relay from the source or previous relays in the broadcast process.
-We adopt a protocol of the latter type, MPR~\cite{mpr} (\emph{Multipoint Relay}).
+We adopt MPR~\cite{mpr} as a protocol of the latter type.
 
 MPR lets each node $n_i$ decide which of its one-hop (direct) neighbors should be instructed to act as relays during a broadcast in which $n_i$ acts as a relay.
 MPR requires the discovery of all one-hop and two-hop neighbors using periodic control messages.

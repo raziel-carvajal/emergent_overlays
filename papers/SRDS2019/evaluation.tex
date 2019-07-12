@@ -9,9 +9,9 @@ We evaluate the performance and reliability of broadcast using full-stack simula
 We compare emergent overlays with baseline protocols and with two approaches to adaptive broadcast from the literature~\cite{2001:AAR:876878.879323,adaptive_group_com_iscc02}.
 
 Our evaluation aims at answering the following research questions:
-(i) Do emergent overlays allow improving the cost of broadcast in zones where CF is inefficient?
-(ii) Is autonomous adaptation effective in emerging overlays without centralized control?
-(iii) How do emergent overlays compare to previous approaches of adaptive broadcasting?
+(i) do emergent overlays allow improving the cost of broadcast in zones where CF is inefficient?
+(ii) is autonomous adaptation effective in emerging overlays without centralized control?
+(iii) how do emergent overlays compare to previous approaches of adaptive broadcasting?
 
 \subsection{Experimental setup}
 
@@ -151,11 +151,10 @@ We choose to use MPR with $\Delta=30s$ for emergent overlays, and CF with $\text
 \end{figure}
 
 We evaluate the quality of observables collected at the level of the MAC protocol, as defined in \S\ref{sec:adaptation:observables}.
-Figure~\ref{fig:eval:observables:density} presents the distribution of observed density $\bar{d}_{5}$, i.e. for an observation period of 5 seconds.%
+Figure~\ref{fig:eval:observables} presents the distribution of observed density ($\bar{d}_{5}$) and observed stability ($\bar{s}_{5}$) for an observation period of 5 seconds.%
 \footnote{We do not present distributions for other aggregation periods due to space limitations. 
 Our experiments confirm that short periods (e.g. 1 second) yield similar distributions, but measurements for individual nodes are subject to higher noise.
 Longer periods (e.g. 10 seconds) do not bring significant benefits.}
-Figure~\ref{fig:eval:observables:stability} presents the distribution of observed stability $\bar{s}_{5}$.
 We present the distribution for both the entire system and regions at and outside the POI.
 
 We can observe that the distribution of density outside and at the POI differ, with the former ranging from as low as 1 and up to 25 neighbors, while the latter ranges from 18 to 34.
