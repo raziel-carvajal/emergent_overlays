@@ -49,7 +49,7 @@ The velocity of every walk is chosen randomly from an interval: [0:0.5]~m/s at t
 These values are representative of mobility in large gatherings.
 Nodes move freely within the entire communication area.
 We verify upon generation of a mobility trace that at any point in time, the graph formed by all nodes and direct neighborhood relations is connected (therefore, the potential for complete coverage is theoretically 100\%).
-We discard (infrequent) random seeds that may not ensure this connectedness.
+We discard the infrequent random seeds that do not ensure this connectedness.
 
 % However, when a node reaches the frontier of the POI it may remain in its current region with a likelihood of 50\%. %% This is too complicated, and raises eyebrows for no reason.
 
@@ -176,8 +176,8 @@ We evaluate the effectiveness of our adaptation protocol in emerging an overlay 
 The simulation starts with all nodes using CF, with new messages being sent from the beginning, and every 2 seconds.
 
 We use the following parameters for our adaptation (\S\ref{sec:adaptation}):
-${s}_{\text{min}}$ is set to 2 seconds/ node.
-${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors, respectively.
+${s}_{\text{min}}$ is set to 2 seconds/node.
+${d}_{\text{emerge}}$ and ${d}_{\text{keep}}$ are set to 20 and 10 observed neighbors respectively.
 These values were determined from the distribution of observables discussed in the previous subsection.
 
 Figure~\ref{fig:eval:performance:emerg-ovl} presents, over time and from top to bottom, the evolution of the number of nodes using either protocol, the LBC at the POI and the average number of incoming messages over the entire network.
@@ -208,8 +208,8 @@ This is a result of measurements for nodes out of the POI but close to it, who a
     \includegraphics[width=\linewidth]{./plots/adaptive-rcv-msgs}
     \label{fig:eval:performance:incoming}
 	\end{minipage} 
-	\vspace{-1mm}
-	\caption{Performance of adaptive approaches, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).\vspace{-1mm}}
+	\vspace{-3mm}
+	\caption{Performance of adaptive approaches, for all of the communication area (light grey), at the POI (dark grey) and out of the POI (white).\vspace{-3mm}}
 	\label{fig:eval:performance}
 \end{figure}
 
