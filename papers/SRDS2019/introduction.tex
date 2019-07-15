@@ -5,19 +5,20 @@
 \label{sec:introduction}
 
 Mobile Ad-hoc Networks (MANETs) are formed of mobile nodes relying on direct wireless communication subject to faults and uncertainty.
-MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure does not suffice\cite{overview_adhoc_networks,Bellavista2013}.
+MANETs allow networked applications in situations where no infrastructure is available, or where the available infrastructure does not suffice~\cite{overview_adhoc_networks,Bellavista2013}.
 A first target example is a music festival in a rural area, where setting up a permanent communication infrastructure is not economically viable.
 MANETs let a large number of attendees communicate with each other despite the saturation of the local cellular network.
 Another example is an emergency scenario where teams of rescuers coordinate over an area where communication infrastructures and power distribution networks are no longer available~\cite{lieser2017architecture,verma2015manet}.
 
-MANETs typically involve a large number of nodes with arbitrary mobility patterns.
-For human-attached nodes, models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,rhee2011levy}, with two major observations.
+MANETs typically involve a large number of nodes with arbitrary mobility.
+For human-attached nodes, models allow understanding general mobility patterns~\cite{Hess:2015:DHM:2856149.2840722,rhee2011levy}.
+These models concur with two major observations.
 First, \emph{mobility} is heterogeneous, with nodes alternating between periods of high and low speed.
 Second, there are points of attraction around which users tend to aggregate~\cite{stepanov2005mobility_model_outdoor}, leading to zones of heterogeneous \emph{density}.
 Heterogeneity in space was confirmed by an experiment at the Paléo music festival in Switzerland~\cite{naini2015opportunistic}.
-The authors performed an estimation of the population size and of its spatial distribution by collecting unique MAC addresses from a significant portion of attendees' mobiles phone that were discoverable via bluetooth.
-The authors report differences in node density between $15m\times 15m$ areas of up to one order of magnitude (10x).
-A similar study during a street festival in Belgium~\cite{versichele2012use} also reports a high heterogeneity of density, and confirms that users tend to alternate between lowly-mobile zones (points of interests) with a higher number of users, and zones of lower density (3x in the collected sample).
+The authors performed an estimation of the population size and of its spatial distribution by collecting unique MAC addresses from a significant portion of attendees' mobile phones that were discoverable via bluetooth.
+The authors report differences in node density of up to one order of magnitude (10x) between different $15m\times 15m$ areas.
+A similar study during a street festival in Belgium~\cite{versichele2012use} reports a high heterogeneity of density, and confirms that users tend to alternate between lowly-mobile zones (points of interests) with a higher number of users, and zones of lower density (3x in the collected sample).
 
 
 % A similar experiment in the EPFL campus~\cite{naini2015opportunistic} using Wifi discovery found density differences of up to 6 times between different zones.
@@ -26,7 +27,7 @@ A similar study during a street festival in Belgium~\cite{versichele2012use} als
 % \cite{Stange:2011:AWM:2077357.2077368}
 % \cite{Ellersiek:2013:UBT:2533810.2533813}
 
-Heterogeneity in space and mobility in MANETs directly impacts data dissemination, and particularly \emph{broadcast} operations.
+Heterogeneity in space and mobility directly impacts data dissemination in MANETs, and particularly \emph{broadcast} operations.
 Broadcast allows delivering messages from any source to all nodes in the network, e.g. to forward live announcements to all users of a music festival mobile application.
 Efficient routing also depends on broadcast~\cite{overview_adhoc_networks}.
 Offering efficient and reliable broadcast in a MANET requires an appropriate forwarding strategy.
@@ -64,7 +65,7 @@ Protocols of the two families are not designed to be interoperable: deploying di
 \textbf{Contributions.}
 %
 We target efficient broadcast in \emph{heterogeneous} MANETs.
-Our motivation is that controlled flooding is efficient in the general case and using an overlay is beneficial in zones where density increases while mobility decreases, typical of human movement at points of interest.
+Our motivation is that controlled flooding is efficient in the general case and using an overlay is beneficial in zones where density increases while mobility decreases, typical of human behavior at points of interest.
 %
 We contribute the novel notion of \emph{\textbf{emergent overlays}}, allowing a subset of the nodes in a MANET to autonomously decide to switch from the use of controlled flooding to the bootstrap and use of an overlay.
 %

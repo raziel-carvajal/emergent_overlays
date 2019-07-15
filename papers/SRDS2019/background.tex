@@ -37,7 +37,7 @@ When nodes emit network frames, only nodes in their coverage area can receive th
 We refer to this as a \emph{local broadcast}.
 %
 Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
-For example, node $n_{3}$ is in the range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
+For example, node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
 % Sending and receiving frames consumes energy from the node's limited power supply.
 %
 % To reach out-of-range destinations, some nodes must act as relays to forward frames to other nodes of the network, enabling \emph{global broadcast}.
@@ -59,7 +59,7 @@ The protocol is illustrated by Figure~\ref{fig:mac_protocol}.
 BMW relies on \emph{virtual carrier sensing}, as used for point-to-point communication in the classical IEEE 802.11 coordination protocol~\cite{ieee1997wireless}.
 A node initiates a local broadcast by sending a RTS (Request To Send) frame, with the goal of \emph{discovering} local neighbors.
 These neighbors reply with CTS (Clear To Send) messages containing their identity.
-Physical carrier sensing~\cite{ieee1997wireless} reduce the risk of collisions between CTS replies:
+Physical carrier sensing~\cite{ieee1997wireless} reduces the risk of collisions between CTS replies:
 nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
 The payload frame is then transmitted, and neighbors acknowledge its reception, again using physical carrier sensing to avoid collisions.
 Up to two additional retransmissions happen in case of missed or error-bearing acknowledgments.
@@ -83,7 +83,9 @@ We present next the two protocols, one of each type, that we later combine to en
 \begin{figure}[t]
 	\begin{minipage}[t]{0.475\linewidth}
     \includegraphics[width=\linewidth]{figures/flooding}
-    \caption{Broadcast using counter-based controlled flooding, example with $c=2$, and details of counter and timer initial values for 4 sample nodes. Duplicates to previous relay nodes are omitted for clarity.}
+    \caption{Broadcast using counter-based controlled flooding, example with $c=2$, and details of counter and timer initial values for 4 sample nodes. 
+	% Duplicates to previous relay nodes are omitted for clarity.
+	}
 		\label{fig:background:flooding}
 	\end{minipage}%
   \hfill%
@@ -94,7 +96,7 @@ We present next the two protocols, one of each type, that we later combine to en
 	\end{minipage}
 \end{figure}
 
-uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
+Uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
 It generates a large number of duplicates, and many concurrent retransmissions in dense areas.
 % This creates a high number of collisions and retransmissions by the MAC protocol.
 The risk of collision may be reduced by waiting before retransmitting, either for a random amount of time~\cite{BroadcastStormProblem} or, when GPS coordinates are available, for a time that depends on a local density estimation~\cite{abba} but these mitigations do not reduce the number of duplicates.
@@ -118,14 +120,14 @@ An illustration of counter-based controlled flooding with $c=2$ is given by Figu
 
 \input{mpr_protocol}
 
-overlay-based approaches pre-compute which nodes should act as relays.
+Overlay-based approaches pre-compute which nodes should act as relays.
 This requires exchange of information between nodes outside of actual message broadcasts.
 The goal is to form a \emph{connected dominating set}:
 the combined coverage areas of all relays must contain all nodes in the network.
 The overlay should be connected but at the same time contain as few relays as possible.
 It can be \emph{explicit} when nodes are aware of their status of relay nodes~\cite{stojmenovic-cds,Nikolov2015}.
 It may also be implicit, when nodes are informed they should act as a relay from the source or previous relays in the broadcast process.
-We adopt MPR~\cite{mpr} as a protocol of the latter type.
+We adopt a protocol of the latter type, MPR~\cite{mpr}.
 
 MPR lets each node $n_i$ decide which of its one-hop (direct) neighbors should be instructed to act as relays during a broadcast in which $n_i$ acts as a relay.
 MPR requires the discovery of all one-hop and two-hop neighbors using periodic control messages.

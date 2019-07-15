@@ -44,11 +44,13 @@ The values of these criteria depend on the nature of the MANET, the wireless ran
 We define appropriate values for our test scenario in our evaluation.
 
 \subsection{Protocol switching policies}
-Nodes keep using MPR when their local observables of density and stability $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceed a fixed threshold $({s}_{\text{min}},{d}_{\text{emerge}})$ otherwise, nodes switch to CF.
-This simple policy of adaptation results in having an overlay in dense and stable regions but it has the risk of creating small overlays surrounded by CF zones, when nodes density varies between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
-A \emph{coordinated} mechanism is given in Algorithm~\ref{algorithm:coordinated}, targeting two objectives:
-first, it should allow entire \emph{regions} of the MANET to switch simultaneously to use MPR, thereby avoiding single isolated nodes using an overlay.
-Second, it must allow created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated residual regions.
+
+A simple policy would be to let nodes decide independently when to switch from CF to MPR, when the locally observed value for $(\bar{s}_{-\delta},\bar{d}_{-\delta})$ exceeds both thresholds $({s}_{\text{min}},{d}_{\text{emerge}})$.
+As long as these values remain over thresholds $({s}_{\text{min}},{d}_{\text{keep}})$, a node would continue using MPR, but switch back to CF otherwise.
+While this \emph{single-node} policy will lead homogeneously dense and stable regions to eventually switch to MPR, it has the risk of creating small MPR regions surrounded by CF zones, when nodes density is distributed between ${d}_{\text{keep}}$ and ${d}_{\text{emerge}}$.
+A \emph{coordinated} mechanism is given in Algorithm~\ref{algorithm:coordinated}, that addresses these shortcomings.
+First, it allows entire \emph{regions} of the MANET to switch simultaneously to use MPR, thereby avoiding single isolated nodes using an overlay.
+Second, it allows the created overlays to gracefully \emph{dissolve} when they are no longer necessary, without unnecessarily keeping isolated residual regions.
 
 \input{policy_algo}
 
@@ -72,7 +74,7 @@ If no further invitation to use MPR has been received when the timer expires, th
 This can happen either as nodes are in a moderately dense area where no node has consistently seen a density justifying sending an invitation, or if an increase in mobility jeopardizes the interest of using an overlay.
 An exception is made for nodes running MPR who do not receive a \texttt{hello} frame for more than a period of $2\Delta$.
 %These nodes immediately switch back to CF.
-This accounts for mobile nodes who have moved out of a dense zone, and are no longer in range of MPR nodes.
+This accounts for mobile nodes who have moved out of a dense zone, and are no longer in range of any MPR node.
 
 % The decision to emerge an overlay in a region of the MANET is based primarily on the organization of nodes in space (the  density in the neighborhood of a node) and on their dynamism (i.e., witnessed as frequent reconfigurations in the neighborhood of a node).
 % The collection of up-to-date information would require constant probing by each node of its surrounding, which would defeat the purpose of emergent overlays of reducing costs and improving reliability through less collisions.
