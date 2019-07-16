@@ -1,0 +1,95 @@
+%!TEX root = main.tex
+%=========================================================
+
+\section{Related Work}
+\label{sec:related}
+
+\y{this section lacks a cohesive narrative. it should identify a gap, and relationships to similar works}
+% We review related work on broadcast in MANETs, adaptation mechanisms in wireless and mobile networks, and studies of mobility in these systems.
+
+A survey by Ruiz and Bouvry~\citep{ruiz2015survey} provides a comprehensive taxonomy of controlled flooding and overlay-based protocols, also covered in surveys by Reina \emph{et~al.}~\citep{Reina2015} and Santi~\citep{Santi:2005:TCW:1089733.1089736}.
+%
+% Broadcast protocols consider either fixed- or a variable-range communication~\citep{woon2011variable,park2013efficient}.
+% Our focus in this paper is on fixed-range communication.
+Our previous work~\citep{DensityMobDrivenEval} and the work of Williams and Camp~\citep{Williams2002} present comparative evaluations of broadcast protocols from different classes.
+Hess \emph{et~al.}~\citep{Hess:2015:DHM:2856149.2840722} survey human mobility models for mobile networking.
+Levy walk are a \emph{general} model~\citep{rhee2011levy}.
+Other proposals allow modeling mobility in specific scenarios, such as disaster areas~\citep{Aschenbruck2009}.
+
+The \emph{broadcast storm} problem associated with flooding is identified by Ni et al.~\citep{BroadcastStormProblem}, who also propose \emph{controlled flooding} using counters and timers as we use in this paper.
+The collection of topology information~\citep{ProbFlood} or GPS locations~\citep{abba} allows the optimizing of controlled flooding. However, they are costlier and more sensitive to high mobility.
+
+Overlay-based broadcast is based on the construction of connected dominating sets (CDS)~\citep{stojmenovic-cds}, with the goal of minimizing the number of necessary relay nodes.
+MPR~\citep{mpr} or TSS~\citep{Nikolov2015} create CDS by guaranteeing the coverage of two-hop neighbors by at least one relay node.
+Ahn and Lee~\citep{mpr-improvement} improve MPR to guarantee that each 2-hop neighbor is covered by $m$ such relays.
+Other approaches~\citep{woon2011variable,park2013efficient} consider variable-range local broadcast to optimize the CDS.
+
+Determining the optimal configuration for a MANET broadcast algorithm is difficult.
+% Adaptation techniques have been proposed for different protocols and application contexts.
+Kokuti and Vilmos~\citep{kokuti2012adaptive} propose adaptation techniques to dynamically decide on parameters in controlled flooding.
+Tseng, Ni and Shih~\citep{2001:AAR:876878.879323} similarly propose the ACF adaptation mechanism that we used in our evaluation (\S\ref{sec:evaluation}).
+Controlled flooding adaptation can use measures of node velocity, as for S-H flooding~\citep{adaptive_group_com_iscc02} detailed in~\S\ref{sec:evaluation}, or measures of observed contention and collisions~\citep{2001:AAR:876878.879323}.
+Liarokapis and Shahrabi~\citep{prob-based-adaptive-tech} propose techniques to switch from simple to controlled flooding, and adapt switching threshold to locally measured density.
+Artimy~\citep{artimy2007local} proposes density estimation and dynamic range adaptation for vehicular networks, distinguishing between free-flow and congested phases.
+
+The term \emph{emergent overlay} has been previously used in another context, wired unstructured P2P network~\citep{galuba2007generic}, to denote the \emph{on demand} construction of distributed hash tables~\citep{jelasity2009t} following a centralized decision.
+Bellavista \emph{et al.}~\citep{Bellavista2013} combine a static sensor network using an overlay and a MANET with controlled flooding for data collection for an IoT scenario, but the use of either protocol is determined in advance.
+We are not aware of any previous approach combining in a single MANET controlled flooding and overlays.
+
+
+% broadcast algorithms in manets
+% \begin{itemize}
+% 	\item Surveys:
+% 	\begin{itemize}
+% 		\item : 2015 survey with the taxonomy
+% 		\item \citep{Reina2015}: 2015 survey on probabilistic broadcast approaches
+% 		\item \citep{Santi:2005:TCW:1089733.1089736}: 2005 survey on topology control in manets
+% 	\end{itemize}
+% 	\item Controlled flooding:
+% 	\begin{itemize}
+% 		\item \citep{BroadcastStormProblem}: 3 controlled flooding approaches to deal with broadcast storms
+%
+% 		% \item \citep{ProbFlood}: 2003 broadcast approach to privilege that nodes located at the border of transmissions range act as relays
+% 	\end{itemize}
+% 	\item Overlay-based
+% 	\begin{itemize}
+% 		\item \citep{stojmenovic-cds} 1st paper in determining connected dominating sets (CDS)
+% 		\item \citep{Nikolov2015} 2015 a more recent approach to build CDS
+% 		\item \citep{mpr} another approach to create CDS
+% 		\item \citep{mpr-improvement}: 2014 recent improvement of MPR (multi-point relaying technique) to build backbones
+% 		\item \citep{overlays_for_manets} 2015 recent study about how to maintain P2P overlays in MANETs for routing
+% 	\end{itemize}
+%
+% 	%		\item \citep{clustering-approach}: 2009 approach for clusters within MANETs that uses location and energy metrics \er{for clusters? from the title it seems it uses broadcast as a tool, so you could rather use it in the intro to motivate the uses of broadcast}
+%
+% \end{itemize}
+
+% studies of broadcast performance
+% \begin{itemize}
+% 	\item \citep{DensityMobDrivenEval} our evaluation study of broadcast over different scenarios of mobility and density
+% 	\item evaluation of broadcast protocols~\citep{Williams2002}, there is also a first classification of protocols
+% \end{itemize}
+
+% adaptation mechanisms in wireless systems, manets, sensor networks
+% \begin{itemize}
+% 	\item \citep{artimy2007local} seems to also use overlays and flooding in vehicular networks
+% 	\item \citep{kokuti2012adaptive}
+% 	\item \citep{adaptive_group_com_iscc02} is basically one adaptation policy where the switching criteria is based on the relative velocity of nodes ; nodes switch between a list of controlled flooding approaches
+% 	\item in this work \citep{Bellavista2013} overlays are build on the top of wireless sensor networks (WSN) to speed up data dissemination. Such data is classified with a certain priority; interoperability issues between WSN and MANETs are tackled but no between dissemination protocols
+% 	\item 2003 \citep{2001:AAR:876878.879323} this work (aprox 700 citaitons) follows the paper about the broadcast storm problem to point out the need of adapting the value of thresholds shown in \citep{BroadcastStormProblem}
+% 	\item \citep{hypergossiping} : adaptive approach based on gossiping
+% 	\item \citep{prob-based-adaptive-tech} thresholds are changed on the fly without using control messages (seems promising, still have to read carefully)
+% 	\item \citep{whitbeck2010hymad}: adaptation for routing in dense and dynamic networks
+% \end{itemize}
+
+% mobility traces and models
+% \begin{itemize}
+% 	\item \citep{Hess:2015:DHM:2856149.2840722}: a recent survey
+% 	\item \citep{Aschenbruck2009}: mobility model for disaster area scenarios
+% 	\item \citep{rhee2011levy}: Levy walk nature, classical paper
+% \end{itemize}
+%
+% emergent overlays elsewhere
+% \begin{itemize}
+% 	\item This paper~\citep{galuba2007generic} uses the term in another context, an unstructured p2p network where a DHT or another structure is bootstrapped on demand
+% \end{itemize}

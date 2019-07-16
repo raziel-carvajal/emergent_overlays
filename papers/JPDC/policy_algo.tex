@@ -1,0 +1,117 @@
+%!TEX root = main.tex
+%=========================================================
+
+\begin{algorithm}[t]
+\begin{footnotesize}
+	\begin{algorithmic}[1]
+	
+	\BeginConstants
+		\State $\Delta$: time \Comment{period of sending of \texttt{hello} messages for MPR}
+		\State ${s}_{\text{min}},{d}_{\text{emerge}},{d}_{\text{keep}}$ \Comment{policy thresholds}
+	\EndConstants
+	
+	\BeginVariables
+		\State $\bar{s}_{-\delta}$, $\bar{d}_{-\delta}$ \Comment{observables maintained by MAC protocol}
+		\State $P$ $\in$ \{ CF, MPR \} \Comment{currently running protocol}
+		\State $t_\text{MPR}$ \Comment{when running MPR, dissolution timer}
+	\EndVariables
+	
+	\smallskip
+	
+	\ProcedureAlt{emerge(): }
+		\Return ($\bar{s}_{-\delta} \geq {s}_{\text{min}} \wedge \bar{d}_{-\delta} \geq {d}_{\text{emerge}}$)
+		\label{algorithm:coordinated:line:emerge_condition}
+	\EndProcedureAlt
+	
+	\ProcedureAlt{keep(): }
+		\Return ($\bar{s}_{-\delta} \geq {s}_{\text{min}} \wedge \bar{d}_{-\delta} \geq {d}_{\text{keep}}$)
+		\label{algorithm:coordinated:line:keep_condition}
+	\EndProcedureAlt	
+	
+	\BeginUpon{processing of message $m$ for the first time}
+		\If{emerge()} \Comment{act as a proposer}
+			\State $m.$\texttt{em} $\gets$ \texttt{true}, useMPR()
+		\ElsIf{$m.$\texttt{em}} \Comment{react to proposal:}
+			\If{keep()} useMPR() \Comment{start or renew MPR use, or}
+			\Else ~ $m.$\texttt{em} $\gets$ \texttt{false} \Comment{do not propagate proposal further}
+			\EndIf
+		\EndIf
+	\EndUpon
+	
+	\ProcedureAlt{useMPR()}
+		\If{$P =$ CF}
+			\State MPR.init() \Comment{initialize \texttt{hello} messages}
+			\State wait($2\times\Delta$), then $P \gets$ MPR \Comment{stabilize then switch}
+		\EndIf
+		\State $t_\text{MPR} \gets $ currentTime() $+ 10\times\Delta$ \Comment{set dissolution timer}
+	\EndProcedureAlt
+	
+	\BeginTimerExpires{$t_\text{MPR}$}{\textbf{ or if no MPR hello received in} $2\Delta$}
+		\State MPR.terminate()
+		\State $P \gets$ CF \Comment{dissolve overlay and return to using CF}
+	\EndTimerExpires
+
+\end{algorithmic}
+\end{footnotesize}
+\caption{Coordinated adaptation on node $n_i$}\label{algorithm:coordinated}
+\end{algorithm}
+
+
+
+% \begin{algorithm}[t]
+% \begin{footnotesize}
+% 	\begin{algorithmic}[1]
+%
+% 	\BeginConstants
+% 		\State $\Delta$: time \Comment{period of sending of \texttt{hello} messages for MPR}
+% 		\State ${s}_{\text{min}},{d}_{\text{emerge}},{d}_{\text{keep}}$ \Comment{policy thresholds}
+% 	\EndConstants
+%
+% 	\BeginVariables
+% 		\State $\bar{s}_{-\delta}$, $\bar{d}_{-\delta}$ \Comment{observables maintained by MAC protocol}
+% 		\State $P$ $\in$ \{ CF, MPR \} \Comment{currently running protocol}
+% 		\State $t_\text{MPR}$ \Comment{when running MPR, dissolution timer}
+% 	\EndVariables
+%
+% 	\smallskip
+%
+% 	\ProcedureAlt{emerge(): }
+% 		\Return ($\bar{s}_{-\delta} \geq {s}_{\text{min}} \wedge \bar{d}_{-\delta} \geq {d}_{\text{emerge}}$)
+% 		\label{algorithm:coordinated:line:emerge_condition}
+% 	\EndProcedureAlt
+%
+% 	\ProcedureAlt{keep(): }
+% 		\Return ($\bar{s}_{-\delta} \geq {s}_{\text{min}} \wedge \bar{d}_{-\delta} \geq {d}_{\text{keep}}$)
+% 		\label{algorithm:coordinated:line:keep_condition}
+% 	\EndProcedureAlt
+%
+% 	\BeginUpon{processing of message $m$ \emph{for the first time}}
+% 		\If{emerge()}
+% 			\State $m.$\texttt{em} $\gets$ \texttt{true}
+% 			\If{$P =$ CF} switchToMPR() \EndIf
+% 		\ElsIf{$m.$\texttt{em}}
+% 			\If{keep()}
+% 				\If{$P =$ CF} switchToMPR()
+% 				\Else ~$t_\text{MPR} \gets $ currentTime() $+ 10\times\Delta$
+% 				\EndIf
+% 			\Else
+% 				~ $m.$\texttt{em} $\gets$ \texttt{false}
+% 			\EndIf
+% 		\EndIf
+% 	\EndUpon
+%
+% 	\ProcedureAlt{switchToMPR()}
+% 		\State MPR.init() \Comment{initialize the sending of \texttt{hello} messages by MPR}
+% 		\State wait($2\times\Delta$), then $P \gets$ MPR \Comment{stabilize and switch}
+% 		\State $t_\text{MPR} \gets $ currentTime() $+ 10\times\Delta$ \Comment{set dissolution timer}
+% 	\EndProcedureAlt
+%
+% 	\BeginTimerExpires{$t_\text{MPR}$}{\textbf{ or if no MPR hello received in} $2\Delta$}
+% 		\State MPR.terminate()
+% 		\State $P \gets$ CF \Comment{dissolve overlay and return to using CF}
+% 	\EndTimerExpires
+%
+% \end{algorithmic}
+% \end{footnotesize}
+% \caption{Coordinated adaptation on node $n_i$}\label{algorithm:coordinated}
+% \end{algorithm}

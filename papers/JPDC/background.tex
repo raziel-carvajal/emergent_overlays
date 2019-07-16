@@ -1,0 +1,366 @@
+%!TEX root = main.tex
+%=========================================================
+
+\section{Key concepts}
+\label{sec:background}
+
+\begin{figure}[t]
+	\begin{minipage}[t]{0.475\linewidth}
+    \includegraphics[width=\linewidth]{figures/model}
+    \caption{Communication model and illustration of network collisions.}
+		\label{fig:manet-comm-model}
+	\end{minipage}%
+  \hfill%
+	\begin{minipage}[t]{0.475\linewidth}
+    \includegraphics[width=\linewidth]{figures/mac}
+    \caption{BMW MAC protocol for local broadcast: neighborhood discovery and frame retransmissions.}
+    \label{fig:mac_protocol}
+	\end{minipage}
+\end{figure}
+
+We start by detailing our system and communication models.
+We follow-up with the description of the three base protocols we combine in our approach.
+
+% The first protocol is a MAC protocol enabling
+% reliable \emph{local broadcast}. The two other protocols implement
+% \emph{global broadcast}: One is based on controlled flooding and the other uses an overlay.
+
+\subsection{System and communication models}
+\label{sec:background:model}
+
+A set $N$ of nodes $n_{i},n_{j},\dots$ are mobile in a 2-dimensional space.
+We do not consider the availability of geolocation information (GPS) on the devices.
+Nodes communicate using wireless transceivers with a limited and fixed transmission range Tx.
+Nodes cannot send and receive simultaneously: transceivers are either in sending or listening mode.
+%
+When nodes emit network frames, only nodes in their coverage area can receive them.
+We refer to this as a \emph{local broadcast}.
+%
+Figure~\ref{fig:manet-comm-model} presents the coverage areas for nodes $n_{1\dots4}$.
+For example, node $n_{3}$ is in range of both $n_{1}$ and $n_{2}$. % and may receive frames from either node.
+% Sending and receiving frames consumes energy from the node's limited power supply.
+%
+% To reach out-of-range destinations, some nodes must act as relays to forward frames to other nodes of the network, enabling \emph{global broadcast}.
+
+The main obstacle to reliable local broadcast is the occurrence of \emph{collisions}, which may happen when two nodes have overlapping coverage areas.
+If nodes $n_{1}$ and $n_{2}$ send frames at the same time then it is impossible for $n_{3}$ to successfully receive both of the frames, or even any of them.
+The same applies to a node such as $n_4$ that is in sending mode and cannot receive frames from other nodes in range.
+Detecting collisions as they happen is not possible~\citep{ieee1997wireless}.
+Reliable local broadcast must therefore rely on a medium access control protocol.
+
+\subsection{MAC protocol for local broadcast}
+\label{sec:background:mac}
+
+A MAC (\emph{Medium Access Control}) protocol arbitrates the use of the wireless medium to minimize collisions and their impact on communication reliability.
+It detects missed receptions and implements frame retransmissions when necessary.
+
+We use broadcast medium window (BMW), a MAC protocol for reliable local broadcast~\citep{tang2001mac}.
+The protocol is illustrated by Figure~\ref{fig:mac_protocol}.
+BMW relies on \emph{virtual carrier sensing}, as used for point-to-point communication in the classical IEEE 802.11 coordination protocol~\citep{ieee1997wireless}.
+A node initiates a local broadcast by sending a RTS (Request To Send) frame, with the goal of \emph{discovering} local neighbors.
+These neighbors reply with CTS (Clear To Send) messages containing their identity.
+Physical carrier sensing~\citep{ieee1997wireless} reduces the risk of collisions between CTS replies:
+nodes wait for an initial random duration and probe the wireless medium before sending; If it is currently used, they back off and retry after an (exponentially increasing) duration.
+The payload frame is then transmitted, and neighbors acknowledge its reception, again using physical carrier sensing to avoid collisions.
+Up to two additional retransmissions happen in case of missed or error-bearing acknowledgments.
+% The rationale is that more than three failures for a local broadcast due to collisions indicate a highly contended medium, and using more re-sending will likely result in a local broadcast storm~\citep{BroadcastStormProblem}.
+
+\subsection{(Global) Broadcast protocols}
+\label{sec:background:broadcast}
+
+The goal of \emph{global} broadcast (hereafter referred simply as broadcast) is to reliably send a message to all nodes in the network, despite mobility and collisions.
+The source can be any node in the network, and the message may require multiple frames. % \footnote{A session protocol assists in splitting a message in multiple frames if necessary and calling the MAC protocol. We do not detail this protocol as it is straightforward to design and implement.}
+Nodes \emph{may} forward a message using local broadcast upon its first reception.
+We denote such nodes as \emph{relay} nodes.
+Subsequent receptions are \emph{duplicates} that are simply ignored.
+The target is to reduce the number of relay nodes while ensuring a high (ideally full) \emph{reach}, i.e. the average proportion of nodes that receive each broadcast.\footnote{Incomplete broadcasts may be completed using periodic anti-entropy~\citep{leme2017analyzing}.}
+Broadcast protocols use either controlled flooding or an overlay~\citep{ruiz2015survey}.
+We present next the two protocols, one of each type, that we later combine to enable emergent overlays.
+
+\subsubsection{Counter-based controlled flooding}
+\label{sec:background:broadcast:flooding}
+
+\begin{figure}[t]
+	\begin{minipage}[t]{0.475\linewidth}
+    \includegraphics[width=\linewidth]{figures/flooding}
+    \caption{Broadcast using counter-based controlled flooding, example with $c=2$, and details of counter and timer initial values for 4 sample nodes. 
+	% Duplicates to previous relay nodes are omitted for clarity.
+	}
+		\label{fig:background:flooding}
+	\end{minipage}%
+  \hfill%
+	\begin{minipage}[t]{0.475\linewidth}
+    \includegraphics[width=\linewidth]{figures/mpr}
+    \caption{MPR selection of overlay nodes: $n_1$ and $n_2$ are selected during the first phase as they connect to isolated nodes, $n_3$ and $n_4$ in the second phase as they allow to cover the most two-hop neighbors.}
+    \label{fig:background:mpr}
+	\end{minipage}
+\end{figure}
+
+Uncontrolled (``pure'') flooding is the simplest broadcast protocol where every node acts as a relay for every message.
+It generates a large number of duplicates, and many concurrent retransmissions in dense areas.
+% This creates a high number of collisions and retransmissions by the MAC protocol.
+The risk of collision may be reduced by waiting before retransmitting, either for a random amount of time~\citep{BroadcastStormProblem} or, when GPS coordinates are available, for a time that depends on a local density estimation~\citep{abba} but these mitigations do not reduce the number of duplicates.
+
+\emph{Controlled Flooding} (CF) enables nodes to decide \emph{not to} retransmit, when they estimate that their neighborhood has been sufficiently covered.
+We use the classical counter-based approach~\citep{BroadcastStormProblem} that is efficient in a variety of practical situations, as comparative studies have shown~\citep{DensityMobDrivenEval,Williams2002}.
+Upon the first reception of a message, a node sets up a timer $t$ and a counter $c$.
+Every reception of a duplicate decreases $c$ by one.
+When $t$ expires, the node only acts as a relay if $c>0$.
+
+Controlled flooding is intuitively good for regions with high mobility.
+The decision of whether or not to be a relay is made by each node independently, based on its observation of the local neighborhood at dissemination time.
+Optimal values for $t$ and $c$ depend on nodes density.
+For sparse areas, a low value of $c$ can lead to incomplete coverage.
+In dense areas, a high value of $c$ will lead to many duplicates.
+We choose to favor coverage in sparse areas and use a random $t \in [10^{-6}, 10^{-4})$ seconds and $c=3$.
+An illustration of counter-based controlled flooding with $c=2$ is given by Figure~\ref{fig:background:flooding}.
+
+\subsubsection{Multipoint Relay (MPR)}
+\label{sec:background:broadcast:overlay}
+
+\input{mpr_protocol}
+
+Overlay-based approaches pre-compute which nodes should act as relays.
+This requires exchange of information between nodes outside of actual message broadcasts.
+The goal is to form a \emph{connected dominating set}:
+the combined coverage areas of all relays must contain all nodes in the network.
+The overlay should be connected but at the same time contain as few relays as possible.
+It can be \emph{explicit} when nodes are aware of their status of relay nodes~\citep{stojmenovic-cds,Nikolov2015}.
+It may also be implicit, when nodes are informed they should act as a relay from the source or previous relays in the broadcast process.
+We adopt a protocol of the latter type, MPR~\citep{mpr}.
+
+MPR lets each node $n_i$ decide which of its one-hop (direct) neighbors should be instructed to act as relays during a broadcast in which $n_i$ acts as a relay.
+MPR requires the discovery of all one-hop and two-hop neighbors using periodic control messages.
+Nodes periodically announce themselves using best-effort local broadcast, i.e. bypassing the BMW MAC protocol.
+These \texttt{hello} messages include the current neighborhood, collected by the MAC protocol in recent exchanges.
+Information about a neighbor is reset after a few missed announcements, to account for nodes leaving the coverage area.
+The ideal frequency of announcements depends on the network dynamics.
+Too frequent announcements bear the risk of extra collisions and energy costs, while infrequent ones may lead to overlays that are no longer connected or dominating.
+
+The selection of relays is detailed by Algorithm~\ref{algorithm:mpr} and illustrated by Figure~\ref{fig:background:mpr}.
+The goal is to ensure that all two-hop neighbors are \emph{covered} by at least one relay.
+The selection is in two phases.
+The first phase (lines 7--10) selects relays that are \emph{necessary}, i.e. one-hop neighbors that are the only connection to ``isolated'' two-hop neighbors.
+The second phase (lines 11--14) selects relays that are \emph{sufficient} to complete the coverage.
+The heuristic is to add as relay the one-hop neighbors that cover the largest number of two-hop neighbors until all nodes are covered.
+As the set of uncovered nodes is the union of all two-hop neighbors (line 5), the \texttt{while} loop on lines 11--14 always terminate.
+MPR is a local heuristic that may not guarantee the optimal selection of relays, but it has the advantage of requiring little computation and no GPS coordinates.
+It also does not require specific synchronization between nodes to agree on an explicit overlay (e.g. to inform nodes who must act as relays), reducing its maintenance costs.
+
+Overlay-based broadcast is expected to be useful in scenarios where nodes density is high, greatly reducing the number of relays without requiring a difficult-to-set counter or time value.
+It is however necessary that the nodes positions be sufficiently stable, or the frequency of control messages will need to be increased to a point where they will create collisions and potentially bear higher costs than for dissemination itself.
+
+% In ~\citep{mpr}, Qayyum et al. propose a topology-based broadcast protocol called Multi-point Relaying (MPR).
+% %
+% The MPR protocol assumes that every node knows two sets, its one-hop and two-hop sets of neighbors.
+% %
+% Find out the first set requires sending \emph{hello} control messages with the sender's identifier in it.
+% %
+% Given that a node eventually receives hello messages from those located at the node's broadcast area, the set of two-hop neighbors is obtained by sending a ~\emph{surroundings} control message, which contains the list of hello message senders.
+% %
+% Before presenting the MPR protocol, we first define the set of one-hop neighbors of node $x$ as $N(x)$ and the set of two-hop neighbors as $N_{2}(x)$. The MPR protocol works as follows.
+%
+% \begin{enumerate}
+% 	\item Start with an empty set of relay nodes.
+% 	\item Mark every node $r \in N(x)$ as relay node, if a node $m \in N_{2}(x)$ exist such that nodes $m$ and $x$ are the only two one-hop neighbors of $r$.
+% 	\item While there is a node $n \in N_{2}(x)$ that is not covered, chose another relay node $r \in N_(x)$ with the highest number of neighbors.
+% \end{enumerate}
+%
+% Figure~\ref{fig:mpr-example} shows the steps taken by a node $a$ to compute its set of relay, assume that node $a$ already knows the sets $N(a)$ and $N_{2}(a)$.
+% %
+% Node $b$ is marked as a relay node as it is the only neighbor of $f$.
+% %
+% The second rule indicates that node $c$ is a relay node too, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $g$ (here, zero).
+% %
+% The MPR technique is a distributed heuristic to figure out the minimum connected dominating set.
+
+
+
+% \begin{figure}[t]
+% 	\begin{minipage}[t]{0.45\linewidth}
+%     \includegraphics[width=\linewidth]{figures/manet-comm-model.png}
+%     \caption{Multi-hop routing communication in MANETs and redundancy in received messages.}
+% 		\label{fig:manet-comm-model}
+% 	\end{minipage}%
+%   \hfill%
+% 	\begin{minipage}[t]{0.45\linewidth}
+%     \includegraphics[width=\linewidth]{figures/example-of-collision.png}
+%     \caption{Collision of messages when a node is located within two broadcast areas.}
+%     \label{fig:example-of-collision}
+% 	\end{minipage}
+% \end{figure}
+%
+% Nodes in MANETs hold wireless transceivers that send networks packets in a broadcast fashion.
+% %
+% The covered area or broadcast area per transceiver is represented in the literature by a disk with radius Tx.
+% %
+% The length of Tx is commonly known as \emph{transmission range}.
+% %
+% Figure~\ref{fig:manet-comm-model} depicts node $n_{1}$ at the center of its broadcast area, any node positioned at such area may receive packets from $n_{1}$.
+% %
+% \er{there is a big confusion here between the model and the protocol we will put on top of the system. The redundancy you describe is a result of flooding and has nothing to do with the model. This must be removed and discussed in the subsection about the flooding protocol}
+% This local broadcast approach of communication generates redundancy in received packets.
+% %
+% \er{a routing protocol is not part of the model. It is a protocol ...}
+% In Figure~\ref{fig:manet-comm-model}, nodes $n_{1}$ and $n_{4}$ communicate with each other via $n_{3}$, when $n_{1}$ sends a packet \emph{p} to aim $n_{4}$, node $n_{3}$ forwards \emph{p} to reach the destination node.
+% %
+% But, node $n_{2}$ receives twice a packet that was not intended to it because this node is within two broadcast areas.
+% %
+% Notice that point-to-point communication requires multi-hop routing where some nodes positioned between source and destination forwards packets.
+% %
+% Another issue in wireless communication is collisions, which occurs when at least two nodes sharing a single broadcast area send packets concurrently.
+% %
+% In our example, if $n_{1}$ and $n_{2}$ send packets at the same time, $n_{3}$ may drop packets from any of both sources or not listen any packet at all.
+% %
+% Collision detection in wireless networks remains an open issue given that the current mechanisms require to transmit and listen at the same time for detecting potential collisions~\citep{hidden-terminal-problem}.
+%
+%
+% \subsection{MAC layer and collision avoidance}
+% \label{sec:background:mac}
+% Wireless distributed MAC (Medium Access Control) protocols such as IEEE 802.11 coordination function allows nodes to share a common channel for data transmission and relies in a collision avoidance mechanism commonly known as \emph{virtual carrier sensing}~\citep{ieee1997wireless}.
+% %
+% This mechanism is a handshake protocol between a sender and any receiver that is positioned at the senders broadcast area.
+% %
+% When a node is willing to send a data packet, it starts by sending a Request To Send (RTS) packet.
+% %
+% On reception of RTS a receiver  holds the medium to expect data from RTS sender by answering with a Clear To Send (CTS) packet.
+% %
+% Once the sender receives CTS, the data transmission begins and it is tagged as successful transmission if the receiver acknowledge the sender (with another packet) when all data packets were correctly received.
+% %
+% In case interferences take place in any of the phases of the previous handshake protocol, nodes respond with error packets.
+% %
+% This is a drawback in collision avoidance mechanisms because nodes waste bandwidth by sending error packets along with data packets.
+%
+%
+% %
+% Virtual carrier sensing is prone to errors when hidden nodes to senders interfere with the handshake protocol, this phenomenon is known as the \emph{hidden terminal problem} and it is depicted in figure~\ref{fig:mac-example}.
+% %
+% Suppose node $n_{1}$ initiates the virtual carrier sensing protocol with node $n_{2}$, notice in the figure that node $n_{3}$ is hidden for $n_{1}$.
+% %
+% Once $n_{2}$ receives an RTS packet from $n_{1}$, the former replies with a CTS that will reach $n_{3}$.
+% %
+% Given that $n_{3}$ has not previously initiate an exchange with $n_{1}$, node $n_{3}$ sends an error packet and may interrupt the data transmission between $n_{1}$ and $n_{2}$.
+% %
+% Improved protocols to deal with the hidden terminal problem, such as the one presented in~\citep{mac-with-cd}, use out-of-band packets to explore the channel conditions without interfering with data transmission, this techniques achieve both collisions detection and avoidance.
+% %
+%
+% %
+% One of our contributions is a virtual carrier sensing protocol that do not require the transmission of error packets and count the number of potential collisions of data packets (refer to section~\ref{sec:mechanisms}).
+% %
+% We aim to take advantage of the local broadcast approach to improve reliability of data packets and, at the same time, ameliorate the utilization of bandwidth.
+% %
+% We do not argue that our MAC protocol outperforms the implementation in the IEEE 802.11 coordination function, in fact, the evaluation of our MAC protocol is left as future work.
+%
+% \begin{figure}[t]
+% 	\begin{minipage}[t]{0.45\linewidth}
+%     \includegraphics[width=\linewidth]{figures/mac-example.png}
+%     \caption{Example of the hidden terminal problem.}
+% 		\label{fig:mac-example}
+% 	\end{minipage}%
+%   \hfill%
+% 	\begin{minipage}[t]{0.45\linewidth}
+%     \includegraphics[width=\linewidth]{figures/mpr-example.pdf}
+%     \caption{Example of how the MPR technique finds out relay nodes.}
+%     \label{fig:mpr-example}
+% 	\end{minipage}
+% \end{figure}
+%
+% \subsection{Broadcast algorithms}
+% \label{sec:background:broadcast}
+% Broadcast is a fundamental operation for distributed applications in MANETs.
+% %
+% This operation consist in delivering a message from a source node to every other node in the network.
+% %
+% We provide a more formal definition of broadcast.
+% %
+% In a network of $N$ nodes a broadcast protocol aims to find a subset of \emph{relay nodes} with $R \subset N$, such that, if a source node $s \in R$ sends a message \emph{m} and only those nodes in the set $R - \{s\}$ forwards such message, \emph{m} will be received at least once by every node in $N$.
+% %
+% A vast amount of broadcast protocols have been proposed and aim to minimize the set of relay nodes without decreasing reachability.
+%
+%
+% %
+% The lack of a central authority in MANETs requires to focus on distributed broadcast protocols that relay only in local data available at each node, avoiding any contact to services out of the network (like GPS or monitoring services).
+% %
+% Ruiz and Bouvry have surveyed broadcast protocols approaches~\citep{ruiz2015survey} and classify them in two groups: topology-based and non topology-based protocols.
+% %
+% Each group in this classification distinguishes protocols that vary the transmission range (Tx) of transceivers from those who use a fixed Tx.
+% %
+% In order to let each node cover a fixed broadcast area, and this area of coverage is the same for every node in the network, in this paper we only considers protocols that use a fixed Tx and no GPS coordinates are fetched from an external service.
+% %
+% We now give a general overview of the classification proposed in~\citep{ruiz2015survey} and describe the broadcast protocols we use in our adaptive approach (described in~\ref{sec:mechanisms}).
+%
+% %
+% \subsubsection{Topology-based broadcast protocols}
+% \label{sec:background:broadcast:overlay-based-protocols}
+% Protocols in this category build and maintain a distributed wireless topology which is formally known as a Connected Dominating Set (CDS).
+% %
+% Basically, a CDS is also a set of relay nodes (as explained in~\ref{sec:background:broadcast}).
+% %
+% A CDS have the property that every node out of such set is adjacent to at least one relay node~\citep{cds-explained}.
+% %
+% This property enforce broadcast because nodes out of a CDS receive messages from at least one of their adjacent relay nodes and naturally, every relay node forwards a message at least once.
+% %
+% Nodes build and maintain a CDS via the exchange of networks packets commonly known as \emph{control messages}.
+% %
+% These messages contain data of nodes surroundings.
+% %
+% Topology-based broadcast protocols use control messages to decide whether or not nodes are relay nodes.
+% %
+% This decision is computed on every node and is prior to forward incoming data packets.
+% %
+% In general, the objective of a topology-based protocol is to figure out relay nodes and label them.
+%
+% %
+% In ~\citep{mpr}, Qayyum et al. propose a topology-based broadcast protocol called Multi-point Relaying (MPR).
+% %
+% The MPR protocol assumes that every node knows two sets, its one-hop and two-hop sets of neighbors.
+% %
+% Find out the first set requires sending \emph{hello} control messages with the sender's identifier in it.
+% %
+% Given that a node eventually receives hello messages from those located at the node's broadcast area, the set of two-hop neighbors is obtained by sending a ~\emph{surroundings} control message, which contains the list of hello message senders.
+% %
+% Before presenting the MPR protocol, we first define the set of one-hop neighbors of node $x$ as $N(x)$ and the set of two-hop neighbors as $N_{2}(x)$. The MPR protocol works as follows.
+%
+% \begin{enumerate}
+% 	\item Start with an empty set of relay nodes.
+% 	\item Mark every node $r \in N(x)$ as relay node, if a node $m \in N_{2}(x)$ exist such that nodes $m$ and $x$ are the only two one-hop neighbors of $r$.
+% 	\item While there is a node $n \in N_{2}(x)$ that is not covered, chose another relay node $r \in N_(x)$ with the highest number of neighbors.
+% \end{enumerate}
+%
+% Figure~\ref{fig:mpr-example} shows the steps taken by a node $a$ to compute its set of relay, assume that node $a$ already knows the sets $N(a)$ and $N_{2}(a)$.
+% %
+% Node $b$ is marked as a relay node as it is the only neighbor of $f$.
+% %
+% The second rule indicates that node $c$ is a relay node too, because the number of covered two-hop neighbors (here, two) is bigger than those neighbors covered by $g$ (here, zero).
+% %
+% The MPR technique is a distributed heuristic to figure out the minimum connected dominating set.
+%
+% \subsubsection{Broadcast protocols not using topologies}
+% \label{sec:background:broadcast:non-overlay-based-protocols}
+% Protocols of this category decides whether or not nodes act as relays on the reception of messages.
+% %
+% Nodes follows a more reactive approach than the one performed in topology-based protocols because no prior computation is required.
+% %
+% An example is the straightforward approach \emph{simple flooding}, where nodes forward only once messages that haven not been previously heard.
+% %
+% This approach has been proven to be effective in networks with high mobility~\citep{ObraczkaK_2001}, on the other hand, the network is overwhelm with redundant messages that rapidly increase the likelihood of collisions.
+% %
+%
+% %
+% Ni et al. propose in~\citep{BroadcastStormProblem} several techniques that perform controlled flooding approaches based on the number of received messages, the intersection of several broadcast areas or using probabilistic schemes.
+% %
+% For instance, the counter-based approach works as follows.
+% %
+% Every node use a predefined threshold for allowed receptions.
+% %
+% When a message $m$ is heard for the first time a counter $c$ of allowed receptions for such message is set to one.
+% %
+% Then, a timer $t$ is set to a random duration that serves to wait for additional receptions of $m$.
+% %
+% In case another copy of $m$ is heard, the timer $t$ pauses, the counter of receptions for such message increases of one and finally, the timer resumes.
+% %
+% When $t$ has expired and the counter of receptions for $m$ is lower than the threshold of allowed receptions, then $m$ is forwarded; otherwise, the message is not forwarded.
+% %
+% In our adaptive approach we use the previous counter-based approach to broadcast in sparsely dense regions of the network where nodes move faster.
+% %
+

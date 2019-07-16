@@ -1,0 +1,81 @@
+%!TEX root = main.tex
+%=========================================================
+
+\begin{algorithm}[t]
+\begin{footnotesize}
+	\begin{algorithmic}[1]
+	
+	\BeginConstants
+		\State $\Delta$: time \Comment{period of sending of \texttt{hello} messages for MPR}
+	\EndConstants
+	
+	\BeginVariables
+		\State b: boolean, init \texttt{false} \Comment{should the node act as a border node?}
+		\State t: time, init $\bot$ \Comment{only meaningful if b is \texttt{true}}
+	\EndVariables
+	
+	\ProcedureAlt{iAmBorder()}{ }
+		\If{b $\wedge$ (currentTime - t) $> 2\times\Delta$}
+			b $\gets$ \texttt{false}
+		\EndIf
+		\State \Return b
+	\EndProcedureAlt
+	
+	\smallskip
+	
+	\begin{center}
+	{\textbf{Code for node running CF}}
+	\end{center}
+	\vspace{-2.5mm}
+	\hrulefill
+	
+	\ProcedureAlt{MAC.receive(MPR \texttt{hello} from $n_j$)}
+		\State $t_{n_j} \gets $ new timer with duration $\in [10:100]$ ms
+	\EndProcedureAlt
+	
+	\ProcedureAlt{CF.receive(\texttt{border}$(n_j)$ from $n_k$)}
+		\State cancel $t_{n_j}$ (if it exists)
+	\EndProcedureAlt
+	
+	\BeginTimerExpires{$t_{n_j}$}
+		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$ s}
+		\State MAC.localBroadcast(\texttt{border}($n_j$))
+	\EndTimerExpires
+	
+	\ProcedureAlt{CF.receive(message $m$) for the first time}
+		\State CF.handle($m$) \Comment{regular handling of the message}
+		\If{iAmBorder()}
+			$\text{counter}_m \gets \infty$ \Comment{forces being a relay}
+		\EndIf
+	\EndProcedureAlt
+	
+	\smallskip
+	
+	\begin{center}
+	{\textbf{Code for node running MPR}}
+	\end{center}
+	\vspace{-2.5mm}
+	\hrulefill
+	
+	\ProcedureAlt{MAC.receive(\texttt{border}$(n_j)$ from $n_k$)}
+		\State b $\gets$ \texttt{true} ; t $\gets$ currentTime \Comment{now a border node for $2\times \Delta$s}
+	\EndProcedureAlt
+	
+	\ProcedureAlt{MPR.receive(message $m$) for the first time}
+		\If{$m$ was sent using MPR}
+		
+			\If{$n_i \not \in m$.relays $\wedge$ iAmBorder()}
+				\State CF.handle($m$) \Comment{if leaf and border node, use CF}
+			\Else
+				\If{$n_i \in m$.relays} b $\gets$ \texttt{false} \Comment{already a relay} \EndIf 
+				\State MPR.handle($m$) \Comment{regular handling of the message}
+			\EndIf
+		
+		\Else ~MPR.broadcast($m$) \Comment{from CF, initiate MPR broadcast}
+		\EndIf
+	\EndProcedureAlt
+
+\end{algorithmic}
+\end{footnotesize}
+\caption{Interoperability mechanisms on node $n_i$}\label{algorithm:interoperability}
+\end{algorithm}

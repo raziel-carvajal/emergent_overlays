@@ -1,0 +1,46 @@
+%!TEX root = main.tex
+
+\begin{table}[t]
+\setlength\tabcolsep{1pt}
+\footnotesize
+\centering
+\newcolumntype{C}{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{0.17\linewidth} }
+\newcolumntype{D}{>{\centering\arraybackslash} m{0.15\linewidth} }
+
+\newcolumntype{E}{>{\raggedleft\arraybackslash} m{0.19\linewidth} }
+
+\begin{tabular}{CDEEE}
+
+\toprule
+	\textbf{Protocol} & 
+	\textbf{Region} & 
+	\textbf{Reach (\%)} & 
+	\textbf{LBC (\%)} & 
+	\textbf{Collisions}
+	\\
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{CF}_{c=3}$}
+						& All     &  98.90 & 78.51  &  8890.00 \\ 
+						& Out of POI &  100.00   & 94.40  &  3070.10  \\
+						& At POI  &  97.30 & 35.09  &  5819.80  \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{CF}_{c=4}$}
+						& All     & 99.91 & 74.63 & 12403.36 \\ 
+						& Out of POI & 100.00   & 90.05 & 3962.85 \\
+						& At POI  & 98.67 & 32.69 & 8440.51 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{MPR}_{\Delta=20\text{s}}$}
+						& All    &  99.80  & 94.70   & 599.80 \\
+						& Out of POI &  99.60  & 98.00   & 231.50 \\
+						& At POI  &  100.00   & 81.50   & 368.20 \\ 
+\midrule
+	\multirow{3}{0.125\linewidth}{$\text{MPR}_{\Delta=30\text{s}}$}
+						& All    &  99.30  & 95.00   & 621.60 \\
+						& Out of POI &  98.70  & 98.40   & 245.20 \\
+						& At POI  &  99.90  & 79.50   & 376.30 \\ 
+\bottomrule
+\vspace{1mm}
+\end{tabular}
+\caption{Performance and reliability of baseline protocols.\vspace{-1mm}}
+\label{eval:baseline:coverage-collisions}
+\end{table}
