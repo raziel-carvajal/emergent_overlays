@@ -1,0 +1,44 @@
+%!TEX root = main.tex
+%=========================================================
+\newpage
+
+\section{Global broadcast in heterogeneous MANET (draft of proof)}
+
+Previous works in broadcast protocols assume that every node in a network follows a unique protocol.
+To the best of our knowledge, emergent overlays is the first adaptive approach that combines two state-of-the-art broadcast protocols.
+This combination result in having an heterogeneous MANET where nodes switch from CF and MPR (or vice-versa).
+We need to guarantee global broadcast in such heterogeneous networks.
+This section contains a first step towards a general poof of full coverage in heterogeneous MANETs where nodes switch from CF and MPR to broadcast.
+
+\textbf{Lemma 1}. Let N be a MANET where nodes have no motion and they chose in an arbitrarily way between CF or MPR as broadcast protocol. We then state that every node in N receive broadcast messages from every source node within such network.
+
+
+Before giving a proof of Lemma 1, we rely on the following assumptions:
+
+\begin{itemize}
+	\item The network N is deployed assuming ideal conditions of communication, in other words, every node located at the broadcast area of relays receive broadcast messages successfully.
+	\item Individual protocols guarantee full coverage. Global coverage is guaranteed in a network where every node use a unique protocol to broadcast.
+	\item Border nodes have been discovered with the interoperable mechanism presented in section~\ref{sec:mechanisms}. Recall that border nodes are simply bridges between CF and MPR (or \emph{vice-versa}).
+\end{itemize}
+
+We proceed with the proof of Lemma 1 by showing that there is no node in the static network N that misses broadcast messages. Observe that this is similar to say that global broadcast takes place in N.
+Given that nodes select arbitrarily the protocol to broadcast, we separate such selection in two possible outcomes.
+
+First, assume that all nodes chose the same protocol P to broadcast.
+As part of our assumptions, P guarantees global broadcast in an homogeneous network (where nodes run a unique protocol), which makes Lemma 1 a valid statement.
+
+In the second outcome, some nodes in N have arbitrarily chosen CF as broadcast protocol and others MPR.
+Let \emph{m} be a broadcast message.
+Assume that there exist a node \emph{n} in range of another node \emph{n}' such that \emph{n} does not receive a copy of \emph{m}, even if \emph{n'} holds a copy of such message.
+Consider now that the broadcast protocol running at \emph{n} differs from the one running at \emph{n'}, once again, we have two possible outcomes:
+
+\begin{itemize}
+	\item \textbf{\emph{n'} runs MPR and \emph{n} runs CF.} Node \emph{n'} maintains an overlay, when \emph{n'} acts as a relay this node forwards \emph{m} and eventually, \emph{n} receives a copy of such message. In case \emph{n'} is a pure receiver at the overlay, its neighbor \emph{n} have bootstrapped the interoperability mechanism (see section~\ref{sec:mechanisms}) and have chosen \emph{n'} as border node, because \emph{n} is at the edge of a system running CF. Border nodes are relays, meaning that \emph{n} will eventually receive \emph{m}.
+	\item \textbf{\emph{n'} runs CF and \emph{n} runs MPR.}
+\end{itemize}
+
+We conclude that assuming the existence of a node \emph{n} that do not hear from message \emph{m}, is a false statement, which makes Lemma 1 a valid statement.
+
+
+%Assume that there exist a node n within range of another node n' that do not receive a broadcast message even if n' already have a copy of such message.
+
