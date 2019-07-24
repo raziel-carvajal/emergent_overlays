@@ -33,11 +33,11 @@ Assume that there exist a node \emph{n} in range of another node \emph{n}' such 
 Consider now that the broadcast protocol running at \emph{n} differs from the one running at \emph{n'}, once again, we have two possible outcomes:
 
 \begin{itemize}
-	\item \textbf{\emph{n'} runs MPR and \emph{n} runs CF.} Node \emph{n'} maintains an overlay, when \emph{n'} acts as a relay this node forwards \emph{m} and eventually, \emph{n} receives a copy of such message. In case \emph{n'} is a pure receiver at the overlay, its neighbor \emph{n} have bootstrapped the interoperability mechanism (see section~\ref{sec:mechanisms}) and have chosen \emph{n'} as border node, because \emph{n} is at the edge of a system running CF. Border nodes are relays, meaning that \emph{n} will eventually receive \emph{m}.
-	\item \textbf{\emph{n'} runs CF and \emph{n} runs MPR.}
+	\item \textbf{\emph{n'} runs CF and \emph{n} runs MPR.} Nodes in CF are relays when the threshold of allowed copies have not been reached. Having \emph{n'} as relay results in the imminent reception of \emph{m} at node \emph{n}; recall that both nodes are in range from each other. In case the threshold of allowed copies of \emph{m} have been reached at \emph{n'}, this node is a pure receiver but it is also tagged as border node by its neighbor \emph{n}. Recall that our interoperability mechanism (see section~\ref{sec:mechanisms}) bootstraps when \emph{n'} receives controlled messages from neighbors running MPR; controlled messages allow to maintain overlays. Border nodes are relays, meaning that \emph{n} will eventually receive \emph{m}.
+	\item \textbf{\emph{n'} runs MPR and \emph{n} runs CF.} Node \emph{n'} maintains an overlay, when \emph{n'} acts as a relay this node forwards \emph{m} and eventually, \emph{n} receives a copy of such message. In case \emph{n'} is a pure receiver at the overlay, its neighbor \emph{n} have bootstrapped the interoperability mechanism and have chosen \emph{n'} as border node, because \emph{n} is at the edge of a system running CF.
 \end{itemize}
 
-We conclude that assuming the existence of a node \emph{n} that do not hear from message \emph{m}, is a false statement, which makes Lemma 1 a valid statement.
+Assuming the existence of a node \emph{n} that do not hear from message \emph{m} is a false assumption, which makes Lemma 1 a valid statement.
 
 
 %Assume that there exist a node n within range of another node n' that do not receive a broadcast message even if n' already have a copy of such message.
