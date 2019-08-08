@@ -27,7 +27,7 @@ def getArgs():
       '--nodes', dest='nodes', type=int, default=100,
       help='number of nodes in the network')
   p.add_argument(
-      '--random-steps', dest='rand_steps', type=int, default=40,
+      '--random-steps', dest='rand_steps', type=int, default=10,
       help='number of random walks that all nodes perform')
   p.add_argument(
       '--steps-towards-poi', dest='poi_steps', type=int, default=20,
@@ -80,11 +80,17 @@ if __name__ == '__main__':
   traceSize = args.rand_steps + args.poi_steps
   # create a graph of N nodes
   G.add_nodes_from(range(1, args.nodes + 1))
+  history = {}
+  for i in range(0, args.nodes):
+    history[i] = []
   i = 0
   # plot snapshots of the network where nodes move in a random way
   while i < args.rand_steps:
     network.updateNodePositions(atWholeNet=True)
     plotSnapshot(i, network.positions, (args.area_l, args.area_w))
+    # update history of positions
+    for j in range(0, len(network.positions)):
+      history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
   # intialise models towards 2 PoI
   posAt1stGroup, posAt2ndGroup = [], []
@@ -97,6 +103,8 @@ if __name__ == '__main__':
   while i < args.rand_steps + args.poi_steps:
     network.updateNodePositions(atWholeNet=False)
     plotSnapshot(i, network.positions, (args.area_l, args.area_w))
+    for j in range(0, len(network.positions)):
+      history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
   # overwrite random model specifiying nodes poisitions
   network.rand_model = network.getRandomWaypointInstance(
@@ -105,4 +113,14 @@ if __name__ == '__main__':
   while i < 2 * args.rand_steps + args.poi_steps:
     network.updateNodePositions(atWholeNet=True)
     plotSnapshot(i, network.positions, (args.area_l, args.area_w))
+    for j in range(0, len(network.positions)):
+      history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
+  # create trace of positions and store them in a file
+  with open('spacial-gravity.bm', 'a') as f:
+    f.write('\n')
+    for i in range(0, args.nodes):
+      l = ''
+      for j in range(0, len(history[i])):
+        l = '{}{} {} {} '.format(l, j, history[i][j][0], history[i][j][1])
+      f.write('{}\n'.format(l))
