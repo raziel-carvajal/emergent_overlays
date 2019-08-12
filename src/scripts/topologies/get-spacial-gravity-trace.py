@@ -92,21 +92,21 @@ if __name__ == '__main__':
     for j in range(0, len(network.positions)):
       history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
-  # intialise models towards 2 PoI
+  # get instances of a mobility model where nodes move towards PoI
   posAt1stGroup, posAt2ndGroup = [], []
   for p in network.positions:
     l = posAt1stGroup if p[0] <= (network.length / 2.) else posAt2ndGroup
     l.append((p[0], p[1]))
     network.setModelsOfAttraction(
         len(posAt1stGroup), posAt1stGroup, len(posAt2ndGroup), posAt2ndGroup)
-  # plot snapshots where nodes move towards PoI
+  # plot snapshots of such network
   while i < args.rand_steps + args.poi_steps:
     network.updateNodePositions(atWholeNet=False)
     plotSnapshot(i, network.positions, (args.area_l, args.area_w))
     for j in range(0, len(network.positions)):
       history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
-  # overwrite random model specifiying nodes poisitions
+  # overwrite random model specifiying the latest nodes positions
   network.rand_model = network.getRandomWaypointInstance(
       initial_positions=network.positions)
   # plot snapshots where nodes move (again) in a random way
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     for j in range(0, len(network.positions)):
       history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
-  # create trace of positions and store them in a file
+  # store trace of possition in BonnMotion format
   with open('spacial-gravity.bm', 'a') as f:
     f.write('\n')
     for i in range(0, args.nodes):
