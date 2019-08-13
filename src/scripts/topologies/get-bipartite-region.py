@@ -6,13 +6,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_waypoint
 
-# an undirected graph represents every snapshot of the adhoc network
-G = nx.Graph()
-# nodes transmission range
-TX = None
-# number of nodes in network
-NODES = None
-
 
 def getArgs():
   p = argparse.ArgumentParser(
@@ -51,6 +44,8 @@ def plotSnapshot(snapshotId, positions, dimensions):
 
 
 def updateGraph(coords):
+  G.clear()
+  G.add_nodes_from(range(0, NODES))
   edges = []
   for n in range(0, NODES):
     a = coords[n]
@@ -78,12 +73,31 @@ class CommunicationArea(object):
                         for p in next(self._2ndRegion)])
 
 
+# get inputs
+ARGS = getArgs()
+# nodes transmission range
+TX = ARGS.tx
+# number of nodes in network
+NODES = ARGS.nodes
+# an undirected graph represents every snapshot of the adhoc network
+G = nx.Graph()
 if __name__ == '__main__':
-  args = getArgs()
-  NODES = args.nodes
-  TX = args.tx
-  G.add_nodes_from(range(0, NODES))
-  area = CommunicationArea(args.area_l, args.area_w)
-  area.updateNodePositions()
-  updateGraph(area.coords)
-  plotSnapshot('test', area.coords, (area.length, area.width))
+  history = {}
+  area = CommunicationArea(ARGS.area_l, ARGS.area_w)
+  traceNo = 0
+  # create ${ARGS.tz} snapshots of the netowk
+  while traceNo < ARGS.tz:
+    area.updateNodePositions()
+    updateGraph(area.coords)
+    if nx.is_connected(G):  # keep only connected components
+      history[traceNo] = [(p[0], p[1]) for p in area.coords]
+      plotSnapshot(traceNo, area.coords, (area.length, area.width))
+      traceNo = traceNo + 1
+  # store trace of possition in BonnMotion format
+  with open('bipartite-region.bm', 'a') as f:
+    f.write('\n')
+    for n in range(0, NODES):
+      l = ''
+      for t in range(0, traceNo):
+        l = '{}{} {} {} '.format(l, t, history[t][n][0], history[t][n][1])
+      f.write('{}\n'.format(l))
