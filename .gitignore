@@ -56,6 +56,7 @@ experiments/networks/built_topologies/*.*
 # Non useful experimental results
 experiments/configs/builtConfigs/results/
 experiments/configs/results/
+./*.yml
 
 # .gitignore for latex
 *.aux
