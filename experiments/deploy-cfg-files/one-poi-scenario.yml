@@ -1,0 +1,47 @@
+version: "2.0"
+services:
+  trace_generator:
+    env_file: env
+    environment:
+      ## [optional/string, options: bipartite, with2poi]
+      ## ID of scenario
+      # SCENARIO_ID: '?'
+      ## [optional/spaced-separated-string, ex: cf1.ini cf2.ini ...]
+      ## overwites the list configurations to deploy
+      # NEW_LIST: 'n_295_d_0_tr_3_a_20x20_idx_0_p_cds.ini'
+      ## [mandatory/string, options: yes, no]
+      ## when set to 'no', this process creates a new topology; otherwise, it
+      ## uses a previous trace
+      USE_PREVIOUS_TRACE: 'no'
+    image: emergent_overlays_trace_generator:latest
+    build:
+      context: ./services/trace_generator
+    volumes:
+      - './src/scripts/topologies:/usr/emrg-ovrl/src/scripts/topologies'
+      - './experiments/configs/in_common:/usr/emrg-ovrl/experiments/configs/in_common'
+      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
+      - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+  worker:
+    image: emergent_overlays_worker:latest
+    build:
+      context: .
+      dockerfile: ./services/worker/Dockerfile
+    volumes:
+      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
+      - './experiments/networks/built_topologies:/usr/emrg-ovrl/experiments/networks/built_topologies'
+      - './results:/usr/emrg-ovrl/results'
+  dist_generator:
+    image: emergent_overlays_dist_generator:latest
+    build:
+      context: .
+      dockerfile: ./services/dist_generator/Dockerfile
+    volumes:
+      - './experiments/configs/built_configs:/usr/emrg-ovrl/experiments/configs/built_configs'
+      - './results:/usr/emrg-ovrl/results'
+  plotter:
+    image: emergent_overlays_plotter:latest
+    build:
+      context: .
+      dockerfile: ./services/plotter/Dockerfile
+    volumes:
+      - './results:/usr/emrg-ovrl/results'
