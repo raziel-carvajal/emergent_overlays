@@ -22,9 +22,22 @@ echo "Deleting datasets from a previous execution..."
 rm -fr experiments/configs/built_configs/results
 workdir=`pwd`
 if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
-	echo "Creating a mobility trace..."
+	echo "Creating a mobility trace for scenario:"
 	cd src/scripts/topologies
-	./make-topology.sh
+	case "${SCENARIO_ID}" in
+		"bipartite" )
+			echo -e "\t bipartite scenario"
+			./get-bipartite-scenario.sh
+			;;
+		"with2poi" )
+			echo -e "\t scenario with 2 PoI"
+			# TODO 
+			;;
+		* )
+			echo -e "\t default scenario with one PoI"
+			./make-topology.sh
+			;;
+	esac
 else
 	echo "Using previous trace..."
 fi
