@@ -37,6 +37,8 @@ def plotSnapshot(snapshotId, positions, dimensions):
     k = k + 1
   plt.subplot(111)
   plt.xlim((0, dimensions[0]))
+  r = range(0, dimensions[0] + 5, 5)
+  plt.xticks(r)
   plt.ylim((0, dimensions[1]))
   nx.draw_networkx(G, pos=posMap, node_size=5, with_labels=False)
   plt.savefig('snapshot{}.pdf'.format(snapshotId))
@@ -93,8 +95,14 @@ if __name__ == '__main__':
       history[traceNo] = [(p[0], p[1]) for p in area.coords]
       plotSnapshot(traceNo, area.coords, (area.length, area.width))
       traceNo = traceNo + 1
-  # store trace of possition in BonnMotion format
-  with open('bipartite-region.bm', 'a') as f:
+  # store nodes 1st position
+  with open('bipartite-scenario-1st-position', mode='a') as f:
+    l = ''
+    for p in history[0]:
+      l = '{}{},{} '.format(l, p[0], p[1])
+    f.write('{}\n'.format(l))
+  # store trace in BonnMotion format
+  with open('bipartite-scenario.bm', 'a') as f:
     f.write('\n')
     for n in range(0, NODES):
       l = ''
