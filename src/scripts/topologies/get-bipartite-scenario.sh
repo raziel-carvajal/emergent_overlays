@@ -29,9 +29,9 @@ overlays=${SIMULATION_TIME}
 	--transmission-range ${NODES_TRANSMISSION_RANGE} --nodes ${NODES} --scenario-id 2
 ### rename files for this scenario and change containing directory
 temp='' ; for l in `ls -t *.pdf` ; do temp="${l} ${temp}" ; done
-pdfunite ${temp} all.pdf ; convert all.pdf all.gif ; rm 'snapshot'*
+pdfunite ${temp} all.pdf ; rm 'snapshot'*
 expeId=`ls *.ned | awk -F ".ned" '{print $1}'`
-mv all.pdf "${expeId}.pdf" ; mv all.gif "${expeId}.gif"
+mv all.pdf "${expeId}.pdf"
 temp=`ls *.bm` ; mv ${temp} "${expeId}.bm"
 mv ${expeId}.* ../../../experiments/networks/built_topologies
 

@@ -31,7 +31,7 @@ RUN echo "backend : Agg" > /etc/matplotlibrc && \
   rm -r /root/.cache
 
 # install nodejs
-RUN apt -y install gnupg imagemagick
+RUN apt -y install gnupg
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
   apt -y install nodejs
 # install deamon to dispatch INI files
