@@ -18,8 +18,8 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-echo "Deleting datasets from a previous execution..."
-rm -fr experiments/configs/built_configs/results
+# echo "Deleting datasets from a previous execution..."
+# rm -fr experiments/configs/built_configs/results
 workdir=`pwd`
 if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
 	echo "Creating a mobility trace for scenario:"
@@ -31,7 +31,7 @@ if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
 			;;
 		"with2poi" )
 			echo -e "\t scenario with 2 PoI"
-			# TODO 
+			# TODO
 			;;
 		* )
 			echo -e "\t default scenario with one PoI"
