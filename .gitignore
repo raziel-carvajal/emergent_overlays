@@ -28,7 +28,6 @@
 *.out
 *.app
 *.pyc
-env
 
 # output of compilation with opp_* tools
 src/emergent_overlays/Makefile
@@ -56,8 +55,6 @@ experiments/networks/built_topologies/*.*
 # Non useful experimental results
 experiments/configs/builtConfigs/results/
 experiments/configs/results/
-docker-compose.yml
-!experiments/docker-compose.yml
 
 # .gitignore for latex
 *.aux
