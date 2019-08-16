@@ -49,7 +49,7 @@ rm -f Position_*.pdf
 nodesNoAtTrace=`wc -l mobility-trace | awk '{print $1}'`
 let nodesNoAtTrace=nodesNoAtTrace-1
 ./make-ned-file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
-	--transmission-range ${tx} --nodes ${nodesNoAtTrace}
+	--transmission-range ${tx} --nodes ${nodesNoAtTrace} --scenario-id 1
 
 mobF=`ls *.ned | awk -F ".ned" '{ print $1}'`
 mv mobility-trace "${mobF}.mobility"
