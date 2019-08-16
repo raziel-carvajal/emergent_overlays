@@ -1,11 +1,18 @@
 version: "2.0"
 services:
   trace_generator:
-    env_file: env
+    env_file: ./experiments/env-files/bipartite-scenario.env
     environment:
-      USE_PREVIOUS_TRACE: 'no'
-      # replace the list of configuration files
+      ## [optional/string, options: bipartite, with2poi]
+      ## ID of scenario
+      # SCENARIO_ID: '?'
+      ## [optional/spaced-separated-string, ex: cf1.ini cf2.ini ...]
+      ## overwites the list configurations to deploy
       # NEW_LIST: 'n_295_d_0_tr_3_a_20x20_idx_0_p_cds.ini'
+      ## [mandatory/string, options: yes, no]
+      ## when set to 'no', this process creates a new topology; otherwise, it
+      ## uses a previous trace
+      USE_PREVIOUS_TRACE: 'no'
     image: emergent_overlays_trace_generator:latest
     build:
       context: ./services/trace_generator
