@@ -48,31 +48,32 @@ simple InteroperableBroadcast extends UDPBasicApp
     //			time to send the first control message
     double startSendingCtrlMsgs @unit(s) = this.broadcastInterval - 2 * this.nodesNo * this.minSentDelay + this.minSentDelay;
     //		specify running protocol identifier (see enum Protocols at InteroperableBroadcast.h)
-    int runningProtocolId;
+    //		by default nodes run pure flooding
+    int runningProtocolId = default(0);
     // 		options to measure observables
     double getObsInterval @unit(s) = this.broadcastInterval - 0.01s;// lag to be sure that the swiching policy use latests observables
-    double startObsApprox @unit(s)= this.broadcastInterval + (this.broadcastInterval / 2);
+    double startObsApprox @unit(s) = this.broadcastInterval + (this.broadcastInterval / 2);
     // 			TODO for windows bigger than 10, be sure that there is an implementation for FIX ME
-	int windowSize = default(10);
-  	// 			FIX ME: turn indexSequence into a string and reimplement initialize() at utils/Observable.cc
-	int indexSequence = default(125);
-	bool withLastMeasure = default(true);
-	// 			when false, the weighted average is calculated instead
-	bool withRateOfChange = default(true);
+    int windowSize = default(10);
+    // 			FIX ME: turn indexSequence into a string and reimplement initialize() at utils/Observable.cc
+    int indexSequence = default(125);
+    bool withLastMeasure = default(true);
+    // 			when false, the weighted average is calculated instead
+    bool withRateOfChange = default(true);
 
-	//		options for adaptation
-	bool withAdaptation = default(false);
-	double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2);
-	int adaptationPolicy = default(0);// single = 0, collective = 1
-	double densityThreshold = default(20.0);
-	double stabilityThreshold = default(1.0);
+    //		options for adaptation
+    bool withAdaptation = default(false);
+    double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2);
+    int adaptationPolicy = default(0);// single = 0, collective = 1
+    double densityThreshold = default(20.0);
+    double stabilityThreshold = default(1.0);
 
     // options for broadcast protocols
     // 		controlled flooding
     int counterCfcondition = default(3);
     //		scoped-hyper flooding
     double neigSimilarity = default(0.85);
-    
+
     xml sourceNodes = default(xml("<root />"));
 
 	// statistics
@@ -102,7 +103,7 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     @signal[mobilityObs](type=double);
     @statistic[mobilityObs](source=mobilityObs; record=vector; interpolationmode=none);
-    
+
     @signal[runningAlgorithm](type=int);
     @statistic[runningAlgorithm](source=runningAlgorithm; record=vector; interpolationmode=none);
 }
