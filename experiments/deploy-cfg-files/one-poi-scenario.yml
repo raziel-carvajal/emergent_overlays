@@ -3,7 +3,7 @@ services:
   trace_generator:
     env_file: env
     environment:
-      ## [optional/string, options: bipartite, with2poi]
+      ## [optional/string, options: with1Poi, with2Poi, bipartite]
       ## ID of scenario
       # SCENARIO_ID: '?'
       ## [optional/spaced-separated-string, ex: cf1.ini cf2.ini ...]
