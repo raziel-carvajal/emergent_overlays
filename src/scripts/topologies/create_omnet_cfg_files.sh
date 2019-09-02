@@ -17,16 +17,15 @@
 #      REVISION:  ---
 #===============================================================================
 [ ${#} != 1 ] && echo -e "Usage: ${0} [Scenario_ID] \nEnd of ${0}." && exit 1
-# [BEING] NOTE uncomment this block to perform a local test
+# # [BEING] NOTE uncomment this block to perform a local test
 # rm -f *.pdf *.gif *.bm *.ned \
 # 	network_metadata.json bipartite-scenario-1st-position source_nodes.xml
-#
 # echo -e "\t scenario with one PoI"
 # let walks=${SIMULATION_TIME}/4
 # ./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
 # 	--cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
 # 	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
-# [END] NOTE
+# # [END] NOTE
 
 ./make_ned_file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
 	--transmission-range ${NODES_TRANSMISSION_RANGE} --nodes ${NODES}
