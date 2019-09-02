@@ -1,9 +1,9 @@
 #!/bin/bash -
 #===============================================================================
 #
-#          FILE: run-trace_generator.sh
+#          FILE: run_trace_generator.sh
 #
-#         USAGE: ./run-trace_generator.sh
+#         USAGE: ./run_trace_generator.sh
 #
 #   DESCRIPTION:
 #
@@ -16,28 +16,40 @@
 #       CREATED: 11/15/2018 15:17
 #      REVISION:  ---
 #===============================================================================
-
-set -o nounset                              # Treat unset variables as an error
-# echo "Deleting datasets from a previous execution..."
-# rm -fr experiments/configs/built_configs/results
 workdir=`pwd`
 if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
-	echo "Creating a mobility trace for scenario:"
 	cd src/scripts/topologies
+	# delete outputs from previous executions
+	rm -f *.pdf *.gif *.bm *.ned \
+		network_metadata.json bipartite-scenario-1st-position source_nodes.xml
+	echo "Creating a new mobility trace for:"
 	case "${SCENARIO_ID}" in
-		"bipartite" )
-			echo -e "\t bipartite scenario"
-			./get-bipartite-scenario.sh
+		"with1Poi" )
+			echo -e "\t scenario with one PoI"
+			let walks=${SIMULATION_TIME}/4
+		  ./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
+			  --cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
+			  --transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
 			;;
-		"with2poi" )
+		"with2Poi" )
 			echo -e "\t scenario with 2 PoI"
 			# TODO
 			;;
+		"bipartite" )
+			echo -e "\t bipartite scenario"
+			./get-bipartite-trace.py --cma-length ${COMM_AREA_LENGTH} \
+			  --cma-width ${COMM_AREA_WIDTH} --nodes ${NODES} \
+				--trace-size ${SIMULATION_TIME} \
+				--transmission-range ${NODES_TRANSMISSION_RANGE}
+			;;
 		* )
 			echo -e "\t default scenario with one PoI"
-			./make-topology.sh
+			# TODO this is a deprecated method to create traces with one PoI and a
+			# call to this scripts may require minor changes
+			# ./make-topology.sh
 			;;
 	esac
+	./create_omnet_cfg_files
 else
 	echo "Using previous trace..."
 fi

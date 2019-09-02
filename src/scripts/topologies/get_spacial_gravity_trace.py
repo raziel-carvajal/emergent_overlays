@@ -6,9 +6,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import reference_point_group
 from pymobility.models.mobility import random_waypoint
+from utils_for_traces import plotSnapshot
 #
 G = nx.Graph()
-AGGREGATION = .5
+AGGREGATION = 0.25
 PARTITIONS = 4
 
 
@@ -35,20 +36,6 @@ def getArgs():
       '--steps-towards-poi', dest='poi_steps', type=int, default=20,
       help='number of walks towards every PoI')
   return p.parse_args()
-
-
-def plotSnapshot(snapshotId, positions, dimensions):
-  posMap = {}
-  k = 1
-  for p in positions:
-    posMap[k] = [p[0], p[1]]
-    k = k + 1
-  plt.subplot(111)
-  plt.xlim((0, dimensions[0]))
-  plt.ylim((0, dimensions[1]))
-  nx.draw_networkx(G, pos=posMap, node_size=10, with_labels=False)
-  plt.savefig('snapshot{}.pdf'.format(snapshotId))
-  plt.clf()
 
 
 class CommunicationArea(object):
@@ -105,7 +92,6 @@ class CommunicationArea(object):
 if __name__ == '__main__':
   args = getArgs()
   network = CommunicationArea(args.area_l, args.area_w, args.nodes)
-  traceSize = args.rand_steps + args.poi_steps
   # create a graph of N nodes
   G.add_nodes_from(range(1, args.nodes + 1))
   history = {}
@@ -146,11 +132,11 @@ if __name__ == '__main__':
     for j in range(0, len(network.positions)):
       history[j].append((network.positions[j][0], network.positions[j][1]))
     i = i + 1
-  # store trace of possition in BonnMotion format
-  with open('spacial-gravity.bm', 'a') as f:
-    f.write('\n')
-    for i in range(0, args.nodes):
-      l = ''
-      for j in range(0, len(history[i])):
-        l = '{}{} {} {} '.format(l, j, history[i][j][0], history[i][j][1])
-      f.write('{}\n'.format(l))
+  # # store trace of possition in BonnMotion format
+  # with open('spacial-gravity.bm', 'a') as f:
+  #   f.write('\n')
+  #   for i in range(0, args.nodes):
+  #     l = ''
+  #     for j in range(0, len(history[i])):
+  #       l = '{}{} {} {} '.format(l, j, history[i][j][0], history[i][j][1])
+  #     f.write('{}\n'.format(l))

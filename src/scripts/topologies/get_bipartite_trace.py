@@ -5,6 +5,7 @@ import argparse
 import networkx as nx
 import matplotlib.pyplot as plt
 from pymobility.models.mobility import random_waypoint
+from utils_for_traces import plotSnapshot, updateGraph
 
 
 def getArgs():
@@ -23,41 +24,6 @@ def getArgs():
   p.add_argument('--transmission-range', dest='tx', type=int, default=5,
                  help='node transmission range')
   return p.parse_args()
-
-
-def getDistance(a, b):
-  return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
-
-
-def plotSnapshot(snapshotId, positions, dimensions):
-  posMap = {}
-  k = 0
-  for p in positions:
-    posMap[k] = [p[0], p[1]]
-    k = k + 1
-  plt.subplot(111)
-  plt.xlim((0, dimensions[0]))
-  r = range(0, dimensions[0] + 5, 5)
-  plt.xticks(r)
-  plt.ylim((0, dimensions[1]))
-  nx.draw_networkx(G, pos=posMap, node_size=5, with_labels=False)
-  plt.savefig('snapshot{}.pdf'.format(snapshotId))
-  plt.clf()
-
-
-def updateGraph(coords):
-  G.clear()
-  G.add_nodes_from(range(0, NODES))
-  edges = []
-  for n in range(0, NODES):
-    a = coords[n]
-    others = range(0, NODES)
-    others.remove(n)
-    for m in others:
-      b = coords[m]
-      if getDistance(a, b) <= TX:
-        edges.append((n, m))
-  G.add_edges_from(edges, attr_dict=None)
 
 
 class CommunicationArea(object):
@@ -90,7 +56,7 @@ if __name__ == '__main__':
   # create ${ARGS.tz} snapshots of the netowk
   while traceNo < ARGS.tz:
     area.updateNodePositions()
-    updateGraph(area.coords)
+    updateGraph(G, area.coords, TX)
     if nx.is_connected(G):  # keep only connected components
       history[traceNo] = [(p[0], p[1]) for p in area.coords]
       plotSnapshot(traceNo, area.coords, (area.length, area.width))
