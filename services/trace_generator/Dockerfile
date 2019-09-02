@@ -37,6 +37,6 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
 # install deamon to dispatch INI files
 ADD ini-f-d ini-f-d
 RUN cd ini-f-d && npm install
-ADD run-trace_generator.sh .
+ADD run_trace_generator.sh .
 
 CMD ./run-trace_generator.sh
