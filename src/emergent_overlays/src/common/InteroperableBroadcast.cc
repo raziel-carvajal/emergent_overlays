@@ -97,7 +97,7 @@ void InteroperableBroadcast::processStart() {
 
 void InteroperableBroadcast::sendPacket() {
   int sourceNodeId = sourceNodes[broadcastMsgId];
-  if (isnan(sourceNodeId) == 0 && turnNodeIdToInt() == sourceNodeId) {
+  if (isnan(sourceNodeId) == 0 && turnNodeIdToInt() == sourceNodeId && sourceNodeId > 0) {
     // local node was tagged as source node
     cPacket* m = getBroadcastMsg();
     log("New broadcast session [" + string(m->getName()) + "]");
@@ -404,7 +404,12 @@ void InteroperableBroadcast::setSourceNodesList() {
   cXMLElementList nodes = list->getElementsByTagName("SourceNode");
   int i = 0;
   for (const auto& m : nodes) {
-    sourceNodes[i] = stoi(xmlutils::getRequiredAttribute(*m, "id"), &sz);
+    try {
+      sourceNodes[i] = stoi(xmlutils::getRequiredAttribute(*m, "id"), &sz);
+    }
+    catch (exception e) {
+      sourceNodes[i] = -1;
+    }
     i++;
   }
 }
