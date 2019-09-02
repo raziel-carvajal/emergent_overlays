@@ -49,7 +49,7 @@ if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
 			# ./make-topology.sh
 			;;
 	esac
-	./create_omnet_cfg_files.sh
+	./create_omnet_cfg_files.sh ${SCENARIO_ID}
 else
 	echo "Using previous trace..."
 fi
