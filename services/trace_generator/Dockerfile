@@ -39,4 +39,4 @@ ADD ini-f-d ini-f-d
 RUN cd ini-f-d && npm install
 ADD run_trace_generator.sh .
 
-CMD ./run-trace_generator.sh
+CMD ./run_trace_generator.sh
