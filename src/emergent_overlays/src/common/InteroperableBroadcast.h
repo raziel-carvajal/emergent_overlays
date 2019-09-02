@@ -41,6 +41,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     };
 
     int runningProtocolId;
+    int* sourceNodes = nullptr;
 
     IProtocol* runningProtocol = nullptr;
 
@@ -123,6 +124,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     string removeQuotes(string target) {
       return target.substr(1, target.size() - 2);
     }
+
+    void setSourceNodesList();
 
   public:
     enum Protocols {
@@ -210,6 +213,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
 
     int getMsgId(string msgHeader, string substr);
+    int turnNodeIdToInt();
 
     double getRandomTime(double a, double b) {
       return uniform(a, b);

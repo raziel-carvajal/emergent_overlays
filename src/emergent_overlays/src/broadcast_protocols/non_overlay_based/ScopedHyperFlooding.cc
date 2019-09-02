@@ -71,16 +71,7 @@ void ScopedHyperFlooding::cancelSelfEvents() {
 void ScopedHyperFlooding::initialize(bool firstCall) {
   controller->log("Running protocol: " + controller->getProtocolName(controller->HYPER_SCOPED_FLOODING));
 
-  bool isNumeric = false;
-  int i = 0;
-  while (!isNumeric) {
-    if (!isalpha(controller->nodeId[i]))
-      isNumeric = true;
-    else
-      i++;
-  }
-  std::string::size_type sz;
-  int n = stoi(controller->nodeId.substr(i, controller->nodeId.size()), &sz);
+  int n = controller->turnNodeIdToInt();
   int nodesNo = controller->par("nodesNo").longValue();
   neigSimilarity = controller->par("neigSimilarity").doubleValue();
   // unique value per node to delay delivery of messages and avoid collisions

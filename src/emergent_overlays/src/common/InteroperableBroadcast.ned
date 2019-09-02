@@ -37,7 +37,6 @@ simple InteroperableBroadcast extends UDPBasicApp
     bool withDebugging = default(false);
    	//		WARNING this value cannot be lower than 100 (min timer to schedule events in the simulator)
     int nodesNo = default(100);
-    bool isSourceNode = default(false);
 	// 		options for messages
     double minSentDelay @unit(s) = default(0.00001s);
     double broadcastInterval @unit(s) = default(1s);
@@ -73,6 +72,8 @@ simple InteroperableBroadcast extends UDPBasicApp
     int counterCfcondition = default(3);
     //		scoped-hyper flooding
     double neigSimilarity = default(0.85);
+    
+    xml sourceNodes = default(xml("<root />"));
 
 	// statistics
     @signal[rcvdBroadcastMsg](type=int);

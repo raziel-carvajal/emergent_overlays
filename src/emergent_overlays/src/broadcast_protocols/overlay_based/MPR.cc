@@ -45,16 +45,7 @@ void Mpr::initialize(bool firstCall) {
   cancelSelfEvents();
   controller->log("Running protocol: " + controller->getProtocolName(controller->MPR));
 
-  bool isNumeric = false;
-  int i = 0;
-  while (!isNumeric) {
-    if (!isalpha(controller->nodeId[i]))
-      isNumeric = true;
-    else
-      i++;
-  }
-  std::string::size_type sz;
-  int n = stoi(controller->nodeId.substr(i, controller->nodeId.size()), &sz);
+  int n = controller->turnNodeIdToInt();
   nodesNo = controller->par("nodesNo").longValue();
   // unique value per node to delay delivery of messages and avoid collisions
   minSentDelay = controller->par("minSentDelay").doubleValue();

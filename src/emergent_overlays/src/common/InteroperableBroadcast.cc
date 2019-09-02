@@ -20,6 +20,7 @@
 #include <inet/physicallayer/idealradio/IdealTransmitter.h>
 #include <inet/common/geometry/common/Coord.h>
 #include <inet/common/ModuleAccess.h>
+#include "inet/common/XMLUtils.h"
 
 Define_Module(InteroperableBroadcast);
 
@@ -51,6 +52,8 @@ void InteroperableBroadcast::processStart() {
   // set unique node ID
   const char* id = getParentModule()->getFullName();
   nodeId = id;
+  // load list of source nodes
+  setSourceNodesList();
   // initialize mobility model and set transmission range
   physicallayer::IdealTransmitter* transmitter = check_and_cast<physicallayer::IdealTransmitter*>(
       getContainingNode(this)->getModuleByPath(".wlan[0].radio.transmitter"));
@@ -93,10 +96,9 @@ void InteroperableBroadcast::processStart() {
 }
 
 void InteroperableBroadcast::sendPacket() {
-  // TODO implement multiple sources as follows:
-  // - create a configuration file where source nodes were chosen randomly
-  //   before an experiment starts; lines of this file: <SESSION_ID> <NODE_ID>
-  if (par("isSourceNode").boolValue()) {
+  int sourceNodeId = sourceNodes[broadcastMsgId];
+  if (isnan(sourceNodeId) == 0 && turnNodeIdToInt() == sourceNodeId) {
+    // local node was tagged as source node
     cPacket* m = getBroadcastMsg();
     log("New broadcast session [" + string(m->getName()) + "]");
     // send now
@@ -107,6 +109,7 @@ void InteroperableBroadcast::sendPacket() {
     // tag packet as received
     receivedMsg.insert(m->getName());
   }
+  broadcastMsgId++;
 }
 
 void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
@@ -236,7 +239,7 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
         if (knownForeignAlgos.find(basicPk->getRunningProtocol()) == knownForeignAlgos.end()) {
           string toCompare = ((string) basicPk->getName()).substr(0, ctrlMsgName.size());
 
-          if (toCompare ==  ctrlMsgName) {
+          if (toCompare == ctrlMsgName) {
             knownForeignAlgos.insert(basicPk->getRunningProtocol());
             log("I am Border node (UdpPacket::CTRL)");
             isBorderNode = true;
@@ -360,9 +363,8 @@ bool InteroperableBroadcast::isSelfTimer(cMessage* msg) {
 }
 
 cPacket* InteroperableBroadcast::getBroadcastMsg() {
-  broadcastMsgId++;
   string name(packetName);
-  name += to_string(broadcastMsgId);
+  name += to_string(broadcastMsgId + 1);
 // let each protocol create broadcast messages
   cPacket* pk = runningProtocol->createBroadcastMsg(name.c_str());
   addBroadcastHeaders(pk);
@@ -392,4 +394,30 @@ void InteroperableBroadcast::addBroadcastHeaders(cPacket* pk) {
 void InteroperableBroadcast::addCtrlHeaders(cPacket* pk) {
   addSender(pk);
   addPacketType(pk, UdpPacket::CTRL);
+}
+
+void InteroperableBroadcast::setSourceNodesList() {
+  int n(par("stopTime").doubleValue() / par("broadcastInterval").doubleValue());
+  sourceNodes = new int[n];
+  string::size_type sz;
+  cXMLElement *list = par("sourceNodes").xmlValue();
+  cXMLElementList nodes = list->getElementsByTagName("SourceNode");
+  int i = 0;
+  for (const auto& m : nodes) {
+    sourceNodes[i] = stoi(xmlutils::getRequiredAttribute(*m, "id"), &sz);
+    i++;
+  }
+}
+
+int InteroperableBroadcast::turnNodeIdToInt() {
+  bool isNumeric = false;
+  int i = 0;
+  while (!isNumeric) {
+    if (!isalpha(nodeId[i]))
+      isNumeric = true;
+    else
+      i++;
+  }
+  string::size_type sz;
+  return stoi(nodeId.substr(i, nodeId.size()), &sz);
 }
