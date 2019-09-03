@@ -20,8 +20,7 @@ workdir=`pwd`
 if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
 	cd src/scripts/topologies
 	# delete outputs from previous executions
-	rm -f *.pdf *.gif *.bm *.ned \
-		network_metadata.json bipartite-scenario-1st-position source_nodes.xml
+	rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
 	echo "Creating a new mobility trace for:"
 	case "${SCENARIO_ID}" in
 		"with1Poi" )

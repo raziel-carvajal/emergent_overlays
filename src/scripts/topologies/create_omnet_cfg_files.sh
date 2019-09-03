@@ -17,15 +17,14 @@
 #      REVISION:  ---
 #===============================================================================
 [ ${#} != 1 ] && echo -e "Usage: ${0} [Scenario_ID] \nEnd of ${0}." && exit 1
-# # [BEING] NOTE uncomment this block to perform a local test
-# rm -f *.pdf *.gif *.bm *.ned \
-# 	network_metadata.json bipartite-scenario-1st-position source_nodes.xml
-# echo -e "\t scenario with one PoI"
-# let walks=${SIMULATION_TIME}/4
-# ./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
-# 	--cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
-# 	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
-# # [END] NOTE
+# [BEING] NOTE uncomment this block to perform a local test
+rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
+echo -e "\t scenario with one PoI"
+let walks=${SIMULATION_TIME}/4
+./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
+	--cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
+	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
+# [END] NOTE
 
 ./make_ned_file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
 	--transmission-range ${NODES_TRANSMISSION_RANGE} --nodes ${NODES}
@@ -34,8 +33,10 @@ temp='' ; for l in `ls -t *.pdf` ; do temp="${l} ${temp}" ; done
 pdfunite ${temp} all.pdf ; rm 'snapshot'*
 expeId=`ls *.ned | awk -F ".ned" '{print $1}'`
 mv all.pdf "${expeId}.pdf"
-temp=`ls *.bm` ; mv ${temp} "${expeId}.bm"
-mv ${expeId}.* source_nodes.xml ../../../experiments/networks/built_topologies
+# these 3 files are outputs of the script that creates the mobility trace
+mv "trace.bm" "${expeId}.bm" ; mv "network_metadata.json" "${expeId}.json"
+mv "source_nodes.xml" "${expeId}.xml"
+mv ${expeId}.* "../../../experiments/networks/built_topologies"
 
 # now, create configuration file (INI) for experiment
 cat '../../../experiments/configs/in_common/common.ini' > iniFile
@@ -50,6 +51,10 @@ sed -i -e "s/BROADCAST_MSG_INTERVAL/${BROADCAST_MSGS_INTERVAL}s/" iniFile
 sed -i -e "s/ADAPTATION_POLICY/0/" iniFile
 ### number of nodes in the network
 echo "**.udpApp[0].nodesNo = ${NODES}" >> iniFile
+### set file with list of source nodes
+temp="**.udpApp[0].sourceNodes = xmldoc"
+temp="${temp}(\"../../experiments/networks/built_topologies/${expeId}.xml\")"
+echo ${temp} >> iniFile
 ### assign the broadcast protocol running on each node
 case "${1}" in
 	"with1Poi" )

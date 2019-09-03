@@ -37,19 +37,6 @@ def getCoordinate(coorAsStr):
   return (float(xy[1]), float(xy[2]))
 
 
-# TODO deprecated code (take rid of this)
-# def getNedForBipartiteScenario():
-#   with open(TRACE, 'r') as f:
-#     coords = (f.readline()).split(' ')
-#   c = CONTENT
-#   for n in range(0, ARGS.nodes):
-#     xy = coords[n].split(',')
-#     c += "host{0}: Cellphone ".format(n + 1) + "{@display(" + '"' +\
-#         "p={0},{1}".format(xy[0], xy[1]) + '"' + ");}\n"
-#   c += "}"
-#   with open(NED_FILE + '.ned', 'a') as f:
-#     f.write(c)
-
 ARGS = getArgs()
 NED_FILE = getNedFileName()
 CONTENT = NED_HEAD + 'network ' + NED_FILE + '{\n' + NED_MIDD

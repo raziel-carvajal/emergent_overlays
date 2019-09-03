@@ -69,8 +69,9 @@ class CommunicationArea(object):
 
 
 AGGREGATION = .2
-HISTORY, COMPONENTS = {}, {}
+COMPONENTS, NBRS = {}, {}
 ARGS = getArgs()
+HISTORY = {i: [] for i in range(0, ARGS.nodes)}
 TX = ARGS.tx
 TRACE_LEN = 4 * ARGS.walks
 CM = utils.ComponentMatrix(ARGS.nodes, TRACE_LEN)
@@ -79,8 +80,6 @@ SRC_NODES = ET.Element('root')
 
 if __name__ == '__main__':
   network = CommunicationArea(ARGS.area_l, ARGS.area_w, ARGS.nodes)
-  for i in range(0, ARGS.nodes):
-    HISTORY[i] = []
   for i in range(0, TRACE_LEN):
     if i >= ARGS.walks and i < 3 * ARGS.walks:
       if i == ARGS.walks:
@@ -98,6 +97,8 @@ if __name__ == '__main__':
     largestCoCom = max(nx.connected_components(G), key=len)
     CM.appendComponent(largestCoCom)
     COMPONENTS[i] = [n for n in largestCoCom]
+    # update dictionary of neighbors
+    NBRS[i] = {n: len(G.neighbors(n)) for n in largestCoCom}
     # plot snapshots of network
     utils.plotSnapshot(G, i, network.positions, (ARGS.area_l, ARGS.area_w))
     # update HISTORY of positions
@@ -108,7 +109,11 @@ if __name__ == '__main__':
   graphInfo = {}
   sources = CM.getSourceNodes()
   for i in range(0, TRACE_LEN):
-    graphInfo[i] = {'cc': COMPONENTS[i], 'srcNode': sources[i]}
+    graphInfo[i] = {
+        'bigestComponent': COMPONENTS[i],
+        'componentSize': len(COMPONENTS[i]),
+        'neighbors': NBRS[i],
+        'srcNode': sources[i]}
     ET.SubElement(
         SRC_NODES, 'SourceNode', attrib={'id': str(sources[i]), 'time': str(i)})
   with open('network_metadata.json', 'w') as f:
