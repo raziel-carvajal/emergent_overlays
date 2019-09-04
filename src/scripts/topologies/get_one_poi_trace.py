@@ -108,7 +108,7 @@ if __name__ == '__main__':
   # store attributes of each snapshot
   graphInfo = {}
   sources = CM.getSourceNodes()
-  for i in range(0, TRACE_LEN):
+  for i in range(1, TRACE_LEN):  # 1st position is ignored in experiments
     graphInfo[i] = {
         'bigestComponent': COMPONENTS[i],
         'componentSize': len(COMPONENTS[i]),
