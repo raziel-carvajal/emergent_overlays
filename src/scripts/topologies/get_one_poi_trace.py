@@ -98,7 +98,7 @@ if __name__ == '__main__':
     CM.appendComponent(largestCoCom)
     COMPONENTS[i] = [n for n in largestCoCom]
     # update dictionary of neighbors
-    NBRS[i] = {n: len(G.neighbors(n)) for n in largestCoCom}
+    NBRS[i] = {n: G.neighbors(n) for n in largestCoCom}
     # plot snapshots of network
     utils.plotSnapshot(G, i, network.positions, (ARGS.area_l, ARGS.area_w))
     # update HISTORY of positions
