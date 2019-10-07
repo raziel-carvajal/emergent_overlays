@@ -17,11 +17,20 @@
 
 SinglePolicy::SinglePolicy(InteroperableBroadcast* c) {
   controller = c;
-  densityThr1 = controller->par("densityThreshold").doubleValue();
-  controller->log("density threshold: " + to_string(densityThr1));
+  densityKeep = controller->par("densityKeep").doubleValue();
+  densityEmerge = controller->par("densityEmerge").doubleValue();
+  stabilityMin = controller->par("stabilityMin").doubleValue();
 }
 
 int SinglePolicy::choseAlgorithm(double density, double stability) {
-  controller->log("doIswitch ? " + to_string(density) + " >= " + to_string(densityThr1));
-  return density >= densityThr1 ? controller->Protocols::MPR : controller->Protocols::CONTROLLED_FLOODING;
+  controller->log("doIswitch ? " + to_string(density) + " >= " + to_string(densityKeep));
+  return density >= densityKeep ? controller->Protocols::MPR : controller->Protocols::CONTROLLED_FLOODING;
+}
+
+bool SinglePolicy::emerge(double density, double stability) {
+  return stability >= stabilityMin && density >= densityEmerge;
+}
+
+bool SinglePolicy::keep(double density, double stability) {
+  return stability >= stabilityMin && density >= densityKeep;
 }

@@ -30,6 +30,7 @@ class CollectivePolicy : public IPolicy {
   public:
     CollectivePolicy(InteroperableBroadcast* c);
     int choseAlgorithm(double density, double stability);
+    bool emerge(double density, double stability);
 };
 
 #endif /* COLLECTIVEPOLICY_H_ */

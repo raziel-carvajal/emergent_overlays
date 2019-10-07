@@ -18,11 +18,13 @@
 #include <msgs/Basic_m.h>
 #include <algorithm>
 
-void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
+bool Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
+  bool firstReception = false;
   MprBroadcastPacket* m = dynamic_cast<MprBroadcastPacket*>(pk);
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end() && m != nullptr) {
     // tag packet as received
     controller->receivedMsg.insert(pkName);
+    firstReception = true;
     OneHopNeigs senderNeigs = m->getNeighbors();
 
     bool fwdMsg = false;
@@ -39,6 +41,7 @@ void Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
       controller->fwdBroadcastMsg(broadcastMsg);
     }
   }
+  return firstReception;
 }
 
 void Mpr::initialize(bool firstCall) {

@@ -27,7 +27,7 @@ class InteroperableBroadcast;
 class SwitchingCriteria {
   private:
     enum Timers {
-      APPLY_CRITERIA
+      SEND_WILL_TO_SWITCH, APPLY_POLICY
     };
 
     enum Policies {
@@ -41,9 +41,10 @@ class SwitchingCriteria {
     Observables* observables = nullptr;
 
     cMessage* switchTimer = new cMessage("swichTimer");
+    cMessage* evalPoTimer = new cMessage("evalPoTimer");
 
-  private:
-    void applyCriteria();
+  public:
+    bool addAdapHeader = false;
 
   public:
     SwitchingCriteria(InteroperableBroadcast* c, Observables* obs);
@@ -51,6 +52,7 @@ class SwitchingCriteria {
     bool isSelfEvent(cMessage* event);
     void handleEvent(cMessage* event);
     void cancelSelfEvents();
+    void onWillToChange();
 };
 
 #endif /* SWITCHINGCRITERIA_H_ */

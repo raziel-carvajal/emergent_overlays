@@ -190,6 +190,7 @@ class InteroperableBroadcast : public UDPBasicApp {
     void fwdBroadcastMsg(cPacket* pk);
     void scheduleEvent(short kind, double delay, cMessage *selfMsgPtr);
     void addPacketType(cPacket* msg, long t);
+    void addWillToChange(cPacket* msg, bool withInteropHeader);
     void updateRunningAlgorithm(int newAlgo);
 
     string getProtocolName(Protocols p) {

@@ -37,7 +37,7 @@ class Flooding : public IProtocol {
       controller = c;
     }
 
-    void onBroadcastMsg(cPacket* pk, const char* pkName);
+    bool onBroadcastMsg(cPacket* pk, const char* pkName);
 
     void handleEvent(cMessage* msg) {}
 

@@ -21,16 +21,17 @@
 
 class SinglePolicy : public IPolicy {
   public:
-    double densityThr1;
-    double densityThr2;
-    double stabilityThr1;
-    double stabilityThr2;
+    double densityKeep;
+    double densityEmerge;
+    double stabilityMin;
 
     InteroperableBroadcast* controller = nullptr;
 
   public:
     SinglePolicy(InteroperableBroadcast* c);
     int choseAlgorithm(double density, double stability);
+    bool emerge(double density, double stability);
+    bool keep(double density, double stability);
 };
 
 #endif /* SINGLEPOLICY_H_ */

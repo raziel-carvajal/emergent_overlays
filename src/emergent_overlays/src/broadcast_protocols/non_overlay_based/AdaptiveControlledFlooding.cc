@@ -23,12 +23,14 @@ bool AdaptiveControlledFlooding::isProtocolEvent(cMessage* msg) {
   return timers.find(event) != timers.end() && timers[event] == msg;
 }
 
-void AdaptiveControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+bool AdaptiveControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+  bool firstReception = false;
   // tag packet as received
   string timerName("CfTimer-" + string(pkName));
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end()) {
     controller->log("1st reception of  " + string(pkName));
     controller->receivedMsg.insert(pkName);
+    firstReception = true;
 
     timers[timerName] = new cMessage(timerName.c_str());
     counters[timerName] = 1;
@@ -55,6 +57,7 @@ void AdaptiveControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName)
       }
     }
   }
+  return firstReception;
 }
 
 void AdaptiveControlledFlooding::handleEvent(cMessage* msg) {

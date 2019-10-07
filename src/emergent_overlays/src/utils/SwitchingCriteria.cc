@@ -44,27 +44,42 @@ SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs
   }
 
   double t = controller->par("applyAdapPolicy").doubleValue();
-  controller->log("apply switching criteria in " + to_string(t) + "s");
-  controller->scheduleEvent(APPLY_CRITERIA, t, switchTimer);
+//  controller->log("apply switching criteria in " + to_string(t) + "s");
+  controller->scheduleEvent(SEND_WILL_TO_SWITCH, t, switchTimer);
 }
 
 bool SwitchingCriteria::isSelfEvent(cMessage* event) {
-  return event == switchTimer;
+  return event == switchTimer || event == evalPoTimer;
 }
 
 void SwitchingCriteria::handleEvent(cMessage* event) {
   switch (event->getKind()) {
-    case APPLY_CRITERIA: {
-      controller->updateRunningAlgorithm(
-          policy->choseAlgorithm(observables->latestDensity, observables->latestStability));
+    case SEND_WILL_TO_SWITCH: {
+      // tell the controller to broadcast will to change
+      addAdapHeader = true;
 
-      double t = 2 * controller->par("windowSize").doubleValue() * controller->par("broadcastInterval").doubleValue();
+      double t = controller->par("applyAdapPolicy").doubleValue()
+          - controller->par("broadcastInterval").doubleValue() / 2.0;
       controller->log("apply switching criteria in " + to_string(t) + "s");
-      controller->scheduleEvent(APPLY_CRITERIA, t, switchTimer);
+      controller->scheduleEvent(SEND_WILL_TO_SWITCH, t, switchTimer);
+    }
+      break;
+    case APPLY_POLICY: {
+      controller->log("apply switching criteria");
+      if (policy->emerge(observables->getDensityObs(), observables->getMobilityObs())) {
+        controller->updateRunningAlgorithm(controller->Protocols::MPR);
+      } else {
+        controller->updateRunningAlgorithm(controller->Protocols::CONTROLLED_FLOODING);
+      }
     }
       break;
     default:
       throw cRuntimeError("Unknown event [%d] in SwitchingCriteria.handleEvent()", (int) event->getKind());
       break;
   }
+}
+
+void SwitchingCriteria::onWillToChange() {
+  double t = controller->par("waitToEvaluatePolicy").doubleValue();
+  controller->scheduleEvent(APPLY_POLICY, t, evalPoTimer);
 }

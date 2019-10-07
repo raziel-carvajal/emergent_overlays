@@ -50,8 +50,6 @@ class Observables {
   private:
 
     void registerObservables(double density, double mobility);
-    double getDensityObs();
-    double getMobilityObs();
     void updateTimeWindow();
 
     map<int, int[2]> getInvervals();
@@ -67,12 +65,18 @@ class Observables {
     virtual ~Observables() {
 
     }
+
     void initForWeightedAvg();
     void initForRateOfChange();
-    bool isSelfEvent(cMessage* event);
     void handleEvent(cMessage* event);
     void cancelSelfEvents();
+
+    bool isSelfEvent(cMessage* event);
+
     int getLatestNeigsNo();
+
+    double getDensityObs();
+    double getMobilityObs();
 };
 
 #endif /* OBSERVABLES_H_ */

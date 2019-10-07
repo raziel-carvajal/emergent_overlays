@@ -17,11 +17,13 @@
 #include <common/InteroperableBroadcast.h>
 #include <msgs/Basic_m.h>
 
-void ControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+bool ControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
   // tag packet as received
+  bool firstReception = false;
   string timerName("CfTimer-" + string(pkName));
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end()) {
     controller->log("1st reception of  " + string(pkName));
+    firstReception = true;
     controller->receivedMsg.insert(pkName);
 
     timers[timerName] = new cMessage(timerName.c_str());
@@ -30,7 +32,7 @@ void ControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
     msgs[timerName]->getParList().remove("Sender");
     controller->addSender(msgs[timerName]);
     //
-    double t = controller->getRandWaitingTime();
+    double t = controller->getRandWaitingTime() * controller->par("macWaitingTimeFactor").doubleValue();
     controller->log("CF timer: " + to_string(t));
     controller->scheduleEvent(Timer::EXPIRES, t, timers[timerName]);
     controller->log("Timer scheduled !");
@@ -49,6 +51,7 @@ void ControlledFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
       }
     }
   }
+  return firstReception;
 }
 
 void ControlledFlooding::initialize(bool firstCall) {

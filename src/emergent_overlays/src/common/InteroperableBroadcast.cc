@@ -193,10 +193,11 @@ void InteroperableBroadcast::handleMessageWhenUp(cMessage* msg) {
     } else if (collector->isSelfEvent(msg)) {
       collector->handleEvent(msg);
     } else if (switchingPolicy->isSelfEvent(msg)) {
-      if (par("withAdaptation").boolValue())
+      if (par("withAdaptation").boolValue()) {
         switchingPolicy->handleEvent(msg);
+      }
     } else {
-      throw cRuntimeError("Invalid kind %d in selfInteropMsg 2", (int) msg->getKind());
+      throw cRuntimeError("Invalid kind %s in selfInteropMsg 2", msg->getName());
     }
   }
 
@@ -222,7 +223,12 @@ void InteroperableBroadcast::processPacket(cPacket* pk) {
       // count received messages
       UDPBasicApp::numReceived++;
       // let the algorithm deal with the reception
-      runningProtocol->onBroadcastMsg(pk, pk->getName());
+      if (runningProtocol->onBroadcastMsg(pk, pk->getName())) {
+        // package received for the first time
+        if (pk->par("WillToChange").boolValue()) {
+          switchingPolicy->onWillToChange();
+        }
+      }
     }
       break;
     case UdpPacket::CTRL: {
@@ -388,7 +394,8 @@ void InteroperableBroadcast::addBroadcastHeaders(cPacket* pk) {
   pk->setByteLength(par("messageLength").longValue());
   addSender(pk);
   addPacketType(pk, UdpPacket::BROADCAST);
-
+  // add header of adaptation when needed
+  addWillToChange(pk, par("withAdaptation").boolValue() && switchingPolicy->addAdapHeader);
 }
 
 void InteroperableBroadcast::addCtrlHeaders(cPacket* pk) {
@@ -412,6 +419,14 @@ void InteroperableBroadcast::setSourceNodesList() {
     }
     i++;
   }
+}
+
+void InteroperableBroadcast::addWillToChange(cPacket* msg, bool withInteropHeader) {
+  cMsgPar* p = new cMsgPar("WillToChange");
+  p->setBoolValue(true);
+  msg->addPar(p);
+  //
+  switchingPolicy->addAdapHeader = false;
 }
 
 int InteroperableBroadcast::turnNodeIdToInt() {

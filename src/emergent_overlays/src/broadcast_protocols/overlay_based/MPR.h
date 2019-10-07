@@ -83,7 +83,7 @@ class Mpr : public IProtocol {
     void setController(InteroperableBroadcast* c) {
       controller = c;
     }
-    void onBroadcastMsg(cPacket* pk, const char* pkName);
+    bool onBroadcastMsg(cPacket* pk, const char* pkName);
 
     void handleEvent(cMessage* msg);
     // FIXME add headers for interop mechanism

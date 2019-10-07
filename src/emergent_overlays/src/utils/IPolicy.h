@@ -22,6 +22,7 @@ class IPolicy {
       // TODO Auto-generated destructor stub
     }
     virtual int choseAlgorithm(double density, double stability) = 0;
+    virtual bool emerge(double density, double stability) = 0;
 };
 
 #endif /* IPOLICY_H_ */

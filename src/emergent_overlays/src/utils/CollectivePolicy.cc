@@ -22,3 +22,7 @@ CollectivePolicy::CollectivePolicy(InteroperableBroadcast* c) {
 int CollectivePolicy::choseAlgorithm(double density, double stability) {
   return -1;
 }
+
+bool CollectivePolicy::emerge(double density, double stability) {
+  return false;
+}

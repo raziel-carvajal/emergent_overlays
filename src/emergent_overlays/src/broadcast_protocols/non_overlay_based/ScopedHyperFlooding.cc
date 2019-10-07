@@ -21,10 +21,12 @@ bool ScopedHyperFlooding::isProtocolEvent(cMessage* msg) {
   return msg == sendCtrlMsgTimer;
 }
 
-void ScopedHyperFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+bool ScopedHyperFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+  bool firstReception = false;
   MprBroadcastPacket* m = dynamic_cast<MprBroadcastPacket*>(pk);
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end() && m != nullptr) {
     // tag packet as received
+    firstReception = true;
     controller->receivedMsg.insert(pkName);
     set<string>::iterator it;
     string temp("my neighbors are: ");
@@ -50,6 +52,7 @@ void ScopedHyperFlooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
     }
     neighbors.clear();
   }
+  return firstReception;
 }
 
 void ScopedHyperFlooding::handleEvent(cMessage* msg) {

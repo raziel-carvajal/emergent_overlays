@@ -17,14 +17,17 @@
 #include <common/InteroperableBroadcast.h>
 #include <msgs/Basic_m.h>
 
-void Flooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+bool Flooding::onBroadcastMsg(cPacket* pk, const char* pkName) {
+  bool firstReception = false;
   // tag packet as received
   if (controller->receivedMsg.find(pkName) == controller->receivedMsg.end()) {
-    controller->log("FWD message "+string(pkName));
+    controller->log("FWD message " + string(pkName));
+    firstReception = true;
     controller->receivedMsg.insert(pkName);
     // forward iff message wasn't hear before
     controller->fwdBroadcastMsg(pk);
   }
+  return firstReception;
 }
 
 cPacket* Flooding::createBroadcastMsg(const char* msgId) {
@@ -34,7 +37,7 @@ cPacket* Flooding::createBroadcastMsg(const char* msgId) {
 }
 
 void Flooding::initialize(bool firstCall) {
-  controller->log("Running protocol: "+controller->getProtocolName(controller->FLOODING));
+  controller->log("Running protocol: " + controller->getProtocolName(controller->FLOODING));
   cancelSelfEvents();
 }
 

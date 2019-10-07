@@ -29,7 +29,7 @@ simple InteroperableBroadcast extends UDPBasicApp
     // options of our MAC layer
     int maxRetriesAtMac = default(2);
     bool withMac = default(false);
-    double macWaitingTimeFactor = default(100);
+    double macWaitingTimeFactor = default(10);
     double macLowerWaitingTime @unit(s) = this.minSentDelay;
     double macUpperWaitingTime @unit(s) = this.minSentDelay * this.macWaitingTimeFactor;
 
@@ -48,10 +48,10 @@ simple InteroperableBroadcast extends UDPBasicApp
     //			time to send the first control message
     double startSendingCtrlMsgs @unit(s) = this.broadcastInterval - 2 * this.nodesNo * this.minSentDelay + this.minSentDelay;
     //		specify running protocol identifier (see enum Protocols at InteroperableBroadcast.h)
-    //		by default nodes run pure flooding
-    int runningProtocolId = default(0);
+    //		by default nodes run controlled flooding
+    int runningProtocolId = default(2);
     // 		options to measure observables
-    double getObsInterval @unit(s) = this.broadcastInterval - 0.01s;// lag to be sure that the swiching policy use latests observables
+    double getObsInterval @unit(s) = this.broadcastInterval - 0.01s;// lag (.01s) to be sure that the swiching policy use latests observables
     double startObsApprox @unit(s) = this.broadcastInterval + (this.broadcastInterval / 2);
     // 			TODO for windows bigger than 10, be sure that there is an implementation for FIX ME
     int windowSize = default(10);
@@ -63,11 +63,14 @@ simple InteroperableBroadcast extends UDPBasicApp
 
     //		options for adaptation
     bool withAdaptation = default(false);
-    double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2);
     int adaptationPolicy = default(0);// single = 0, collective = 1
-    double densityThreshold = default(20.0);
-    double stabilityThreshold = default(1.0);
-
+	//			thresholds of policy    
+    double densityKeep = default(15);
+    double densityEmerge = default(25);
+    double stabilityMin = default(1.0);
+    //			
+	double waitToEvaluatePolicy @unit(s) = default(0.01s);
+    double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2) + 0.01s;
     // options for broadcast protocols
     // 		controlled flooding
     int counterCfcondition = default(3);
