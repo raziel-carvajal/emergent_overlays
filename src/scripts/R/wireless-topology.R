@@ -8,17 +8,10 @@ get_neighbors <- function(nodeID, positions, tx) {
 	neighbors$nodeId
 }
 
-get_wireless_topology <- function(positions, tx, plot = FALSE, graphName = "graph") {
-  # we order to have the node identifier as index of every list that follows
-  positions <- positions[order(positions$nodeId), ]
-  # get edges of graph using transmission range of nodes store one-hop neighbors in
-  # a list (to speed up process)
-  oneHopNeigs <- lapply(c(1:length(positions$nodeId)), function(i) {
-    get_neighbors(i, positions, tx)
-  })
-  edges <- sapply(c(1:length(positions$nodeId)), function(i) {
-    sapply(oneHopNeigs[[i]], function(neig) {
-      c(i, neig)
+createGraph <- function(nodesNo, neighbors) {
+  edges <- sapply(names(neighbors), function(n) {
+    sapply(neighbors[[ n ]], function(m) {
+      c(n, m)
     })
   })
   g <- simplify(graph(edges = unlist(edges), directed = F))
@@ -28,17 +21,17 @@ get_wireless_topology <- function(positions, tx, plot = FALSE, graphName = "grap
   E(g)$arrow.mode <- 0
   E(g)$color <- "lightgrey"
   V(g)$size <- 3
-  # V(g)$label <- ""
+  V(g)$label <- ""
   # V(g)$label.cex <- 0.4
   V(g)$frame.color <- "black"
 
   g
 }
 
-get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
-  msgReceivers, forward_type_ds, runningAlgoAtTopology, savePlot=F) {
+plotWirelessTopology <- function(topNo, nodesNo, neighbors, nodesPositions,
+  msgReceivers, forward_type_ds, runningAlgoAtTopology) {
   # create graph based on edges
-  g <- get_wireless_topology(nodesPositions, Tx)
+  g <- createGraph(nodesNo, neighbors)
 
 	# colour code for reachability
   #   0 -> SIMPLE
@@ -61,52 +54,50 @@ get.graph <- function(nodes, nodesPositions, Tx, overlayNo,
 	# })
 	# colors <- c('dimgray', 'gold', 'cyan')
 
-  if(savePlot){
-		V(g)$color <- labelCode
+	V(g)$color <- labelCode
 
-		# BEGIN attributes values to show experimental scenario
-		# V(g)$color = 'white'
-		# V(g)$size <- 1.3
-		# END
+	# BEGIN attributes values to show experimental scenario
+	# V(g)$color = 'white'
+	# V(g)$size <- 1.3
+	# END
 
-		# colour nodes according to its position at communication area
-		# lastAtSparse <- ceiling( (length(nodes) - 1) / 2 )
-		# V(g)$color <- c(rep('white', lastAtSparse), rep('lightgrey', length(nodes) - lastAtSparse) )
-    # colors <- c('white', 'lightgrey')
-    # use node coordinates as layout
+	# colour nodes according to its position at communication area
+	# lastAtSparse <- ceiling( (length(nodes) - 1) / 2 )
+	# V(g)$color <- c(rep('white', lastAtSparse), rep('lightgrey', length(nodes) - lastAtSparse) )
+  # colors <- c('white', 'lightgrey')
+  # use node coordinates as layout
 
-		layout <- cbind(nodesPositions$x, nodesPositions$y)
+	layout <- cbind(nodesPositions$x, nodesPositions$y)
 
-    # save one graph per broadcast session
-    name <- paste("graph_", overlayNo, ".pdf", sep="")
+  # save one graph per broadcast session
+  name <- paste("graph_", topNo, ".pdf", sep="")
 
-		pdf(name)
-		plot.igraph(g, layout=layout)
+	# pdf(name)
+	# plot.igraph(g, layout=layout)
 
-		# BEGIN attributes values to show experimental scenario
-		# pdf(name, width=10, height=5)
-		# plot(g, layout=layout*0.01, rescale=F, , xlim=c(0, 1), ylim=c(0, .45), margin=0.1)
-		# END
+	# BEGIN attributes values to show experimental scenario
+	pdf(name, width=10, height=5)
+	plot(g, layout=layout*0.01, rescale=F, , xlim=c(0, 1), ylim=c(0, .45), margin=0.1)
+	# END
 
-		# legend(
-	  #   x=0.7, y=1.4, title='Running algorithm',
-	  #   c('Simple flooding ', 'MPR ', 'Controlled flooding'),
-		# 	pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-	  # )
+	# legend(
+  #   x=0.7, y=1.4, title='Running algorithm',
+  #   c('Simple flooding ', 'MPR ', 'Controlled flooding'),
+	# 	pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+  # )
 
-		legend(
-	    x=0.7, y=1.4, title='Type of forward',
-	    c(
-	      paste('Simple [', length(labelCode[labelCode == 'cyan']), ']'),
-	      paste('CDS relay [', length(labelCode[labelCode == 'gold']), ']'),
-	      paste('Border [', length(labelCode[labelCode == 'orangered']), ']'),
-	      paste('Receiver [', length(labelCode[labelCode == 'dimgray']), ']'),
-	      paste('Unreachable [', length(labelCode[labelCode == 'white']), ']')
-	    ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-	  )
+	legend(
+    x=0.7, y=1.4, title='Type of forward',
+    c(
+      paste('Simple [', length(labelCode[labelCode == 'cyan']), ']'),
+      paste('CDS relay [', length(labelCode[labelCode == 'gold']), ']'),
+      paste('Border [', length(labelCode[labelCode == 'orangered']), ']'),
+      paste('Receiver [', length(labelCode[labelCode == 'dimgray']), ']'),
+      paste('Unreachable [', length(labelCode[labelCode == 'white']), ']')
+    ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+  )
+  dev.off()
 
-    dev.off()
-  }
   g
 }
 #
