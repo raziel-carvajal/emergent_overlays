@@ -265,127 +265,154 @@ if(args$wplot){
 }
 
 if(args$wobs){
-	densityObs  <- getVector(datasetFile, 'densityObs:vector')
-	denAtSparse <- subset(densityObs, node_id < args$fadz)
-	denAtDense  <- subset(densityObs, node_id >= args$fadz)
-	mobilityObs <- getVector(datasetFile, 'mobilityObs:vector')
-	mobAtSparse <- subset(mobilityObs, node_id < args$fadz)
-	mobAtDense  <- subset(mobilityObs, node_id >= args$fadz)
-	ds <- data.frame(
-		time=c(denAtSparse$time, denAtDense$time, densityObs$time),
-		density=c(denAtSparse$value, denAtDense$value, densityObs$value),
-		mobility=c(mobAtSparse$value, mobAtDense$value, mobilityObs$value),
-		positionedAt=c(
-			rep("Sparse", length(denAtSparse$value)),
-			rep("Dense", length(denAtDense$value)),
-			rep("All", length(densityObs$value))
-		),
-		algo=rep(
-			algorithmN,
-			length(denAtSparse$value) + length(denAtDense$value) + length(densityObs$value)
-		),
-		stringsAsFactors=F
-	)
-  saveDataFrame(
-    ds,
-    args$resultsDir, 'ObservablesDistribution', algorithmN
-  )
-}
+  densityObs  <- getVector(datasetFile, 'densityObs:vector')
+  mobilityObs <- getVector(datasetFile, 'mobilityObs:vector')
 
-
-
-if(args$wmot) {
-	d <- 5 # delta in seconds
-	timeLine <- lapply(1:floor(args$simTime / d), function(i){
-		data.frame(limInf = (i -1) * d, limSup = i * d)
-	})
-	sent_broadcast_msgs <- subset(sent_broadcast_msgs, time <= args$simTime)
-	recv_broadcast_msgs <- subset(recv_broadcast_msgs, time <= args$simTime)
-	sentCtrlMsgs <- subset(sentCtrlMsgs, time <= args$simTime)
-	recvCtrlMsgs <- subset(recvCtrlMsgs, time <= args$simTime)
-
-	recvMsgsOverTime <- getRecvMsgsOverTime(recv_broadcast_msgs, timeLine)
-	saveDataFrame(
+  nodesAtPoi <- groundTruth[[ topologyIndx[1] ]]$nodesAtDense
+  # stability and density have the same timestamp
+  timestamps <- unique(densityObs$time)
+  # get dataset of density
+  densityDS <- lapply(timestamps, function( t ) {
+    dsAtT <- subset(densityObs, time == t)
+    densityAtT <- subset(dsAtT, node_id %in% nodesAtPoi)$value
+    density <- c(
+      densityAtT,
+      subset(dsAtT, !(node_id %in% nodesAtPoi))$value
+    )
+    region <- c(
+      rep("Dense", length(densityAtT)),
+      rep("Sparse", length(density) - length(densityAtT))
+    )
     data.frame(
-      time = recvMsgsOverTime$time,
-			avgRecvMsgs = recvMsgsOverTime$data,
-      algo=rep(algorithmN, length(recvMsgsOverTime$time)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'recvMessagesTimeline', algorithmN
-  )
-
-	energy_consumption <- getWattsFromSentRecvMsgs(
-    sent_broadcast_msgs, recv_broadcast_msgs,
-		sentCtrlMsgs, recvCtrlMsgs, timeLine
-  )
-	saveDataFrame(
-    data.frame(
-      time = energy_consumption$time,
-			e_consumption = energy_consumption$consumption,
-      algo=rep(algorithmN, length(energy_consumption$time)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'batteryConsumptionTimeline', algorithmN
-  )
-
-	runningAlgosDist <- getRunningAlogrithm(runningAlgorithm, args$simTime)
-	saveDataFrame(
-    runningAlgosDist,
-    args$resultsDir,
-		'runningAlgorithmTimeline',
-		algorithmN
-  )
-}
-
-if(args$wpc){
-  print('Get distribution of energy consumption')
-  energy_consumption <- getWattsFromSentRecvMsgs(
-    sent_broadcast_msgs, recv_broadcast_msgs, all_nodes
-  )
-  saveDataFrame(
-    data.frame(
-      data=energy_consumption,
-      algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'batteryConsumptionDistribution', algorithmN
-  )
-}
-if(args$wsm){
-  print('DONE - Get distribution of sent broadcast messages')
-  ds <- lapply(all_nodes, function(n){
-		data.frame(
-			sentMsgNo = length(subset(sent_broadcast_msgs, node_id == n)$value),
-			positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
-		)
+      time = rep(t, length(density)),
+      density = density,
+      region = region
+    )
   })
-	ds <- do.call('rbind', ds)
+  densityDS <- do.call("rbind", densityDS)
   saveDataFrame(
-    data.frame(
-      sentMsgNo = c(ds$sentMsgNo, ds$sentMsgNo),
-			positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
-      algorithm = rep(algorithmN, length(ds$sentMsgNo)*2), stringsAsFactors=F
-    ),
-    args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+    densityDS,
+    args$resultsDir, 'DensityDistribution', algorithmN
   )
-}
-if(args$wrm){
-  print('DONE - Get distribution of received broadcast messages')
-  ds <- lapply(all_nodes, function(n){
-		data.frame(
-			recvMsgNo = length(subset(recv_broadcast_msgs, node_id == n)$value),
-			positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
-		)
+
+  # get dataset of mobility
+  mobilityDS <- lapply(timestamps, function( t ) {
+    dsAtT <- subset(mobilityObs, time == t)
+    mobilityAtT <- subset(dsAtT, node_id %in% nodesAtPoi)$value
+    mobility <- c(
+      mobilityAtT,
+      subset(dsAtT, !(node_id %in% nodesAtPoi))$value
+    )
+    region <- c(
+      rep("Dense", length(mobilityAtT)),
+      rep("Sparse", length(mobility) - length(mobilityAtT))
+    )
+    data.frame(
+      time = rep(t, length(mobility)),
+      mobility = mobility,
+      region = region
+    )
   })
-	ds <- do.call('rbind', ds)
+  mobilityDS <- do.call("rbind", mobilityDS)
   saveDataFrame(
-    data.frame(
-      recvMsgNo = c(ds$recvMsgNo, ds$recvMsgNo),
-			duplicates = c((ds$recvMsgNo - 1), (ds$recvMsgNo - 1)),
-			positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
-      algorithm=rep(algorithmN, length(ds$recvMsgNo)*2), stringsAsFactors=F
-    ),
-    args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+    mobilityDS,
+    args$resultsDir, 'MobilityDistribution', algorithmN
   )
 }
+
+# if(args$wmot) {
+# 	d <- 5 # delta in seconds
+# 	timeLine <- lapply(1:floor(args$simTime / d), function(i){
+# 		data.frame(limInf = (i -1) * d, limSup = i * d)
+# 	})
+# 	sent_broadcast_msgs <- subset(sent_broadcast_msgs, time <= args$simTime)
+# 	recv_broadcast_msgs <- subset(recv_broadcast_msgs, time <= args$simTime)
+# 	sentCtrlMsgs <- subset(sentCtrlMsgs, time <= args$simTime)
+# 	recvCtrlMsgs <- subset(recvCtrlMsgs, time <= args$simTime)
+#
+# 	recvMsgsOverTime <- getRecvMsgsOverTime(recv_broadcast_msgs, timeLine)
+# 	saveDataFrame(
+#     data.frame(
+#       time = recvMsgsOverTime$time,
+# 			avgRecvMsgs = recvMsgsOverTime$data,
+#       algo=rep(algorithmN, length(recvMsgsOverTime$time)), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'recvMessagesTimeline', algorithmN
+#   )
+#
+# 	energy_consumption <- getWattsFromSentRecvMsgs(
+#     sent_broadcast_msgs, recv_broadcast_msgs,
+# 		sentCtrlMsgs, recvCtrlMsgs, timeLine
+#   )
+# 	saveDataFrame(
+#     data.frame(
+#       time = energy_consumption$time,
+# 			e_consumption = energy_consumption$consumption,
+#       algo=rep(algorithmN, length(energy_consumption$time)), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'batteryConsumptionTimeline', algorithmN
+#   )
+#
+# 	runningAlgosDist <- getRunningAlogrithm(runningAlgorithm, args$simTime)
+# 	saveDataFrame(
+#     runningAlgosDist,
+#     args$resultsDir,
+# 		'runningAlgorithmTimeline',
+# 		algorithmN
+#   )
+# }
+#
+# if(args$wpc){
+#   print('Get distribution of energy consumption')
+#   energy_consumption <- getWattsFromSentRecvMsgs(
+#     sent_broadcast_msgs, recv_broadcast_msgs, all_nodes
+#   )
+#   saveDataFrame(
+#     data.frame(
+#       data=energy_consumption,
+#       algo=rep(algorithmN, length(energy_consumption)), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'batteryConsumptionDistribution', algorithmN
+#   )
+# }
+# TODO take rid of args$fadz and use ground truth
+# if(args$wsm){
+#   print('DONE - Get distribution of sent broadcast messages')
+#   ds <- lapply(all_nodes, function(n){
+# 		data.frame(
+# 			sentMsgNo = length(subset(sent_broadcast_msgs, node_id == n)$value),
+# 			positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
+# 		)
+#   })
+# 	ds <- do.call('rbind', ds)
+#   saveDataFrame(
+#     data.frame(
+#       sentMsgNo = c(ds$sentMsgNo, ds$sentMsgNo),
+# 			positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
+#       algorithm = rep(algorithmN, length(ds$sentMsgNo)*2), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'sentBroadcastMsgsDistribution', algorithmN
+#   )
+# }
+# if(args$wrm){
+#   print('DONE - Get distribution of received broadcast messages')
+#   ds <- lapply(all_nodes, function(n){
+# 		data.frame(
+# 			recvMsgNo = length(subset(recv_broadcast_msgs, node_id == n)$value),
+# 			positionedAt = ifelse(n < args$fadz, "Sparse", "Dense")
+# 		)
+#   })
+# 	ds <- do.call('rbind', ds)
+#   saveDataFrame(
+#     data.frame(
+#       recvMsgNo = c(ds$recvMsgNo, ds$recvMsgNo),
+# 			duplicates = c((ds$recvMsgNo - 1), (ds$recvMsgNo - 1)),
+# 			positionedAt = c(as.character(ds$positionedAt), rep("All", length(ds$positionedAt))),
+#       algorithm=rep(algorithmN, length(ds$recvMsgNo)*2), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'recvBroadcastMsgsDistribution', algorithmN
+#   )
+# }
 
 
 # # creates a list of wireless topologies using nodes positions (ground thruth)
@@ -428,39 +455,39 @@ if(args$wrm){
 # }
 # save distribution of nodes per type of FWD they perform within the biggest
 # connected graph (a component of a wireless topology)
-sentCtrlMsgs <- getVector(datasetFile, 'sentCtrlFrames:vector')
-recvCtrlMsgs <- getVector(datasetFile, 'recvCtrlFrames:vector')
-if(args$wft){
-	print('Get distribution of forwading types')
-  saveDataFrame(
-    get.node.roles(overlays, msgs_ids, algorithmN),
-    args$resultsDir, 'noderoles', algorithmN
-  )
-}
-if(args$wpe){
-  print("DONE - Get packet error rate")
-  pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")
-  saveDataFrame(
-    data.frame(
-      data=pktErrorRate$data * 100 , # in percetage
-      algo=rep(algorithmN, length(pktErrorRate$data)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'packetErrorRate', algorithmN
-  )
-}
-
-if (args$wsre){
-	print("DONE - Get saved rebroadcasts")
-	savedRe <- sapply(msgs_ids, function( o ) {
-    receivers <- subset(recv_broadcast_msgs, value == msgs_ids[o])$value
-		getSavedRebroadcasts(overlays[[o]], receivers)
-	})
-	saveDataFrame(
-    data.frame(
-      data=savedRe,
-      algo=rep(algorithmN, length(savedRe)), stringsAsFactors=F
-    ),
-    args$resultsDir, 'savedRebroadcasts', algorithmN
-  )
-}
-print('End of get-broadcast-metrics.R')
+# sentCtrlMsgs <- getVector(datasetFile, 'sentCtrlFrames:vector')
+# recvCtrlMsgs <- getVector(datasetFile, 'recvCtrlFrames:vector')
+# if(args$wft){
+# 	print('Get distribution of forwading types')
+#   saveDataFrame(
+#     get.node.roles(overlays, msgs_ids, algorithmN),
+#     args$resultsDir, 'noderoles', algorithmN
+#   )
+# }
+# if(args$wpe){
+#   print("DONE - Get packet error rate")
+#   pktErrorRate <- getStatistics(datasetFile, "packetErrorRate:histogram")
+#   saveDataFrame(
+#     data.frame(
+#       data=pktErrorRate$data * 100 , # in percetage
+#       algo=rep(algorithmN, length(pktErrorRate$data)), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'packetErrorRate', algorithmN
+#   )
+# }
+#
+# if (args$wsre){
+# 	print("DONE - Get saved rebroadcasts")
+# 	savedRe <- sapply(msgs_ids, function( o ) {
+#     receivers <- subset(recv_broadcast_msgs, value == msgs_ids[o])$value
+# 		getSavedRebroadcasts(overlays[[o]], receivers)
+# 	})
+# 	saveDataFrame(
+#     data.frame(
+#       data=savedRe,
+#       algo=rep(algorithmN, length(savedRe)), stringsAsFactors=F
+#     ),
+#     args$resultsDir, 'savedRebroadcasts', algorithmN
+#   )
+# }
+# print('End of get-broadcast-metrics.R')
