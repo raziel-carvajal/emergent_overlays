@@ -29,12 +29,12 @@ SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs
   int criteria = controller->par("adaptationPolicy").longValue();
   switch (criteria) {
     case SINGLE: {
-      controller->log("using single adap policy");
+//      controller->log("using single adap policy");
       policy = new SinglePolicy(controller);
     }
       break;
     case COLLECTIVE: {
-      controller->log("using collective adap policy");
+//      controller->log("using collective adap policy");
       policy = new CollectivePolicy(controller);
     }
       break;
@@ -44,7 +44,6 @@ SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs
   }
 
   double t = controller->par("applyAdapPolicy").doubleValue();
-//  controller->log("apply switching criteria in " + to_string(t) + "s");
   controller->scheduleEvent(SEND_WILL_TO_SWITCH, t, switchTimer);
 }
 
@@ -60,13 +59,13 @@ void SwitchingCriteria::handleEvent(cMessage* event) {
 
       double t = controller->par("applyAdapPolicy").doubleValue()
           - controller->par("broadcastInterval").doubleValue() / 2.0;
-      controller->log("apply switching criteria in " + to_string(t) + "s");
+      controller->log("next evaluation for adaptation policy in: " + to_string(t) + "s");
       controller->scheduleEvent(SEND_WILL_TO_SWITCH, t, switchTimer);
     }
       break;
     case APPLY_POLICY: {
-      controller->log("apply switching criteria");
-      if (policy->emerge(observables->getDensityObs(), observables->getMobilityObs())) {
+      controller->log("applying switching criteria");
+      if (policy->emerge(observables->latestDensity, observables->latestStability)) {
         controller->updateRunningAlgorithm(controller->Protocols::MPR);
       } else {
         controller->updateRunningAlgorithm(controller->Protocols::CONTROLLED_FLOODING);

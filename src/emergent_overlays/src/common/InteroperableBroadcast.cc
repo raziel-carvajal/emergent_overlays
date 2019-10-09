@@ -423,7 +423,7 @@ void InteroperableBroadcast::setSourceNodesList() {
 
 void InteroperableBroadcast::addWillToChange(cPacket* msg, bool withInteropHeader) {
   cMsgPar* p = new cMsgPar("WillToChange");
-  p->setBoolValue(true);
+  p->setBoolValue(withInteropHeader);
   msg->addPar(p);
   //
   switchingPolicy->addAdapHeader = false;

@@ -72,7 +72,7 @@ int ControlledFlooding::getFwdType() {
 
 bool ControlledFlooding::isProtocolEvent(cMessage* msg) {
   string event = string(msg->getName());
-  controller->log("Handling: " + event);
+//  controller->log("Handling: " + event);
   return timers.find(event) != timers.end() && timers[event] == msg ? true : false;
 }
 

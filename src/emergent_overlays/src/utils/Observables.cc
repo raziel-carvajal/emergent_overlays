@@ -26,7 +26,7 @@ Observables::Observables(InteroperableBroadcast* c) {
   intervals = getInvervals();
   //
   double t = controller->par("startObsApprox").doubleValue();
-  controller->log("update window every: " + to_string(t) + "s");
+//  controller->log("update window every: " + to_string(t) + "s");
   controller->scheduleEvent(UPDATE_WINDOW, t, updateTimer);
 }
 
@@ -45,7 +45,7 @@ double Observables::getDensityObs() {
     // TODO implement weighted average over "densityApprox"
   }
   rate /= (densityApprox.size() * 1.0);
-  controller->log("Density rate: " + to_string(rate));
+//  controller->log("Density rate: " + to_string(rate));
   latestDensity = rate;
   return rate;
 }
@@ -77,7 +77,7 @@ double Observables::getMobilityObs() {
     // TODO implement weighted average over "mobilityApprox"
   }
   rate /= (intervals.size() * 1.0);
-  controller->log("Mobility rate: " + to_string(rate));
+//  controller->log("Mobility rate: " + to_string(rate));
   latestStability = rate;
   return rate;
 }
@@ -90,7 +90,7 @@ void Observables::updateTimeWindow() {
     mobilityApprox[indx].insert(*it);
     info += *it + " ";
   }
-  controller->log(info);
+//  controller->log(info);
   int n = controller->par("windowSize").longValue();
   if (indx % n == 0) {
     controller->log("record observables");
@@ -115,7 +115,7 @@ map<int, int[2]> Observables::getInvervals() {
     info += "(" + to_string(intervals[j][0]) + ", " + to_string(intervals[j][1]) + ") ";
     j++;
   }
-  controller->log(info);
+//  controller->log(info);
   return intervals;
 }
 

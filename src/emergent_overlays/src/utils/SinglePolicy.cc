@@ -28,6 +28,10 @@ int SinglePolicy::choseAlgorithm(double density, double stability) {
 }
 
 bool SinglePolicy::emerge(double density, double stability) {
+  controller->log("emerge ?" + to_string(stability >= stabilityMin && density >= densityEmerge));
+  controller->log(
+      to_string(stability) + " >= " + to_string(stabilityMin) + " and " + to_string(density) + " >= "
+          + to_string(densityEmerge));
   return stability >= stabilityMin && density >= densityEmerge;
 }
 
