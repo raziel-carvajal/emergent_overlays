@@ -17,14 +17,30 @@
 #      REVISION:  ---
 #===============================================================================
 [ ${#} != 1 ] && echo -e "Usage: ${0} [Scenario_ID] \nEnd of ${0}." && exit 1
-# [BEING] NOTE uncomment this block to perform a local test
-rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
-echo -e "\t scenario with one PoI"
-let walks=${SIMULATION_TIME}/4
-./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
-	--cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
-	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
-# [END] NOTE
+
+# # [BEING] NOTE Local test with one mobile PoI
+# rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
+# echo -e "\t scenario with one PoI"
+# let walks=${SIMULATION_TIME}/4
+# ./get_one_poi_trace.py --cma-length ${COMM_AREA_LENGTH} \
+# 	--cma-width ${COMM_AREA_WIDTH} --nodes ${NODES}  \
+# 	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
+# # [END]
+
+# # [BEING] NOTE Local test with one fixed mobile PoI
+# rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
+# echo -e "\t scenario with one PoI"
+# let nodesNoAtD=${NODES}/2
+# let nodesNoAtS=${NODES}/2
+# echo -e "\t scenario with one fixed PoI"
+# ./gen_mobility_trace.py --nodes-at-dense ${nodesNoAtD} \
+#   --cma-length ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH}   \
+#   --dense-area-length ${POI_AREA_LENGTH} --dense-area-width ${POI_AREA_WIDTH} \
+#   --nodes-at-sparse ${nodesNoAtS} \
+# 	--transmission-range ${NODES_TRANSMISSION_RANGE} \
+# 	--trace-size ${SIMULATION_TIME}
+# let NODES=NODES+1
+# # [END]
 
 ./make_ned_file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
 	--transmission-range ${NODES_TRANSMISSION_RANGE} --nodes ${NODES}
@@ -55,7 +71,7 @@ echo "**.udpApp[0].nodesNo = ${NODES}" >> iniFile
 temp="**.udpApp[0].sourceNodes = xmldoc"
 temp="${temp}(\"../../experiments/networks/built_topologies/${expeId}.xml\")"
 echo ${temp} >> iniFile
-### assign the broadcast protocol running on each node
+# assign the broadcast protocol running on each node
 case "${1}" in
 	"with1Poi" )
 		echo "Nodes use pure-flooding as protocol to bootstrap"

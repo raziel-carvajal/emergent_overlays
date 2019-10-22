@@ -24,14 +24,17 @@ if [[ "${USE_PREVIOUS_TRACE}" != "yes" ]]; then
 	echo "Creating a new mobility trace for:"
 	case "${SCENARIO_ID}" in
 		"withFixedPoI" )
+			rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
 			let nodesNoAtD=${NODES}/2
 			let nodesNoAtS=${NODES}/2
 			echo -e "\t scenario with one fixed PoI"
-			./gen_mobility_trace.py --cma-length ${COMM_AREA_LENGTH} \
-			  --cma-width ${COMM_AREA_WIDTH} --nodes-at-dense ${nodesNoAtD}  \
+			./gen_mobility_trace.py --nodes-at-dense ${nodesNoAtD} \
+			  --cma-length ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH}   \
+			  --dense-area-length ${POI_AREA_LENGTH} --dense-area-width ${POI_AREA_WIDTH} \
 			  --nodes-at-sparse ${nodesNoAtS} \
 				--transmission-range ${NODES_TRANSMISSION_RANGE} \
 				--trace-size ${SIMULATION_TIME}
+			let NODES=NODES+1
 			;;
 		"with1Poi" )
 			echo -e "\t scenario with one PoI"
