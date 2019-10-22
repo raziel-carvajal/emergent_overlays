@@ -1,29 +1,18 @@
 library(igraph)
 
-get_neighbors <- function(nodeID, positions, tx) {
-  node <- subset(positions, nodeId == nodeID)
-  neighbors <- subset(positions, abs(node$x - x) < tx & abs(node$y - y) < tx)
-	neighbors <- subset(neighbors, nodeId != node$nodeId)
-	neighbors <- subset(neighbors, sqrt((node$x - x)^2 + (node$y - y)^2) < tx)
-	neighbors$nodeId
-}
-
 createGraph <- function(nodesNo, neighbors) {
   edges <- sapply(names(neighbors), function(n) {
     sapply(neighbors[[ n ]], function(m) {
-      c(n, m)
+      c(strtoi(n), m)
     })
   })
-  g <- simplify(graph(edges = unlist(edges), directed = F))
-	# uncomment to remove all edeges in graph
-	# g <- delete_edges(g, E(g))
 
-  E(g)$arrow.mode <- 0
+  g <- simplify(graph(edges = unlist(edges), directed = F))
+  E(g)$width <- 0.1
   E(g)$color <- "lightgrey"
-  V(g)$size <- 3
-  V(g)$label <- ""
-  # V(g)$label.cex <- 0.4
-  V(g)$frame.color <- "black"
+  V(g)$size <- 10
+  # V(g)$label <- ""
+  V(g)$label.cex <- 0.3
 
   g
 }
@@ -33,33 +22,17 @@ plotWirelessTopology <- function(topNo, nodesNo, neighbors, nodesPositions,
   # create graph based on edges
   g <- createGraph(nodesNo, neighbors)
 
-	# colour code for reachability
-  #   0 -> SIMPLE
-  #   1 -> CDS RELAY
-  #   2 -> BORDER
-	labelCode <- rep(NA, length(nodes))
+  labelCode <- rep('white', nodesNo)
 	labelCode[msgReceivers] <- 'dimgray'
-	labelCode[ subset(forward_type_ds, value == 0)$node_id ] <- 'cyan'
-  labelCode[ subset(forward_type_ds, value == 1)$node_id ] <- 'gold'
+  # forward type codes: simple (0), overlay relay (1), border node (2)
+  labelCode[ subset(forward_type_ds, value == 0)$node_id ] <- 'cyan'
   labelCode[ subset(forward_type_ds, value == 2)$node_id ] <- 'orangered'
-	labelCode[labelCode == NA] <- 'white'
-
-	colors <- c('cyan', 'gold', 'orangered', 'dimgray', 'white')
-
-	# runningAlgoAtTopology <- runningAlgoAtTopology[order(runningAlgoAtTopology$node_id), ]
-	# # colour code for running algorithm
-	# # 0 -> simple flooding ; 1 -> MPR ; 2 -> controlled flooding
-	# labelCode <- sapply(runningAlgoAtTopology$value, function(a){
-	# 	ifelse(a == 0, 'dimgray', ifelse(a == 1, 'gold', 'cyan'))
-	# })
-	# colors <- c('dimgray', 'gold', 'cyan')
-
+  labelCode[ subset(forward_type_ds, value == 1)$node_id ] <- 'gold'
 	V(g)$color <- labelCode
 
-	# BEGIN attributes values to show experimental scenario
-	# V(g)$color = 'white'
-	# V(g)$size <- 1.3
-	# END
+  nodesShape <- rep('circle', nodesNo)
+  nodesShape[ subset(runningAlgoAtTopology, value == 1)$node_id ] <- 'square'
+  V(g)$shape <- nodesShape
 
 	# colour nodes according to its position at communication area
 	# lastAtSparse <- ceiling( (length(nodes) - 1) / 2 )
@@ -67,35 +40,23 @@ plotWirelessTopology <- function(topNo, nodesNo, neighbors, nodesPositions,
   # colors <- c('white', 'lightgrey')
   # use node coordinates as layout
 
-	layout <- cbind(nodesPositions$x, nodesPositions$y)
+  # NOTE this code shows a cluster of nodes based on a certain label
+  # c <- cluster_label_prop(g, initial=c(rep(1*(-1), 20), rep(0, 41)) )
+  # plot(c, g, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5))
+  # plot.igraph(g, add=T, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5))
 
-  # save one graph per broadcast session
-  name <- paste("graph_", topNo, ".pdf", sep="")
+  # NOTE this code sets a pie as form of nodes
+  # values <- lapply(1:61, function(x) c(5, 5))
+  # vertex.shape=c(rep("pie", 30), rep("rectangle", 31)),
+  # vertex.pie=values,
+  # vertex.pie.color=list(heat.colors(5))
 
-	# pdf(name)
-	# plot.igraph(g, layout=layout)
-
-	# BEGIN attributes values to show experimental scenario
-	pdf(name, width=10, height=5)
-	plot(g, layout=layout*0.01, rescale=F, , xlim=c(0, 1), ylim=c(0, .45), margin=0.1)
-	# END
-
-	# legend(
-  #   x=0.7, y=1.4, title='Running algorithm',
-  #   c('Simple flooding ', 'MPR ', 'Controlled flooding'),
-	# 	pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
-  # )
-
-	legend(
-    x=0.7, y=1.4, title='Type of forward',
-    c(
-      paste('Simple [', length(labelCode[labelCode == 'cyan']), ']'),
-      paste('CDS relay [', length(labelCode[labelCode == 'gold']), ']'),
-      paste('Border [', length(labelCode[labelCode == 'orangered']), ']'),
-      paste('Receiver [', length(labelCode[labelCode == 'dimgray']), ']'),
-      paste('Unreachable [', length(labelCode[labelCode == 'white']), ']')
-    ), pch=21, col="#777777", pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1
+  pdf( paste("graph_", topNo, ".pdf", sep="") )
+  layout <- cbind(nodesPositions$x, nodesPositions$y)
+  plot.igraph(
+    g, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5),
   )
+  rect(0, 0, 9, 4.5, lwd=1.5)
   dev.off()
 
   g
