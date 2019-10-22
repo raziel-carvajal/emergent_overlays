@@ -1,9 +1,9 @@
 version: "2.0"
 services:
   trace_generator:
-    env_file: env
+    env_file: onepoi_scenario.env
     environment:
-      ## [optional/string, options: with1Poi, with2Poi, bipartite]
+      ## [optional/string, options: withFixedPoI, with1Poi, with2Poi, bipartite]
       ## ID of scenario
       # SCENARIO_ID: '?'
       ## [optional/spaced-separated-string, ex: cf1.ini cf2.ini ...]
