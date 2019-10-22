@@ -27,7 +27,7 @@ class InteroperableBroadcast;
 class SwitchingCriteria {
   private:
     enum Timers {
-      SEND_WILL_TO_SWITCH, APPLY_POLICY
+      SEND_WILL_TO_SWITCH, APPLY_POLICY, DISABLE_BORDER_PROTOCOL
     };
 
     enum Policies {
@@ -42,17 +42,21 @@ class SwitchingCriteria {
 
     cMessage* switchTimer = new cMessage("swichTimer");
     cMessage* evalPoTimer = new cMessage("evalPoTimer");
+    cMessage* borderTimer = new cMessage("borderTimer");
 
   public:
     bool addAdapHeader = false;
+    bool enableBorderProtocol = true;
 
   public:
     SwitchingCriteria(InteroperableBroadcast* c, Observables* obs);
 
     bool isSelfEvent(cMessage* event);
+
     void handleEvent(cMessage* event);
     void cancelSelfEvents();
     void onWillToChange();
+    void applyPolicy();
 };
 
 #endif /* SWITCHINGCRITERIA_H_ */

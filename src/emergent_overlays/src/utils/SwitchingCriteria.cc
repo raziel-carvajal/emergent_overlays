@@ -20,6 +20,8 @@
 
 void SwitchingCriteria::cancelSelfEvents() {
   controller->cancelAndDelete(switchTimer);
+  controller->cancelAndDelete(evalPoTimer);
+  controller->cancelAndDelete(borderTimer);
 }
 
 SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs) {
@@ -29,12 +31,10 @@ SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs
   int criteria = controller->par("adaptationPolicy").longValue();
   switch (criteria) {
     case SINGLE: {
-//      controller->log("using single adap policy");
       policy = new SinglePolicy(controller);
     }
       break;
     case COLLECTIVE: {
-//      controller->log("using collective adap policy");
       policy = new CollectivePolicy(controller);
     }
       break;
@@ -48,7 +48,7 @@ SwitchingCriteria::SwitchingCriteria(InteroperableBroadcast* c, Observables* obs
 }
 
 bool SwitchingCriteria::isSelfEvent(cMessage* event) {
-  return event == switchTimer || event == evalPoTimer;
+  return event == switchTimer || event == evalPoTimer || event == borderTimer;
 }
 
 void SwitchingCriteria::handleEvent(cMessage* event) {
@@ -61,15 +61,24 @@ void SwitchingCriteria::handleEvent(cMessage* event) {
           - controller->par("broadcastInterval").doubleValue() / 2.0;
       controller->log("next evaluation for adaptation policy in: " + to_string(t) + "s");
       controller->scheduleEvent(SEND_WILL_TO_SWITCH, t, switchTimer);
+
+      // reset variables that deal with border protocol
+      controller->knownForeignAlgos.clear();
+      controller->isBorderNode = false;
+      enableBorderProtocol = true;
+
+      double t1 = controller->par("broadcastInterval").doubleValue()
+          + controller->par("broadcastInterval").doubleValue() / 4.0;
+      controller->scheduleEvent(DISABLE_BORDER_PROTOCOL, t1, borderTimer);
     }
       break;
     case APPLY_POLICY: {
-      controller->log("applying switching criteria");
-      if (policy->emerge(observables->latestDensity, observables->latestStability)) {
-        controller->updateRunningAlgorithm(controller->Protocols::MPR);
-      } else {
-        controller->updateRunningAlgorithm(controller->Protocols::CONTROLLED_FLOODING);
-      }
+      applyPolicy();
+    }
+      break;
+    case DISABLE_BORDER_PROTOCOL: {
+      controller->log("DISABLE BORDER");
+      enableBorderProtocol = false;
     }
       break;
     default:
@@ -81,4 +90,13 @@ void SwitchingCriteria::handleEvent(cMessage* event) {
 void SwitchingCriteria::onWillToChange() {
   double t = controller->par("waitToEvaluatePolicy").doubleValue();
   controller->scheduleEvent(APPLY_POLICY, t, evalPoTimer);
+}
+
+void SwitchingCriteria::applyPolicy() {
+  controller->log("applying switching criteria");
+  if (policy->emerge(observables->latestDensity, observables->latestStability)) {
+    controller->updateRunningAlgorithm(controller->Protocols::MPR);
+  } else {
+    controller->updateRunningAlgorithm(controller->Protocols::CONTROLLED_FLOODING);
+  }
 }

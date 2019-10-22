@@ -70,12 +70,14 @@ simple InteroperableBroadcast extends UDPBasicApp
     double stabilityMin = default(1.0);
     //			
 	double waitToEvaluatePolicy @unit(s) = default(0.01s);
-    double applyAdapPolicy @unit(s) = 2 * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2) + 0.01s;
+	int windowsNo = default(2);
+    double applyAdapPolicy @unit(s) = this.windowsNo * this.windowSize * this.broadcastInterval + (this.broadcastInterval / 2) + 0.01s;
     // options for broadcast protocols
     // 		controlled flooding
     int counterCfcondition = default(3);
     //		scoped-hyper flooding
     double neigSimilarity = default(0.85);
+    int hopsToSharBorderMsg = default(3);
 
     xml sourceNodes = default(xml("<root />"));
 

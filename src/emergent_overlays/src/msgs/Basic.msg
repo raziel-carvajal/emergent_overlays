@@ -39,7 +39,11 @@ packet MprCtrl extends Basic {
 	Positions ys;
 }
 
-packet BorderReq extends Basic {}
+packet BorderReq extends Basic {
+	int hopsToLive;
+    string firstEmitter;
+    int firstForeignProtocol;
+}
 
 packet Ack {
     string sender;

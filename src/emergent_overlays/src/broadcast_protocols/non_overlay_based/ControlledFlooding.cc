@@ -86,10 +86,11 @@ void ControlledFlooding::handleEvent(cMessage* msg) {
       controller->send(msgs[event]);
       controller->emit(controller->sentBroadcastMsg,
           controller->getMsgId(msgs[event]->getName(), controller->getBroadcastMsgName()));
-      if (controller->isBorderNode)
+      if (controller->isBorderNode) {
         controller->emit(controller->forward_type, controller->ForwardType::BORDER_NODE);
-      else
+      } else {
         controller->emit(controller->forward_type, getFwdType());
+      }
       timers.erase(event);
       counters.erase(event);
       msgs.erase(event);
@@ -106,6 +107,8 @@ void ControlledFlooding::cancelSelfEvents() {
   for (map<string, cMessage*>::iterator it = timers.begin(); it != timers.end(); ++it) {
     controller->cancelAndDelete(it->second);
   }
-  timers.clear();
   msgs.clear();
+  timers.clear();
+  counters.clear();
+
 }

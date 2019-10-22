@@ -37,7 +37,12 @@ using namespace std;
 class InteroperableBroadcast : public UDPBasicApp {
   private:
     enum Timer {
-      HALT_APP = 1, FWD_BROADCAST_MSG, SEND_BROADCAST_MSG, STORE_POSITION, SEND_BORDER_REQ, RESET_BORDER_STATUS
+      HALT_APP = 1,
+      FWD_BROADCAST_MSG,
+      SEND_BROADCAST_MSG,
+      STORE_POSITION,
+      SEND_BORDER_REQ,
+      RESET_BORDER_STATUS
     };
 
     int runningProtocolId;
@@ -51,8 +56,6 @@ class InteroperableBroadcast : public UDPBasicApp {
     cMessage* fwdBMsgTimer = new cMessage("fwdBMsgTimer");
     cMessage* borderMsgTimer = new cMessage("borderMsgTimer");
     cMessage* resetBorderTimer = new cMessage("resetBorderTimer");
-
-    set<int> knownForeignAlgos;
 
     cPacket* latestPkToFwd = nullptr;
 
@@ -101,7 +104,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     }
 
     cPacket* getBroadcastMsg();
-    cPacket* getBorderReqMsg();
+    cPacket* getBorderReqMsg(int hopsNo, const char* emitter, int foreignAlgo);
+    void addParamsToBorderTimer(int hops, int foreignAlgo, const char* emitterId);
 
     L3Address getSrcAddress(cPacket *msg);
 
@@ -158,6 +162,8 @@ class InteroperableBroadcast : public UDPBasicApp {
     static simsignal_t runningAlgorithm;
 
     IProtocol* protocols[Protocols::LAST_PROTOCOL];
+
+    set<int> knownForeignAlgos;
 
     set<string> receivedMsg;
 

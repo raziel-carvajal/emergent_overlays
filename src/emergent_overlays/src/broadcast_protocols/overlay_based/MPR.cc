@@ -30,7 +30,8 @@ bool Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
     bool fwdMsg = false;
     if (amIrelay(senderNeigs)) {
       fwdMsg = true;
-      controller->isBorderNode = false;
+//      controller->isBorderNode = false;
+      controller->log("overlay relay");
       controller->emit(controller->forward_type, controller->OVERLAY_RELAY);
     } else if (controller->isBorderNode) {
       fwdMsg = true;
@@ -38,6 +39,12 @@ bool Mpr::onBroadcastMsg(cPacket* pk, const char* pkName) {
     }
     if (fwdMsg) {
       cPacket* broadcastMsg = createBroadcastMsg(pkName);
+      broadcastMsg->getParList().remove("WillToChange");
+      cMsgPar* p = new cMsgPar("WillToChange");
+      cMsgPar* q = dynamic_cast<cMsgPar*>(pk->getParList().get("WillToChange"));
+      p->setBoolValue(q->boolValue());
+      broadcastMsg->addPar(p);
+
       controller->fwdBroadcastMsg(broadcastMsg);
     }
   }
