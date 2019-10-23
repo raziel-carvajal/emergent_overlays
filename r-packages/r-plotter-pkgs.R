@@ -35,4 +35,9 @@ install.packages(
   repos = "http://cloud.r-project.org",
   dependencies = TRUE
 )
-
+install.packages(
+  "rjson",
+  Sys.getenv("R_LIBS_USER"),
+  repos = "http://cloud.r-project.org",
+  dependencies = TRUE
+)
