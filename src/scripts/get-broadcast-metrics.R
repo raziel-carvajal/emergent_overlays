@@ -51,6 +51,11 @@ args <- get.arguments()
 
 # create name of data set
 expeConfig <- unlist(strsplit(args$configName, '_'))
+
+cmaDimensions <- data.frame(
+  length = strtoi( strsplit(expeConfig[8], 'x')[[1]][1] ),
+  width  = strtoi( strsplit(expeConfig[8], 'x')[[1]][2] )  )
+
 algorithmN <- toupper(expeConfig[ length(expeConfig) ])
 datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
 datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
@@ -248,8 +253,8 @@ if(args$wplot){
     receivers<-subset(recv_broadcast_msgs, value == msgs_ids[i])
 		# get what type of FWD nodes perform
 		fwdTypeAtTopology <- subset(
-			forwardTypeDs, min(senders$time) <= time & time <= max(receivers$time)
-		)
+			forwardTypeDs, min(senders$time) <= time & time <= max(receivers$time) )
+
 		# get positions of nodes during dissemination of broadcast message
     nodesPositions <- positions[ ( (i - 1) * N + 1 ):( i * N ), ]
 		# get the algorithm that nodes run during the dissemination of message: msgs_ids[o]
@@ -259,8 +264,7 @@ if(args$wplot){
 		# build wireless topology
 		plotWirelessTopology(
       i, N, neighbors, nodesPositions, unique(receivers$node_id),
-			fwdTypeAtTopology, runningAlgoAtTopology
-    )
+			fwdTypeAtTopology, runningAlgoAtTopology, cmaDimensions )
   })
 }
 

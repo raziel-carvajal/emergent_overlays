@@ -18,7 +18,8 @@ createGraph <- function(nodesNo, neighbors) {
 }
 
 plotWirelessTopology <- function(topNo, nodesNo, neighbors, nodesPositions,
-  msgReceivers, forward_type_ds, runningAlgoAtTopology) {
+  msgReceivers, forward_type_ds, runningAlgoAtTopology, cmaDimensions,
+  scaleFactor = 0.1, withFixedPoI = T) {
   # create graph based on edges
   g <- createGraph(nodesNo, neighbors)
 
@@ -34,31 +35,19 @@ plotWirelessTopology <- function(topNo, nodesNo, neighbors, nodesPositions,
   nodesShape[ subset(runningAlgoAtTopology, value == 1)$node_id ] <- 'square'
   V(g)$shape <- nodesShape
 
-	# colour nodes according to its position at communication area
-	# lastAtSparse <- ceiling( (length(nodes) - 1) / 2 )
-	# V(g)$color <- c(rep('white', lastAtSparse), rep('lightgrey', length(nodes) - lastAtSparse) )
-  # colors <- c('white', 'lightgrey')
-  # use node coordinates as layout
-
-  # NOTE this code shows a cluster of nodes based on a certain label
-  # c <- cluster_label_prop(g, initial=c(rep(1*(-1), 20), rep(0, 41)) )
-  # plot(c, g, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5))
-  # plot.igraph(g, add=T, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5))
-
-  # NOTE this code sets a pie as form of nodes
-  # values <- lapply(1:61, function(x) c(5, 5))
-  # vertex.shape=c(rep("pie", 30), rep("rectangle", 31)),
-  # vertex.pie=values,
-  # vertex.pie.color=list(heat.colors(5))
-
   pdf( paste("graph_", topNo, ".pdf", sep="") )
   layout <- cbind(nodesPositions$x, nodesPositions$y)
   plot.igraph(
-    g, layout = layout*0.1, rescale = F, xlim = c(0, 9.0), ylim = c(0, 4.5),
-  )
-  rect(0, 0, 9, 4.5, lwd=1.5)
-  dev.off()
+    g, layout = layout*scaleFactor, rescale = F,
+    xlim = c(0, cmaDimensions$length * scaleFactor),
+    ylim = c(0, cmaDimensions$width * scaleFactor) )
 
+  if(withFixedPoI){
+    rect(0, 0,
+      cmaDimensions$length * scaleFactor,
+      cmaDimensions$width * scaleFactor, lwd=1.5)
+  }
+  dev.off()
   g
 }
 #
