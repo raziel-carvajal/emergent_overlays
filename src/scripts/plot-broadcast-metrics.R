@@ -1,26 +1,34 @@
-library(ggplot2)
-library(plyr)
 library(argparse)
-library(e1071)
-library(grid)
-library(reshape2)
-library(Cairo)
-library(grid)
 library(gridExtra)
+
 source("R/theme-for-papers.R")
+source("R/plotting-functions.R")
 
 get_arguments <- function() {
   parser <- ArgumentParser(description='Plot broadcast metrics.')
 
   parser$add_argument('resultsDir',  type="character")
+  parser$add_argument('dataset',  type="character")
+  parser$add_argument('protocol',  type="character")
 
   parser$add_argument('--plot-energy-consumption', dest='pc', action='store_true')
+
   parser$add_argument('--plot-coverage', dest='co', action='store_true')
-	parser$add_argument('--plot-observables', dest='obs', action='store_true')
+  parser$add_argument('--plot-coverage-all-datasets', dest='coads', action='store_true')
+
+  parser$add_argument('--plot-local-coverage-over-time', dest='plcot', action='store_true')
+  parser$add_argument('--plot-local-coverage-all-datasets', dest='plcads', action='store_true')
+
+  parser$add_argument('--plot-density-obs', dest='denobs', action='store_true')
+  parser$add_argument('--plot-mobility-obs', dest='mobobs', action='store_true')
 	parser$add_argument('--plot-recv-msgs-in-time', dest='recvt', action='store_true')
 	parser$add_argument('--plot-coverage-in-time', dest='covint', action='store_true')
 	parser$add_argument('--plot-runalgo-in-time', dest='algoint', action='store_true')
-  parser$add_argument('--plot-packet-err', dest='pe', action='store_true')
+
+  parser$add_argument('--plot-msg-err-rate', dest='pmer', action='store_true')
+  parser$add_argument('--plot-msg-err-rate-over-time', dest='pmerot', action='store_true')
+  parser$add_argument('--plot-msg-err-rate-all-datasets', dest='merads', action='store_true')
+
   parser$add_argument('--plot-sent-msgs', dest='sm', action='store_true')
   parser$add_argument('--plot-recv-msgs', dest='rm', action='store_true')
 	parser$add_argument('--plot-saved-rebroadcasts', dest='srb', action='store_true')
@@ -28,129 +36,258 @@ get_arguments <- function() {
 
   parser$parse_args()
 }
-
-plot.nodes.roles.distribution <- function(ds) {
-  names(ds) <- c('count', 'fw_type', 'zone', 'algorithm')
-  denseDs <- subset(ds, zone == 'DENSE')
-  sparsDs <- subset(ds, zone == 'SPARSE')
-  sparsP <- ggplot(sparsDs)
-  denseP <- ggplot(denseDs)
-  p1 <- sparsP + geom_col(aes(x=algorithm, y=count, fill=fw_type)) +
-    ggtitle('Forwarding nodes in sparse zone') + get.plot.theme.style() +
-    xlab('Algorithm') + ylab('Nodes (%)') + guides(fill=guide_legend(title='Type'))
-  p2 <- denseP + geom_col(aes(x=algorithm, y=count, fill=fw_type)) +
-    ggtitle('Forwarding nodes in dense zone') + get.plot.theme.style() +
-    xlab('Algorithm') + ylab('Nodes (%)') + guides(fill=guide_legend(title='Type'))
-  print(p1)
-  print(p2)
-}
-
-plot.dist.as.cdf <- function(ds, title, xlabel, ylabel) {
-	p <- ggplot(ds, aes(x = data, linetype = region))
-	p <- p + stat_ecdf(aes(y = ..y..*100), pad = F, size = 1)
-	p <- p + scale_linetype_manual(
-		labels = c("All", "At PoI", "Out of PoI"),
-		values = c('solid', 'dashed', 'dotted')
-	)
-	p <- p + scale_x_continuous(breaks = seq(0, ceiling(max(ds$data)), by = 1))
-	p <- p + theme_Publication() + labs(y = ylabel, x = xlabel)
-	p <- p + ylim(0, 100)
-	# p <- p + xlim(0, ceiling(max(ds$data))) + ylim(0, 100)
-  print(p)
-}
-
-plotRunAlgoOverTime <- function(ds, xlabel, ylabel){
-	p <- ggplot(
-		data = ds,
-		aes(x = time, y = nodes, group = algo)
-	)
-	p <- p + geom_col(aes(fill = algo), colour = 'black')
-	p <- p + geom_text(
-		aes(label = c('100\nCF', nodes[2:(length(nodes)-1)], '67\nMPR') ),
-		position = position_stack(vjust = 0.5),
-		size = 3
-	)
-	p <- p + scale_fill_manual(
-		values = c("#ffffff", "grey90")
-	)
-	# p <- p + geom_text(
-	# 	data = ds,
-	# 	aes(x = time, y = nodes, label = paste0(nodes,"%")),
-  # 	size = 4, position = position_stack(vjust = 0.5)
-	# )
-	p <- p + scale_x_continuous(
-		# limits = c(0, 125),
-		breaks = seq(0, 120, by = 20)
-	)
-
-	p <- p + labs(x = xlabel, y = ylabel)
-	p + theme0()
-}
-
-plotOverTimeReg <- function(ds, xlabel, ylabel, ylim, ybr){
-	p <- ggplot(data = ds, aes(
-		x = time, y = data, linetype = region
-	))
-	p <- p + geom_line()
-	p <- p + geom_point()
-
-	p <- p + scale_x_continuous(
-		limits = c(0, 120),
-		breaks = seq(0, 120, by = 20)
-	)
-	p <- p + scale_y_continuous(
-		limits = ylim,
-		breaks = ybr
-	)
-
-	p <- p + labs(x = xlabel, y = ylabel)
-	p + theme1()
-}
-
-plotOverTimeAlg <- function(ds, xlabel, ylabel, ylim, ybr){
-	p <- ggplot(data = ds, aes(
-		x = time, y = data, linetype = algo
-	))
-	p <- p + geom_line()
-	p <- p + geom_point()
-
-	p <- p + scale_x_continuous(
-		limits = c(0, 120),
-		breaks = seq(0, 120, by = 20)
-	)
-	p <- p + scale_y_continuous(
-		limits = ylim,
-		breaks = ybr
-	)
-
-	p <- p + labs(x = xlabel, y = ylabel)
-	p + theme2()
-}
-
-plot.data.using.boxes <- function(ds, title, xlabel, ylabel) {
-	p <- ggplot(data = ds, aes(x = algorithm, y = data, fill = region) )
-	p <- p + geom_boxplot()
-	p <- p + scale_fill_manual(
-		labels = c("All", "At PoI", "Out of PoI"),
-		values = c("#cccccc", "#666666", "#ffffff")
-	)
-	# "MPR3" = expression(MPR['\u0394=30']))
-	p <- p + scale_x_discrete(
-		labels = c(
-			"HYBRID1" = expression('Emerg Ovl'),
-			"ADAPTIVECF" = expression('Adaptive CF'),
-			"SCOPEDHYPFLOOD" = expression('S-H Flood')
-		)
-	)
-	p <- p + theme_Publication() + labs(y = ylabel) + ylim(0, max(ds$data))
-	cairo_pdf(file="plot.pdf")
-  print(p)
-	dev.off()
-}
-
 args <- get_arguments()
+
 metadata = NULL
 separate_dist = TRUE
+files <- list.files(
+  path=args$resultsDir,
+  pattern=paste(args$dataset, '-', args$protocol, sep='')
+)
+
+if ( length(files) == 0 ) {
+  print("No dataset was found")
+  stop()
+}
+
+if (args$plcot) {
+  pdf(file=paste('local-coverage-over-time-', args$protocol, '.pdf', sep=''))
+  t <- read.table( paste(args$resultsDir, files[1], sep=''), header=T )
+  d <- c( t$globalLocalCoverage, t$localCoverageAtPoi, t$localCoverageOutPoi)
+  dataset <- data.frame(
+    data = d,
+    # for emergent overlays
+    time = rep(order(t$time, decreasing=T) * 10, 3),
+    # time = rep(t$time, 3),
+    region = c(
+      rep("All", length(t$globalLocalCoverage)),
+      rep("At PoI", length(t$localCoverageAtPoi)),
+      rep("Out of PoI", length(t$localCoverageOutPoi))
+    )
+  )
+  p <- plotOverTime(
+    dataset,
+    paste('Local coverage over time of', args$protocol),
+    'Time (s)',
+    'Local coverage (%)',
+    # for emergent overlays
+    data.frame(min=0, max=max(t$time*10), step=50),
+    # data.frame(min=0, max=max(t$time), step=5),
+    data.frame(min=0, max=100, step=10)
+  )
+  grid.arrange(p, ncol = 1)
+  dev.off()
+}
+
+if (args$pmerot) {
+  pdf(file=paste('mer-over-time-', args$protocol, '.pdf', sep=''))
+  t <- read.table( paste(args$resultsDir, files[1], sep=''), header=T )
+  d <- c( t$globalMsgsErrorRate, t$msgErrorRateAtPoi, t$msgErrorRateOutPoi)
+  dataset <- data.frame(
+    data = d,
+    # for emergent overlays
+    # time = rep(order(t$time, decreasing=T) * 10, 3),
+    time = rep(t$time, 3),
+    region = c(
+      rep("All", length(t$globalMsgsErrorRate)),
+      rep("At PoI", length(t$msgErrorRateAtPoi)),
+      rep("Out of PoI", length(t$msgErrorRateOutPoi))
+    )
+  )
+  p <- plotOverTime(
+    dataset,
+    paste('Broadcast message error rate of', args$protocol),
+    'Time (s)',
+    'Error Rate',
+    # for emergent overlays
+    # data.frame(min=0, max=max(t$time*10), step=50),
+    data.frame(min=0, max=max(t$time), step=5),
+    data.frame(min=0, max=1.0, step=0.2)
+  )
+  grid.arrange(p, ncol = 1)
+  dev.off()
+}
+
+if (args$coads) {
+  pdf(file="coverage.pdf")
+  algos <- c('CF', 'MPR', 'Emergent Overlays')
+  datasets <- data.frame(
+    'coverage_msg-error-rate-CONTROLLEDFLOOD-3',
+    'coverage_msg-error-rate-MPR',
+    'coverage_msg-error-rate-EMERG-OVRL-0'
+  )
+  names(datasets) <- algos
+  plots <- lapply(algos, function(a){
+    t <- read.table( paste(args$resultsDir, datasets[[ a ]], sep=''), header=T )
+    d <- c( t$globalCoverage, t$coverageAtPoi, t$coverageOutPoi)
+    dataset <- data.frame(
+      data = d, algorithm = rep(unique(t$algo), length(d)),
+      region = c(
+        rep("All", length(t$globalCoverage)),
+        rep("At PoI", length(t$coverageAtPoi)),
+        rep("Out of PoI", length(t$coverageOutPoi))
+      )
+    )
+    plot.dist.as.cdf(
+      dataset,
+      paste('Global coverage of', a),
+      'Global coverage (%)',
+      'Broadcast messages (CDF in %)', c(0, 100)
+    )
+  })
+  grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol = 1)
+  dev.off()
+}
+
+if (args$plcads) {
+  pdf(file="local-coverage.pdf")
+  algos <- c('CF', 'MPR', 'Emergent Overlays')
+  datasets <- data.frame(
+    'coverage_msg-error-rate-CONTROLLEDFLOOD-0',
+    'coverage_msg-error-rate-MPR',
+    'coverage_msg-error-rate-EMERG-OVRL-0'
+  )
+  names(datasets) <- algos
+  plots <- lapply(algos, function(a){
+    t <- read.table( paste(args$resultsDir, datasets[[ a ]], sep=''), header=T )
+    d <- c( t$globalLocalCoverage, t$localCoverageAtPoi, t$localCoverageOutPoi)
+    dataset <- data.frame(
+      data = d, algorithm = rep(unique(t$algo), length(d)),
+      region = c(
+        rep("All", length(t$globalLocalCoverage)),
+        rep("At PoI", length(t$localCoverageAtPoi)),
+        rep("Out of PoI", length(t$localCoverageOutPoi))
+      )
+    )
+    plot.dist.as.cdf(
+      dataset,
+      paste('Local coverage of', a),
+      'Local coverage (%)',
+      'Broadcast messages (CDF in %)', c(0, 100)
+    )
+  })
+  grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol = 1)
+  dev.off()
+}
+
+if (args$merads) {
+  pdf(file="message-error-rate.pdf")
+  algos <- c('CF', 'MPR', 'Emergent Overlays')
+  datasets <- data.frame(
+    'coverage_msg-error-rate-CONTROLLEDFLOOD-3',
+    'coverage_msg-error-rate-MPR',
+    'coverage_msg-error-rate-EMERG-OVRL-0'
+  )
+  names(datasets) <- algos
+  plots <- lapply(algos, function(a){
+    t <- read.table( paste(args$resultsDir, datasets[[ a ]], sep=''), header=T )
+    d <- c( t$globalMsgsErrorRate, t$msgErrorRateAtPoi, t$msgErrorRateOutPoi)
+    dataset <- data.frame(
+      data = d, algorithm = rep(unique(t$algo), length(d)),
+      region = c(
+        rep("All", length(t$globalMsgsErrorRate)),
+        rep("At PoI", length(t$msgErrorRateAtPoi)),
+        rep("Out of PoI", length(t$msgErrorRateOutPoi))
+      )
+    )
+    plot.dist.as.cdf(
+      dataset,
+      paste('Message Error Rate of', a),
+      'Error Rate',
+      'Broadcast messages (CDF in %)', c(0, 1)
+    )
+  })
+  grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol = 1)
+  dev.off()
+}
+
+if (args$co) {
+  print('Ploting coverage...')
+  pdf('coverage.pdf')
+  for (f in files) {
+    t <- read.table( paste(args$resultsDir, f, sep=''), header=T )
+    d <- c( t$globalCoverage, t$coverageAtPoi, t$coverageOutPoi)
+    dataset <- data.frame(
+      data = d, algorithm = rep(unique(t$algo), length(d)),
+      region = c(
+        rep("All", length(t$globalCoverage)),
+        rep("At PoI", length(t$coverageAtPoi)),
+        rep("Out of PoI", length(t$coverageOutPoi))
+      )
+    )
+    plot.dist.as.cdf(
+      dataset,
+      'Global coverage of Emergent Overlays',
+      'Global coverage (%)',
+      'Broadcast messages (CDF in %)', c(0, 100)
+    )
+  }
+  dev.off()
+  print('DONE')
+}
+
+if (args$pmer) {
+  print('Ploting broadcast message error rate...')
+  pdf('broadcast-message-error-rate.pdf')
+  for (f in files) {
+    t <- read.table( paste(args$resultsDir, f, sep=''), header=T )
+    d <- c( t$globalMsgsErrorRate, t$msgErrorRateAtPoi, t$msgErrorRateOutPoi)
+    dataset <- data.frame(
+      data = d, algorithm = rep(unique(t$algo), length(d)),
+      region = c(
+        rep("All", length(t$globalMsgsErrorRate)),
+        rep("At PoI", length(t$msgErrorRateAtPoi)),
+        rep("Out of PoI", length(t$msgErrorRateOutPoi))
+      )
+    )
+    plot.dist.as.cdf(
+      dataset,
+      'Message error rate of controlled flooding',
+      'Error rate',
+      'Broadcast messages (CDF in %)', c(0, 1)
+    )
+  }
+  dev.off()
+  print('DONE')
+}
+
+if (args$denobs || args$mobobs) {
+	print("Plotting observables")
+  for (f in files) {
+    dataset <- read.table( paste(args$resultsDir, f, sep=''), header=T )
+    samples <- unique(dataset$time)
+    regions <- unique(dataset$region)
+    obs <- ifelse(args$denobs, 'density', 'mobility')
+    plotInfo <- data.frame(
+      plotTitle = paste('Observable: nodes', obs, '(in'),
+      xLabel = paste('Nodes', obs),
+      yLabel = paste('Number of times', obs, 'was measured (CDF in %)')
+    )
+    for (r in regions) {
+      sdsByRegion <- subset(dataset, region == r)
+      pdf(paste(obs, '-approx-at-', r, '.pdf', sep=''))
+      if (args$denobs) {
+        values <- sdsByRegion$density
+      } else {
+        values <- sdsByRegion$mobility
+      }
+      sdsByRegion <- data.frame(
+        data = values,
+        sample = sapply(sdsByRegion$time, toString)
+      )
+      plotCDFset(
+        sdsByRegion,
+        paste(plotInfo$plotTitle, r, 'zone)'),
+        plotInfo$xLabel, plotInfo$yLabel, c(0, 40)
+      )
+      dev.off()
+    }
+  }
+  print('DONE')
+  # plot.dist.as.cdf(
+	# 	dsToPlot, '', 'Estimated stability (seconds/neighbor)', 'CDF in % (nodes)'
+	# )
+}
 
 if (args$algoint) {
   ds <- read.table(
@@ -214,9 +351,9 @@ if (args$recvt) {
   print('DONE')
 }
 
-pdf(file="plot.pdf", width = unit(5.5, 'cm'), height = unit(4, 'cm'))
-grid.arrange(p1, p2, p3, ncol = 1)
-dev.off()
+# pdf(file="plot.pdf", width = unit(5.5, 'cm'), height = unit(4, 'cm'))
+# grid.arrange(p1, p2, p3, ncol = 1)
+# dev.off()
 
 if (args$pc) {
   print('Plotting power consumption')
@@ -244,51 +381,20 @@ if (args$srb) {
 	print('DONE')
 }
 
-if (args$co) {
-  print('Ploting network coverage')
-  ds <- read.table(
-    paste(args$resultsDir, 'coverage', sep=''),
-    header=F
-  )
-  names(ds) <- headers
-  plot.data.using.boxes(
-    ds, 'Reachability', '', 'Broadcast sessions [%]', c(0, 100)
-  )
-  print('DONE')
-}
+# if (args$pe) {
+#   print('Ploting packet error rate')
+#   ds <- read.table(
+#     paste(args$resultsDir, 'packetErrorRate', sep=''),
+#     header=F
+#   )
+#   names(ds) <- c('data', 'algorithm')
+#   plot.dist.as.cdf(
+#     ds, '',
+#     'Lost broadcast messages (%)', 'CDS', xMax=100
+#   )
+#   print('DONE')
+# }
 
-if (args$pe) {
-  print('Ploting packet error rate')
-  ds <- read.table(
-    paste(args$resultsDir, 'packetErrorRate', sep=''),
-    header=F
-  )
-  names(ds) <- c('data', 'algorithm')
-  plot.dist.as.cdf(
-    ds, '',
-    'Lost broadcast messages (%)', 'CDS', xMax=100
-  )
-  print('DONE')
-}
-
-if (args$obs) {
-	print("Plotting distribution of observables")
-	ds <- read.table(
-		paste(args$resultsDir, 'ObservablesDistribution-SIMPLEF', sep=''),
-		header=T
-	)
-	window <- unique(ds$time)[1]
-	subDs <- subset(ds, time == window)
-	dsToPlot <- data.frame(
-		data = subDs$mobility,
-		# data = subDs$density,
-		region = subDs$positionedAt
-	)
-  plot.dist.as.cdf(
-		dsToPlot, '', 'Estimated stability (seconds/neighbor)', 'CDF in % (nodes)'
-	)
-	print('DONE')
-}
 if (args$rm) {
   print("Plotting received broadcast messages")
   ds <- read.table(

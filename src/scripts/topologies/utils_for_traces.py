@@ -14,7 +14,10 @@ def plotSnapshot(g, snapshotId, positions, dimensions):
   plt.xlim((0, dimensions[0]))
   plt.yticks(range(0, dimensions[1] + 5, 5))
   plt.ylim((0, dimensions[1]))
-  nx.draw_networkx(g, pos=posMap, node_size=10, with_labels=False)
+  nx.draw_networkx(
+      g, pos=posMap, node_size=40, with_labels=True, font_size=6,
+      node_shape='s', linewidths=0.5
+  )
   plt.savefig('snapshot{}.pdf'.format(snapshotId))
   plt.clf()
 
@@ -25,13 +28,35 @@ def updateHistory(history, positions):
 
 
 def storeTrace(fileName, history):
-  with open(fileName, 'a') as f:
+  with open(fileName, 'w') as f:
     f.write('\n')
     for i in range(0, len(history)):
       l = ''
       for j in range(0, len(history[i])):
         l = '{}{} {} {} '.format(l, j, history[i][j][0], history[i][j][1])
       f.write('{}\n'.format(l))
+
+
+def storeRoutingInfo(fileName, data):
+  with open(fileName, 'w') as f:
+    f.write('src, dst, hopsNo, path, topologyID\n')
+    for topId, routingInfo in data.iteritems():
+      for srcId, destinations in routingInfo.iteritems():
+        for dst, path in destinations.iteritems():
+          if srcId != dst:
+            f.write('{}, {}, {}, {}, {}\n'.format(
+                srcId, dst, len(path) - 1, str(path).replace(', ', '-'), topId))
+
+
+def storeNeigsCardinality(fileName, data, nodesNo):
+  with open(fileName, 'w') as f:
+    for nodeId in range(nodesNo):
+      tmp = []
+      for topId in data.keys():
+        tmp.append(data[topId][nodeId])
+      pathStr = str(tmp).replace('[', '')
+      pathStr = pathStr.replace(']', '')
+      f.write('{}\n'.format(pathStr))
 
 
 def getDistance(a, b):

@@ -15,40 +15,26 @@ get.arguments <- function() {
   parser$add_argument('datasetFile', type='character',
     help='Dataset of an experiment with Omnet++/INET (no extension).')
   # experimental settings
-  parser$add_argument('--simulation-time',
-    dest='simTime', type='double', help='Duration of experiment in seconds.')
-  parser$add_argument('--results-dir',
-    dest='resultsDir', type='character')
-  parser$add_argument('--transmission-range',
-    dest='tx', type='integer', help='Nodes transmission range.')
-	parser$add_argument('--with-mobility',
-		dest='wmob', action='store_true')
-	parser$add_argument('--with-plotting',
-		dest='wplot', action='store_true')
-	parser$add_argument('--with-metrics-over-time',
-		dest='wmot', action='store_true')
+  parser$add_argument('--simulation-time', dest='simTime', type='double')
+  parser$add_argument('--results-dir', dest='resultsDir', type='character')
+  parser$add_argument('--transmission-range', dest='tx', type='integer')
+	parser$add_argument('--with-mobility', dest='wmob', action='store_true')
+	parser$add_argument('--with-plotting', dest='wplot', action='store_true')
+	parser$add_argument('--with-metrics-over-time', dest='wmot', action='store_true')
   # list of broadcast metrics
-  parser$add_argument('--with-energy-consumption',
-    dest='wpc', action='store_true')
-  parser$add_argument('--with-coverage',
-    dest='wco', action='store_true')
-  parser$add_argument('--with-packet-err',
-    dest='wpe', action='store_true')
-  parser$add_argument('--with-sent-msgs',
-    dest='wsm', action='store_true')
-  parser$add_argument('--with-recv-msgs',
-    dest='wrm', action='store_true')
-	parser$add_argument('--with-fwd-type',
-		dest='wft', action='store_true')
-	parser$add_argument('--with-saved-rebroadcasts',
-		dest='wsre', action='store_true')
-	parser$add_argument('--with-observables',
-		dest='wobs', action='store_true')
-
+  parser$add_argument('--with-energy-consumption', dest='wpc', action='store_true')
+  parser$add_argument('--with-coverage', dest='wco', action='store_true')
+  parser$add_argument('--with-packet-err', dest='wpe', action='store_true')
+  parser$add_argument('--with-sent-msgs', dest='wsm', action='store_true')
+  parser$add_argument('--with-recv-msgs', dest='wrm', action='store_true')
+	parser$add_argument('--with-fwd-type', dest='wft', action='store_true')
+	parser$add_argument('--with-saved-rebroadcasts', dest='wsre', action='store_true')
+	parser$add_argument('--with-observables', dest='wobs', action='store_true')
+  parser$add_argument('--with-dataset-id', dest='wdsid', type='integer', default=0)
   parser$parse_args()
 }
-args <- get.arguments()
 
+args <- get.arguments()
 # create name of data set
 expeConfig <- unlist(strsplit(args$configName, '_'))
 
@@ -58,7 +44,7 @@ cmaDimensions <- data.frame(
 
 algorithmN <- toupper(expeConfig[ length(expeConfig) ])
 datasetFile <- unlist(strsplit(args$datasetFile, args$configName))
-datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-0', sep='')
+datasetFile <- paste(datasetFile[1], 'results/', args$configName, '-', args$wdsid, sep='')
 
 # metadata of every wireless topology form per each entry of the mobility trace
 fName <- strsplit(args$configName, expeConfig[ length(expeConfig) ])
@@ -70,14 +56,20 @@ topologyIndx <- sapply(names(groundTruth), function(i) {
   ifelse(is.nan( as.numeric(groundTruth[[ i ]]$srcNode) ) , NaN, i)
 })
 topologyIndx <- topologyIndx[ !is.nan(topologyIndx) ]
+srcNodes <- sapply(topologyIndx, function(i) {
+  as.numeric( groundTruth[[ i ]]$srcNode )
+})
 
 # fetch sent/received messages
 sent_broadcast_msgs <- getVector(datasetFile, 'sentBroadcastMsg:vector')
 recv_broadcast_msgs <- getVector(datasetFile, 'rcvdBroadcastMsg:vector')
-
 # identifiers of all broadcast sessions
 msgs_ids <- sort.int(unique(sent_broadcast_msgs$value))
+broadcastMsgsTimeline <- order( sapply(1:length(msgs_ids), function(i) {
+  subset( subset(sent_broadcast_msgs, node_id == srcNodes[i]), value == msgs_ids[i] )$time
+}))
 
+protocolId <- paste(algorithmN, '-', args$wdsid, sep='')
 if(args$wco){
   # get global coverage
   ### over all nodes
@@ -211,12 +203,27 @@ if(args$wco){
   print(colOutOfPoi)
 
   dataSet <- data.frame(
+    time=broadcastMsgsTimeline[ 1 : length(globalCovPerc) ],
 		globalCoverage = globalCovPerc,
-		localCoverage = localCovPerc,
-		msgsErrorRate = msgErrorRate,
+		globalLocalCoverage = localCovPerc,
+		globalMsgsErrorRate = msgErrorRate,
+    coverageAtPoi = gCovAtPoi,
+    localCoverageAtPoi = lCovAtPoi,
+    msgErrorRateAtPoi = merAtPoi,
+    coverageOutPoi = gCovOutOfPoi,
+    localCoverageOutPoi = lCovOutPoi,
+    msgErrorRateOutPoi = merOutOfPoi,
 		algo=rep(algorithmN, length(globalCovPerc)), stringsAsFactors=F
 	)
-	saveDataFrame(dataSet, args$resultsDir, 'coverage_msg-error-rate', algorithmN)
+	saveDataFrame(dataSet, args$resultsDir, 'coverage_msg-error-rate', protocolId)
+
+  dataSet <- data.frame(
+    totalCollisionsNo = globalCollisionsNo,
+    collisionsAtPoi = colAtPoi,
+    collisionsOutPoi=colOutOfPoi,
+    algorithm = algorithmN, stringsAsFactors=F
+  )
+  saveDataFrame(dataSet, args$resultsDir, 'collisions', protocolId)
 }
 
 xPositions <- getVector(datasetFile, 'positionAtX:vector')
@@ -236,7 +243,7 @@ runningAlgorithm <- runningAlgorithm[order(runningAlgorithm$time), ]
 runningAlgorithm <- subset(runningAlgorithm, time <= args$simTime)
 
 # nodes are labeled according to the type of FWD they perform OR whether they
-# are border nodes (hybrid deployment) or not, this vector contains that
+# are border nodes or not (experiment with adaptation), this vector contains that
 # information in form of integer values where: 3 means border node,
 # 2 is a CDS relay and 0 means simple FWD
 forwardTypeDs <- getVector(datasetFile, 'forward_type:vector')
@@ -269,10 +276,9 @@ if(args$wplot){
 }
 
 if(args$wobs){
-  densityObs  <- getVector(datasetFile, 'densityObs:vector')
-  mobilityObs <- getVector(datasetFile, 'mobilityObs:vector')
-
+  # gets nodes at PoI
   nodesAtPoi <- groundTruth[[ topologyIndx[1] ]]$nodesAtDense
+  densityObs  <- getVector(datasetFile, 'densityObs:vector')
   # stability and density have the same timestamp
   timestamps <- unique(densityObs$time)
   # get dataset of density
@@ -296,9 +302,10 @@ if(args$wobs){
   densityDS <- do.call("rbind", densityDS)
   saveDataFrame(
     densityDS,
-    args$resultsDir, 'DensityDistribution', algorithmN
+    args$resultsDir, 'DensityDistribution', protocolId
   )
 
+  mobilityObs <- getVector(datasetFile, 'mobilityObs:vector')
   # get dataset of mobility
   mobilityDS <- lapply(timestamps, function( t ) {
     dsAtT <- subset(mobilityObs, time == t)
@@ -320,7 +327,7 @@ if(args$wobs){
   mobilityDS <- do.call("rbind", mobilityDS)
   saveDataFrame(
     mobilityDS,
-    args$resultsDir, 'MobilityDistribution', algorithmN
+    args$resultsDir, 'MobilityDistribution', protocolId
   )
 }
 
@@ -486,7 +493,7 @@ if(args$wobs){
 #     receivers <- subset(recv_broadcast_msgs, value == msgs_ids[o])$value
 # 		getSavedRebroadcasts(overlays[[o]], receivers)
 # 	})
-# 	saveDataFrame(
+# 	 (
 #     data.frame(
 #       data=savedRe,
 #       algo=rep(algorithmN, length(savedRe)), stringsAsFactors=F

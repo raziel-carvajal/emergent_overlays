@@ -52,5 +52,5 @@ if __name__ == '__main__':
         "p={0},{1}".format(initialPos[i - 1][0], initialPos[i - 1][1]) + '"' +\
         ");}\n"
   CONTENT += "}"
-  with open(NED_FILE + '.ned', 'a') as f:
+  with open(NED_FILE + '.ned', 'w') as f:
     f.write(CONTENT)

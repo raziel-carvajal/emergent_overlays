@@ -27,7 +27,7 @@
 # 	--transmission-range ${NODES_TRANSMISSION_RANGE} --walks ${walks}
 # # [END]
 
-# # [BEING] NOTE Local test with one fixed mobile PoI
+# [BEING] NOTE Local test with one fixed mobile PoI
 # rm -f *.pdf *.gif *.bm *.ned *.json *.xml bipartite-scenario-1st-position
 # echo -e "\t scenario with one PoI"
 # let nodesNoAtD=${NODES}/2
@@ -40,7 +40,7 @@
 # 	--transmission-range ${NODES_TRANSMISSION_RANGE} \
 # 	--trace-size ${SIMULATION_TIME}
 # let NODES=NODES+1
-# # [END]
+# [END]
 
 ./make_ned_file.py --cma-len ${COMM_AREA_LENGTH} --cma-width ${COMM_AREA_WIDTH} \
 	--transmission-range ${NODES_TRANSMISSION_RANGE} --nodes ${NODES}

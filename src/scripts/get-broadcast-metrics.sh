@@ -53,18 +53,21 @@ echo -e "\tBroadcast message interval: ${broaInt}"
 echo -e "\tNodes transmission range: ${tx}"
 echo -e "\tExperiment with mobility: ${withMobility}"
 
+# --with-plotting \
+# --with-dataset-id 0 \
+# --with-coverage \
+# --with-observables \
+# --with-energy-consumption \
+# --with-metrics-over-time \
+# --with-sent-msgs \
+# --with-recv-msgs \
 Rscript get-broadcast-metrics.R \
+  ${withMobility} \
   --simulation-time ${simTime} \
   --transmission-range ${tx} \
   --results-dir ../../results \
-  --with-plotting \
-	${withMobility} ${CONF_NAME} ${CONF_FILE}
-  # --with-coverage \
-  # --with-observables \
-	# --with-energy-consumption \
-  # --with-metrics-over-time \
-	# --with-sent-msgs \
-	# --with-recv-msgs \
+  --with-coverage \
+  ${CONF_NAME} ${CONF_FILE}
 
 echo "Moving built graphs..."
 rm -fr ${CONF_NAME}
@@ -75,9 +78,9 @@ cp ${CONF_FILE} ${CONF_NAME}/
 mv ../../experiments/configs/built_configs/results/${CONF_NAME}-*  ${CONF_NAME}/dataset
 tar czf ${CONF_NAME}.tgz ${CONF_NAME}/
 mv ${CONF_NAME}.tgz ../../results
-
+# [BEGIN] Comment to perform unit test
 echo "Announce that the datasets are ready for plotting..."
 curl -X POST trace_generator/completed_task
 [ ${?} != 0 ] && echo "/!\ End of task ${CONF_FILE} wasn't announced"
-
+# [END] Comment to perform unit test
 echo -e "Done - Find distributions of broadcast metrics at ../../results \nEnd of ${0}"

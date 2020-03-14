@@ -10,11 +10,6 @@ do
 done
 # [END] Comment to perform unit test
 
-cat ../../results/recvBroadcastMsgsDistribution-* \
-  > ../../results/recvBroadcastMsgsDistribution
-cat ../../results/sentBroadcastMsgsDistribution-* \
-  > ../../results/sentBroadcastMsgsDistribution
-
 echo "Plotting all broadcast metrics"
 Rscript plot-broadcast-metrics.R \
   --plot-sent-msgs \
